@@ -41,13 +41,11 @@ public class NoticeOfChangeController implements BaseController {
         @RequestBody CallbackRequest ccdRequest) {
 
         CaseDetails caseDetails = ccdRequest.getCaseDetails();
-        CaseDetails originalCaseDetails = ccdRequest.getCaseDetailsBefore();
-        Map<String, Object> caseData = caseDetails.getData();
-        validateCaseData(ccdRequest);
-
-
         log.info("Received request to update representation on case with Case ID: {}", caseDetails.getId());
         log.info("Authorisation token for invoker = {}", authToken);
+        Map<String, Object> caseData = caseDetails.getData();
+        validateCaseData(ccdRequest);
+        CaseDetails originalCaseDetails = ccdRequest.getCaseDetailsBefore();
         caseData = noticeOfChangeService.caseWorkerUpdatesRepresentation(caseDetails, authToken, originalCaseDetails);
         caseDetails.getData().putAll(caseData);
 
