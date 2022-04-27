@@ -341,7 +341,7 @@ def sonarExclusions = ['**/uk/gov/hmcts/reform/finrem/caseorchestration/config/*
 sonarqube {
     properties {
         property "sonar.projectKey", "finrem-case-orchestration"
-        property "sonar.exclusions", sonarExclusions.join(', ')
+        property "sonar.exclusions", sonarExclusions.join('uk.gov.hmcts.reform.finrem.caseorchestration.service.NoticeOfChangeService,')
         property "sonar.dynamicAnalysis", "reuseReports"
         property "sonar.java.coveragePlugin", "jacoco"
         property "sonar.coverage.jacoco.xmlReportPaths", "${jacocoTestReport.reports.xml.destination.path}"

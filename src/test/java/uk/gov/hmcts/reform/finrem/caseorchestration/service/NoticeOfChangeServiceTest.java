@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
 
 public class NoticeOfChangeServiceTest extends BaseServiceTest {
     private static final String PATH = "/fixtures/noticeOfChange/caseworkerNoc/";
@@ -218,6 +219,54 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             OrganisationPolicy actualPolicy = getOrganisationPolicy(caseData, APPLICANT_ORGANISATION_POLICY);
             assertThat(actualPolicy.getOrganisation().getOrganisationName()).isEqualTo("FRApplicantSolicitorFirm");
             assertThat(actualPolicy.getOrganisation().getOrganisationID()).isEqualTo("A31PTVA");
+        }
+    }
+
+    @Test
+    public void changeOfRepresentativesRespondent() throws Exception {
+        setUpCaseDetails("change-of-representatives-respondent");
+        when(mockIdamService.getIdamFullName(any())).thenReturn("Claire Mumford");
+        when(mockCaseDataService.buildFullApplicantName(any())).thenReturn("John Smith");
+        when(mockCaseDataService.buildFullRespondentName(any())).thenReturn("Jane Smith");
+        when(mockCaseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
+        when(mockCaseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
+        when(mockCaseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(mockAssignCaseAccessService.revokeUserAccess(any())).thenReturn(CaseAssignmentUserRolesResponse
+            .builder()
+            .build());
+
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH
+            + "change-of-representatives-respondent-before.json")) {
+
+            CallbackRequest actualRequest = mapper.readValue(resourceAsStream, CallbackRequest.class);
+            InputStream is = getClass().getResourceAsStream(PATH + "change-of-representatives-respondent-original.json");
+            CaseDetails originalDetails = mapper.readValue(is, CallbackRequest.class).getCaseDetails();
+
+            when(mockAssignCaseAccessService.getUsersWithAccess(APP_SOLICITOR_POLICY)).thenReturn(
+                CaseAssignmentUserRolesResource.builder()
+                    .caseAssignmentUserRoles(List.of(
+                        CaseAssignmentUserRole.builder().caseRole(APP_SOLICITOR_POLICY)
+                            .caseDataId(TEST_CASE_ID)
+                            .userId(TEST_USER_ID)
+                            .caseRole(APP_SOLICITOR_POLICY)
+                            .build()))
+                    .build());
+
+            Map<String, Object> caseData = noticeOfChangeService.caseWorkerUpdatesRepresentation(actualRequest.getCaseDetails(),
+                authTokenGenerator.generate(), originalDetails);
+            List<Element<ChangeOfRepresentation>> actual = getFirstChangeElement.apply(caseData);
+            ChangeOfRepresentation actualChange = actual.get(0).getValue();
+            ChangeOfRepresentation expectedChange = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
+                .getData()).get(0).getValue();
+
+            assertThat(actual).hasSize(2);
+            assertThat(actualChange.getClientName()).isEqualTo(expectedChange.getClientName());
+            assertThat(actualChange.getParty()).isEqualTo(expectedChange.getParty());
+            assertThat(actualChange.getAdded()).isEqualTo(expectedChange.getAdded());
+            assertThat(actualChange.getBy()).isEqualTo(expectedChange.getBy());
+            OrganisationPolicy actualPolicy = getOrganisationPolicy(caseData, RESPONDENT_ORGANISATION_POLICY);
+            assertThat(actualPolicy.getOrganisation().getOrganisationName()).isEqualTo("FRRespondentSolicitorFirm");
+            assertThat(actualPolicy.getOrganisation().getOrganisationID()).isEqualTo("A31PTVU");
         }
     }
 
