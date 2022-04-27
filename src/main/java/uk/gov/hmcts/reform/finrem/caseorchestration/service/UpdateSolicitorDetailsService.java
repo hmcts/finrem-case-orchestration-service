@@ -74,15 +74,10 @@ public class UpdateSolicitorDetailsService {
                                                              boolean isConsented,
                                                              boolean isApplicant) {
         if (isApplicant) {
-            caseData.put(isConsented ? CONSENTED_SOLICITOR_NAME : CONTESTED_SOLICITOR_NAME,
-                addedSolicitor.getName());
-            caseData.put(isConsented ? SOLICITOR_EMAIL : CONTESTED_SOLICITOR_EMAIL, addedSolicitor.getEmail());
-            caseData.put(isConsented ? CONSENTED_SOLICITOR_FIRM : CONTESTED_SOLICITOR_FIRM,
-                addedSolicitor.getOrganisation().getOrganisationName());
+            updateAppSolFields(caseData, isConsented, addedSolicitor);
         } else {
             updateRespSolFields(caseData, addedSolicitor);
         }
-
 
         return caseData;
     }
@@ -91,15 +86,30 @@ public class UpdateSolicitorDetailsService {
                                                       boolean isConsented,
                                                       boolean isApplicant) {
         if (isApplicant) {
-            caseData.remove(SOLICITOR_PHONE);
-            caseData.remove(isConsented ? CONSENTED_SOLICITOR_DX_NUMBER : CONTESTED_SOLICITOR_DX_NUMBER);
-            caseData.remove(isConsented ? APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED
-                : APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED);
+            removeAppSolFields(caseData, isConsented);
         } else {
             removeRespSolFields(caseData);
         }
 
         return caseData;
+    }
+
+    private void updateAppSolFields(Map<String, Object> caseData,
+                                    boolean isConsented,
+                                    ChangedRepresentative addedSolicitor) {
+        caseData.put(isConsented ? CONSENTED_SOLICITOR_NAME : CONTESTED_SOLICITOR_NAME,
+            addedSolicitor.getName());
+        caseData.put(isConsented ? SOLICITOR_EMAIL : CONTESTED_SOLICITOR_EMAIL, addedSolicitor.getEmail());
+        caseData.put(isConsented ? CONSENTED_SOLICITOR_FIRM : CONTESTED_SOLICITOR_FIRM,
+            addedSolicitor.getOrganisation().getOrganisationName());
+    }
+
+    private void removeAppSolFields(Map<String, Object> caseData,
+                                    boolean isConsented) {
+        caseData.remove(SOLICITOR_PHONE);
+        caseData.remove(isConsented ? CONSENTED_SOLICITOR_DX_NUMBER : CONTESTED_SOLICITOR_DX_NUMBER);
+        caseData.remove(isConsented ? APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED
+            : APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED);
     }
 
     private void updateRespSolFields(Map<String, Object> caseData,
