@@ -74,6 +74,7 @@ public class NoticeOfChangeService {
                                                                CaseDetails originalCaseDetails) {
         Map<String,Object> caseData = caseDetails.getData();
         isApplicant = ((String) caseData.get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
+        log.info("case details for caseID {}: ", caseDetails);
         final OrganisationPolicy orgPolicyToUpdate = getOrganisationPolicy(caseDetails);
         log.info("About to start noc as caseworker for caseID {}", caseDetails.getId());
         log.info("Org policy before update: {}", getOrganisationPolicy(originalCaseDetails));
