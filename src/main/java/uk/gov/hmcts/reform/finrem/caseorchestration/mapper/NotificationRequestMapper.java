@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentatives;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 
 import java.util.Collections;
@@ -37,55 +38,63 @@ public class NotificationRequestMapper {
     private final CaseDataService caseDataService;
     private final ObjectMapper objectMapper;
 
+    private static final String RESPONDENT = "Respondent";
     private static final String CONSENTED = "consented";
     private static final String CONTESTED = "contested";
 
-    public NotificationRequest createNotificationRequestForAppSolicitor(CaseDetails caseDetails) {
-        return caseDataService.isConsentedApplication(caseDetails)
-            ? buildNotificationRequest(caseDetails, SOLICITOR_REFERENCE, CONSENTED_SOLICITOR_NAME, SOLICITOR_EMAIL, CONSENTED)
-            : buildNotificationRequest(caseDetails, SOLICITOR_REFERENCE, CONTESTED_SOLICITOR_NAME, CONTESTED_SOLICITOR_EMAIL, CONTESTED);
+
+    public NotificationRequest getNotificationRequestForRespondentSolicitor(CaseDetails caseDetails) {
+        return buildNotificationRequest(caseDetails, getCaseDataKeysForRespondentSolicitor());
     }
 
-    public NotificationRequest createNotificationRequestForRespSolicitor(CaseDetails caseDetails) {
+    public NotificationRequest getNotificationRequestForApplicantSolicitor(CaseDetails caseDetails) {
         return caseDataService.isConsentedApplication(caseDetails)
-            ? buildNotificationRequest(caseDetails, RESP_SOLICITOR_REFERENCE, RESP_SOLICITOR_NAME, RESP_SOLICITOR_EMAIL, CONSENTED)
-            : buildNotificationRequest(caseDetails, RESP_SOLICITOR_REFERENCE, RESP_SOLICITOR_NAME, RESP_SOLICITOR_EMAIL, CONTESTED);
+            ? buildNotificationRequest(caseDetails, getConsentedCaseDataKeysForRespondentSolicitor())
+            : buildNotificationRequest(caseDetails, getContestedCaseDataKeysForRespondentSolicitor());
     }
 
     public NotificationRequest getNotificationRequestForNoticeOfChange(CaseDetails caseDetails) {
-        String solicitorReferenceKey;
-        String solicitorNameKey;
-        String solicitorEmailKey;
-
-        if (isLastChangeOfRepresentationForRespondent(caseDetails)) {
-            solicitorReferenceKey = RESP_SOLICITOR_REFERENCE;
-            solicitorNameKey = RESP_SOLICITOR_NAME;
-            solicitorEmailKey = RESP_SOLICITOR_EMAIL;
-        } else {
-            solicitorReferenceKey = SOLICITOR_REFERENCE;
-            if (caseDataService.isConsentedApplication(caseDetails)) {
-                solicitorNameKey = CONSENTED_SOLICITOR_NAME;
-                solicitorEmailKey = SOLICITOR_EMAIL;
-            } else {
-                solicitorNameKey = CONTESTED_SOLICITOR_NAME;
-                solicitorEmailKey = CONTESTED_SOLICITOR_EMAIL;
-            }
-        }
-
-        return buildNotificationRequest(caseDetails, solicitorReferenceKey, solicitorNameKey, solicitorEmailKey, getCaseType(caseDetails));
+        return isRespondentSolicitorChangedOnLatestChangeOfRepresentation(caseDetails)
+            ? getNotificationRequestForRespondentSolicitor(caseDetails)
+            : getNotificationRequestForApplicantSolicitor(caseDetails);
     }
 
-    private boolean isLastChangeOfRepresentationForRespondent(CaseDetails caseDetails) {
-        return getLastChangeOfRepresentation(caseDetails).getParty().equals("Respondent");
+    private SolicitorCaseDataKeysWrapper getContestedCaseDataKeysForRespondentSolicitor() {
+        return SolicitorCaseDataKeysWrapper.builder()
+            .solicitorEmailKey(CONTESTED_SOLICITOR_EMAIL)
+            .solicitorNameKey(CONTESTED_SOLICITOR_NAME)
+            .solicitorReferenceKey(SOLICITOR_REFERENCE)
+            .build();
+    }
+
+    private SolicitorCaseDataKeysWrapper getConsentedCaseDataKeysForRespondentSolicitor() {
+        return SolicitorCaseDataKeysWrapper.builder()
+            .solicitorEmailKey(SOLICITOR_EMAIL)
+            .solicitorNameKey(CONSENTED_SOLICITOR_NAME)
+            .solicitorReferenceKey(SOLICITOR_REFERENCE)
+            .build();
+    }
+
+    private SolicitorCaseDataKeysWrapper getCaseDataKeysForRespondentSolicitor() {
+        return SolicitorCaseDataKeysWrapper.builder()
+            .solicitorEmailKey(RESP_SOLICITOR_EMAIL)
+            .solicitorNameKey(RESP_SOLICITOR_NAME)
+            .solicitorReferenceKey(RESP_SOLICITOR_REFERENCE)
+            .build();
+    }
+
+    private boolean isRespondentSolicitorChangedOnLatestChangeOfRepresentation(CaseDetails caseDetails) {
+        return getLastChangeOfRepresentation(caseDetails).getParty().equals(RESPONDENT);
     }
 
     private ChangeOfRepresentation getLastChangeOfRepresentation(CaseDetails caseDetails) {
         ChangeOfRepresentatives changeOfRepresentativesHistory = objectMapper
-            .convertValue(caseDetails.getData().get(CHANGE_OF_REPRESENTATIVES), new TypeReference<>() {});
-        ChangeOfRepresentation lastChangeOfRepresentation = Collections
-            .max(changeOfRepresentativesHistory.getChangeOfRepresentation(), Comparator.comparing(c -> c.getValue().getDate()))
+            .convertValue(caseDetails.getData().get(CHANGE_OF_REPRESENTATIVES), new TypeReference<>() {
+            });
+        return Collections
+            .max(changeOfRepresentativesHistory.getChangeOfRepresentation(),
+                Comparator.comparing(c -> c.getValue().getDate()))
             .getValue();
-        return lastChangeOfRepresentation;
     }
 
     private String getCaseType(CaseDetails caseDetails) {
@@ -99,20 +108,17 @@ public class NotificationRequestMapper {
     }
 
     private NotificationRequest buildNotificationRequest(CaseDetails caseDetails,
-                                                         String solicitorReference,
-                                                         String solicitorName,
-                                                         String solicitorEmail,
-                                                         String caseType) {
+                                                         SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
         NotificationRequest notificationRequest = new NotificationRequest();
         Map<String, Object> mapOfCaseData = caseDetails.getData();
 
         notificationRequest.setCaseReferenceNumber(Objects.toString(caseDetails.getId()));
-        notificationRequest.setSolicitorReferenceNumber(Objects.toString(mapOfCaseData.get(solicitorReference)));
+        notificationRequest.setSolicitorReferenceNumber(Objects.toString(mapOfCaseData.get(solicitorCaseDataKeysWrapper.getSolicitorReferenceKey())));
         notificationRequest.setDivorceCaseNumber(Objects.toString(mapOfCaseData.get(DIVORCE_CASE_NUMBER)));
-        notificationRequest.setName(Objects.toString(mapOfCaseData.get(solicitorName)));
-        notificationRequest.setNotificationEmail(Objects.toString(mapOfCaseData.get(solicitorEmail)));
+        notificationRequest.setName(Objects.toString(mapOfCaseData.get(solicitorCaseDataKeysWrapper.getSolicitorNameKey())));
+        notificationRequest.setNotificationEmail(Objects.toString(mapOfCaseData.get(solicitorCaseDataKeysWrapper.getSolicitorEmailKey())));
         notificationRequest.setGeneralEmailBody(Objects.toString(mapOfCaseData.get(GENERAL_EMAIL_BODY)));
-        notificationRequest.setCaseType(caseType);
+        notificationRequest.setCaseType(getCaseType(caseDetails));
 
         if (caseDataService.isContestedApplication(caseDetails)) {
             String selectedCourt = ContestedCourtHelper.getSelectedFrc(caseDetails);
