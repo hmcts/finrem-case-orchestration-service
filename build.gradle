@@ -336,12 +336,16 @@ def sonarExclusions = ['**/uk/gov/hmcts/reform/finrem/caseorchestration/config/*
                        '**/uk/gov/hmcts/reform/finrem/caseorchestration/model/**',
                        '**/uk/gov/hmcts/reform/finrem/caseorchestration/error/**',
                        '**/uk/gov/hmcts/reform/finrem/caseorchestration/ccd/datamigration/model/**',
-                       '**/uk/gov/hmcts/reform/finrem/caseorchestration/CaseOrchestrationApplication']
+                       '**/uk/gov/hmcts/reform/finrem/caseorchestration/CaseOrchestrationApplication',
+                       'uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService',
+                       'uk.gov.hmcts.reform.finrem.caseorchestration.service.NoticeOfChangeService',
+                       'uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService'
+]
 
 sonarqube {
     properties {
         property "sonar.projectKey", "finrem-case-orchestration"
-        property "sonar.exclusions", sonarExclusions.join('uk.gov.hmcts.reform.finrem.caseorchestration.service.NoticeOfChangeService,')
+        property "sonar.exclusions", sonarExclusions.join(', ')
         property "sonar.dynamicAnalysis", "reuseReports"
         property "sonar.java.coveragePlugin", "jacoco"
         property "sonar.coverage.jacoco.xmlReportPaths", "${jacocoTestReport.reports.xml.destination.path}"
@@ -355,9 +359,7 @@ pitest {
                          'uk.gov.hmcts.reform.finrem.caseorchestration.model.*',
                          'uk.gov.hmcts.reform.finrem.caseorchestration.config.*',
                          'uk.gov.hmcts.reform.finrem.caseorchestration.controllers.PaymentByAccountStub',
-                         'uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService',
-                         'uk.gov.hmcts.reform.finrem.caseorchestration.service.NoticeOfChangeService',
-                         'uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService'])
+                         ])
     threads.set(4)
     outputFormats.set(['XML', 'HTML'])
     timestampedReports.set(false)
