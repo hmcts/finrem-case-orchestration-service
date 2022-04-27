@@ -47,14 +47,13 @@ public class NoticeOfChangeController implements BaseController {
         Map<String, Object> caseData = caseDetails.getData();
         validateCaseData(ccdRequest);
 
-        if (caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE)) {
-            log.info("Received request to update representation on case with Case ID: {}", caseDetails.getId());
-            caseData = noticeOfChangeService.caseWorkerUpdatesRepresentation(caseDetails, authToken, originalCaseDetails);
-            caseDetails.getData().putAll(caseData);
+
+        log.info("Received request to update representation on case with Case ID: {}", caseDetails.getId());
+        caseData = noticeOfChangeService.caseWorkerUpdatesRepresentation(caseDetails, authToken, originalCaseDetails);
+        caseDetails.getData().putAll(caseData);
 
 
-            log.info("Updated details for caseID {}: {}", caseDetails.getId(), caseData);
-        }
+        log.info("Updated details for caseID {}: {}", caseDetails.getId(), caseData);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
