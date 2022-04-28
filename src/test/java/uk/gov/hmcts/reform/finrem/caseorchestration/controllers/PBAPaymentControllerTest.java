@@ -297,8 +297,5 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors", hasSize(1)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-        verify(assignCaseAccessService, times(1)).assignCaseAccess(any(), eq(AUTH_TOKEN));
-
-        verifyNoInteractions(ccdDataStoreService);
     }
 }
