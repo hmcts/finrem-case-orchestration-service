@@ -26,8 +26,21 @@ import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_PHONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_DX_NUMBER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_FIRM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_PHONE;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -62,6 +75,10 @@ public class RemoveApplicantDetailsController implements BaseController {
 
         Map<String, Object> caseData = caseDetails.getData();
         String applicantRepresented = caseData.get(APPLICANT_REPRESENTED).toString();
+        boolean isContested = caseDetails.getCaseTypeId().equalsIgnoreCase(CASE_TYPE_ID_CONTESTED);
+        String respondentRepresented = isContested
+            ? (String) caseData.get(CONTESTED_RESPONDENT_REPRESENTED)
+            : (String) caseData.get(CONSENTED_RESPONDENT_REPRESENTED);
 
         if (applicantRepresented.equals(YES_VALUE)) {
             //remove applicants data as solicitors data has been added
@@ -76,6 +93,20 @@ public class RemoveApplicantDetailsController implements BaseController {
             caseData.remove("applicantSolicitorEmail");
             caseData.remove("applicantSolicitorDXnumber");
             caseData.remove("applicantSolicitorConsentForEmails");
+        }
+
+        if (respondentRepresented.equals(YES_VALUE)) {
+            caseData.remove(RESPONDENT_ADDRESS);
+            caseData.remove(RESPONDENT_PHONE);
+            caseData.remove(RESPONDENT_EMAIL);
+        } else {
+            caseData.remove(RESP_SOLICITOR_NAME);
+            caseData.remove(RESP_SOLICITOR_FIRM);
+            caseData.remove(RESP_SOLICITOR_ADDRESS);
+            caseData.remove(RESP_SOLICITOR_PHONE);
+            caseData.remove(RESP_SOLICITOR_EMAIL);
+            caseData.remove(RESP_SOLICITOR_DX_NUMBER);
+            caseData.remove(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT);
         }
 
         if (caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE)) {
