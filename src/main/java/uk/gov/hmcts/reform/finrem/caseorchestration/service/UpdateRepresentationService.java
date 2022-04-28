@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
@@ -28,6 +29,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
@@ -46,97 +48,92 @@ public class UpdateRepresentationService {
     private final UpdateSolicitorDetailsService updateSolicitorDetailsService;
     private final ChangeOfRepresentationService changeOfRepresentationService;
 
-    private static final String CHANGE_REQUEST_FIELD = "changeOrganisationRequestField";
+    private static final String CHANGE_ORGANISATION_REQUEST = "changeOrganisationRequestField";
     private static final String NOC_EVENT = "nocRequest";
-    private static final String CHANGE_OF_REPS = "ChangeOfRepresentatives";
-
-    private boolean isApplicant;
+    private static final String CHANGE_OF_REPRESENTATIVES = "ChangeOfRepresentatives";
 
     public Map<String, Object> updateRepresentationAsSolicitor(CaseDetails caseDetails,
                                                                String authToken)  {
 
         log.info("Updating representation for case ID {}", caseDetails.getId());
 
+        final UserDetails solicitorToAdd = getInvokerDetails(authToken, caseDetails);
+        final ChangeOrganisationRequest changeRequest = getChangeOrganisationRequest(caseDetails);
+
+        final ChangedRepresentative addedSolicitor = getAddedSolicitor(solicitorToAdd, changeRequest);
+        final ChangedRepresentative removedSolicitor = getRemovedSolicitor(caseDetails, changeRequest);
+
+        log.info("About to start updating solicitor details in the case data for caseId: {}", caseDetails.getId());
+        caseDetails.getData().putAll(updateCaseDataWithNewSolDetails(caseDetails, addedSolicitor, changeRequest));
+
+        Map<String, Object> updatedCaseData = updateChangeOfRepresentatives(caseDetails,
+            addedSolicitor,
+            removedSolicitor,
+            changeRequest);
+        return updatedCaseData;
+    }
+
+    private UserDetails getInvokerDetails(String authToken, CaseDetails caseDetails) {
         AuditEvent auditEvent = auditEventService.getLatestAuditEventByName(caseDetails.getId().toString(), NOC_EVENT)
             .orElseThrow(() -> new IllegalStateException(String.format("Could not find %s event in audit", NOC_EVENT)));
 
-        UserDetails solicitorToAdd = idamClient.getUserByUserId(authToken, auditEvent.getUserId());
-        ChangeOrganisationRequest change = getChangeOrganisationRequest(caseDetails);
-        isApplicant = change.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY);
-
-        ChangedRepresentative addedSolicitor = ChangedRepresentative.builder()
-            .name(solicitorToAdd.getFullName())
-            .email(solicitorToAdd.getEmail())
-            .organisation(change.getOrganisationToAdd())
-            .build();
-
-        ChangedRepresentative removedSolicitor = Optional.ofNullable(change.getOrganisationToRemove())
-            .map(org -> ChangedRepresentative.builder()
-            .name(isApplicant ? getApplicantSolicitorName(caseDetails)
-                : (String) caseDetails.getData().get(RESP_SOLICITOR_NAME))
-            .email(isApplicant ? getApplicantSolicitorEmail(caseDetails)
-                : (String) caseDetails.getData().get(RESP_SOLICITOR_EMAIL))
-            .organisation(org).build())
-            .orElse(null);
-
-        log.info("About to start updating solicitor details in the case data for caseId: {}", caseDetails.getId());
-        caseDetails.getData().putAll(updateCaseDataWithNewSolDetails(caseDetails, addedSolicitor));
-
-        return updateChangeOfRepresentatives(caseDetails, addedSolicitor, removedSolicitor);
+        return idamClient.getUserByUserId(authToken, auditEvent.getUserId());
     }
 
     private Map<String, Object> updateChangeOfRepresentatives(CaseDetails caseDetails,
                                                               ChangedRepresentative addedSolicitor,
-                                                              ChangedRepresentative removedSolicitor) {
+                                                              ChangedRepresentative removedSolicitor,
+                                                              ChangeOrganisationRequest changeRequest) {
 
         Map<String, Object> caseData = caseDetails.getData();
-        ChangeOfRepresentatives current = ChangeOfRepresentatives.builder()
-            .changeOfRepresentation(objectMapper.convertValue(caseData.get(CHANGE_OF_REPS),
-                new TypeReference<>() {}))
-            .build();
+        ChangeOfRepresentatives current = getCurrentChangeOfRepresentatives(caseData);
 
-        ChangeOfRepresentatives change = changeOfRepresentationService.generateChangeOfRepresentatives(
-            ChangeOfRepresentationRequest.builder()
-                .by(addedSolicitor.getName())
-                .party(isApplicant ? "Applicant" : "Respondent")
-                .clientName(isApplicant ? caseDataService.buildFullApplicantName(caseDetails)
-                    : caseDataService.buildFullRespondentName(caseDetails))
-                .current(current)
-                .addedRepresentative(addedSolicitor)
-                .removedRepresentative(removedSolicitor)
-                .build()
-        );
+        ChangeOfRepresentatives change = changeOfRepresentationService
+            .generateChangeOfRepresentatives(buildChangeOfRepresentationRequest(caseDetails,
+                addedSolicitor,
+                removedSolicitor,
+                current,
+                changeRequest));
 
-        caseData.put(CHANGE_OF_REPS, change.getChangeOfRepresentation());
+        caseData.put(CHANGE_OF_REPRESENTATIVES, change.getChangeOfRepresentation());
 
         return caseData;
     }
 
     private Map<String, Object> updateCaseDataWithNewSolDetails(CaseDetails caseDetails,
-                                                                ChangedRepresentative addedSolicitor) {
+                                                                ChangedRepresentative addedSolicitor,
+                                                                ChangeOrganisationRequest changeRequest) {
 
         Map<String, Object> caseData = caseDetails.getData();
         boolean isConsented = caseDataService.isConsentedApplication(caseDetails);
         String appSolicitorAddressField = isConsented ? CONSENTED_SOLICITOR_ADDRESS : CONTESTED_SOLICITOR_ADDRESS;
-        String solicitorAddressField = isApplicant ? appSolicitorAddressField : RESP_SOLICITOR_ADDRESS;
+        String solicitorAddressField = changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY)
+            ? appSolicitorAddressField : RESP_SOLICITOR_ADDRESS;
 
-        //isRepresented Boolean
-        caseData.put(isApplicant ? APPLICANT_REPRESENTED : getRespondentRepresentedKey(caseDetails), YES_VALUE);
+        caseData.put(changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY)
+            ? APPLICANT_REPRESENTED
+            : getRespondentRepresentedKey(caseDetails),
+            YES_VALUE);
+
         OrganisationsResponse organisationsResponse = organisationService
             .findOrganisationByOrgId(addedSolicitor.getOrganisation().getOrganisationID());
 
-        //address
         caseData.put(solicitorAddressField,
             updateSolicitorDetailsService.convertOrganisationAddressToSolicitorAddress(organisationsResponse));
 
-        //Other contact fields
-        return updateSolicitorDetailsService.updateSolicitorContactDetails(addedSolicitor, caseData,
-            isConsented, isApplicant);
+        Map<String, Object> updatedCaseData = updateSolicitorDetailsService.updateSolicitorContactDetails(addedSolicitor,
+             caseData, isConsented, changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY));
+
+        updatedCaseData = updateSolicitorDetailsService.removeSolicitorFields(updatedCaseData,
+            isConsented,
+            changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY));
+
+        return updatedCaseData;
     }
 
     private ChangeOrganisationRequest getChangeOrganisationRequest(CaseDetails caseDetails) {
 
-        return objectMapper.convertValue(caseDetails.getData().get(CHANGE_REQUEST_FIELD),
+        return objectMapper.convertValue(caseDetails.getData().get(CHANGE_ORGANISATION_REQUEST),
             ChangeOrganisationRequest.class);
     }
 
@@ -155,5 +152,51 @@ public class UpdateRepresentationService {
     private String getRespondentRepresentedKey(CaseDetails caseDetails) {
         return caseDataService.isConsentedApplication(caseDetails)
             ? CONSENTED_RESPONDENT_REPRESENTED : CONTESTED_RESPONDENT_REPRESENTED;
+    }
+
+    private ChangedRepresentative getAddedSolicitor(UserDetails solicitorToAdd,
+                                                    ChangeOrganisationRequest changeRequest) {
+        return ChangedRepresentative.builder()
+            .name(solicitorToAdd.getFullName())
+            .email(solicitorToAdd.getEmail())
+            .organisation(changeRequest.getOrganisationToAdd())
+            .build();
+    }
+
+    private ChangedRepresentative getRemovedSolicitor(CaseDetails caseDetails,
+                                                      ChangeOrganisationRequest changeRequest) {
+        return Optional.ofNullable(changeRequest.getOrganisationToRemove())
+            .map(org -> ChangedRepresentative.builder()
+                .name(changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY)
+                    ? getApplicantSolicitorName(caseDetails)
+                    : (String) caseDetails.getData().get(RESP_SOLICITOR_NAME))
+                .email(changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY)
+                    ? getApplicantSolicitorEmail(caseDetails)
+                    : (String) caseDetails.getData().get(RESP_SOLICITOR_EMAIL))
+                .organisation(org).build())
+            .orElse(null);
+    }
+
+    private ChangeOfRepresentatives getCurrentChangeOfRepresentatives(Map<String, Object> caseData) {
+        return ChangeOfRepresentatives.builder()
+            .changeOfRepresentation(objectMapper.convertValue(caseData.get(CHANGE_OF_REPRESENTATIVES),
+                new TypeReference<>() {})).build();
+    }
+
+    private ChangeOfRepresentationRequest buildChangeOfRepresentationRequest(CaseDetails caseDetails,
+                                                                             ChangedRepresentative addedSolicitor,
+                                                                             ChangedRepresentative removedSolicitor,
+                                                                             ChangeOfRepresentatives current,
+                                                                             ChangeOrganisationRequest changeRequest) {
+        return ChangeOfRepresentationRequest.builder()
+            .by(addedSolicitor.getName())
+            .party(changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY) ? APPLICANT : RESPONDENT)
+            .clientName(changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY)
+                ? caseDataService.buildFullApplicantName(caseDetails)
+                : caseDataService.buildFullRespondentName(caseDetails))
+            .current(current)
+            .addedRepresentative(addedSolicitor)
+            .removedRepresentative(removedSolicitor)
+            .build();
     }
 }

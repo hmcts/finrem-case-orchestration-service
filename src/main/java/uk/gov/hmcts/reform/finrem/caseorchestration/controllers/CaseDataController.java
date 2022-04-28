@@ -49,7 +49,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 public class CaseDataController implements BaseController {
 
-    private static final String CHANGE_REQUEST_FIELD = "changeOrganisationRequestField";
+    private static final String CHANGE_ORGANISATION_REQUEST = "changeOrganisationRequestField";
     private final UpdateSolicitorDetailsService solicitorService;
     private final IdamService idamService;
     private final CaseDataService caseDataService;
@@ -154,6 +154,12 @@ public class CaseDataController implements BaseController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        addDefaultChangeOrganisationRequest(caseData);
+        addOrganisationPoliciesIfPartiesNotRepresented(caseData);
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+    }
+
+    private void addDefaultChangeOrganisationRequest(Map<String, Object> caseData) {
         ChangeOrganisationRequest defaultChangeRequest = ChangeOrganisationRequest
             .builder()
             .requestTimestamp(null)
@@ -164,10 +170,7 @@ public class CaseDataController implements BaseController {
             .organisationToRemove(null)
             .reason(null)
             .build();
-        caseData.put(CHANGE_REQUEST_FIELD, defaultChangeRequest);
-        addOrganisationPoliciesIfPartiesNotRepresented(caseData);
-        System.out.println(caseData);
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        caseData.put(CHANGE_ORGANISATION_REQUEST, defaultChangeRequest);
     }
 
     private void addOrganisationPoliciesIfPartiesNotRepresented(Map<String, Object> caseData) {

@@ -16,6 +16,7 @@ public class CCDConfigConstant {
     public static final String APPLICANT_CONFIDENTIAL_ADDRESS = "applicantAddressConfidential";
     public static final String APPLICANT_PHONE = "applicantPhone";
     public static final String APPLICANT_EMAIL = "applicantEmail";
+    public static final String APPLICANT = "Applicant";
 
     public static final String CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME = "appRespondentFMName";
     public static final String CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME = "respondentFMName";
@@ -25,6 +26,7 @@ public class CCDConfigConstant {
     public static final String RESPONDENT_CONFIDENTIAL_ADDRESS = "respondentAddressConfidential";
     public static final String RESPONDENT_PHONE = "respondentPhone";
     public static final String RESPONDENT_EMAIL = "respondentEmail";
+    public static final String RESPONDENT = "Respondent";
 
     //Applicant Solicitor related
     public static final String SOLICITOR_REFERENCE = "solicitorReference";
@@ -497,8 +499,9 @@ public class CCDConfigConstant {
     public static final String INTERIM_HEARING_DOCUMENT = "interimHearingDirectionsDocument";
     public static final String INTERIM_HEARING_UPLOADED_DOCUMENT = "interimUploadAdditionalDocument";
 
+
     //NoC
     public static final String NOC_PARTY = "nocParty";
     public static final String CHANGE_ORGANISATION_REQUEST = "changeOrganisationRequestField";
-
+    public static final String CHANGE_OF_REPRESENTATIVES = "ChangeOfRepresentatives";
 }
