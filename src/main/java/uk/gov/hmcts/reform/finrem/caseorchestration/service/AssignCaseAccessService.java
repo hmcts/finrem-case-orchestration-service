@@ -81,13 +81,20 @@ public class AssignCaseAccessService {
         Optional<CaseAssignmentUserRole> userToRemove = getUserToRemove(creatorRoles, allRoles);
 
         if (userToRemove.isEmpty()) {
+            log.info("All roles for case: {}", allRoles);
+            log.info("Creator roles for case: {}", creatorRoles);
             log.info("Applicant solicitor did not create case with id {}", caseDetails.getId());
             return null;
         }
 
-        return userToRemove
-            .map(creator -> revokeCreatorRole(caseDetails, creator.getUserId()))
-            .orElse(null);
+        return revokeCreatorRole(caseDetails, userToRemove.get().getUserId());
+    }
+
+    private CaseAssignmentUserRolesResource getUserRoles(String caseId) {
+        return caseDataApi.getUserRoles(
+            systemUserService.getSysUserToken(),
+            authTokenGenerator.generate(),
+            List.of(caseId));
     }
 
     private List<CaseAssignmentUserRole> getCreatorRoles(List<CaseAssignmentUserRole> allRoles) {
@@ -105,13 +112,6 @@ public class AssignCaseAccessService {
         return allRoles.stream()
             .filter(creatorWasApplicantSolicitor)
             .findFirst();
-    }
-
-    private CaseAssignmentUserRolesResource getUserRoles(String caseId) {
-        return caseDataApi.getUserRoles(
-            systemUserService.getSysUserToken(),
-            authTokenGenerator.generate(),
-            List.of(caseId));
     }
 
     private CaseAssignmentUserRolesResponse revokeCreatorRole(CaseDetails caseDetails, String userId) {
