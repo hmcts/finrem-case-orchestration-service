@@ -8,13 +8,14 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentation;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentatives;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -88,13 +89,11 @@ public class NotificationRequestMapper {
     }
 
     private ChangeOfRepresentation getLastChangeOfRepresentation(CaseDetails caseDetails) {
-        ChangeOfRepresentatives changeOfRepresentativesHistory = objectMapper
-            .convertValue(caseDetails.getData().get(CHANGE_OF_REPRESENTATIVES), new TypeReference<>() {
-            });
-        return Collections
-            .max(changeOfRepresentativesHistory.getChangeOfRepresentation(),
-                Comparator.comparing(c -> c.getValue().getDate()))
-            .getValue();
+
+        List<Element<ChangeOfRepresentation>> changeOfRepresentation = objectMapper
+            .convertValue(caseDetails.getData().get(CHANGE_OF_REPRESENTATIVES), new TypeReference<>() {});
+
+        return Collections.max(changeOfRepresentation, Comparator.comparing(c -> c.getValue().getDate())).getValue();
     }
 
     private String getCaseType(CaseDetails caseDetails) {
