@@ -49,6 +49,7 @@ public class UpdateRepresentationController implements BaseController {
             caseDetails.getId());
 
         validateCaseData(ccdRequest);
+        assignCaseAccessService.findAndRevokeCreatorRole(caseDetails);
         Map<String, Object> caseData = updateRepresentationService.updateRepresentationAsSolicitor(caseDetails, authToken);
         caseDetails.getData().putAll(caseData);
         log.info("Case details for caseID {} == {}", caseDetails.getId(), caseDetails.getData());
