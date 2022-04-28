@@ -176,7 +176,7 @@ public class NoticeOfChangeService {
     }
 
     // Manage case assignment's API only accepts CaseRoleId as the selected element of a dynamic list
-    // and not just as a simple string, so we have to do this ugly cast to get the API to process our COR
+    // and not just as a simple string, so we have to do this cast to get the API to process our COR
     private DynamicList generateCaseRoleIdDynamicListElementAsList(String role) {
         final DynamicListElement roleItem = DynamicListElement.builder()
             .code(role)

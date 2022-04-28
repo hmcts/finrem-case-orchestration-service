@@ -6,6 +6,7 @@
     "state": "applicationDrafted",
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
+      "updateIncludesRepresentativeChange": "No",
       "helpWithFeesQuestion": "Yes",
       "applicantLName": "Guy",
       "dateOfMarriage": "1111-01-01",

@@ -4,7 +4,9 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NoticeOfChangeService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 
 import javax.validation.constraints.NotNull;
 
@@ -26,8 +31,17 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
+@RequiredArgsConstructor
 @Slf4j
 public class RemoveApplicantDetailsController implements BaseController {
+
+    private static final String INCLUDES_REPRESENTATION_CHANGE = "updateIncludesRepresentativeChange";
+
+    @Autowired final NoticeOfChangeService noticeOfChangeService;
+
+    @Autowired final AssignCaseAccessService assignCaseAccessService;
+
+    @Autowired final SystemUserService systemUserService;
 
     @PostMapping(path = "/remove-details", consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE)
@@ -62,6 +76,20 @@ public class RemoveApplicantDetailsController implements BaseController {
             caseData.remove("applicantSolicitorEmail");
             caseData.remove("applicantSolicitorDXnumber");
             caseData.remove("applicantSolicitorConsentForEmails");
+        }
+
+        if (caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE)) {
+            CaseDetails originalCaseDetails = callback.getCaseDetailsBefore();
+            log.info("Received request to update representation on case with Case ID: {}", caseDetails.getId());
+            caseData = noticeOfChangeService.updateRepresentation(caseDetails, authorisationToken, originalCaseDetails);
+            caseDetails.getData().putAll(caseData);
+
+            AboutToStartOrSubmitCallbackResponse response = assignCaseAccessService.applyDecision(
+                systemUserService.getSysUserToken(),
+                caseDetails);
+
+            log.info("Response from Manage case service for caseID {}: {}", caseDetails.getId(), response);
+            return ResponseEntity.ok(response);
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
