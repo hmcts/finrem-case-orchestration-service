@@ -5,10 +5,10 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import java.time.LocalDate;
 import java.util.List;
@@ -150,11 +150,11 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
     }
 
     @SneakyThrows
-    private List<Element<ChangeOfRepresentation>> getChangeOfRepresentationListJson(String party,
-                                                     String latestSolicitorName,
-                                                     String latestSolicitorEmail) {
+    private List<Element<RepresentationUpdate>> getChangeOfRepresentationListJson(String party,
+                                                                                  String latestSolicitorName,
+                                                                                  String latestSolicitorEmail) {
         return Stream.of(
-            element(UUID.randomUUID(), ChangeOfRepresentation.builder()
+            element(UUID.randomUUID(), RepresentationUpdate.builder()
                 .party(party)
                 .clientName("TestClient Name")
                 .via("Notice of Change")
@@ -171,7 +171,7 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
                     .organisation(Organisation.builder().build())
                     .build())
                 .build()),
-            element(UUID.randomUUID(), ChangeOfRepresentation.builder()
+            element(UUID.randomUUID(), RepresentationUpdate.builder()
                 .party(party)
                 .clientName("TestClient Name")
                 .via("Notice of Change")

@@ -7,8 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
@@ -55,7 +55,7 @@ public class NotificationRequestMapper {
     }
 
     public NotificationRequest getNotificationRequestForNoticeOfChange(CaseDetails caseDetails) {
-        return isRespondentSolicitorChangedOnLatestChangeOfRepresentation(caseDetails)
+        return isRespondentSolicitorChangedOnLatestRepresentationUpdate(caseDetails)
             ? getNotificationRequestForRespondentSolicitor(caseDetails)
             : getNotificationRequestForApplicantSolicitor(caseDetails);
     }
@@ -84,16 +84,16 @@ public class NotificationRequestMapper {
             .build();
     }
 
-    private boolean isRespondentSolicitorChangedOnLatestChangeOfRepresentation(CaseDetails caseDetails) {
-        return getLastChangeOfRepresentation(caseDetails).getParty().equals(RESPONDENT);
+    private boolean isRespondentSolicitorChangedOnLatestRepresentationUpdate(CaseDetails caseDetails) {
+        return getLastRepresentationUpdate(caseDetails).getParty().equals(RESPONDENT);
     }
 
-    private ChangeOfRepresentation getLastChangeOfRepresentation(CaseDetails caseDetails) {
+    private RepresentationUpdate getLastRepresentationUpdate(CaseDetails caseDetails) {
 
-        List<Element<ChangeOfRepresentation>> changeOfRepresentation = objectMapper
+        List<Element<RepresentationUpdate>> representationUpdates = objectMapper
             .convertValue(caseDetails.getData().get(CHANGE_OF_REPRESENTATIVES), new TypeReference<>() {});
 
-        return Collections.max(changeOfRepresentation, Comparator.comparing(c -> c.getValue().getDate())).getValue();
+        return Collections.max(representationUpdates, Comparator.comparing(c -> c.getValue().getDate())).getValue();
     }
 
     private String getCaseType(CaseDetails caseDetails) {
