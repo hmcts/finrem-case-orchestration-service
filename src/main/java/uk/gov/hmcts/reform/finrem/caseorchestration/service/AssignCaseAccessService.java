@@ -69,6 +69,8 @@ public class AssignCaseAccessService {
         List<CaseAssignmentUserRole> allRoles = getUserRoles(caseDetails.getId().toString())
             .getCaseAssignmentUserRoles();
         List<CaseAssignmentUserRole> creatorRoles = getCreatorRoles(allRoles);
+        log.info("All roles for case: {}", allRoles);
+        log.info("Creator roles for case: {}", creatorRoles);
 
         if (creatorRoles.isEmpty()) {
             log.info("No creator role found for caseId {}", caseDetails.getId());
@@ -81,8 +83,6 @@ public class AssignCaseAccessService {
         Optional<CaseAssignmentUserRole> userToRemove = getUserToRemove(creatorRoles, allRoles);
 
         if (userToRemove.isEmpty()) {
-            log.info("All roles for case: {}", allRoles);
-            log.info("Creator roles for case: {}", creatorRoles);
             log.info("Applicant solicitor did not create case with id {}", caseDetails.getId());
             return null;
         }

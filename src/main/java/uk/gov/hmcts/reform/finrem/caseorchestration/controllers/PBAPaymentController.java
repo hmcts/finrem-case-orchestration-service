@@ -118,8 +118,8 @@ public class PBAPaymentController implements BaseController {
                     if (prdOrganisation.getOrganisationIdentifier().equals(applicantOrgId)) {
                         log.info("Assigning case access for Case ID: {}", caseDetails.getId());
                         try {
-                            assignCaseAccessService.assignCaseAccess(caseDetails, authToken);
                             ccdDataStoreService.removeCreatorRole(caseDetails, authToken);
+                            assignCaseAccessService.assignCaseAccess(caseDetails, authToken);
                         } catch (Exception e) {
                             log.error("Assigning case access threw exception for Case ID: {}, {}",
                                 caseDetails.getId(), e.getMessage());
