@@ -16,7 +16,7 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChangeOfRepresentation {
+public class RepresentationUpdate {
     @JsonProperty("party")
     String party;
 
