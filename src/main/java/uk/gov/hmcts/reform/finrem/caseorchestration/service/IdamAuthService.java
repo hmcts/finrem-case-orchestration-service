@@ -17,9 +17,15 @@ import static uk.gov.hmcts.reform.idam.client.IdamClient.OPENID_GRANT_TYPE;
 public class IdamAuthService {
     private final IdamAuthApi idamAuthApi;
     private final OAuth2Configuration oAuth2Configuration;
+    private static final String COURT_ADMIN_ROLE = "caseworker-divorce-financialremedy-courtadmin";
 
     public String getAccessToken(String username, String password) {
         return BEARER_AUTH_TYPE + " " + idamAuthApi.generateOpenIdToken(buildTokenRequest(username, password)).accessToken;
+    }
+
+    public boolean isUserCourtAdmin(String authorisation, String userId) {
+        UserDetails user = getUserByUserId(authorisation, userId);
+        return user.getRoles().contains(COURT_ADMIN_ROLE);
     }
 
     public UserDetails getUserByUserId(String authorisation, String userId) {

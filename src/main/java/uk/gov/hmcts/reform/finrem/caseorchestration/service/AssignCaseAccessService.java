@@ -58,7 +58,6 @@ public class AssignCaseAccessService {
 
     public AboutToStartOrSubmitCallbackResponse applyDecision(String authToken, CaseDetails caseDetails) {
         log.info("Updating case access via assignCaseAccessService for caseID {}", caseDetails.getId());
-        log.info("Sending payload to ManageCaseAssignment Service: {}", caseDetails);
         return caseAssignmentApi.applyDecision(authToken, authTokenGenerator.generate(),
             DecisionRequest.decisionRequest(caseDetails));
     }
@@ -85,9 +84,14 @@ public class AssignCaseAccessService {
             return null;
         }
 
-        return userToRemove
-            .map(creator -> revokeCreatorRole(caseDetails, creator.getUserId()))
-            .orElse(null);
+        return revokeCreatorRole(caseDetails, userToRemove.get().getUserId());
+    }
+
+    private CaseAssignmentUserRolesResource getUserRoles(String caseId) {
+        return caseDataApi.getUserRoles(
+            systemUserService.getSysUserToken(),
+            authTokenGenerator.generate(),
+            List.of(caseId));
     }
 
     private List<CaseAssignmentUserRole> getCreatorRoles(List<CaseAssignmentUserRole> allRoles) {
@@ -105,13 +109,6 @@ public class AssignCaseAccessService {
         return allRoles.stream()
             .filter(creatorWasApplicantSolicitor)
             .findFirst();
-    }
-
-    private CaseAssignmentUserRolesResource getUserRoles(String caseId) {
-        return caseDataApi.getUserRoles(
-            systemUserService.getSysUserToken(),
-            authTokenGenerator.generate(),
-            List.of(caseId));
     }
 
     private CaseAssignmentUserRolesResponse revokeCreatorRole(CaseDetails caseDetails, String userId) {
