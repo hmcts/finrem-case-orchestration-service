@@ -59,7 +59,8 @@
       "applicantSolicitorPhone": "89897876765",
       "applicantSolicitorEmail": "emailSol99@email.com",
       "applicantSolicitorDXnumber": "",
-      "applicantSolicitorConsentForEmails": "No"
+      "applicantSolicitorConsentForEmails": "No",
+      "respondentRepresented": "No"
     }
   }
 }

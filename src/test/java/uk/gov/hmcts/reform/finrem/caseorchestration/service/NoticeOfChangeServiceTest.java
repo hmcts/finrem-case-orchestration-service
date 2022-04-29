@@ -9,8 +9,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 
 import java.io.InputStream;
 import java.util.List;
@@ -34,7 +34,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
 
     private CallbackRequest callbackRequest;
 
-    private final Function<Map<String, Object>, List<Element<ChangeOfRepresentation>>> getFirstChangeElement =
+    private final Function<Map<String, Object>, List<Element<RepresentationUpdate>>> getFirstChangeElement =
         this::convertToChangeOfRepresentation;
 
 
@@ -67,8 +67,8 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
                 authTokenGenerator.generate(),
                 originalDetails);
 
-            ChangeOfRepresentation actualChange = getFirstChangeElement.apply(caseData).get(0).getValue();
-            ChangeOfRepresentation expectedChange = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
+            RepresentationUpdate actualChange = getFirstChangeElement.apply(caseData).get(0).getValue();
+            RepresentationUpdate expectedChange = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
                 .getData()).get(0).getValue();
 
             assertThat(actualChange.getClientName()).isEqualTo(expectedChange.getClientName());
@@ -90,9 +90,9 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(),
                 authTokenGenerator.generate(),
                 originalDetails);
-            List<Element<ChangeOfRepresentation>> actual = getFirstChangeElement.apply(caseData);
-            ChangeOfRepresentation actualChange = actual.get(1).getValue();
-            ChangeOfRepresentation expectedChange = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
+            List<Element<RepresentationUpdate>> actual = getFirstChangeElement.apply(caseData);
+            RepresentationUpdate actualChange = actual.get(1).getValue();
+            RepresentationUpdate expectedChange = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
                 .getData()).get(0).getValue();
 
             assertThat(actual).hasSize(2);
@@ -117,8 +117,8 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             CaseDetails originalDetails = mapper.readValue(is, CallbackRequest.class).getCaseDetails();
             Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(),
                 authTokenGenerator.generate(), originalDetails);
-            ChangeOfRepresentation actualChange = getFirstChangeElement.apply(caseData).get(0).getValue();
-            ChangeOfRepresentation expectedChange = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
+            RepresentationUpdate actualChange = getFirstChangeElement.apply(caseData).get(0).getValue();
+            RepresentationUpdate expectedChange = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
                 .getData()).get(0).getValue();
 
             assertThat(actualChange.getClientName()).isEqualTo(expectedChange.getClientName());
@@ -139,9 +139,9 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             CaseDetails originalDetails = mapper.readValue(is, CallbackRequest.class).getCaseDetails();
             Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(),
                 authTokenGenerator.generate(), originalDetails);
-            List<Element<ChangeOfRepresentation>> actual = getFirstChangeElement.apply(caseData);
-            ChangeOfRepresentation actualChange = actual.get(1).getValue();
-            ChangeOfRepresentation expectedChange = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
+            List<Element<RepresentationUpdate>> actual = getFirstChangeElement.apply(caseData);
+            RepresentationUpdate actualChange = actual.get(1).getValue();
+            RepresentationUpdate expectedChange = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
                 .getData()).get(0).getValue();
 
             assertThat(actual).hasSize(2);
@@ -166,8 +166,8 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(),
                 authTokenGenerator.generate(),
                 originalDetails);
-            ChangeOfRepresentation actualChange = getFirstChangeElement.apply(caseData).get(0).getValue();
-            ChangeOfRepresentation expectedChange = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
+            RepresentationUpdate actualChange = getFirstChangeElement.apply(caseData).get(0).getValue();
+            RepresentationUpdate expectedChange = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
                 .getData()).get(0).getValue();
 
             assertThat(actualChange.getClientName()).isEqualTo(expectedChange.getClientName());
@@ -192,8 +192,8 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
                 authTokenGenerator.generate(),
                 originalDetails);
 
-            ChangeOfRepresentation actualChange = getFirstChangeElement.apply(caseData).get(0).getValue();
-            ChangeOfRepresentation expected = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
+            RepresentationUpdate actualChange = getFirstChangeElement.apply(caseData).get(0).getValue();
+            RepresentationUpdate expected = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
                 .getData()).get(0).getValue();
 
             assertThat(actualChange.getClientName()).isEqualTo(expected.getClientName());
@@ -222,8 +222,8 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(),
                 authTokenGenerator.generate(),
                 originalDetails);
-            ChangeOfRepresentation actualChange = getFirstChangeElement.apply(caseData).get(0).getValue();
-            ChangeOfRepresentation expected = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
+            RepresentationUpdate actualChange = getFirstChangeElement.apply(caseData).get(0).getValue();
+            RepresentationUpdate expected = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
                 .getData()).get(0).getValue();
 
             assertThat(actualChange.getClientName()).isEqualTo(expected.getClientName());
@@ -233,7 +233,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
         }
     }
 
-    private List<Element<ChangeOfRepresentation>> convertToChangeOfRepresentation(Map<String, Object> data) {
+    private List<Element<RepresentationUpdate>> convertToChangeOfRepresentation(Map<String, Object> data) {
         System.out.println(data);
         return mapper.convertValue(data.get(CHANGE_OF_REPRESENTATIVES),
             new TypeReference<>() {});

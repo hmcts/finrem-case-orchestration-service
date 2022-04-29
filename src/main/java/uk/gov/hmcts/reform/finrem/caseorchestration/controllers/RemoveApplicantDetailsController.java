@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import javax.validation.constraints.NotNull;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -31,6 +32,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INCLUDES_REPRESENTATION_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_PHONE;
@@ -47,8 +49,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequiredArgsConstructor
 @Slf4j
 public class RemoveApplicantDetailsController implements BaseController {
-
-    private static final String INCLUDES_REPRESENTATION_CHANGE = "updateIncludesRepresentativeChange";
 
     @Autowired final NoticeOfChangeService noticeOfChangeService;
 
@@ -74,12 +74,31 @@ public class RemoveApplicantDetailsController implements BaseController {
         validateCaseData(callback);
 
         Map<String, Object> caseData = caseDetails.getData();
-        String applicantRepresented = caseData.get(APPLICANT_REPRESENTED).toString();
-        boolean isContested = caseDetails.getCaseTypeId().equalsIgnoreCase(CASE_TYPE_ID_CONTESTED);
-        String respondentRepresented = isContested
-            ? (String) caseData.get(CONTESTED_RESPONDENT_REPRESENTED)
-            : (String) caseData.get(CONSENTED_RESPONDENT_REPRESENTED);
 
+        removeApplicantDetails(caseData);
+        removeRespondentDetails(caseData, caseDetails.getCaseTypeId());
+
+        if (Optional.ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
+            && caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE)) {
+            CaseDetails originalCaseDetails = callback.getCaseDetailsBefore();
+            log.info("Received request to update representation on case with Case ID: {}", caseDetails.getId());
+            assignCaseAccessService.findAndRevokeCreatorRole(caseDetails);
+            caseData = noticeOfChangeService.updateRepresentation(caseDetails, authorisationToken, originalCaseDetails);
+            caseDetails.getData().putAll(caseData);
+
+            AboutToStartOrSubmitCallbackResponse response = assignCaseAccessService.applyDecision(
+                systemUserService.getSysUserToken(),
+                caseDetails);
+
+            log.info("Response from Manage case service for caseID {}: {}", caseDetails.getId(), response);
+            return ResponseEntity.ok(response);
+        }
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+    }
+
+    private void removeApplicantDetails(Map<String, Object> caseData) {
+        String applicantRepresented = caseData.get(APPLICANT_REPRESENTED).toString();
         if (applicantRepresented.equals(YES_VALUE)) {
             //remove applicants data as solicitors data has been added
             caseData.remove("applicantAddress");
@@ -94,7 +113,13 @@ public class RemoveApplicantDetailsController implements BaseController {
             caseData.remove("applicantSolicitorDXnumber");
             caseData.remove("applicantSolicitorConsentForEmails");
         }
+    }
 
+    private void removeRespondentDetails(Map<String, Object> caseData, String caseTypeId) {
+        boolean isContested = caseTypeId.equalsIgnoreCase(CASE_TYPE_ID_CONTESTED);
+        String respondentRepresented = isContested
+            ? (String) caseData.get(CONTESTED_RESPONDENT_REPRESENTED)
+            : (String) caseData.get(CONSENTED_RESPONDENT_REPRESENTED);
         if (respondentRepresented.equals(YES_VALUE)) {
             caseData.remove(RESPONDENT_ADDRESS);
             caseData.remove(RESPONDENT_PHONE);
@@ -108,21 +133,5 @@ public class RemoveApplicantDetailsController implements BaseController {
             caseData.remove(RESP_SOLICITOR_DX_NUMBER);
             caseData.remove(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT);
         }
-
-        if (caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE)) {
-            CaseDetails originalCaseDetails = callback.getCaseDetailsBefore();
-            log.info("Received request to update representation on case with Case ID: {}", caseDetails.getId());
-            caseData = noticeOfChangeService.updateRepresentation(caseDetails, authorisationToken, originalCaseDetails);
-            caseDetails.getData().putAll(caseData);
-
-            AboutToStartOrSubmitCallbackResponse response = assignCaseAccessService.applyDecision(
-                systemUserService.getSysUserToken(),
-                caseDetails);
-
-            log.info("Response from Manage case service for caseID {}: {}", caseDetails.getId(), response);
-            return ResponseEntity.ok(response);
-        }
-
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 }

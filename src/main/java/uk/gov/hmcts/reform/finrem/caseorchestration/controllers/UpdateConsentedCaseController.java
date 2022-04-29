@@ -15,13 +15,18 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NoticeOfChangeService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_PHONE;
@@ -32,6 +37,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_DX_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INCLUDES_REPRESENTATION_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_DX_NUMBER;
@@ -58,6 +64,15 @@ public class UpdateConsentedCaseController implements BaseController {
     @Autowired
     private ConsentOrderService consentOrderService;
 
+    @Autowired
+    private NoticeOfChangeService noticeOfChangeService;
+
+    @Autowired
+    private AssignCaseAccessService assignCaseAccessService;
+
+    @Autowired
+    private SystemUserService systemUserService;
+
     @PostMapping(path = "/update-case", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles update case details and cleans up the data fields based on the options chosen for Consented Cases")
     @ApiResponses(value = {
@@ -82,6 +97,22 @@ public class UpdateConsentedCaseController implements BaseController {
         updateD81Details(caseData);
         updateApplicantOrSolicitorContactDetails(caseData);
         updateLatestConsentOrder(ccdRequest);
+
+        if (Optional.ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
+            && caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE)) {
+            CaseDetails originalCaseDetails = ccdRequest.getCaseDetailsBefore();
+            log.info("Received request to update representation on case with Case ID: {}", caseDetails.getId());
+            assignCaseAccessService.findAndRevokeCreatorRole(caseDetails);
+            caseData = noticeOfChangeService.updateRepresentation(caseDetails, authToken, originalCaseDetails);
+            caseDetails.getData().putAll(caseData);
+
+            AboutToStartOrSubmitCallbackResponse response = assignCaseAccessService.applyDecision(
+                systemUserService.getSysUserToken(),
+                caseDetails);
+
+            log.info("Response from Manage case service for caseID {}: {}", caseDetails.getId(), response);
+            return ResponseEntity.ok(response);
+        }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }

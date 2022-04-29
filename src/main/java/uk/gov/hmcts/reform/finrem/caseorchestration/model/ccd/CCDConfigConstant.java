@@ -504,4 +504,6 @@ public class CCDConfigConstant {
     public static final String NOC_PARTY = "nocParty";
     public static final String CHANGE_ORGANISATION_REQUEST = "changeOrganisationRequestField";
     public static final String CHANGE_OF_REPRESENTATIVES = "ChangeOfRepresentatives";
+    public static final String INCLUDES_REPRESENTATION_CHANGE = "updateIncludesRepresentativeChange";
+
 }

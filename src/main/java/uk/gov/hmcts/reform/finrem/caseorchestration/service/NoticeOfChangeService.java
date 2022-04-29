@@ -9,8 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationHistory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentatives;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationApprovalStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
@@ -91,12 +91,12 @@ public class NoticeOfChangeService {
                                                               CaseDetails originalDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 
-        ChangeOfRepresentatives current = ChangeOfRepresentatives.builder()
-            .changeOfRepresentation(objectMapper.convertValue(caseData.get(CHANGE_OF_REPS),
+        ChangeOfRepresentationHistory current = ChangeOfRepresentationHistory.builder()
+            .representationUpdates(objectMapper.convertValue(caseData.get(CHANGE_OF_REPS),
                 new TypeReference<>() {}))
             .build();
 
-        ChangeOfRepresentatives change = changeOfRepresentationService.generateChangeOfRepresentatives(
+        ChangeOfRepresentationHistory change = changeOfRepresentationService.generateChangeOfRepresentatives(
             ChangeOfRepresentationRequest.builder()
                 .by(idamService.getIdamFullName(authToken))
                 .party(isApplicant ? APPLICANT : "respondent")
@@ -108,7 +108,7 @@ public class NoticeOfChangeService {
                 .build()
         );
 
-        caseData.put(CHANGE_OF_REPS, change.getChangeOfRepresentation());
+        caseData.put(CHANGE_OF_REPS, change.getRepresentationUpdates());
         return caseData;
     }
 
