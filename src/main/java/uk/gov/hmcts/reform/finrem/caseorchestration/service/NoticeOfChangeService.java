@@ -84,6 +84,7 @@ public class NoticeOfChangeService {
                                                               String authToken,
                                                               CaseDetails originalDetails) {
         Map<String, Object> caseData = caseDetails.getData();
+        boolean isApplicant = ((String) caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
 
         ChangeOfRepresentationHistory current = ChangeOfRepresentationHistory.builder()
             .representationUpdates(objectMapper.convertValue(caseData.get(CHANGE_OF_REPRESENTATIVES),
@@ -93,14 +94,12 @@ public class NoticeOfChangeService {
         ChangeOfRepresentationHistory change = changeOfRepresentationService.generateChangeOfRepresentatives(
             ChangeOfRepresentationRequest.builder()
                 .by(idamService.getIdamFullName(authToken))
-                .party(((String) caseData.get(NOC_PARTY)).equalsIgnoreCase(APPLICANT)
-                    ? APPLICANT : RESPONDENT)
-                .clientName(((String) caseData.get(NOC_PARTY)).equalsIgnoreCase(APPLICANT)
-                    ? caseDataService.buildFullApplicantName(caseDetails)
+                .party(isApplicant ? APPLICANT : RESPONDENT)
+                .clientName(isApplicant ? caseDataService.buildFullApplicantName(caseDetails)
                     : caseDataService.buildFullRespondentName(caseDetails))
                 .current(current)
                 .addedRepresentative(getAddedRepresentative(caseDetails))
-                .removedRepresentative(getRemovedRepresentative(originalDetails))
+                .removedRepresentative(getRemovedRepresentative(originalDetails, isApplicant))
                 .build()
         );
 
@@ -134,9 +133,8 @@ public class NoticeOfChangeService {
             .build();
     }
 
-    private ChangedRepresentative getRemovedRepresentative(CaseDetails caseDetails) {
+    private ChangedRepresentative getRemovedRepresentative(CaseDetails caseDetails, boolean isApplicant) {
         Map<String, Object> caseData = caseDetails.getData();
-        boolean isApplicant = ((String) caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
         String representedKey = isApplicant ? APPLICANT_REPRESENTED : getRespondentRepresentedKey(caseDetails);
 
         if (caseData.get(representedKey).equals(YES_VALUE)) {

@@ -23,14 +23,17 @@ public class UpdateRepresentationWorkflowService {
     @Autowired private final SystemUserService systemUserService;
 
     public AboutToStartOrSubmitCallbackResponse handleNoticeOfChangeWorkflow(CaseDetails caseDetails,
-                                                                                             String authorisationToken,
-                                                                                             CaseDetails originalCaseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
+                                                                             String authorisationToken,
+                                                                             CaseDetails originalCaseDetails) {
+
         log.info("Received request to update representation on case with Case ID: {}", caseDetails.getId());
         assignCaseAccessService.findAndRevokeCreatorRole(caseDetails);
-        caseData = noticeOfChangeService.updateRepresentation(caseDetails, authorisationToken, originalCaseDetails);
+        Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(caseDetails,
+            authorisationToken,
+            originalCaseDetails);
         caseDetails.getData().putAll(caseData);
-        caseDetails = noticeOfChangeService.persistOriginalOrgPoliciesWhenRevokingAccess(caseDetails, originalCaseDetails);
+        caseDetails = noticeOfChangeService.persistOriginalOrgPoliciesWhenRevokingAccess(caseDetails,
+            originalCaseDetails);
         AboutToStartOrSubmitCallbackResponse response = assignCaseAccessService.applyDecision(
             systemUserService.getSysUserToken(),
             caseDetails);
