@@ -232,7 +232,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     }
 
     @Test
-    @Ignore("Ignore for NoC test purposes as assignAccessFeatureToggle needs to be enabled for preview testing")
     public void shouldNotAssignApplicantSolicitor_assignCaseAccessToggledOff() throws Exception {
         doPBAPaymentReferenceAlreadyExistsSetup();
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);

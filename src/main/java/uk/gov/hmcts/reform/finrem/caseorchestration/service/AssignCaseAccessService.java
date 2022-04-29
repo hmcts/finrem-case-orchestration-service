@@ -69,8 +69,6 @@ public class AssignCaseAccessService {
         List<CaseAssignmentUserRole> allRoles = getUserRoles(caseDetails.getId().toString())
             .getCaseAssignmentUserRoles();
         List<CaseAssignmentUserRole> creatorRoles = getCreatorRoles(allRoles);
-        log.info("All roles for case: {}", allRoles);
-        log.info("Creator roles for case: {}", creatorRoles);
 
         if (creatorRoles.isEmpty()) {
             log.info("No creator role found for caseId {}", caseDetails.getId());
