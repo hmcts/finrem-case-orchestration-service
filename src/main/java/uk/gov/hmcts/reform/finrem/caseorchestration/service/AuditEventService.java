@@ -24,8 +24,6 @@ public class AuditEventService {
         String userToken = systemUserService.getSysUserToken();
 
         String authToken = authTokenGenerator.generate();
-        log.info("Generated Sys user token {} for caseID {}", userToken, caseId);
-        log.info("Generated service auth token {} for caseID {}", authToken, caseId);
         AuditEventsResponse auditEventsResponse
             = caseDataApi.getAuditEvents(userToken, authToken, false, caseId);
 

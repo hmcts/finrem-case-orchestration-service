@@ -11,6 +11,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateRepresentationService;
 
@@ -82,6 +83,10 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
         return when(assignCaseAccessService.applyDecision(eq(VALID_AUTH_TOKEN), any()));
     }
 
+    protected OngoingStubbing<CaseAssignmentUserRolesResponse> whenRevokeCreatorCaseAccessValid() {
+        return when(assignCaseAccessService.findAndRevokeCreatorRole(any()));
+    }
+
     private void doRequestSetUp() throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
@@ -104,6 +109,7 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
             .builder()
             .data(getUpdatedRepresentationData(jsonFixture()))
             .build());
+        whenRevokeCreatorCaseAccessValid().thenReturn(null);
 
         mvc.perform(post(updateEndpoint())
             .contentType(MediaType.APPLICATION_JSON)

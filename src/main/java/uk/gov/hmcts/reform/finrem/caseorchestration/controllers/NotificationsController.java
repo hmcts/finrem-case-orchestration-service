@@ -615,7 +615,7 @@ public class NotificationsController implements BaseController {
     @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Notice of change e-mail and letter sent successfully",
             response = AboutToStartOrSubmitCallbackResponse.class)})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendNoticeOfChangeEmailAndLetter(
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendNoticeOfChangeNotifications(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @RequestBody CallbackRequest callbackRequest) {
 
