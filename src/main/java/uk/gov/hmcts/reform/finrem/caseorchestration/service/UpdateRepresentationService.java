@@ -7,8 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationHistory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentatives;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.events.AuditEvent;
@@ -86,16 +86,16 @@ public class UpdateRepresentationService {
                                                               ChangeOrganisationRequest changeRequest) {
 
         Map<String, Object> caseData = caseDetails.getData();
-        ChangeOfRepresentatives current = getCurrentChangeOfRepresentatives(caseData);
+        ChangeOfRepresentationHistory current = getCurrentChangeOfRepresentatives(caseData);
 
-        ChangeOfRepresentatives change = changeOfRepresentationService
+        ChangeOfRepresentationHistory change = changeOfRepresentationService
             .generateChangeOfRepresentatives(buildChangeOfRepresentationRequest(caseDetails,
                 addedSolicitor,
                 removedSolicitor,
                 current,
                 changeRequest));
 
-        caseData.put(CHANGE_OF_REPRESENTATIVES, change.getChangeOfRepresentation());
+        caseData.put(CHANGE_OF_REPRESENTATIVES, change.getRepresentationUpdates());
 
         return caseData;
     }
@@ -177,16 +177,16 @@ public class UpdateRepresentationService {
             .orElse(null);
     }
 
-    private ChangeOfRepresentatives getCurrentChangeOfRepresentatives(Map<String, Object> caseData) {
-        return ChangeOfRepresentatives.builder()
-            .changeOfRepresentation(objectMapper.convertValue(caseData.get(CHANGE_OF_REPRESENTATIVES),
+    private ChangeOfRepresentationHistory getCurrentChangeOfRepresentatives(Map<String, Object> caseData) {
+        return ChangeOfRepresentationHistory.builder()
+            .representationUpdates(objectMapper.convertValue(caseData.get(CHANGE_OF_REPRESENTATIVES),
                 new TypeReference<>() {})).build();
     }
 
     private ChangeOfRepresentationRequest buildChangeOfRepresentationRequest(CaseDetails caseDetails,
                                                                              ChangedRepresentative addedSolicitor,
                                                                              ChangedRepresentative removedSolicitor,
-                                                                             ChangeOfRepresentatives current,
+                                                                             ChangeOfRepresentationHistory current,
                                                                              ChangeOrganisationRequest changeRequest) {
         return ChangeOfRepresentationRequest.builder()
             .by(addedSolicitor.getName())
