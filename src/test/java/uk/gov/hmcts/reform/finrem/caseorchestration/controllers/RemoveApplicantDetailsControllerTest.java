@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NoticeOfChangeService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateRepresentationWorkflowService;
 
 import java.io.File;
 
@@ -25,10 +23,7 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
 
     private static final String REMOVE_DETAILS_URL = "/case-orchestration/remove-details";
 
-    @MockBean
-    protected NoticeOfChangeService noticeOfChangeService;
-    @MockBean protected AssignCaseAccessService assignCaseAccessService;
-    @MockBean protected SystemUserService systemUserService;
+    @MockBean protected UpdateRepresentationWorkflowService handleNocWorkflowService;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 

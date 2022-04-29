@@ -15,10 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NoticeOfChangeService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateRepresentationWorkflowService;
 
 import java.util.List;
 import java.util.Map;
@@ -64,14 +62,7 @@ public class UpdateConsentedCaseController implements BaseController {
     @Autowired
     private ConsentOrderService consentOrderService;
 
-    @Autowired
-    private NoticeOfChangeService noticeOfChangeService;
-
-    @Autowired
-    private AssignCaseAccessService assignCaseAccessService;
-
-    @Autowired
-    private SystemUserService systemUserService;
+    @Autowired private UpdateRepresentationWorkflowService nocWorkflowService;
 
     @PostMapping(path = "/update-case", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles update case details and cleans up the data fields based on the options chosen for Consented Cases")
@@ -101,17 +92,9 @@ public class UpdateConsentedCaseController implements BaseController {
         if (Optional.ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
             && caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE)) {
             CaseDetails originalCaseDetails = ccdRequest.getCaseDetailsBefore();
-            log.info("Received request to update representation on case with Case ID: {}", caseDetails.getId());
-            assignCaseAccessService.findAndRevokeCreatorRole(caseDetails);
-            caseData = noticeOfChangeService.updateRepresentation(caseDetails, authToken, originalCaseDetails);
-            caseDetails.getData().putAll(caseData);
-
-            AboutToStartOrSubmitCallbackResponse response = assignCaseAccessService.applyDecision(
-                systemUserService.getSysUserToken(),
-                caseDetails);
-
-            log.info("Response from Manage case service for caseID {}: {}", caseDetails.getId(), response);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails,
+                authToken,
+                originalCaseDetails));
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());

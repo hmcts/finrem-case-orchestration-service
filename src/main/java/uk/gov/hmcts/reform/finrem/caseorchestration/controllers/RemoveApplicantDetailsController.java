@@ -16,9 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NoticeOfChangeService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateRepresentationWorkflowService;
 
 import javax.validation.constraints.NotNull;
 
@@ -50,11 +48,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 public class RemoveApplicantDetailsController implements BaseController {
 
-    @Autowired final NoticeOfChangeService noticeOfChangeService;
-
-    @Autowired final AssignCaseAccessService assignCaseAccessService;
-
-    @Autowired final SystemUserService systemUserService;
+    @Autowired private final UpdateRepresentationWorkflowService nocWorkflowService;
 
     @PostMapping(path = "/remove-details", consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE)
@@ -81,17 +75,9 @@ public class RemoveApplicantDetailsController implements BaseController {
         if (Optional.ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
             && caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE)) {
             CaseDetails originalCaseDetails = callback.getCaseDetailsBefore();
-            log.info("Received request to update representation on case with Case ID: {}", caseDetails.getId());
-            assignCaseAccessService.findAndRevokeCreatorRole(caseDetails);
-            caseData = noticeOfChangeService.updateRepresentation(caseDetails, authorisationToken, originalCaseDetails);
-            caseDetails.getData().putAll(caseData);
-
-            AboutToStartOrSubmitCallbackResponse response = assignCaseAccessService.applyDecision(
-                systemUserService.getSysUserToken(),
-                caseDetails);
-
-            log.info("Response from Manage case service for caseID {}: {}", caseDetails.getId(), response);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails,
+                authorisationToken,
+                originalCaseDetails));
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());

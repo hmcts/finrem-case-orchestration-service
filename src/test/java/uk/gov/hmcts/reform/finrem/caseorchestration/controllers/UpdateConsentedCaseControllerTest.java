@@ -8,10 +8,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NoticeOfChangeService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateRepresentationWorkflowService;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,13 +40,7 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
 
 
     @MockBean
-    private NoticeOfChangeService noticeOfChangeService;
-
-    @MockBean
-    private AssignCaseAccessService assignCaseAccessService;
-
-    @MockBean
-    private SystemUserService systemUserService;
+    private UpdateRepresentationWorkflowService mockNocWorkflowService;
 
     @Before
     public void setUp() {
