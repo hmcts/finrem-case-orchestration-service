@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.NocLetterNotificationService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ import java.util.ArrayList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -45,7 +47,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class NotificationsControllerTest extends BaseControllerTest {
 
     @Autowired private NotificationsController notificationsController;
-
+    @MockBean private NocLetterNotificationService nocLetterNotificationService;
     @MockBean private NotificationService notificationService;
     @MockBean private PaperNotificationService paperNotificationService;
     @MockBean private GeneralEmailService generalEmailService;
@@ -55,6 +57,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @MockBean private CaseDataService caseDataService;
     @MockBean private TransferCourtService transferCourtService;
     @MockBean private FeatureToggleService featureToggleService;
+
 
     @Test
     public void sendHwfSuccessfulConfirmationEmailIfDigitalCase() {
@@ -941,9 +944,11 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @Test
     public void givenNoticeOfChangeNotificationThenSendNoticeOfChangeServiceCalled() {
 
-        notificationsController.sendNoticeOfChangeEmailAndLetter(buildCallbackRequest());
+        notificationsController.sendNoticeOfChangeEmailAndLetter("authToken", buildCallbackRequest());
 
         verify(notificationService, times(1)).sendNoticeOfChangeEmail(any());
+
+        verify(nocLetterNotificationService, times(1)).sendNoticeOfChangeLetters(any(CaseDetails.class), anyString());
     }
 
     private CallbackRequest createCallbackRequestWithFinalOrder() {

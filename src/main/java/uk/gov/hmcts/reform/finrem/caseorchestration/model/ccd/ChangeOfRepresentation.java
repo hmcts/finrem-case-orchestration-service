@@ -17,6 +17,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChangeOfRepresentation {
+
     @JsonProperty("party")
     String party;
 
@@ -37,4 +38,5 @@ public class ChangeOfRepresentation {
 
     @JsonProperty("removed")
     ChangedRepresentative removed;
+
 }

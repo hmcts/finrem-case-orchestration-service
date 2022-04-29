@@ -185,6 +185,8 @@ dependencyManagement {
             entry 'jackson-core'
             entry 'jackson-databind'
             entry 'jackson-annotations'
+            entry 'jackson-module'
+            entry 'jackson-datatype'
         }
     }
 }
@@ -206,6 +208,10 @@ dependencies {
     implementation group: 'io.github.openfeign', name: 'feign-httpclient', version: '11.6'
     implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign'
     implementation group: 'io.github.openfeign.form', name: 'feign-form', version: '3.8.0'
+
+    implementation group: 'com.fasterxml.jackson.module', name: 'jackson-modules-java8', version: versions.jackson
+    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: versions.jackson
+
 
     implementation 'com.github.hmcts:idam-java-client:2.0.1'
 
@@ -230,6 +236,8 @@ dependencies {
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
     testImplementation group: 'com.fasterxml.jackson.core', name:'jackson-databind', version: versions.jackson
     testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: versions.jackson
+    testImplementation group: 'com.fasterxml.jackson.module', name: 'jackson-modules-java8', version: versions.jackson
+    testImplementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: versions.jackson
 
     testSmokeImplementation group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
     testSmokeImplementation sourceSets.main.runtimeClasspath

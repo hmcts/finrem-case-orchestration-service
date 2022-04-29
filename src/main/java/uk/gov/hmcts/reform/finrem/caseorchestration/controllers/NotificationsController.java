@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentServi
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.NocLetterNotificationService;
 
 import java.io.IOException;
 import java.util.Map;
@@ -46,6 +47,7 @@ public class NotificationsController implements BaseController {
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
     private final TransferCourtService transferCourtService;
     private final FeatureToggleService featureToggleService;
+    private final NocLetterNotificationService nocLetterNotificationService;
 
     @PostMapping(value = "/hwf-successful", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Notify Applicant/Applicant Solicitor of HWF Successful by email or letter.")
@@ -614,6 +616,7 @@ public class NotificationsController implements BaseController {
         @ApiResponse(code = 204, message = "Notice of change e-mail and letter sent successfully",
             response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendNoticeOfChangeEmailAndLetter(
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @RequestBody CallbackRequest callbackRequest) {
 
         log.info("Received request to send Notice of Change email and letter for Case ID: {}", callbackRequest.getCaseDetails().getId());
@@ -622,6 +625,8 @@ public class NotificationsController implements BaseController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         notificationService.sendNoticeOfChangeEmail(caseDetails);
+        log.info("Call the noc letter service");
+        nocLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, authorisationToken);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
