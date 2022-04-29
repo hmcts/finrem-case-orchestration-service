@@ -31,7 +31,6 @@ public class UpdateRepresentationWorkflowService {
         caseData = noticeOfChangeService.updateRepresentation(caseDetails, authorisationToken, originalCaseDetails);
         caseDetails.getData().putAll(caseData);
         caseDetails = noticeOfChangeService.persistOriginalOrgPoliciesWhenRevokingAccess(caseDetails, originalCaseDetails);
-
         AboutToStartOrSubmitCallbackResponse response = assignCaseAccessService.applyDecision(
             systemUserService.getSysUserToken(),
             caseDetails);
