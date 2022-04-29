@@ -73,7 +73,6 @@ public class NoticeOfChangeService {
         log.info("About to start updating representation as caseworker for caseID {}", caseDetails.getId());
 
         Map<String,Object> caseData = updateChangeOfRepresentatives(caseDetails, authorizationToken, originalCaseDetails);
-        log.info("added changeOfRepresentatives to case with caseID {}", caseDetails.getId());
         ChangeOrganisationRequest changeRequest = generateChangeOrganisationRequest(caseDetails, originalCaseDetails);
         caseData.put(CHANGE_ORGANISATION_REQUEST, changeRequest);
 
@@ -120,8 +119,6 @@ public class NoticeOfChangeService {
         Organisation organisationToRemove = Optional.ofNullable(getOrgPolicy(originalDetails, isApplicant
                 ? APPLICANT_ORGANISATION_POLICY : RESPONDENT_ORGANISATION_POLICY))
             .map(OrganisationPolicy::getOrganisation).orElse(null);
-
-        log.info("Generating Change Organisation Request for case with CaseID {}", caseDetails.getId());
 
         return ChangeOrganisationRequest.builder()
             .caseRoleId(role)
