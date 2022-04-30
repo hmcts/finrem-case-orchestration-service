@@ -7,10 +7,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationHistory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.events.AuditEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -50,7 +50,7 @@ public class UpdateRepresentationService {
 
     private static final String CHANGE_REQUEST_FIELD = "changeOrganisationRequestField";
     private static final String NOC_EVENT = "nocRequest";
-    private static final String CHANGE_OF_REPRESENTATIVES = "ChangeOfRepresentatives";
+    private static final String REPRESENTATION_UPDATE_HISTORY = "RepresentationUpdateHistory";
 
     public Map<String, Object> updateRepresentationAsSolicitor(CaseDetails caseDetails,
                                                                String authToken)  {
@@ -66,10 +66,11 @@ public class UpdateRepresentationService {
         log.info("About to start updating solicitor details in the case data for caseId: {}", caseDetails.getId());
         caseDetails.getData().putAll(updateCaseDataWithNewSolDetails(caseDetails, addedSolicitor, changeRequest));
 
-        Map<String, Object> updatedCaseData = updateChangeOfRepresentatives(caseDetails,
+        Map<String, Object> updatedCaseData = updateRepresentationUpdateHistory(caseDetails,
             addedSolicitor,
             removedSolicitor,
             changeRequest);
+
         return updatedCaseData;
     }
 
@@ -80,22 +81,22 @@ public class UpdateRepresentationService {
         return idamClient.getUserByUserId(authToken, auditEvent.getUserId());
     }
 
-    private Map<String, Object> updateChangeOfRepresentatives(CaseDetails caseDetails,
+    private Map<String, Object> updateRepresentationUpdateHistory(CaseDetails caseDetails,
                                                               ChangedRepresentative addedSolicitor,
                                                               ChangedRepresentative removedSolicitor,
                                                               ChangeOrganisationRequest changeRequest) {
 
         Map<String, Object> caseData = caseDetails.getData();
-        ChangeOfRepresentationHistory current = getCurrentChangeOfRepresentatives(caseData);
+        RepresentationUpdateHistory current = getCurrentRepresentationUpdateHistory(caseData);
 
-        ChangeOfRepresentationHistory change = changeOfRepresentationService
-            .generateChangeOfRepresentatives(buildChangeOfRepresentationRequest(caseDetails,
+        RepresentationUpdateHistory change = changeOfRepresentationService
+            .generateRepresentationUpdateHistory(buildChangeOfRepresentationRequest(caseDetails,
                 addedSolicitor,
                 removedSolicitor,
                 current,
                 changeRequest));
 
-        caseData.put(CHANGE_OF_REPRESENTATIVES, change.getRepresentationUpdates());
+        caseData.put(REPRESENTATION_UPDATE_HISTORY, change.getRepresentationUpdateHistory());
 
         return caseData;
     }
@@ -177,16 +178,16 @@ public class UpdateRepresentationService {
             .orElse(null);
     }
 
-    private ChangeOfRepresentationHistory getCurrentChangeOfRepresentatives(Map<String, Object> caseData) {
-        return ChangeOfRepresentationHistory.builder()
-            .representationUpdates(objectMapper.convertValue(caseData.get(CHANGE_OF_REPRESENTATIVES),
+    private RepresentationUpdateHistory getCurrentRepresentationUpdateHistory(Map<String, Object> caseData) {
+        return RepresentationUpdateHistory.builder()
+            .representationUpdateHistory(objectMapper.convertValue(caseData.get(REPRESENTATION_UPDATE_HISTORY),
                 new TypeReference<>() {})).build();
     }
 
     private ChangeOfRepresentationRequest buildChangeOfRepresentationRequest(CaseDetails caseDetails,
                                                                              ChangedRepresentative addedSolicitor,
                                                                              ChangedRepresentative removedSolicitor,
-                                                                             ChangeOfRepresentationHistory current,
+                                                                             RepresentationUpdateHistory current,
                                                                              ChangeOrganisationRequest changeRequest) {
         return ChangeOfRepresentationRequest.builder()
             .by(addedSolicitor.getName())
