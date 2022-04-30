@@ -8,7 +8,7 @@ import lombok.Value;
 @Builder(toBuilder = true)
 public class ChangeOfRepresentationRequest {
 
-    ChangeOfRepresentationHistory current;
+    RepresentationUpdateHistory current;
     String party;
     String clientName;
     ChangedRepresentative addedRepresentative;

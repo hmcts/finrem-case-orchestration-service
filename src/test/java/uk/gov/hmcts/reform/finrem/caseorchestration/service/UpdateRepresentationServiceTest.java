@@ -9,11 +9,11 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationHistory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.events.AuditEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationContactInformation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
@@ -67,7 +67,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     public static final String POSTCODE = "postCode";
 
     private static final String NOTICE_OF_CHANGE = "Notice of Change";
-    private static final String CHANGE_OF_REPRESENTATIVES = "ChangeOfRepresentatives";
+    private static final String REPRESENTATION_UPDATE_HISTORY = "RepresentationUpdateHistory";
 
     @Autowired private UpdateRepresentationService updateRepresentationService;
 
@@ -308,7 +308,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     }
 
     private List<Element<RepresentationUpdate>> convertToChangeOfRepresentation(Map<String, Object> data) {
-        return mapper.convertValue(data.get(CHANGE_OF_REPRESENTATIVES),
+        return mapper.convertValue(data.get(REPRESENTATION_UPDATE_HISTORY),
             new TypeReference<>() {});
     }
 
@@ -318,7 +318,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         when(organisationService.findOrganisationByOrgId(any())).thenReturn(orgResponse);
         when(updateSolicitorDetailsService.convertOrganisationAddressToSolicitorAddress(orgResponse))
             .thenReturn(prepareSolAddressData(orgResponse));
-        when(changeOfRepresentationService.generateChangeOfRepresentatives(any()))
+        when(changeOfRepresentationService.generateRepresentationUpdateHistory(any()))
             .thenReturn(getChangeOfRepsAppContested());
         when(updateSolicitorDetailsService.updateSolicitorContactDetails(any(), any(), anyBoolean(), anyBoolean()))
             .thenReturn(getUpdatedContactData("contestedAppSolicitorAdding"));
@@ -328,7 +328,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
 
     private void setUpMockContext(UserDetails solicitor,
                                   OrganisationsResponse orgResponse,
-                                  Supplier<ChangeOfRepresentationHistory> supplier,
+                                  Supplier<RepresentationUpdateHistory> supplier,
                                   String fixture,
                                   boolean isConsented) throws Exception {
         when(auditEventService.getLatestAuditEventByName(any(), eq(NOC_EVENT))).thenReturn(Optional.of(testAuditEvent));
@@ -336,7 +336,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         when(organisationService.findOrganisationByOrgId(any())).thenReturn(orgResponse);
         when(updateSolicitorDetailsService.convertOrganisationAddressToSolicitorAddress(orgResponse))
             .thenReturn(prepareSolAddressData(orgResponse));
-        when(changeOfRepresentationService.generateChangeOfRepresentatives(any()))
+        when(changeOfRepresentationService.generateRepresentationUpdateHistory(any()))
             .thenReturn(supplier.get());
         when(updateSolicitorDetailsService.updateSolicitorContactDetails(any(), any(), anyBoolean(), anyBoolean()))
             .thenReturn(getUpdatedContactData(fixture));
@@ -353,7 +353,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         when(organisationService.findOrganisationByOrgId(any())).thenReturn(orgResponse);
         when(updateSolicitorDetailsService.convertOrganisationAddressToSolicitorAddress(orgResponse))
             .thenReturn(prepareSolAddressData(orgResponse));
-        when(changeOfRepresentationService.generateChangeOfRepresentatives(any()))
+        when(changeOfRepresentationService.generateRepresentationUpdateHistory(any()))
             .thenReturn(getChangeOfRepsReplacingApplicant(newSolicitor, newSolicitorOrg));
         when(updateSolicitorDetailsService.updateSolicitorContactDetails(any(), any(), anyBoolean(), anyBoolean()))
             .thenReturn(getUpdatedContactData("AppSolReplacing"));
@@ -381,13 +381,13 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
             .getCaseDetails().getData();
     }
 
-    private ChangeOfRepresentationHistory getChangeOfRepsAppContested() {
+    private RepresentationUpdateHistory getChangeOfRepsAppContested() {
         ChangedRepresentative added = ChangedRepresentative.builder()
             .name(testAppSolicitor.getFullName())
             .email(testAppSolicitor.getEmail())
             .organisation(applicantOrg)
             .build();
-        return ChangeOfRepresentationHistory.builder().representationUpdates(
+        return RepresentationUpdateHistory.builder().representationUpdateHistory(
             List.of(element(UUID.randomUUID(),
                 RepresentationUpdate.builder()
                     .party("applicant")
@@ -400,14 +400,14 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
                     .build()))).build();
     }
 
-    private ChangeOfRepresentationHistory getChangeOfRepsRespondent() {
+    private RepresentationUpdateHistory getChangeOfRepsRespondent() {
         ChangedRepresentative added = ChangedRepresentative.builder()
             .name(testRespSolicitor.getFullName())
             .email(testRespSolicitor.getEmail())
             .organisation(respondentOrg)
             .build();
 
-        return ChangeOfRepresentationHistory.builder().representationUpdates(
+        return RepresentationUpdateHistory.builder().representationUpdateHistory(
             List.of(element(UUID.randomUUID(),
                 RepresentationUpdate.builder()
                 .party("respondent")
@@ -420,8 +420,8 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
                 .build()))).build();
     }
 
-    private ChangeOfRepresentationHistory getChangeOfRepsReplacingApplicant(UserDetails testAppSolicitorReplacing,
-                                                                            Organisation appOrg) {
+    private RepresentationUpdateHistory getChangeOfRepsReplacingApplicant(UserDetails testAppSolicitorReplacing,
+                                                                          Organisation appOrg) {
         ChangedRepresentative added = ChangedRepresentative.builder()
             .name(testAppSolicitorReplacing.getFullName())
             .email(testAppSolicitorReplacing.getEmail())
@@ -434,7 +434,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
             .organisation(applicantOrg)
             .build();
 
-        return ChangeOfRepresentationHistory.builder().representationUpdates(
+        return RepresentationUpdateHistory.builder().representationUpdateHistory(
             List.of(element(UUID.randomUUID(),
                 RepresentationUpdate.builder()
                     .party("applicant")
