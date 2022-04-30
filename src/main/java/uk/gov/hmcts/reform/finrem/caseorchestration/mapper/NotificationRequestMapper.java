@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_OF_REPRESENTATIVES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REPRESENTATION_UPDATE_HISTORY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
@@ -90,11 +90,11 @@ public class NotificationRequestMapper {
 
     private RepresentationUpdate getLastRepresentationUpdate(CaseDetails caseDetails) {
 
-        log.debug("CHANGE_OF_REPRESENTATIVES json object      +++++     " + caseDetails.getData().get(CHANGE_OF_REPRESENTATIVES));
-        log.info("CHANGE_OF_REPRESENTATIVES json object      +++++     " + caseDetails.getData().get(CHANGE_OF_REPRESENTATIVES));
+        log.debug("CHANGE_OF_REPRESENTATIVES json object      +++++     " + caseDetails.getData().get(REPRESENTATION_UPDATE_HISTORY));
+        log.info("CHANGE_OF_REPRESENTATIVES json object      +++++     " + caseDetails.getData().get(REPRESENTATION_UPDATE_HISTORY));
 
         List<Element<RepresentationUpdate>> representationUpdates = objectMapper
-            .convertValue(caseDetails.getData().get(CHANGE_OF_REPRESENTATIVES), new TypeReference<>() {});
+            .convertValue(caseDetails.getData().get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {});
 
         return Collections.max(representationUpdates, Comparator.comparing(c -> c.getValue().getDate())).getValue();
     }

@@ -111,7 +111,7 @@
       "regionList": "london",
       "londonFRCList": "cfc",
       "cfcCourtList": "FR_s_CFCList_9",
-      "ChangeOfRepresentatives": [
+      "RepresentationUpdateHistory": [
         {
           "id": "60dbe6bc-c1a7-11ec-9d64-0242ac120002",
           "value": {

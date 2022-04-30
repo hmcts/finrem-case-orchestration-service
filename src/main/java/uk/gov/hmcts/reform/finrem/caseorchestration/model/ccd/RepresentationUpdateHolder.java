@@ -6,9 +6,9 @@ import lombok.Data;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
-public class ChangeOfRepresentationDataHolder {
+public class RepresentationUpdateHolder {
     @JsonProperty("id")
     private String id;
     @JsonProperty("value")
-    private ChangeOfRepresentation changeOfRepresentation;
+    private RepresentationUpdate representationUpdate;
 }

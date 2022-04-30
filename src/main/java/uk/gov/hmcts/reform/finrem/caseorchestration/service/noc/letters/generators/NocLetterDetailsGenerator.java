@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.address.AddresseeBuilderService;
@@ -35,7 +35,7 @@ public class NocLetterDetailsGenerator {
     }
 
     public NoticeOfChangeLetterDetails generate(CaseDetails caseDetails,
-                                                ChangeOfRepresentation changeOfRepresentation,
+                                                RepresentationUpdate representationUpdate,
                                                 DocumentHelper.PaperNotificationRecipient recipient,
                                                 NoticeType noticeType) {
 
@@ -45,9 +45,9 @@ public class NocLetterDetailsGenerator {
             .letterDate(DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()))
             .divorceCaseNumber(Objects.toString(caseDetails.getData().get(DIVORCE_CASE_NUMBER)))
             .caseNumber(caseDetails.getId().toString())
-            .reference(getSolicitorReference(caseDetails, changeOfRepresentation))
+            .reference(getSolicitorReference(caseDetails, representationUpdate))
             .applicantName(documentHelper.getApplicantFullName(caseDetails))
-            .solicitorFirmName(getSolicitorFirmName(changeOfRepresentation, noticeType))
+            .solicitorFirmName(getSolicitorFirmName(representationUpdate, noticeType))
             .respondentName(isConsentedApplication ? documentHelper.getRespondentFullNameConsented(caseDetails) :
                 documentHelper.getRespondentFullNameContested(caseDetails))
             .courtDetails(isConsentedApplication ? buildConsentedFrcCourtDetails() : buildFrcCourtDetails(caseDetails.getData()))
@@ -55,17 +55,17 @@ public class NocLetterDetailsGenerator {
             .build();
     }
 
-    private String getSolicitorReference(CaseDetails caseDetails, ChangeOfRepresentation changeOfRepresentation) {
-        return isApplicant(changeOfRepresentation) ? Objects.toString(caseDetails.getData().get(SOLICITOR_REFERENCE)) :
+    private String getSolicitorReference(CaseDetails caseDetails, RepresentationUpdate representationUpdate) {
+        return isApplicant(representationUpdate) ? Objects.toString(caseDetails.getData().get(SOLICITOR_REFERENCE)) :
             Objects.toString(caseDetails.getData().get(RESP_SOLICITOR_REFERENCE));
     }
 
-    private String getSolicitorFirmName(ChangeOfRepresentation changeOfRepresentation, NoticeType noticeType) {
-        return noticeType == NoticeType.ADD ? changeOfRepresentation.getAdded().getOrganisation().getOrganisationName() :
-            changeOfRepresentation.getRemoved().getOrganisation().getOrganisationName();
+    private String getSolicitorFirmName(RepresentationUpdate representationUpdate, NoticeType noticeType) {
+        return noticeType == NoticeType.ADD ? representationUpdate.getAdded().getOrganisation().getOrganisationName() :
+            representationUpdate.getRemoved().getOrganisation().getOrganisationName();
     }
 
-    private boolean isApplicant(ChangeOfRepresentation changeOfRepresentation) {
-        return changeOfRepresentation.getParty().equals(COR_APPLICANT);
+    private boolean isApplicant(RepresentationUpdate representationUpdate) {
+        return representationUpdate.getParty().equals(COR_APPLICANT);
     }
 }

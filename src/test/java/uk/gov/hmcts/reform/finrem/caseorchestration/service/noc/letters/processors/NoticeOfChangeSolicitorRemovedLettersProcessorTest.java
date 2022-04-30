@@ -7,7 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.generators.LitigantSolicitorRevokedNocLetterGenerator;
@@ -45,19 +45,19 @@ public class NoticeOfChangeSolicitorRemovedLettersProcessorTest {
 
         CaseDetails caseDetails =
             caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-no-solicitor-email.json", new ObjectMapper());
-        ChangeOfRepresentation changeOfRepresentation = ChangeOfRepresentation.builder().party(COR_APPLICANT).build();
+        RepresentationUpdate representationUpdate = RepresentationUpdate.builder().party(COR_APPLICANT).build();
 
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.FALSE);
 
         NoticeOfChangeLetterDetails noticeOfChangeLetterDetailsApplicant = NoticeOfChangeLetterDetails.builder().build();
-        when(noticeOfChangeLetterDetailsGenerator.generate(caseDetails, changeOfRepresentation, APPLICANT,
+        when(noticeOfChangeLetterDetailsGenerator.generate(caseDetails, representationUpdate, APPLICANT,
             NocLetterDetailsGenerator.NoticeType.REMOVE)).thenReturn(noticeOfChangeLetterDetailsApplicant);
 
         NoticeOfChangeLetterDetails noticeOfChangeLetterDetailsSolicitor = NoticeOfChangeLetterDetails.builder().build();
-        when(noticeOfChangeLetterDetailsGenerator.generate(caseDetails, changeOfRepresentation, SOLICITOR,
+        when(noticeOfChangeLetterDetailsGenerator.generate(caseDetails, representationUpdate, SOLICITOR,
             NocLetterDetailsGenerator.NoticeType.REMOVE)).thenReturn(noticeOfChangeLetterDetailsSolicitor);
 
-        noticeOfChangeLettersProcessor.processSolicitorAndLitigantLetters(caseDetails, AUTH_TOKEN, changeOfRepresentation);
+        noticeOfChangeLettersProcessor.processSolicitorAndLitigantLetters(caseDetails, AUTH_TOKEN, representationUpdate);
 
         verify(litigantSolicitorRevokedNocLetterGenerator).generateNoticeOfLetter(AUTH_TOKEN, noticeOfChangeLetterDetailsApplicant);
         verify(solicitorNocLetterGenerator).generateNoticeOfLetter(AUTH_TOKEN, noticeOfChangeLetterDetailsSolicitor);
@@ -69,15 +69,15 @@ public class NoticeOfChangeSolicitorRemovedLettersProcessorTest {
 
         CaseDetails caseDetails =
             caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-with-solicitor-email.json", new ObjectMapper());
-        ChangeOfRepresentation changeOfRepresentation = ChangeOfRepresentation.builder().party(COR_APPLICANT).build();
+        RepresentationUpdate representationUpdate = RepresentationUpdate.builder().party(COR_APPLICANT).build();
 
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.FALSE);
 
         NoticeOfChangeLetterDetails noticeOfChangeLetterDetailsApplicant = NoticeOfChangeLetterDetails.builder().build();
-        when(noticeOfChangeLetterDetailsGenerator.generate(caseDetails, changeOfRepresentation, APPLICANT,
+        when(noticeOfChangeLetterDetailsGenerator.generate(caseDetails, representationUpdate, APPLICANT,
             NocLetterDetailsGenerator.NoticeType.REMOVE)).thenReturn(noticeOfChangeLetterDetailsApplicant);
 
-        noticeOfChangeLettersProcessor.processSolicitorAndLitigantLetters(caseDetails, AUTH_TOKEN, changeOfRepresentation);
+        noticeOfChangeLettersProcessor.processSolicitorAndLitigantLetters(caseDetails, AUTH_TOKEN, representationUpdate);
 
         verify(litigantSolicitorRevokedNocLetterGenerator).generateNoticeOfLetter(AUTH_TOKEN, noticeOfChangeLetterDetailsApplicant);
         verifyNoInteractions(solicitorNocLetterGenerator);
@@ -89,15 +89,15 @@ public class NoticeOfChangeSolicitorRemovedLettersProcessorTest {
         CaseDetails caseDetails =
             caseDetailsFromResource("/fixtures/noticeOfChange/consented/noc-letter-notifications-with-solicitor-no-respondent-email.json",
                 new ObjectMapper());
-        ChangeOfRepresentation changeOfRepresentation = ChangeOfRepresentation.builder().party(COR_RESPONDENT).build();
+        RepresentationUpdate representationUpdate = RepresentationUpdate.builder().party(COR_RESPONDENT).build();
 
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.TRUE);
 
         NoticeOfChangeLetterDetails noticeOfChangeLetterDetailsApplicant = NoticeOfChangeLetterDetails.builder().build();
-        when(noticeOfChangeLetterDetailsGenerator.generate(caseDetails, changeOfRepresentation, RESPONDENT,
+        when(noticeOfChangeLetterDetailsGenerator.generate(caseDetails, representationUpdate, RESPONDENT,
             NocLetterDetailsGenerator.NoticeType.REMOVE)).thenReturn(noticeOfChangeLetterDetailsApplicant);
 
-        noticeOfChangeLettersProcessor.processSolicitorAndLitigantLetters(caseDetails, AUTH_TOKEN, changeOfRepresentation);
+        noticeOfChangeLettersProcessor.processSolicitorAndLitigantLetters(caseDetails, AUTH_TOKEN, representationUpdate);
 
         verify(litigantSolicitorRevokedNocLetterGenerator).generateNoticeOfLetter(AUTH_TOKEN, noticeOfChangeLetterDetailsApplicant);
         verifyNoInteractions(solicitorNocLetterGenerator);

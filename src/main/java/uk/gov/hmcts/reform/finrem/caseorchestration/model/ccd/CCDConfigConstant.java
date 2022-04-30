@@ -503,5 +503,4 @@ public class CCDConfigConstant {
     public static final String REPRESENTATION_UPDATE_HISTORY = "RepresentationUpdateHistory";
     public static final String CHANGE_REQUEST_FIELD = "changeOrganisationRequestField";
 
-
 }

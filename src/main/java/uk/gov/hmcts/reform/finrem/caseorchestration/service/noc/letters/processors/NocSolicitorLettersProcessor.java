@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.process
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.generators.NocLetterDetailsGenerator;
@@ -43,20 +43,20 @@ public abstract class NocSolicitorLettersProcessor {
         this.noticeType = noticeType;
     }
 
-    public void processSolicitorAndLitigantLetters(CaseDetails caseDetails, String authToken, ChangeOfRepresentation changeOfRepresentation) {
+    public void processSolicitorAndLitigantLetters(CaseDetails caseDetails, String authToken, RepresentationUpdate representationUpdate) {
 
         log.info("In the processSolicitorAndLitigantLetters method for case {} and noticeType {}", caseDetails.getId(), noticeType);
-        boolean isApplicantCheck = isApplicant(changeOfRepresentation);
+        boolean isApplicantCheck = isApplicant(representationUpdate);
         NoticeOfChangeLetterDetails noticeOfChangeLetterDetailsLitigant = null;
         if (isApplicantCheck && isEmailAddressNotProvided(caseDetails, APPLICANT_EMAIL)) {
             log.info("The litigant is an applicant and the email address is not provided");
             noticeOfChangeLetterDetailsLitigant =
-                noticeOfChangeLetterDetailsGenerator.generate(caseDetails, changeOfRepresentation, APPLICANT,
+                noticeOfChangeLetterDetailsGenerator.generate(caseDetails, representationUpdate, APPLICANT,
                     noticeType);
         } else if (!isApplicantCheck && isEmailAddressNotProvided(caseDetails, RESPONDENT_EMAIL)) {
             log.info("The litigant is a respondent and the email address is not provided");
             noticeOfChangeLetterDetailsLitigant =
-                noticeOfChangeLetterDetailsGenerator.generate(caseDetails, changeOfRepresentation, RESPONDENT,
+                noticeOfChangeLetterDetailsGenerator.generate(caseDetails, representationUpdate, RESPONDENT,
                     noticeType);
         }
         if (noticeOfChangeLetterDetailsLitigant != null) {
@@ -69,14 +69,14 @@ public abstract class NocSolicitorLettersProcessor {
         if (solicitorHasNotProvidedAnEmailAddress(caseDetails, isConsentedApplication)) {
             log.info("Solicitor has not provided an email address so send out letter for isConsented {}", isConsentedApplication);
             NoticeOfChangeLetterDetails noticeOfChangeLetterDetailsSolicitor =
-                noticeOfChangeLetterDetailsGenerator.generate(caseDetails, changeOfRepresentation, SOLICITOR,
+                noticeOfChangeLetterDetailsGenerator.generate(caseDetails, representationUpdate, SOLICITOR,
                     noticeType);
             solicitorNocLetterGenerator.generateNoticeOfLetter(authToken, noticeOfChangeLetterDetailsSolicitor);
         }
     }
 
-    private boolean isApplicant(ChangeOfRepresentation changeOfRepresentation) {
-        return changeOfRepresentation.getParty().equals(COR_APPLICANT);
+    private boolean isApplicant(RepresentationUpdate representationUpdate) {
+        return representationUpdate.getParty().equals(COR_APPLICANT);
     }
 
     private boolean isEmailAddressNotProvided(CaseDetails caseDetails, String emailField) {

@@ -9,7 +9,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.processors.NocSolicitorAddedLettersProcessor;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -33,7 +33,7 @@ public class NoticeOfChangeLetterNotificationServiceTest {
     private CaseDetails caseDetails;
 
     @Captor
-    private ArgumentCaptor<ChangeOfRepresentation> changeOfRepresentationArgumentCaptor;
+    private ArgumentCaptor<RepresentationUpdate> changeOfRepresentationArgumentCaptor;
 
     @Before
     public void setUpTest() {
@@ -50,13 +50,13 @@ public class NoticeOfChangeLetterNotificationServiceTest {
         verify(nocSolicitorAddedLettersProcessor).processSolicitorAndLitigantLetters(any(CaseDetails.class), anyString(),
             changeOfRepresentationArgumentCaptor.capture());
 
-        ChangeOfRepresentation changeOfRepresentation = changeOfRepresentationArgumentCaptor.getValue();
-        assertThat(changeOfRepresentation.getAdded().getOrganisation().getOrganisationName(), is("FRApplicantSolicitorFirmAdded"));
+        RepresentationUpdate representationUpdate = changeOfRepresentationArgumentCaptor.getValue();
+        assertThat(representationUpdate.getAdded().getOrganisation().getOrganisationName(), is("FRApplicantSolicitorFirmAdded"));
 
         verify(nocSolicitorRemovedLettersProcessor).processSolicitorAndLitigantLetters(any(CaseDetails.class), anyString(),
             changeOfRepresentationArgumentCaptor.capture());
 
-        ChangeOfRepresentation changeOfRepresentationRemoved = changeOfRepresentationArgumentCaptor.getValue();
+        RepresentationUpdate changeOfRepresentationRemoved = changeOfRepresentationArgumentCaptor.getValue();
         assertThat(changeOfRepresentationRemoved.getRemoved().getOrganisation().getOrganisationName(), is("FRApplicantSolicitorFirmRemoved"));
 
     }
@@ -70,8 +70,8 @@ public class NoticeOfChangeLetterNotificationServiceTest {
         verify(nocSolicitorAddedLettersProcessor).processSolicitorAndLitigantLetters(any(CaseDetails.class), anyString(),
             changeOfRepresentationArgumentCaptor.capture());
 
-        ChangeOfRepresentation changeOfRepresentation = changeOfRepresentationArgumentCaptor.getValue();
-        assertThat(changeOfRepresentation.getAdded().getOrganisation().getOrganisationName(), is("FRApplicantSolicitorFirm1"));
+        RepresentationUpdate representationUpdate = changeOfRepresentationArgumentCaptor.getValue();
+        assertThat(representationUpdate.getAdded().getOrganisation().getOrganisationName(), is("FRApplicantSolicitorFirm1"));
 
         verifyNoMoreInteractions(nocSolicitorAddedLettersProcessor);
     }
@@ -85,8 +85,8 @@ public class NoticeOfChangeLetterNotificationServiceTest {
         verify(nocSolicitorRemovedLettersProcessor).processSolicitorAndLitigantLetters(any(CaseDetails.class), anyString(),
             changeOfRepresentationArgumentCaptor.capture());
 
-        ChangeOfRepresentation changeOfRepresentation = changeOfRepresentationArgumentCaptor.getValue();
-        assertThat(changeOfRepresentation.getRemoved().getOrganisation().getOrganisationName(), is("FRApplicantSolicitorFirmR1"));
+        RepresentationUpdate representationUpdate = changeOfRepresentationArgumentCaptor.getValue();
+        assertThat(representationUpdate.getRemoved().getOrganisation().getOrganisationName(), is("FRApplicantSolicitorFirmR1"));
 
         verifyNoMoreInteractions(nocSolicitorRemovedLettersProcessor);
     }
@@ -100,8 +100,8 @@ public class NoticeOfChangeLetterNotificationServiceTest {
         verify(nocSolicitorRemovedLettersProcessor).processSolicitorAndLitigantLetters(any(CaseDetails.class), anyString(),
             changeOfRepresentationArgumentCaptor.capture());
 
-        ChangeOfRepresentation changeOfRepresentation = changeOfRepresentationArgumentCaptor.getValue();
-        assertThat(changeOfRepresentation.getRemoved().getOrganisation().getOrganisationName(), is("FRApplicantSolicitorFirmMax"));
+        RepresentationUpdate representationUpdate = changeOfRepresentationArgumentCaptor.getValue();
+        assertThat(representationUpdate.getRemoved().getOrganisation().getOrganisationName(), is("FRApplicantSolicitorFirmMax"));
 
         verifyNoMoreInteractions(nocSolicitorRemovedLettersProcessor);
     }
