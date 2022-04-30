@@ -23,7 +23,8 @@ public abstract class NocLetterGenerator {
 
     public CaseDocument generateNoticeOfLetter(String authToken, NoticeOfChangeLetterDetails noticeOfChangeLetterDetails) {
 
-        log.info("Calling the DocumentService with template {} and filename {}", getNocDocumentTemplate().getTemplateName(), getNocDocumentTemplate().getDocumentFileName());
+        log.info("Calling the DocumentService with template {} and filename {}",
+            getNocDocumentTemplate().getTemplateName(), getNocDocumentTemplate().getDocumentFileName());
         CaseDocument caseDocument = genericDocumentService.generateDocumentFromPlaceholdersMap(authToken,
             convertNoticeOfChangeLetterDetailsToMap(noticeOfChangeLetterDetails),
             getNocDocumentTemplate().getTemplateName(),

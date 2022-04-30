@@ -28,7 +28,7 @@ public class NocLetterNotificationService {
 
     public void sendNoticeOfChangeLetters(CaseDetails caseDetails, String authToken) {
 
-        log.info("Send noc letters for case id {}", caseDetails.getId() );
+        log.info("Send noc letters for case id {}", caseDetails.getId());
         RepresentationUpdate representationUpdate = getRepresentationUpdate(caseDetails);
         log.info("Got the representationUpdate");
         if (representationUpdate.getAdded() != null) {
