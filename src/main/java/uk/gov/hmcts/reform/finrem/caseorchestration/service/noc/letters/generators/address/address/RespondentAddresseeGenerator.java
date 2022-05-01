@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.address;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.generators.address.address;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

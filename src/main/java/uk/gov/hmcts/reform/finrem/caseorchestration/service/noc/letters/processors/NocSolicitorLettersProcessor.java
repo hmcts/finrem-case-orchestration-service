@@ -46,6 +46,12 @@ public abstract class NocSolicitorLettersProcessor {
     public void processSolicitorAndLitigantLetters(CaseDetails caseDetails, String authToken, RepresentationUpdate representationUpdate) {
 
         log.info("In the processSolicitorAndLitigantLetters method for case {} and noticeType {}", caseDetails.getId(), noticeType);
+        sendLitigantLetters(caseDetails, authToken, representationUpdate);
+        sendSolicitorLetters(caseDetails, authToken, representationUpdate);
+    }
+
+
+    private void sendLitigantLetters(CaseDetails caseDetails, String authToken, RepresentationUpdate representationUpdate) {
         boolean isApplicantCheck = isApplicant(representationUpdate);
         NoticeOfChangeLetterDetails noticeOfChangeLetterDetailsLitigant = null;
         if (isApplicantCheck && isEmailAddressNotProvided(caseDetails, APPLICANT_EMAIL)) {
@@ -63,7 +69,9 @@ public abstract class NocSolicitorLettersProcessor {
             log.info("Letter is required so generate");
             litigantNocLetterGenerator.generateNoticeOfLetter(authToken, noticeOfChangeLetterDetailsLitigant);
         }
+    }
 
+    private void sendSolicitorLetters(CaseDetails caseDetails, String authToken, RepresentationUpdate representationUpdate) {
         log.info("Now check if solicitor notification letter is required");
         boolean isConsentedApplication = caseDataService.isConsentedApplication(caseDetails);
         if (solicitorHasNotProvidedAnEmailAddress(caseDetails, isConsentedApplication)) {

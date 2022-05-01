@@ -1,5 +1,5 @@
 
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.address;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.generators.address.address;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.address.ApplicantAddresseeGenerator;
 
 import java.util.Map;
 

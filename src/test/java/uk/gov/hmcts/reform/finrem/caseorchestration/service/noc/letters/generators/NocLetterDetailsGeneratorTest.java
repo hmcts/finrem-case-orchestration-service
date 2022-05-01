@@ -15,7 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.address.AddresseeBuilderService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.generators.address.address.AddresseeBuilderService;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

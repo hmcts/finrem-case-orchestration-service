@@ -21,7 +21,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 
 @RunWith(MockitoJUnitRunner.class)
-public class NoticeOfChangeLetterNotificationServiceTest {
+public class NocLetterNotificationServiceTest {
 
     protected static final String AUTH_TOKEN = "authToken";
     NocLetterNotificationService noticeOfChangeLetterNotificationService;
@@ -58,7 +58,6 @@ public class NoticeOfChangeLetterNotificationServiceTest {
 
         RepresentationUpdate changeOfRepresentationRemoved = changeOfRepresentationArgumentCaptor.getValue();
         assertThat(changeOfRepresentationRemoved.getRemoved().getOrganisation().getOrganisationName(), is("FRApplicantSolicitorFirmRemoved"));
-
     }
 
     @Test

@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.address;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.generators.address.address;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -7,10 +7,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.address.AddresseeBuilderService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.address.ApplicantAddresseeGenerator;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.address.RespondentAddresseeGenerator;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.address.SolicitorAddresseeGenerator;
 
 import static org.mockito.Mockito.verify;
 

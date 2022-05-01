@@ -24,7 +24,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.processors.NocSolicitorLettersProcessor.COR_APPLICANT;
 
 @RunWith(MockitoJUnitRunner.class)
-public class NoticeOfChangeSolicitorAddedLettersProcessorTest {
+public class NocSolicitorAddedLettersProcessorTest {
 
     protected static final String AUTH_TOKEN = "authToken";
     protected static final String COR_RESPONDENT = "respondent";
