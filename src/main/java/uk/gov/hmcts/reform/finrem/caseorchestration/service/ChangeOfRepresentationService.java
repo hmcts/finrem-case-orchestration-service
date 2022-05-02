@@ -4,10 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationHistory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistory;
+
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -25,14 +26,16 @@ public class ChangeOfRepresentationService {
 
     private static final String NOTICE_OF_CHANGE = "Notice of Change";
 
-    public ChangeOfRepresentationHistory generateChangeOfRepresentatives(ChangeOfRepresentationRequest
+    public RepresentationUpdateHistory generateRepresentationUpdateHistory(ChangeOfRepresentationRequest
                                                                        changeOfRepresentationRequest) {
 
-        ChangeOfRepresentationHistory change = Optional.ofNullable(changeOfRepresentationRequest.getCurrent()).map(
-            current -> buildNewHistory(current.getRepresentationUpdates()))
-            .orElse(ChangeOfRepresentationHistory.builder().representationUpdates(new ArrayList<>()).build());
+        log.info("Updating change of representatives for case.");
 
-        change.getRepresentationUpdates().add(element(UUID.randomUUID(),
+        RepresentationUpdateHistory history = Optional.ofNullable(changeOfRepresentationRequest.getCurrent()).map(
+            current -> buildNewHistory(current.getRepresentationUpdateHistory()))
+            .orElse(RepresentationUpdateHistory.builder().representationUpdateHistory(new ArrayList<>()).build());
+
+        history.getRepresentationUpdateHistory().add(element(UUID.randomUUID(),
             RepresentationUpdate.builder()
                 .party(changeOfRepresentationRequest.getParty())
                 .clientName(changeOfRepresentationRequest.getClientName())
@@ -43,14 +46,17 @@ public class ChangeOfRepresentationService {
                 .removed(changeOfRepresentationRequest.getRemovedRepresentative())
                 .build()
         ));
-        change.getRepresentationUpdates().sort(Comparator.comparing(element -> element.getValue().getDate()));
 
-        return change;
+        log.info("Updated change of representatives: {}", history);
+
+        history.getRepresentationUpdateHistory().sort(Comparator.comparing(element -> element.getValue().getDate()));
+
+        return history;
     }
 
-    private ChangeOfRepresentationHistory buildNewHistory(List<Element<RepresentationUpdate>> currentChangeList) {
-        return  ChangeOfRepresentationHistory.builder()
-            .representationUpdates(Optional.ofNullable(currentChangeList).orElse(new ArrayList<>()))
+    private RepresentationUpdateHistory buildNewHistory(List<Element<RepresentationUpdate>> currentChangeList) {
+        return  RepresentationUpdateHistory.builder()
+            .representationUpdateHistory(Optional.ofNullable(currentChangeList).orElse(new ArrayList<>()))
             .build();
     }
 
