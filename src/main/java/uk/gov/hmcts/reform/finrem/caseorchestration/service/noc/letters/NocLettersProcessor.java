@@ -3,8 +3,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLetterDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.NocDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
@@ -23,11 +25,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 @Slf4j
 public abstract class NocLettersProcessor {
 
-    private final NocDocumentService litigantNocLetterGenerator;
+    private final NocDocumentService nocDocumentService;
     private final SolicitorNocDocumentService solicitorNocDocumentService;
     private final NocLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator;
     private final CaseDataService caseDataService;
     private final NoticeType noticeType;
+    private final BulkPrintService bulkPrintService;
 
     public static final String COR_APPLICANT = "applicant";
 
@@ -36,11 +39,13 @@ public abstract class NocLettersProcessor {
         SolicitorNocDocumentService solicitorNocDocumentService,
         NocLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator,
         CaseDataService caseDataService,
+        BulkPrintService bulkPrintService,
         NoticeType noticeType) {
-        this.litigantNocLetterGenerator = nocDocumentService;
+        this.nocDocumentService = nocDocumentService;
         this.solicitorNocDocumentService = solicitorNocDocumentService;
         this.noticeOfChangeLetterDetailsGenerator = noticeOfChangeLetterDetailsGenerator;
         this.caseDataService = caseDataService;
+        this.bulkPrintService = bulkPrintService;
         this.noticeType = noticeType;
     }
 
@@ -68,7 +73,9 @@ public abstract class NocLettersProcessor {
         }
         if (noticeOfChangeLetterDetailsLitigant != null) {
             log.info("Letter is required so generate");
-            litigantNocLetterGenerator.generateNoticeOfChangeLetter(authToken, noticeOfChangeLetterDetailsLitigant);
+            CaseDocument caseDocument = nocDocumentService.generateNoticeOfChangeLetter(authToken, noticeOfChangeLetterDetailsLitigant);
+            log.info("Generated the litigant case document now send to bulk print");
+            bulkPrintService.sendDocumentForPrint(caseDocument, caseDetails);
         }
     }
 
@@ -80,7 +87,9 @@ public abstract class NocLettersProcessor {
             NoticeOfChangeLetterDetails noticeOfChangeLetterDetailsSolicitor =
                 noticeOfChangeLetterDetailsGenerator.generate(caseDetails, representationUpdate, SOLICITOR,
                     noticeType);
-            solicitorNocDocumentService.generateNoticeOfChangeLetter(authToken, noticeOfChangeLetterDetailsSolicitor);
+            CaseDocument caseDocument = solicitorNocDocumentService.generateNoticeOfChangeLetter(authToken, noticeOfChangeLetterDetailsSolicitor);
+            log.info("Generated the solicitor case document now send to bulk print");
+            bulkPrintService.sendDocumentForPrint(caseDocument, caseDetails);
         }
     }
 

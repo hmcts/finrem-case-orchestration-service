@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.LitigantSolicitorAddedNocDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
@@ -16,8 +17,8 @@ public class NocSolicitorAddedLettersProcessor extends NocLettersProcessor {
         LitigantSolicitorAddedNocDocumentService litigantSolicitorAddedNocDocumentService,
         SolicitorNocDocumentService solicitorNocDocumentService,
         NocLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator,
-        CaseDataService caseDataService) {
-        super(litigantSolicitorAddedNocDocumentService, solicitorNocDocumentService, noticeOfChangeLetterDetailsGenerator, caseDataService,
+        CaseDataService caseDataService, BulkPrintService bulkPrintService) {
+        super(litigantSolicitorAddedNocDocumentService, solicitorNocDocumentService, noticeOfChangeLetterDetailsGenerator, caseDataService, bulkPrintService,
             NoticeType.ADD);
     }
 }
