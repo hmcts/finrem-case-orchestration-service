@@ -642,13 +642,13 @@ public class NotificationsController implements BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @RequestBody CallbackRequest callbackRequest) {
 
-        log.info("Received request to send Notice of Change email and letter for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         if (!requiresNotifications(callbackRequest)) {
             return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
         }
+        log.info("Received request to send Notice of Change email and letter for Case ID: {}", callbackRequest.getCaseDetails().getId());
         notificationService.sendNoticeOfChangeEmailCaseworker(caseDetails);
         log.info("Call the noc letter service");
         nocLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, authorisationToken);
