@@ -502,5 +502,8 @@ public class CCDConfigConstant {
     //Notice of Change
     public static final String REPRESENTATION_UPDATE_HISTORY = "RepresentationUpdateHistory";
     public static final String CHANGE_REQUEST_FIELD = "changeOrganisationRequestField";
+    public static final String INCLUDES_REPRESENTATIVE_UPDATE = "updateIncludesRepresentativeChange";
+    public static final String UPDATE_CONTACT_DETAILS_EVENT = "FR_updateContactDetails";
+
 
 }

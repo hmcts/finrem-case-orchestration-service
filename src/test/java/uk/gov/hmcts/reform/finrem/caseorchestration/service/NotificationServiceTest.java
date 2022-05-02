@@ -69,6 +69,8 @@ public class NotificationServiceTest extends BaseServiceTest {
     private static final String END_POINT_TRANSFER_TO_LOCAL_COURT = "http://localhost:8086/notify/transfer-to-local-court";
     private static final String END_POINT_NOTICE_OF_CHANGE_CONSENTED = "http://localhost:8086/notify/notice-of-change";
     private static final String END_POINT_NOTICE_OF_CHANGE_CONTESTED = "http://localhost:8086/notify/contested/notice-of-change";
+    private static final String END_POINT_NOC_CASEWORKER_CONTESTED = "http://localhost:8086/notify/contested/notice-of-change/caseworker";
+    private static final String END_POINT_NOC_CASEWORKER_CONSENTED = "http://localhost:8086/notify/notice-of-change/caseworker";
 
     private static final String ERROR_500_MESSAGE = "500 Internal Server Error";
     private static final String TEST_USER_EMAIL = "fr_applicant_sol@sharklasers.com";
@@ -1004,5 +1006,33 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(getConsentedCallbackRequest().getCaseDetails());
         verify(notificationServiceConfiguration).getConsentedNoticeOfChange();
+    }
+
+    @Test
+    public void givenContestedCase_whenSendNoCCaseworkerEmail_thenSendContestedEmail() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_NOC_CASEWORKER_CONTESTED))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+
+        notificationService.sendNoticeOfChangeEmailCaseworker(getContestedCallbackRequestUpdateDetails()
+            .getCaseDetails());
+
+        verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(getContestedCallbackRequestUpdateDetails()
+            .getCaseDetails());
+        verify(notificationServiceConfiguration).getContestedNoCCaseworker();
+    }
+
+    @Test
+    public void givenConsentedCase_whenSendNoCCaseworkerEmail_thenSendConsentedEmail() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_NOC_CASEWORKER_CONSENTED))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+
+        notificationService.sendNoticeOfChangeEmailCaseworker(getConsentedCallbackRequestUpdateDetails()
+            .getCaseDetails());
+
+        verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(getConsentedCallbackRequestUpdateDetails()
+            .getCaseDetails());
+        verify(notificationServiceConfiguration).getConsentedNoCCaseworker();
     }
 }

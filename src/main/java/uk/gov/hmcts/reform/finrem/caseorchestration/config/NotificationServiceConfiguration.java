@@ -39,4 +39,6 @@ public class NotificationServiceConfiguration {
     private String prepareForInterimHearing;
     private String contestedNoticeOfChange;
     private String consentedNoticeOfChange;
+    private String contestedNoCCaseworker;
+    private String consentedNoCCaseworker;
 }

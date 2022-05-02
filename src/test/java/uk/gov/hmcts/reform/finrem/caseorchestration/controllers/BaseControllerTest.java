@@ -16,8 +16,11 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INCLUDES_REPRESENTATIVE_UPDATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPDATE_CONTACT_DETAILS_EVENT;
 
 public abstract class BaseControllerTest extends BaseTest {
 
@@ -71,7 +74,14 @@ public abstract class BaseControllerTest extends BaseTest {
     protected CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
         CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(123)).data(caseData).build();
-        return CallbackRequest.builder().caseDetails(caseDetails).build();
+        return CallbackRequest.builder().eventId("SomeEventId").caseDetails(caseDetails).build();
+    }
+
+    protected CallbackRequest buildNoCCaseworkerCallbackRequest() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(INCLUDES_REPRESENTATIVE_UPDATE, YES_VALUE);
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(123)).data(caseData).build();
+        return CallbackRequest.builder().eventId(UPDATE_CONTACT_DETAILS_EVENT).caseDetails(caseDetails).build();
     }
 
     protected CallbackRequest buildCallbackInterimRequest() {

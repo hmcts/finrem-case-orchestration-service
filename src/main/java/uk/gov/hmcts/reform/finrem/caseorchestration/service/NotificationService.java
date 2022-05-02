@@ -372,9 +372,22 @@ public class NotificationService {
             .getNotificationRequestForNoticeOfChange(caseDetails), uri);
     }
 
+    public void sendNoticeOfChangeEmailCaseworker(CaseDetails caseDetails) {
+        URI uri = getNoticeOfChangeUriCaseworker(caseDetails);
+        sendNotificationEmail(notificationRequestMapper
+            .getNotificationRequestForNoticeOfChange(caseDetails), uri);
+    }
+
     private URI getNoticeOfChangeUri(CaseDetails caseDetails) {
         return buildUri(caseDataService.isConsentedApplication(caseDetails)
             ? notificationServiceConfiguration.getConsentedNoticeOfChange()
             : notificationServiceConfiguration.getContestedNoticeOfChange());
+    }
+
+    private URI getNoticeOfChangeUriCaseworker(CaseDetails caseDetails) {
+        return buildUri(caseDataService.isConsentedApplication(caseDetails)
+            ? notificationServiceConfiguration.getConsentedNoCCaseworker()
+            : notificationServiceConfiguration.getContestedNoCCaseworker());
+
     }
 }

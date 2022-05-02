@@ -28,10 +28,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.NocLette
 import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INCLUDES_REPRESENTATIVE_UPDATE;
 
 @RestController
 @Slf4j
@@ -623,11 +626,40 @@ public class NotificationsController implements BaseController {
         validateCaseData(callbackRequest);
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-
         notificationService.sendNoticeOfChangeEmail(caseDetails);
         log.info("Call the noc letter service");
         nocLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, authorisationToken);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+    }
+
+    @PostMapping(value = "/notice-of-change/caseworker", consumes = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Send a notice of change to the Solicitor email and a letter to the organization.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 204, message = "Notice of change e-mail and letter sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendNoticeOfChangeNotificationsCaseworker(
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
+        @RequestBody CallbackRequest callbackRequest) {
+
+        log.info("Received request to send Notice of Change email and letter for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        validateCaseData(callbackRequest);
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        if (!requiresNotifications(callbackRequest)) {
+            return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+        }
+        notificationService.sendNoticeOfChangeEmailCaseworker(caseDetails);
+        log.info("Call the noc letter service");
+        nocLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, authorisationToken);
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+    }
+
+    private boolean requiresNotifications(CallbackRequest callbackRequest) {
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+
+        return Optional.ofNullable(caseData.get(INCLUDES_REPRESENTATIVE_UPDATE))
+            .map(updateField -> updateField.equals(YES_VALUE)).orElse(false);
     }
 }

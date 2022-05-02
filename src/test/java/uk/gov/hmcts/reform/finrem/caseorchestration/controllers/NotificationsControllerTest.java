@@ -951,6 +951,18 @@ public class NotificationsControllerTest extends BaseControllerTest {
         verify(nocLetterNotificationService, times(1)).sendNoticeOfChangeLetters(any(CaseDetails.class), anyString());
     }
 
+    @Test
+    public void givenNoticeOfChangeAsCaseworker_whenSendNoCNotifications_ThenSendNoticeOfChangeServiceCalled() {
+
+        notificationsController.sendNoticeOfChangeNotificationsCaseworker("authtoken",
+            buildNoCCaseworkerCallbackRequest());
+
+        verify(notificationService, times(1)).sendNoticeOfChangeEmailCaseworker(any());
+
+        verify(nocLetterNotificationService, times(1))
+            .sendNoticeOfChangeLetters(any(CaseDetails.class), anyString());
+    }
+
     private CallbackRequest createCallbackRequestWithFinalOrder() {
         CallbackRequest callbackRequest = buildCallbackRequest();
 
