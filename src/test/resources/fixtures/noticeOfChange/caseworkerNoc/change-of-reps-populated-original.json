@@ -34,7 +34,7 @@
       "respondentRepresented": "Yes",
       "respondentPhone": "7411201631",
       "respondentFMName": "Jane",
-      "ChangeOfRepresentatives": {
+      "RepresentationUpdateHistory": {
         "ChangeOfRepresentation": [
           {
             "party": "applicant",

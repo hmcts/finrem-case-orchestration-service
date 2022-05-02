@@ -40,7 +40,7 @@
       "respondentPhone": "7411201631",
       "appRespondentRep": "Yes",
       "appRespondentFMName": "Jane",
-      "ChangeOfRepresentatives": [
+      "RepresentationUpdateHistory": [
         {
           "id": "60dbe6bc-c1a7-11ec-9d64-0242ac120002",
           "value": {

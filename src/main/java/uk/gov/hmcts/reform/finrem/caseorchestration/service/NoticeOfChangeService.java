@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationHistory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationApprovalStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
@@ -18,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistory;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -48,7 +48,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 public class NoticeOfChangeService {
 
-    private static final String CHANGE_OF_REPRESENTATIVES = "ChangeOfRepresentatives";
+    private static final String REPRESENTATION_UPDATE_HISTORY = "RepresentationUpdateHistory";
 
     private final CaseDataService caseDataService;
     private final IdamService idamService;
@@ -72,25 +72,25 @@ public class NoticeOfChangeService {
                                                     CaseDetails originalCaseDetails) {
         log.info("About to start updating representation as caseworker for caseID {}", caseDetails.getId());
 
-        Map<String,Object> caseData = updateChangeOfRepresentatives(caseDetails, authorizationToken, originalCaseDetails);
+        Map<String,Object> caseData = updateRepresentationUpdateHistory(caseDetails, authorizationToken, originalCaseDetails);
         ChangeOrganisationRequest changeRequest = generateChangeOrganisationRequest(caseDetails, originalCaseDetails);
         caseData.put(CHANGE_ORGANISATION_REQUEST, changeRequest);
 
         return caseData;
     }
 
-    private Map<String, Object> updateChangeOfRepresentatives(CaseDetails caseDetails,
+    private Map<String, Object> updateRepresentationUpdateHistory(CaseDetails caseDetails,
                                                               String authToken,
                                                               CaseDetails originalDetails) {
         Map<String, Object> caseData = caseDetails.getData();
         boolean isApplicant = ((String) caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
 
-        ChangeOfRepresentationHistory current = ChangeOfRepresentationHistory.builder()
-            .representationUpdates(objectMapper.convertValue(caseData.get(CHANGE_OF_REPRESENTATIVES),
+        RepresentationUpdateHistory current = RepresentationUpdateHistory.builder()
+            .representationUpdateHistory(objectMapper.convertValue(caseData.get(REPRESENTATION_UPDATE_HISTORY),
                 new TypeReference<>() {}))
             .build();
 
-        ChangeOfRepresentationHistory change = changeOfRepresentationService.generateChangeOfRepresentatives(
+        RepresentationUpdateHistory change = changeOfRepresentationService.generateRepresentationUpdateHistory(
             ChangeOfRepresentationRequest.builder()
                 .by(idamService.getIdamFullName(authToken))
                 .party(isApplicant ? APPLICANT : RESPONDENT)
@@ -102,7 +102,7 @@ public class NoticeOfChangeService {
                 .build()
         );
 
-        caseData.put(CHANGE_OF_REPRESENTATIVES, change.getRepresentationUpdates());
+        caseData.put(REPRESENTATION_UPDATE_HISTORY, change.getRepresentationUpdateHistory());
         return caseData;
     }
 
@@ -154,7 +154,8 @@ public class NoticeOfChangeService {
         boolean isApplicant = ((String) caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
 
         return Optional.ofNullable(getOrgPolicy(caseDetails, isApplicant
-                ? APPLICANT_ORGANISATION_POLICY : RESPONDENT_ORGANISATION_POLICY).getOrganisation())
+                ? APPLICANT_ORGANISATION_POLICY
+                : RESPONDENT_ORGANISATION_POLICY).getOrganisation())
             .map(org -> ChangedRepresentative.builder()
                 .name(isApplicant
                     ? getApplicantSolicitorName(caseDetails)

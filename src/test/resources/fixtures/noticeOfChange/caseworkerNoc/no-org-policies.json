@@ -16,7 +16,7 @@
       "respondentLName": "Smith",
       "respondentPhone": "7411201631",
       "respondentFMName": "Jane",
-      "ChangeOfRepresentatives": {
+      "RepresentationUpdateHistory": {
         "ChangeOfRepresentation": [
           {
             "id": "",

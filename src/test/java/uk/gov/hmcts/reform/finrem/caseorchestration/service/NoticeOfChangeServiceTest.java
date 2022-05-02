@@ -34,7 +34,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class NoticeOfChangeServiceTest extends BaseServiceTest {
 
     private static final String PATH = "/fixtures/noticeOfChange/caseworkerNoc/";
-    private static final String CHANGE_OF_REPRESENTATIVES = "ChangeOfRepresentatives";
+    private static final String REPRESENTATION_UPDATE_HISTORY = "RepresentationUpdateHistory";
 
     @Autowired private NoticeOfChangeService noticeOfChangeService;
 
@@ -61,7 +61,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldUpdateRepresentationAndGenerateChangeOfRepresentatives_whenCaseDataIsValid() throws Exception {
+    public void shouldUpdateRepresentationAndGenerateRepresentationUpdateHistory_whenCaseDataIsValid() throws Exception {
         setUpCaseDetails("change-of-representatives.json");
 
         setUpHelper();
@@ -89,7 +89,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldUpdateRepresentationAndUpdateChangeOfRepresentatives_whenChangeAlreadyPopulated() throws Exception  {
+    public void shouldUpdateRepresentationAndUpdateRepresentationUpdateHistory_whenChangeAlreadyPopulated() throws Exception  {
         setUpCaseDetails("change-of-representatives.json");
         setUpHelper();
 
@@ -114,7 +114,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void inConsented_shouldUpdateChangeOfRepresentatives_whenChangeCurrentlyUnpopulated() throws Exception {
+    public void inConsented_shouldUpdateRepresentationUpdateHistory_whenChangeCurrentlyUnpopulated() throws Exception {
         setUpCaseDetails("consented-change-of-reps.json");
 
         setUpHelper();
@@ -139,7 +139,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void inConsented_shouldUpdateChangeOfRepresentatives_whenChangeCurrentlyPopulated() throws Exception  {
+    public void inConsented_shouldUpdateRepresentationUpdateHistory_whenChangeCurrentlyPopulated() throws Exception  {
         setUpCaseDetails("consented-change-of-reps.json");
         setUpHelper();
         when(mockCaseDataService.isConsentedApplication(any())).thenReturn(true);
@@ -163,7 +163,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldUpdateChangeOfRepresentatives_whenNatureIsRemoving() throws Exception {
+    public void shouldUpdateRepresentationUpdateHistory_whenNatureIsRemoving() throws Exception {
         setUpCaseDetails("change-of-reps-removing.json");
         setUpHelper();
         when(mockCaseDataService.isConsentedApplication(any())).thenReturn(true);
@@ -188,7 +188,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldUpdateChangeOfRepresentatives_whenNatureIsReplacing() throws Exception {
+    public void shouldUpdateRepresentationUpdateHistory_whenNatureIsReplacing() throws Exception {
         setUpCaseDetails("change-of-reps-replacing.json");
 
         setUpHelper();
@@ -215,7 +215,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldUpdateChangeOfRepresentativesRespondent() throws Exception {
+    public void shouldUpdateRepresentationUpdateHistoryRespondent() throws Exception {
         setUpCaseDetails("change-of-representatives-respondent.json");
         when(mockIdamService.getIdamFullName(any())).thenReturn("Claire Mumford");
         when(mockCaseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
@@ -289,7 +289,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
 
     private List<Element<RepresentationUpdate>> convertToChangeOfRepresentation(Map<String, Object> data) {
         System.out.println(data);
-        return mapper.convertValue(data.get(CHANGE_OF_REPRESENTATIVES),
+        return mapper.convertValue(data.get(REPRESENTATION_UPDATE_HISTORY),
             new TypeReference<>() {});
     }
 
