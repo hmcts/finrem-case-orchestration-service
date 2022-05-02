@@ -18,7 +18,8 @@ public class NocSolicitorAddedLettersProcessor extends NocLettersProcessor {
         SolicitorNocDocumentService solicitorNocDocumentService,
         NocLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator,
         CaseDataService caseDataService, BulkPrintService bulkPrintService) {
-        super(litigantSolicitorAddedNocDocumentService, solicitorNocDocumentService, noticeOfChangeLetterDetailsGenerator, caseDataService, bulkPrintService,
+        super(litigantSolicitorAddedNocDocumentService, solicitorNocDocumentService,
+            noticeOfChangeLetterDetailsGenerator, caseDataService, bulkPrintService,
             NoticeType.ADD);
     }
 }
