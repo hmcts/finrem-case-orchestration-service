@@ -58,11 +58,13 @@ public class NotificationsTest extends BaseTest {
     private static final String CONSENT_ORDER_AVAILABLE_URL = "/case-orchestration/notify/consent-order-available";
     private static final String CONSENT_ORDER_NOT_APPROVED_URL = "/case-orchestration/notify/order-not-approved";
     private static final String ASSIGNED_TO_JUDGE_URL = "/case-orchestration/notify/assign-to-judge";
+    private static final String NOTICE_OF_CHANGE_URL = "/case-orchestration/notify/notice-of-change";
     private static final String NOTIFY_HWF_SUCCESSFUL_CONTEXT_PATH = "/notify/hwf-successful";
     private static final String NOTIFY_CONSENT_ORDER_MADE_CONTEXT_PATH = "/notify/consent-order-made";
     private static final String NOTIFY_CONSENT_ORDER_AVAILABLE_CONTEXT_PATH = "/notify/consent-order-available";
     private static final String NOTIFY_CONSENT_ORDER_NOT_APPROVED_CONTEXT_PATH = "/notify/consent-order-not-approved";
     private static final String NOTIFY_ASSIGN_TO_JUDGE_CONTEXT_PATH = "/notify/assign-to-judge";
+    private static final String NOTIFY_NOTICE_OF_CHANGE_CONTEXT_PATH = "/notify/notice-of-change";
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -149,6 +151,20 @@ public class NotificationsTest extends BaseTest {
             .andDo(print())
             .andExpect(content().json(expectedCaseData()));
         verify(postRequestedFor(urlEqualTo(NOTIFY_ASSIGN_TO_JUDGE_CONTEXT_PATH))
+            .withHeader(CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE)));
+    }
+
+    @Test
+    public void notifyNoticeOfChange() throws Exception {
+        stubForNotification(NOTIFY_NOTICE_OF_CHANGE_CONTEXT_PATH, HttpStatus.OK.value());
+        webClient.perform(MockMvcRequestBuilders.post(NOTICE_OF_CHANGE_URL)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(content().json(expectedCaseData()));
+        verify(postRequestedFor(urlEqualTo(NOTIFY_NOTICE_OF_CHANGE_CONTEXT_PATH))
             .withHeader(CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE)));
     }
 
