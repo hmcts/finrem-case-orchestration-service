@@ -1,9 +1,9 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.noc;
 
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
 
-@Configuration
+@TestConfiguration
 @ComponentScan(basePackages = {"uk.gov.hmcts.reform.finrem.caseorchestration.service.noc",
     "uk.gov.hmcts.reform.finrem.caseorchestration.helper"})
 public class NocTestConfig {
@@ -37,7 +37,6 @@ public class NocTestConfig {
     private TransferCourtService transferCourtService;
     @MockBean
     private FeatureToggleService featureToggleService;
-
 
 }
 
