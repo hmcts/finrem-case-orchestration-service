@@ -7,6 +7,7 @@
     "state": "created",
     "case_type_id": "FinancialRemedyMVP2",
     "case_data": {
+      "updateIncludesRepresentativeChange": "No",
       "PBANumber": "PBA123456",
       "d81Question": "Yes",
       "PBAreference": "ABCD",
@@ -287,6 +288,20 @@
     "state": "created",
     "case_type_id": "FinancialRemedyMVP2",
     "case_data": {
+      "ApplicantOrganisationPolicy": {
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]",
+        "Organisation": {
+          "OrganisationName": "FRApplicantSolicitorFirm",
+          "OrganisationID": "A31PTVA"
+        }
+      },
+      "RespondentOrganisationPolicy": {
+        "OrgPolicyCaseAssignedRole": "[RESPSOLICITOR]",
+        "Organisation": {
+          "OrganisationName": "FRRespondentSolicitorFirm",
+          "OrganisationID": "A31PTVU"
+        }
+      },
       "PBANumber": "PBA123456",
       "d81Question": "Yes",
       "PBAreference": "ABCD",

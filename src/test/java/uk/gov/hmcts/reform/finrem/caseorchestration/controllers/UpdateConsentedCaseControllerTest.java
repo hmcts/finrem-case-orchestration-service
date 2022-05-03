@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateRepresentationWorkflowService;
@@ -29,6 +30,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
 
     private static final String CASE_ORCHESTRATION_UPDATE_CASE = "/case-orchestration/update-case";
+    private static final String UPDATE_CONTACT_DETAILS_ENDPOINT = "/case-orchestration/update-contact-details";
     private static final String FEE_LOOKUP_JSON = "/fixtures/fee-lookup.json";
 
     private ObjectMapper objectMapper = new ObjectMapper();
@@ -37,7 +39,6 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
 
     @MockBean
     private ConsentOrderService consentOrderService;
-
 
     @MockBean
     private UpdateRepresentationWorkflowService mockNocWorkflowService;
@@ -234,6 +235,34 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.solicitorDXnumber").doesNotExist())
             .andExpect(jsonPath("$.data.solicitorEmail").doesNotExist())
             .andExpect(jsonPath("$.data.solicitorPhone").doesNotExist());
+    }
+
+    @Test
+    public void givenValidData_whenUpdateCaseDetails_thenShouldPreserveOrgPolicies() throws Exception {
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/updatecase/amend-divorce-details-d81-joint.json").toURI()));
+
+        mvc.perform(post(UPDATE_CONTACT_DETAILS_ENDPOINT)
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy").exists())
+            .andExpect(jsonPath("$.data.RespondentOrganisationPolicy").exists());
+    }
+
+    @Test
+    public void givenValidData_whenUpdateContactDetailsAndIncludesNoC_thenReturnCorrectData() throws Exception {
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/noticeOfChange/caseworkerNoc/consented-change-of-reps.json").toURI()));
+        when(mockNocWorkflowService.handleNoticeOfChangeWorkflow(any(), any(), any()))
+            .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().build());
+        mvc.perform(post(UPDATE_CONTACT_DETAILS_ENDPOINT)
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
     }
 
     private void doRequestSetUp() throws IOException, URISyntaxException {
