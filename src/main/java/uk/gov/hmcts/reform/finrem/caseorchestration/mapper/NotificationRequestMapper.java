@@ -90,9 +90,6 @@ public class NotificationRequestMapper {
 
     private RepresentationUpdate getLastRepresentationUpdate(CaseDetails caseDetails) {
 
-        log.debug("CHANGE_OF_REPRESENTATIVES json object      +++++     " + caseDetails.getData().get(REPRESENTATION_UPDATE_HISTORY));
-        log.info("CHANGE_OF_REPRESENTATIVES json object      +++++     " + caseDetails.getData().get(REPRESENTATION_UPDATE_HISTORY));
-
         List<Element<RepresentationUpdate>> representationUpdates = objectMapper
             .convertValue(caseDetails.getData().get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {
             });
