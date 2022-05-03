@@ -62,5 +62,68 @@
       "applicantSolicitorConsentForEmails": "No",
       "respondentRepresented": "No"
     }
+  },
+  "case_details_before": {
+    "id": "123",
+    "jurisdiction": "DIVORCE",
+    "state": "applicationDrafted",
+    "case_type_id": "FinancialRemedyContested",
+    "case_data": {
+      "updateIncludesRepresentativeChange": "No",
+      "helpWithFeesQuestion": "Yes",
+      "applicantLName": "Guy",
+      "dateOfMarriage": "1111-01-01",
+      "mortgageDetail": "test",
+      "netValueOfHome": "dfdf",
+      "applicantFMName": "Poor",
+      "dateOfSepration": "1111-01-01",
+      "propertyAddress": "test",
+      "respondentEmail": null,
+      "respondentLName": "test",
+      "respondentPhone": null,
+      "respondentFMName": "test",
+      "divorceCaseNumber": "DD12D12345",
+      "fastTrackDecision": "Yes",
+      "respondentAddress": {
+        "County": "",
+        "Country": "",
+        "PostCode": "",
+        "PostTown": "SRIKALAHASTI",
+        "AddressLine1": "House no: 6-354-2, Gandhi Street, Srikalahasti, Chittor District",
+        "AddressLine2": "Srikalahasti, Chittor District",
+        "AddressLine3": ""
+      },
+      "promptForAnyDocument": "No",
+      "applicantAttendedMIAM": "No",
+      "claimingExemptionMIAM": "Yes",
+      "divorceDecreeNisiDate": "1111-01-01",
+      "isApplicantsHomeCourt": "No",
+      "nameOfCourtDivorceCentre": "test",
+      "otherReasonForComplexity": "Yes",
+      "detailPotentialAllegation": "sfsffsd",
+      "benefitForChildrenDecision": "No",
+      "paymentForChildrenDecision": "Yes",
+      "addToComplexityListOfCourts": "trueDontKnow",
+      "otherReasonForComplexityText": "sdff",
+      "additionalPropertyOrderDecision": "No",
+      "applicantRepresented": "Yes",
+      "applicantSolicitorName": "SolName99",
+      "applicantSolicitorFirm": "SolFirm99",
+      "solicitorReference": "SolRef99",
+      "applicantSolicitorAddress": {
+        "AddressLine1": "67 Pears Road",
+        "AddressLine2": "",
+        "AddressLine3": "",
+        "PostTown": "Hounslow",
+        "County": "",
+        "PostCode": "TW3 1SS",
+        "Country": "United Kingdom"
+      },
+      "applicantSolicitorPhone": "89897876765",
+      "applicantSolicitorEmail": "emailSol99@email.com",
+      "applicantSolicitorDXnumber": "",
+      "applicantSolicitorConsentForEmails": "No",
+      "respondentRepresented": "No"
+    }
   }
 }
