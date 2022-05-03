@@ -16,8 +16,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
-public class ChangeOfRepresentationHistory {
-    @JsonProperty("ChangeOfRepresentatives")
-    private List<Element<RepresentationUpdate>> representationUpdates;
+public class RepresentationUpdateHistory {
+    @JsonProperty("RepresentationUpdateHistory")
+    private List<Element<RepresentationUpdate>> representationUpdateHistory;
 
 }

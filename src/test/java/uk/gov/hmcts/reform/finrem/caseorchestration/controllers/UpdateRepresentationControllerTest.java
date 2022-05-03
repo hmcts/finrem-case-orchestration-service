@@ -116,7 +116,7 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, VALID_AUTH_TOKEN)
             .content(requestContent.toString()))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.ChangeOfRepresentatives[0].value.by",
+            .andExpect(jsonPath("$.data.RepresentationUpdateHistory[0].value.by",
                 is("Test Applicant Solicitor")))
             .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy.Organisation.OrganisationID",
                 is("A31PTVU")))
