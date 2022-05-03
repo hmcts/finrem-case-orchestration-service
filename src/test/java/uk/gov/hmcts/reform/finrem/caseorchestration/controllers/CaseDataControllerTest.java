@@ -11,6 +11,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateSolicitorDetailsService;
 
+import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -35,6 +37,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
     private static final String CONTESTED_HWF_JSON = "/fixtures/contested/hwf.json";
     private static final String CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON = "/fixtures/contested/validate-hearing-successfully.json";
+    private static final String CONTESTED_VALIDATE_HEARING_DATE_JSON = "/fixtures/contested/manage-bundle-validate-hearing-date.json";
 
     @Autowired private CaseDataController caseDataController;
 
@@ -291,5 +294,21 @@ public class CaseDataControllerTest extends BaseControllerTest {
                 .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.civilPartnership", is(NO_VALUE)));
+    }
+
+    @Test
+    public void shouldSuccessfullyCheckHearingDate() throws Exception {
+        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+
+        loadRequestContentWith(CONTESTED_VALIDATE_HEARING_DATE_JSON);
+        mvc.perform(post("/case-orchestration//contested/validateHearingDate")
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors").isArray())
+            .andExpect(jsonPath("$.errors", hasSize(1)))
+            .andExpect(jsonPath("$.errors", hasItem("Missing hearing date.")));
     }
 }

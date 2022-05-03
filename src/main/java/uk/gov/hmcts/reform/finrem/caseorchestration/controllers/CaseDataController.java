@@ -1,6 +1,9 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -14,14 +17,21 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateSolicitorDetailsService;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import javax.validation.constraints.NotNull;
+
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
@@ -30,6 +40,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IS_ADMIN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION;
@@ -142,6 +153,35 @@ public class CaseDataController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
+
+    @PostMapping(path = "/contested/validateHearingDate", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "check hearing date")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
+            response = AboutToStartOrSubmitCallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request"),
+        @ApiResponse(code = 500, message = "Internal Server Error")})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> checkHearingDate(
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+
+        CaseDetails caseDetails = callback.getCaseDetails();
+        log.info("Received request to check for hearing date for Case ID: {}", caseDetails.getId());
+        validateCaseData(callback);
+
+        final List<String> errors = new ArrayList<>();
+
+        try {
+            validateHearingDate(callback);
+        } catch (InvalidCaseDataException invalidCaseDataException) {
+            errors.add(invalidCaseDataException.getMessage());
+        }
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
+            .builder()
+            .data(caseDetails.getData())
+            .errors(errors)
+            .build());
+    }
+
     private void setData(final String authToken, final Map<String, Object> caseData) {
         if (idamService.isUserRoleAdmin(authToken)) {
             caseData.put(IS_ADMIN, YES_VALUE);
@@ -191,6 +231,13 @@ public class CaseDataController implements BaseController {
         if (featureToggleService.isRespondentJourneyEnabled()
             && caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())) {
             solicitorService.setApplicantSolicitorOrganisationDetails(authToken, caseDetails);
+        }
+    }
+
+    private void validateHearingDate(CallbackRequest callbackRequest) {
+        if (callbackRequest.getCaseDetails().getData().get(HEARING_DATE) == null) {
+            log.info("Hearing date for Case ID: {} not found", callbackRequest.getCaseDetails().getId());
+            throw new InvalidCaseDataException(BAD_REQUEST.value(), "Missing hearing date.");
         }
     }
 }
