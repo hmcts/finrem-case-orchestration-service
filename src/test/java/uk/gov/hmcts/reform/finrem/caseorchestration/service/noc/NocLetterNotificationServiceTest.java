@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.NocSolicitorAddedLettersProcessor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.NocSolicitorRemovedLettersProcessor;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -30,7 +31,7 @@ public class NocLetterNotificationServiceTest {
     @Mock
     private NocSolicitorAddedLettersProcessor nocSolicitorAddedLettersProcessor;
     @Mock
-    private NocSolicitorAddedLettersProcessor nocSolicitorRemovedLettersProcessor;
+    private NocSolicitorRemovedLettersProcessor nocSolicitorRemovedLettersProcessor;
     private CaseDetails caseDetails;
 
     @Captor

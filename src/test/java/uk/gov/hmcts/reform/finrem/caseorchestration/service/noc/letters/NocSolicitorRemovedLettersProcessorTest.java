@@ -82,6 +82,7 @@ public class NocSolicitorRemovedLettersProcessorTest extends NocLettersProcessor
         verify(litigantSolicitorRemovedNocDocumentService).generateNoticeOfChangeLetter(AUTH_TOKEN, noticeOfChangeLetterDetailsApplicant);
         verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails);
         verifyNoInteractions(solicitorNocDocumentService);
+
     }
 
     @Test

@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.NocSolicitorAddedLettersProcessor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.NocSolicitorRemovedLettersProcessor;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -23,7 +24,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class NocLetterNotificationService {
 
     private final NocSolicitorAddedLettersProcessor nocSolicitorAddedLettersProcessor;
-    private final NocSolicitorAddedLettersProcessor nocSolicitorRemovedLettersProcessor;
+    private final NocSolicitorRemovedLettersProcessor nocSolicitorRemovedLettersProcessor;
 
     public void sendNoticeOfChangeLetters(CaseDetails caseDetails, String authToken) {
 
