@@ -84,6 +84,15 @@
           }
         }
       ],
+      "applicantAddress": {
+        "County": "essex",
+        "Country": "UK",
+        "PostCode": "b1 1ab",
+        "PostTown": "london",
+        "AddressLine1": "line1",
+        "AddressLine2": "line2",
+        "AddressLine3": "line3"
+      },
       "respondentAddress": {
         "County": "essex",
         "Country": "UK",
