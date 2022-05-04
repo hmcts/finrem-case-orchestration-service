@@ -332,7 +332,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
 
         loadRequestContentWith(CONTESTED_VALIDATE_HEARING_DATE_JSON);
-        mvc.perform(post("/case-orchestration//contested/rearrangeUploadedHearingBundles")
+        mvc.perform(post("/case-orchestration//contested/sortUploadedHearingBundles")
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(APPLICATION_JSON_VALUE))

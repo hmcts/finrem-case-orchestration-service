@@ -185,7 +185,7 @@ public class CaseDataController implements BaseController {
             .build());
     }
 
-    @PostMapping(path = "/contested/rearrangeUploadedHearingBundles", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/contested/sortUploadedHearingBundles", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Documents to be viewed in order of newest first at top of the list")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
