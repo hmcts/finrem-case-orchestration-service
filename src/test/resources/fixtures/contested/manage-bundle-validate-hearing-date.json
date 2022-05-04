@@ -63,6 +63,28 @@
       },
       "authorisationFirm": "test",
       "authorisationName": "test",
+      "hearingUploadBundle": [
+        {
+          "id": "56b10c6e-2420-466d-bc1e-de863768776a",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/6fb53e1e-8d23-4fb7-a1d0-8897b2685e05",
+              "document_filename": "dummy1.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/6fb53e1e-8d23-4fb7-a1d0-8897b2685e05/binary"
+            }
+          }
+        },
+        {
+          "id": "21885e49-e7e7-402e-8e1c-1a27d9caf358",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b5016252-74f6-4075-a3cc-0a549d1d7a01",
+              "document_filename": "BulkPrintCoverSheet-1649341720076259.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b5016252-74f6-4075-a3cc-0a549d1d7a01/binary"
+            }
+          }
+        }
+      ],
       "divorceCaseNumber": "DD12D12345",
       "issueDate": "2019-03-04",
       "fastTrackDecision": "Yes",

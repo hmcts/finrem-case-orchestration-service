@@ -325,4 +325,22 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.hearingDate", is("2019-05-04")));
     }
+
+    @Test
+    public void reArrangeUploadedBundle() throws Exception {
+        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+
+        loadRequestContentWith(CONTESTED_VALIDATE_HEARING_DATE_JSON);
+        mvc.perform(post("/case-orchestration//contested/rearrangeUploadedHearingBundles")
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.hearingUploadBundle").isArray())
+            .andExpect(jsonPath("$.data.hearingUploadBundle[0].value.caseDocuments.document_filename",
+                is("BulkPrintCoverSheet-1649341720076259.pdf")))
+            .andExpect(jsonPath("$.data.hearingUploadBundle[1].value.caseDocuments.document_filename",
+                is("dummy1.pdf")));
+    }
 }

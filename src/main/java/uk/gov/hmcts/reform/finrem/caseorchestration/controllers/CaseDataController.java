@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingBundleData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
@@ -26,6 +27,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateSolicitorDetai
 import javax.validation.constraints.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +43,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_UPLOAD_BUNDLE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IS_ADMIN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION;
@@ -165,7 +168,7 @@ public class CaseDataController implements BaseController {
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
         CaseDetails caseDetails = callback.getCaseDetails();
-        log.info("Received request to check for hearing date for Case ID: {}", caseDetails.getId());
+        log.info("Received request to check for manage bundle hearing date for Case ID: {}", caseDetails.getId());
         validateCaseData(callback);
 
         final List<String> errors = new ArrayList<>();
@@ -179,6 +182,29 @@ public class CaseDataController implements BaseController {
             .builder()
             .data(caseDetails.getData())
             .errors(errors)
+            .build());
+    }
+
+    @PostMapping(path = "/contested/rearrangeUploadedHearingBundles", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Documents to be viewed in order of newest first at top of the list")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
+            response = AboutToStartOrSubmitCallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request"),
+        @ApiResponse(code = 500, message = "Internal Server Error")})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sortHearingBundles(
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+
+        CaseDetails caseDetails = callback.getCaseDetails();
+        log.info("Received request to check for hearing date for Case ID: {}", caseDetails.getId());
+        validateCaseData(callback);
+        Map<String, Object> caseData = caseDetails.getData();
+        List<HearingBundleData> hearingBundleDataList = (List<HearingBundleData>) caseData.get(HEARING_UPLOAD_BUNDLE_COLLECTION);
+        Collections.reverse(hearingBundleDataList);
+        caseData.put(HEARING_UPLOAD_BUNDLE_COLLECTION, hearingBundleDataList);
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
+            .builder()
+            .data(caseData)
             .build());
     }
 
