@@ -297,7 +297,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldSuccessfullyCheckHearingDate() throws Exception {
+    public void shouldThrowExceptionWhenHearingDateNotFound() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
 
@@ -310,5 +310,19 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.errors").isArray())
             .andExpect(jsonPath("$.errors", hasSize(1)))
             .andExpect(jsonPath("$.errors", hasItem("Missing hearing date.")));
+    }
+
+    @Test
+    public void shouldSuccessfullyProcessWhenHearingDateFound() throws Exception {
+        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+
+        loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
+        mvc.perform(post("/case-orchestration//contested/validateHearingDate")
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.hearingDate", is("2019-05-04")));
     }
 }
