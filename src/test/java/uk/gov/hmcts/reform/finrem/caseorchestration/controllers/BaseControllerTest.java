@@ -71,6 +71,12 @@ public abstract class BaseControllerTest extends BaseTest {
     protected CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
         CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(123)).data(caseData).build();
+        return CallbackRequest.builder().caseDetails(caseDetails).build();
+    }
+
+    protected CallbackRequest buildCallbackRequestWithBeforeCaseDetails() {
+        Map<String, Object> caseData = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(123)).data(caseData).build();
         CaseDetails caseDetailsBefore = CaseDetails.builder().id(Long.valueOf(120)).data(caseData).build();
         return CallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
     }

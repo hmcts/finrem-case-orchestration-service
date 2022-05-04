@@ -944,7 +944,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @Test
     public void givenNoticeOfChangeWhenSendNoticeOfChangeNotificationsThenSendNoticeOfChangeServiceCalled() {
 
-        notificationsController.sendNoticeOfChangeNotifications("authToken", buildCallbackRequest());
+        notificationsController.sendNoticeOfChangeNotifications("authToken", buildCallbackRequestWithBeforeCaseDetails());
 
         verify(notificationService, times(1)).sendNoticeOfChangeEmail(any());
 
