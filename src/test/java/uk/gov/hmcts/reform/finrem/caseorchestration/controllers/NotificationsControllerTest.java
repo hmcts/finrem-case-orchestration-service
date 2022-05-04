@@ -948,7 +948,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         verify(notificationService, times(1)).sendNoticeOfChangeEmail(any());
 
-        verify(nocLetterNotificationService, times(1)).sendNoticeOfChangeLetters(any(CaseDetails.class), anyString());
+        verify(nocLetterNotificationService, times(1)).sendNoticeOfChangeLetters(any(CaseDetails.class), any(CaseDetails.class), anyString());
     }
 
     private CallbackRequest createCallbackRequestWithFinalOrder() {

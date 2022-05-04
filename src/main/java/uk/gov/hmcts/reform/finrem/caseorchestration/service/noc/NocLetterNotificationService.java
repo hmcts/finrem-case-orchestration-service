@@ -26,7 +26,7 @@ public class NocLetterNotificationService {
     private final NocSolicitorAddedLettersProcessor nocSolicitorAddedLettersProcessor;
     private final NocSolicitorRemovedLettersProcessor nocSolicitorRemovedLettersProcessor;
 
-    public void sendNoticeOfChangeLetters(CaseDetails caseDetails, String authToken) {
+    public void sendNoticeOfChangeLetters(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authToken) {
 
         log.info("Send noc letters for case id {}", caseDetails.getId());
         RepresentationUpdate representationUpdate = getLatestRepresentationUpdate(caseDetails);
@@ -38,7 +38,7 @@ public class NocLetterNotificationService {
             }
             if (representationUpdate.getRemoved() != null) {
                 log.info("The representationUpdate is for a Removed solicitor");
-                nocSolicitorRemovedLettersProcessor.processSolicitorAndLitigantLetters(caseDetails, authToken, representationUpdate);
+                nocSolicitorRemovedLettersProcessor.processSolicitorAndLitigantLetters(caseDetailsBefore, authToken, representationUpdate);
             }
         }
     }

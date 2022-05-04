@@ -54,6 +54,7 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
     ArgumentCaptor<Map> placeholdersMapArgumentCaptor;
 
     private CaseDetails caseDetails;
+    private CaseDetails caseDetailsBefore;
 
 
     @Test
@@ -87,14 +88,15 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
             eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorRevokedFileName()));
 
         verify(bulkPrintService).sendDocumentForPrint(litigantSolicitorAddedCaseDocument, caseDetails);
-        verify(bulkPrintService).sendDocumentForPrint(litigantSolicitorRemovedCaseDocument, caseDetails);
+        verify(bulkPrintService).sendDocumentForPrint(litigantSolicitorRemovedCaseDocument, caseDetailsBefore);
 
     }
 
     @Override
     protected CallbackRequest buildCallbackRequest() {
         caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-add-and-revoke.json", new ObjectMapper());
-        return CallbackRequest.builder().caseDetails(caseDetails).build();
+        caseDetailsBefore = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-add-and-revoke-before.json", new ObjectMapper());
+        return CallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
     }
 
 
