@@ -54,17 +54,16 @@ public class NocLetterDetailsGeneratorTest {
     private NocLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator;
     private CaseDetails caseDetails;
     private RepresentationUpdate representationUpdate;
+    private ChangedRepresentative changedRepresentativeRemoved;
+    private ChangedRepresentative changedRepresentativeAdded;
 
     @Before
     public void setUpTest() {
-        caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-add-and-revoke.json", new ObjectMapper());
+        caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-add-and-revoke.json",
+            new ObjectMapper());
         when(documentHelper.getApplicantFullName(caseDetails)).thenReturn(APPLICANT_FULL_NAME);
         when(documentHelper.getRespondentFullNameContested(caseDetails)).thenReturn(RESPONDENT_FULL_NAME_CONTESTED);
         when(documentHelper.getRespondentFullNameConsented(caseDetails)).thenReturn(RESPONDENT_FULL_NAME_CONSENTED);
-        when(addresseeBuilder.generateAddressee(caseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT)).thenReturn(
-            Addressee.builder().formattedAddress(
-                FORMATTED_ADDRESS).name(ADDRESSEE_NAME).build());
-
         representationUpdate = buildChangeOfRepresentation();
     }
 
@@ -72,6 +71,9 @@ public class NocLetterDetailsGeneratorTest {
     public void shouldGenerateNoticeOfChangeLetterDetailsForApplicantWhenSolicitorAdded() {
 
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.FALSE);
+        when(addresseeBuilder.generateAddressee(caseDetails, changedRepresentativeAdded, DocumentHelper.PaperNotificationRecipient.APPLICANT))
+            .thenReturn(Addressee.builder().formattedAddress(
+                FORMATTED_ADDRESS).name(ADDRESSEE_NAME).build());
         NoticeOfChangeLetterDetails noticeOfChangeLetterDetails =
             noticeOfChangeLetterDetailsGenerator.generate(caseDetails, buildChangeOfRepresentation(),
                 DocumentHelper.PaperNotificationRecipient.APPLICANT,
@@ -87,6 +89,9 @@ public class NocLetterDetailsGeneratorTest {
     public void shouldGenerateNoticeOfChangeLetterDetailsForApplicantWhenSolicitorRemoved() {
 
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.TRUE);
+        when(addresseeBuilder.generateAddressee(caseDetails, changedRepresentativeRemoved, DocumentHelper.PaperNotificationRecipient.APPLICANT))
+            .thenReturn(Addressee.builder().formattedAddress(
+                FORMATTED_ADDRESS).name(ADDRESSEE_NAME).build());
 
         NoticeOfChangeLetterDetails noticeOfChangeLetterDetails =
             noticeOfChangeLetterDetailsGenerator.generate(caseDetails, representationUpdate, DocumentHelper.PaperNotificationRecipient.APPLICANT,
@@ -117,7 +122,8 @@ public class NocLetterDetailsGeneratorTest {
     private void assertContestedCourtDetails(NoticeOfChangeLetterDetails noticeOfChangeLetterDetails) {
         Map<String, Object> courtDetails = noticeOfChangeLetterDetails.getCourtDetails();
         assertThat(courtDetails.get(COURT_DETAILS_NAME_KEY), is("Central Family Court"));
-        assertThat(courtDetails.get(COURT_DETAILS_ADDRESS_KEY), is("Central Family Court, First Avenue House, 42-49 High Holborn, London WC1V 6NP"));
+        assertThat(courtDetails.get(COURT_DETAILS_ADDRESS_KEY),
+            is("Central Family Court, First Avenue House, 42-49 High Holborn, London WC1V 6NP"));
         assertThat(courtDetails.get(COURT_DETAILS_PHONE_KEY), is("0207 421 8594"));
         assertThat(courtDetails.get(COURT_DETAILS_EMAIL_KEY), is("cfc.fru@justice.gov.uk"));
     }
@@ -137,26 +143,28 @@ public class NocLetterDetailsGeneratorTest {
     }
 
     private RepresentationUpdate buildChangeOfRepresentation() {
+        changedRepresentativeRemoved = ChangedRepresentative.builder()
+            .name("Sir Solicitor Remove")
+            .email("sirsolicitor1@gmail.com")
+            .organisation(Organisation.builder()
+                .organisationID("A31PTVAR")
+                .organisationName("FRApplicantSolicitorFirmRemoved")
+                .build()).build();
+        changedRepresentativeAdded = ChangedRepresentative.builder()
+            .name("Sir Solicitor")
+            .email("sirsolicitor1@gmail.com")
+            .organisation(Organisation.builder()
+                .organisationID("A31PTVA")
+                .organisationName("FRApplicantSolicitorFirm")
+                .build()).build();
         return RepresentationUpdate.builder()
             .party("applicant")
             .clientName("John Smith")
             .by("Sir Solicitor")
             .via("Notice of Change")
             .date(LocalDate.now())
-            .added(ChangedRepresentative.builder()
-                .name("Sir Solicitor")
-                .email("sirsolicitor1@gmail.com")
-                .organisation(Organisation.builder()
-                    .organisationID("A31PTVA")
-                    .organisationName("FRApplicantSolicitorFirm")
-                    .build()).build())
-            .removed(ChangedRepresentative.builder()
-                .name("Sir Solicitor Remove")
-                .email("sirsolicitor1@gmail.com")
-                .organisation(Organisation.builder()
-                    .organisationID("A31PTVAR")
-                    .organisationName("FRApplicantSolicitorFirmRemoved")
-                    .build()).build()).build();
+            .added(changedRepresentativeAdded)
+            .removed(changedRepresentativeRemoved).build();
     }
 
 }

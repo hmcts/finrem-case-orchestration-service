@@ -48,8 +48,8 @@ public class NocLetterDetailsGenerator {
             .respondentName(isConsentedApplication ? documentHelper.getRespondentFullNameConsented(caseDetails) :
                 documentHelper.getRespondentFullNameContested(caseDetails))
             .courtDetails(isConsentedApplication ? buildConsentedFrcCourtDetails() : buildFrcCourtDetails(caseDetails.getData()))
-            .addressee(addresseeBuilder.generateAddressee(caseDetails, recipient))
-            .build();
+            .addressee(addresseeBuilder.generateAddressee(caseDetails, noticeType == NoticeType.ADD ? representationUpdate.getAdded()
+                : representationUpdate.getRemoved(), recipient)).build();
     }
 
     private String getSolicitorReference(CaseDetails caseDetails, RepresentationUpdate representationUpdate) {

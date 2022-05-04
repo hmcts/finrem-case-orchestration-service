@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.noc;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
@@ -11,7 +12,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateSolicitorDetailsService;
 
 @TestConfiguration
 @ComponentScan(basePackages = {"uk.gov.hmcts.reform.finrem.caseorchestration.service.noc",
@@ -22,6 +25,14 @@ public class NocTestConfig {
     public CaseDataService caseDataService() {
         return new CaseDataService();
     }
+
+    @Bean
+    public UpdateSolicitorDetailsService solicitorContactDetailsService() {
+        return new UpdateSolicitorDetailsService(prdOrganisationService, new ObjectMapper(), caseDataService());
+    }
+
+    @MockBean
+    private PrdOrganisationService prdOrganisationService;
 
     @MockBean
     private PaperNotificationService paperNotificationService;

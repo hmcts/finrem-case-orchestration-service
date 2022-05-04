@@ -57,6 +57,13 @@ public class UpdateSolicitorDetailsService {
         }
     }
 
+    public Map<String, Object> convertOrganisationAddressToSolicitorAddress(String organisationId) {
+        OrganisationsResponse organisationResponse = organisationService.findOrganisationByOrgId(organisationId);
+        return this.convertOrganisationAddressToSolicitorAddress(organisationResponse);
+
+    }
+
+
     public Map<String, Object> convertOrganisationAddressToSolicitorAddress(OrganisationsResponse organisationData) {
         return objectMapper.convertValue(Address.builder()
             .addressLine1(organisationData.getContactInformation().get(0).getAddressLine1())
@@ -83,8 +90,8 @@ public class UpdateSolicitorDetailsService {
     }
 
     public Map<String, Object> removeSolicitorFields(Map<String, Object> caseData,
-                                                      boolean isConsented,
-                                                      boolean isApplicant) {
+                                                     boolean isConsented,
+                                                     boolean isApplicant) {
         if (isApplicant) {
             removeAppSolFields(caseData, isConsented);
         } else {
