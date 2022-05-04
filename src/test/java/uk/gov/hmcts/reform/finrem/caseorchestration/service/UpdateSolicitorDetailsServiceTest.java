@@ -56,9 +56,12 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
     public static final String TOWN_CITY = "townCity";
     public static final String POSTCODE = "postCode";
 
-    @Autowired UpdateSolicitorDetailsService updateSolicitorDetailsService;
-    @MockBean PrdOrganisationService prdOrganisationService;
-    @MockBean CaseDataService caseDataService;
+    @Autowired
+    UpdateSolicitorDetailsService updateSolicitorDetailsService;
+    @MockBean
+    PrdOrganisationService prdOrganisationService;
+    @MockBean
+    CaseDataService caseDataService;
 
     OrganisationContactInformation organisationContactInformation = OrganisationContactInformation.builder()
         .addressLine1(ADDRESS_LINE_1)
@@ -97,6 +100,29 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
         Assert.assertEquals(addressMap.get("PostCode"), organisationContactInformation.getPostcode());
         Assert.assertEquals(caseDetails.getData().get(CONTESTED_SOLICITOR_FIRM), TEST_SOLICITOR_NAME);
         Assert.assertEquals(caseDetails.getData().get(SOLICITOR_REFERENCE), TEST_SOLICITOR_REFERENCE);
+    }
+
+
+    @Test
+    public void shouldSuccessfullyConvertOrganisationAddress() {
+
+        when(prdOrganisationService.findOrganisationByOrgId("organisationId")).thenReturn(OrganisationsResponse.builder()
+            .contactInformation(Arrays.asList(organisationContactInformation))
+            .name(TEST_SOLICITOR_NAME)
+            .organisationIdentifier(TEST_SOLICITOR_REFERENCE)
+            .build());
+
+        Map<String, Object> addressMap = updateSolicitorDetailsService.convertOrganisationAddressToSolicitorAddress("organisationId");
+
+
+        Assert.assertEquals(addressMap.get("AddressLine1"), organisationContactInformation.getAddressLine1());
+        Assert.assertEquals(addressMap.get("AddressLine2"), organisationContactInformation.getAddressLine2());
+        Assert.assertEquals(addressMap.get("AddressLine3"), organisationContactInformation.getAddressLine3());
+        Assert.assertEquals(addressMap.get("County"), organisationContactInformation.getCounty());
+        Assert.assertEquals(addressMap.get("Country"), organisationContactInformation.getCountry());
+        Assert.assertEquals(addressMap.get("PostTown"), organisationContactInformation.getTownCity());
+        Assert.assertEquals(addressMap.get("PostCode"), organisationContactInformation.getPostcode());
+
     }
 
     @Test

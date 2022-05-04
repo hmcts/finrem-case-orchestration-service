@@ -308,13 +308,16 @@ public class DocumentHelper {
     }
 
     public String formatAddressForLetterPrinting(Map<String, Object> address) {
-        return Stream.of("AddressLine1", "AddressLine2", "County", "PostTown", "PostCode")
-            .map(address::get)
-            .filter(Objects::nonNull)
-            .map(Object::toString)
-            .filter(StringUtils::isNotEmpty)
-            .filter(s -> !s.equals("null"))
-            .collect(Collectors.joining("\n"));
+        if (address != null) {
+            return Stream.of("AddressLine1", "AddressLine2", "County", "PostTown", "PostCode")
+                .map(address::get)
+                .filter(Objects::nonNull)
+                .map(Object::toString)
+                .filter(StringUtils::isNotEmpty)
+                .filter(s -> !s.equals("null"))
+                .collect(Collectors.joining("\n"));
+        }
+        return "";
     }
 
     public BulkPrintDocument getCaseDocumentAsBulkPrintDocument(CaseDocument caseDocument) {
@@ -361,10 +364,10 @@ public class DocumentHelper {
 
         return documentLink != null
             ? Optional.of(CaseDocument.builder()
-                .documentUrl(documentLink.get(DOCUMENT_URL).toString())
-                .documentFilename(documentLink.get(DOCUMENT_FILENAME).toString())
-                .documentBinaryUrl(documentLink.get(DOCUMENT_BINARY_URL).toString())
-                .build())
+            .documentUrl(documentLink.get(DOCUMENT_URL).toString())
+            .documentFilename(documentLink.get(DOCUMENT_FILENAME).toString())
+            .documentBinaryUrl(documentLink.get(DOCUMENT_BINARY_URL).toString())
+            .build())
             : Optional.empty();
     }
 
@@ -391,7 +394,8 @@ public class DocumentHelper {
     }
 
     public List<HearingOrderCollectionData> getFinalOrderDocuments(Map<String, Object> caseData) {
-        return objectMapper.convertValue(caseData.get(FINAL_ORDER_COLLECTION), new TypeReference<>() {});
+        return objectMapper.convertValue(caseData.get(FINAL_ORDER_COLLECTION), new TypeReference<>() {
+        });
     }
 
     public List<HearingOrderCollectionData> getHearingOrderDocuments(Map<String, Object> caseData) {

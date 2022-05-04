@@ -10,6 +10,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 
 import java.util.Map;
@@ -56,7 +57,7 @@ public class ApplicantAddresseeGeneratorTest {
             APPLICANT_FULL_NAME);
         when(documentHelper.formatAddressForLetterPrinting(APPLICANT_ADDRESS_VALUE)).thenReturn(FORMATTED_ADDRESS);
 
-        Addressee addressee = applicantAddresseeGenerator.generate(caseDetails);
+        Addressee addressee = applicantAddresseeGenerator.generate(caseDetails, ChangedRepresentative.builder().build());
 
         assertThat(addressee.getName(), is(APPLICANT_FULL_NAME));
         assertThat(addressee.getFormattedAddress(), is(FORMATTED_ADDRESS));

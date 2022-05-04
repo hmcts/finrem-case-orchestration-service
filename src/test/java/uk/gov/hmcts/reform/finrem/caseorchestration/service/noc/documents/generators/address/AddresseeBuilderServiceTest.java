@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 
 import static org.mockito.Mockito.verify;
 
@@ -25,30 +26,27 @@ public class AddresseeBuilderServiceTest {
     SolicitorAddresseeGenerator solicitorAddresseeGenerator;
 
     CaseDetails caseDetails = CaseDetails.builder().build();
+    ChangedRepresentative changedRepresentative = ChangedRepresentative.builder().build();
 
     @Test
     public void givenRecipientIsSolicitorThenShouldCallSolicitorAddressGenerator() {
 
-        addresseeBuilderService.generateAddressee(caseDetails, DocumentHelper.PaperNotificationRecipient.SOLICITOR);
-        verify(solicitorAddresseeGenerator).generate(caseDetails);
-
+        addresseeBuilderService.generateAddressee(caseDetails, changedRepresentative, DocumentHelper.PaperNotificationRecipient.SOLICITOR);
+        verify(solicitorAddresseeGenerator).generate(caseDetails, changedRepresentative);
     }
 
     @Test
     public void givenRecipientIsApplicantThenShouldCallApplicantAddressGenerator() {
 
-        addresseeBuilderService.generateAddressee(caseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT);
-        verify(applicantAddresseeGenerator).generate(caseDetails);
-
+        addresseeBuilderService.generateAddressee(caseDetails, changedRepresentative, DocumentHelper.PaperNotificationRecipient.APPLICANT);
+        verify(applicantAddresseeGenerator).generate(caseDetails, changedRepresentative);
     }
 
     @Test
     public void givenRecipientIsRespondenthenShouldCallRespondentAddressGenerator() {
 
-        addresseeBuilderService.generateAddressee(caseDetails, DocumentHelper.PaperNotificationRecipient.RESPONDENT);
-        verify(respondentAddresseeGenerator).generate(caseDetails);
-
+        addresseeBuilderService.generateAddressee(caseDetails, changedRepresentative, DocumentHelper.PaperNotificationRecipient.RESPONDENT);
+        verify(respondentAddresseeGenerator).generate(caseDetails, changedRepresentative);
     }
-
 
 }

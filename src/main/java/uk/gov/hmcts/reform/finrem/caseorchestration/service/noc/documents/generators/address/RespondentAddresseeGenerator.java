@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 
 import java.util.Map;
@@ -24,7 +25,7 @@ public class RespondentAddresseeGenerator implements AddresseeGenerator {
     private final CaseDataService caseDataService;
     private final DocumentHelper documentHelper;
 
-    public Addressee generate(CaseDetails caseDetails) {
+    public Addressee generate(CaseDetails caseDetails, ChangedRepresentative changedRepresentative) {
         boolean isConsentedApplication = caseDataService.isConsentedApplication(caseDetails);
         log.info("In the generate addressee method for Respondent for caseType isConsented {}", isConsentedApplication);
         return Addressee.builder()
