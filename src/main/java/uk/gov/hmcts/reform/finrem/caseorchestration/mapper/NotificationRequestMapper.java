@@ -91,8 +91,7 @@ public class NotificationRequestMapper {
     private RepresentationUpdate getLastRepresentationUpdate(CaseDetails caseDetails) {
 
         List<Element<RepresentationUpdate>> representationUpdates = objectMapper
-            .convertValue(caseDetails.getData().get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {
-            });
+            .convertValue(caseDetails.getData().get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {});
 
         return Collections.max(representationUpdates, Comparator.comparing(c -> c.getValue().getDate())).getValue();
     }

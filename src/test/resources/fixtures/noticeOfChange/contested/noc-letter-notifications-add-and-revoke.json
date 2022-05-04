@@ -20,6 +20,15 @@
       "respondentFMName": "test",
       "divorceCaseNumber": "DD12D12345",
       "fastTrackDecision": "Yes",
+      "applicantAddress": {
+        "County": "Middlesex",
+        "Country": "UK",
+        "PostCode": "HA5 3AY",
+        "PostTown": "SRIKALAHASTI",
+        "AddressLine1": "15 Riverside",
+        "AddressLine2": "Pinner",
+        "AddressLine3": ""
+      },
       "respondentAddress": {
         "County": "",
         "Country": "",

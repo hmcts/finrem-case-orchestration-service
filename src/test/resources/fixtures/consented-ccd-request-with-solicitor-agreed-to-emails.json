@@ -84,6 +84,15 @@
           }
         }
       ],
+      "applicantAddress": {
+        "County": "essex",
+        "Country": "UK",
+        "PostCode": "b1 1ab",
+        "PostTown": "london",
+        "AddressLine1": "line1",
+        "AddressLine2": "line2",
+        "AddressLine3": "line3"
+      },
       "respondentAddress": {
         "County": "essex",
         "Country": "UK",
@@ -277,6 +286,35 @@
               "document_binary_url": "http://doc1.binary"
             },
             "amendedConsentOrderDate": "2010-01-02"
+          }
+        }
+      ],
+      "RepresentationUpdateHistory":
+      [
+        {
+          "id": "60dbe6bc-c1a7-11ec-9d64-0242ac120002",
+          "value": {
+            "party": "applicant",
+            "name": "John Smith",
+            "date": "2020-06-01",
+            "by": "Test Applicant Solicitor",
+            "via": "Notice of Change",
+            "added": {
+              "name": "Test Applicant Solicitor",
+              "email": "appsolicitor1@yahoo.com",
+              "Organisation": {
+                "OrganisationID": "A31PTVU",
+                "OrganisationName": "FRApplicantSolicitorFirm2"
+              }
+            },
+            "removed": {
+              "name": "Sir Solicitor",
+              "email": "sirsolicitor1@gmail.com",
+              "Organisation": {
+                "OrganisationID": "A31PTVA",
+                "OrganisationName": "FRApplicantSolicitorFirm"
+              }
+            }
           }
         }
       ]
