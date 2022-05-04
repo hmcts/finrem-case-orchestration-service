@@ -94,8 +94,11 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
 
     @Override
     protected CallbackRequest buildCallbackRequest() {
-        caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-add-and-revoke.json", new ObjectMapper());
-        caseDetailsBefore = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-add-and-revoke-before.json", new ObjectMapper());
+        caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-add-and-revoke.json",
+            new ObjectMapper());
+        caseDetailsBefore =
+            caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-add-and-revoke-before.json",
+                new ObjectMapper());
         return CallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
     }
 
