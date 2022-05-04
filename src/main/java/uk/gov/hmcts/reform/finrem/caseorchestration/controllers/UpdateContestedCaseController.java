@@ -124,6 +124,8 @@ public class UpdateContestedCaseController implements BaseController {
             removeRespondentSolicitorAddress(caseData);
         }
 
+        caseData.put(CASE_ROLE, null);
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
