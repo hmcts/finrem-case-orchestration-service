@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,6 +61,8 @@ public class NotificationsTest extends BaseTest {
     GenericDocumentService genericDocumentService;
     @MockBean
     BulkPrintService bulkPrintService;
+    @MockBean
+    PrdOrganisationService prdOrganisationService;
 
     private static final String HWF_SUCCESSFUL_URL = "/case-orchestration/notify/hwf-successful";
     private static final String CONSENT_ORDER_MADE_URL = "/case-orchestration/notify/consent-order-made";
