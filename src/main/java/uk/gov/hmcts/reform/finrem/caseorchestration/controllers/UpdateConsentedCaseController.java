@@ -61,8 +61,7 @@ public class UpdateConsentedCaseController implements BaseController {
     private static final String DIVORCE_UPLOAD_EVIDENCE_1 = "divorceUploadEvidence1";
     private static final String DIVORCE_DECREE_NISI_DATE = "divorceDecreeNisiDate";
 
-    @Autowired
-    private ConsentOrderService consentOrderService;
+    @Autowired private ConsentOrderService consentOrderService;
 
     @Autowired private UpdateRepresentationWorkflowService nocWorkflowService;
 
