@@ -48,7 +48,7 @@ public class UpdateRepresentationService {
     private final UpdateSolicitorDetailsService updateSolicitorDetailsService;
     private final ChangeOfRepresentationService changeOfRepresentationService;
 
-    private static final String CHANGE_REQUEST_FIELD = "changeOrganisationRequestField";
+    private static final String CHANGE_ORGANISATION_REQUEST = "changeOrganisationRequestField";
     private static final String NOC_EVENT = "nocRequest";
     private static final String REPRESENTATION_UPDATE_HISTORY = "RepresentationUpdateHistory";
 
@@ -134,7 +134,7 @@ public class UpdateRepresentationService {
 
     private ChangeOrganisationRequest getChangeOrganisationRequest(CaseDetails caseDetails) {
 
-        return objectMapper.convertValue(caseDetails.getData().get(CHANGE_REQUEST_FIELD),
+        return objectMapper.convertValue(caseDetails.getData().get(CHANGE_ORGANISATION_REQUEST),
             ChangeOrganisationRequest.class);
     }
 

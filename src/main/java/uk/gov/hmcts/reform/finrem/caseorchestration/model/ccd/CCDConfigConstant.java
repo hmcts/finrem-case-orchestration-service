@@ -499,7 +499,10 @@ public class CCDConfigConstant {
     public static final String INTERIM_HEARING_DOCUMENT = "interimHearingDirectionsDocument";
     public static final String INTERIM_HEARING_UPLOADED_DOCUMENT = "interimUploadAdditionalDocument";
 
-    //Notice of Change
+    //NoC
+    public static final String NOC_PARTY = "nocParty";
+    public static final String CHANGE_ORGANISATION_REQUEST = "changeOrganisationRequestField";
+    public static final String INCLUDES_REPRESENTATION_CHANGE = "updateIncludesRepresentativeChange";
     public static final String REPRESENTATION_UPDATE_HISTORY = "RepresentationUpdateHistory";
     public static final String CHANGE_REQUEST_FIELD = "changeOrganisationRequestField";
     public static final String INCLUDES_REPRESENTATIVE_UPDATE = "updateIncludesRepresentativeChange";

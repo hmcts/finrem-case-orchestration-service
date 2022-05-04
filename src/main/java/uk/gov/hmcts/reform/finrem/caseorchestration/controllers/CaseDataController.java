@@ -49,7 +49,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 public class CaseDataController implements BaseController {
 
-    private static final String CHANGE_REQUEST_FIELD = "changeOrganisationRequestField";
+    private static final String CHANGE_ORGANISATION_REQUEST = "changeOrganisationRequestField";
     private final UpdateSolicitorDetailsService solicitorService;
     private final IdamService idamService;
     private final CaseDataService caseDataService;
@@ -170,7 +170,7 @@ public class CaseDataController implements BaseController {
             .organisationToRemove(null)
             .reason(null)
             .build();
-        caseData.put(CHANGE_REQUEST_FIELD, defaultChangeRequest);
+        caseData.put(CHANGE_ORGANISATION_REQUEST, defaultChangeRequest);
     }
 
     private void addOrganisationPoliciesIfPartiesNotRepresented(Map<String, Object> caseData) {

@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateRepresentationWorkflowService;
 
 import java.io.File;
 
@@ -20,6 +22,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
 
     private static final String REMOVE_DETAILS_URL = "/case-orchestration/remove-details";
+
+    @MockBean protected UpdateRepresentationWorkflowService handleNocWorkflowService;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 

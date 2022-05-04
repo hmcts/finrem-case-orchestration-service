@@ -204,5 +204,4 @@ public class CaseDataService {
         return caseData.get(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION) != null
             && !((List<Map>) caseData.get(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION)).isEmpty();
     }
-
 }
