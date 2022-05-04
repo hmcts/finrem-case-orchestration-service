@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
 
+import java.util.List;
+
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.SERVICE_AUTHORISATION_HEADER;
@@ -18,6 +20,6 @@ public interface DataStoreClient {
     @GetMapping(
         path = "/case-users",
         headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE)
-    CaseAssignedUserRolesResource getCaseAssignedUserRoles(@PathVariable("case_ids") Long caseID, @RequestHeader(HttpHeaders.AUTHORIZATION)
+    CaseAssignedUserRolesResource getCaseAssignedUserRoles(@PathVariable("case_ids") List<String> caseIds, @RequestHeader(HttpHeaders.AUTHORIZATION)
         String authToken, @RequestHeader(SERVICE_AUTHORISATION_HEADER) String serviceAuthorization);
 }
