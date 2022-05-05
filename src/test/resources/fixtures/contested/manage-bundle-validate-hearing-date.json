@@ -65,23 +65,36 @@
       "authorisationName": "test",
       "hearingUploadBundle": [
         {
-          "id": "56b10c6e-2420-466d-bc1e-de863768776a",
+          "id": "c00eeedd-603d-418c-b349-1bc74f651e2a",
           "value": {
-            "caseDocuments": {
-              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/6fb53e1e-8d23-4fb7-a1d0-8897b2685e05",
-              "document_filename": "dummy1.pdf",
-              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/6fb53e1e-8d23-4fb7-a1d0-8897b2685e05/binary"
-            }
+            "bundleDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/3af97b92-bfc2-4f45-8ac3-9204049cd1f5",
+              "document_filename": "BulkPrintCoverSheet-1649341720076259.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/3af97b92-bfc2-4f45-8ac3-9204049cd1f5/binary"
+            },
+            "bundleUploadDate": "2022-05-07"
           }
         },
         {
-          "id": "21885e49-e7e7-402e-8e1c-1a27d9caf358",
+          "id": "7dc5f5b2-7e91-4824-84ae-f9c053108e1c",
           "value": {
-            "caseDocuments": {
-              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b5016252-74f6-4075-a3cc-0a549d1d7a01",
-              "document_filename": "BulkPrintCoverSheet-1649341720076259.pdf",
-              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b5016252-74f6-4075-a3cc-0a549d1d7a01/binary"
-            }
+            "bundleDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/345b26ef-0a33-469d-b8aa-182599ba9f6c",
+              "document_filename": "dummy1-1649341720076259.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/345b26ef-0a33-469d-b8aa-182599ba9f6c/binary"
+            },
+            "bundleUploadDate": "2022-05-02"
+          }
+        },
+        {
+          "id": "65c89dc5-be92-4dea-87a6-4887b036b3a6",
+          "value": {
+            "bundleDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4d9d3dbe-9f96-4a02-a254-764f5bb9445f",
+              "document_filename": "InterimHearingNotice-1649341720076259.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4d9d3dbe-9f96-4a02-a254-764f5bb9445f/binary"
+            },
+            "bundleUploadDate": "2022-05-04"
           }
         }
       ],

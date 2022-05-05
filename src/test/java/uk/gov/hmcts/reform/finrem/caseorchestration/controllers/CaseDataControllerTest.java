@@ -338,9 +338,11 @@ public class CaseDataControllerTest extends BaseControllerTest {
                 .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.hearingUploadBundle").isArray())
-            .andExpect(jsonPath("$.data.hearingUploadBundle[0].value.caseDocuments.document_filename",
-                is("BulkPrintCoverSheet-1649341720076259.pdf")))
-            .andExpect(jsonPath("$.data.hearingUploadBundle[1].value.caseDocuments.document_filename",
-                is("dummy1.pdf")));
+            .andExpect(jsonPath("$.data.hearingUploadBundle[0].value.bundleDocuments.document_filename",
+                is("InterimHearingNotice-1649341720076259.pdf")))
+            .andExpect(jsonPath("$.data.hearingUploadBundle[1].value.bundleDocuments.document_filename",
+                is("dummy1-1649341720076259.pdf")))
+            .andExpect(jsonPath("$.data.hearingUploadBundle[2].value.bundleDocuments.document_filename",
+                is("BulkPrintCoverSheet-1649341720076259.pdf")));
     }
 }
