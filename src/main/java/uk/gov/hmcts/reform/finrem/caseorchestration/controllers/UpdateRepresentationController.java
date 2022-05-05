@@ -52,7 +52,6 @@ public class UpdateRepresentationController implements BaseController {
         assignCaseAccessService.findAndRevokeCreatorRole(caseDetails);
         Map<String, Object> caseData = updateRepresentationService.updateRepresentationAsSolicitor(caseDetails, authToken);
         caseDetails.getData().putAll(caseData);
-        log.info("Case details for caseID {} == {}", caseDetails.getId(), caseDetails.getData());
         return ResponseEntity.ok(assignCaseAccessService.applyDecision(authToken, caseDetails));
     }
 }
