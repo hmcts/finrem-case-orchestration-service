@@ -113,7 +113,7 @@ public class UpdateContestedCaseController implements BaseController {
         @RequestBody CallbackRequest ccdRequest) {
 
         CaseDetails caseDetails = ccdRequest.getCaseDetails();
-        log.info("Received request to update consented case solicitor contact details with Case ID: {}", caseDetails.getId());
+        log.info("Received request to update contested case solicitor contact details with Case ID: {}", caseDetails.getId());
 
         validateCaseData(ccdRequest);
         Map<String, Object> caseData = caseDetails.getData();
