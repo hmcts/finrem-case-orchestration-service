@@ -1,18 +1,20 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@Data
 @Builder
-@Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class HearingBundleData {
+public class HearingUploadBundleData {
     @JsonProperty("id")
     private String id;
     @JsonProperty("value")
-    private HearingBundle hearingBundle;
+    private HearingBundle value;
 }
