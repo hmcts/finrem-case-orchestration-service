@@ -6,7 +6,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLetterDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.address.AddresseeGeneratorService;
 
@@ -30,6 +32,7 @@ public class NocLetterDetailsGenerator {
     private final AddresseeGeneratorService addresseeBuilder;
     private final DocumentHelper documentHelper;
     private final CaseDataService caseDataService;
+    private final PrdOrganisationService prdOrganisationService;
 
     public NoticeOfChangeLetterDetails generate(CaseDetails caseDetails,
                                                 RepresentationUpdate representationUpdate,
@@ -58,8 +61,18 @@ public class NocLetterDetailsGenerator {
     }
 
     private String getSolicitorFirmName(RepresentationUpdate representationUpdate, NoticeType noticeType) {
-        return noticeType == NoticeType.ADD ? representationUpdate.getAdded().getOrganisation().getOrganisationName() :
-            representationUpdate.getRemoved().getOrganisation().getOrganisationName();
+
+        return noticeType == NoticeType.ADD
+            ? getSolicitorFirmNameFromOrganisationService(representationUpdate.getAdded().getOrganisation().getOrganisationID())
+            : getSolicitorFirmNameFromOrganisationService(representationUpdate.getRemoved().getOrganisation().getOrganisationID());
+    }
+
+    private String getSolicitorFirmNameFromOrganisationService(String organisationId) {
+        OrganisationsResponse organisationsResponse = prdOrganisationService.findOrganisationByOrgId(organisationId);
+        if (organisationsResponse != null) {
+            return organisationsResponse.getName();
+        }
+        return "";
     }
 
     private boolean isApplicant(RepresentationUpdate representationUpdate) {

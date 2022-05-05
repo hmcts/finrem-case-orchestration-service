@@ -14,7 +14,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentat
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLetterDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.address.AddresseeGeneratorService;
 
@@ -43,12 +45,19 @@ public class NocLetterDetailsGeneratorTest {
     protected static final String FORMATTED_ADDRESS = "formattedAddress";
     protected static final String ADDRESSEE_NAME = "addresseeName";
 
+    protected static final String ORGANISATION_ADDED_NAME = "organisationAdded";
+    protected static final String ORGANISATION_REMOVED_NAME = "organisationRemoved";
+    protected static final String ORGANISATION_ID_ADDED = "A31PTVA";
+    protected static final String ORGANISATION_ID_REMOVED = "A31PTVAR";
+
     @Mock
     private AddresseeGeneratorService addresseeBuilder;
     @Mock
     private DocumentHelper documentHelper;
     @Mock
     private CaseDataService caseDataService;
+    @Mock
+    private PrdOrganisationService prdOrganisationService;
 
     @InjectMocks
     private NocLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator;
@@ -74,6 +83,8 @@ public class NocLetterDetailsGeneratorTest {
         when(addresseeBuilder.generateAddressee(caseDetails, changedRepresentativeAdded, DocumentHelper.PaperNotificationRecipient.APPLICANT))
             .thenReturn(Addressee.builder().formattedAddress(
                 FORMATTED_ADDRESS).name(ADDRESSEE_NAME).build());
+        when(prdOrganisationService.findOrganisationByOrgId(ORGANISATION_ID_ADDED))
+            .thenReturn(OrganisationsResponse.builder().name(ORGANISATION_ADDED_NAME).build());
         NoticeOfChangeLetterDetails noticeOfChangeLetterDetails =
             noticeOfChangeLetterDetailsGenerator.generate(caseDetails, buildChangeOfRepresentation(),
                 DocumentHelper.PaperNotificationRecipient.APPLICANT,
@@ -92,6 +103,8 @@ public class NocLetterDetailsGeneratorTest {
         when(addresseeBuilder.generateAddressee(caseDetails, changedRepresentativeRemoved, DocumentHelper.PaperNotificationRecipient.APPLICANT))
             .thenReturn(Addressee.builder().formattedAddress(
                 FORMATTED_ADDRESS).name(ADDRESSEE_NAME).build());
+        when(prdOrganisationService.findOrganisationByOrgId(ORGANISATION_ID_REMOVED))
+            .thenReturn(OrganisationsResponse.builder().name(ORGANISATION_REMOVED_NAME).build());
 
         NoticeOfChangeLetterDetails noticeOfChangeLetterDetails =
             noticeOfChangeLetterDetailsGenerator.generate(caseDetails, representationUpdate, DocumentHelper.PaperNotificationRecipient.APPLICANT,
@@ -115,8 +128,8 @@ public class NocLetterDetailsGeneratorTest {
             is(isConsented ? RESPONDENT_FULL_NAME_CONSENTED : RESPONDENT_FULL_NAME_CONTESTED));
 
         assertThat(noticeOfChangeLetterDetails.getSolicitorFirmName(), is(noticeType == NoticeType.ADD
-            ? representationUpdate.getAdded().getOrganisation().getOrganisationName()
-            : representationUpdate.getRemoved().getOrganisation().getOrganisationName()));
+            ? ORGANISATION_ADDED_NAME
+            : ORGANISATION_REMOVED_NAME));
     }
 
     private void assertContestedCourtDetails(NoticeOfChangeLetterDetails noticeOfChangeLetterDetails) {
@@ -147,14 +160,14 @@ public class NocLetterDetailsGeneratorTest {
             .name("Sir Solicitor Remove")
             .email("sirsolicitor1@gmail.com")
             .organisation(Organisation.builder()
-                .organisationID("A31PTVAR")
+                .organisationID(ORGANISATION_ID_REMOVED)
                 .organisationName("FRApplicantSolicitorFirmRemoved")
                 .build()).build();
         changedRepresentativeAdded = ChangedRepresentative.builder()
             .name("Sir Solicitor")
             .email("sirsolicitor1@gmail.com")
             .organisation(Organisation.builder()
-                .organisationID("A31PTVA")
+                .organisationID(ORGANISATION_ID_ADDED)
                 .organisationName("FRApplicantSolicitorFirm")
                 .build()).build();
         return RepresentationUpdate.builder()

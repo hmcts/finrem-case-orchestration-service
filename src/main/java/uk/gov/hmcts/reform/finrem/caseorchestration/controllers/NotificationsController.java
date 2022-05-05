@@ -626,9 +626,11 @@ public class NotificationsController implements BaseController {
         validateCaseData(callbackRequest);
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+
         notificationService.sendNoticeOfChangeEmail(caseDetails);
         log.info("Call the noc letter service");
-        nocLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, authorisationToken);
+        nocLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, callbackRequest.getCaseDetailsBefore(), authorisationToken);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
@@ -651,7 +653,7 @@ public class NotificationsController implements BaseController {
         log.info("Received request to send Notice of Change email and letter for Case ID: {}", callbackRequest.getCaseDetails().getId());
         notificationService.sendNoticeOfChangeEmailCaseworker(caseDetails);
         log.info("Call the noc letter service");
-        nocLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, authorisationToken);
+        nocLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, callbackRequest.getCaseDetailsBefore(), authorisationToken);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }

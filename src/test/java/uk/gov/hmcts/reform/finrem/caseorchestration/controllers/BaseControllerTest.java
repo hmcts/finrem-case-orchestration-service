@@ -84,6 +84,13 @@ public abstract class BaseControllerTest extends BaseTest {
         return CallbackRequest.builder().eventId(UPDATE_CONTACT_DETAILS_EVENT).caseDetails(caseDetails).build();
     }
 
+    protected CallbackRequest buildCallbackRequestWithBeforeCaseDetails() {
+        Map<String, Object> caseData = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(123)).data(caseData).build();
+        CaseDetails caseDetailsBefore = CaseDetails.builder().id(Long.valueOf(120)).data(caseData).build();
+        return CallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
+    }
+
     protected CallbackRequest buildCallbackInterimRequest() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(RESP_SOLICITOR_EMAIL, "abc@mailinator.com");

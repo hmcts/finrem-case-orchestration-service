@@ -10,7 +10,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.NocSolicitorAddedLettersProcessor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.NocSolicitorRemovedLettersProcessor;
 
@@ -33,6 +32,7 @@ public class NocLetterNotificationServiceTest {
     @Mock
     private NocSolicitorRemovedLettersProcessor nocSolicitorRemovedLettersProcessor;
     private CaseDetails caseDetails;
+    private CaseDetails caseDetailsBefore;
 
     @Captor
     private ArgumentCaptor<RepresentationUpdate> changeOfRepresentationArgumentCaptor;
@@ -46,8 +46,13 @@ public class NocLetterNotificationServiceTest {
     @Test
     public void shouldSendNoticeOfChangeLettersForAddedAndRemoved() {
 
-        caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-add-and-revoke.json", new ObjectMapper());
-        noticeOfChangeLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, AUTH_TOKEN);
+        caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-add-and-revoke.json",
+            new ObjectMapper());
+        caseDetailsBefore =
+            caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-add-and-revoke-before.json",
+                new ObjectMapper());
+
+        noticeOfChangeLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
         verify(nocSolicitorAddedLettersProcessor).processSolicitorAndLitigantLetters(any(CaseDetails.class), anyString(),
             changeOfRepresentationArgumentCaptor.capture());
@@ -65,8 +70,12 @@ public class NocLetterNotificationServiceTest {
     @Test
     public void shouldSendNoticeOfChangeLettersForAdded() {
 
-        caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-add.json", new ObjectMapper());
-        noticeOfChangeLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, AUTH_TOKEN);
+        caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-add.json",
+            new ObjectMapper());
+        caseDetailsBefore = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-add-before.json",
+            new ObjectMapper());
+
+        noticeOfChangeLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
         verify(nocSolicitorAddedLettersProcessor).processSolicitorAndLitigantLetters(any(CaseDetails.class), anyString(),
             changeOfRepresentationArgumentCaptor.capture());
@@ -80,8 +89,14 @@ public class NocLetterNotificationServiceTest {
     @Test
     public void shouldSendNoticeOfChangeLettersForRevoked() {
 
-        caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-revoke.json", new ObjectMapper());
-        noticeOfChangeLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, AUTH_TOKEN);
+        caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-revoke.json",
+            new ObjectMapper());
+
+
+        caseDetailsBefore = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-revoke-before.json",
+            new ObjectMapper());
+
+        noticeOfChangeLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
         verify(nocSolicitorRemovedLettersProcessor).processSolicitorAndLitigantLetters(any(CaseDetails.class), anyString(),
             changeOfRepresentationArgumentCaptor.capture());
@@ -95,8 +110,13 @@ public class NocLetterNotificationServiceTest {
     @Test
     public void shouldSendNoticeOfChangeLettersForLatestChangeOfRepresentationOnly() {
 
-        caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-max-cor.json", new ObjectMapper());
-        noticeOfChangeLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, AUTH_TOKEN);
+        caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-max-cor.json",
+            new ObjectMapper());
+
+        caseDetailsBefore =
+            caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-max-cor-before.json",
+                new ObjectMapper());
+        noticeOfChangeLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
         verify(nocSolicitorRemovedLettersProcessor).processSolicitorAndLitigantLetters(any(CaseDetails.class), anyString(),
             changeOfRepresentationArgumentCaptor.capture());
