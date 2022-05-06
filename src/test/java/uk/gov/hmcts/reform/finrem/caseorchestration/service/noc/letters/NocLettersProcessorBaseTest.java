@@ -20,7 +20,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDe
 public abstract class NocLettersProcessorBaseTest {
 
     protected static final String AUTH_TOKEN = "authToken";
-    protected static final String COR_RESPONDENT = "respondent";
+    protected static final String COR_RESPONDENT = "Respondent";
 
     @Mock
     protected NocLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator;
