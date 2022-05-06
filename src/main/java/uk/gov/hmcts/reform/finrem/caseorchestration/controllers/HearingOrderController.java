@@ -39,7 +39,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequestMapping(value = "/case-orchestration")
 @RequiredArgsConstructor
 @Slf4j
-public class HearingOrderController implements BaseController {
+public class HearingOrderController extends BaseController {
 
     private final HearingOrderService hearingOrderService;
     private final ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
@@ -77,7 +77,7 @@ public class HearingOrderController implements BaseController {
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to store hearing order for case: {}", caseDetails.getId());
 
-        validateCaseData(callback);
+        validateRequest(callback);
 
         Map<String, Object> caseData = caseDetails.getData();
         hearingOrderService.convertToPdfAndStampAndStoreLatestDraftHearingOrder(caseDetails, authorisationToken);
@@ -98,7 +98,7 @@ public class HearingOrderController implements BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
         CaseDetails caseDetails = callback.getCaseDetails();
-        validateCaseData(callback);
+        validateRequest(callback);
 
         prepareFieldsForOrderApprovedCoverLetter(caseDetails, authorisationToken);
 
@@ -124,7 +124,7 @@ public class HearingOrderController implements BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
         CaseDetails caseDetails = callback.getCaseDetails();
-        validateCaseData(callback);
+        validateRequest(callback);
 
         Map<String, Object> caseData = caseDetails.getData();
 

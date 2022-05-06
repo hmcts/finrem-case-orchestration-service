@@ -27,7 +27,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
 @SuppressWarnings("unchecked")
-public class PBAValidateController implements BaseController {
+public class PBAValidateController extends BaseController {
 
     private final PBAValidationService pbaValidationService;
 
@@ -41,7 +41,7 @@ public class PBAValidateController implements BaseController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request to validate PBA number for Case ID: {}", caseDetails.getId());
 
-        validateCaseData(callbackRequest);
+        validateRequest(callbackRequest);
 
         Map<String, Object> caseData = caseDetails.getData();
         if (isPBAPayment(caseData)) {

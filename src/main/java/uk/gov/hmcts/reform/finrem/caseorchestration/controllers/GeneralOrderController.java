@@ -27,7 +27,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @RestController
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-public class GeneralOrderController implements BaseController {
+public class GeneralOrderController extends BaseController {
     @Autowired
     private GeneralOrderService service;
 
@@ -45,7 +45,7 @@ public class GeneralOrderController implements BaseController {
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request for generating general order with Case ID: {}", caseDetails.getId());
 
-        validateCaseData(callback);
+        validateRequest(callback);
 
         Map<String, Object> generalOrder = service.createGeneralOrder(authorisationToken, caseDetails);
 
@@ -68,7 +68,7 @@ public class GeneralOrderController implements BaseController {
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request for storing general order with Case ID: {}", caseDetails.getId());
-        validateCaseData(callback);
+        validateRequest(callback);
 
         Map<String, Object> caseData = service.populateGeneralOrderCollection(caseDetails);
 

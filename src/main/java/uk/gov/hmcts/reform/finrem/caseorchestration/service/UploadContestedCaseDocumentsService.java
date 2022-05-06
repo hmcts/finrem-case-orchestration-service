@@ -57,7 +57,7 @@ public class UploadContestedCaseDocumentsService {
     private final ObjectMapper mapper;
     private final FeatureToggleService featureToggleService;
 
-    public Map<String, Object> filterDocumentsToRelevantParty(Map<String, Object> caseData) {
+    public void setUploadedDocumentsToCollections(Map<String, Object> caseData) {
 
         boolean respondentJourneyEnabled = featureToggleService.isRespondentJourneyEnabled();
         log.info("Respondent Solicitor Journey toggle is: {}", respondentJourneyEnabled);
@@ -101,8 +101,6 @@ public class UploadContestedCaseDocumentsService {
         }
 
         caseData.put(CONTESTED_UPLOADED_DOCUMENTS, uploadedDocuments);
-
-        return caseData;
     }
 
     private List<ContestedUploadedDocumentData> getDocumentCollection(Map<String, Object> caseData, String collection) {

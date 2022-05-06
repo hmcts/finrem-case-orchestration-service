@@ -36,7 +36,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @RequiredArgsConstructor
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-public class HearingDocumentController implements BaseController {
+public class HearingDocumentController extends BaseController {
 
     private final HearingDocumentService hearingDocumentService;
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
@@ -57,7 +57,7 @@ public class HearingDocumentController implements BaseController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request for validating a hearing for Case ID: {}", caseDetails.getId());
 
-        validateCaseData(callbackRequest);
+        validateRequest(callbackRequest);
 
         List<String> errors = validateHearingService.validateHearingErrors(caseDetails);
         if (!errors.isEmpty()) {
@@ -89,7 +89,7 @@ public class HearingDocumentController implements BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
         CaseDetails caseDetails = callback.getCaseDetails();
-        validateCaseData(callback);
+        validateRequest(callback);
         Map<String, Object> caseData = caseDetails.getData();
         List<String> errors = new ArrayList<>();
 

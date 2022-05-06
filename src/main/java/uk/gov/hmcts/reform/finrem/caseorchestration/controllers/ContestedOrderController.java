@@ -26,7 +26,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(value = "/case-orchestration")
-public class ContestedOrderController implements BaseController {
+public class ContestedOrderController extends BaseController {
 
     private final ContestedCaseOrderService contestedCaseOrderService;
 
@@ -42,7 +42,7 @@ public class ContestedOrderController implements BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
-        validateCaseData(callback);
+        validateRequest(callback);
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Starting to send contested order for case {}", caseDetails.getId());

@@ -35,7 +35,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RestController
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-public class GeneralOrderStartController implements BaseController {
+public class GeneralOrderStartController extends BaseController {
 
     @Autowired
     private IdamService service;
@@ -54,7 +54,7 @@ public class GeneralOrderStartController implements BaseController {
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to clear general order fields for Case ID: {}", caseDetails.getId());
 
-        validateCaseData(callback);
+        validateRequest(callback);
 
         Map<String, Object> caseData = caseDetails.getData();
         caseData.put(GENERAL_ORDER_ADDRESS_TO, null);

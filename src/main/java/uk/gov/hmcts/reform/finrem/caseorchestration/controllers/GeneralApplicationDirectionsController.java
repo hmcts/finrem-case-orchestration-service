@@ -30,7 +30,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @RequestMapping(value = "/case-orchestration")
 @RequiredArgsConstructor
 @Slf4j
-public class GeneralApplicationDirectionsController implements BaseController {
+public class GeneralApplicationDirectionsController extends BaseController {
 
     private final GeneralApplicationDirectionsService generalApplicationDirectionsService;
 
@@ -47,7 +47,7 @@ public class GeneralApplicationDirectionsController implements BaseController {
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to submit general application directions for Case ID: {}", caseDetails.getId());
-        validateCaseData(callback);
+        validateRequest(callback);
 
         List<String> errors = new ArrayList<>();
         try {
@@ -76,7 +76,7 @@ public class GeneralApplicationDirectionsController implements BaseController {
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to start general application directions for Case ID: {}", caseDetails.getId());
-        validateCaseData(callback);
+        validateRequest(callback);
 
         generalApplicationDirectionsService.startGeneralApplicationDirections(caseDetails);
 
@@ -99,7 +99,7 @@ public class GeneralApplicationDirectionsController implements BaseController {
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to submit for interim hearing for Case ID: {}", caseDetails.getId());
-        validateCaseData(callback);
+        validateRequest(callback);
 
         List<String> errors = new ArrayList<>();
         try {

@@ -28,7 +28,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RestController
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-public class ContestedDocumentController implements BaseController {
+public class ContestedDocumentController extends BaseController {
 
     @Autowired
     private OnlineFormDocumentService service;

@@ -51,7 +51,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RestController
 @RequestMapping(value = "/case-orchestration")
 @RequiredArgsConstructor
-public class ConsentOrderApprovedController implements BaseController {
+public class ConsentOrderApprovedController extends BaseController {
 
     private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     private final GenericDocumentService genericDocumentService;
@@ -73,7 +73,7 @@ public class ConsentOrderApprovedController implements BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
-        validateCaseData(callback);
+        validateRequest(callback);
         CaseDetails caseDetails = callback.getCaseDetails();
         CaseDocument latestConsentOrder = getLatestConsentOrder(caseDetails.getData());
 
@@ -104,7 +104,7 @@ public class ConsentOrderApprovedController implements BaseController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> consentInContestedConsentOrderApproved(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
-        validateCaseData(callback);
+        validateRequest(callback);
         CaseDetails caseDetails = callback.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 

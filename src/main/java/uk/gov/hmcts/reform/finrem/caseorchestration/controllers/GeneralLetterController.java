@@ -32,7 +32,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequestMapping(value = "/case-orchestration")
 @RequiredArgsConstructor
 @Slf4j
-public class GeneralLetterController implements BaseController {
+public class GeneralLetterController extends BaseController {
 
     private final IdamService idamService;
     private final GeneralLetterService generalLetterService;
@@ -51,7 +51,7 @@ public class GeneralLetterController implements BaseController {
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to clear general letter fields for Case ID: {}", caseDetails.getId());
 
-        validateCaseData(callback);
+        validateRequest(callback);
 
         Map<String, Object> caseData = caseDetails.getData();
         caseData.put(GENERAL_LETTER_ADDRESS_TO, null);
@@ -77,7 +77,7 @@ public class GeneralLetterController implements BaseController {
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to preview general letter for Case ID: {}", caseDetails.getId());
-        validateCaseData(callback);
+        validateRequest(callback);
 
         if (generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails).isEmpty()) {
             generalLetterService.previewGeneralLetter(authorisationToken, caseDetails);
@@ -102,7 +102,7 @@ public class GeneralLetterController implements BaseController {
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request for generating general letter with Case ID: {}", caseDetails.getId());
-        validateCaseData(callback);
+        validateRequest(callback);
 
         if (generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails).isEmpty()) {
             generalLetterService.createGeneralLetter(authorisationToken, caseDetails);

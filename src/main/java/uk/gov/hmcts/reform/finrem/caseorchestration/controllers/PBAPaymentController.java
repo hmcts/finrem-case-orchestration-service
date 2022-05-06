@@ -51,7 +51,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
 @SuppressWarnings("unchecked")
-public class PBAPaymentController implements BaseController {
+public class PBAPaymentController extends BaseController {
 
     private final FeeService feeService;
     private final PBAPaymentService pbaPaymentService;
@@ -71,7 +71,7 @@ public class PBAPaymentController implements BaseController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request for PBA payment for consented for Case ID: {}", caseDetails.getId());
 
-        validateCaseData(callbackRequest);
+        validateRequest(callbackRequest);
 
         final Map<String, Object> mapOfCaseData = caseDetails.getData();
         feeLookup(authToken, callbackRequest, mapOfCaseData);
@@ -105,7 +105,7 @@ public class PBAPaymentController implements BaseController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request for assign applicant solicitor for Case ID: {}", caseDetails.getId());
 
-        validateCaseData(callbackRequest);
+        validateRequest(callbackRequest);
         final Map<String, Object> mapOfCaseData = caseDetails.getData();
 
         if (featureToggleService.isAssignCaseAccessEnabled()) {

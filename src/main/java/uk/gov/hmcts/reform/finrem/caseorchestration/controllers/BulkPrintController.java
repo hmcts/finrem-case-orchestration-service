@@ -26,7 +26,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @RequestMapping(value = "/case-orchestration")
 @RequiredArgsConstructor
 @Slf4j
-public class BulkPrintController implements BaseController {
+public class BulkPrintController extends BaseController {
 
     private final ConsentOrderPrintService consentOrderPrintService;
 
@@ -46,7 +46,7 @@ public class BulkPrintController implements BaseController {
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request for Bulk Print for Case ID {}", caseDetails.getId());
-        validateCaseData(callback);
+        validateRequest(callback);
 
         consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, authorisationToken);
 

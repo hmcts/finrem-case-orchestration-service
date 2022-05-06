@@ -39,7 +39,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequestMapping(value = "/case-orchestration")
 @RequiredArgsConstructor
 @Slf4j
-public class ContestedDraftOrderNotApprovedController implements BaseController {
+public class ContestedDraftOrderNotApprovedController extends BaseController {
 
     private final ContestedDraftOrderNotApprovedService contestedNotApprovedService;
     private final BulkPrintService bulkPrintService;
@@ -61,7 +61,7 @@ public class ContestedDraftOrderNotApprovedController implements BaseController 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to clear contested application not approved fields for Case ID: {}", caseDetails.getId());
 
-        validateCaseData(callback);
+        validateRequest(callback);
 
         Map<String, Object> caseData = caseDetails.getData();
         caseData.put(CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_TYPE, null);
@@ -88,7 +88,7 @@ public class ContestedDraftOrderNotApprovedController implements BaseController 
         Map<String, Object> caseData = caseDetails.getData();
 
         log.info("Received request to preview application not approved document for Case ID: {}", caseDetails.getId());
-        validateCaseData(callback);
+        validateRequest(callback);
 
         Map<String, Object> refusalOrder = contestedNotApprovedService.createRefusalOrder(authorisationToken, caseDetails);
         caseData.putAll(refusalOrder);
@@ -108,7 +108,7 @@ public class ContestedDraftOrderNotApprovedController implements BaseController 
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request for storing general order with Case ID: {}", caseDetails.getId());
-        validateCaseData(callback);
+        validateRequest(callback);
 
         Map<String, Object> caseData = contestedNotApprovedService.populateRefusalOrderCollection(caseDetails);
 
@@ -129,7 +129,7 @@ public class ContestedDraftOrderNotApprovedController implements BaseController 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request for send refusal reason for case with Case ID: {}", caseDetails.getId());
 
-        validateCaseData(callback);
+        validateRequest(callback);
 
         Optional<CaseDocument> refusalReason = contestedNotApprovedService.getLatestRefusalReason(caseDetails);
 

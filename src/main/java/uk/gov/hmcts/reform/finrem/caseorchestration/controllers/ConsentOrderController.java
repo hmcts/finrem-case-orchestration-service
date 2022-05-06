@@ -29,7 +29,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RestController
 @RequestMapping(value = "/case-orchestration")
 @RequiredArgsConstructor
-public class ConsentOrderController implements BaseController {
+public class ConsentOrderController extends BaseController {
 
     private final ConsentOrderService consentOrderService;
     private final IdamService idamService;
@@ -47,7 +47,7 @@ public class ConsentOrderController implements BaseController {
 
         log.info("Received request to update latest Consent Order with Case ID : {}", callbackRequest.getCaseDetails().getId());
 
-        validateCaseData(callbackRequest);
+        validateRequest(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         CaseDocument caseDocument = consentOrderService.getLatestConsentOrderData(callbackRequest);
         caseData.put(LATEST_CONSENT_ORDER, caseDocument);

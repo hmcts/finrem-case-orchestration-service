@@ -27,7 +27,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @RestController
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-public class MiamCheckController implements BaseController {
+public class MiamCheckController extends BaseController {
 
     @Autowired
     private MiamCheckService service;
@@ -46,7 +46,7 @@ public class MiamCheckController implements BaseController {
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request for validating MIAM exemption for Case ID: {}", caseDetails.getId());
 
-        validateCaseData(callback);
+        validateRequest(callback);
         return ResponseEntity.ok(response(callback));
     }
 

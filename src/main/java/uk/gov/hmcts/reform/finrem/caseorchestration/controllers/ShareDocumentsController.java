@@ -26,7 +26,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(value = "/case-orchestration")
-public class ShareDocumentsController implements BaseController {
+public class ShareDocumentsController extends BaseController {
 
     private final ShareDocumentsService shareDocumentsService;
 
@@ -40,7 +40,7 @@ public class ShareDocumentsController implements BaseController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> shareDocumentsWithRespondent(
         @RequestBody CallbackRequest ccdRequest) {
         log.info("Received request to share documents with respondent");
-        validateCaseData(ccdRequest);
+        validateRequest(ccdRequest);
 
         CaseDetails caseDetails = ccdRequest.getCaseDetails();
         String applicantShareDocumentsValue = nullToEmpty(caseDetails.getData().get(APPLICANT_SHARE_DOCUMENTS));
@@ -64,7 +64,7 @@ public class ShareDocumentsController implements BaseController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> shareDocumentsWithApplicant(
         @RequestBody CallbackRequest ccdRequest) {
         log.info("Received request to share documents with applicant");
-        validateCaseData(ccdRequest);
+        validateRequest(ccdRequest);
 
         CaseDetails caseDetails = ccdRequest.getCaseDetails();
         String respondentShareDocumentsValue = nullToEmpty(caseDetails.getData().get(RESPONDENT_SHARE_DOCUMENTS));

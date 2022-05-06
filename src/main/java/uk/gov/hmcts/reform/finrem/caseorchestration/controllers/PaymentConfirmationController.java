@@ -31,7 +31,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
 @SuppressWarnings("unchecked")
-public class PaymentConfirmationController implements BaseController {
+public class PaymentConfirmationController extends BaseController {
 
     private final PaymentConfirmationService paymentConfirmationService;
     private final CaseDataService caseDataService;
@@ -46,7 +46,7 @@ public class PaymentConfirmationController implements BaseController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request for PBA confirmation for Case ID: {}", caseDetails.getId());
 
-        validateCaseData(callbackRequest);
+        validateRequest(callbackRequest);
 
         return ResponseEntity.ok(SubmittedCallbackResponse.builder()
             .confirmationBody(confirmationBody(caseDetails))

@@ -27,7 +27,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RestController
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-public class RemoveApplicantDetailsController implements BaseController {
+public class RemoveApplicantDetailsController extends BaseController {
 
     @PostMapping(path = "/remove-details", consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE)
@@ -44,7 +44,7 @@ public class RemoveApplicantDetailsController implements BaseController {
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request for removing Applicant/Applicants Solicitor details for Case ID: {}", caseDetails.getId());
 
-        validateCaseData(callback);
+        validateRequest(callback);
 
         Map<String, Object> caseData = caseDetails.getData();
         String applicantRepresented = caseData.get(APPLICANT_REPRESENTED).toString();

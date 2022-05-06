@@ -26,7 +26,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @RequestMapping(value = "/case-orchestration")
 @RequiredArgsConstructor
 @Slf4j
-public class GeneralApplicationController implements BaseController {
+public class GeneralApplicationController extends BaseController {
 
     private final GeneralApplicationService generalApplicationService;
 
@@ -43,7 +43,7 @@ public class GeneralApplicationController implements BaseController {
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to submit general application for Case ID: {}", caseDetails.getId());
-        validateCaseData(callback);
+        validateRequest(callback);
 
         CaseDetails caseDetailsBefore = callback.getCaseDetailsBefore();
         generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, authorisationToken);
@@ -67,7 +67,7 @@ public class GeneralApplicationController implements BaseController {
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to start general application for Case ID: {}", caseDetails.getId());
-        validateCaseData(callback);
+        validateRequest(callback);
 
         generalApplicationService.updateCaseDataStart(caseDetails.getData(), authorisationToken);
 

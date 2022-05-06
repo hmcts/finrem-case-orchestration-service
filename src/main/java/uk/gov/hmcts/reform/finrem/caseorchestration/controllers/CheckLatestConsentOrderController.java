@@ -27,7 +27,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 @RestController
 @RequestMapping(value = "/case-orchestration")
-public class CheckLatestConsentOrderController implements BaseController {
+public class CheckLatestConsentOrderController extends BaseController {
 
     @PostMapping(path = "/check-latest-consent-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Validation check for latest consent order field in CCD")
@@ -41,7 +41,7 @@ public class CheckLatestConsentOrderController implements BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
-        validateCaseData(callback);
+        validateRequest(callback);
 
         Map<String, Object> caseData = callback.getCaseDetails().getData();
         long caseId = callback.getCaseDetails().getId();

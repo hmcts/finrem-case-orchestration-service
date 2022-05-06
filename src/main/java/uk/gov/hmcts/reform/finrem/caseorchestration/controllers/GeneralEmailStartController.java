@@ -31,7 +31,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequestMapping(value = "/case-orchestration")
 @RequiredArgsConstructor
 @Slf4j
-public class GeneralEmailStartController implements BaseController {
+public class GeneralEmailStartController extends BaseController {
 
     private final IdamService idamService;
 
@@ -49,7 +49,7 @@ public class GeneralEmailStartController implements BaseController {
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to pre populate general email fields for Case ID: {}", caseDetails.getId());
 
-        validateCaseData(callback);
+        validateRequest(callback);
 
         Map<String, Object> caseData = caseDetails.getData();
         caseData.put(GENERAL_EMAIL_RECIPIENT, null);

@@ -22,6 +22,6 @@ public class UploadContestedCaseDocumentControllerTest extends BaseControllerTes
     public void controllerShouldFilterDocumentsByParty() {
         controller.uploadCaseDocuments(buildCallbackRequest());
 
-        verify(service).filterDocumentsToRelevantParty(any());
+        verify(service).setUploadedDocumentsToCollections(any());
     }
 }

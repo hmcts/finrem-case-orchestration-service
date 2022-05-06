@@ -38,7 +38,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
 @SuppressWarnings("unchecked")
-public class FeeLookupController implements BaseController {
+public class FeeLookupController extends BaseController {
 
     private final FeeService feeService;
     private final CaseDataService caseDataService;
@@ -52,7 +52,7 @@ public class FeeLookupController implements BaseController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request for Fee lookup for Case ID {}", caseDetails.getId());
 
-        validateCaseData(callbackRequest);
+        validateRequest(callbackRequest);
 
         ApplicationType applicationType = caseDataService.isConsentedApplication(caseDetails) ? CONSENTED : CONTESTED;
         FeeResponse feeResponse = feeService.getApplicationFee(applicationType);
