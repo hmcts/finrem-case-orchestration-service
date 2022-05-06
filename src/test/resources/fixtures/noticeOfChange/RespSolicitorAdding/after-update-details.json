@@ -71,7 +71,7 @@
               "added": {
                 "name": "Test respondent Solicitor",
                 "email": "padmaja.ramisetti@gmail.com",
-                "Organisation": {
+                "organisation": {
                   "OrganisationID": "A31PTVU",
                   "OrganisationName": "FRRespondentSolicitorFirm"
                 }
