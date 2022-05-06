@@ -4,12 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateRepresentationWorkflowService;
 
 import java.io.File;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -25,12 +27,15 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
 
     @MockBean protected UpdateRepresentationWorkflowService handleNocWorkflowService;
 
+    @MockBean protected FeatureToggleService featureToggleService;
+
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     public void shouldSuccessfullyRemoveApplicantSolicitorDetails() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/amend-applicant-solicitor-details.json").toURI()));
+        when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(true);
 
         mvc.perform(post(REMOVE_DETAILS_URL)
             .content(requestContent.toString())
@@ -57,6 +62,7 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
     public void shouldSuccessfullyRemoveApplicantDetails() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/amend-applicant-details.json").toURI()));
+        when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(true);
 
         mvc.perform(post(REMOVE_DETAILS_URL)
             .content(requestContent.toString())

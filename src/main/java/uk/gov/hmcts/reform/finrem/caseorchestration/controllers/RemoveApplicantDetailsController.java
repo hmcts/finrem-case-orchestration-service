@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateRepresentationWorkflowService;
 
 import javax.validation.constraints.NotNull;
@@ -52,6 +53,8 @@ public class RemoveApplicantDetailsController implements BaseController {
 
     @Autowired private final UpdateRepresentationWorkflowService nocWorkflowService;
 
+    @Autowired private final FeatureToggleService featureToggleService;
+
     @PostMapping(path = "/remove-details", consumes = APPLICATION_JSON_VALUE,
         produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Removes applicant details or applicants solicitor details")
@@ -74,12 +77,16 @@ public class RemoveApplicantDetailsController implements BaseController {
         removeApplicantDetails(caseData);
         removeRespondentDetails(caseData, caseDetails.getCaseTypeId());
 
-        if (Optional.ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
-            && caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE)) {
-            CaseDetails originalCaseDetails = callback.getCaseDetailsBefore();
-            return ResponseEntity.ok(nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails,
-                authorisationToken,
-                originalCaseDetails));
+        if (featureToggleService.isCaseworkerNoCEnabled()) {
+
+            if (Optional.ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
+                && caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE)) {
+                CaseDetails originalCaseDetails = callback.getCaseDetailsBefore();
+                return ResponseEntity.ok(nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails,
+                    authorisationToken,
+                    originalCaseDetails));
+            }
+
         }
 
         persistOrgPolicies(caseData, callback.getCaseDetailsBefore());
