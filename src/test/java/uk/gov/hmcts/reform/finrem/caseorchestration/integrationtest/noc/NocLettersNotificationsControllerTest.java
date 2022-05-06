@@ -105,10 +105,10 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
 
     private void assertNotificationLetterDetails(Map letterAddedDetailsMap) {
         Map caseDetails = (Map) letterAddedDetailsMap.get("caseDetails");
-        Map case_data = (Map) caseDetails.get("case_data");
-        String caseNumber = case_data.get("caseNumber").toString();
+        Map caseData = (Map) caseDetails.get("case_data");
+        String caseNumber = caseData.get("caseNumber").toString();
         assertThat(caseNumber, is(this.caseDetails.getId().toString()));
-        String applicantName = case_data.get("applicantName").toString();
+        String applicantName = caseData.get("applicantName").toString();
         assertThat(applicantName, is("Poor Guy"));
 
     }
