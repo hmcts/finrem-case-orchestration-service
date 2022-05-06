@@ -18,16 +18,20 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingBundle;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingUploadBundleData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedCaseOrderService;
 
 import javax.validation.constraints.NotNull;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -116,9 +120,18 @@ public class ContestedOrderController implements BaseController {
         List<HearingUploadBundleData> hearingBundleDataList = Optional.ofNullable(caseData.get(HEARING_UPLOAD_BUNDLE_COLLECTION))
             .map(this::convertToHearingBundleDataList).orElse(Collections.emptyList());
 
-        hearingBundleDataList.sort((e1, e2) -> e2.getValue().getBundleUploadDate().compareTo(e1.getValue().getBundleUploadDate()));
-
-        caseData.put(HEARING_UPLOAD_BUNDLE_COLLECTION, hearingBundleDataList);
+        if (!hearingBundleDataList.isEmpty()) {
+            List<HearingUploadBundleData> updateUploadDate = hearingBundleDataList.stream().
+                map(hd -> HearingUploadBundleData.builder()
+                    .id(hd.getId())
+                    .value(HearingBundle.builder().bundleDocuments(hd.getValue().getBundleDocuments())
+                        .bundleUploadDate(hd.getValue().getBundleUploadDate() == null ? LocalDateTime.now() : hd.getValue().getBundleUploadDate())
+                        .build())
+                    .build()).
+                sorted(Comparator.nullsLast((e1, e2) -> e2.getValue().getBundleUploadDate().compareTo(e1.getValue().getBundleUploadDate()))).
+                collect(Collectors.toList());
+            caseData.put(HEARING_UPLOAD_BUNDLE_COLLECTION, updateUploadDate);
+        }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
             .builder()
             .data(caseData)
