@@ -67,34 +67,40 @@
         {
           "id": "c00eeedd-603d-418c-b349-1bc74f651e2a",
           "value": {
+            "hearingBundleDate": "2022-05-07",
             "bundleDocuments": {
               "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/3af97b92-bfc2-4f45-8ac3-9204049cd1f5",
               "document_filename": "BulkPrintCoverSheet-1649341720076259.pdf",
               "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/3af97b92-bfc2-4f45-8ac3-9204049cd1f5/binary"
             },
-            "bundleUploadDate": "2022-05-07T13:10:29.455"
+            "bundleUploadDate": "2022-05-07",
+            "hearingBundleDescription": "This is first document"
           }
         },
         {
           "id": "7dc5f5b2-7e91-4824-84ae-f9c053108e1c",
           "value": {
+            "hearingBundleDate": "2022-05-05",
             "bundleDocuments": {
               "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/345b26ef-0a33-469d-b8aa-182599ba9f6c",
               "document_filename": "dummy1-1649341720076259.pdf",
               "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/345b26ef-0a33-469d-b8aa-182599ba9f6c/binary"
             },
-            "bundleUploadDate": "2022-05-02T16:00:49.455"
+            "bundleUploadDate": "2022-05-02",
+            "hearingBundleDescription": "This is second document"
           }
         },
         {
           "id": "65c89dc5-be92-4dea-87a6-4887b036b3a6",
           "value": {
+            "hearingBundleDate": "2022-05-11",
             "bundleDocuments": {
               "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4d9d3dbe-9f96-4a02-a254-764f5bb9445f",
               "document_filename": "InterimHearingNotice-1649341720076259.pdf",
               "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4d9d3dbe-9f96-4a02-a254-764f5bb9445f/binary"
             },
-            "bundleUploadDate": "2022-05-04T10:00:49.455"
+            "bundleUploadDate": "2022-05-01",
+            "hearingBundleDescription": "This is last document"
           }
         }
       ],

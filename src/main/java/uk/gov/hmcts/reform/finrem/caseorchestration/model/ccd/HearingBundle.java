@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -16,8 +16,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class HearingBundle {
 
+    @JsonProperty("hearingBundleDate")
+    private LocalDate hearingBundleDate;
     @JsonProperty("bundleDocuments")
     private CaseDocument bundleDocuments;
     @JsonProperty("bundleUploadDate")
-    private LocalDateTime bundleUploadDate;
+    private LocalDate bundleUploadDate;
+    @JsonProperty("hearingBundleDescription")
+    private String hearingBundleDescription;
 }
