@@ -261,13 +261,13 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
-            .andExpect(jsonPath("$.data.solicitorFirm").doesNotExist())
-            .andExpect(jsonPath("$.data.solicitorName").doesNotExist())
-            .andExpect(jsonPath("$.data.solicitorReference").doesNotExist())
-            .andExpect(jsonPath("$.data.solicitorAddress").doesNotExist())
-            .andExpect(jsonPath("$.data.solicitorDXnumber").doesNotExist())
-            .andExpect(jsonPath("$.data.solicitorEmail").doesNotExist())
-            .andExpect(jsonPath("$.data.solicitorPhone").doesNotExist());
+            .andExpect(jsonPath("$.data.rSolicitorFirm").doesNotExist())
+            .andExpect(jsonPath("$.data.rSolicitorName").doesNotExist())
+            .andExpect(jsonPath("$.data.rSolicitorReference").doesNotExist())
+            .andExpect(jsonPath("$.data.rSolicitorAddress").doesNotExist())
+            .andExpect(jsonPath("$.data.rSolicitorDXnumber").doesNotExist())
+            .andExpect(jsonPath("$.data.rSolicitorEmail").doesNotExist())
+            .andExpect(jsonPath("$.data.rSolicitorPhone").doesNotExist());
     }
 
     private void doRequestSetUp() throws IOException, URISyntaxException {
