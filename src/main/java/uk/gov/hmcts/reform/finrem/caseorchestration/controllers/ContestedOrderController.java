@@ -118,18 +118,19 @@ public class ContestedOrderController implements BaseController {
         Map<String, Object> caseData = caseDetails.getData();
 
         List<HearingUploadBundleData> hearingBundleDataList = Optional.ofNullable(caseData.get(HEARING_UPLOAD_BUNDLE_COLLECTION))
-            .map(this::convertToHearingBundleDataList).orElse(Collections.emptyList());
+                .map(this::convertToHearingBundleDataList).orElse(Collections.emptyList());
 
         if (!hearingBundleDataList.isEmpty()) {
-            List<HearingUploadBundleData> updateUploadDate = hearingBundleDataList.stream().
-                map(hd -> HearingUploadBundleData.builder()
+            List<HearingUploadBundleData> updateUploadDate = hearingBundleDataList.stream()
+                    .map(hd -> HearingUploadBundleData.builder()
                     .id(hd.getId())
                     .value(HearingBundle.builder().bundleDocuments(hd.getValue().getBundleDocuments())
-                        .bundleUploadDate(hd.getValue().getBundleUploadDate() == null ? LocalDateTime.now() : hd.getValue().getBundleUploadDate())
-                        .build())
-                    .build()).
-                sorted(Comparator.nullsLast((e1, e2) -> e2.getValue().getBundleUploadDate().compareTo(e1.getValue().getBundleUploadDate()))).
-                collect(Collectors.toList());
+                        .bundleUploadDate(hd.getValue().getBundleUploadDate() == null
+                            ? LocalDateTime.now() : hd.getValue().getBundleUploadDate()).build())
+                    .build())
+                    .sorted(Comparator.nullsLast((e1, e2) -> e2.getValue().getBundleUploadDate()
+                    .compareTo(e1.getValue().getBundleUploadDate())))
+                    .collect(Collectors.toList());
             caseData.put(HEARING_UPLOAD_BUNDLE_COLLECTION, updateUploadDate);
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
