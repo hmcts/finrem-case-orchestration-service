@@ -26,9 +26,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(value = "/case-orchestration")
-public class UploadContestedCaseDocumentController implements BaseController {
+public class UploadContestedCaseDocumentController extends BaseController {
 
-    private final UploadContestedCaseDocumentsService service;
+    private final UploadContestedCaseDocumentsService uploadContestedCaseDocumentsService;
 
     @PostMapping(path = "/upload-contested-case-documents", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles update Contested Case details and cleans up the data fields based on the options chosen for Contested Cases")
@@ -41,13 +41,13 @@ public class UploadContestedCaseDocumentController implements BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false)
         @RequestBody CallbackRequest ccdRequest) {
 
-        validateCaseData(ccdRequest);
+        validateRequest(ccdRequest);
 
         CaseDetails caseDetails = ccdRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
         log.info("Received request to upload Contested case documents for Case ID: {}", caseDetails.getId());
 
-        caseData = service.filterDocumentsToRelevantParty(caseData);
+        uploadContestedCaseDocumentsService.setUploadedDocumentsToCollections(caseData);
         log.info("Successfully filtered documents to relevant party for Case ID: {}", caseDetails.getId());
 
         return ResponseEntity.ok(
