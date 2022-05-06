@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateRepresentationWorkflowService;
 
 import java.util.List;
@@ -65,6 +66,8 @@ public class UpdateConsentedCaseController implements BaseController {
 
     @Autowired private UpdateRepresentationWorkflowService nocWorkflowService;
 
+    @Autowired private FeatureToggleService featureToggleService;
+
     @PostMapping(path = "/update-case", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles update case details and cleans up the data fields based on the options chosen for Consented Cases")
     @ApiResponses(value = {
@@ -113,12 +116,16 @@ public class UpdateConsentedCaseController implements BaseController {
         updateRespondentSolicitorAddress(caseData);
         updateApplicantOrSolicitorContactDetails(caseData);
 
-        if (Optional.ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
-            && caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE)) {
-            CaseDetails originalCaseDetails = ccdRequest.getCaseDetailsBefore();
-            return ResponseEntity.ok(nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails,
-                authToken,
-                originalCaseDetails));
+        if (featureToggleService.isCaseworkerNoCEnabled()) {
+
+            if (Optional.ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
+                && caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE)) {
+                CaseDetails originalCaseDetails = ccdRequest.getCaseDetailsBefore();
+                return ResponseEntity.ok(nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails,
+                    authToken,
+                    originalCaseDetails));
+            }
+
         }
 
         persistOrgPolicies(caseData, ccdRequest.getCaseDetailsBefore());
