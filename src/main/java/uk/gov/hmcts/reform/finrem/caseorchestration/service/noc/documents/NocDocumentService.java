@@ -6,6 +6,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
@@ -13,6 +14,9 @@ public abstract class NocDocumentService {
 
     private final GenericDocumentService genericDocumentService;
     private final ObjectMapper objectMapper;
+
+    static final String CASE_DETAILS = "caseDetails";
+    static final String CASE_DATA = "case_data";
 
     public NocDocumentService(GenericDocumentService genericDocumentService,
                               ObjectMapper objectMapper) {
@@ -32,8 +36,11 @@ public abstract class NocDocumentService {
     }
 
     private Map convertNoticeOfChangeLetterDetailsToMap(NoticeOfChangeLetterDetails noticeOfChangeLetterDetails) {
-        return objectMapper.convertValue(noticeOfChangeLetterDetails, Map.class);
-
+        HashMap caseDetailsMap = new HashMap<String, Object>();
+        HashMap caseDataMap = new HashMap<String, Object>();
+        caseDataMap.put(CASE_DATA, objectMapper.convertValue(noticeOfChangeLetterDetails, Map.class));
+        caseDetailsMap.put(CASE_DETAILS, caseDataMap);
+        return caseDetailsMap;
     }
 
     abstract NocDocumentTemplate getNocDocumentTemplate();

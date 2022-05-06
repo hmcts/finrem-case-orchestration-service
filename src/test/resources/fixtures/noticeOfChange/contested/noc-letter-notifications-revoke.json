@@ -123,7 +123,7 @@
             "removed": {
               "name": "Sir Solicitor",
               "email": "sirsolicitor1@gmail.com",
-              "Organisation": {
+              "organisation": {
                 "OrganisationID": "A31PTVA",
                 "OrganisationName": "FRApplicantSolicitorFirmR1"
               }

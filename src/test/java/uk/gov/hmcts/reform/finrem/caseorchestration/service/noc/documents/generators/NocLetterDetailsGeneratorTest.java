@@ -90,7 +90,7 @@ public class NocLetterDetailsGeneratorTest {
                 DocumentHelper.PaperNotificationRecipient.APPLICANT,
                 NoticeType.ADD);
 
-        assertLetterDetails(representationUpdate, noticeOfChangeLetterDetails, NoticeType.ADD, Boolean.FALSE);
+        assertLetterDetails(noticeOfChangeLetterDetails, NoticeType.ADD, Boolean.FALSE);
         assertContestedCourtDetails(noticeOfChangeLetterDetails);
         assertAddresseeDetails(noticeOfChangeLetterDetails);
 
@@ -110,13 +110,13 @@ public class NocLetterDetailsGeneratorTest {
             noticeOfChangeLetterDetailsGenerator.generate(caseDetails, representationUpdate, DocumentHelper.PaperNotificationRecipient.APPLICANT,
                 NoticeType.REMOVE);
 
-        assertLetterDetails(representationUpdate, noticeOfChangeLetterDetails, NoticeType.REMOVE, Boolean.TRUE);
+        assertLetterDetails(noticeOfChangeLetterDetails, NoticeType.REMOVE, Boolean.TRUE);
         assertConsentedCourtDetails(noticeOfChangeLetterDetails);
         assertAddresseeDetails(noticeOfChangeLetterDetails);
 
     }
 
-    private void assertLetterDetails(RepresentationUpdate representationUpdate, NoticeOfChangeLetterDetails noticeOfChangeLetterDetails,
+    private void assertLetterDetails(NoticeOfChangeLetterDetails noticeOfChangeLetterDetails,
                                      NoticeType noticeType, boolean isConsented) {
         assertThat(noticeOfChangeLetterDetails.getCaseNumber(), is(caseDetails.getId().toString()));
         assertThat(noticeOfChangeLetterDetails.getReference(), is(caseDetails.getData().get(SOLICITOR_REFERENCE).toString()));
