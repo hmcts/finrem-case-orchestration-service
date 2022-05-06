@@ -45,7 +45,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
     private CallbackRequest callbackRequest;
 
     private final Function<Map<String, Object>, List<Element<RepresentationUpdate>>> getFirstChangeElement =
-        this::convertToChangeOfRepresentation;
+        this::convertToUpdateHistory;
 
 
     @Before
@@ -287,8 +287,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
         assertThat(actualPolicy).isEqualTo(appSolicitorPolicy);
     }
 
-    private List<Element<RepresentationUpdate>> convertToChangeOfRepresentation(Map<String, Object> data) {
-        System.out.println(data);
+    private List<Element<RepresentationUpdate>> convertToUpdateHistory(Map<String, Object> data) {
         return mapper.convertValue(data.get(REPRESENTATION_UPDATE_HISTORY),
             new TypeReference<>() {});
     }

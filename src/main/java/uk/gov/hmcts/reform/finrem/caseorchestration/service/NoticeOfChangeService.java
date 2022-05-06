@@ -73,7 +73,7 @@ public class NoticeOfChangeService {
         log.info("About to start updating representation as caseworker for caseID {}", caseDetails.getId());
 
         Map<String,Object> caseData = updateRepresentationUpdateHistory(caseDetails, authorizationToken, originalCaseDetails);
-        ChangeOrganisationRequest changeRequest = generateChangeOrganisationRequest(caseDetails, originalCaseDetails);
+        final ChangeOrganisationRequest changeRequest = generateChangeOrganisationRequest(caseDetails, originalCaseDetails);
         caseData.put(CHANGE_ORGANISATION_REQUEST, changeRequest);
 
         return caseData;
@@ -83,56 +83,37 @@ public class NoticeOfChangeService {
                                                               String authToken,
                                                               CaseDetails originalDetails) {
         Map<String, Object> caseData = caseDetails.getData();
-        boolean isApplicant = ((String) caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
 
-        RepresentationUpdateHistory current = RepresentationUpdateHistory.builder()
-            .representationUpdateHistory(objectMapper.convertValue(caseData.get(REPRESENTATION_UPDATE_HISTORY),
-                new TypeReference<>() {}))
-            .build();
+        RepresentationUpdateHistory current = buildCurrentUpdateHistory(caseData);
 
-        RepresentationUpdateHistory change = changeOfRepresentationService.generateRepresentationUpdateHistory(
-            ChangeOfRepresentationRequest.builder()
-                .by(idamService.getIdamFullName(authToken))
-                .party(isApplicant ? APPLICANT : RESPONDENT)
-                .clientName(isApplicant ? caseDataService.buildFullApplicantName(caseDetails)
-                    : caseDataService.buildFullRespondentName(caseDetails))
-                .current(current)
-                .addedRepresentative(getAddedRepresentative(caseDetails))
-                .removedRepresentative(getRemovedRepresentative(originalDetails, isApplicant))
-                .build()
-        );
+        final RepresentationUpdateHistory history = changeOfRepresentationService.generateRepresentationUpdateHistory(
+            buildChangeOfRepresentationRequest(authToken, caseDetails, current, originalDetails));
 
-        caseData.put(REPRESENTATION_UPDATE_HISTORY, change.getRepresentationUpdateHistory());
+        caseData.put(REPRESENTATION_UPDATE_HISTORY, history.getRepresentationUpdateHistory());
         return caseData;
     }
 
     private ChangeOrganisationRequest generateChangeOrganisationRequest(CaseDetails caseDetails,
                                                                         CaseDetails originalDetails) {
 
-        DynamicList role = generateCaseRoleIdAsDynamicList(((String) caseDetails.getData()
-            .get(NOC_PARTY)).equalsIgnoreCase(APPLICANT) ? APP_SOLICITOR_POLICY : RESP_SOLICITOR_POLICY);
-        boolean isApplicant = ((String) caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
+        final boolean isApplicant = ((String) caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
+        final DynamicList role = generateCaseRoleIdAsDynamicList(isApplicant ? APP_SOLICITOR_POLICY : RESP_SOLICITOR_POLICY);
 
-        Organisation organisationToAdd = Optional.ofNullable(getOrgPolicy(caseDetails, isApplicant
-                ? APPLICANT_ORGANISATION_POLICY : RESPONDENT_ORGANISATION_POLICY))
-            .map(OrganisationPolicy::getOrganisation).orElse(null);
-        Organisation organisationToRemove = Optional.ofNullable(getOrgPolicy(originalDetails, isApplicant
+        final Organisation organisationToAdd = Optional.ofNullable(getOrgPolicy(caseDetails, isApplicant
                 ? APPLICANT_ORGANISATION_POLICY : RESPONDENT_ORGANISATION_POLICY))
             .map(OrganisationPolicy::getOrganisation).orElse(null);
 
-        return ChangeOrganisationRequest.builder()
-            .caseRoleId(role)
-            .requestTimestamp(LocalDateTime.now())
-            .approvalRejectionTimestamp(LocalDateTime.now())
-            .approvalStatus(ChangeOrganisationApprovalStatus.APPROVED)
-            .organisationToAdd(organisationToAdd)
-            .organisationToRemove(organisationToRemove)
-            .build();
+        final Organisation organisationToRemove = Optional.ofNullable(getOrgPolicy(originalDetails, isApplicant
+                ? APPLICANT_ORGANISATION_POLICY : RESPONDENT_ORGANISATION_POLICY))
+            .map(OrganisationPolicy::getOrganisation).orElse(null);
+
+        return buildChangeOrganisationRequest(role, organisationToAdd, organisationToRemove);
     }
 
     private ChangedRepresentative getRemovedRepresentative(CaseDetails caseDetails, boolean isApplicant) {
         Map<String, Object> caseData = caseDetails.getData();
-        String representedKey = isApplicant ? APPLICANT_REPRESENTED : getRespondentRepresentedKey(caseDetails);
+        final String representedKey = isApplicant ? APPLICANT_REPRESENTED : getRespondentRepresentedKey(caseDetails);
+        final String litigantOrgPolicy = isApplicant ? APPLICANT_ORGANISATION_POLICY : RESPONDENT_ORGANISATION_POLICY;
 
         if (caseData.get(representedKey).equals(YES_VALUE)) {
             return ChangedRepresentative.builder()
@@ -142,8 +123,7 @@ public class NoticeOfChangeService {
                 .email(isApplicant
                     ? getApplicantSolicitorEmail(caseDetails)
                     : (String) caseData.get(RESP_SOLICITOR_EMAIL))
-                .organisation(getOrgPolicy(caseDetails, isApplicant
-                    ? APPLICANT_ORGANISATION_POLICY : RESPONDENT_ORGANISATION_POLICY).getOrganisation())
+                .organisation(getOrgPolicy(caseDetails, litigantOrgPolicy).getOrganisation())
                 .build();
         }
         return null;
@@ -151,19 +131,18 @@ public class NoticeOfChangeService {
 
     private ChangedRepresentative getAddedRepresentative(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
-        boolean isApplicant = ((String) caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
+        final boolean isApplicant = ((String) caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
+        final String litigantOrgPolicy = isApplicant ? APPLICANT_ORGANISATION_POLICY : RESPONDENT_ORGANISATION_POLICY;
 
-        return Optional.ofNullable(getOrgPolicy(caseDetails, isApplicant
-                ? APPLICANT_ORGANISATION_POLICY
-                : RESPONDENT_ORGANISATION_POLICY).getOrganisation())
-            .map(org -> ChangedRepresentative.builder()
+        return Optional.ofNullable(getOrgPolicy(caseDetails, litigantOrgPolicy).getOrganisation())
+            .map(organisation -> ChangedRepresentative.builder()
                 .name(isApplicant
                     ? getApplicantSolicitorName(caseDetails)
                     : (String) caseData.get(RESP_SOLICITOR_NAME))
                 .email(isApplicant
                     ? getApplicantSolicitorEmail(caseDetails)
                     : (String) caseData.get(RESP_SOLICITOR_EMAIL))
-                .organisation(org)
+                .organisation(organisation)
                 .build()).orElse(null);
     }
 
@@ -172,8 +151,6 @@ public class NoticeOfChangeService {
             ? CONSENTED_RESPONDENT_REPRESENTED : CONTESTED_RESPONDENT_REPRESENTED;
     }
 
-    // Manage case assignment's API only accepts CaseRoleId as the selected element of a dynamic list
-    // and not just as a simple string, so we have to do this cast to get the API to process our COR
     private DynamicList generateCaseRoleIdAsDynamicList(String role) {
         final DynamicListElement roleItem = DynamicListElement.builder()
             .code(role)
@@ -198,22 +175,15 @@ public class NoticeOfChangeService {
             ? (String) caseData.get(SOLICITOR_EMAIL) : (String) caseData.get(CONTESTED_SOLICITOR_EMAIL);
     }
 
+    //aac handles org policy modification, so we want to revert the org policies to their value before the event started
     public CaseDetails persistOriginalOrgPoliciesWhenRevokingAccess(CaseDetails caseDetails,
                                                                     CaseDetails originalCaseDetails) {
-        if (((String)caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase(APPLICANT)
-            && Optional.ofNullable(getOrgPolicy(caseDetails,APPLICANT_ORGANISATION_POLICY)
-            .getOrgPolicyCaseAssignedRole()).isEmpty()) {
-            caseDetails.getData().put(APPLICANT_ORGANISATION_POLICY,
-                getOrgPolicy(originalCaseDetails, APPLICANT_ORGANISATION_POLICY));
 
-            return caseDetails;
-        }
-        if (Optional.ofNullable(getOrgPolicy(caseDetails, RESPONDENT_ORGANISATION_POLICY)).isEmpty()
-            || Optional.ofNullable(getOrgPolicy(caseDetails,RESPONDENT_ORGANISATION_POLICY)
-            .getOrgPolicyCaseAssignedRole()).isEmpty()) {
+        final boolean isApplicant = ((String)caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
+        final String litigantOrgPolicy = isApplicant ? APPLICANT_ORGANISATION_POLICY : RESPONDENT_ORGANISATION_POLICY;
 
-            caseDetails.getData().put(RESPONDENT_ORGANISATION_POLICY,
-                getOrgPolicy(originalCaseDetails, RESPONDENT_ORGANISATION_POLICY));
+        if (hasInvalidOrgPolicy(caseDetails, isApplicant)) {
+            caseDetails.getData().put(litigantOrgPolicy, getOrgPolicy(originalCaseDetails, litigantOrgPolicy));
         }
         return caseDetails;
     }
@@ -223,4 +193,52 @@ public class NoticeOfChangeService {
             OrganisationPolicy.class);
     }
 
+    private ChangeOrganisationRequest buildChangeOrganisationRequest(DynamicList role,
+                                                                     Organisation organisationToAdd,
+                                                                     Organisation organisationToRemove) {
+        return ChangeOrganisationRequest.builder()
+            .caseRoleId(role)
+            .requestTimestamp(LocalDateTime.now())
+            .approvalRejectionTimestamp(LocalDateTime.now())
+            .approvalStatus(ChangeOrganisationApprovalStatus.APPROVED)
+            .organisationToAdd(organisationToAdd)
+            .organisationToRemove(organisationToRemove)
+            .build();
+    }
+
+    private ChangeOfRepresentationRequest buildChangeOfRepresentationRequest(String authToken,
+                                                                             CaseDetails caseDetails,
+                                                                             RepresentationUpdateHistory current,
+                                                                             CaseDetails originalDetails) {
+
+        final boolean isApplicant = ((String) caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
+
+        return ChangeOfRepresentationRequest.builder()
+            .by(idamService.getIdamFullName(authToken))
+            .party(isApplicant ? APPLICANT : RESPONDENT)
+            .clientName(isApplicant ? caseDataService.buildFullApplicantName(caseDetails)
+                : caseDataService.buildFullRespondentName(caseDetails))
+            .current(current)
+            .addedRepresentative(getAddedRepresentative(caseDetails))
+            .removedRepresentative(getRemovedRepresentative(originalDetails, isApplicant))
+            .build();
+    }
+
+    private RepresentationUpdateHistory buildCurrentUpdateHistory(Map<String, Object> caseData) {
+        return RepresentationUpdateHistory.builder()
+            .representationUpdateHistory(objectMapper.convertValue(caseData.get(REPRESENTATION_UPDATE_HISTORY),
+                new TypeReference<>() {}))
+            .build();
+    }
+
+    private boolean hasInvalidOrgPolicy(CaseDetails caseDetails, boolean isApplicant) {
+        Optional<OrganisationPolicy> orgPolicy = Optional.ofNullable(getOrgPolicy(caseDetails, isApplicant
+            ? APPLICANT_ORGANISATION_POLICY
+            : RESPONDENT_ORGANISATION_POLICY));
+
+        return orgPolicy.isEmpty()
+            || orgPolicy.get().getOrgPolicyCaseAssignedRole() == null
+            || !orgPolicy.get().getOrgPolicyCaseAssignedRole().equalsIgnoreCase(
+                isApplicant ? APP_SOLICITOR_POLICY : RESP_SOLICITOR_POLICY);
+    }
 }
