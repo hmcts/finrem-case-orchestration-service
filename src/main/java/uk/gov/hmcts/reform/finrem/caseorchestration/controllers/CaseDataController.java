@@ -154,7 +154,9 @@ public class CaseDataController implements BaseController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        addDefaultChangeOrganisationRequest(caseData);
+        if (featureToggleService.isSolicitorNoticeOfChangeEnabled()) {
+            addDefaultChangeOrganisationRequest(caseData);
+        }
         addOrganisationPoliciesIfPartiesNotRepresented(caseData);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
