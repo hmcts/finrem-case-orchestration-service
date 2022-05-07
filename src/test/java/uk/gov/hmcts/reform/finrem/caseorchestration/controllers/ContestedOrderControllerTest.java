@@ -118,11 +118,17 @@ public class ContestedOrderControllerTest extends BaseControllerTest {
                 .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.hearingUploadBundle").isArray())
-            .andExpect(jsonPath("$.data.hearingUploadBundle[0].value.bundleDocuments.document_filename",
+            .andExpect(jsonPath("$.data.hearingUploadBundle[0].id",
+                is("83922295-dbaa-471f-95ff-93efdf200fab")))
+            .andExpect(jsonPath("$.data.hearingUploadBundle[1].value.hearingBundleDate",
+                is("2022-08-20")))
+            .andExpect(jsonPath("$.data.hearingUploadBundle[1].value.hearingBundleDocuments[0]"
+                    + ".value.bundleDocuments.document_filename",
                 is("InterimHearingNotice-1649341720076259.pdf")))
-            .andExpect(jsonPath("$.data.hearingUploadBundle[1].value.bundleDocuments.document_filename",
-                is("BulkPrintCoverSheet-1649341720076259.pdf")))
-            .andExpect(jsonPath("$.data.hearingUploadBundle[2].value.bundleDocuments.document_filename",
-                is("dummy1-1649341720076259.pdf")));
+            .andExpect(jsonPath("$.data.hearingUploadBundle[1].value.hearingBundleDocuments[1]"
+                    + ".value.bundleDocuments.document_filename",
+                is("NocLitigantSolicitorAddedLetter.pdf")))
+            .andExpect(jsonPath("$.data.hearingUploadBundle[1].id",
+                is("d090f7a0-5897-4577-a07f-2137483cb1f9")));
     }
 }

@@ -65,42 +65,54 @@
       "authorisationName": "test",
       "hearingUploadBundle": [
         {
-          "id": "c00eeedd-603d-418c-b349-1bc74f651e2a",
+          "id": "d090f7a0-5897-4577-a07f-2137483cb1f9",
           "value": {
-            "hearingBundleDate": "2022-05-07",
-            "bundleDocuments": {
-              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/3af97b92-bfc2-4f45-8ac3-9204049cd1f5",
-              "document_filename": "BulkPrintCoverSheet-1649341720076259.pdf",
-              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/3af97b92-bfc2-4f45-8ac3-9204049cd1f5/binary"
-            },
-            "bundleUploadDate": "2022-05-07",
-            "hearingBundleDescription": "This is first document"
+            "hearingBundleDate": "2022-08-20",
+            "hearingBundleDocuments": [
+              {
+                "id": "d389989b-4ac5-49e4-9164-31054f0bdfdc",
+                "value": {
+                  "bundleDocuments": {
+                    "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/676bc5f8-020d-4504-8143-369aeedb130e",
+                    "document_filename": "NocLitigantSolicitorAddedLetter.pdf",
+                    "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/676bc5f8-020d-4504-8143-369aeedb130e/binary"
+                  },
+                  "bundleUploadDate": "2022-05-04"
+                }
+              },
+              {
+                "id": "1e2d6f5e-bcb0-48cd-a43d-6d21cc993f8d",
+                "value": {
+                  "bundleDocuments": {
+                    "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/acafec84-71e6-4d7c-8490-c59af095b63c",
+                    "document_filename": "InterimHearingNotice-1649341720076259.pdf",
+                    "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/acafec84-71e6-4d7c-8490-c59af095b63c/binary"
+                  },
+                  "bundleUploadDate": "2022-05-05"
+                }
+              }
+            ],
+            "hearingBundleDescription": "This is First Hearing Set"
           }
         },
         {
-          "id": "7dc5f5b2-7e91-4824-84ae-f9c053108e1c",
+          "id": "83922295-dbaa-471f-95ff-93efdf200fab",
           "value": {
-            "hearingBundleDate": "2022-05-05",
-            "bundleDocuments": {
-              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/345b26ef-0a33-469d-b8aa-182599ba9f6c",
-              "document_filename": "dummy1-1649341720076259.pdf",
-              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/345b26ef-0a33-469d-b8aa-182599ba9f6c/binary"
-            },
-            "bundleUploadDate": "2022-05-02",
-            "hearingBundleDescription": "This is second document"
-          }
-        },
-        {
-          "id": "65c89dc5-be92-4dea-87a6-4887b036b3a6",
-          "value": {
-            "hearingBundleDate": "2022-05-11",
-            "bundleDocuments": {
-              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4d9d3dbe-9f96-4a02-a254-764f5bb9445f",
-              "document_filename": "InterimHearingNotice-1649341720076259.pdf",
-              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4d9d3dbe-9f96-4a02-a254-764f5bb9445f/binary"
-            },
-            "bundleUploadDate": "2022-05-01",
-            "hearingBundleDescription": "This is last document"
+            "hearingBundleDate": "2022-12-31",
+            "hearingBundleDocuments": [
+              {
+                "id": "257c7adf-0f89-4e90-a79f-7146dadaa815",
+                "value": {
+                  "bundleDocuments": {
+                    "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/1fe5a5dc-02d3-430a-a036-974e1823c1e7",
+                    "document_filename": "NocLitigantSolicitorAddedLetter.pdf",
+                    "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/1fe5a5dc-02d3-430a-a036-974e1823c1e7/binary"
+                  },
+                  "bundleUploadDate": "2022-07-07"
+                }
+              }
+            ],
+            "hearingBundleDescription": "This is second Hearing Set"
           }
         }
       ],

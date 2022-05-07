@@ -7,20 +7,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-import java.util.List;
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class HearingBundle {
-
-    @JsonProperty("hearingBundleDate")
-    private LocalDate hearingBundleDate;
-    @JsonProperty("hearingBundleDocuments")
-    private List<HearingUploadBundle> hearingBundleDocuments;
-    @JsonProperty("hearingBundleDescription")
-    private String hearingBundleDescription;
+public class HearingUploadBundle {
+    @JsonProperty("id")
+    private String id;
+    @JsonProperty("value")
+    private HearingBundleItems value;
 }

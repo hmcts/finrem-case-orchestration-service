@@ -19,12 +19,13 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingBundle;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingBundleItems;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingUploadBundle;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingUploadBundleData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedCaseOrderService;
 
 import javax.validation.constraints.NotNull;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -126,9 +127,12 @@ public class ContestedOrderController implements BaseController {
                     .id(hd.getId())
                     .value(HearingBundle.builder()
                         .hearingBundleDate(hd.getValue().getHearingBundleDate())
-                        .bundleDocuments(hd.getValue().getBundleDocuments())
-                        .bundleUploadDate(hd.getValue().getBundleUploadDate() == null
-                            ? LocalDate.now() : hd.getValue().getBundleUploadDate())
+                        .hearingBundleDocuments(hd.getValue().getHearingBundleDocuments().stream()
+                             .map(hdi -> HearingUploadBundle.builder().id(hdi.getId())
+                                 .value(HearingBundleItems.builder().bundleDocuments(hdi.getValue().getBundleDocuments())
+                                     .bundleUploadDate(hdi.getValue().getBundleUploadDate()).build()).build())
+                                 .sorted(Comparator.nullsLast((e1, e2) -> e2.getValue().getBundleUploadDate()
+                                    .compareTo(e1.getValue().getBundleUploadDate()))).collect(Collectors.toList()))
                         .hearingBundleDescription(hd.getValue().getHearingBundleDescription())
                         .build())
                     .build())
