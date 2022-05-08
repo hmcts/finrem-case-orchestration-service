@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLett
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Objects;
@@ -60,9 +61,10 @@ public class NocDocumentServiceBaseTest {
         caseData = Map.of(DIVORCE_CASE_NUMBER, "divCaseReference", SOLICITOR_REFERENCE,
             "solicitorReference");
         caseDetails = CaseDetails.builder().id(1234L).data(caseData).build();
+        LocalDate date = LocalDate.of(2022, Month.MAY, 6);
 
         noticeOfChangeLetterDetails = NoticeOfChangeLetterDetails.builder()
-            .letterDate(DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()))
+            .letterDate(DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(date))
             .divorceCaseNumber(Objects.toString(caseDetails.getData().get(DIVORCE_CASE_NUMBER)))
             .caseNumber(caseDetails.getId().toString())
             .reference(Objects.toString(caseDetails.getData().get(SOLICITOR_REFERENCE)))

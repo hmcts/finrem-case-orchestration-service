@@ -81,7 +81,10 @@ public abstract class BaseControllerTest extends BaseTest {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(INCLUDES_REPRESENTATIVE_UPDATE, YES_VALUE);
         CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(123)).data(caseData).build();
-        return CallbackRequest.builder().eventId(UPDATE_CONTACT_DETAILS_EVENT).caseDetails(caseDetails).build();
+        return CallbackRequest.builder().eventId(UPDATE_CONTACT_DETAILS_EVENT)
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetails)
+            .build();
     }
 
     protected CallbackRequest buildCallbackRequestWithBeforeCaseDetails() {

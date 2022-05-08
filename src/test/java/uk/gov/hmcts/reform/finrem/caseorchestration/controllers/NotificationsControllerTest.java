@@ -960,7 +960,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         verify(notificationService, times(1)).sendNoticeOfChangeEmailCaseworker(any());
 
         verify(nocLetterNotificationService, times(1))
-            .sendNoticeOfChangeLetters(any(CaseDetails.class), anyString());
+            .sendNoticeOfChangeLetters(any(CaseDetails.class), any(CaseDetails.class), anyString());
     }
 
     private CallbackRequest createCallbackRequestWithFinalOrder() {
