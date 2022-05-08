@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.NocSolicitorAddedLettersProcessor;
@@ -32,11 +33,14 @@ public class NocLetterNotificationService {
         RepresentationUpdate representationUpdate = getLatestRepresentationUpdate(caseDetails);
         if (representationUpdate != null) {
             log.info("Got the representationUpdate");
-            if (representationUpdate.getAdded() != null) {
+            ChangedRepresentative corAdded = representationUpdate.getAdded();
+            if (isOrganisationIdPopulated(corAdded)) {
                 log.info("The representationUpdate is for an Added solicitor");
                 nocSolicitorAddedLettersProcessor.processSolicitorAndLitigantLetters(caseDetails, authToken, representationUpdate);
+
             }
-            if (representationUpdate.getRemoved() != null) {
+            ChangedRepresentative corRemoved = representationUpdate.getRemoved();
+            if (isOrganisationIdPopulated(corRemoved)) {
                 log.info("The representationUpdate is for a Removed solicitor");
                 nocSolicitorRemovedLettersProcessor.processSolicitorAndLitigantLetters(caseDetailsBefore, authToken, representationUpdate);
             }
@@ -50,6 +54,11 @@ public class NocLetterNotificationService {
             });
         return Collections.max(representationUpdates, Comparator.comparing(representationUpdate -> representationUpdate.getValue().getDate()))
             .getValue();
+    }
+
+
+    private boolean isOrganisationIdPopulated(ChangedRepresentative corAdded) {
+        return corAdded != null && corAdded.getOrganisation() != null && corAdded.getOrganisation().getOrganisationID() != null;
     }
 
 }

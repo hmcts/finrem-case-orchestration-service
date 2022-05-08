@@ -32,7 +32,7 @@ public abstract class NocLettersProcessor {
     private final NoticeType noticeType;
     private final BulkPrintService bulkPrintService;
 
-    public static final String COR_APPLICANT = "applicant";
+    public static final String COR_APPLICANT = "Applicant";
 
     public NocLettersProcessor(
         NocDocumentService nocDocumentService,

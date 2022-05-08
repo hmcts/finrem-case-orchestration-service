@@ -69,7 +69,8 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     private static final String NOTICE_OF_CHANGE = "Notice of Change";
     private static final String REPRESENTATION_UPDATE_HISTORY = "RepresentationUpdateHistory";
 
-    @Autowired private UpdateRepresentationService updateRepresentationService;
+    @Autowired
+    private UpdateRepresentationService updateRepresentationService;
 
     @MockBean
     private AuditEventService auditEventService;
@@ -83,9 +84,11 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     @MockBean
     private PrdOrganisationService organisationService;
 
-    @MockBean private UpdateSolicitorDetailsService updateSolicitorDetailsService;
+    @MockBean
+    private UpdateSolicitorDetailsService updateSolicitorDetailsService;
 
-    @MockBean private ChangeOfRepresentationService changeOfRepresentationService;
+    @MockBean
+    private ChangeOfRepresentationService changeOfRepresentationService;
 
     private UserDetails testAppSolicitor;
     private UserDetails testRespSolicitor;
@@ -175,7 +178,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         RepresentationUpdate actualChangeOfRep = getFirstChangeElement.apply(actualData).get(0).getValue();
         RepresentationUpdate expectedChangeOfRep = getFirstChangeElement.apply(expectedCaseData).get(0).getValue();
 
-        assertEquals(actualChangeOfRep.getParty(), expectedChangeOfRep.getParty());
+        assertEquals(actualChangeOfRep.getParty().toLowerCase(), expectedChangeOfRep.getParty().toLowerCase());
         assertEquals(actualChangeOfRep.getClientName(), expectedChangeOfRep.getClientName());
         assertEquals(actualChangeOfRep.getBy(), expectedChangeOfRep.getBy());
         assertEquals(actualChangeOfRep.getAdded(), expectedChangeOfRep.getAdded());
@@ -212,7 +215,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         RepresentationUpdate actualChangeOfRep = getFirstChangeElement.apply(actualData).get(0).getValue();
         RepresentationUpdate expectedChangeOfRep = getFirstChangeElement.apply(expectedCaseData).get(0).getValue();
 
-        assertEquals(actualChangeOfRep.getParty(), expectedChangeOfRep.getParty());
+        assertEquals(actualChangeOfRep.getParty().toLowerCase(), expectedChangeOfRep.getParty().toLowerCase());
         assertEquals(actualChangeOfRep.getClientName(), expectedChangeOfRep.getClientName());
         assertEquals(actualChangeOfRep.getBy(), expectedChangeOfRep.getBy());
         assertEquals(actualChangeOfRep.getAdded(), expectedChangeOfRep.getAdded());
@@ -247,7 +250,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         RepresentationUpdate actualChangeOfRep = getFirstChangeElement.apply(actualData).get(0).getValue();
         RepresentationUpdate expectedChangeOfRep = getFirstChangeElement.apply(expectedCaseData).get(0).getValue();
 
-        assertEquals(actualChangeOfRep.getParty(), expectedChangeOfRep.getParty());
+        assertEquals(actualChangeOfRep.getParty().toLowerCase(), expectedChangeOfRep.getParty().toLowerCase());
         assertEquals(actualChangeOfRep.getClientName(), expectedChangeOfRep.getClientName());
         assertEquals(actualChangeOfRep.getBy(), expectedChangeOfRep.getBy());
         assertEquals(actualChangeOfRep.getAdded(), expectedChangeOfRep.getAdded());
@@ -293,7 +296,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         RepresentationUpdate actualChangeOfRep = getFirstChangeElement.apply(actualData).get(0).getValue();
         RepresentationUpdate expectedChangeOfRep = getFirstChangeElement.apply(expectedCaseData).get(0).getValue();
 
-        assertEquals(actualChangeOfRep.getParty(), expectedChangeOfRep.getParty());
+        assertEquals(actualChangeOfRep.getParty().toLowerCase(), expectedChangeOfRep.getParty().toLowerCase());
         assertEquals(actualChangeOfRep.getClientName(), expectedChangeOfRep.getClientName());
         assertEquals(actualChangeOfRep.getBy(), expectedChangeOfRep.getBy());
         assertEquals(actualChangeOfRep.getAdded(), expectedChangeOfRep.getAdded());
@@ -309,7 +312,8 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
 
     private List<Element<RepresentationUpdate>> convertToChangeOfRepresentation(Map<String, Object> data) {
         return mapper.convertValue(data.get(REPRESENTATION_UPDATE_HISTORY),
-            new TypeReference<>() {});
+            new TypeReference<>() {
+            });
     }
 
     private void setUpDefaultMockContext() throws Exception {
@@ -410,14 +414,14 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         return RepresentationUpdateHistory.builder().representationUpdateHistory(
             List.of(element(UUID.randomUUID(),
                 RepresentationUpdate.builder()
-                .party("respondent")
-                .clientName("Jane Smith")
-                .date(LocalDate.of(2020, 6, 1))
-                .added(added)
-                .removed(null)
-                .by(testRespSolicitor.getFullName())
-                .via(NOTICE_OF_CHANGE)
-                .build()))).build();
+                    .party("respondent")
+                    .clientName("Jane Smith")
+                    .date(LocalDate.of(2020, 6, 1))
+                    .added(added)
+                    .removed(null)
+                    .by(testRespSolicitor.getFullName())
+                    .via(NOTICE_OF_CHANGE)
+                    .build()))).build();
     }
 
     private RepresentationUpdateHistory getChangeOfRepsReplacingApplicant(UserDetails testAppSolicitorReplacing,
