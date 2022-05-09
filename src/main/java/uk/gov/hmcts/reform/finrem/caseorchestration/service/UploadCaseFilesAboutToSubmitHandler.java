@@ -561,11 +561,9 @@ public class UploadCaseFilesAboutToSubmitHandler {
 
     private List<ContestedUploadedDocumentData> getTrialBundleUploadedList(List<ContestedUploadedDocumentData> uploadedDocuments) {
 
-        List<ContestedUploadedDocumentData> trialBundleList = uploadedDocuments.stream()
+        return uploadedDocuments.stream()
             .filter(d -> isTrialBundle(d.getUploadedCaseDocument()))
             .collect(Collectors.toList());
-
-        return trialBundleList;
     }
 
     private boolean isTrialBundle(ContestedUploadedDocument uploadedCaseDocument) {

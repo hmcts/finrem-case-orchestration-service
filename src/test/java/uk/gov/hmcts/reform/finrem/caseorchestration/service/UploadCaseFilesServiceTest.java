@@ -67,7 +67,7 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
 
     private Map<String, Object> caseData;
 
-    private List<ContestedUploadedDocumentData> uploadDocumentList = new ArrayList<>();
+    private final List<ContestedUploadedDocumentData> uploadDocumentList = new ArrayList<>();
 
     @MockBean
     private FeatureToggleService featureToggleService;
@@ -82,7 +82,7 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
     @Test
     public void applicantCorrespondenceDocumentsFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
-        uploadDocumentList.add(createContestedUploadDocumentItem("Letter from Applicant", "applicant", "no", null, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Letter from Applicant", "applicant", "no", null));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
         uploadCaseFilesService.handle(caseData);
@@ -93,11 +93,11 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
     @Test
     public void applicantFrFormsDocumentsFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
-        uploadDocumentList.add(createContestedUploadDocumentItem("Form B", "applicant", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Applicant - Form E", "applicant", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Form F", "applicant", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Form G", "applicant", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Form H", "applicant", "no", null, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form B", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Applicant - Form E", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form F", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form G", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form H", "applicant", "no", null));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
         uploadCaseFilesService.handle(caseData);
@@ -108,20 +108,20 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
     @Test
     public void applicantEvidenceDocumentsFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
-        uploadDocumentList.add(createContestedUploadDocumentItem("Statement of Issues", "applicant", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "applicant", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Case Summary", "applicant", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Questionnaire", "applicant", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Reply to Questionnaire", "applicant", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Valuation Report", "applicant", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Pension Plan", "applicant", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Position Statement", "applicant", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Skeleton Argument", "applicant", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Expert Evidence", "applicant", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Witness Statement/Affidavit", "applicant", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Care Plan", "applicant", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Offers", "applicant", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("other", "applicant", "no", "Other Example", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Statement of Issues", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Case Summary", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Questionnaire", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Reply to Questionnaire", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Valuation Report", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Pension Plan", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Position Statement", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Skeleton Argument", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Expert Evidence", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Witness Statement/Affidavit", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Care Plan", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Offers", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("other", "applicant", "no", "Other Example"));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
         uploadCaseFilesService.handle(caseData);
@@ -132,7 +132,7 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
     @Test
     public void applicantConfidentialDocumentsFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        uploadDocumentList.add(createContestedUploadDocumentItem("Other", "applicant", "yes", "Other Example", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Other", "applicant", "yes", "Other Example"));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
         uploadCaseFilesService.handle(caseData);
@@ -143,7 +143,7 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
     @Test
     public void respondentCorrespondenceDocumentsFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
-        uploadDocumentList.add(createContestedUploadDocumentItem("Letter from Applicant", "respondent", "no", null, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Letter from Applicant", "respondent", "no", null));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
         uploadCaseFilesService.handle(caseData);
@@ -154,11 +154,11 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
     @Test
     public void respondentFrFormsDocumentsFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
-        uploadDocumentList.add(createContestedUploadDocumentItem("Form B", "respondent", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Applicant - Form E", "respondent", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Form F", "respondent", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Form G", "respondent", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Form H", "respondent", "no", null, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form B", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Applicant - Form E", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form F", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form G", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form H", "respondent", "no", null));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
         uploadCaseFilesService.handle(caseData);
@@ -169,20 +169,20 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
     @Test
     public void respondentEvidenceDocumentsFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
-        uploadDocumentList.add(createContestedUploadDocumentItem("Statement of Issues", "respondent", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "respondent", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Case Summary", "respondent", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Questionnaire", "respondent", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Reply to Questionnaire", "respondent", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Valuation Report", "respondent", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Pension Plan", "respondent", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Position Statement", "respondent", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Skeleton Argument", "respondent", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Expert Evidence", "respondent", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Witness Statement/Affidavit", "respondent", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Care Plan", "respondent", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Offers", "respondent", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("other", "respondent", "no", "Other Example", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Statement of Issues", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Case Summary", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Questionnaire", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Reply to Questionnaire", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Valuation Report", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Pension Plan", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Position Statement", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Skeleton Argument", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Expert Evidence", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Witness Statement/Affidavit", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Care Plan", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Offers", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("other", "respondent", "no", "Other Example"));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
         uploadCaseFilesService.handle(caseData);
@@ -193,7 +193,7 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
     @Test
     public void respondentConfidentialDocumentsFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        uploadDocumentList.add(createContestedUploadDocumentItem("Other", "respondent", "yes", "Other Example", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Other", "respondent", "yes", "Other Example"));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
         uploadCaseFilesService.handle(caseData);
@@ -204,7 +204,7 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
     @Test
     public void appFormEExhibitsFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        uploadDocumentList.add(createContestedUploadDocumentItem("Applicant - Form E", "applicant", "no", null, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Applicant - Form E", "applicant", "no", null));
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
@@ -216,9 +216,9 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
     @Test
     public void appChronologiesStatementsFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        uploadDocumentList.add(createContestedUploadDocumentItem("Statement of Issues", "applicant", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "applicant", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Form G", "applicant", "no", null, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Statement of Issues", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form G", "applicant", "no", null));
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
@@ -230,8 +230,8 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
     @Test
     public void appQuestionnairesAnswersFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        uploadDocumentList.add(createContestedUploadDocumentItem("Questionnaire", "applicant", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Reply to Questionnaire", "applicant", "no", null, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Questionnaire", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Reply to Questionnaire", "applicant", "no", null));
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
@@ -243,8 +243,8 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
     @Test
     public void appStatementsExhibitsFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        uploadDocumentList.add(createContestedUploadDocumentItem("Statement/Affidavit", "applicant", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Witness Statement/Affidavit", "applicant", "no", null, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Statement/Affidavit", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Witness Statement/Affidavit", "applicant", "no", null));
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
@@ -256,9 +256,9 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
     @Test
     public void appCaseSummariesFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        uploadDocumentList.add(createContestedUploadDocumentItem("Position Statement", "applicant", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Skeleton Argument", "applicant", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Case Summary", "applicant", "no", null, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Position Statement", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Skeleton Argument", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Case Summary", "applicant", "no", null));
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
@@ -270,7 +270,7 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
     @Test
     public void appFormsHFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        uploadDocumentList.add(createContestedUploadDocumentItem("Form H", "applicant", "no", null, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form H", "applicant", "no", null));
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
@@ -282,8 +282,8 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
     @Test
     public void appExpertEvidenceFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        uploadDocumentList.add(createContestedUploadDocumentItem("Valuation Report", "applicant", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Expert Evidence", "applicant", "no", null, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Valuation Report", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Expert Evidence", "applicant", "no", null));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
         uploadCaseFilesService.handle(caseData);
@@ -294,8 +294,8 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
     @Test
     public void appCorrespondenceDocsFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        uploadDocumentList.add(createContestedUploadDocumentItem("Offers", "applicant", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Letter from Applicant", "applicant", "no", null, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Offers", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Letter from Applicant", "applicant", "no", null));
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
@@ -307,11 +307,11 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
     @Test
     public void appOtherDocsFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        uploadDocumentList.add(createContestedUploadDocumentItem("other", "applicant", "no", "Other Example", null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Form B", "applicant", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Form F", "applicant", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Care Plan", "applicant", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Pension Plan", "applicant", "no", null, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("other", "applicant", "no", "Other Example"));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form B", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form F", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Care Plan", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Pension Plan", "applicant", "no", null));
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
@@ -323,7 +323,7 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
     @Test
     public void respFormEExhibitsFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        uploadDocumentList.add(createContestedUploadDocumentItem("Applicant - Form E", "respondent", "no", null, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Applicant - Form E", "respondent", "no", null));
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
@@ -335,9 +335,9 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
     @Test
     public void respChronologiesStatementsFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        uploadDocumentList.add(createContestedUploadDocumentItem("Statement of Issues", "respondent", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "respondent", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Form G", "respondent", "no", null, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Statement of Issues", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form G", "respondent", "no", null));
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
@@ -349,8 +349,8 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
     @Test
     public void respQuestionnairesAnswersFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        uploadDocumentList.add(createContestedUploadDocumentItem("Questionnaire", "respondent", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Reply to Questionnaire", "respondent", "no", null, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Questionnaire", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Reply to Questionnaire", "respondent", "no", null));
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
@@ -362,8 +362,8 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
     @Test
     public void respStatementsExhibitsFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        uploadDocumentList.add(createContestedUploadDocumentItem("Statement/Affidavit", "respondent", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Witness Statement/Affidavit", "respondent", "no", null, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Statement/Affidavit", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Witness Statement/Affidavit", "respondent", "no", null));
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
@@ -375,9 +375,9 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
     @Test
     public void respCaseSummariesFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        uploadDocumentList.add(createContestedUploadDocumentItem("Position Statement", "respondent", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Skeleton Argument", "respondent", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Case Summary", "respondent", "no", null, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Position Statement", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Skeleton Argument", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Case Summary", "respondent", "no", null));
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
@@ -389,7 +389,7 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
     @Test
     public void respFormsHFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        uploadDocumentList.add(createContestedUploadDocumentItem("Form H", "respondent", "no", null, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form H", "respondent", "no", null));
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
@@ -401,8 +401,8 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
     @Test
     public void respExpertEvidenceFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        uploadDocumentList.add(createContestedUploadDocumentItem("Valuation Report", "respondent", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Expert Evidence", "respondent", "no", null, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Valuation Report", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Expert Evidence", "respondent", "no", null));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
         uploadCaseFilesService.handle(caseData);
@@ -413,8 +413,8 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
     @Test
     public void respCorrespondenceDocsFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        uploadDocumentList.add(createContestedUploadDocumentItem("Offers", "respondent", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Letter from Applicant", "respondent", "no", null, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Offers", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Letter from Applicant", "respondent", "no", null));
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
@@ -426,11 +426,11 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
     @Test
     public void respOtherDocsFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        uploadDocumentList.add(createContestedUploadDocumentItem("other", "respondent", "no", "Other Example", null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Form B", "respondent", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Form F", "respondent", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Care Plan", "respondent", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Pension Plan", "respondent", "no", null, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("other", "respondent", "no", "Other Example"));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form B", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form F", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Care Plan", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Pension Plan", "respondent", "no", null));
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
@@ -443,10 +443,10 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
     public void documentsAreNotFilteredWithoutDocTypeOrPartySpecified() {
 
         //simulating user not uploading a document into CCD Document field
-        uploadDocumentList.add(createNullDocumentUploadItem("Form B", "applicant", "no", null, null));
+        uploadDocumentList.add(createNullDocumentUploadItem());
 
-        uploadDocumentList.add(createContestedUploadDocumentItem(null, "applicant", "yes", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Form B", null, "yes", null, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem(null, "applicant", "yes", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form B", null, "yes", null));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
         uploadCaseFilesService.handle(caseData);
@@ -457,13 +457,13 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
     @Test
     public void otherDocumentTypeIsFiltered() {
         //Valid filter to Evidence Collection
-        uploadDocumentList.add(createContestedUploadDocumentItem("other", "applicant", null, null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("other", "applicant", "no", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("other", "applicant", "no", "Other Example", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("other", "applicant", null, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("other", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("other", "applicant", "no", "Other Example"));
 
         //Valid filter to Confidential Collection
-        uploadDocumentList.add(createContestedUploadDocumentItem("other", "applicant", "yes", null, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("other", "applicant", "yes", "Other Example", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("other", "applicant", "yes", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("other", "applicant", "yes", "Other Example"));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
         uploadCaseFilesService.handle(caseData);
@@ -474,7 +474,7 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
 
     @Test
     public void documentsUploadedDoNotFilterToRespondentUnlessSelected() {
-        uploadDocumentList.add(createContestedUploadDocumentItem("Letter from Applicant", "applicant", "no", null, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Letter from Applicant", "applicant", "no", null));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
         uploadCaseFilesService.handle(caseData);
@@ -497,8 +497,8 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
     public void applicantAndRespondentConfidentialDocumentsAreNotStoredWhenToggleOff() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
 
-        uploadDocumentList.add(createContestedUploadDocumentItem("Other", "applicant", "yes", "Other Example", null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Other", "respondent", "yes", "Other Example", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Other", "applicant", "yes", "Other Example"));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Other", "respondent", "yes", "Other Example"));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
         uploadCaseFilesService.handle(caseData);
@@ -510,8 +510,8 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
     @Test
     public void givenUploadFileTrialBundleSelectedWhenAboutToSubmitThenShowTrialBundleDeprecatedErrorMessage() {
 
-        uploadDocumentList.add(createContestedUploadDocumentItem("Trial Bundle", "applicant", "yes", "Other Example", null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Other", "respondent", "yes", "Other Example", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Trial Bundle", "applicant", "yes", "Other Example"));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Other", "respondent", "yes", "Other Example"));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
         AboutToStartOrSubmitCallbackResponse response = uploadCaseFilesService.handle(caseDetails.getData());
@@ -523,8 +523,8 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
     @Test
     public void givenUploadFileWithoutTrialBundleWhenAboutToSubmitThenNoErrors() {
 
-        uploadDocumentList.add(createContestedUploadDocumentItem("Letter from Applicant", "applicant", "yes", "Other Example", null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Other", "respondent", "yes", "Other Example", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Letter from Applicant", "applicant", "yes", "Other Example"));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Other", "respondent", "yes", "Other Example"));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
         AboutToStartOrSubmitCallbackResponse response = uploadCaseFilesService.handle(caseDetails.getData());
@@ -544,8 +544,7 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
 
 
     private ContestedUploadedDocumentData createContestedUploadDocumentItem(String type, String party,
-                                                                            String isConfidential, String other,
-                                                                            String hearingDetails) {
+                                                                            String isConfidential, String other) {
 
         return ContestedUploadedDocumentData.builder()
             .uploadedCaseDocument(ContestedUploadedDocument
@@ -555,31 +554,29 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
                 .caseDocumentParty(party)
                 .caseDocumentConfidential(isConfidential)
                 .caseDocumentOther(other)
-                .hearingDetails(hearingDetails)
+                .hearingDetails(null)
                 .build())
             .build();
     }
 
-    private ContestedUploadedDocumentData createNullDocumentUploadItem(String type, String party,
-                                                                       String isConfidential, String other,
-                                                                       String hearingDetails) {
+    private ContestedUploadedDocumentData createNullDocumentUploadItem() {
 
         return ContestedUploadedDocumentData.builder()
             .uploadedCaseDocument(ContestedUploadedDocument
                 .builder()
                 .caseDocuments(null)
-                .caseDocumentType(type)
-                .caseDocumentParty(party)
-                .caseDocumentConfidential(isConfidential)
-                .caseDocumentOther(other)
-                .hearingDetails(hearingDetails)
+                .caseDocumentType("Form B")
+                .caseDocumentParty("applicant")
+                .caseDocumentConfidential("no")
+                .caseDocumentOther(null)
+                .hearingDetails(null)
                 .build())
             .build();
     }
 
     private List<ContestedUploadedDocumentData> getDocumentCollection(Map<String, Object> data, String field) {
         return mapper.convertValue(data.get(field),
-            new TypeReference<List<ContestedUploadedDocumentData>>() {
+            new TypeReference<>() {
             });
     }
 }
