@@ -76,7 +76,7 @@
               "added": {
                 "name": "Test Applicant Solicitor",
                 "email": "appsolicitor1@yahoo.com",
-                "Organisation": {
+                "organisation": {
                   "OrganisationID": "A31PTVU",
                   "OrganisationName": "FRApplicantSolicitorFirm2"
                 }
@@ -84,7 +84,7 @@
               "removed": {
                 "name": "Sir Solicitor",
                 "email": "sirsolicitor1@gmail.com",
-                "Organisation": {
+                "organisation": {
                   "OrganisationID": "A31PTVA",
                   "OrganisationName": "FRApplicantSolicitorFirm"
                 }
