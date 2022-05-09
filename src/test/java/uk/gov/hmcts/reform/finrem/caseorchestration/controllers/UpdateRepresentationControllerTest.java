@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateRepresentationService;
 
 import java.io.File;
@@ -48,8 +49,15 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
     @MockBean
     private AssignCaseAccessService assignCaseAccessService;
 
+    @MockBean
+    private FeatureToggleService featureToggleService;
+
     protected String updateEndpoint() {
         return "/case-orchestration/apply-noc-decision";
+    }
+
+    protected String setDefaultsEndpoint() {
+        return "/case-orchestration/set-update-defaults";
     }
 
     String beforeFixture() {
@@ -146,5 +154,33 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    public void givenCaseworkerNocEnabled_whenSettingDefaults_thenNullifyFields() throws Exception {
+        doRequestSetUp();
+        when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(true);
+
+        mvc.perform(post(setDefaultsEndpoint())
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.updateIncludesRepresentativeChange", is(emptyOrNullString())))
+            .andExpect(jsonPath("$.data.nocParty", is(emptyOrNullString())));
+    }
+
+    @Test
+    public void givenCaseWorkerNocNotEnabled_whenSettingDefaults_thenDoNothing() throws Exception {
+        doRequestSetUp();
+        when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(false);
+
+        mvc.perform(post(setDefaultsEndpoint())
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.updateIncludesRepresentativeChange", is("Yes")))
+            .andExpect(jsonPath("$.data.nocParty", is("applicant")));
     }
 }
