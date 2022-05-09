@@ -659,6 +659,9 @@ public class NotificationsController implements BaseController {
     }
 
     private boolean requiresNotifications(CallbackRequest callbackRequest) {
+        if (!featureToggleService.isCaseworkerNoCEnabled()) {
+            return false;
+        }
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
 
         return Optional.ofNullable(caseData.get(INCLUDES_REPRESENTATIVE_UPDATE))
