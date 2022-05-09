@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CONFIDENTIAL_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CORRESPONDENCE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_EVIDENCE_COLLECTION;
@@ -540,19 +541,31 @@ public class UploadCaseFilesAboutToSubmitHandler {
 
     public AboutToStartOrSubmitCallbackResponse handle(Map<String, Object> caseData) {
 
-        AboutToStartOrSubmitCallbackResponse response = AboutToStartOrSubmitCallbackResponse
-            .builder()
-            .errors(new ArrayList<>())
-            .build();
+        AboutToStartOrSubmitCallbackResponse response = getCallBackResponse(caseData);
 
-        if (isTrialBundleSelectedInAnyUploadedFile(caseData)) {
-            response.getErrors().add(TRIAL_BUNDLE_SELECTED_ERROR);
+        setWarningsAndErrors(caseData, response);
+        if (isNotEmpty(response.getErrors())) {
             return response;
         }
 
         setUploadedDocumentsToCollections(caseData);
         response.setData(caseData);
         return response;
+    }
+
+    private void setWarningsAndErrors(Map<String, Object> caseData, AboutToStartOrSubmitCallbackResponse response) {
+        if (isTrialBundleSelectedInAnyUploadedFile(caseData)) {
+            response.getErrors().add(TRIAL_BUNDLE_SELECTED_ERROR);
+        }
+    }
+
+    private AboutToStartOrSubmitCallbackResponse getCallBackResponse(Map<String, Object> caseData) {
+        return AboutToStartOrSubmitCallbackResponse
+            .builder()
+            .data(caseData)
+            .errors(new ArrayList<>())
+            .warnings(new ArrayList<>())
+            .build();
     }
 
     private boolean isTrialBundleSelectedInAnyUploadedFile(Map<String, Object> caseData) {
