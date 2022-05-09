@@ -23,6 +23,7 @@ public class GeneralApplicationDirectionsControllerTest extends BaseControllerTe
 
     private static final String SUBMIT_GENERAL_APPLICATION_URL = "/case-orchestration/submit-general-application-directions";
     private static final String START_GENERAL_APPLICATION_URL = "/case-orchestration/start-general-application-directions";
+    private static final String INTERIM_HEARING_URL = "/case-orchestration/submit-for-interim-hearing";
 
     @MockBean
     private GeneralApplicationDirectionsService generalApplicationDirectionsService;
@@ -93,5 +94,16 @@ public class GeneralApplicationDirectionsControllerTest extends BaseControllerTe
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    public void submitInterimHearing() throws Exception {
+        mvc.perform(post(INTERIM_HEARING_URL)
+                .content(resourceContentAsString("/fixtures/general-application.json"))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verify(generalApplicationDirectionsService, times(1)).submitInterimHearing(isA(CaseDetails.class), eq(AUTH_TOKEN));
     }
 }

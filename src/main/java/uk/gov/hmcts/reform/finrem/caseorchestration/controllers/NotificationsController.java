@@ -583,4 +583,30 @@ public class NotificationsController implements BaseController {
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
+
+    @PostMapping(value = "/prepare-for-interim-hearing", consumes = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "send general application refer to judge email")
+    @ApiResponses(value = {
+        @ApiResponse(code = 204, message = "General application refer to judge email sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendInterimHearingNotification(
+        @RequestBody CallbackRequest callbackRequest) {
+        log.info("Received request to send general application refer to judge email for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        validateCaseData(callbackRequest);
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        Map<String, Object> caseData = caseDetails.getData();
+
+        if (!caseDataService.isPaperApplication(caseData)) {
+            if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
+                log.info("Sending email notification to Applicant Solicitor about interim hearing");
+                notificationService.sendInterimNotificationEmailToApplicantSolicitor(caseDetails);
+            }
+            if (notificationService.shouldEmailRespondentSolicitor(caseData)) {
+                log.info("Sending email notification to Respondent Solicitor about interim hearing");
+                notificationService.sendInterimNotificationEmailToRespondentSolicitor(caseDetails);
+            }
+        }
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+    }
 }
