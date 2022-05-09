@@ -554,7 +554,8 @@ public class UploadCaseFilesAboutToSubmitHandler {
     }
 
     private void setWarningsAndErrors(Map<String, Object> caseData, AboutToStartOrSubmitCallbackResponse response) {
-        if (isTrialBundleSelectedInAnyUploadedFile(caseData)) {
+        if (featureToggleService.isManageBundleEnabled()
+            && isTrialBundleSelectedInAnyUploadedFile(caseData)) {
             response.getErrors().add(TRIAL_BUNDLE_SELECTED_ERROR);
         }
     }

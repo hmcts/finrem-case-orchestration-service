@@ -11,7 +11,9 @@ public enum Features {
     ASSIGN_CASE_ACCESS("assign_case_access"),
     SEND_TO_FRC("send_to_frc"),
     PAYMENT_REQUEST_USING_CASE_TYPE("pba_case_type"),
-    USE_USER_TOKEN("use_user_token");
+    USE_USER_TOKEN("use_user_token"),
+
+    MANAGE_BUNDLE("manage_bundle");
 
     private final String name;
 }

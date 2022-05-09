@@ -27,12 +27,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CORRESPONDENCE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_EVIDENCE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FR_FORM_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_TRIAL_BUNDLE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_CASE_SUMMARIES_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_CHRONOLOGIES_STATEMENTS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_CORRESPONDENCE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_EXPERT_EVIDENCE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_FORMS_H_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_FORM_E_EXHIBITS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_HEARING_BUNDLES_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_OTHER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_QUESTIONNAIRES_ANSWERS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_STATEMENTS_EXHIBITS_COLLECTION;
@@ -41,6 +43,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_CORRESPONDENCE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_EVIDENCE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_FR_FORM_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_TRIAL_BUNDLE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_CASE_SUMMARIES_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_CORRESPONDENCE_COLLECTION;
@@ -52,7 +55,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_QUESTIONNAIRES_ANSWERS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_STATEMENTS_EXHIBITS_COLLECTION;
 
-public class UploadCaseFilesServiceTest extends BaseServiceTest {
+public class UploadCaseFilesAboutToSubmitHandlerTest extends BaseServiceTest {
 
     public static final String TRIAL_BUNDLE_SELECTED_DESIRED_ERROR =
         "To upload a hearing bundle please use the Manage hearing bundles event which can be found on the "
@@ -74,6 +77,7 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
 
     @Before
     public void setUp() {
+        when(featureToggleService.isManageBundleEnabled()).thenReturn(false);
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         caseDetails = buildCaseDetails();
         caseData = caseDetails.getData();
@@ -127,6 +131,17 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
         uploadCaseFilesService.handle(caseData);
 
         assertThat(getDocumentCollection(caseData, APPLICANT_EVIDENCE_COLLECTION), hasSize(14));
+    }
+
+    @Test
+    public void applicantTrialBundleDocumentsFiltered() {
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
+        uploadDocumentList.add(createContestedUploadDocumentItem("Trial Bundle", "applicant", "no", null));
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+
+        uploadCaseFilesService.handle(caseData);
+
+        assertThat(getDocumentCollection(caseData, APPLICANT_TRIAL_BUNDLE_COLLECTION), hasSize(1));
     }
 
     @Test
@@ -191,6 +206,17 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void respondentTrialBundleDocumentsFiltered() {
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
+        uploadDocumentList.add(createContestedUploadDocumentItem("Trial Bundle", "respondent", "no", null));
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+
+        uploadCaseFilesService.handle(caseData);
+
+        assertThat(getDocumentCollection(caseData, RESPONDENT_TRIAL_BUNDLE_COLLECTION), hasSize(1));
+    }
+
+    @Test
     public void respondentConfidentialDocumentsFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         uploadDocumentList.add(createContestedUploadDocumentItem("Other", "respondent", "yes", "Other Example"));
@@ -199,6 +225,18 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
         uploadCaseFilesService.handle(caseData);
 
         assertThat(getDocumentCollection(caseData, RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION), hasSize(1));
+    }
+
+    @Test
+    public void appHearingBundlesFiltered() {
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
+        uploadDocumentList.add(createContestedUploadDocumentItem("Trial Bundle", "applicant", "no", null));
+
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+
+        uploadCaseFilesService.handle(caseData);
+
+        assertThat(getDocumentCollection(caseData, APP_HEARING_BUNDLES_COLLECTION), hasSize(1));
     }
 
     @Test
@@ -318,6 +356,18 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
         uploadCaseFilesService.handle(caseData);
 
         assertThat(getDocumentCollection(caseData, APP_OTHER_COLLECTION), hasSize(5));
+    }
+
+    @Test
+    public void respHearingBundlesFiltered() {
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
+        uploadDocumentList.add(createContestedUploadDocumentItem("Trial Bundle", "respondent", "no", null));
+
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+
+        uploadCaseFilesService.handle(caseData);
+
+        assertThat(getDocumentCollection(caseData, RESP_HEARING_BUNDLES_COLLECTION), hasSize(1));
     }
 
     @Test
@@ -509,6 +559,7 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
 
     @Test
     public void givenUploadFileTrialBundleSelectedWhenAboutToSubmitThenShowTrialBundleDeprecatedErrorMessage() {
+        when(featureToggleService.isManageBundleEnabled()).thenReturn(true);
 
         uploadDocumentList.add(createContestedUploadDocumentItem("Trial Bundle", "applicant", "yes", "Other Example"));
         uploadDocumentList.add(createContestedUploadDocumentItem("Other", "respondent", "yes", "Other Example"));
@@ -522,6 +573,7 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
 
     @Test
     public void givenUploadFileWithoutTrialBundleWhenAboutToSubmitThenNoErrors() {
+        when(featureToggleService.isManageBundleEnabled()).thenReturn(true);
 
         uploadDocumentList.add(createContestedUploadDocumentItem("Letter from Applicant", "applicant", "yes", "Other Example"));
         uploadDocumentList.add(createContestedUploadDocumentItem("Other", "respondent", "yes", "Other Example"));
@@ -534,6 +586,7 @@ public class UploadCaseFilesServiceTest extends BaseServiceTest {
 
     @Test
     public void givenNoUploadFileWhenAboutToSubmitThenNoErrors() {
+        when(featureToggleService.isManageBundleEnabled()).thenReturn(true);
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, null);
 

@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.ASSIGN_CASE_ACCESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.MANAGE_BUNDLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.PAYMENT_REQUEST_USING_CASE_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.RESPONDENT_JOURNEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_TO_FRC;
@@ -45,6 +46,14 @@ public class FeatureToggleService {
         return Optional.ofNullable(toggle.get(feature.getName()))
             .map(Boolean::parseBoolean)
             .orElse(false);
+    }
+
+    /*
+     * DFR-909
+     * DFR-908
+     */
+    public boolean isManageBundleEnabled() {
+        return isFeatureEnabled(MANAGE_BUNDLE);
     }
 
     /*
