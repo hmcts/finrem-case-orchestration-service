@@ -124,10 +124,10 @@ public class ContestedOrderControllerTest extends BaseControllerTest {
                 is("2022-08-20")))
             .andExpect(jsonPath("$.data.hearingUploadBundle[1].value.hearingBundleDocuments[0]"
                     + ".value.bundleDocuments.document_filename",
-                is("InterimHearingNotice-1649341720076259.pdf")))
+                is("NocLitigantSolicitorAddedLetter.pdf")))
             .andExpect(jsonPath("$.data.hearingUploadBundle[1].value.hearingBundleDocuments[1]"
                     + ".value.bundleDocuments.document_filename",
-                is("NocLitigantSolicitorAddedLetter.pdf")))
+                is("InterimHearingNotice-1649341720076259.pdf")))
             .andExpect(jsonPath("$.data.hearingUploadBundle[1].id",
                 is("d090f7a0-5897-4577-a07f-2137483cb1f9")));
     }

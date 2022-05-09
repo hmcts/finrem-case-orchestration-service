@@ -26,7 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedCaseOrderSe
 
 import javax.validation.constraints.NotNull;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -132,7 +132,7 @@ public class ContestedOrderController implements BaseController {
                              .map(hdi -> HearingUploadBundle.builder().id(hdi.getId())
                                  .value(HearingBundleItems.builder().bundleDocuments(hdi.getValue().getBundleDocuments())
                                      .bundleUploadDate(hdi.getValue().getBundleUploadDate() == null
-                                         ? LocalDate.now() : hdi.getValue().getBundleUploadDate())
+                                         ? LocalDateTime.now() : hdi.getValue().getBundleUploadDate())
                                      .build()).build())
                                  .sorted(Comparator.nullsLast((e1, e2) -> e2.getValue().getBundleUploadDate()
                                     .compareTo(e1.getValue().getBundleUploadDate()))).collect(Collectors.toList()))
