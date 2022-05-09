@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -17,22 +18,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CONFIDENTIAL_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CORRESPONDENCE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_EVIDENCE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FR_FORM_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_TRIAL_BUNDLE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_CASE_SUMMARIES_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_CHRONOLOGIES_STATEMENTS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_CORRESPONDENCE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_EXPERT_EVIDENCE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_FORMS_H_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_FORM_E_EXHIBITS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_HEARING_BUNDLES_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_OTHER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_QUESTIONNAIRES_ANSWERS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_STATEMENTS_EXHIBITS_COLLECTION;
@@ -41,7 +41,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_CORRESPONDENCE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_EVIDENCE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_FR_FORM_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_TRIAL_BUNDLE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_CASE_SUMMARIES_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_CORRESPONDENCE_COLLECTION;
@@ -53,10 +52,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_QUESTIONNAIRES_ANSWERS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_STATEMENTS_EXHIBITS_COLLECTION;
 
-public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
+public class UploadCaseFilesServiceTest extends BaseServiceTest {
 
+    public static final String TRIAL_BUNDLE_SELECTED_DESIRED_ERROR =
+        "To upload a hearing bundle please use the Manage hearing bundles event which can be found on the "
+            + "drop-down list on the home page";
     @Autowired
-    private UploadContestedCaseDocumentsService service;
+    private UploadCaseFilesAboutToSubmitHandler uploadCaseFilesService;
 
     @Autowired
     private ObjectMapper mapper;
@@ -83,7 +85,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
         uploadDocumentList.add(createContestedUploadDocumentItem("Letter from Applicant", "applicant", "no", null, null));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        service.setUploadedDocumentsToCollections(caseData);
+        uploadCaseFilesService.handle(caseData);
 
         assertThat(getDocumentCollection(caseData, APPLICANT_CORRESPONDENCE_COLLECTION), hasSize(1));
     }
@@ -98,7 +100,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
         uploadDocumentList.add(createContestedUploadDocumentItem("Form H", "applicant", "no", null, null));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        service.setUploadedDocumentsToCollections(caseData);
+        uploadCaseFilesService.handle(caseData);
 
         assertThat(getDocumentCollection(caseData, APPLICANT_FR_FORM_COLLECTION), hasSize(5));
     }
@@ -122,20 +124,9 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
         uploadDocumentList.add(createContestedUploadDocumentItem("other", "applicant", "no", "Other Example", null));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        service.setUploadedDocumentsToCollections(caseData);
+        uploadCaseFilesService.handle(caseData);
 
         assertThat(getDocumentCollection(caseData, APPLICANT_EVIDENCE_COLLECTION), hasSize(14));
-    }
-
-    @Test
-    public void applicantTrialBundleDocumentsFiltered() {
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
-        uploadDocumentList.add(createContestedUploadDocumentItem("Trial Bundle", "applicant", "no", null, null));
-        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
-
-        service.setUploadedDocumentsToCollections(caseData);
-
-        assertThat(getDocumentCollection(caseData, APPLICANT_TRIAL_BUNDLE_COLLECTION), hasSize(1));
     }
 
     @Test
@@ -144,7 +135,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
         uploadDocumentList.add(createContestedUploadDocumentItem("Other", "applicant", "yes", "Other Example", null));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        service.setUploadedDocumentsToCollections(caseData);
+        uploadCaseFilesService.handle(caseData);
 
         assertThat(getDocumentCollection(caseData, APPLICANT_CONFIDENTIAL_DOCS_COLLECTION), hasSize(1));
     }
@@ -155,7 +146,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
         uploadDocumentList.add(createContestedUploadDocumentItem("Letter from Applicant", "respondent", "no", null, null));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        service.setUploadedDocumentsToCollections(caseData);
+        uploadCaseFilesService.handle(caseData);
 
         assertThat(getDocumentCollection(caseData, RESPONDENT_CORRESPONDENCE_COLLECTION), hasSize(1));
     }
@@ -170,7 +161,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
         uploadDocumentList.add(createContestedUploadDocumentItem("Form H", "respondent", "no", null, null));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        service.setUploadedDocumentsToCollections(caseData);
+        uploadCaseFilesService.handle(caseData);
 
         assertThat(getDocumentCollection(caseData, RESPONDENT_FR_FORM_COLLECTION), hasSize(5));
     }
@@ -194,20 +185,9 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
         uploadDocumentList.add(createContestedUploadDocumentItem("other", "respondent", "no", "Other Example", null));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        service.setUploadedDocumentsToCollections(caseData);
+        uploadCaseFilesService.handle(caseData);
 
         assertThat(getDocumentCollection(caseData, RESPONDENT_EVIDENCE_COLLECTION), hasSize(14));
-    }
-
-    @Test
-    public void respondentTrialBundleDocumentsFiltered() {
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
-        uploadDocumentList.add(createContestedUploadDocumentItem("Trial Bundle", "respondent", "no", null, null));
-        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
-
-        service.setUploadedDocumentsToCollections(caseData);
-
-        assertThat(getDocumentCollection(caseData, RESPONDENT_TRIAL_BUNDLE_COLLECTION), hasSize(1));
     }
 
     @Test
@@ -216,21 +196,9 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
         uploadDocumentList.add(createContestedUploadDocumentItem("Other", "respondent", "yes", "Other Example", null));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        service.setUploadedDocumentsToCollections(caseData);
+        uploadCaseFilesService.handle(caseData);
 
         assertThat(getDocumentCollection(caseData, RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION), hasSize(1));
-    }
-
-    @Test
-    public void appHearingBundlesFiltered() {
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        uploadDocumentList.add(createContestedUploadDocumentItem("Trial Bundle", "applicant", "no", null, null));
-
-        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
-
-        service.setUploadedDocumentsToCollections(caseData);
-
-        assertThat(getDocumentCollection(caseData, APP_HEARING_BUNDLES_COLLECTION), hasSize(1));
     }
 
     @Test
@@ -240,7 +208,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        service.setUploadedDocumentsToCollections(caseData);
+        uploadCaseFilesService.handle(caseData);
 
         assertThat(getDocumentCollection(caseData, APP_FORM_E_EXHIBITS_COLLECTION), hasSize(1));
     }
@@ -254,7 +222,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        service.setUploadedDocumentsToCollections(caseData);
+        uploadCaseFilesService.handle(caseData);
 
         assertThat(getDocumentCollection(caseData, APP_CHRONOLOGIES_STATEMENTS_COLLECTION), hasSize(3));
     }
@@ -267,7 +235,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        service.setUploadedDocumentsToCollections(caseData);
+        uploadCaseFilesService.handle(caseData);
 
         assertThat(getDocumentCollection(caseData, APP_QUESTIONNAIRES_ANSWERS_COLLECTION), hasSize(2));
     }
@@ -280,7 +248,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        service.setUploadedDocumentsToCollections(caseData);
+        uploadCaseFilesService.handle(caseData);
 
         assertThat(getDocumentCollection(caseData, APP_STATEMENTS_EXHIBITS_COLLECTION), hasSize(2));
     }
@@ -294,7 +262,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        service.setUploadedDocumentsToCollections(caseData);
+        uploadCaseFilesService.handle(caseData);
 
         assertThat(getDocumentCollection(caseData, APP_CASE_SUMMARIES_COLLECTION), hasSize(3));
     }
@@ -306,7 +274,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        service.setUploadedDocumentsToCollections(caseData);
+        uploadCaseFilesService.handle(caseData);
 
         assertThat(getDocumentCollection(caseData, APP_FORMS_H_COLLECTION), hasSize(1));
     }
@@ -318,7 +286,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
         uploadDocumentList.add(createContestedUploadDocumentItem("Expert Evidence", "applicant", "no", null, null));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        service.setUploadedDocumentsToCollections(caseData);
+        uploadCaseFilesService.handle(caseData);
 
         assertThat(getDocumentCollection(caseData, APP_EXPERT_EVIDENCE_COLLECTION), hasSize(2));
     }
@@ -331,7 +299,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        service.setUploadedDocumentsToCollections(caseData);
+        uploadCaseFilesService.handle(caseData);
 
         assertThat(getDocumentCollection(caseData, APP_CORRESPONDENCE_COLLECTION), hasSize(2));
     }
@@ -347,21 +315,9 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        service.setUploadedDocumentsToCollections(caseData);
+        uploadCaseFilesService.handle(caseData);
 
         assertThat(getDocumentCollection(caseData, APP_OTHER_COLLECTION), hasSize(5));
-    }
-
-    @Test
-    public void respHearingBundlesFiltered() {
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        uploadDocumentList.add(createContestedUploadDocumentItem("Trial Bundle", "respondent", "no", null, null));
-
-        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
-
-        service.setUploadedDocumentsToCollections(caseData);
-
-        assertThat(getDocumentCollection(caseData, RESP_HEARING_BUNDLES_COLLECTION), hasSize(1));
     }
 
     @Test
@@ -371,7 +327,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        service.setUploadedDocumentsToCollections(caseData);
+        uploadCaseFilesService.handle(caseData);
 
         assertThat(getDocumentCollection(caseData, RESP_FORM_E_EXHIBITS_COLLECTION), hasSize(1));
     }
@@ -385,7 +341,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        service.setUploadedDocumentsToCollections(caseData);
+        uploadCaseFilesService.handle(caseData);
 
         assertThat(getDocumentCollection(caseData, RESP_CHRONOLOGIES_STATEMENTS_COLLECTION), hasSize(3));
     }
@@ -398,7 +354,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        service.setUploadedDocumentsToCollections(caseData);
+        uploadCaseFilesService.handle(caseData);
 
         assertThat(getDocumentCollection(caseData, RESP_QUESTIONNAIRES_ANSWERS_COLLECTION), hasSize(2));
     }
@@ -411,7 +367,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        service.setUploadedDocumentsToCollections(caseData);
+        uploadCaseFilesService.handle(caseData);
 
         assertThat(getDocumentCollection(caseData, RESP_STATEMENTS_EXHIBITS_COLLECTION), hasSize(2));
     }
@@ -425,7 +381,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        service.setUploadedDocumentsToCollections(caseData);
+        uploadCaseFilesService.handle(caseData);
 
         assertThat(getDocumentCollection(caseData, RESP_CASE_SUMMARIES_COLLECTION), hasSize(3));
     }
@@ -437,7 +393,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        service.setUploadedDocumentsToCollections(caseData);
+        uploadCaseFilesService.handle(caseData);
 
         assertThat(getDocumentCollection(caseData, RESP_FORM_H_COLLECTION), hasSize(1));
     }
@@ -449,7 +405,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
         uploadDocumentList.add(createContestedUploadDocumentItem("Expert Evidence", "respondent", "no", null, null));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        service.setUploadedDocumentsToCollections(caseData);
+        uploadCaseFilesService.handle(caseData);
 
         assertThat(getDocumentCollection(caseData, RESP_EXPERT_EVIDENCE_COLLECTION), hasSize(2));
     }
@@ -462,7 +418,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        service.setUploadedDocumentsToCollections(caseData);
+        uploadCaseFilesService.handle(caseData);
 
         assertThat(getDocumentCollection(caseData, RESP_CORRESPONDENCE_COLLECTION), hasSize(2));
     }
@@ -471,14 +427,14 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
     public void respOtherDocsFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         uploadDocumentList.add(createContestedUploadDocumentItem("other", "respondent", "no", "Other Example", null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Form B", "respondent", "no", null,  null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Form F", "respondent", "no", null,  null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Care Plan", "respondent", "no", null,  null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Pension Plan", "respondent", "no", null,  null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form B", "respondent", "no", null, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form F", "respondent", "no", null, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Care Plan", "respondent", "no", null, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Pension Plan", "respondent", "no", null, null));
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        service.setUploadedDocumentsToCollections(caseData);
+        uploadCaseFilesService.handle(caseData);
 
         assertThat(getDocumentCollection(caseData, RESP_OTHER_COLLECTION), hasSize(5));
     }
@@ -493,7 +449,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
         uploadDocumentList.add(createContestedUploadDocumentItem("Form B", null, "yes", null, null));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        service.setUploadedDocumentsToCollections(caseData);
+        uploadCaseFilesService.handle(caseData);
 
         assertThat(getDocumentCollection(caseData, CONTESTED_UPLOADED_DOCUMENTS), hasSize(3));
     }
@@ -510,7 +466,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
         uploadDocumentList.add(createContestedUploadDocumentItem("other", "applicant", "yes", "Other Example", null));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        service.setUploadedDocumentsToCollections(caseData);
+        uploadCaseFilesService.handle(caseData);
 
         assertThat(getDocumentCollection(caseData, APP_OTHER_COLLECTION), hasSize(3));
         assertThat(getDocumentCollection(caseData, APPLICANT_CONFIDENTIAL_DOCS_COLLECTION), hasSize(2));
@@ -521,7 +477,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
         uploadDocumentList.add(createContestedUploadDocumentItem("Letter from Applicant", "applicant", "no", null, null));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        service.setUploadedDocumentsToCollections(caseData);
+        uploadCaseFilesService.handle(caseData);
 
         assertThat(getDocumentCollection(caseData, APP_CORRESPONDENCE_COLLECTION), hasSize(1));
 
@@ -545,15 +501,45 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
         uploadDocumentList.add(createContestedUploadDocumentItem("Other", "respondent", "yes", "Other Example", null));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        service.setUploadedDocumentsToCollections(caseData);
+        uploadCaseFilesService.handle(caseData);
 
         assertNull(getDocumentCollection(caseData, APPLICANT_CONFIDENTIAL_DOCS_COLLECTION));
         assertNull(getDocumentCollection(caseData, RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION));
     }
 
     @Test
-    public void givenUploadTrialBundleFileWhenFilterDocumentsToRelevantPartyThenThrowDeprecatedTypeError(){
+    public void givenUploadFileTrialBundleSelectedWhenAboutToSubmitThenShowTrialBundleDeprecatedErrorMessage() {
 
+        uploadDocumentList.add(createContestedUploadDocumentItem("Trial Bundle", "applicant", "yes", "Other Example", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Other", "respondent", "yes", "Other Example", null));
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+
+        AboutToStartOrSubmitCallbackResponse response = uploadCaseFilesService.handle(caseDetails.getData());
+
+        assertThat(response.getErrors().size(), is(1));
+        assertThat(response.getErrors().iterator().next(), is(TRIAL_BUNDLE_SELECTED_DESIRED_ERROR));
+    }
+
+    @Test
+    public void givenUploadFileWithoutTrialBundleWhenAboutToSubmitThenNoErrors() {
+
+        uploadDocumentList.add(createContestedUploadDocumentItem("Letter from Applicant", "applicant", "yes", "Other Example", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Other", "respondent", "yes", "Other Example", null));
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+
+        AboutToStartOrSubmitCallbackResponse response = uploadCaseFilesService.handle(caseDetails.getData());
+
+        assertThat(response.getErrors().size(), is(0));
+    }
+
+    @Test
+    public void givenNoUploadFileWhenAboutToSubmitThenNoErrors() {
+
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, null);
+
+        AboutToStartOrSubmitCallbackResponse response = uploadCaseFilesService.handle(caseDetails.getData());
+
+        assertThat(response.getErrors().size(), is(0));
     }
 
 
@@ -562,16 +548,16 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
                                                                             String hearingDetails) {
 
         return ContestedUploadedDocumentData.builder()
-                .uploadedCaseDocument(ContestedUploadedDocument
-                    .builder()
-                    .caseDocuments(new CaseDocument())
-                    .caseDocumentType(type)
-                    .caseDocumentParty(party)
-                    .caseDocumentConfidential(isConfidential)
-                    .caseDocumentOther(other)
-                    .hearingDetails(hearingDetails)
-                    .build())
-                .build();
+            .uploadedCaseDocument(ContestedUploadedDocument
+                .builder()
+                .caseDocuments(new CaseDocument())
+                .caseDocumentType(type)
+                .caseDocumentParty(party)
+                .caseDocumentConfidential(isConfidential)
+                .caseDocumentOther(other)
+                .hearingDetails(hearingDetails)
+                .build())
+            .build();
     }
 
     private ContestedUploadedDocumentData createNullDocumentUploadItem(String type, String party,
@@ -579,16 +565,16 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
                                                                        String hearingDetails) {
 
         return ContestedUploadedDocumentData.builder()
-                .uploadedCaseDocument(ContestedUploadedDocument
-                    .builder()
-                    .caseDocuments(null)
-                    .caseDocumentType(type)
-                    .caseDocumentParty(party)
-                    .caseDocumentConfidential(isConfidential)
-                    .caseDocumentOther(other)
-                    .hearingDetails(hearingDetails)
-                    .build())
-                .build();
+            .uploadedCaseDocument(ContestedUploadedDocument
+                .builder()
+                .caseDocuments(null)
+                .caseDocumentType(type)
+                .caseDocumentParty(party)
+                .caseDocumentConfidential(isConfidential)
+                .caseDocumentOther(other)
+                .hearingDetails(hearingDetails)
+                .build())
+            .build();
     }
 
     private List<ContestedUploadedDocumentData> getDocumentCollection(Map<String, Object> data, String field) {

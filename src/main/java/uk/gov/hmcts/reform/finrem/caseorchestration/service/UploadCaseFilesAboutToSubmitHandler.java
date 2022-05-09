@@ -6,11 +6,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CONFIDENTIAL_DOCS_COLLECTION;
@@ -49,15 +52,20 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UploadContestedCaseDocumentsService {
+public class UploadCaseFilesAboutToSubmitHandler {
+
+    public static final String TRIAL_BUNDLE_SELECTED_ERROR =
+        "To upload a hearing bundle please use the Manage hearing "
+            + "bundles event which can be found on the drop-down list on the home page";
 
     private static final String APPLICANT = "applicant";
     private static final String RESPONDENT = "respondent";
+    public static final String TRIAL_BUNDLE_TYPE = "Trial Bundle";
 
     private final ObjectMapper mapper;
     private final FeatureToggleService featureToggleService;
 
-    public void setUploadedDocumentsToCollections(Map<String, Object> caseData) {
+    private void setUploadedDocumentsToCollections(Map<String, Object> caseData) {
 
         boolean respondentJourneyEnabled = featureToggleService.isRespondentJourneyEnabled();
         log.info("Respondent Solicitor Journey toggle is: {}", respondentJourneyEnabled);
@@ -108,7 +116,8 @@ public class UploadContestedCaseDocumentsService {
             return new ArrayList<>();
         }
 
-        return mapper.convertValue(caseData.get(collection), new TypeReference<>() {});
+        return mapper.convertValue(caseData.get(collection), new TypeReference<>() {
+        });
     }
 
     private boolean isTypeValidForCorrespondence(String caseDocumentType) {
@@ -310,9 +319,9 @@ public class UploadContestedCaseDocumentsService {
     }
 
     private void filterHearingBundles(List<ContestedUploadedDocumentData> uploadedDocuments,
-                        Map<String, Object> caseData,
-                        String collection,
-                        String party) {
+                                      Map<String, Object> caseData,
+                                      String collection,
+                                      String party) {
         List<ContestedUploadedDocumentData> hearingBundlesFiltered = uploadedDocuments.stream()
             .filter(d -> d.getUploadedCaseDocument().getCaseDocuments() != null
                 && d.getUploadedCaseDocument().getCaseDocumentParty() != null
@@ -332,9 +341,9 @@ public class UploadContestedCaseDocumentsService {
     }
 
     private void filterFormEExhibits(List<ContestedUploadedDocumentData> uploadedDocuments,
-                        Map<String, Object> caseData,
-                        String collection,
-                        String party) {
+                                     Map<String, Object> caseData,
+                                     String collection,
+                                     String party) {
         List<ContestedUploadedDocumentData> formEExhibitsFiltered = uploadedDocuments.stream()
             .filter(d -> d.getUploadedCaseDocument().getCaseDocuments() != null
                 && d.getUploadedCaseDocument().getCaseDocumentParty() != null
@@ -354,9 +363,9 @@ public class UploadContestedCaseDocumentsService {
     }
 
     private void filterChronologiesStatements(List<ContestedUploadedDocumentData> uploadedDocuments,
-                        Map<String, Object> caseData,
-                        String collection,
-                        String party) {
+                                              Map<String, Object> caseData,
+                                              String collection,
+                                              String party) {
         List<ContestedUploadedDocumentData> chronologiesStatementsFiltered = uploadedDocuments.stream()
             .filter(d -> d.getUploadedCaseDocument().getCaseDocuments() != null
                 && d.getUploadedCaseDocument().getCaseDocumentParty() != null
@@ -376,9 +385,9 @@ public class UploadContestedCaseDocumentsService {
     }
 
     private void filterQuestionnairesAnswers(List<ContestedUploadedDocumentData> uploadedDocuments,
-                        Map<String, Object> caseData,
-                        String collection,
-                        String party) {
+                                             Map<String, Object> caseData,
+                                             String collection,
+                                             String party) {
         List<ContestedUploadedDocumentData> questionnairesAnswersFiltered = uploadedDocuments.stream()
             .filter(d -> d.getUploadedCaseDocument().getCaseDocuments() != null
                 && d.getUploadedCaseDocument().getCaseDocumentParty() != null
@@ -398,9 +407,9 @@ public class UploadContestedCaseDocumentsService {
     }
 
     private void filterStatementsExhibits(List<ContestedUploadedDocumentData> uploadedDocuments,
-                        Map<String, Object> caseData,
-                        String collection,
-                        String party) {
+                                          Map<String, Object> caseData,
+                                          String collection,
+                                          String party) {
         List<ContestedUploadedDocumentData> statementsExhibitsFiltered = uploadedDocuments.stream()
             .filter(d -> d.getUploadedCaseDocument().getCaseDocuments() != null
                 && d.getUploadedCaseDocument().getCaseDocumentParty() != null
@@ -420,9 +429,9 @@ public class UploadContestedCaseDocumentsService {
     }
 
     private void filterCaseSummaries(List<ContestedUploadedDocumentData> uploadedDocuments,
-                        Map<String, Object> caseData,
-                        String collection,
-                        String party) {
+                                     Map<String, Object> caseData,
+                                     String collection,
+                                     String party) {
         List<ContestedUploadedDocumentData> caseSummariesFiltered = uploadedDocuments.stream()
             .filter(d -> d.getUploadedCaseDocument().getCaseDocuments() != null
                 && d.getUploadedCaseDocument().getCaseDocumentParty() != null
@@ -442,9 +451,9 @@ public class UploadContestedCaseDocumentsService {
     }
 
     private void filterFormsH(List<ContestedUploadedDocumentData> uploadedDocuments,
-                        Map<String, Object> caseData,
-                        String collection,
-                        String party) {
+                              Map<String, Object> caseData,
+                              String collection,
+                              String party) {
         List<ContestedUploadedDocumentData> formsHFiltered = uploadedDocuments.stream()
             .filter(d -> d.getUploadedCaseDocument().getCaseDocuments() != null
                 && d.getUploadedCaseDocument().getCaseDocumentParty() != null
@@ -464,9 +473,9 @@ public class UploadContestedCaseDocumentsService {
     }
 
     private void filterExpertEvidence(List<ContestedUploadedDocumentData> uploadedDocuments,
-                        Map<String, Object> caseData,
-                        String collection,
-                        String party) {
+                                      Map<String, Object> caseData,
+                                      String collection,
+                                      String party) {
         List<ContestedUploadedDocumentData> expertEvidenceFiltered = uploadedDocuments.stream()
             .filter(d -> d.getUploadedCaseDocument().getCaseDocuments() != null
                 && d.getUploadedCaseDocument().getCaseDocumentParty() != null
@@ -486,9 +495,9 @@ public class UploadContestedCaseDocumentsService {
     }
 
     private void filterCorrespondenceDocs(List<ContestedUploadedDocumentData> uploadedDocuments,
-                        Map<String, Object> caseData,
-                        String collection,
-                        String party) {
+                                          Map<String, Object> caseData,
+                                          String collection,
+                                          String party) {
         List<ContestedUploadedDocumentData> correspondenceDocsFiltered = uploadedDocuments.stream()
             .filter(d -> d.getUploadedCaseDocument().getCaseDocuments() != null
                 && d.getUploadedCaseDocument().getCaseDocumentParty() != null
@@ -508,9 +517,9 @@ public class UploadContestedCaseDocumentsService {
     }
 
     private void filterOtherDocs(List<ContestedUploadedDocumentData> uploadedDocuments,
-                        Map<String, Object> caseData,
-                        String collection,
-                        String party) {
+                                 Map<String, Object> caseData,
+                                 String collection,
+                                 String party) {
         List<ContestedUploadedDocumentData> otherDocsFiltered = uploadedDocuments.stream()
             .filter(d -> d.getUploadedCaseDocument().getCaseDocuments() != null
                 && d.getUploadedCaseDocument().getCaseDocumentParty() != null
@@ -527,5 +536,42 @@ public class UploadContestedCaseDocumentsService {
         if (!otherCollection.isEmpty()) {
             caseData.put(collection, otherCollection);
         }
+    }
+
+    public AboutToStartOrSubmitCallbackResponse handle(Map<String, Object> caseData) {
+
+        AboutToStartOrSubmitCallbackResponse response = AboutToStartOrSubmitCallbackResponse
+            .builder()
+            .errors(new ArrayList<>())
+            .build();
+
+        if (isTrialBundleSelectedInAnyUploadedFile(caseData)) {
+            response.getErrors().add(TRIAL_BUNDLE_SELECTED_ERROR);
+            return response;
+        }
+
+        setUploadedDocumentsToCollections(caseData);
+        response.setData(caseData);
+        return response;
+    }
+
+    private boolean isTrialBundleSelectedInAnyUploadedFile(Map<String, Object> caseData) {
+        return !getTrialBundleUploadedList(getDocumentCollection(caseData, CONTESTED_UPLOADED_DOCUMENTS)).isEmpty();
+    }
+
+    private List<ContestedUploadedDocumentData> getTrialBundleUploadedList(List<ContestedUploadedDocumentData> uploadedDocuments) {
+
+        List<ContestedUploadedDocumentData> trialBundleList = uploadedDocuments.stream()
+            .filter(d -> isTrialBundle(d.getUploadedCaseDocument()))
+            .collect(Collectors.toList());
+
+        return trialBundleList;
+    }
+
+    private boolean isTrialBundle(ContestedUploadedDocument uploadedCaseDocument) {
+        return Optional.ofNullable(uploadedCaseDocument)
+            .map(ContestedUploadedDocument::getCaseDocumentType)
+            .filter(type -> type.equals(TRIAL_BUNDLE_TYPE))
+            .isPresent();
     }
 }
