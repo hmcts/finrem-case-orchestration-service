@@ -35,6 +35,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INCLUDES_REPRESENTATIVE_UPDATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOC_PARTY;
 
 @RestController
 @Slf4j
@@ -654,7 +655,8 @@ public class NotificationsController implements BaseController {
         notificationService.sendNoticeOfChangeEmailCaseworker(caseDetails);
         log.info("Call the noc letter service");
         nocLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, callbackRequest.getCaseDetailsBefore(), authorisationToken);
-
+        caseDetails.getData().put(INCLUDES_REPRESENTATIVE_UPDATE, null);
+        caseDetails.getData().put(NOC_PARTY, null);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
 
