@@ -953,7 +953,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void givenNoticeOfChangeAsCaseworker_whenSendNoCNotifications_ThenSendNoticeOfChangeServiceCalled() {
-
+        when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(true);
         notificationsController.sendNoticeOfChangeNotificationsCaseworker("authtoken",
             buildNoCCaseworkerCallbackRequest());
 
