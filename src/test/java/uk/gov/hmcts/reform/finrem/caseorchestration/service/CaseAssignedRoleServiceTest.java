@@ -107,7 +107,7 @@ public class CaseAssignedRoleServiceTest {
 
     private void mockMethodCalls(String role, boolean isConsentedApplication) {
         when(authTokenGenerator.generate()).thenReturn(SERVICE_AUTH_TOKEN);
-        when(dataStoreClient.getUserRoles(AUTH_TOKEN, SERVICE_AUTH_TOKEN, List.of(caseDetails.getId().toString())))
+        when(dataStoreClient.getUserRoles(AUTH_TOKEN, SERVICE_AUTH_TOKEN, caseDetails.getId().toString()))
             .thenReturn(caseAssignedUserRolesResource);
         when(caseAssignedUserRolesResource.getCaseAssignedUserRoles()).thenReturn(userRoles);
         when(userRoles.get(0)).thenReturn(caseAssignedUserRole);

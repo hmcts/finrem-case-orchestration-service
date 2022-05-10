@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
 
-import java.util.List;
-
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.SERVICE_AUTHORISATION_HEADER;
 
 @FeignClient(name = "data-store-api", url = "${ccd.data-store.api.baseurl}")
@@ -24,5 +22,5 @@ public interface DataStoreClient {
     @ResponseBody
     CaseAssignedUserRolesResource getUserRoles(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                            @RequestHeader(SERVICE_AUTHORISATION_HEADER) String serviceAuthorization,
-        @RequestParam("case_idS") List<String> caseIds);
+        @RequestParam("case_idS") String caseIds);
 }

@@ -8,7 +8,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DataStoreClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
 
-import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
@@ -32,7 +31,7 @@ public class CaseAssignedRoleService {
                                                        String authToken) {
 
         CaseAssignedUserRolesResource resource = dataStoreClient.getUserRoles(authToken, authTokenGenerator.generate(),
-            List.of(caseDetails.getId().toString()));
+            caseDetails.getId().toString());
         String caseRole = resource.getCaseAssignedUserRoles().get(0).getCaseRole();
 
         boolean isConsented = caseDataService.isConsentedApplication(caseDetails);
