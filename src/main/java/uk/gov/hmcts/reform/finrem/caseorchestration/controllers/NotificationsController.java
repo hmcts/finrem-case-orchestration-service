@@ -623,12 +623,12 @@ public class NotificationsController implements BaseController {
 
         if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             log.info("Sending email notification to Applicant Solicitor for 'Update Frc information'");
-            notificationService.sendUpdateFrcInformationEmail(caseDetails);
+            notificationService.sendUpdateFrcInformationEmailToAppSolicitor(caseDetails);
         }
 
         if (featureToggleService.isRespondentJourneyEnabled() && notificationService.shouldEmailRespondentSolicitor(caseData)) {
             log.info("Sending email notification to Respondent Solicitor for 'Update Frc information'");
-            notificationService.sendUpdateFrcInformationEmail(caseDetails);
+            notificationService.sendUpdateFrcInformationEmailToRespondentSolicitor(caseDetails);
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());

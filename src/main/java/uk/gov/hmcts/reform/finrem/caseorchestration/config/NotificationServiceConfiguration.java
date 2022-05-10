@@ -37,4 +37,5 @@ public class NotificationServiceConfiguration {
     private String contestedGeneralApplicationReferToJudge;
     private String contestedGeneralApplicationOutcome;
     private String prepareForInterimHearing;
+    private String updateFRCInformation;
 }

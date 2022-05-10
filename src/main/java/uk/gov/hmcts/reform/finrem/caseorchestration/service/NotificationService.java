@@ -330,8 +330,17 @@ public class NotificationService {
         sendNotificationEmail(notificationRequest, uri);
     }
 
-    public void sendUpdateFrcInformationEmail(CaseDetails caseDetails) {
+    public void sendUpdateFrcInformationEmailToAppSolicitor(CaseDetails caseDetails) {
+        sendUpdateFrcInformationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(caseDetails));
+    }
 
+    public void sendUpdateFrcInformationEmailToRespondentSolicitor(CaseDetails caseDetails) {
+        sendUpdateFrcInformationEmail(notificationRequestMapper.createNotificationRequestForRespSolicitor(caseDetails));
+    }
+
+    public void sendUpdateFrcInformationEmail(NotificationRequest notificationRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getUpdateFRCInformation());
+        sendNotificationEmail(notificationRequest, uri);
     }
 
     private void sendNotificationEmail(NotificationRequest notificationRequest, URI uri) {
