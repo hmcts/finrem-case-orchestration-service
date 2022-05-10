@@ -26,12 +26,13 @@ public class CaseAssignedRoleService {
     private final DataStoreClient dataStoreClient;
     private final CaseDataService caseDataService;
     private final AuthTokenGenerator authTokenGenerator;
+    private final IdamService idamService;
 
     public Map<String, Object> setCaseAssignedUserRole(CaseDetails caseDetails,
                                                        String authToken) {
 
         CaseAssignedUserRolesResource resource = dataStoreClient.getUserRoles(authToken, authTokenGenerator.generate(),
-            caseDetails.getId().toString());
+            caseDetails.getId().toString(), idamService.getIdamUserId(authToken));
         String caseRole = resource.getCaseAssignedUserRoles().get(0).getCaseRole();
 
         boolean isConsented = caseDataService.isConsentedApplication(caseDetails);

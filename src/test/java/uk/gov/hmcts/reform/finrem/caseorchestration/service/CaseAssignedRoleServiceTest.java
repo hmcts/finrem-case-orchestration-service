@@ -54,12 +54,15 @@ public class CaseAssignedRoleServiceTest {
     @Mock
     private  AuthTokenGenerator authTokenGenerator;
 
+    @Mock
+    private IdamService idamService;
+
 
     @Before
     public void setUp() {
         Map<String, Object> caseData = new HashMap<>();
         caseDetails = CaseDetails.builder().id(1234L).data(caseData).build();
-        caseAssignedRoleService = new CaseAssignedRoleService(dataStoreClient, caseDataService, authTokenGenerator);
+        caseAssignedRoleService = new CaseAssignedRoleService(dataStoreClient, caseDataService, authTokenGenerator, idamService);
     }
 
     @Test
@@ -107,7 +110,8 @@ public class CaseAssignedRoleServiceTest {
 
     private void mockMethodCalls(String role, boolean isConsentedApplication) {
         when(authTokenGenerator.generate()).thenReturn(SERVICE_AUTH_TOKEN);
-        when(dataStoreClient.getUserRoles(AUTH_TOKEN, SERVICE_AUTH_TOKEN, caseDetails.getId().toString()))
+        when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn("123");
+        when(dataStoreClient.getUserRoles(AUTH_TOKEN, SERVICE_AUTH_TOKEN, caseDetails.getId().toString(), "123"))
             .thenReturn(caseAssignedUserRolesResource);
         when(caseAssignedUserRolesResource.getCaseAssignedUserRoles()).thenReturn(userRoles);
         when(userRoles.get(0)).thenReturn(caseAssignedUserRole);

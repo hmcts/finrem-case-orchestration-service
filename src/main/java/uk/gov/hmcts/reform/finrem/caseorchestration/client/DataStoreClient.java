@@ -22,5 +22,5 @@ public interface DataStoreClient {
     @ResponseBody
     CaseAssignedUserRolesResource getUserRoles(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                            @RequestHeader(SERVICE_AUTHORISATION_HEADER) String serviceAuthorization,
-        @RequestParam("case_ids") String caseIds);
+        @RequestParam("case_ids") String caseIds, @RequestParam("user_ids") String userIds);
 }
