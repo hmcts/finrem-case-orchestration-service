@@ -14,11 +14,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.Litiga
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.NocLettersProcessor.COR_APPLICANT;
+
 
 @RunWith(MockitoJUnitRunner.class)
 public class NocSolicitorAddedLettersProcessorTest extends NocLettersProcessorBaseTest {
@@ -34,7 +36,7 @@ public class NocSolicitorAddedLettersProcessorTest extends NocLettersProcessorBa
     }
 
     @Test
-    public void shouldGenerateSolicitorAndApplicantLettersWhenSolicitorAddedAndNoSolicicitorEmailProvided() {
+    public void givenSolicitorAddedAndNoSolicitorEmailProvidedAndAddressesPopulatedGenerateSolicitorAndApplicantLetters() {
 
         CaseDetails caseDetails =
             getCaseDetails("/fixtures/noticeOfChange/contested/noc-letter-notifications-no-solicitor-email.json");
@@ -62,7 +64,7 @@ public class NocSolicitorAddedLettersProcessorTest extends NocLettersProcessorBa
 
 
     @Test
-    public void shouldOnlyGenerateApplicantLettersWhenSolicicitorEmailProvided() {
+    public void givenSolicitorAddedAndSolicitorEmailProvidedAndAddressesPopulatedShouldGenerateApplicantLettersOnly() {
 
         CaseDetails caseDetails = getCaseDetails("/fixtures/noticeOfChange/contested/noc-letter-notifications-with-solicitor-email.json");
         RepresentationUpdate representationUpdate = RepresentationUpdate.builder().party(COR_APPLICANT).build();
@@ -83,7 +85,7 @@ public class NocSolicitorAddedLettersProcessorTest extends NocLettersProcessorBa
     }
 
     @Test
-    public void shouldOnlyGenerateSolicitorLetterWhenRespondentEmailProvidedAndNoSolicitorEmailProvided() {
+    public void givenSolicitorAddedAndSolicitorEmailNotProvidedWillGenerateSolicitorLetter() {
 
         CaseDetails caseDetails =
             getCaseDetails("/fixtures/noticeOfChange/consented/noc-letter-notifications-with-solicitor-no-respondent-email.json");
@@ -102,6 +104,35 @@ public class NocSolicitorAddedLettersProcessorTest extends NocLettersProcessorBa
         verify(litigantSolicitorAddedNocDocumentService).generateNoticeOfChangeLetter(AUTH_TOKEN, noticeOfChangeLetterDetailsRespondent);
         verifyNoInteractions(solicitorNocDocumentService);
         verify(bulkPrintService).sendDocumentForPrint(caseDocumentRespondent, caseDetails);
+    }
+
+
+
+    @Test
+    public void givenSolicitorAddedAndNoApplicantAddressesPopulatedShouldGenerateSolicitoLettersOnly() {
+
+        CaseDetails caseDetails =
+            getCaseDetails("/fixtures/noticeOfChange/contested/noc-letter-notifications-no-solicitor-email-no-applicant-address.json");
+        RepresentationUpdate representationUpdate = RepresentationUpdate.builder().party(COR_APPLICANT).build();
+
+        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.FALSE);
+
+        NoticeOfChangeLetterDetails noticeOfChangeLetterDetailsApplicant =
+            getNoticeOfChangeLetterDetails(caseDetails, representationUpdate, APPLICANT);
+        NoticeOfChangeLetterDetails noticeOfChangeLetterDetailsSolicitor =
+            getNoticeOfChangeLetterDetails(caseDetails, representationUpdate, SOLICITOR);
+
+        final CaseDocument caseDocumentSol =
+            setUpCaseDocumentInteraction(noticeOfChangeLetterDetailsSolicitor, solicitorNocDocumentService, "solDocFileName");
+        final CaseDocument caseDocumentApplicant =
+            setUpCaseDocumentInteraction(noticeOfChangeLetterDetailsApplicant, litigantSolicitorAddedNocDocumentService, "appDocFileName");
+
+        noticeOfChangeLettersProcessor.processSolicitorAndLitigantLetters(caseDetails, AUTH_TOKEN, representationUpdate);
+
+        verifyNoInteractions(litigantSolicitorAddedNocDocumentService);
+        verify(solicitorNocDocumentService).generateNoticeOfChangeLetter(AUTH_TOKEN, noticeOfChangeLetterDetailsSolicitor);
+        verify(bulkPrintService).sendDocumentForPrint(caseDocumentSol, caseDetails);
+        verifyNoMoreInteractions(litigantSolicitorAddedNocDocumentService);
     }
 
 
