@@ -20,6 +20,6 @@ public interface DataStoreClient {
     @GetMapping(
         path = "/case-users",
         headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE)
-    CaseAssignedUserRolesResource getCaseAssignedUserRoles(@PathVariable("case_ids") List<String> caseIds, @RequestHeader(HttpHeaders.AUTHORIZATION)
+    CaseAssignedUserRolesResource getCaseAssignedUserRoles(@PathVariable("case_id") List<String> caseIds, @RequestHeader(HttpHeaders.AUTHORIZATION)
         String authToken, @RequestHeader(SERVICE_AUTHORISATION_HEADER) String serviceAuthorization);
 }
