@@ -53,6 +53,7 @@ public class NocDocumentServiceBaseTest {
 
     @Captor
     ArgumentCaptor<Map> notiicationLettersDetailsMapCaptor;
+    private String letterDate;
 
     @Before
     public void setUpTest() {
@@ -61,8 +62,9 @@ public class NocDocumentServiceBaseTest {
             "solicitorReference");
         caseDetails = CaseDetails.builder().id(1234L).data(caseData).build();
 
+        letterDate = DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now());
         noticeOfChangeLetterDetails = NoticeOfChangeLetterDetails.builder()
-            .letterDate(DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()))
+            .letterDate(letterDate)
             .divorceCaseNumber(Objects.toString(caseDetails.getData().get(DIVORCE_CASE_NUMBER)))
             .caseNumber(caseDetails.getId().toString())
             .reference(Objects.toString(caseDetails.getData().get(SOLICITOR_REFERENCE)))
@@ -87,10 +89,9 @@ public class NocDocumentServiceBaseTest {
         assertThat(caseDataMap.get("caseNumber"), is("1234"));
         assertThat(caseDataMap.get("reference"), is("solicitorReference"));
         assertThat(caseDataMap.get("divorceCaseNumber"), is("divCaseReference"));
-        assertThat(caseDataMap.get("letterDate"), is("2022-05-06"));
+        assertThat(caseDataMap.get("letterDate"), is(letterDate));
         assertThat(caseDataMap.get("applicantName"), is("applicantName"));
         assertThat(caseDataMap.get("respondentName"), is("respondentName"));
-        assertThat(caseDataMap.get("letterDate"), is("2022-05-06"));
 
         Map courtDetailsMap = (Map) caseDataMap.get("courtDetails");
         assertThat(courtDetailsMap.get("courtName"), is("Family Court at the Courts and Tribunal Service Centre"));

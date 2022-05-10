@@ -60,7 +60,8 @@ public abstract class NocLettersProcessor {
 
 
     private void sendLitigantLetter(CaseDetails caseDetails, String authToken, RepresentationUpdate representationUpdate) {
-        boolean isApplicantCheck = isApplicant(representationUpdate);
+        boolean isApplicantCheck
+            = isApplicant(representationUpdate);
         NoticeOfChangeLetterDetails noticeOfChangeLetterDetailsLitigant = null;
         if (isApplicantCheck && !isCaseFieldPopulated(caseDetails, APPLICANT_EMAIL) && isCaseFieldPopulated(caseDetails, APPLICANT_ADDRESS)) {
             log.info("The litigant is an applicant and the email address is not provided");
