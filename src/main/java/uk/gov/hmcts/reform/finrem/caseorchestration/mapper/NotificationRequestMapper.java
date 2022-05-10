@@ -36,6 +36,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequiredArgsConstructor
 public class NotificationRequestMapper {
 
+    protected static final String EMPTY_STRING = "";
     private final CaseDataService caseDataService;
     private final ObjectMapper objectMapper;
 
@@ -112,7 +113,8 @@ public class NotificationRequestMapper {
         Map<String, Object> mapOfCaseData = caseDetails.getData();
 
         notificationRequest.setCaseReferenceNumber(Objects.toString(caseDetails.getId()));
-        notificationRequest.setSolicitorReferenceNumber(Objects.toString(mapOfCaseData.get(solicitorCaseDataKeysWrapper.getSolicitorReferenceKey())));
+        notificationRequest.setSolicitorReferenceNumber(Objects.toString(mapOfCaseData.get(solicitorCaseDataKeysWrapper.getSolicitorReferenceKey()),
+            EMPTY_STRING));
         notificationRequest.setDivorceCaseNumber(Objects.toString(mapOfCaseData.get(DIVORCE_CASE_NUMBER)));
         notificationRequest.setName(Objects.toString(mapOfCaseData.get(solicitorCaseDataKeysWrapper.getSolicitorNameKey())));
         notificationRequest.setNotificationEmail(Objects.toString(mapOfCaseData.get(solicitorCaseDataKeysWrapper.getSolicitorEmailKey())));

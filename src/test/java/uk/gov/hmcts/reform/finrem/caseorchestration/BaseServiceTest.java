@@ -92,6 +92,30 @@ public abstract class BaseServiceTest extends BaseTest {
     }
 
     protected CallbackRequest getContestedCallbackRequest() {
+        Map<String, Object> caseData = getCaseData();
+        return CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                .caseTypeId(CASE_TYPE_ID_CONTESTED)
+                .id(12345L)
+                .data(caseData)
+                .build())
+            .build();
+    }
+
+    protected CallbackRequest getContestedCallbackRequestWithCaseDataValues(Map<String, Object> caseDataValuesToAdd) {
+        Map<String, Object> caseData = getCaseData();
+        caseData.putAll(caseDataValuesToAdd);
+        //caseDataValuesToAdd.keySet().stream().forEach(k ->  caseData.put( k, caseDataValuesToAdd.get(k)));
+        return CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                .caseTypeId(CASE_TYPE_ID_CONTESTED)
+                .id(12345L)
+                .data(caseData)
+                .build())
+            .build();
+    }
+
+    private Map<String, Object> getCaseData() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(CONTESTED_SOLICITOR_EMAIL, TEST_SOLICITOR_EMAIL);
         caseData.put(CONTESTED_SOLICITOR_NAME, TEST_SOLICITOR_NAME);
@@ -105,13 +129,7 @@ public abstract class BaseServiceTest extends BaseTest {
         caseData.put(MIDLANDS_FRC_LIST, NOTTINGHAM);
         caseData.put(NOTTINGHAM_COURTLIST, "FR_s_NottinghamList_1");
         caseData.put(BULK_PRINT_LETTER_ID_RES, NOTTINGHAM);
-        return CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder()
-                .caseTypeId(CASE_TYPE_ID_CONTESTED)
-                .id(12345L)
-                .data(caseData)
-                .build())
-            .build();
+        return caseData;
     }
 
     protected CallbackRequest getContestedCallbackRequestUpdateDetails() {
