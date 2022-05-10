@@ -607,4 +607,30 @@ public class NotificationsController implements BaseController {
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
+
+    @PostMapping(value = "/update-frc", consumes = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Send FRC change update notifications")
+    @ApiResponses(value = {
+        @ApiResponse(code = 204, message = "Update FRC information notificatons sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
+    ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendUpdateFrcNotifications(
+        @RequestBody CallbackRequest callbackRequest) {
+        log.info("Received request to send update FRC info notifications for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        validateCaseData(callbackRequest);
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        Map<String, Object> caseData = caseDetails.getData();
+
+        if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
+            log.info("Sending email notification to Applicant Solicitor for 'Update Frc information'");
+            notificationService.sendUpdateFrcInformationEmail(caseDetails);
+        }
+
+        if (featureToggleService.isRespondentJourneyEnabled() && notificationService.shouldEmailRespondentSolicitor(caseData)) {
+            log.info("Sending email notification to Respondent Solicitor for 'Update Frc information'");
+            notificationService.sendUpdateFrcInformationEmail(caseDetails);
+        }
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+    }
 }
