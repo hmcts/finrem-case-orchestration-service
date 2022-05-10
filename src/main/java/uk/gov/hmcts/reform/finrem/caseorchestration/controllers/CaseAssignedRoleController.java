@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,7 +29,7 @@ public class CaseAssignedRoleController {
 
     private final CaseAssignedRoleService service;
 
-    @GetMapping(path = "/get-user-roles", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/get-user-roles", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Retrieve case assigned user role for a given case id and user id")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",

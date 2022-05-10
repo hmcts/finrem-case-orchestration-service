@@ -20,7 +20,7 @@ import java.util.Map;
 import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -64,7 +64,7 @@ public class CaseAssignedRoleControllerTest extends BaseControllerTest {
             .getResource("/fixtures/applicant-solicitor-to-draft-order-with-email-consent.json").toURI()));
         CaseDetails caseDetails = objectMapper.convertValue(requestContent.get(CASE_DETAILS_KEY), CaseDetails.class);
         when(service.setCaseAssignedUserRole(caseDetails, AUTH_TOKEN)).thenReturn(userRoles);
-        mvc.perform(get(GET_USER_ROLES)
+        mvc.perform(post(GET_USER_ROLES)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -84,7 +84,7 @@ public class CaseAssignedRoleControllerTest extends BaseControllerTest {
             .getResource("/fixtures/applicant-solicitor-to-draft-order-with-email-consent.json").toURI()));
         CaseDetails caseDetails = objectMapper.convertValue(requestContent.get(CASE_DETAILS_KEY), CaseDetails.class);
         when(service.setCaseAssignedUserRole(caseDetails, AUTH_TOKEN)).thenReturn(userRoles);
-        mvc.perform(get(GET_USER_ROLES)
+        mvc.perform(post(GET_USER_ROLES)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -104,7 +104,7 @@ public class CaseAssignedRoleControllerTest extends BaseControllerTest {
             .getResource("/fixtures/updatecase/remove-respondent-solicitor-details.json").toURI()));
         CaseDetails caseDetails = objectMapper.convertValue(requestContent.get(CASE_DETAILS_KEY), CaseDetails.class);
         when(service.setCaseAssignedUserRole(caseDetails, AUTH_TOKEN)).thenReturn(userRoles);
-        mvc.perform(get(GET_USER_ROLES)
+        mvc.perform(post(GET_USER_ROLES)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
