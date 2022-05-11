@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpda
 
 
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -65,7 +65,7 @@ public class ChangeOfRepresentationServiceTest extends BaseServiceTest {
                     .clientName("John Smith")
                     .by("Sir Solicitor")
                     .via("Notice of Change")
-                    .date(LocalDate.now())
+                    .date(LocalDateTime.now())
                     .added(ChangedRepresentative.builder()
                         .name("Sir Solicitor")
                         .email("sirsolicitor1@gmail.com")
