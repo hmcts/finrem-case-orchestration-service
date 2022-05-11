@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.address.AddresseeGeneratorService;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
@@ -175,7 +176,7 @@ public class NocLetterDetailsGeneratorTest {
             .clientName("John Smith")
             .by("Sir Solicitor")
             .via("Notice of Change")
-            .date(LocalDate.now())
+            .date(LocalDateTime.now())
             .added(changedRepresentativeAdded)
             .removed(changedRepresentativeRemoved).build();
     }
