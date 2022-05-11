@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpda
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistory;
 
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -41,7 +41,7 @@ public class ChangeOfRepresentationService {
                 .clientName(changeOfRepresentationRequest.getClientName())
                 .via(NOTICE_OF_CHANGE)
                 .by(changeOfRepresentationRequest.getBy())
-                .date(LocalDate.now())
+                .date(LocalDateTime.now())
                 .added(changeOfRepresentationRequest.getAddedRepresentative())
                 .removed(changeOfRepresentationRequest.getRemovedRepresentative())
                 .build()

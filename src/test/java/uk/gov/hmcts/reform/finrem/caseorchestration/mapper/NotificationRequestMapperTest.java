@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -176,7 +176,7 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
                 .clientName("TestClient Name")
                 .via("Notice of Change")
                 .by("TestSolicitor2 Name")
-                .date(LocalDate.now().minusDays(5))
+                .date(LocalDateTime.now().minusDays(5))
                 .added(ChangedRepresentative.builder()
                     .email("testSolicitor2@test.com")
                     .name("TestSolicitor2 Name")
@@ -193,7 +193,7 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
                 .clientName("TestClient Name")
                 .via("Notice of Change")
                 .by(latestSolicitorName)
-                .date(LocalDate.now())
+                .date(LocalDateTime.now())
                 .added(ChangedRepresentative.builder()
                     .email(latestSolicitorEmail)
                     .name(latestSolicitorName)

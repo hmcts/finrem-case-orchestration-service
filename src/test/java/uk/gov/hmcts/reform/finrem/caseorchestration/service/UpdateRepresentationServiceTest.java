@@ -21,6 +21,8 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -387,12 +389,14 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
             .email(testAppSolicitor.getEmail())
             .organisation(applicantOrg)
             .build();
+        LocalDateTime date = LocalDateTime.of(LocalDate.of(2020, 6, 1),
+            LocalTime.of(15,0));
         return RepresentationUpdateHistory.builder().representationUpdateHistory(
             List.of(element(UUID.randomUUID(),
                 RepresentationUpdate.builder()
                     .party("applicant")
                     .clientName("John Smith")
-                    .date(LocalDate.of(2020, 6, 1))
+                    .date(date)
                     .added(added)
                     .removed(null)
                     .by(testAppSolicitor.getFullName())
@@ -406,13 +410,15 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
             .email(testRespSolicitor.getEmail())
             .organisation(respondentOrg)
             .build();
+        LocalDateTime date = LocalDateTime.of(LocalDate.of(2020, 6, 1),
+            LocalTime.of(15,0));
 
         return RepresentationUpdateHistory.builder().representationUpdateHistory(
             List.of(element(UUID.randomUUID(),
                 RepresentationUpdate.builder()
                 .party("respondent")
                 .clientName("Jane Smith")
-                .date(LocalDate.of(2020, 6, 1))
+                .date(date)
                 .added(added)
                 .removed(null)
                 .by(testRespSolicitor.getFullName())
@@ -434,12 +440,15 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
             .organisation(applicantOrg)
             .build();
 
+        LocalDateTime date = LocalDateTime.of(LocalDate.of(2020, 6, 1),
+            LocalTime.of(15,0));
+
         return RepresentationUpdateHistory.builder().representationUpdateHistory(
             List.of(element(UUID.randomUUID(),
                 RepresentationUpdate.builder()
                     .party("applicant")
                     .clientName("John Smith")
-                    .date(LocalDate.of(2020, 6, 1))
+                    .date(date)
                     .added(added)
                     .removed(removed)
                     .by(testAppSolicitorReplacing.getFullName())
