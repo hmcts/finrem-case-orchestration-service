@@ -46,7 +46,7 @@
           "value": {
             "party": "respondent",
             "name": "Jane Smith",
-            "date": "2020-06-01",
+            "date": "2020-06-01T15:00:00.000",
             "by": "Claire Mumford",
             "via": "Notice of Change",
             "added": {
