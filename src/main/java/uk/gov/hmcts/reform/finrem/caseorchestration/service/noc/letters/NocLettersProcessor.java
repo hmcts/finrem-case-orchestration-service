@@ -62,19 +62,8 @@ public abstract class NocLettersProcessor {
     private void sendLitigantLetter(CaseDetails caseDetails, String authToken, RepresentationUpdate representationUpdate) {
         boolean isApplicantCheck
             = isApplicant(representationUpdate);
-        NoticeOfChangeLetterDetails noticeOfChangeLetterDetailsLitigant = null;
-        if (isApplicantCheck && !isCaseFieldPopulated(caseDetails, APPLICANT_EMAIL) && isCaseFieldPopulated(caseDetails, APPLICANT_ADDRESS)) {
-            log.info("The litigant is an applicant and the email address is not provided");
-            noticeOfChangeLetterDetailsLitigant =
-                noticeOfChangeLetterDetailsGenerator.generate(caseDetails, representationUpdate, APPLICANT,
-                    noticeType);
-        } else if (!isApplicantCheck && !isCaseFieldPopulated(caseDetails, RESPONDENT_EMAIL)
-            && isCaseFieldPopulated(caseDetails, RESPONDENT_ADDRESS)) {
-            log.info("The litigant is a respondent and the email address is not provided");
-            noticeOfChangeLetterDetailsLitigant =
-                noticeOfChangeLetterDetailsGenerator.generate(caseDetails, representationUpdate, RESPONDENT,
-                    noticeType);
-        }
+        NoticeOfChangeLetterDetails noticeOfChangeLetterDetailsLitigant =
+            generateLitigantLetterIfRequired(caseDetails, representationUpdate, isApplicantCheck);
         if (noticeOfChangeLetterDetailsLitigant != null) {
             log.info("Letter is required so generate");
             CaseDocument caseDocument = nocDocumentService.generateNoticeOfChangeLetter(authToken, noticeOfChangeLetterDetailsLitigant);
@@ -95,6 +84,24 @@ public abstract class NocLettersProcessor {
             log.info("Generated the solicitor case document now send to bulk print");
             bulkPrintService.sendDocumentForPrint(caseDocument, caseDetails);
         }
+    }
+
+    private NoticeOfChangeLetterDetails generateLitigantLetterIfRequired(CaseDetails caseDetails, RepresentationUpdate representationUpdate,
+                                                                         boolean isApplicantCheck) {
+        NoticeOfChangeLetterDetails noticeOfChangeLetterDetailsLitigant = null;
+        if (isApplicantCheck && !isCaseFieldPopulated(caseDetails, APPLICANT_EMAIL) && isCaseFieldPopulated(caseDetails, APPLICANT_ADDRESS)) {
+            log.info("The litigant is an applicant with an address and an email address is not provided");
+            noticeOfChangeLetterDetailsLitigant =
+                noticeOfChangeLetterDetailsGenerator.generate(caseDetails, representationUpdate, APPLICANT,
+                    noticeType);
+        } else if (!isApplicantCheck && !isCaseFieldPopulated(caseDetails, RESPONDENT_EMAIL)
+            && isCaseFieldPopulated(caseDetails, RESPONDENT_ADDRESS)) {
+            log.info("The litigant is a respondent with a address and the email address is not provided");
+            noticeOfChangeLetterDetailsLitigant =
+                noticeOfChangeLetterDetailsGenerator.generate(caseDetails, representationUpdate, RESPONDENT,
+                    noticeType);
+        }
+        return noticeOfChangeLetterDetailsLitigant;
     }
 
     private boolean isApplicant(RepresentationUpdate representationUpdate) {
