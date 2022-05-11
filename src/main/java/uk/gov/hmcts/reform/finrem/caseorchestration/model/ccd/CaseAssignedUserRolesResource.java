@@ -10,8 +10,6 @@ import java.util.List;
 
 @Data
 @Builder(toBuilder = true)
-@NoArgsConstructor
-@AllArgsConstructor
 public class CaseAssignedUserRolesResource {
 
     @JsonProperty("case_users")
