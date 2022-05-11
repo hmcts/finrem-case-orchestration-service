@@ -106,8 +106,6 @@ public class NocSolicitorAddedLettersProcessorTest extends NocLettersProcessorBa
         verify(bulkPrintService).sendDocumentForPrint(caseDocumentRespondent, caseDetails);
     }
 
-
-
     @Test
     public void givenSolicitorAddedAndNoApplicantAddressesPopulatedShouldGenerateSolicitoLettersOnly() {
 
@@ -134,6 +132,5 @@ public class NocSolicitorAddedLettersProcessorTest extends NocLettersProcessorBa
         verify(bulkPrintService).sendDocumentForPrint(caseDocumentSol, caseDetails);
         verifyNoMoreInteractions(litigantSolicitorAddedNocDocumentService);
     }
-
 
 }
