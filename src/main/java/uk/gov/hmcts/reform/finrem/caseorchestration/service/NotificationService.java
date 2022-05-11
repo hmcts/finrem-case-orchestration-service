@@ -44,7 +44,7 @@ public class NotificationService {
     private final NotificationRequestMapper notificationRequestMapper;
     private final CaseDataService caseDataService;
 
-    private String recipientEmail = "fr_applicant_sol@sharklasers.com";
+    private static final String DEFAULT_EMAIL = "fr_applicant_sol@sharklasers.com";
 
     public void sendConsentedHWFSuccessfulConfirmationEmail(CaseDetails caseDetails) {
         URI uri = buildUri(notificationServiceConfiguration.getHwfSuccessful());
@@ -280,6 +280,7 @@ public class NotificationService {
     }
 
     public void sendContestedGeneralApplicationOutcomeEmail(CaseDetails caseDetails) throws IOException {
+        String recipientEmail = DEFAULT_EMAIL;
         if (featureToggleService.isSendToFRCEnabled()) {
             Map<String, Object> data = caseDetails.getData();
             Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
@@ -345,7 +346,7 @@ public class NotificationService {
     }
 
     public void sendUpdateFrcInformationEmailToCourt(CaseDetails caseDetails) throws JsonProcessingException {
-        recipientEmail = getRecipientEmail(caseDetails);
+        String recipientEmail = getRecipientEmail(caseDetails);
 
         NotificationRequest notificationRequest = notificationRequestMapper.createNotificationRequestForAppSolicitor(caseDetails);
         notificationRequest.setNotificationEmail(recipientEmail);
@@ -398,6 +399,6 @@ public class NotificationService {
 
             return (String) courtDetails.get(COURT_DETAILS_EMAIL_KEY);
         }
-        return null;
+        return DEFAULT_EMAIL;
     }
 }
