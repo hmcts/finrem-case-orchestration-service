@@ -10,7 +10,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
-import java.time.LocalDate;
+
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -27,10 +29,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REPRESENTATION_UPDATE_HISTORY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element.element;
 
 public class NotificationRequestMapperTest extends BaseServiceTest {
 
+    protected static final String EMPTY_STRING = "";
     @Autowired
     NotificationRequestMapper notificationRequestMapper;
 
@@ -45,6 +49,19 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         assertEquals(TEST_SOLICITOR_NAME, notificationRequest.getName());
         assertEquals(TEST_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
         assertEquals("consented", notificationRequest.getCaseType());
+    }
+
+    @Test
+    public void shouldReturnEmptyStringForSolicitorReferenceWhenNotProvided() {
+        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(
+            getContestedCallbackRequestWithCaseDataValues(Collections.singletonMap(SOLICITOR_REFERENCE, null)).getCaseDetails());
+
+        assertEquals("12345", notificationRequest.getCaseReferenceNumber());
+        assertEquals(EMPTY_STRING, notificationRequest.getSolicitorReferenceNumber());
+        assertEquals(TEST_DIVORCE_CASE_NUMBER, notificationRequest.getDivorceCaseNumber());
+        assertEquals(TEST_SOLICITOR_NAME, notificationRequest.getName());
+        assertEquals(TEST_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
+        assertEquals("contested", notificationRequest.getCaseType());
     }
 
     @Test
@@ -159,7 +176,7 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
                 .clientName("TestClient Name")
                 .via("Notice of Change")
                 .by("TestSolicitor2 Name")
-                .date(LocalDate.now().minusDays(5))
+                .date(LocalDateTime.now().minusDays(5))
                 .added(ChangedRepresentative.builder()
                     .email("testSolicitor2@test.com")
                     .name("TestSolicitor2 Name")
@@ -176,7 +193,7 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
                 .clientName("TestClient Name")
                 .via("Notice of Change")
                 .by(latestSolicitorName)
-                .date(LocalDate.now())
+                .date(LocalDateTime.now())
                 .added(ChangedRepresentative.builder()
                     .email(latestSolicitorEmail)
                     .name(latestSolicitorName)

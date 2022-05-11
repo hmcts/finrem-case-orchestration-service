@@ -615,7 +615,7 @@
           "value": {
             "party": "Applicant",
             "name": "John Smith",
-            "date": "2020-06-01",
+            "date": "2020-06-01T15:00:00.000",
             "by": "Test Applicant Solicitor",
             "via": "Notice of Change",
             "added": {
