@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -936,6 +937,42 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         verify(notificationService, never()).sendInterimNotificationEmailToApplicantSolicitor(any());
         verify(notificationService, times(1)).sendInterimNotificationEmailToRespondentSolicitor(any());
+    }
+
+    @Test
+    public void givenUpdateFrc_whenSendEmail_thenNotificationServiceCalledThreeTimes() throws JsonProcessingException {
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class))).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+
+        notificationsController.sendUpdateFrcNotifications(buildCallbackRequest());
+        verify(notificationService, times(1)).sendUpdateFrcInformationEmailToAppSolicitor(any());
+        verify(notificationService, times(1)).sendUpdateFrcInformationEmailToRespondentSolicitor(any());
+        verify(notificationService, times(1)).sendUpdateFrcInformationEmailToCourt(any());
+    }
+
+    @Test
+    public void givenUpdateFrc_whenAppSolNotAgreeToReceiveEmails_thenNotificationServiceCalledTwice() throws JsonProcessingException {
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class))).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+
+        notificationsController.sendUpdateFrcNotifications(buildCallbackRequest());
+        verify(notificationService, never()).sendUpdateFrcInformationEmailToAppSolicitor(any());
+        verify(notificationService, times(1)).sendUpdateFrcInformationEmailToRespondentSolicitor(any());
+        verify(notificationService, times(1)).sendUpdateFrcInformationEmailToCourt(any());
+    }
+
+    @Test
+    public void givenUpdateFrc_whenRespSolNotAgreeToReceiveEmails_thenNotificationServiceCalledTwice() throws JsonProcessingException {
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class))).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+
+        notificationsController.sendUpdateFrcNotifications(buildCallbackRequest());
+        verify(notificationService, times(1)).sendUpdateFrcInformationEmailToAppSolicitor(any());
+        verify(notificationService, never()).sendUpdateFrcInformationEmailToRespondentSolicitor(any());
+        verify(notificationService, times(1)).sendUpdateFrcInformationEmailToCourt(any());
     }
 
     private CallbackRequest createCallbackRequestWithFinalOrder() {

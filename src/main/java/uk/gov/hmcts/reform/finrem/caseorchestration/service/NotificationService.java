@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -343,6 +344,15 @@ public class NotificationService {
         sendNotificationEmail(notificationRequest, uri);
     }
 
+    public void sendUpdateFrcInformationEmailToCourt(CaseDetails caseDetails) throws JsonProcessingException {
+        recipientEmail = getRecipientEmail(caseDetails);
+
+        NotificationRequest notificationRequest = notificationRequestMapper.createNotificationRequestForAppSolicitor(caseDetails);
+        notificationRequest.setNotificationEmail(recipientEmail);
+        URI uri = buildUri(notificationServiceConfiguration.getUpdateFRCInformationCourt());
+        sendNotificationEmail(notificationRequest, uri);
+    }
+
     private void sendNotificationEmail(NotificationRequest notificationRequest, URI uri) {
         HttpEntity<NotificationRequest> request = new HttpEntity<>(notificationRequest, buildHeaders());
         try {
@@ -378,5 +388,16 @@ public class NotificationService {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type", "application/json");
         return headers;
+    }
+
+    private String getRecipientEmail(CaseDetails caseDetails) throws JsonProcessingException {
+        if (featureToggleService.isSendToFRCEnabled()) {
+            Map<String, Object> data = caseDetails.getData();
+            Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
+            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(data.get(CaseHearingFunctions.getSelectedCourt(data)));
+
+            return (String) courtDetails.get(COURT_DETAILS_EMAIL_KEY);
+        }
+        return null;
     }
 }

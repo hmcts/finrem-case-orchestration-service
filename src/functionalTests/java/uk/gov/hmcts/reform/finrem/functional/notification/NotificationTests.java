@@ -39,6 +39,9 @@ public class NotificationTests extends IntegrationTestBase {
     @Value("${cos.notification.contest-draft-order.api}")
     private String contestDraftOrderApiUri;
 
+    @Value("${case.orchestration.api}/notify/update-frc")
+    private String updateFrcInfoUri;
+
     private String consentedDir = "/json/consented/";
     private String contestedDir = "/json/contested/";
 
@@ -110,5 +113,10 @@ public class NotificationTests extends IntegrationTestBase {
 
         utils.validatePostSuccess(contestDraftOrderApiUri,
             "applicant-solicitor-to-draft-order-with-email-consent.json", contestedDir);
+    }
+
+    @Test
+    public void verifyNotifyUpdateFrcInfoIsOkay() {
+        utils.validatePostSuccess(updateFrcInfoUri, "update-frc-info.json", contestedDir);
     }
 }

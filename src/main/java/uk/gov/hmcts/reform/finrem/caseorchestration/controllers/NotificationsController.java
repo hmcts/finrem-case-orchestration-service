@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -614,7 +615,7 @@ public class NotificationsController implements BaseController {
         @ApiResponse(code = 204, message = "Update FRC information notificatons sent successfully",
             response = AboutToStartOrSubmitCallbackResponse.class)})
     ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendUpdateFrcNotifications(
-        @RequestBody CallbackRequest callbackRequest) {
+        @RequestBody CallbackRequest callbackRequest) throws JsonProcessingException {
         log.info("Received request to send update FRC info notifications for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
 
@@ -630,6 +631,9 @@ public class NotificationsController implements BaseController {
             log.info("Sending email notification to Respondent Solicitor for 'Update Frc information'");
             notificationService.sendUpdateFrcInformationEmailToRespondentSolicitor(caseDetails);
         }
+
+        log.info("Sending email notification to court for 'Update Frc Information'");
+        notificationService.sendUpdateFrcInformationEmailToCourt(caseDetails);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
