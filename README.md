@@ -24,7 +24,7 @@ To get the project to build in IntelliJ IDEA, you have to:
  - Install the Lombok plugin: Preferences -> Plugins
  - Enable Annotation Processing: Preferences -> Build, Execution, Deployment -> Compiler -> Annotation Processors
 
-### Running
+### Running the service in isolation
 
 You can run the application by executing following command:
 
@@ -33,6 +33,26 @@ You can run the application by executing following command:
 ```
 
 The application will start locally on: `http://localhost:9000`
+
+### Running the service with CCD and Idam locally (Developers and QA)
+
+The best way to develop and test services in Financial Remedy is to run
+
+```bash
+./gradlew bootWithCCD
+```
+This will spin up finrem-case-orchestration along with an Idam simulator and the base CCD services.
+
+In case you are not logged in you must run
+```bash
+az acr login --name hmctspublic --subscription DCD-CNP-Prod
+az acr login --name hmctsprivate --subscription DCD-CNP-Prod
+```
+#### Gotchas on macOS
+- You must have Docker Desktop running
+
+- The IDAM Simulator runs on port 5000, so it is necessary to disable macOS' AirPlay Receiver server in: 
+Settings > Sharing > AirPlay Receiver
 
 ### API documentation
 
