@@ -44,7 +44,7 @@ public class NotificationService {
     private final NotificationRequestMapper notificationRequestMapper;
     private final CaseDataService caseDataService;
 
-    private static final String DEFAULT_EMAIL = "fr_applicant_sol@sharklasers.com";
+    private static final String DEFAULT_EMAIL = "fr_applicant_solicitor1@mailinator.com";
 
     public void sendConsentedHWFSuccessfulConfirmationEmail(CaseDetails caseDetails) {
         URI uri = buildUri(notificationServiceConfiguration.getHwfSuccessful());
