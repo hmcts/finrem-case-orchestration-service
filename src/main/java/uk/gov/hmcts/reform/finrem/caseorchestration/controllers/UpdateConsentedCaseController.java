@@ -39,7 +39,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INCLUDES_REPRESENTATION_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_DX_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
@@ -183,6 +186,8 @@ public class UpdateConsentedCaseController implements BaseController {
     private void updateRespondentSolicitorAddress(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get(CONSENTED_RESPONDENT_REPRESENTED), "No")) {
             removeRespondentSolicitorAddress(caseData);
+        } else {
+            removeRespondentAddress(caseData);
         }
     }
 
@@ -232,6 +237,12 @@ public class UpdateConsentedCaseController implements BaseController {
         caseData.put(APPLICANT_ADDRESS, null);
         caseData.put(APPLICANT_PHONE, null);
         caseData.put(APPLICANT_EMAIL, null);
+    }
+
+    private void removeRespondentAddress(Map<String, Object> caseData) {
+        caseData.put(RESPONDENT_ADDRESS, null);
+        caseData.put(RESPONDENT_PHONE, null);
+        caseData.put(RESPONDENT_EMAIL, null);
     }
 
     private boolean equalsTo(String fieldData, String value) {
