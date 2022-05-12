@@ -107,6 +107,10 @@ public class PaperNotificationService {
         }
     }
 
+    public void printUpdateFrcInformationNotification(CaseDetails caseDetails, String authToken) {
+
+    }
+
     public boolean shouldPrintForApplicant(CaseDetails caseDetails) {
         return !caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())
             || !caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)
