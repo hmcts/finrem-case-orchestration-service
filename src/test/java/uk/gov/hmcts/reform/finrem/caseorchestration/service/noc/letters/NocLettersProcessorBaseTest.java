@@ -50,10 +50,12 @@ public abstract class NocLettersProcessorBaseTest {
         return caseDocument;
     }
 
-    protected NoticeOfChangeLetterDetails getNoticeOfChangeLetterDetails(CaseDetails caseDetails, RepresentationUpdate representationUpdate,
+    protected NoticeOfChangeLetterDetails getNoticeOfChangeLetterDetails(CaseDetails caseDetails,
+                                                                         CaseDetails caseDetailsBefore,
+                                                                         RepresentationUpdate representationUpdate,
                                                                          DocumentHelper.PaperNotificationRecipient recipient) {
         NoticeOfChangeLetterDetails noticeOfChangeLetterDetails = NoticeOfChangeLetterDetails.builder().build();
-        when(noticeOfChangeLetterDetailsGenerator.generate(caseDetails, representationUpdate, recipient,
+        when(noticeOfChangeLetterDetailsGenerator.generate(caseDetails, caseDetailsBefore, representationUpdate, recipient,
             noticeType)).thenReturn(noticeOfChangeLetterDetails);
         return noticeOfChangeLetterDetails;
     }

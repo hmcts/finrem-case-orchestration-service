@@ -46,21 +46,21 @@ public class NocLetterNotificationServiceTest {
     @Test
     public void shouldSendNoticeOfChangeLettersForAddedAndRemoved() {
 
-        caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-add-and-revoke.json",
+        caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke.json",
             new ObjectMapper());
         caseDetailsBefore =
-            caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-add-and-revoke-before.json",
+            caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke-before.json",
                 new ObjectMapper());
 
         noticeOfChangeLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
-        verify(nocSolicitorAddedLettersProcessor).processSolicitorAndLitigantLetters(any(CaseDetails.class), anyString(),
+        verify(nocSolicitorAddedLettersProcessor).processSolicitorAndLitigantLetters(any(CaseDetails.class), any(CaseDetails.class), anyString(),
             changeOfRepresentationArgumentCaptor.capture());
 
         RepresentationUpdate representationUpdate = changeOfRepresentationArgumentCaptor.getValue();
         assertThat(representationUpdate.getAdded().getOrganisation().getOrganisationName(), is("FRApplicantSolicitorFirmAdded"));
 
-        verify(nocSolicitorRemovedLettersProcessor).processSolicitorAndLitigantLetters(any(CaseDetails.class), anyString(),
+        verify(nocSolicitorRemovedLettersProcessor).processSolicitorAndLitigantLetters(any(CaseDetails.class), any(CaseDetails.class), anyString(),
             changeOfRepresentationArgumentCaptor.capture());
 
         RepresentationUpdate changeOfRepresentationRemoved = changeOfRepresentationArgumentCaptor.getValue();
@@ -70,14 +70,14 @@ public class NocLetterNotificationServiceTest {
     @Test
     public void shouldSendNoticeOfChangeLettersForAdded() {
 
-        caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-add.json",
+        caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add.json",
             new ObjectMapper());
-        caseDetailsBefore = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-add-before.json",
+        caseDetailsBefore = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-before.json",
             new ObjectMapper());
 
         noticeOfChangeLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
-        verify(nocSolicitorAddedLettersProcessor).processSolicitorAndLitigantLetters(any(CaseDetails.class), anyString(),
+        verify(nocSolicitorAddedLettersProcessor).processSolicitorAndLitigantLetters(any(CaseDetails.class), any(CaseDetails.class), anyString(),
             changeOfRepresentationArgumentCaptor.capture());
 
         RepresentationUpdate representationUpdate = changeOfRepresentationArgumentCaptor.getValue();
@@ -89,16 +89,16 @@ public class NocLetterNotificationServiceTest {
     @Test
     public void shouldSendNoticeOfChangeLettersForRevoked() {
 
-        caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-revoke.json",
+        caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-revoke.json",
             new ObjectMapper());
 
 
-        caseDetailsBefore = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-revoke-before.json",
+        caseDetailsBefore = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-revoke-before.json",
             new ObjectMapper());
 
         noticeOfChangeLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
-        verify(nocSolicitorRemovedLettersProcessor).processSolicitorAndLitigantLetters(any(CaseDetails.class), anyString(),
+        verify(nocSolicitorRemovedLettersProcessor).processSolicitorAndLitigantLetters(any(CaseDetails.class), any(CaseDetails.class), anyString(),
             changeOfRepresentationArgumentCaptor.capture());
 
         RepresentationUpdate representationUpdate = changeOfRepresentationArgumentCaptor.getValue();
@@ -110,15 +110,15 @@ public class NocLetterNotificationServiceTest {
     @Test
     public void shouldSendNoticeOfChangeLettersForLatestChangeOfRepresentationOnly() {
 
-        caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-max-cor.json",
+        caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-max-cor.json",
             new ObjectMapper());
 
         caseDetailsBefore =
-            caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-max-cor-before.json",
+            caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-max-cor-before.json",
                 new ObjectMapper());
         noticeOfChangeLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
-        verify(nocSolicitorRemovedLettersProcessor).processSolicitorAndLitigantLetters(any(CaseDetails.class), anyString(),
+        verify(nocSolicitorRemovedLettersProcessor).processSolicitorAndLitigantLetters(any(CaseDetails.class), any(CaseDetails.class), anyString(),
             changeOfRepresentationArgumentCaptor.capture());
 
         RepresentationUpdate representationUpdate = changeOfRepresentationArgumentCaptor.getValue();

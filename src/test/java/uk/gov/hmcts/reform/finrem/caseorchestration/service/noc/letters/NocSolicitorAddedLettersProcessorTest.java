@@ -39,22 +39,26 @@ public class NocSolicitorAddedLettersProcessorTest extends NocLettersProcessorBa
     public void givenSolicitorAddedAndNoSolicitorEmailProvidedAndAddressesPopulatedGenerateSolicitorAndApplicantLetters() {
 
         CaseDetails caseDetails =
-            getCaseDetails("/fixtures/noticeOfChange/contested/noc-letter-notifications-no-solicitor-email.json");
+            getCaseDetails("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-no-solicitor-email-applicant.json");
+
+        CaseDetails caseDetailsBefore =
+            getCaseDetails("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-no-solicitor-email-applicant-before.json");
+
         RepresentationUpdate representationUpdate = RepresentationUpdate.builder().party(COR_APPLICANT).build();
 
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.FALSE);
 
         NoticeOfChangeLetterDetails noticeOfChangeLetterDetailsApplicant =
-            getNoticeOfChangeLetterDetails(caseDetails, representationUpdate, APPLICANT);
+            getNoticeOfChangeLetterDetails(caseDetails,caseDetailsBefore, representationUpdate, APPLICANT);
         NoticeOfChangeLetterDetails noticeOfChangeLetterDetailsSolicitor =
-            getNoticeOfChangeLetterDetails(caseDetails, representationUpdate, SOLICITOR);
+            getNoticeOfChangeLetterDetails(caseDetails, caseDetailsBefore, representationUpdate, SOLICITOR);
 
         final CaseDocument caseDocumentSol =
             setUpCaseDocumentInteraction(noticeOfChangeLetterDetailsSolicitor, solicitorNocDocumentService, "solDocFileName");
         final CaseDocument caseDocumentApplicant =
             setUpCaseDocumentInteraction(noticeOfChangeLetterDetailsApplicant, litigantSolicitorAddedNocDocumentService, "appDocFileName");
 
-        noticeOfChangeLettersProcessor.processSolicitorAndLitigantLetters(caseDetails, AUTH_TOKEN, representationUpdate);
+        noticeOfChangeLettersProcessor.processSolicitorAndLitigantLetters(caseDetails, caseDetailsBefore, AUTH_TOKEN, representationUpdate);
 
         verify(litigantSolicitorAddedNocDocumentService).generateNoticeOfChangeLetter(AUTH_TOKEN, noticeOfChangeLetterDetailsApplicant);
         verify(solicitorNocDocumentService).generateNoticeOfChangeLetter(AUTH_TOKEN, noticeOfChangeLetterDetailsSolicitor);
@@ -66,18 +70,23 @@ public class NocSolicitorAddedLettersProcessorTest extends NocLettersProcessorBa
     @Test
     public void givenSolicitorAddedAndSolicitorEmailProvidedAndAddressesPopulatedShouldGenerateApplicantLettersOnly() {
 
-        CaseDetails caseDetails = getCaseDetails("/fixtures/noticeOfChange/contested/noc-letter-notifications-with-solicitor-email.json");
+        CaseDetails caseDetails = getCaseDetails(
+            "/fixtures/noticeOfChange/contested/noc/add-with-solicitor-and-applicant-addresses-and-no-emails.json");
         RepresentationUpdate representationUpdate = RepresentationUpdate.builder().party(COR_APPLICANT).build();
+
+        CaseDetails caseDetailsBefore = getCaseDetails(
+            "/fixtures/noticeOfChange/contested/noc/add-with-solicitor-and-applicant-addresses-and-no-emails-before.json");
+
 
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.FALSE);
 
         NoticeOfChangeLetterDetails noticeOfChangeLetterDetailsApplicant =
-            getNoticeOfChangeLetterDetails(caseDetails, representationUpdate, APPLICANT);
+            getNoticeOfChangeLetterDetails(caseDetails, caseDetailsBefore, representationUpdate, APPLICANT);
 
         final CaseDocument caseDocumentApplicant =
             setUpCaseDocumentInteraction(noticeOfChangeLetterDetailsApplicant, litigantSolicitorAddedNocDocumentService, "appDocFileName1");
 
-        noticeOfChangeLettersProcessor.processSolicitorAndLitigantLetters(caseDetails, AUTH_TOKEN, representationUpdate);
+        noticeOfChangeLettersProcessor.processSolicitorAndLitigantLetters(caseDetails, caseDetailsBefore, AUTH_TOKEN, representationUpdate);
 
         verify(litigantSolicitorAddedNocDocumentService).generateNoticeOfChangeLetter(AUTH_TOKEN, noticeOfChangeLetterDetailsApplicant);
         verifyNoInteractions(solicitorNocDocumentService);
@@ -89,17 +98,21 @@ public class NocSolicitorAddedLettersProcessorTest extends NocLettersProcessorBa
 
         CaseDetails caseDetails =
             getCaseDetails("/fixtures/noticeOfChange/consented/noc-letter-notifications-with-solicitor-no-respondent-email.json");
+
+        CaseDetails caseDetailsBefore =
+            getCaseDetails("/fixtures/noticeOfChange/consented/noc-letter-notifications-with-solicitor-no-respondent-email-before.json");
+
         RepresentationUpdate representationUpdate = RepresentationUpdate.builder().party(COR_RESPONDENT).build();
 
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.TRUE);
 
         NoticeOfChangeLetterDetails noticeOfChangeLetterDetailsRespondent =
-            getNoticeOfChangeLetterDetails(caseDetails, representationUpdate, RESPONDENT);
+            getNoticeOfChangeLetterDetails(caseDetails, caseDetailsBefore, representationUpdate, RESPONDENT);
 
         final CaseDocument caseDocumentRespondent =
             setUpCaseDocumentInteraction(noticeOfChangeLetterDetailsRespondent, litigantSolicitorAddedNocDocumentService, "respondentDocFileName");
 
-        noticeOfChangeLettersProcessor.processSolicitorAndLitigantLetters(caseDetails, AUTH_TOKEN, representationUpdate);
+        noticeOfChangeLettersProcessor.processSolicitorAndLitigantLetters(caseDetails, caseDetailsBefore, AUTH_TOKEN, representationUpdate);
 
         verify(litigantSolicitorAddedNocDocumentService).generateNoticeOfChangeLetter(AUTH_TOKEN, noticeOfChangeLetterDetailsRespondent);
         verifyNoInteractions(solicitorNocDocumentService);
@@ -110,22 +123,27 @@ public class NocSolicitorAddedLettersProcessorTest extends NocLettersProcessorBa
     public void givenSolicitorAddedAndNoApplicantAddressesPopulatedShouldGenerateSolicitoLettersOnly() {
 
         CaseDetails caseDetails =
-            getCaseDetails("/fixtures/noticeOfChange/contested/noc-letter-notifications-no-solicitor-email-no-applicant-address.json");
+            getCaseDetails("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-no-solicitor-email-no-applicant-address.json");
+
+        CaseDetails caseDetailsBefore =
+            getCaseDetails(
+                "/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-no-solicitor-email-no-applicant-address-before.json");
+
         RepresentationUpdate representationUpdate = RepresentationUpdate.builder().party(COR_APPLICANT).build();
 
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.FALSE);
 
         NoticeOfChangeLetterDetails noticeOfChangeLetterDetailsApplicant =
-            getNoticeOfChangeLetterDetails(caseDetails, representationUpdate, APPLICANT);
+            getNoticeOfChangeLetterDetails(caseDetails, caseDetailsBefore, representationUpdate, APPLICANT);
         NoticeOfChangeLetterDetails noticeOfChangeLetterDetailsSolicitor =
-            getNoticeOfChangeLetterDetails(caseDetails, representationUpdate, SOLICITOR);
+            getNoticeOfChangeLetterDetails(caseDetails, caseDetailsBefore, representationUpdate, SOLICITOR);
 
         final CaseDocument caseDocumentSol =
             setUpCaseDocumentInteraction(noticeOfChangeLetterDetailsSolicitor, solicitorNocDocumentService, "solDocFileName");
         final CaseDocument caseDocumentApplicant =
             setUpCaseDocumentInteraction(noticeOfChangeLetterDetailsApplicant, litigantSolicitorAddedNocDocumentService, "appDocFileName");
 
-        noticeOfChangeLettersProcessor.processSolicitorAndLitigantLetters(caseDetails, AUTH_TOKEN, representationUpdate);
+        noticeOfChangeLettersProcessor.processSolicitorAndLitigantLetters(caseDetails, caseDetailsBefore,  AUTH_TOKEN, representationUpdate);
 
         verifyNoInteractions(litigantSolicitorAddedNocDocumentService);
         verify(solicitorNocDocumentService).generateNoticeOfChangeLetter(AUTH_TOKEN, noticeOfChangeLetterDetailsSolicitor);

@@ -27,6 +27,7 @@ import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_ADDRESS_KEY;
@@ -63,17 +64,22 @@ public class NocLetterDetailsGeneratorTest {
     @InjectMocks
     private NocLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator;
     private CaseDetails caseDetails;
+    private CaseDetails caseDetailsBefore;
     private RepresentationUpdate representationUpdate;
     private ChangedRepresentative changedRepresentativeRemoved;
     private ChangedRepresentative changedRepresentativeAdded;
 
     @Before
     public void setUpTest() {
-        caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-add-and-revoke.json",
+        caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke.json",
             new ObjectMapper());
-        when(documentHelper.getApplicantFullName(caseDetails)).thenReturn(APPLICANT_FULL_NAME);
-        when(documentHelper.getRespondentFullNameContested(caseDetails)).thenReturn(RESPONDENT_FULL_NAME_CONTESTED);
-        when(documentHelper.getRespondentFullNameConsented(caseDetails)).thenReturn(RESPONDENT_FULL_NAME_CONSENTED);
+        caseDetailsBefore = caseDetailsFromResource(
+            "/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke-before.json",
+            new ObjectMapper());
+        when(documentHelper.getApplicantFullName(any(CaseDetails.class))).thenReturn(APPLICANT_FULL_NAME);
+        when(documentHelper.getRespondentFullNameContested(any(CaseDetails.class))).thenReturn(RESPONDENT_FULL_NAME_CONTESTED);
+        when(documentHelper.getRespondentFullNameConsented(any(CaseDetails.class))).thenReturn(RESPONDENT_FULL_NAME_CONSENTED);
+
         representationUpdate = buildChangeOfRepresentation();
     }
 
@@ -81,13 +87,14 @@ public class NocLetterDetailsGeneratorTest {
     public void shouldGenerateNoticeOfChangeLetterDetailsForApplicantWhenSolicitorAdded() {
 
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.FALSE);
-        when(addresseeBuilder.generateAddressee(caseDetails, changedRepresentativeAdded, DocumentHelper.PaperNotificationRecipient.APPLICANT))
+        when(addresseeBuilder.generateAddressee(caseDetailsBefore, changedRepresentativeAdded, DocumentHelper.PaperNotificationRecipient.APPLICANT))
             .thenReturn(Addressee.builder().formattedAddress(
                 FORMATTED_ADDRESS).name(ADDRESSEE_NAME).build());
         when(prdOrganisationService.findOrganisationByOrgId(ORGANISATION_ID_ADDED))
             .thenReturn(OrganisationsResponse.builder().name(ORGANISATION_ADDED_NAME).build());
+
         NoticeOfChangeLetterDetails noticeOfChangeLetterDetails =
-            noticeOfChangeLetterDetailsGenerator.generate(caseDetails, buildChangeOfRepresentation(),
+            noticeOfChangeLetterDetailsGenerator.generate(caseDetails, caseDetailsBefore, buildChangeOfRepresentation(),
                 DocumentHelper.PaperNotificationRecipient.APPLICANT,
                 NoticeType.ADD);
 
@@ -108,7 +115,8 @@ public class NocLetterDetailsGeneratorTest {
             .thenReturn(OrganisationsResponse.builder().name(ORGANISATION_REMOVED_NAME).build());
 
         NoticeOfChangeLetterDetails noticeOfChangeLetterDetails =
-            noticeOfChangeLetterDetailsGenerator.generate(caseDetails, representationUpdate, DocumentHelper.PaperNotificationRecipient.APPLICANT,
+            noticeOfChangeLetterDetailsGenerator.generate(caseDetails, caseDetailsBefore, representationUpdate,
+                DocumentHelper.PaperNotificationRecipient.APPLICANT,
                 NoticeType.REMOVE);
 
         assertLetterDetails(noticeOfChangeLetterDetails, NoticeType.REMOVE, Boolean.TRUE);

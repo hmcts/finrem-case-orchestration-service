@@ -29,12 +29,12 @@ public class NocLetterDetailsGenerator {
     public static final String LETTER_DATE_FORMAT = "yyyy-MM-dd";
     public static final String COR_APPLICANT = "applicant";
 
-    private final AddresseeGeneratorService addresseeBuilder;
+    private final AddresseeGeneratorService addresseeGeneratorService;
     private final DocumentHelper documentHelper;
     private final CaseDataService caseDataService;
     private final PrdOrganisationService prdOrganisationService;
 
-    public NoticeOfChangeLetterDetails generate(CaseDetails caseDetails,
+    public NoticeOfChangeLetterDetails generate(CaseDetails caseDetails, CaseDetails caseDetailsBefore,
                                                 RepresentationUpdate representationUpdate,
                                                 DocumentHelper.PaperNotificationRecipient recipient,
                                                 NoticeType noticeType) {
@@ -45,14 +45,15 @@ public class NocLetterDetailsGenerator {
             .letterDate(DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()))
             .divorceCaseNumber(Objects.toString(caseDetails.getData().get(DIVORCE_CASE_NUMBER)))
             .caseNumber(caseDetails.getId().toString())
-            .reference(getSolicitorReference(caseDetails, representationUpdate))
+            .reference(getSolicitorReference(noticeType == NoticeType.ADD ? caseDetails : caseDetailsBefore, representationUpdate))
             .applicantName(documentHelper.getApplicantFullName(caseDetails))
             .solicitorFirmName(getSolicitorFirmName(representationUpdate, noticeType))
             .respondentName(isConsentedApplication ? documentHelper.getRespondentFullNameConsented(caseDetails) :
                 documentHelper.getRespondentFullNameContested(caseDetails))
             .courtDetails(isConsentedApplication ? buildConsentedFrcCourtDetails() : buildFrcCourtDetails(caseDetails.getData()))
-            .addressee(addresseeBuilder.generateAddressee(caseDetails, noticeType == NoticeType.ADD ? representationUpdate.getAdded()
-                : representationUpdate.getRemoved(), recipient)).build();
+            .addressee(addresseeGeneratorService.generateAddressee(noticeType == NoticeType.ADD ? caseDetailsBefore : caseDetails,
+                noticeType == NoticeType.ADD ? representationUpdate.getAdded()
+                    : representationUpdate.getRemoved(), recipient)).build();
     }
 
     private String getSolicitorReference(CaseDetails caseDetails, RepresentationUpdate representationUpdate) {
