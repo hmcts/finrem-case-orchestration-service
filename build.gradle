@@ -436,7 +436,22 @@ task fortifyScan(type: JavaExec)  {
     jvmArgs = ['--add-opens=java.base/java.lang.reflect=ALL-UNNAMED']
 }
 
+task buildCCDXlsx(type: Exec) {
+    group 'ccd tasks'
+    commandLine './bin/build-finrem-xlxs-definitions.sh'
+}
+
 bootWithCCD {
+    dependsOn(buildCCDXlsx)
+
+    doFirst() {
+        project.file('./.local-env-vars').readLines().each() {
+            def index = it.indexOf("=")
+            def key = it.substring(0, index)
+            def value = it.substring(index + 1)
+            environment(key, value)
+        }
+    }
 
     authMode = uk.gov.hmcts.rse.AuthMode.Local
 
