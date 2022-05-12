@@ -36,13 +36,14 @@ public class NocLetterNotificationService {
             ChangedRepresentative corAdded = representationUpdate.getAdded();
             if (isOrganisationIdPopulated(corAdded)) {
                 log.info("The representationUpdate is for an Added solicitor");
-                nocSolicitorAddedLettersProcessor.processSolicitorAndLitigantLetters(caseDetails, authToken, representationUpdate);
+                nocSolicitorAddedLettersProcessor.processSolicitorAndLitigantLetters(caseDetails, caseDetailsBefore, authToken, representationUpdate);
 
             }
             ChangedRepresentative corRemoved = representationUpdate.getRemoved();
             if (isOrganisationIdPopulated(corRemoved)) {
                 log.info("The representationUpdate is for a Removed solicitor");
-                nocSolicitorRemovedLettersProcessor.processSolicitorAndLitigantLetters(caseDetailsBefore, authToken, representationUpdate);
+                nocSolicitorRemovedLettersProcessor.processSolicitorAndLitigantLetters(
+                    caseDetails, caseDetailsBefore, authToken, representationUpdate);
             }
         }
     }

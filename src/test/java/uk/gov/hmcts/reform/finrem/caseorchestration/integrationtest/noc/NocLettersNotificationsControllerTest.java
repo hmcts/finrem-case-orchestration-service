@@ -88,16 +88,16 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
             eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorRevokedFileName()));
 
         verify(bulkPrintService).sendDocumentForPrint(litigantSolicitorAddedCaseDocument, caseDetails);
-        verify(bulkPrintService).sendDocumentForPrint(litigantSolicitorRemovedCaseDocument, caseDetailsBefore);
+        verify(bulkPrintService).sendDocumentForPrint(litigantSolicitorRemovedCaseDocument, caseDetails);
 
     }
 
     @Override
     protected CallbackRequest buildCallbackRequest() {
-        caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-add-and-revoke.json",
+        caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke.json",
             new ObjectMapper());
         caseDetailsBefore =
-            caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc-letter-notifications-add-and-revoke-before.json",
+            caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke-before.json",
                 new ObjectMapper());
         return CallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
     }

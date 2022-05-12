@@ -34,54 +34,55 @@ public class NocSolicitorRemovedLettersProcessorTest extends NocLettersProcessor
     }
 
     @Test
-    public void shouldGenerateSolicitorAndApplicantLettersWhenSolicitorAddedAndNoSolicitorEmailProvided() {
+    public void givenSolicitorRemovedAndSolicitorEmailProvidedAndApplicantEmailProvidedThenShouldNotGenerateSolicitorAndApplicantLetters() {
 
         CaseDetails caseDetails =
-            getCaseDetails("/fixtures/noticeOfChange/contested/noc-letter-notifications-no-solicitor-email.json");
+            getCaseDetails("/fixtures/noticeOfChange/contested/noc/remove-with-solicitor-and-applicant-emails.json");
+
+        CaseDetails caseDetailsBefore =
+            getCaseDetails("/fixtures/noticeOfChange/contested/noc/remove-with-solicitor-and-applicant-emails-before.json");
+
         RepresentationUpdate representationUpdate = RepresentationUpdate.builder().party(COR_APPLICANT).build();
 
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.FALSE);
 
-        NoticeOfChangeLetterDetails noticeOfChangeLetterDetailsApplicant =
-            getNoticeOfChangeLetterDetails(caseDetails, representationUpdate, APPLICANT);
+        nocSolicitorRemovedLettersProcessor.processSolicitorAndLitigantLetters(caseDetails, caseDetailsBefore, AUTH_TOKEN, representationUpdate);
 
-        NoticeOfChangeLetterDetails noticeOfChangeLetterDetailsSolicitor =
-            getNoticeOfChangeLetterDetails(caseDetails, representationUpdate, SOLICITOR);
-
-        final CaseDocument caseDocumentLitigant =
-            setUpCaseDocumentInteraction(noticeOfChangeLetterDetailsApplicant, litigantSolicitorRemovedNocDocumentService,
-                "litigantSolRemovedDocFileName");
-        final CaseDocument caseDocumentSol =
-            setUpCaseDocumentInteraction(noticeOfChangeLetterDetailsSolicitor, solicitorNocDocumentService, "solRemovedDocFileName");
-
-        nocSolicitorRemovedLettersProcessor.processSolicitorAndLitigantLetters(caseDetails, AUTH_TOKEN, representationUpdate);
-
-        verify(litigantSolicitorRemovedNocDocumentService).generateNoticeOfChangeLetter(AUTH_TOKEN, noticeOfChangeLetterDetailsApplicant);
-        verify(solicitorNocDocumentService).generateNoticeOfChangeLetter(AUTH_TOKEN, noticeOfChangeLetterDetailsSolicitor);
-        verify(bulkPrintService).sendDocumentForPrint(caseDocumentLitigant, caseDetails);
-        verify(bulkPrintService).sendDocumentForPrint(caseDocumentSol, caseDetails);
+        verifyNoInteractions(litigantSolicitorRemovedNocDocumentService);
+        verifyNoInteractions(solicitorNocDocumentService);
+        verifyNoInteractions(bulkPrintService);
     }
 
     @Test
-    public void shouldOnlyGenerateApplicantLettersWhenSolicitorEmailProvided() {
+    public void shouldGenerateSolicitorLettersWhenSolicitorRemovedAndAddressIsPresentWithNoEmailAddress() {
 
-        CaseDetails caseDetails = getCaseDetails("/fixtures/noticeOfChange/contested/noc-letter-notifications-with-solicitor-email.json");
+        CaseDetails caseDetails = getCaseDetails(
+            "/fixtures/noticeOfChange/contested/noc/remove-with-solicitor-and-applicant-addresses-and-no-emails.json");
+        CaseDetails caseDetailsBefore = getCaseDetails(
+            "/fixtures/noticeOfChange/contested/noc/remove-with-solicitor-and-applicant-addresses-and-no-emails-before.json");
         RepresentationUpdate representationUpdate = RepresentationUpdate.builder().party(COR_APPLICANT).build();
 
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.FALSE);
 
         NoticeOfChangeLetterDetails noticeOfChangeLetterDetailsApplicant =
-            getNoticeOfChangeLetterDetails(caseDetails, representationUpdate, APPLICANT);
+            getNoticeOfChangeLetterDetails(caseDetails, caseDetailsBefore, representationUpdate, APPLICANT);
+
+        NoticeOfChangeLetterDetails noticeOfChangeLetterDetailsSolicitor =
+            getNoticeOfChangeLetterDetails(caseDetails, caseDetailsBefore, representationUpdate, SOLICITOR);
 
         final CaseDocument caseDocument = setUpCaseDocumentInteraction(noticeOfChangeLetterDetailsApplicant,
             litigantSolicitorRemovedNocDocumentService,
             "litSolRemovedDocFileName");
+        setUpCaseDocumentInteraction(noticeOfChangeLetterDetailsSolicitor,
+            solicitorNocDocumentService,
+            "solRemovedDocFileName");
 
-        nocSolicitorRemovedLettersProcessor.processSolicitorAndLitigantLetters(caseDetails, AUTH_TOKEN, representationUpdate);
+        nocSolicitorRemovedLettersProcessor.processSolicitorAndLitigantLetters(caseDetails, caseDetailsBefore, AUTH_TOKEN, representationUpdate);
 
         verify(litigantSolicitorRemovedNocDocumentService).generateNoticeOfChangeLetter(AUTH_TOKEN, noticeOfChangeLetterDetailsApplicant);
+        verify(solicitorNocDocumentService).generateNoticeOfChangeLetter(AUTH_TOKEN, noticeOfChangeLetterDetailsSolicitor);
+        ;
         verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails);
-        verifyNoInteractions(solicitorNocDocumentService);
 
     }
 
@@ -90,18 +91,21 @@ public class NocSolicitorRemovedLettersProcessorTest extends NocLettersProcessor
 
         CaseDetails caseDetails =
             getCaseDetails("/fixtures/noticeOfChange/consented/noc-letter-notifications-with-solicitor-no-respondent-email.json");
+
+        CaseDetails caseDetailsBefore =
+            getCaseDetails("/fixtures/noticeOfChange/consented/noc-letter-notifications-with-solicitor-no-respondent-email-before.json");
         RepresentationUpdate representationUpdate = RepresentationUpdate.builder().party(COR_RESPONDENT).build();
 
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.TRUE);
 
         NoticeOfChangeLetterDetails noticeOfChangeLetterDetailsRespondent =
-            getNoticeOfChangeLetterDetails(caseDetails, representationUpdate, RESPONDENT);
+            getNoticeOfChangeLetterDetails(caseDetails, caseDetailsBefore, representationUpdate, RESPONDENT);
 
         final CaseDocument caseDocument = setUpCaseDocumentInteraction(noticeOfChangeLetterDetailsRespondent,
             litigantSolicitorRemovedNocDocumentService,
             "litSolRemovedDocFileName");
 
-        nocSolicitorRemovedLettersProcessor.processSolicitorAndLitigantLetters(caseDetails, AUTH_TOKEN, representationUpdate);
+        nocSolicitorRemovedLettersProcessor.processSolicitorAndLitigantLetters(caseDetails, caseDetailsBefore, AUTH_TOKEN, representationUpdate);
 
         verify(litigantSolicitorRemovedNocDocumentService).generateNoticeOfChangeLetter(AUTH_TOKEN, noticeOfChangeLetterDetailsRespondent);
         verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails);
