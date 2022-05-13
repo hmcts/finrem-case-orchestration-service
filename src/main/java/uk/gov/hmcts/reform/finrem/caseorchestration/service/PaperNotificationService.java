@@ -108,7 +108,18 @@ public class PaperNotificationService {
     }
 
     public void printUpdateFrcInformationNotification(CaseDetails caseDetails, String authToken) {
+        if (!caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
+            //send notification letter to app solicitor
+        }
+        if (!caseDataService.isRespondentSolicitorAgreeToReceiveEmails(caseDetails)) {
+            //send notification letter to resp solicitor
+        }
+        if (!caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())) {
 
+        }
+        if (!caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())) {
+
+        }
     }
 
     public boolean shouldPrintForApplicant(CaseDetails caseDetails) {
