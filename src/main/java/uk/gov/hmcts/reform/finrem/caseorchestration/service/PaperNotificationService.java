@@ -5,7 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.service.UpdateFrcInformationDocumentService;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -23,6 +25,7 @@ public class PaperNotificationService {
     private final HelpWithFeesDocumentService helpWithFeesDocumentService;
     private final AssignedToJudgeDocumentService assignedToJudgeDocumentService;
     private final ManualPaymentDocumentService manualPaymentDocumentService;
+    private final UpdateFrcInformationDocumentService updateFrcInformationDocumentService;
     private final BulkPrintService bulkPrintService;
     private final CaseDataService caseDataService;
 
@@ -108,18 +111,9 @@ public class PaperNotificationService {
     }
 
     public void printUpdateFrcInformationNotification(CaseDetails caseDetails, String authToken) {
-        if (!caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-            //send notification letter to app solicitor
-        }
-        if (!caseDataService.isRespondentSolicitorAgreeToReceiveEmails(caseDetails)) {
-            //send notification letter to resp solicitor
-        }
-        if (!caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())) {
+        List<CaseDocument> lettersToSend = updateFrcInformationDocumentService.getUpdateFrcInfoLetters(caseDetails, authToken);
 
-        }
-        if (!caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())) {
-
-        }
+        lettersToSend.forEach(letter -> bulkPrintService.sendDocumentForPrint(letter, caseDetails));
     }
 
     public boolean shouldPrintForApplicant(CaseDetails caseDetails) {

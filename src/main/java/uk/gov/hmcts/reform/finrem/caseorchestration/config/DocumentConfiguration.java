@@ -57,4 +57,8 @@ public class DocumentConfiguration {
     private String additionalHearingFileName;
     private String generalApplicationInterimHearingNoticeTemplate;
     private String generalApplicationInterimHearingNoticeFileName;
+    private String updateFRCInformationSolicitorTemplate;
+    private String updateFRCInformationSolicitorFilename;
+    private String updateFRCInformationLitigantTemplate;
+    private String updateFRCInformationLitigantFilename;
 }
