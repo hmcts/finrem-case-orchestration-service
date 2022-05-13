@@ -57,8 +57,8 @@ public class NocLetterDetailsGenerator {
             .courtDetails(isConsentedApplication ? buildConsentedFrcCourtDetails() : buildFrcCourtDetails(caseDetails.getData()))
             .addressee(addresseeGeneratorService.generateAddressee(noticeType == NoticeType.ADD ? caseDetailsBefore
                 : caseDetails, noticeType == NoticeType.ADD ? representationUpdate.getAdded() : representationUpdate.getRemoved(), recipient))
-            .noticeOfChangeText(recipient == DocumentHelper.PaperNotificationRecipient.SOLICITOR ? noticeType == NoticeType.ADD ?
-                SOLICITOR_ADD_NOC_TEXT : SOLICITOR_REVOKED_NOC_TEXT : null)
+            .noticeOfChangeText(recipient == DocumentHelper.PaperNotificationRecipient.SOLICITOR
+                ? noticeType == NoticeType.ADD ? SOLICITOR_ADD_NOC_TEXT : SOLICITOR_REVOKED_NOC_TEXT : null)
             .build();
     }
 
