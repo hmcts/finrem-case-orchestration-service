@@ -21,5 +21,6 @@ public class NoticeOfChangeLetterDetails {
     private String applicantName;
     private String respondentName;
     private String solicitorFirmName;
+    private String noticeOfChangeText;
 
 }

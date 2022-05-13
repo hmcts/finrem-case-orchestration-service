@@ -123,6 +123,53 @@ public class NocLetterDetailsGeneratorTest {
         assertConsentedCourtDetails(noticeOfChangeLetterDetails);
         assertAddresseeDetails(noticeOfChangeLetterDetails);
 
+
+    }
+
+    @Test
+    public void shouldGenerateNoticeOfChangeLetterDetailsForSolicitorWhenAdded() {
+
+        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.FALSE);
+        when(addresseeBuilder.generateAddressee(caseDetailsBefore, changedRepresentativeAdded, DocumentHelper.PaperNotificationRecipient.SOLICITOR))
+            .thenReturn(Addressee.builder().formattedAddress(
+                FORMATTED_ADDRESS).name(ADDRESSEE_NAME).build());
+        when(prdOrganisationService.findOrganisationByOrgId(ORGANISATION_ID_ADDED))
+            .thenReturn(OrganisationsResponse.builder().name(ORGANISATION_ADDED_NAME).build());
+
+        NoticeOfChangeLetterDetails noticeOfChangeLetterDetails =
+            noticeOfChangeLetterDetailsGenerator.generate(caseDetails, caseDetailsBefore, buildChangeOfRepresentation(),
+                DocumentHelper.PaperNotificationRecipient.SOLICITOR,
+                NoticeType.ADD);
+
+        assertLetterDetails(noticeOfChangeLetterDetails, NoticeType.ADD, Boolean.FALSE);
+        assertContestedCourtDetails(noticeOfChangeLetterDetails);
+        assertAddresseeDetails(noticeOfChangeLetterDetails);
+        assertThat(noticeOfChangeLetterDetails.getNoticeOfChangeText(),
+            is("Your notice of change has been completed successfully. You can now view your client's case."));
+
+    }
+
+    @Test
+    public void shouldGenerateNoticeOfChangeLetterDetailsForSolicitorWhenRemoved() {
+
+        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.FALSE);
+        when(addresseeBuilder.generateAddressee(caseDetails, changedRepresentativeRemoved, DocumentHelper.PaperNotificationRecipient.SOLICITOR))
+            .thenReturn(Addressee.builder().formattedAddress(
+                FORMATTED_ADDRESS).name(ADDRESSEE_NAME).build());
+        when(prdOrganisationService.findOrganisationByOrgId(ORGANISATION_ID_REMOVED))
+            .thenReturn(OrganisationsResponse.builder().name(ORGANISATION_REMOVED_NAME).build());
+
+        NoticeOfChangeLetterDetails noticeOfChangeLetterDetails =
+            noticeOfChangeLetterDetailsGenerator.generate(caseDetails, caseDetailsBefore, buildChangeOfRepresentation(),
+                DocumentHelper.PaperNotificationRecipient.SOLICITOR,
+                NoticeType.REMOVE);
+
+        assertLetterDetails(noticeOfChangeLetterDetails, NoticeType.REMOVE, Boolean.FALSE);
+        assertContestedCourtDetails(noticeOfChangeLetterDetails);
+        assertAddresseeDetails(noticeOfChangeLetterDetails);
+        assertThat(noticeOfChangeLetterDetails.getNoticeOfChangeText(),
+            is("You've completed notice of acting on this, your access to this case has now been revoked."));
+
     }
 
     private void assertLetterDetails(NoticeOfChangeLetterDetails noticeOfChangeLetterDetails,
