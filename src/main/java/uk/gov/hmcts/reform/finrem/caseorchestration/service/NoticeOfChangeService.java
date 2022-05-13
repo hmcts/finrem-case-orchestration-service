@@ -97,14 +97,13 @@ public class NoticeOfChangeService {
                                                                         CaseDetails originalDetails) {
 
         final boolean isApplicant = ((String) caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
+        final String litigantOrgPolicy = isApplicant ? APPLICANT_ORGANISATION_POLICY : RESPONDENT_ORGANISATION_POLICY;
         final DynamicList role = generateCaseRoleIdAsDynamicList(isApplicant ? APP_SOLICITOR_POLICY : RESP_SOLICITOR_POLICY);
 
-        final Organisation organisationToAdd = Optional.ofNullable(getOrgPolicy(caseDetails, isApplicant
-                ? APPLICANT_ORGANISATION_POLICY : RESPONDENT_ORGANISATION_POLICY))
+        final Organisation organisationToAdd = Optional.ofNullable(getOrgPolicy(caseDetails, litigantOrgPolicy))
             .map(OrganisationPolicy::getOrganisation).orElse(null);
 
-        final Organisation organisationToRemove = Optional.ofNullable(getOrgPolicy(originalDetails, isApplicant
-                ? APPLICANT_ORGANISATION_POLICY : RESPONDENT_ORGANISATION_POLICY))
+        final Organisation organisationToRemove = Optional.ofNullable(getOrgPolicy(originalDetails, litigantOrgPolicy))
             .map(OrganisationPolicy::getOrganisation).orElse(null);
 
         return buildChangeOrganisationRequest(role, organisationToAdd, organisationToRemove);
