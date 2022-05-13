@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -24,11 +23,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -99,20 +99,12 @@ public class UpdateFrcInformationDocumentServiceTest {
             .build();
     }
 
-    protected void assertAndVerifySolDocumentsAreGenerated(CaseDocument caseDocument) {
+    protected void assertAndVerifyDocumentsAreGenerated(CaseDocument caseDocument) {
         assertNotNull(caseDocument);
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
             updateFrcInfoLetterDetailsCaptor.capture(),
-            eq(SOL_DOC_TEMPLATE),
-            eq(SOL_DOC_FILENAME));
-    }
-
-    protected void assertAndVerifyLitDocumentsAreGenerated(CaseDocument caseDocument) {
-        assertNotNull(caseDocument);
-        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
-            updateFrcInfoLetterDetailsCaptor.capture(),
-            eq(LIT_DOC_TEMPLATE),
-            eq(LIT_DOC_FILENAME));
+            any(),
+            any());
     }
 
     protected void assertPlaceHoldersMap(Map placeholdersMap) {
@@ -154,11 +146,11 @@ public class UpdateFrcInformationDocumentServiceTest {
 
         List<CaseDocument> letters = updateFrcInformationDocumentService.getUpdateFrcInfoLetters(caseDetails, AUTH_TOKEN);
 
-        letters.forEach(letter -> {
-            Map placeholdersMap = updateFrcInfoLetterDetailsCaptor.getValue();
-            assertPlaceHoldersMap(placeholdersMap);
-        });
+        letters.forEach(letter -> assertPlaceHoldersMap(updateFrcInfoLetterDetailsCaptor.getValue()));
+        letters.forEach(this::assertAndVerifyDocumentsAreGenerated);
 
+        final Predicate<String> solOrLitigantFilename = s -> s.equals(LIT_DOC_FILENAME) || s.equals(SOL_DOC_FILENAME);
+        assertTrue(letters.stream().map(CaseDocument::getDocumentFilename).allMatch(solOrLitigantFilename));
     }
 }
 
