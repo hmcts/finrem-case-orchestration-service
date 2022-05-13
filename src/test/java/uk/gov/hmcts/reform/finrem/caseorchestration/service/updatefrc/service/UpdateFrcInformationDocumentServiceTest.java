@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
@@ -101,7 +102,8 @@ public class UpdateFrcInformationDocumentServiceTest {
 
     protected void assertAndVerifyDocumentsAreGenerated(CaseDocument caseDocument) {
         assertNotNull(caseDocument);
-        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
+        verify(genericDocumentService, times(2))
+            .generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
             updateFrcInfoLetterDetailsCaptor.capture(),
             any(),
             any());
@@ -128,8 +130,7 @@ public class UpdateFrcInformationDocumentServiceTest {
         assertThat(addresseeMap.get("formattedAddress"), is("formattedAddress"));
     }
 
-    @Test
-    public void givenUpdateFrcInfo_whenGetLetters_thenGenerateLetters() {
+    private void setUpMockContext() {
         when(documentConfiguration.getUpdateFRCInformationSolicitorTemplate()).thenReturn(SOL_DOC_TEMPLATE);
         when(documentConfiguration.getUpdateFRCInformationSolicitorFilename()).thenReturn(SOL_DOC_FILENAME);
         when(documentConfiguration.getUpdateFRCInformationLitigantTemplate()).thenReturn(LIT_DOC_TEMPLATE);
@@ -139,17 +140,27 @@ public class UpdateFrcInformationDocumentServiceTest {
         when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
         when(caseDataService.isRespondentSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
         when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
-                updateFrcInfoLetterDetailsCaptor.capture(),
-                eq(any()),
-                eq(any())))
-            .thenReturn(new CaseDocument());
+            updateFrcInfoLetterDetailsCaptor.capture(),
+            eq(LIT_DOC_TEMPLATE),
+            eq(LIT_DOC_FILENAME)))
+            .thenReturn(new CaseDocument(null, LIT_DOC_FILENAME, null));
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
+            updateFrcInfoLetterDetailsCaptor.capture(),
+            eq(SOL_DOC_TEMPLATE),
+            eq(SOL_DOC_FILENAME)))
+            .thenReturn(new CaseDocument(null, SOL_DOC_FILENAME, null));
+        when(updateFrcInfoLetterDetailsGenerator.generate(any(), any())).thenReturn(updateFrcInfoLetterDetails);
+    }
 
+    @Test
+    public void givenUpdateFrcInfo_whenGetLetters_thenGenerateLetters() {
+        setUpMockContext();
         List<CaseDocument> letters = updateFrcInformationDocumentService.getUpdateFrcInfoLetters(caseDetails, AUTH_TOKEN);
 
         letters.forEach(letter -> assertPlaceHoldersMap(updateFrcInfoLetterDetailsCaptor.getValue()));
         letters.forEach(this::assertAndVerifyDocumentsAreGenerated);
 
-        final Predicate<String> solOrLitigantFilename = s -> s.equals(LIT_DOC_FILENAME) || s.equals(SOL_DOC_FILENAME);
+        Predicate<String> solOrLitigantFilename = s -> s.equals(LIT_DOC_FILENAME) || s.equals(SOL_DOC_FILENAME);
         assertTrue(letters.stream().map(CaseDocument::getDocumentFilename).allMatch(solOrLitigantFilename));
     }
 }

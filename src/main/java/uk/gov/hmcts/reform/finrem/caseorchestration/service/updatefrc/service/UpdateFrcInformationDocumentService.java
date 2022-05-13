@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
@@ -23,7 +24,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class UpdateFrcInformationDocumentService {
 
     private final GenericDocumentService genericDocumentService;
@@ -34,6 +34,18 @@ public class UpdateFrcInformationDocumentService {
 
     private static final String CASE_DETAILS = "caseDetails";
     private static final String CASE_DATA = "case_data";
+
+    @Autowired
+    public UpdateFrcInformationDocumentService(GenericDocumentService genericDocumentService,
+                                               DocumentConfiguration documentConfiguration,
+                                               CaseDataService caseDataService,
+                                               UpdateFrcInfoLetterDetailsGenerator updateFrcInfoLetterDetailsGenerator) {
+        this.genericDocumentService = genericDocumentService;
+        this.documentConfiguration = documentConfiguration;
+        this.caseDataService = caseDataService;
+        this.objectMapper = new ObjectMapper();
+        this.updateFrcInfoLetterDetailsGenerator = updateFrcInfoLetterDetailsGenerator;
+    }
 
     public List<CaseDocument> getUpdateFrcInfoLetters(CaseDetails caseDetails, String authToken) {
 
