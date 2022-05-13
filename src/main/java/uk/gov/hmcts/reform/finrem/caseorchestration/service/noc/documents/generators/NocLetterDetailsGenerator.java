@@ -28,6 +28,10 @@ public class NocLetterDetailsGenerator {
 
     public static final String LETTER_DATE_FORMAT = "yyyy-MM-dd";
     public static final String COR_APPLICANT = "applicant";
+    protected static final String SOLICITOR_ADD_NOC_TEXT =
+        "Your notice of change has been completed successfully. You can now view your client's case.";
+    protected static final String SOLICITOR_REVOKED_NOC_TEXT =
+        "You've completed notice of acting on this, your access to this case has now been revoked.";
 
     private final AddresseeGeneratorService addresseeGeneratorService;
     private final DocumentHelper documentHelper;
@@ -51,9 +55,11 @@ public class NocLetterDetailsGenerator {
             .respondentName(isConsentedApplication ? documentHelper.getRespondentFullNameConsented(caseDetails) :
                 documentHelper.getRespondentFullNameContested(caseDetails))
             .courtDetails(isConsentedApplication ? buildConsentedFrcCourtDetails() : buildFrcCourtDetails(caseDetails.getData()))
-            .addressee(addresseeGeneratorService.generateAddressee(noticeType == NoticeType.ADD ? caseDetailsBefore : caseDetails,
-                noticeType == NoticeType.ADD ? representationUpdate.getAdded()
-                    : representationUpdate.getRemoved(), recipient)).build();
+            .addressee(addresseeGeneratorService.generateAddressee(noticeType == NoticeType.ADD ? caseDetailsBefore
+                : caseDetails, noticeType == NoticeType.ADD ? representationUpdate.getAdded() : representationUpdate.getRemoved(), recipient))
+            .noticeOfChangeText(recipient == DocumentHelper.PaperNotificationRecipient.SOLICITOR
+                ? noticeType == NoticeType.ADD ? SOLICITOR_ADD_NOC_TEXT : SOLICITOR_REVOKED_NOC_TEXT : null)
+            .build();
     }
 
     private String getSolicitorReference(CaseDetails caseDetails, RepresentationUpdate representationUpdate) {
