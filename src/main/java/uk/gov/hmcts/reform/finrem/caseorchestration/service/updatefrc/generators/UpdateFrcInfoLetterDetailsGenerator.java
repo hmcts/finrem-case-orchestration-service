@@ -23,6 +23,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
 
@@ -39,6 +41,9 @@ public class UpdateFrcInfoLetterDetailsGenerator {
                                                DocumentHelper.PaperNotificationRecipient recipient) {
         return UpdateFrcInfoLetterDetails.builder()
             .courtDetails(buildFrcCourtDetails(caseDetails.getData()))
+            .reference(Objects.toString(caseDetails.getData().get(recipient == APPLICANT
+                ? SOLICITOR_REFERENCE
+                : RESP_SOLICITOR_REFERENCE)))
             .divorceCaseNumber(Objects.toString(caseDetails.getData().get(DIVORCE_CASE_NUMBER)))
             .applicantName(documentHelper.getApplicantFullName(caseDetails))
             .respondentName(documentHelper.getRespondentFullNameContested(caseDetails))

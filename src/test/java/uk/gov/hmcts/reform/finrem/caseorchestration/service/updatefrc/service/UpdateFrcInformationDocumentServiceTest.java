@@ -153,7 +153,7 @@ public class UpdateFrcInformationDocumentServiceTest {
     }
 
     @Test
-    public void givenUpdateFrcInfo_whenGetLetters_thenGenerateLetters() {
+    public void givenUpdateFrcInfo_whenGetUpdateFrcInfoLetters_thenGenerateLetters() {
         setUpMockContext();
         List<CaseDocument> letters = updateFrcInformationDocumentService.getUpdateFrcInfoLetters(caseDetails, AUTH_TOKEN);
 
