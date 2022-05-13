@@ -17,10 +17,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
@@ -95,14 +93,12 @@ public abstract class NocLettersProcessor {
                                                                          boolean isApplicantCheck) {
         NoticeOfChangeLetterDetails noticeOfChangeLetterDetailsLitigant = null;
         CaseDetails caseDetailsToUse = noticeType == NoticeType.ADD ? caseDetailsBefore : caseDetails;
-        if (isApplicantCheck && !isCaseFieldPopulated(caseDetailsToUse, APPLICANT_EMAIL)
-            && isCaseFieldPopulated(caseDetailsToUse, APPLICANT_ADDRESS)) {
+        if (isApplicantCheck && isCaseFieldPopulated(caseDetailsToUse, APPLICANT_ADDRESS)) {
             log.info("The litigant is an applicant with an address and an email address is not provided");
             noticeOfChangeLetterDetailsLitigant =
                 noticeOfChangeLetterDetailsGenerator.generate(caseDetails, caseDetailsBefore, representationUpdate, APPLICANT,
                     noticeType);
-        } else if (!isApplicantCheck && !isCaseFieldPopulated(caseDetailsToUse, RESPONDENT_EMAIL)
-            && isCaseFieldPopulated(caseDetailsToUse, RESPONDENT_ADDRESS)) {
+        } else if (!isApplicantCheck && isCaseFieldPopulated(caseDetailsToUse, RESPONDENT_ADDRESS)) {
             log.info("The litigant is a respondent with a address and the email address is not provided");
             noticeOfChangeLetterDetailsLitigant =
                 noticeOfChangeLetterDetailsGenerator.generate(caseDetails, caseDetailsBefore, representationUpdate, RESPONDENT,
