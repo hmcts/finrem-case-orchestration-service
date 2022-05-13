@@ -50,21 +50,15 @@ public class UpdateFrcInformationDocumentService {
 
         List<CaseDocument> lettersToSend = new ArrayList<>();
 
-        if (caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())
-            && !caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-
+        if (shouldPrintForApplicantSolicitor(caseDetails)) {
             lettersToSend.add(generateSolicitorUpdateFrcInfoLetter(caseDetails, authToken, APPLICANT));
-        } else if (!caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())) {
-
+        } else if (shouldPrintForApplicant(caseDetails)) {
             lettersToSend.add(generateLitigantUpdateFrcInfoLetter(caseDetails, authToken, APPLICANT));
         }
 
-        if (caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())
-            && !caseDataService.isRespondentSolicitorAgreeToReceiveEmails(caseDetails)) {
-
+        if (shouldPrintForRespondentSolicitor(caseDetails)) {
             lettersToSend.add(generateSolicitorUpdateFrcInfoLetter(caseDetails, authToken, RESPONDENT));
-        } else if (!caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())) {
-
+        } else if (shouldPrintForRespondent(caseDetails)) {
             lettersToSend.add(generateLitigantUpdateFrcInfoLetter(caseDetails, authToken, RESPONDENT));
         }
 
@@ -108,5 +102,23 @@ public class UpdateFrcInformationDocumentService {
         caseDataMap.put(CASE_DATA, objectMapper.convertValue(letterDetails, Map.class));
         caseDetailsMap.put(CASE_DETAILS, caseDataMap);
         return caseDetailsMap;
+    }
+
+    private boolean shouldPrintForApplicantSolicitor(CaseDetails caseDetails) {
+        return caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())
+            && !caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails);
+    }
+
+    private boolean shouldPrintForApplicant(CaseDetails caseDetails) {
+        return !caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData());
+    }
+
+    private boolean shouldPrintForRespondentSolicitor(CaseDetails caseDetails) {
+        return caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())
+            && !caseDataService.isRespondentSolicitorAgreeToReceiveEmails(caseDetails);
+    }
+
+    private boolean shouldPrintForRespondent(CaseDetails caseDetails) {
+        return !caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData());
     }
 }
