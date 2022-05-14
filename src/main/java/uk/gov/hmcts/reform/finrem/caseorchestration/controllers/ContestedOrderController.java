@@ -194,7 +194,7 @@ public class ContestedOrderController implements BaseController {
             .map(this::convertToHearingBundleDataList).orElse(Collections.emptyList());
 
         if (!hearingBundleDataList.isEmpty()) {
-            hearingBundleDataList.stream().map(data -> data.getValue().getHearingBundleDocuments()
+            List<String> errorList = hearingBundleDataList.stream().map(data -> data.getValue().getHearingBundleDocuments()
                 .stream()
                 .map(f -> f.getValue().getBundleDocuments().getDocumentFilename())
                 .filter(n -> !n.toUpperCase().endsWith(".PDF"))
@@ -202,6 +202,7 @@ public class ContestedOrderController implements BaseController {
                 .orElseThrow(() -> new InvalidCaseDataException(BAD_REQUEST.value(),
                     "Upload hearing bundle is not in pdf format. Please upload in pdf format."))
             ).collect(Collectors.toList());
+            log.info("No. of problematic documents {}", errorList.isEmpty() ? 0 : errorList.size());
         }
     }
 }
