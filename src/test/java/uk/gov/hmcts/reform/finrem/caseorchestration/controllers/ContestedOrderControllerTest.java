@@ -139,7 +139,7 @@ public class ContestedOrderControllerTest extends BaseControllerTest {
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
 
         loadRequestContentWith(CONTESTED_VALIDATE_INVALID_DOC_JSON);
-        mvc.perform(post("/case-orchestration//contested/validatePdfBundle")
+        mvc.perform(post("/case-orchestration//contested/sortUploadedHearingBundles")
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(APPLICATION_JSON_VALUE))
