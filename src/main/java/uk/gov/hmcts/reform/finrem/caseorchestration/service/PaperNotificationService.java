@@ -112,7 +112,6 @@ public class PaperNotificationService {
 
     public void printUpdateFrcInformationNotification(CaseDetails caseDetails, String authToken) {
         List<CaseDocument> lettersToSend = updateFrcInformationDocumentService.getUpdateFrcInfoLetters(caseDetails, authToken);
-
         lettersToSend.forEach(letter -> bulkPrintService.sendDocumentForPrint(letter, caseDetails));
     }
 

@@ -41,9 +41,7 @@ public class UpdateFrcInfoLetterDetailsGenerator {
                                                DocumentHelper.PaperNotificationRecipient recipient) {
         return UpdateFrcInfoLetterDetails.builder()
             .courtDetails(buildFrcCourtDetails(caseDetails.getData()))
-            .reference(Objects.toString(caseDetails.getData().get(recipient == APPLICANT
-                ? SOLICITOR_REFERENCE
-                : RESP_SOLICITOR_REFERENCE)))
+            .reference(getSolicitorReference(caseDetails, recipient))
             .divorceCaseNumber(Objects.toString(caseDetails.getData().get(DIVORCE_CASE_NUMBER)))
             .applicantName(documentHelper.getApplicantFullName(caseDetails))
             .respondentName(documentHelper.getRespondentFullNameContested(caseDetails))
@@ -56,21 +54,18 @@ public class UpdateFrcInfoLetterDetailsGenerator {
     private Addressee getAddressee(CaseDetails caseDetails, DocumentHelper.PaperNotificationRecipient recipient) {
         Map<String, Object> caseData = caseDetails.getData();
 
-        if (recipient == APPLICANT && caseDataService.isApplicantRepresentedByASolicitor(caseData)) {
-            log.info("Applicant is represented by a solicitor");
+        if (isApplicantSolicitor(caseData, recipient)) {
+            log.info("Recipient is Applicant's Solicitor");
             return buildAddressee(nullToEmpty((caseData.get(CONTESTED_SOLICITOR_NAME))),
-                documentHelper.formatAddressForLetterPrinting((Map) caseData.get(CONTESTED_SOLICITOR_ADDRESS)));
-        } else if (recipient == RESPONDENT && caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())) {
-            log.info("Respondent is represented by a solicitor");
+                getSolicitorFormattedAddress(caseDetails, CONTESTED_SOLICITOR_ADDRESS));
+        } else if (isRespondentSolicitor(caseData, recipient)) {
+            log.info("Recipient is Respondent's Solicitor");
             return buildAddressee(nullToEmpty((caseData.get(RESP_SOLICITOR_NAME))),
-                documentHelper.formatAddressForLetterPrinting((Map) caseData.get(RESP_SOLICITOR_ADDRESS)));
+                getSolicitorFormattedAddress(caseDetails, RESP_SOLICITOR_ADDRESS));
         } else {
-            log.info("{} is not represented by a solicitor", recipient);
-            boolean isApplicant = recipient == APPLICANT;
-            return buildAddressee(isApplicant
-                    ? caseDataService.buildFullApplicantName(caseDetails)
-                    : caseDataService.buildFullRespondentName(caseDetails),
-                documentHelper.formatAddressForLetterPrinting((Map) caseData.get(isApplicant ? APPLICANT_ADDRESS : RESPONDENT_ADDRESS)));
+            log.info("Recipient is {}", recipient);
+            return buildAddressee(getLitigantName(caseDetails, recipient),
+                getLitigantFormattedAddress(caseDetails, recipient));
         }
     }
 
@@ -79,5 +74,40 @@ public class UpdateFrcInfoLetterDetailsGenerator {
             .name(name)
             .formattedAddress(address)
             .build();
+    }
+
+    private String getLitigantName(CaseDetails caseDetails, DocumentHelper.PaperNotificationRecipient recipient) {
+        boolean isApplicant = recipient == APPLICANT;
+        return isApplicant
+            ? caseDataService.buildFullApplicantName(caseDetails)
+            : caseDataService.buildFullRespondentName(caseDetails);
+    }
+
+    private String getLitigantFormattedAddress(CaseDetails caseDetails,
+                                               DocumentHelper.PaperNotificationRecipient recipient) {
+        Map<String, Object> caseData = caseDetails.getData();
+        boolean isApplicant = recipient == APPLICANT;
+        return documentHelper.formatAddressForLetterPrinting((Map) caseData.get(isApplicant ? APPLICANT_ADDRESS : RESPONDENT_ADDRESS));
+    }
+
+    private String getSolicitorFormattedAddress(CaseDetails caseDetails, String addressKey) {
+        return documentHelper.formatAddressForLetterPrinting((Map) caseDetails.getData().get(addressKey));
+    }
+
+    private boolean isApplicantSolicitor(Map<String, Object> caseData,
+                                         DocumentHelper.PaperNotificationRecipient recipient) {
+        return recipient == APPLICANT && caseDataService.isApplicantRepresentedByASolicitor(caseData);
+    }
+
+    private boolean isRespondentSolicitor(Map<String, Object> caseData,
+                                          DocumentHelper.PaperNotificationRecipient recipient) {
+        return recipient == RESPONDENT && caseDataService.isRespondentRepresentedByASolicitor(caseData);
+    }
+
+    private String getSolicitorReference(CaseDetails caseDetails,
+                                         DocumentHelper.PaperNotificationRecipient recipient) {
+        return Objects.toString(caseDetails.getData().get(recipient == APPLICANT
+            ? SOLICITOR_REFERENCE
+            : RESP_SOLICITOR_REFERENCE));
     }
 }
