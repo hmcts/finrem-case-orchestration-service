@@ -108,7 +108,7 @@ public class ContestedOrderControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void sortLatestFirtUploadedBundle() throws Exception {
+    public void putLastetBundleOnTop() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
 
@@ -139,7 +139,7 @@ public class ContestedOrderControllerTest extends BaseControllerTest {
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
 
         loadRequestContentWith(CONTESTED_VALIDATE_INVALID_DOC_JSON);
-        mvc.perform(post("/case-orchestration//contested/sortUploadedHearingBundles")
+        mvc.perform(post("/case-orchestration//contested/validatePdfBundle")
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(APPLICATION_JSON_VALUE))
