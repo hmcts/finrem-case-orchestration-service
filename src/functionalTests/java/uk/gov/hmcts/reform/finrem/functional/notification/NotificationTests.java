@@ -114,9 +114,4 @@ public class NotificationTests extends IntegrationTestBase {
         utils.validatePostSuccess(contestDraftOrderApiUri,
             "applicant-solicitor-to-draft-order-with-email-consent.json", contestedDir);
     }
-
-    @Test
-    public void verifyNotifyUpdateFrcInfoIsOkay() {
-        utils.validatePostSuccess(updateFrcInfoUri, "update-frc-info.json", contestedDir);
-    }
 }
