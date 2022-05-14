@@ -35,6 +35,7 @@ public class ContestedOrderControllerTest extends BaseControllerTest {
 
     private static final String CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON = "/fixtures/contested/validate-hearing-successfully.json";
     private static final String CONTESTED_VALIDATE_HEARING_DATE_JSON = "/fixtures/contested/manage-bundle-validate-hearing-date.json";
+    private static final String CONTESTED_VALIDATE_INVALID_DOC_JSON = "/fixtures/contested/manage-bundle-invalidate-document.json";
 
     @MockBean
     private ContestedCaseOrderService contestedCaseOrderService;
@@ -130,5 +131,20 @@ public class ContestedOrderControllerTest extends BaseControllerTest {
                 is("InterimHearingNotice-1649341720076259.pdf")))
             .andExpect(jsonPath("$.data.hearingUploadBundle[1].id",
                 is("d090f7a0-5897-4577-a07f-2137483cb1f9")));
+    }
+
+    @Test
+    public void shouldThrowErrorWhenUploadedDocIsNotPdf() throws Exception {
+        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+
+        loadRequestContentWith(CONTESTED_VALIDATE_INVALID_DOC_JSON);
+        mvc.perform(post("/case-orchestration//contested/validatePdfBundle")
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors").isArray())
+            .andExpect(jsonPath("$.errors", hasItem("Upload hearing bundle is not in pdf format. Please upload in pdf format.")));
     }
 }

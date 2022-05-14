@@ -104,6 +104,32 @@ public class ContestedOrderController implements BaseController {
             .build());
     }
 
+    @PostMapping(path = "/contested/validatePdfBundle", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "check if uploaded bundle is pdf")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
+            response = AboutToStartOrSubmitCallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request"),
+        @ApiResponse(code = 500, message = "Internal Server Error")})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> validatePdfBundle(
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+
+        CaseDetails caseDetails = callback.getCaseDetails();
+        log.info("Received request to check for manage bundle is pdf Case ID: {}", caseDetails.getId());
+        validateCaseData(callback);
+        List<String> errors = new ArrayList<>();
+        try {
+            validateIfUploadedBundleIsPdf(caseDetails);
+        } catch (InvalidCaseDataException invalidCaseDataException) {
+            errors.add(invalidCaseDataException.getMessage());
+        }
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
+            .builder()
+            .data(caseDetails.getData())
+            .errors(errors)
+            .build());
+    }
+
     @PostMapping(path = "/contested/sortUploadedHearingBundles", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Documents to be viewed in order of newest first at top of the list")
     @ApiResponses(value = {
@@ -159,6 +185,23 @@ public class ContestedOrderController implements BaseController {
         if (callbackRequest.getCaseDetails().getData().get(HEARING_DATE) == null) {
             log.info("Hearing date for Case ID: {} not found", callbackRequest.getCaseDetails().getId());
             throw new InvalidCaseDataException(BAD_REQUEST.value(), "Missing hearing date.");
+        }
+    }
+
+    private void validateIfUploadedBundleIsPdf(CaseDetails caseDetails) {
+        Map<String, Object> caseData = caseDetails.getData();
+        List<HearingUploadBundleData> hearingBundleDataList = Optional.ofNullable(caseData.get(HEARING_UPLOAD_BUNDLE_COLLECTION))
+            .map(this::convertToHearingBundleDataList).orElse(Collections.emptyList());
+
+        if (!hearingBundleDataList.isEmpty()) {
+            hearingBundleDataList.stream().map(data -> data.getValue().getHearingBundleDocuments()
+                .stream()
+                .map(f -> f.getValue().getBundleDocuments().getDocumentFilename())
+                .filter(n -> !n.toUpperCase().endsWith(".PDF"))
+                .findAny()
+                .orElseThrow(() -> new InvalidCaseDataException(BAD_REQUEST.value(),
+                    "Upload hearing bundle is not in pdf format. Please upload in pdf format."))
+            ).collect(Collectors.toList());
         }
     }
 }
