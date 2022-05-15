@@ -27,10 +27,12 @@ import java.util.function.Predicate;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -71,6 +73,13 @@ public class UpdateFrcInformationDocumentServiceTest {
     private static final String CASE_DETAILS = "caseDetails";
     private static final String CASE_DATA = "case_data";
 
+    private static final String APP_LITIGANT_URL = "appLitigantUrl";
+    private static final String APP_SOLICITOR_URL = "appSolicitorUrl";
+    private static final String RESP_LITIGANT_URL = "respLitigantUrl";
+    private static final String RESP_SOLICITOR_URL = "respSolicitorUrl";
+    private static final String LITIGANT_URL = "litigantUrl";
+    private static final String SOLICITOR_URL = "solicitorUrl";
+
     protected Map caseData = null;
     protected CaseDetails caseDetails = null;
 
@@ -109,6 +118,15 @@ public class UpdateFrcInformationDocumentServiceTest {
             any());
     }
 
+    protected void assertAndVerifyDocumentIsGenerated(CaseDocument caseDocument) {
+        assertNotNull(caseDocument);
+        verify(genericDocumentService, times(1))
+            .generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
+                updateFrcInfoLetterDetailsCaptor.capture(),
+                any(),
+                any());
+    }
+
     protected void assertPlaceHoldersMap(Map placeholdersMap) {
         Map caseDetailsMap = (Map) placeholdersMap.get(CASE_DETAILS);
         Map caseDataMap = (Map) caseDetailsMap.get(CASE_DATA);
@@ -130,7 +148,7 @@ public class UpdateFrcInformationDocumentServiceTest {
         assertThat(addresseeMap.get("formattedAddress"), is("formattedAddress"));
     }
 
-    private void setUpMockContext() {
+    private void setUpMockContextAppSolicitorRespLitigant() {
         when(documentConfiguration.getUpdateFRCInformationSolicitorTemplate()).thenReturn(SOL_DOC_TEMPLATE);
         when(documentConfiguration.getUpdateFRCInformationSolicitorFilename()).thenReturn(SOL_DOC_FILENAME);
         when(documentConfiguration.getUpdateFRCInformationLitigantTemplate()).thenReturn(LIT_DOC_TEMPLATE);
@@ -142,25 +160,199 @@ public class UpdateFrcInformationDocumentServiceTest {
             updateFrcInfoLetterDetailsCaptor.capture(),
             eq(LIT_DOC_TEMPLATE),
             eq(LIT_DOC_FILENAME)))
-            .thenReturn(new CaseDocument(null, LIT_DOC_FILENAME, null));
+            .thenReturn(new CaseDocument(RESP_LITIGANT_URL, LIT_DOC_FILENAME, null));
         when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
             updateFrcInfoLetterDetailsCaptor.capture(),
             eq(SOL_DOC_TEMPLATE),
             eq(SOL_DOC_FILENAME)))
-            .thenReturn(new CaseDocument(null, SOL_DOC_FILENAME, null));
+            .thenReturn(new CaseDocument(APP_SOLICITOR_URL, SOL_DOC_FILENAME, null));
         when(updateFrcInfoLetterDetailsGenerator.generate(any(), any())).thenReturn(updateFrcInfoLetterDetails);
     }
 
+    private void setUpMockContextAppLitigantRespLitigant() {
+        when(documentConfiguration.getUpdateFRCInformationLitigantTemplate()).thenReturn(LIT_DOC_TEMPLATE);
+        when(documentConfiguration.getUpdateFRCInformationLitigantFilename()).thenReturn(LIT_DOC_FILENAME);
+        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
+        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
+            updateFrcInfoLetterDetailsCaptor.capture(),
+            eq(LIT_DOC_TEMPLATE),
+            eq(LIT_DOC_FILENAME)))
+            .thenReturn(new CaseDocument(LITIGANT_URL, LIT_DOC_FILENAME, null));
+        when(updateFrcInfoLetterDetailsGenerator.generate(any(), any())).thenReturn(updateFrcInfoLetterDetails);
+    }
+
+    private void setUpMockContextAppSolicitorRespSolicitor() {
+        when(documentConfiguration.getUpdateFRCInformationSolicitorTemplate()).thenReturn(SOL_DOC_TEMPLATE);
+        when(documentConfiguration.getUpdateFRCInformationSolicitorFilename()).thenReturn(SOL_DOC_FILENAME);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
+        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
+        when(caseDataService.isRespondentSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
+            updateFrcInfoLetterDetailsCaptor.capture(),
+            eq(SOL_DOC_TEMPLATE),
+            eq(SOL_DOC_FILENAME)))
+            .thenReturn(new CaseDocument(SOLICITOR_URL, SOL_DOC_FILENAME, null));
+        when(updateFrcInfoLetterDetailsGenerator.generate(any(), any())).thenReturn(updateFrcInfoLetterDetails);
+    }
+
+    private void setUpMockContextAppLitigantRespSolicitor() {
+        when(documentConfiguration.getUpdateFRCInformationSolicitorTemplate()).thenReturn(SOL_DOC_TEMPLATE);
+        when(documentConfiguration.getUpdateFRCInformationSolicitorFilename()).thenReturn(SOL_DOC_FILENAME);
+        when(documentConfiguration.getUpdateFRCInformationLitigantTemplate()).thenReturn(LIT_DOC_TEMPLATE);
+        when(documentConfiguration.getUpdateFRCInformationLitigantFilename()).thenReturn(LIT_DOC_FILENAME);
+        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
+        when(caseDataService.isRespondentSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
+            updateFrcInfoLetterDetailsCaptor.capture(),
+            eq(LIT_DOC_TEMPLATE),
+            eq(LIT_DOC_FILENAME)))
+            .thenReturn(new CaseDocument(APP_LITIGANT_URL, LIT_DOC_FILENAME, null));
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
+            updateFrcInfoLetterDetailsCaptor.capture(),
+            eq(SOL_DOC_TEMPLATE),
+            eq(SOL_DOC_FILENAME)))
+            .thenReturn(new CaseDocument(RESP_SOLICITOR_URL, SOL_DOC_FILENAME, null));
+        when(updateFrcInfoLetterDetailsGenerator.generate(any(), any())).thenReturn(updateFrcInfoLetterDetails);
+    }
+
+    private void setUpMockContextAppLitigant() {
+        when(documentConfiguration.getUpdateFRCInformationLitigantTemplate()).thenReturn(LIT_DOC_TEMPLATE);
+        when(documentConfiguration.getUpdateFRCInformationLitigantFilename()).thenReturn(LIT_DOC_FILENAME);
+        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
+        when(caseDataService.isRespondentSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
+            updateFrcInfoLetterDetailsCaptor.capture(),
+            eq(LIT_DOC_TEMPLATE),
+            eq(LIT_DOC_FILENAME)))
+            .thenReturn(new CaseDocument(APP_LITIGANT_URL, LIT_DOC_FILENAME, null));
+        when(updateFrcInfoLetterDetailsGenerator.generate(any(), any())).thenReturn(updateFrcInfoLetterDetails);
+    }
+
+    private void setUpMockContextAppSol() {
+        when(documentConfiguration.getUpdateFRCInformationSolicitorTemplate()).thenReturn(SOL_DOC_TEMPLATE);
+        when(documentConfiguration.getUpdateFRCInformationSolicitorFilename()).thenReturn(SOL_DOC_FILENAME);
+        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
+        when(caseDataService.isRespondentSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
+            updateFrcInfoLetterDetailsCaptor.capture(),
+            eq(SOL_DOC_TEMPLATE),
+            eq(SOL_DOC_FILENAME)))
+            .thenReturn(new CaseDocument(APP_SOLICITOR_URL, SOL_DOC_FILENAME, null));
+        when(updateFrcInfoLetterDetailsGenerator.generate(any(), any())).thenReturn(updateFrcInfoLetterDetails);
+    }
+
+    private void setUpNoLetterMockContext() {
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
+        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
+        when(caseDataService.isRespondentSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+    }
+
     @Test
-    public void givenUpdateFrcInfo_whenGetUpdateFrcInfoLetters_thenGenerateLetters() {
-        setUpMockContext();
+    public void givenUpdateFrcInfo_whenGetUpdateFrcInfoLettersForAppSolRespLitigant_thenGenerateLetters() {
+        setUpMockContextAppSolicitorRespLitigant();
+        List<CaseDocument> letters = updateFrcInformationDocumentService.getUpdateFrcInfoLetters(caseDetails, AUTH_TOKEN);
+
+        letters.forEach(letter -> assertPlaceHoldersMap(updateFrcInfoLetterDetailsCaptor.getValue()));
+        letters.forEach(this::assertAndVerifyDocumentsAreGenerated);
+        letters.forEach(letter -> {
+            if (letter.getDocumentFilename().equalsIgnoreCase(LIT_DOC_FILENAME)) {
+                assertEquals(letter.getDocumentUrl(), RESP_LITIGANT_URL);
+            } else if (letter.getDocumentFilename().equalsIgnoreCase(SOL_DOC_FILENAME)) {
+                assertEquals(letter.getDocumentUrl(), APP_SOLICITOR_URL);
+            }
+        });
+
+        Predicate<String> solOrLitigantFilename = s -> s.equals(LIT_DOC_FILENAME) || s.equals(SOL_DOC_FILENAME);
+        assertTrue(letters.stream().map(CaseDocument::getDocumentFilename).allMatch(solOrLitigantFilename));
+    }
+
+    @Test
+    public void givenUpdateFrcInfo_whenGetUpdateFrcInfoLettersForLitigants_thenGenerateLetters() {
+        setUpMockContextAppLitigantRespLitigant();
         List<CaseDocument> letters = updateFrcInformationDocumentService.getUpdateFrcInfoLetters(caseDetails, AUTH_TOKEN);
 
         letters.forEach(letter -> assertPlaceHoldersMap(updateFrcInfoLetterDetailsCaptor.getValue()));
         letters.forEach(this::assertAndVerifyDocumentsAreGenerated);
 
+        Predicate<String> litigantFilename = s -> s.equals(LIT_DOC_FILENAME);
+        assertTrue(letters.stream().map(CaseDocument::getDocumentFilename).allMatch(litigantFilename));
+        letters.forEach(letter -> assertEquals(letter.getDocumentUrl(), LITIGANT_URL));
+    }
+
+    @Test
+    public void givenUpdateFrcInfo_whenGetUpdateFrcInfoLettersForSolicitors_thenGenerateLetters() {
+        setUpMockContextAppSolicitorRespSolicitor();
+        List<CaseDocument> letters = updateFrcInformationDocumentService.getUpdateFrcInfoLetters(caseDetails, AUTH_TOKEN);
+
+        letters.forEach(letter -> assertPlaceHoldersMap(updateFrcInfoLetterDetailsCaptor.getValue()));
+        letters.forEach(this::assertAndVerifyDocumentsAreGenerated);
+
+        Predicate<String> solFilename = s -> s.equals(SOL_DOC_FILENAME);
+        assertTrue(letters.stream().map(CaseDocument::getDocumentFilename).allMatch(solFilename));
+        letters.forEach(letter -> assertEquals(letter.getDocumentUrl(), SOLICITOR_URL));
+    }
+
+    @Test
+    public void givenUpdateFrcInfo_whenGetUpdateFrcInfoLettersForAppLitigantRespSol_thenGenerateLetters() {
+        setUpMockContextAppLitigantRespSolicitor();
+        List<CaseDocument> letters = updateFrcInformationDocumentService.getUpdateFrcInfoLetters(caseDetails, AUTH_TOKEN);
+
+        letters.forEach(letter -> assertPlaceHoldersMap(updateFrcInfoLetterDetailsCaptor.getValue()));
+        letters.forEach(this::assertAndVerifyDocumentsAreGenerated);
+        letters.forEach(letter -> {
+            if (letter.getDocumentFilename().equalsIgnoreCase(LIT_DOC_FILENAME)) {
+                assertEquals(letter.getDocumentUrl(), APP_LITIGANT_URL);
+            } else if (letter.getDocumentFilename().equalsIgnoreCase(SOL_DOC_FILENAME)) {
+                assertEquals(letter.getDocumentUrl(), RESP_SOLICITOR_URL);
+            }
+        });
+
         Predicate<String> solOrLitigantFilename = s -> s.equals(LIT_DOC_FILENAME) || s.equals(SOL_DOC_FILENAME);
         assertTrue(letters.stream().map(CaseDocument::getDocumentFilename).allMatch(solOrLitigantFilename));
     }
+
+    @Test
+    public void givenUpdateFrcInfo_whenGetUpdateFrcInfoLettersForAppOnly_thenGenerateLetter() {
+        setUpMockContextAppLitigant();
+        List<CaseDocument> letters = updateFrcInformationDocumentService.getUpdateFrcInfoLetters(caseDetails, AUTH_TOKEN);
+
+        assertEquals(letters.size(), 1);
+        letters.forEach(letter -> assertPlaceHoldersMap(updateFrcInfoLetterDetailsCaptor.getValue()));
+        CaseDocument appLetter = letters.get(0);
+        assertAndVerifyDocumentIsGenerated(appLetter);
+        assertEquals(appLetter.getDocumentUrl(), APP_LITIGANT_URL);
+        assertEquals(appLetter.getDocumentFilename(), LIT_DOC_FILENAME);
+    }
+
+    @Test
+    public void givenUpdateFrcInfo_whenGetUpdateFrcInfoLettersForAppSolOnly_thenGenerateLetter() {
+        setUpMockContextAppSol();
+        List<CaseDocument> letters = updateFrcInformationDocumentService.getUpdateFrcInfoLetters(caseDetails, AUTH_TOKEN);
+
+        assertEquals(letters.size(), 1);
+        letters.forEach(letter -> assertPlaceHoldersMap(updateFrcInfoLetterDetailsCaptor.getValue()));
+        CaseDocument appLetter = letters.get(0);
+        assertAndVerifyDocumentIsGenerated(appLetter);
+        assertEquals(appLetter.getDocumentUrl(), APP_SOLICITOR_URL);
+        assertEquals(appLetter.getDocumentFilename(), SOL_DOC_FILENAME);
+    }
+
+    @Test
+    public void givenUpdateFrcInfo_whenBothSolicitorsAreDigital_thenGenerateNoLetters() {
+        setUpNoLetterMockContext();
+        List<CaseDocument> letters = updateFrcInformationDocumentService.getUpdateFrcInfoLetters(caseDetails, AUTH_TOKEN);
+
+        assertEquals(letters.size(), 0);
+        verify(genericDocumentService, never())
+            .generateDocumentFromPlaceholdersMap(any(), any(), any(), any());
+    }
+
 }
 

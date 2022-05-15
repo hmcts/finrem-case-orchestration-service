@@ -92,6 +92,7 @@ public class UpdateFrcInformationDocumentService {
 
         UpdateFrcInfoLetterDetails letterDetails = updateFrcInfoLetterDetailsGenerator.generate(caseDetails, recipient);
         Map letterDetailsMap = convertUpdateFrcInfoLetterDetailsToMap(letterDetails);
+        System.out.println(authToken + "\n" + letterDetailsMap + "\n" + template + "\n" + filename);
 
         return genericDocumentService.generateDocumentFromPlaceholdersMap(authToken, letterDetailsMap, template, filename);
     }
