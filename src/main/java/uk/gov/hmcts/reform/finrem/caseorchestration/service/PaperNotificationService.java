@@ -5,10 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.service.UpdateFrcInformationDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.service.UpdateFrcInfoApplicantDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.service.UpdateFrcInfoRespondentDocumentService;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
@@ -25,7 +26,8 @@ public class PaperNotificationService {
     private final HelpWithFeesDocumentService helpWithFeesDocumentService;
     private final AssignedToJudgeDocumentService assignedToJudgeDocumentService;
     private final ManualPaymentDocumentService manualPaymentDocumentService;
-    private final UpdateFrcInformationDocumentService updateFrcInformationDocumentService;
+    private final UpdateFrcInfoApplicantDocumentService updateFrcInfoApplicantDocumentService;
+    private final UpdateFrcInfoRespondentDocumentService updateFrcInfoRespondentDocumentService;
     private final BulkPrintService bulkPrintService;
     private final CaseDataService caseDataService;
 
@@ -111,8 +113,13 @@ public class PaperNotificationService {
     }
 
     public void printUpdateFrcInformationNotification(CaseDetails caseDetails, String authToken) {
-        List<CaseDocument> lettersToSend = updateFrcInformationDocumentService.getUpdateFrcInfoLetters(caseDetails, authToken);
-        lettersToSend.forEach(letter -> bulkPrintService.sendDocumentForPrint(letter, caseDetails));
+        Optional<CaseDocument> applicantLetter = updateFrcInfoApplicantDocumentService.getUpdateFrcInfoLetter(caseDetails,
+            authToken);
+        applicantLetter.ifPresent(letter -> bulkPrintService.sendDocumentForPrint(letter, caseDetails));
+
+        Optional<CaseDocument> respondentLetter = updateFrcInfoRespondentDocumentService.getUpdateFrcInfoLetter(caseDetails,
+            authToken);
+        respondentLetter.ifPresent(letter -> bulkPrintService.sendDocumentForPrint(letter, caseDetails));
     }
 
     public boolean shouldPrintForApplicant(CaseDetails caseDetails) {

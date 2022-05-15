@@ -13,29 +13,25 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.generators.UpdateFrcInfoLetterDetailsGenerator;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
+import java.util.Optional;
 
 @Service
 @Slf4j
-public class UpdateFrcInformationDocumentService {
-
-    private final GenericDocumentService genericDocumentService;
-    private final DocumentConfiguration documentConfiguration;
-    private final CaseDataService caseDataService;
-    private final ObjectMapper objectMapper;
-    private final UpdateFrcInfoLetterDetailsGenerator updateFrcInfoLetterDetailsGenerator;
+public abstract class BaseUpdateFrcInfoDocumentService {
 
     private static final String CASE_DETAILS = "caseDetails";
     private static final String CASE_DATA = "case_data";
 
+    protected final CaseDataService caseDataService;
+    private final GenericDocumentService genericDocumentService;
+    private final DocumentConfiguration documentConfiguration;
+    private final ObjectMapper objectMapper;
+    private final UpdateFrcInfoLetterDetailsGenerator updateFrcInfoLetterDetailsGenerator;
+
     @Autowired
-    public UpdateFrcInformationDocumentService(GenericDocumentService genericDocumentService,
+    public BaseUpdateFrcInfoDocumentService(GenericDocumentService genericDocumentService,
                                                DocumentConfiguration documentConfiguration,
                                                CaseDataService caseDataService,
                                                UpdateFrcInfoLetterDetailsGenerator updateFrcInfoLetterDetailsGenerator) {
@@ -46,28 +42,10 @@ public class UpdateFrcInformationDocumentService {
         this.updateFrcInfoLetterDetailsGenerator = updateFrcInfoLetterDetailsGenerator;
     }
 
-    public List<CaseDocument> getUpdateFrcInfoLetters(CaseDetails caseDetails, String authToken) {
-        List<CaseDocument> lettersToSend = new ArrayList<>();
+    public abstract Optional<CaseDocument> getUpdateFrcInfoLetter(CaseDetails caseDetails, String authToken);
 
-        if (shouldPrintForApplicantSolicitor(caseDetails)) {
-            lettersToSend.add(generateSolicitorUpdateFrcInfoLetter(caseDetails, authToken, APPLICANT));
-        } else if (shouldPrintForApplicant(caseDetails)) {
-            lettersToSend.add(generateLitigantUpdateFrcInfoLetter(caseDetails, authToken, APPLICANT));
-        }
-
-        if (shouldPrintForRespondentSolicitor(caseDetails)) {
-            lettersToSend.add(generateSolicitorUpdateFrcInfoLetter(caseDetails, authToken, RESPONDENT));
-        } else if (shouldPrintForRespondent(caseDetails)) {
-            lettersToSend.add(generateLitigantUpdateFrcInfoLetter(caseDetails, authToken, RESPONDENT));
-        }
-
-        lettersToSend.forEach(letter -> log.info("Document generated for bulk print: {}", letter));
-        return lettersToSend;
-    }
-
-    private CaseDocument generateSolicitorUpdateFrcInfoLetter(CaseDetails caseDetails, String authToken,
-                                                             DocumentHelper.PaperNotificationRecipient recipient) {
-
+    protected CaseDocument generateSolicitorUpdateFrcInfoLetter(CaseDetails caseDetails, String authToken,
+                                                      DocumentHelper.PaperNotificationRecipient recipient) {
         log.info("Generating Update FRC Info Letter for {} solicitor for caseId {}", recipient, caseDetails.getId());
         String template = documentConfiguration.getUpdateFRCInformationSolicitorTemplate();
         String fileName = documentConfiguration.getUpdateFRCInformationSolicitorFilename();
@@ -75,10 +53,9 @@ public class UpdateFrcInformationDocumentService {
         return generateUpdateFrcInfoLetter(caseDetails, authToken, recipient, template, fileName);
     }
 
-    private CaseDocument generateLitigantUpdateFrcInfoLetter(CaseDetails caseDetails,
-                                                            String authToken,
-                                                            DocumentHelper.PaperNotificationRecipient recipient) {
-
+    protected CaseDocument generateLitigantUpdateFrcInfoLetter(CaseDetails caseDetails,
+                                                     String authToken,
+                                                     DocumentHelper.PaperNotificationRecipient recipient) {
         log.info("Generating Update FRC Info Letter for {} for caseId {}", recipient, caseDetails.getId());
         String template = documentConfiguration.getUpdateFRCInformationLitigantTemplate();
         String filename = documentConfiguration.getUpdateFRCInformationLitigantFilename();
@@ -89,7 +66,6 @@ public class UpdateFrcInformationDocumentService {
     private CaseDocument generateUpdateFrcInfoLetter(CaseDetails caseDetails, String authToken,
                                                      DocumentHelper.PaperNotificationRecipient recipient,
                                                      String template, String filename) {
-
         UpdateFrcInfoLetterDetails letterDetails = updateFrcInfoLetterDetailsGenerator.generate(caseDetails, recipient);
         Map letterDetailsMap = convertUpdateFrcInfoLetterDetailsToMap(letterDetails);
         return genericDocumentService.generateDocumentFromPlaceholdersMap(authToken, letterDetailsMap, template, filename);
@@ -101,23 +77,5 @@ public class UpdateFrcInformationDocumentService {
         caseDataMap.put(CASE_DATA, objectMapper.convertValue(letterDetails, Map.class));
         caseDetailsMap.put(CASE_DETAILS, caseDataMap);
         return caseDetailsMap;
-    }
-
-    private boolean shouldPrintForApplicantSolicitor(CaseDetails caseDetails) {
-        return caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())
-            && !caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails);
-    }
-
-    private boolean shouldPrintForApplicant(CaseDetails caseDetails) {
-        return !caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData());
-    }
-
-    private boolean shouldPrintForRespondentSolicitor(CaseDetails caseDetails) {
-        return caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())
-            && !caseDataService.isRespondentSolicitorAgreeToReceiveEmails(caseDetails);
-    }
-
-    private boolean shouldPrintForRespondent(CaseDetails caseDetails) {
-        return !caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData());
     }
 }
