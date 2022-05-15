@@ -27,7 +27,6 @@ public abstract class BaseUpdateFrcInfoDocumentService {
     protected final CaseDataService caseDataService;
     private final GenericDocumentService genericDocumentService;
     private final DocumentConfiguration documentConfiguration;
-    private final ObjectMapper objectMapper;
     private final UpdateFrcInfoLetterDetailsGenerator updateFrcInfoLetterDetailsGenerator;
 
     @Autowired
@@ -38,7 +37,6 @@ public abstract class BaseUpdateFrcInfoDocumentService {
         this.genericDocumentService = genericDocumentService;
         this.documentConfiguration = documentConfiguration;
         this.caseDataService = caseDataService;
-        this.objectMapper = new ObjectMapper();
         this.updateFrcInfoLetterDetailsGenerator = updateFrcInfoLetterDetailsGenerator;
     }
 
@@ -46,7 +44,7 @@ public abstract class BaseUpdateFrcInfoDocumentService {
 
     protected CaseDocument generateSolicitorUpdateFrcInfoLetter(CaseDetails caseDetails, String authToken,
                                                       DocumentHelper.PaperNotificationRecipient recipient) {
-        log.info("Generating Update FRC Info Letter for {} solicitor for caseId {}", recipient, caseDetails.getId());
+        log.info("Generating Update FRC Info Letter for {} SOLICITOR for caseId {}", recipient, caseDetails.getId());
         String template = documentConfiguration.getUpdateFRCInformationSolicitorTemplate();
         String fileName = documentConfiguration.getUpdateFRCInformationSolicitorFilename();
 
@@ -72,6 +70,7 @@ public abstract class BaseUpdateFrcInfoDocumentService {
     }
 
     private Map convertUpdateFrcInfoLetterDetailsToMap(UpdateFrcInfoLetterDetails letterDetails) {
+        ObjectMapper objectMapper = new ObjectMapper();
         HashMap caseDetailsMap = new HashMap<String, Object>();
         HashMap caseDataMap = new HashMap<String, Object>();
         caseDataMap.put(CASE_DATA, objectMapper.convertValue(letterDetails, Map.class));

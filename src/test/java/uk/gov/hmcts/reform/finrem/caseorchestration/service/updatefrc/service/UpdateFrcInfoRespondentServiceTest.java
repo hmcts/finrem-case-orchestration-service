@@ -24,7 +24,7 @@ public class UpdateFrcInfoRespondentServiceTest extends BaseUpdateFrcInfoDocumen
     UpdateFrcInfoRespondentDocumentService updateFrcInfoRespondentDocumentService;
 
     @Test
-    public void givenApplicantRequiresLetterNotification_whenGetUpdateFrcInfoLetter_thenReturnApplicantLetter() {
+    public void givenRespondentRequiresLetterNotification_whenGetUpdateFrcInfoLetter_thenReturnRespondentLetter() {
         setUpLitigantMockContext();
         Optional<CaseDocument> applicantLetter = updateFrcInfoRespondentDocumentService
             .getUpdateFrcInfoLetter(caseDetails, AUTH_TOKEN);
@@ -37,7 +37,7 @@ public class UpdateFrcInfoRespondentServiceTest extends BaseUpdateFrcInfoDocumen
     }
 
     @Test
-    public void givenAppSolicitorRequiresLetterNotification_whenGetUpdateFrcInfoLetter_thenReturnAppSolLetter() {
+    public void givenRespSolicitorRequiresLetterNotification_whenGetUpdateFrcInfoLetter_thenReturnRespSolLetter() {
         setUpSolicitorMockContext();
         Optional<CaseDocument> appSolLetter = updateFrcInfoRespondentDocumentService
             .getUpdateFrcInfoLetter(caseDetails, AUTH_TOKEN);

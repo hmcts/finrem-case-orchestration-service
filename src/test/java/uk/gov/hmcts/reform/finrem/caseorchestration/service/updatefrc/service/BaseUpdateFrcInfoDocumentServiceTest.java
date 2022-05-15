@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -43,8 +42,6 @@ public class BaseUpdateFrcInfoDocumentServiceTest {
 
     @Mock
     protected DocumentConfiguration documentConfiguration;
-
-    protected ObjectMapper objectMapper = new ObjectMapper();
 
     protected static final String AUTH_TOKEN = "authToken";
     protected static final String SOL_DOC_TEMPLATE = "solDocTemplate";
