@@ -34,8 +34,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFu
 public class UpdateFrcInfoLetterDetailsGenerator {
 
     private final DocumentHelper documentHelper;
-    public static final String LETTER_DATE_FORMAT = "yyyy-MM-dd";
     private final CaseDataService caseDataService;
+    public static final String LETTER_DATE_FORMAT = "yyyy-MM-dd";
 
     public UpdateFrcInfoLetterDetails generate(CaseDetails caseDetails,
                                                DocumentHelper.PaperNotificationRecipient recipient) {
