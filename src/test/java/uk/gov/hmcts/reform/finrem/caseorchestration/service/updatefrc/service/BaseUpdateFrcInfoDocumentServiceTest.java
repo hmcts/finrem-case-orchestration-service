@@ -55,14 +55,14 @@ public class BaseUpdateFrcInfoDocumentServiceTest {
     protected static final String LIT_DOC_TEMPLATE = "litDocTemplate";
     protected static final String LIT_DOC_FILENAME = "litDocFilename";
     protected static final String LETTER_DATE_FORMAT = "yyyy-MM-dd";
-    protected static final String APPLICANT_NAME = "applicantName";
-    protected static final String RESPONDENT_NAME = "respondentName";
-    protected static final String FORMATTED_ADDRESS = "formattedAddress";
-    protected static final String ADDRESSEE_NAME = "addresseeName";
+    private static final String APPLICANT_NAME = "applicantName";
+    private static final String RESPONDENT_NAME = "respondentName";
+    private static final String FORMATTED_ADDRESS = "formattedAddress";
+    private static final String ADDRESSEE_NAME = "addresseeName";
     private static final String CASE_DETAILS = "caseDetails";
     private static final String CASE_DATA = "case_data";
 
-    protected Map caseData = null;
+    private Map caseData = null;
     protected CaseDetails caseDetails = null;
 
     protected UpdateFrcInfoLetterDetails updateFrcInfoLetterDetails;
