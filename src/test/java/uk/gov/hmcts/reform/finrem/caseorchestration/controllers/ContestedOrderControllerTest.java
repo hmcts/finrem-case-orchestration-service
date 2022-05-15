@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
+import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -139,12 +140,12 @@ public class ContestedOrderControllerTest extends BaseControllerTest {
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
 
         loadRequestContentWith(CONTESTED_VALIDATE_INVALID_DOC_JSON);
-        mvc.perform(post("/case-orchestration//contested/validatePdfBundle")
+        mvc.perform(post("/case-orchestration//contested/sortUploadedHearingBundles")
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors").isArray())
-            .andExpect(jsonPath("$.errors", hasItem("Upload hearing bundle is not in pdf format. Please upload in pdf format.")));
+            .andExpect(jsonPath("$.errors", hasItem(endsWith("Please upload bundle in pdf format."))));
     }
 }
