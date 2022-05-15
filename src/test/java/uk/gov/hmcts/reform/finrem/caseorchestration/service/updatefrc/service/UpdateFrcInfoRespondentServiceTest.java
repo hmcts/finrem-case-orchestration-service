@@ -23,36 +23,6 @@ public class UpdateFrcInfoRespondentServiceTest extends BaseUpdateFrcInfoDocumen
     @InjectMocks
     UpdateFrcInfoRespondentDocumentService updateFrcInfoRespondentDocumentService;
 
-    private void setUpLitigantMockContext() {
-        when(documentConfiguration.getUpdateFRCInformationLitigantTemplate()).thenReturn(LIT_DOC_TEMPLATE);
-        when(documentConfiguration.getUpdateFRCInformationLitigantFilename()).thenReturn(LIT_DOC_FILENAME);
-        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
-        when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
-            updateFrcInfoLetterDetailsCaptor.capture(),
-            eq(LIT_DOC_TEMPLATE),
-            eq(LIT_DOC_FILENAME)))
-            .thenReturn(new CaseDocument(RESP_LITIGANT_URL, LIT_DOC_FILENAME, null));
-        when(updateFrcInfoLetterDetailsGenerator.generate(any(), any())).thenReturn(updateFrcInfoLetterDetails);
-    }
-
-    private void setUpSolicitorMockContext() {
-        when(documentConfiguration.getUpdateFRCInformationSolicitorTemplate()).thenReturn(SOL_DOC_TEMPLATE);
-        when(documentConfiguration.getUpdateFRCInformationSolicitorFilename()).thenReturn(SOL_DOC_FILENAME);
-        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
-        when(caseDataService.isRespondentSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
-        when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
-            updateFrcInfoLetterDetailsCaptor.capture(),
-            eq(SOL_DOC_TEMPLATE),
-            eq(SOL_DOC_FILENAME)))
-            .thenReturn(new CaseDocument(RESP_SOLICITOR_URL, SOL_DOC_FILENAME, null));
-        when(updateFrcInfoLetterDetailsGenerator.generate(any(), any())).thenReturn(updateFrcInfoLetterDetails);
-    }
-
-    private void setUpNoLetterMockContext() {
-        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
-        when(caseDataService.isRespondentSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
-    }
-
     @Test
     public void givenApplicantRequiresLetterNotification_whenGetUpdateFrcInfoLetter_thenReturnApplicantLetter() {
         setUpLitigantMockContext();
@@ -86,5 +56,35 @@ public class UpdateFrcInfoRespondentServiceTest extends BaseUpdateFrcInfoDocumen
             .getUpdateFrcInfoLetter(caseDetails, AUTH_TOKEN);
 
         assertTrue(shouldBeEmpty.isEmpty());
+    }
+
+    private void setUpLitigantMockContext() {
+        when(documentConfiguration.getUpdateFRCInformationLitigantTemplate()).thenReturn(LIT_DOC_TEMPLATE);
+        when(documentConfiguration.getUpdateFRCInformationLitigantFilename()).thenReturn(LIT_DOC_FILENAME);
+        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
+            updateFrcInfoLetterDetailsCaptor.capture(),
+            eq(LIT_DOC_TEMPLATE),
+            eq(LIT_DOC_FILENAME)))
+            .thenReturn(new CaseDocument(RESP_LITIGANT_URL, LIT_DOC_FILENAME, null));
+        when(updateFrcInfoLetterDetailsGenerator.generate(any(), any())).thenReturn(updateFrcInfoLetterDetails);
+    }
+
+    private void setUpSolicitorMockContext() {
+        when(documentConfiguration.getUpdateFRCInformationSolicitorTemplate()).thenReturn(SOL_DOC_TEMPLATE);
+        when(documentConfiguration.getUpdateFRCInformationSolicitorFilename()).thenReturn(SOL_DOC_FILENAME);
+        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
+        when(caseDataService.isRespondentSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
+            updateFrcInfoLetterDetailsCaptor.capture(),
+            eq(SOL_DOC_TEMPLATE),
+            eq(SOL_DOC_FILENAME)))
+            .thenReturn(new CaseDocument(RESP_SOLICITOR_URL, SOL_DOC_FILENAME, null));
+        when(updateFrcInfoLetterDetailsGenerator.generate(any(), any())).thenReturn(updateFrcInfoLetterDetails);
+    }
+
+    private void setUpNoLetterMockContext() {
+        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
+        when(caseDataService.isRespondentSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
     }
 }
