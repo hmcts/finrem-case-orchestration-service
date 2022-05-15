@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -109,8 +110,8 @@ public class UpdateFrcInformationDocumentServiceTest {
             .build();
     }
 
-    protected void assertAndVerifyDocumentsAreGenerated(CaseDocument caseDocument) {
-        assertNotNull(caseDocument);
+    protected void assertAndVerifyDocumentsAreGenerated(List<CaseDocument> caseDocuments) {
+        caseDocuments.forEach(Assertions::assertNotNull);
         verify(genericDocumentService, times(2))
             .generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
             updateFrcInfoLetterDetailsCaptor.capture(),
@@ -260,7 +261,7 @@ public class UpdateFrcInformationDocumentServiceTest {
         List<CaseDocument> letters = updateFrcInformationDocumentService.getUpdateFrcInfoLetters(caseDetails, AUTH_TOKEN);
 
         letters.forEach(letter -> assertPlaceHoldersMap(updateFrcInfoLetterDetailsCaptor.getValue()));
-        letters.forEach(this::assertAndVerifyDocumentsAreGenerated);
+        assertAndVerifyDocumentsAreGenerated(letters);
         letters.forEach(letter -> {
             if (letter.getDocumentFilename().equalsIgnoreCase(LIT_DOC_FILENAME)) {
                 assertEquals(letter.getDocumentUrl(), RESP_LITIGANT_URL);
@@ -279,7 +280,7 @@ public class UpdateFrcInformationDocumentServiceTest {
         List<CaseDocument> letters = updateFrcInformationDocumentService.getUpdateFrcInfoLetters(caseDetails, AUTH_TOKEN);
 
         letters.forEach(letter -> assertPlaceHoldersMap(updateFrcInfoLetterDetailsCaptor.getValue()));
-        letters.forEach(this::assertAndVerifyDocumentsAreGenerated);
+        assertAndVerifyDocumentsAreGenerated(letters);
 
         Predicate<String> litigantFilename = s -> s.equals(LIT_DOC_FILENAME);
         assertTrue(letters.stream().map(CaseDocument::getDocumentFilename).allMatch(litigantFilename));
@@ -292,7 +293,7 @@ public class UpdateFrcInformationDocumentServiceTest {
         List<CaseDocument> letters = updateFrcInformationDocumentService.getUpdateFrcInfoLetters(caseDetails, AUTH_TOKEN);
 
         letters.forEach(letter -> assertPlaceHoldersMap(updateFrcInfoLetterDetailsCaptor.getValue()));
-        letters.forEach(this::assertAndVerifyDocumentsAreGenerated);
+        assertAndVerifyDocumentsAreGenerated(letters);
 
         Predicate<String> solFilename = s -> s.equals(SOL_DOC_FILENAME);
         assertTrue(letters.stream().map(CaseDocument::getDocumentFilename).allMatch(solFilename));
@@ -305,7 +306,7 @@ public class UpdateFrcInformationDocumentServiceTest {
         List<CaseDocument> letters = updateFrcInformationDocumentService.getUpdateFrcInfoLetters(caseDetails, AUTH_TOKEN);
 
         letters.forEach(letter -> assertPlaceHoldersMap(updateFrcInfoLetterDetailsCaptor.getValue()));
-        letters.forEach(this::assertAndVerifyDocumentsAreGenerated);
+        assertAndVerifyDocumentsAreGenerated(letters);
         letters.forEach(letter -> {
             if (letter.getDocumentFilename().equalsIgnoreCase(LIT_DOC_FILENAME)) {
                 assertEquals(letter.getDocumentUrl(), APP_LITIGANT_URL);
