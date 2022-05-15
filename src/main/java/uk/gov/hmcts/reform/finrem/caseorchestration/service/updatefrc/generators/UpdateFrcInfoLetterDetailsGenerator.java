@@ -62,11 +62,10 @@ public class UpdateFrcInfoLetterDetailsGenerator {
             log.info("Recipient is Respondent's Solicitor");
             return buildAddressee(nullToEmpty((caseData.get(RESP_SOLICITOR_NAME))),
                 getSolicitorFormattedAddress(caseDetails, RESP_SOLICITOR_ADDRESS));
-        } else {
-            log.info("Recipient is {}", recipient);
-            return buildAddressee(getLitigantName(caseDetails, recipient),
-                getLitigantFormattedAddress(caseDetails, recipient));
         }
+
+        log.info("Recipient is {}", recipient);
+        return buildAddressee(getLitigantName(caseDetails, recipient), getLitigantFormattedAddress(caseDetails, recipient));
     }
 
     private Addressee buildAddressee(String name, String address) {

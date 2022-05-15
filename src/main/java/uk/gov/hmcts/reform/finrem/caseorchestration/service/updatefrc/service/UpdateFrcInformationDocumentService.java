@@ -54,11 +54,13 @@ public class UpdateFrcInformationDocumentService {
         } else if (shouldPrintForApplicant(caseDetails)) {
             lettersToSend.add(generateLitigantUpdateFrcInfoLetter(caseDetails, authToken, APPLICANT));
         }
+
         if (shouldPrintForRespondentSolicitor(caseDetails)) {
             lettersToSend.add(generateSolicitorUpdateFrcInfoLetter(caseDetails, authToken, RESPONDENT));
         } else if (shouldPrintForRespondent(caseDetails)) {
             lettersToSend.add(generateLitigantUpdateFrcInfoLetter(caseDetails, authToken, RESPONDENT));
         }
+
         lettersToSend.forEach(letter -> log.info("Document generated for bulk print: {}", letter));
         return lettersToSend;
     }
