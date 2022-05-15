@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.service;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -23,11 +22,6 @@ public class UpdateFrcInfoRespondentServiceTest extends BaseUpdateFrcInfoDocumen
 
     @InjectMocks
     UpdateFrcInfoRespondentDocumentService updateFrcInfoRespondentDocumentService;
-
-    @Before
-    public void setUp() {
-        super.setUp();
-    }
 
     private void setUpLitigantMockContext() {
         when(documentConfiguration.getUpdateFRCInformationLitigantTemplate()).thenReturn(LIT_DOC_TEMPLATE);
