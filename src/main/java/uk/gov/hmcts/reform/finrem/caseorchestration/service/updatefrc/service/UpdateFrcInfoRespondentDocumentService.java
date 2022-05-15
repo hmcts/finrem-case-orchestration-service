@@ -29,9 +29,9 @@ public class UpdateFrcInfoRespondentDocumentService extends BaseUpdateFrcInfoDoc
     @Override
     public Optional<CaseDocument> getUpdateFrcInfoLetter(CaseDetails caseDetails, String authToken) {
         if (shouldPrintForRespondentSolicitor(caseDetails)) {
-            return Optional.ofNullable(generateSolicitorUpdateFrcInfoLetter(caseDetails, authToken, RESPONDENT));
+            return Optional.of(generateSolicitorUpdateFrcInfoLetter(caseDetails, authToken, RESPONDENT));
         } else if (shouldPrintForRespondent(caseDetails)) {
-            return Optional.ofNullable(generateLitigantUpdateFrcInfoLetter(caseDetails, authToken, RESPONDENT));
+            return Optional.of(generateLitigantUpdateFrcInfoLetter(caseDetails, authToken, RESPONDENT));
         }
         return Optional.empty();
     }
