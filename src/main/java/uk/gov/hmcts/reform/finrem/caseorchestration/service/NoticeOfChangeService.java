@@ -42,6 +42,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
 @Service
 @RequiredArgsConstructor
@@ -118,10 +119,10 @@ public class NoticeOfChangeService {
             return ChangedRepresentative.builder()
                 .name(isApplicant
                     ? getApplicantSolicitorName(caseDetails)
-                    : (String) caseData.get(RESP_SOLICITOR_NAME))
+                    : nullToEmpty(caseData.get(RESP_SOLICITOR_NAME)))
                 .email(isApplicant
                     ? getApplicantSolicitorEmail(caseDetails)
-                    : (String) caseData.get(RESP_SOLICITOR_EMAIL))
+                    : nullToEmpty(caseData.get(RESP_SOLICITOR_EMAIL)))
                 .organisation(getOrgPolicy(caseDetails, litigantOrgPolicy).getOrganisation())
                 .build();
         }
@@ -137,10 +138,10 @@ public class NoticeOfChangeService {
             .map(organisation -> ChangedRepresentative.builder()
                 .name(isApplicant
                     ? getApplicantSolicitorName(caseDetails)
-                    : (String) caseData.get(RESP_SOLICITOR_NAME))
+                    : nullToEmpty(caseData.get(RESP_SOLICITOR_NAME)))
                 .email(isApplicant
                     ? getApplicantSolicitorEmail(caseDetails)
-                    : (String) caseData.get(RESP_SOLICITOR_EMAIL))
+                    : nullToEmpty(caseData.get(RESP_SOLICITOR_EMAIL)))
                 .organisation(organisation)
                 .build()).orElse(null);
     }
@@ -165,13 +166,13 @@ public class NoticeOfChangeService {
     private String getApplicantSolicitorName(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
         return caseDataService.isConsentedApplication(caseDetails)
-            ? (String) caseData.get(CONSENTED_SOLICITOR_NAME) : (String) caseData.get(CONTESTED_SOLICITOR_NAME);
+            ? nullToEmpty(caseData.get(CONSENTED_SOLICITOR_NAME)) : nullToEmpty(caseData.get(CONTESTED_SOLICITOR_NAME));
     }
 
     private String getApplicantSolicitorEmail(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
         return caseDataService.isConsentedApplication(caseDetails)
-            ? (String) caseData.get(SOLICITOR_EMAIL) : (String) caseData.get(CONTESTED_SOLICITOR_EMAIL);
+            ? nullToEmpty(caseData.get(SOLICITOR_EMAIL)) : nullToEmpty(caseData.get(CONTESTED_SOLICITOR_EMAIL));
     }
 
     // aac handles org policy modification based on the Change Organisation Request,
