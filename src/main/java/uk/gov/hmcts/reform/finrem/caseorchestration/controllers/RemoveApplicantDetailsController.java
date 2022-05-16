@@ -44,6 +44,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_PHONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -94,7 +95,7 @@ public class RemoveApplicantDetailsController implements BaseController {
     }
 
     private void removeApplicantDetails(Map<String, Object> caseData) {
-        String applicantRepresented = caseData.get(APPLICANT_REPRESENTED).toString();
+        String applicantRepresented = nullToEmpty(caseData.get(APPLICANT_REPRESENTED));
         if (applicantRepresented.equals(YES_VALUE)) {
             //remove applicants data as solicitors data has been added
             caseData.remove("applicantAddress");
