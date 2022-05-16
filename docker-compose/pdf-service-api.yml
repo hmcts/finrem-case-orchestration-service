@@ -1,0 +1,26 @@
+---
+version: '3'
+
+services:
+  pdf-service-api:
+    image: pdf-service:arm64
+    environment:
+      - JAVA_OPTS=-Xms8m -Xmx256m -Djava.security.egd=file:/dev/./urandom -XX:MaxMetaspaceSize=128m
+      - S2S_URL=http://service-auth-provider-api:8080
+      - ROOT_APPENDER
+      - JSON_CONSOLE_PRETTY_PRINT
+      - ROOT_LOGGING_LEVEL
+      - REFORM_SERVICE_NAME=pdf-service
+      - REFORM_TEAM
+      - REFORM_ENVIRONMENT
+      - AZURE_APPLICATIONINSIGHTS_INSTRUMENTATIONKEY=SomeRandomValue
+    ports:
+      - 5500:5500
+    healthcheck:
+      retries: 40
+    networks:
+      - ccd-network
+
+networks:
+  ccd-network:
+    external: true

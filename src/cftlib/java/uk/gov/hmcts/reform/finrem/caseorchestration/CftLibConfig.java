@@ -13,7 +13,7 @@ public class CftLibConfig implements CFTLibConfigurer {
     @Override
     public void configure(CFTLib lib) throws Exception{
         createCcdRoles(lib);
-//        createIdamUsers(lib);
+        createIdamUsers(lib);
         importDefinitions(lib);
     }
 
