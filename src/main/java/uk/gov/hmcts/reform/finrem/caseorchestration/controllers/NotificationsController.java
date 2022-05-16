@@ -623,7 +623,6 @@ public class NotificationsController implements BaseController {
         validateCaseData(callbackRequest);
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
 
         notificationService.sendNoticeOfChangeEmail(caseDetails);
         log.info("Call the noc letter service");

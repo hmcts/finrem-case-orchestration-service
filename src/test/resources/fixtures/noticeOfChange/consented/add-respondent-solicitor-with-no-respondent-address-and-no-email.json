@@ -4,7 +4,7 @@
     "id": "123",
     "jurisdiction": "DIVORCE",
     "state": "applicationDrafted",
-    "case_type_id": "FinancialRemedyContested",
+    "case_type_id": "FinancialRemedyMVP2",
     "case_data": {
       "helpWithFeesQuestion": "No",
       "applicantLName": "Guy",
@@ -18,17 +18,19 @@
       "respondentLName": "test",
       "respondentPhone": null,
       "respondentFMName": "test",
-      "divorceCaseNumber": "DD12D12345",
-      "fastTrackDecision": "Yes",
-      "applicantAddress": {
+      "respondentSolicitorFirm": "test firm",
+      "respondentSolicitorName": "Test",
+      "respondentSolicitorAddress": {
         "County": "",
-        "Country": "",
-        "PostCode": "",
-        "PostTown": "SRIKALAHASTI",
-        "AddressLine1": "House no: 6-354-2, Gandhi Street, Srikalahasti, Chittor District",
+        "Country": "United Kingdom",
+        "PostCode": "SE12 9SE",
+        "PostTown": "London",
+        "AddressLine1": "250 Marvels Lane",
         "AddressLine2": "Srikalahasti, Chittor District",
         "AddressLine3": ""
       },
+      "divorceCaseNumber": "DD12D12345",
+      "fastTrackDecision": "Yes",
       "allocatedCourtList": "nottingham",
       "familyMediatorMIAM": "Yes",
       "petitionIssuedDate": "1111-01-01",
@@ -46,7 +48,7 @@
       "claimingExemptionMIAM": "Yes",
       "divorceDecreeNisiDate": "1111-01-01",
       "isApplicantsHomeCourt": "No",
-      "respondentRepresented": "No",
+      "respondentRepresented": "Yes",
       "applicantSolicitorFirm": "test firm",
       "applicantSolicitorName": "Test",
       "divorceUploadEvidence1": {
@@ -54,6 +56,7 @@
         "document_filename": "Test Document 1.doc",
         "document_binary_url": "http://dm-store:8080/documents/f406f22d-ed3b-4aba-beda-88e008b61301/binary"
       },
+      "solicitorEmail": "test@admin.com",
       "applicantSolicitorPhone": "9963472494",
       "benefitPaymentChecklist": [
         "Step child or step children",
@@ -75,6 +78,15 @@
       ],
       "nameOfCourtDivorceCentre": "test",
       "otherReasonForComplexity": "Yes",
+      "applicantSolicitorAddress": {
+        "County": "",
+        "Country": "United Kingdom",
+        "PostCode": "SE12 9SE",
+        "PostTown": "London",
+        "AddressLine1": "250 Marvels Lane",
+        "AddressLine2": "Srikalahasti, Chittor District",
+        "AddressLine3": ""
+      },
       "detailPotentialAllegation": "sfsffsd",
       "applicantSolicitorDXnumber": null,
       "benefitForChildrenDecision": "No",
@@ -105,20 +117,12 @@
         {
           "id": "60dbe6bc-c1a7-11ec-9d64-0242ac120002",
           "value": {
-            "party": "Applicant",
+            "party": "Respondent",
             "name": "Poor Guy",
             "date": "2020-06-01T15:00:00.000",
-            "by": "Test Applicant Solicitor",
+            "by": "Test Respondent Solicitor",
             "via": "Notice of Change",
             "added": {
-              "name": "Test Applicant Solicitor",
-              "email": "appsolicitor1@yahoo.com",
-              "organisation": {
-                "OrganisationID": "A31PTVU",
-                "OrganisationName": "FRApplicantSolicitorFirmAdded"
-              }
-            },
-            "removed": {
               "name": "Sir Solicitor",
               "email": "sirsolicitor1@gmail.com",
               "organisation": {

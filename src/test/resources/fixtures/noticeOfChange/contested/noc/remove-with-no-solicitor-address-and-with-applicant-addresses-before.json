@@ -20,15 +20,6 @@
       "respondentFMName": "test",
       "divorceCaseNumber": "DD12D12345",
       "fastTrackDecision": "Yes",
-      "applicantAddress": {
-        "County": "",
-        "Country": "",
-        "PostCode": "",
-        "PostTown": "SRIKALAHASTI",
-        "AddressLine1": "House no: 6-354-2, Gandhi Street, Srikalahasti, Chittor District",
-        "AddressLine2": "Srikalahasti, Chittor District",
-        "AddressLine3": ""
-      },
       "allocatedCourtList": "nottingham",
       "familyMediatorMIAM": "Yes",
       "petitionIssuedDate": "1111-01-01",
@@ -49,6 +40,15 @@
       "respondentRepresented": "No",
       "applicantSolicitorFirm": "test firm",
       "applicantSolicitorName": "Test",
+      "applicantAddress": {
+        "County": "",
+        "Country": "",
+        "PostCode": "",
+        "PostTown": "SRIKALAHASTI",
+        "AddressLine1": "House no: 6-354-2, Gandhi Street, Srikalahasti, Chittor District",
+        "AddressLine2": "Srikalahasti, Chittor District",
+        "AddressLine3": ""
+      },
       "divorceUploadEvidence1": {
         "document_url": "http://dm-store:8080/documents/f406f22d-ed3b-4aba-beda-88e008b61301",
         "document_filename": "Test Document 1.doc",
