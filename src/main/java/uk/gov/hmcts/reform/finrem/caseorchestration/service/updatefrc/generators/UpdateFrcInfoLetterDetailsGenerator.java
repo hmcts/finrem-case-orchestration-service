@@ -105,8 +105,8 @@ public class UpdateFrcInfoLetterDetailsGenerator {
 
     private String getSolicitorReference(CaseDetails caseDetails,
                                          DocumentHelper.PaperNotificationRecipient recipient) {
-        return Objects.toString(nullToEmpty(caseDetails.getData().get(recipient == APPLICANT
+        return nullToEmpty(caseDetails.getData().get(recipient == APPLICANT
             ? SOLICITOR_REFERENCE
-            : RESP_SOLICITOR_REFERENCE)));
+            : RESP_SOLICITOR_REFERENCE));
     }
 }
