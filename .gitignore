@@ -6,7 +6,7 @@ target/
 smoke-output/
 functional-output/
 pacts/
-.local-env-vars
+.aat-env
 
 ### STS ###
 .apt_generated

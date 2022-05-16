@@ -445,15 +445,13 @@ bootWithCCD {
     dependsOn(buildCCDXlsx)
 
     doFirst() {
-        project.file('./.local-env-vars').readLines().each() {
+        project.file('./.aat-env').readLines().each() {
             def index = it.indexOf("=")
             def key = it.substring(0, index)
             def value = it.substring(index + 1)
             environment(key, value)
         }
     }
-
-    authMode = uk.gov.hmcts.rse.AuthMode.Local
 
     environment("FEATURE_MANAGE_BUNDLE", "true");
     environment("FEATURE_RESPONDENT_JOURNEY", "true")
