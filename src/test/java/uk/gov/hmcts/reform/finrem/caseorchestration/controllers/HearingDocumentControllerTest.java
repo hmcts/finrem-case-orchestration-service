@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
 import java.io.File;
@@ -55,6 +56,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @MockBean private AdditionalHearingDocumentService additionalHearingDocumentService;
     @MockBean private ValidateHearingService validateHearingService;
     @MockBean private CaseDataService caseDataService;
+    @MockBean private NotificationService notificationService;
 
     @Before
     public void setUp() {
