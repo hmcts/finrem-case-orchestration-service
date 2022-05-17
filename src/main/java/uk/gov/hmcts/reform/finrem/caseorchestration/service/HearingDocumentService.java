@@ -126,10 +126,9 @@ public class HearingDocumentService {
         documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, MINI_FORM_A).ifPresent(caseDocuments::add);
 
         List<CaseDocument> formACaseDocuments = documentHelper.getFormADocumentsData(caseData);
-        log.info("Form A Case Documents for {}: {}", caseId, formACaseDocuments);
         caseDocuments.addAll(formACaseDocuments.stream().map(documentHelper::getCaseDocumentAsBulkPrintDocument).collect(Collectors.toList()));
 
-        log.info("Sending Contested Paper Case bulk print documents for {}: {}", caseId, caseDocuments);
+        log.info("Sending Contested Paper Case bulk print documents for {} from Case Data: {}", caseId, caseData);
 
         return caseDocuments;
     }
