@@ -52,8 +52,8 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @MockBean private PaperNotificationService paperNotificationService;
     @MockBean private GeneralEmailService generalEmailService;
     @MockBean private HelpWithFeesDocumentService helpWithFeesDocumentService;
-    @MockBean private HearingDocumentService hearingDocumentService;
-    @MockBean private AdditionalHearingDocumentService additionalHearingDocumentService;
+    // @MockBean private HearingDocumentService hearingDocumentService;
+    // @MockBean private AdditionalHearingDocumentService additionalHearingDocumentService;
     @MockBean private CaseDataService caseDataService;
     @MockBean private TransferCourtService transferCourtService;
     @MockBean private FeatureToggleService featureToggleService;
@@ -214,18 +214,18 @@ public class NotificationsControllerTest extends BaseControllerTest {
         verifyNoInteractions(notificationService);
     }
 
-    @Test
-    public void givenSolAgreedToEmails_and_noPreviousHearing_shouldSendPrepareForHearingEmail_and_PrintHearingDocuments() {
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
-        when(caseDataService.isContestedApplication(any())).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
-        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(false);
-
-        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
-
-        verify(notificationService).sendPrepareForHearingEmailApplicant(any());
-        verify(hearingDocumentService).sendFormCAndGForBulkPrint(any(), eq(AUTH_TOKEN));
-    }
+//    @Test
+//    public void givenSolAgreedToEmails_and_noPreviousHearing_shouldSendPrepareForHearingEmail_and_PrintHearingDocuments() {
+//        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+//        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+//        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+//        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(false);
+//
+//        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
+//
+//        verify(notificationService).sendPrepareForHearingEmailApplicant(any());
+//        verify(hearingDocumentService).sendFormCAndGForBulkPrint(any(), eq(AUTH_TOKEN));
+//    }
 
     @Test
     public void shouldNotSendPrepareForHearingEmailWhenNotAgreed() {
@@ -238,16 +238,16 @@ public class NotificationsControllerTest extends BaseControllerTest {
         verify(notificationService, never()).sendPrepareForHearingEmailRespondent(any());
     }
 
-    @Test
-    public void givenHadPreviousHearing_whenNotifyHearingInvoked_thenPrintAdditionalHearingDocuments() {
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
-        when(caseDataService.isContestedApplication(any())).thenReturn(true);
-        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
-
-        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
-
-        verify(additionalHearingDocumentService).sendAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
-    }
+//    @Test
+//    public void givenHadPreviousHearing_whenNotifyHearingInvoked_thenPrintAdditionalHearingDocuments() {
+//        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+//        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+//        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
+//
+//        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
+//
+//        verify(additionalHearingDocumentService).sendAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
+//    }
 
     @Test
     public void shouldSendPrepareForHearingOrderSentEmailWhenAgreed() {
