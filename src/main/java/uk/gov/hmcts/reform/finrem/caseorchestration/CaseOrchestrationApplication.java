@@ -9,7 +9,7 @@ import org.springframework.web.filter.CommonsRequestLoggingFilter;
 @SpringBootApplication(scanBasePackages = {
     "uk.gov.hmcts.reform.finrem", "uk.gov.hmcts.reform.bsp.common"
 })
-@EnableFeignClients
+@EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.idam.client", "uk.gov.hmcts.reform.finrem"})
 public class CaseOrchestrationApplication {
 
     public static void main(String[] args) {
