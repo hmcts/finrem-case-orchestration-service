@@ -315,11 +315,8 @@ public class NotificationsController implements BaseController {
     @PostMapping(value = "/prepare-for-hearing", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for 'Prepare for Hearing'.")
     @ApiResponses(value = {
-//        @ApiResponse(code = 204, message = "'Prepare for Hearing' e-mail sent successfully",
-//            response = AboutToStartOrSubmitCallbackResponse.class)})
         @ApiResponse(code = 204, message = "'Prepare for Hearing' e-mail sent successfully",
             response = SubmittedCallbackResponse.class)})
-//    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendPrepareForHearingEmail(
     public ResponseEntity<SubmittedCallbackResponse> sendPrepareForHearingEmail(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @RequestBody CallbackRequest callbackRequest) {
@@ -338,20 +335,6 @@ public class NotificationsController implements BaseController {
             log.info("Sending email notification to Respondent Solicitor for 'Prepare for Hearing'");
             notificationService.sendPrepareForHearingEmailRespondent(caseDetails);
         }
-
-        // NOTE TO SELF, TEST BOTH PAPER AND DIGITAL JOURNEYS
-//        if (!shouldEmailRespondentSolicitor && caseDataService.isContestedApplication(caseDetails)) {
-//            CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-//            if (null != caseDetailsBefore && hearingDocumentService.alreadyHadFirstHearing(caseDetailsBefore)) {
-//                log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
-//                additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, caseDetails);
-//            } else {
-//                log.info("Sending Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
-//                hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, authorisationToken);
-//            }
-//        }
-
-//        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
 
         return ResponseEntity.ok(SubmittedCallbackResponse.builder().build());
     }
