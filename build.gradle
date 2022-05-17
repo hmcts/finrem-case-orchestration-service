@@ -57,10 +57,10 @@ sourceSets {
         resources.srcDir file('src/smokeTest/resources')
     }
 
-    test {
-        java.srcDir 'src/test/java'
-        resources.srcDir 'src/test/resources'
-    }
+//    test {
+//        java.srcDir 'src/test/java'
+//        resources.srcDir 'src/test/resources'
+//    }
 
     functional {
         java {
