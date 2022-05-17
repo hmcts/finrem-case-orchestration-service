@@ -34,22 +34,41 @@ You can run the application by executing following command:
 
 The application will start locally on: `http://localhost:9000`
 
-### Running the service with CCD and Idam locally (Developers and QA)
+### Running the service with CCD (and IDAM) locally (Developers and QA)
 
-The best way to develop and test services in Financial Remedy is to run
+The best way to develop and test services in Financial Remedy is to use `rse-cft-lib` plugin by running:
 
 ```bash
 ./gradlew bootWithCCD
 ```
-This will spin up finrem-case-orchestration along with an Idam simulator and the base CCD services.
 
-In case you are not logged in you must run
+This will spin up finrem-case-orchestration along with the base CCD services 
+and a few docker containers for Postgres, ES, LS and XUI:
+
+on `build.gradle` you can find our customisation for the plugin task on `bootWithCCD`:
+
+- if running it with `authMode = uk.gov.hmcts.rse.AuthMode.AAT`, 
+an `.aat-env` file is needed so the automated process can set up the environment variables
+to point the services to AAT. As these will contain service keys, we are not keeping these under source control, 
+ask a colleague to provide them or copy them from the pods running in AAT.
+(As AAT is heavily used on this setup you must be always on the VPN)
+
+- if running it with `authMode = uk.gov.hmcts.rse.AuthMode.Local` in addition to CCD services an IDAM and S2S simulators
+are also made available so there is no dependency on AAT. 
+
+  
+On both scenarios an automated process will generate and import the definitions directly from your checked out
+`finrem-ccd-definitions` project, which must be present on the same directory level as the `finrem-case-orchestration` folder.
+
+In case you are not logged in you must run the below commands 
+(only the first time you are spinning up the service) 
+to download the service images from Azure Registry.
 ```bash
 az acr login --name hmctspublic --subscription DCD-CNP-Prod
 az acr login --name hmctsprivate --subscription DCD-CNP-Prod
 ```
 #### Gotchas on macOS
-- You must have Docker Desktop running
+- You must have Docker Desktop running; the AAT setup requires 3GB memory minimum and the Local setup will vary depending on how many services you will be running locally
 
 - The IDAM Simulator runs on port 5000, so it is necessary to disable macOS' AirPlay Receiver server in: 
 Settings > Sharing > AirPlay Receiver

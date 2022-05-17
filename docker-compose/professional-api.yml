@@ -1,0 +1,22 @@
+---
+version: '3'
+
+services:
+  professional-api:
+    image: hmctspublic.azurecr.io/rd/professional-api:latest   #Not Multi-Arch yet :(
+    container_name: professional-api
+    environment:
+      AUTH_IDAM_CLIENT_BASEURL: http://localhost:5000
+      CCD_URL: http://ccd-user-profile-api-aat.service.core-compute-aat.internal
+      DELETE_ORG: true
+      IDAM_URL: http://localhost:5000
+      POSTGRES_HOST: rd-professional-api-postgres-db-v11-aat.postgres.database.azure.com
+      POSTGRES_PORT: 6432
+      POSTGRES_USERNAME: postgres
+      PRD_S2S_AUTHORISED_SERVICES: rd_professional_api,rd_user_profile_api,xui_webapp,finrem_payment_service,finrem_case_orchestration,fpl_case_service,iac,aac_manage_case_assignment,divorce_frontend,nfdiv_case_api,am_org_role_mapping_service,probate_backend,civil_service,payment_app,prl_cos_api,civil_general_applications
+      S2S_URL: http://localhost:8489
+      USER_PROFILE_URL: http://localhost:4453
+    ports:
+      - 8090:8090
+    healthcheck:
+      retries: 40
