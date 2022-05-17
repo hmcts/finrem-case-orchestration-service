@@ -46,8 +46,6 @@ public class NotificationsController extends BaseController {
     private final PaperNotificationService paperNotificationService;
     private final GeneralEmailService generalEmailService;
     private final CaseDataService caseDataService;
-    private final HearingDocumentService hearingDocumentService;
-    private final AdditionalHearingDocumentService additionalHearingDocumentService;
     private final TransferCourtService transferCourtService;
     private final FeatureToggleService featureToggleService;
     private final NocLetterNotificationService nocLetterNotificationService;
