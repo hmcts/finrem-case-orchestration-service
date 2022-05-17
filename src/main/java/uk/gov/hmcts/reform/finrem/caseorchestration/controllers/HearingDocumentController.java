@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseExcep
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
 import javax.validation.constraints.NotNull;
@@ -42,6 +43,7 @@ public class HearingDocumentController implements BaseController {
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
     private final ValidateHearingService validateHearingService;
     private final CaseDataService caseDataService;
+    private final NotificationService notificationService;
 
     @PostMapping(path = "/documents/hearing", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles Form C and G generation. Serves as a callback from CCD")
@@ -75,6 +77,20 @@ public class HearingDocumentController implements BaseController {
         }
 
         List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
+
+        boolean shouldEmailRespondentSolicitor = notificationService.shouldEmailRespondentSolicitor(caseDetails.getData());
+
+        // NOTE TO SELF, TEST BOTH PAPER AND DIGITAL JOURNEYS
+        if (!shouldEmailRespondentSolicitor && caseDataService.isContestedApplication(caseDetails)) {
+            CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+            if (null != caseDetailsBefore && hearingDocumentService.alreadyHadFirstHearing(caseDetailsBefore)) {
+                log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
+                additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, caseDetails);
+            } else {
+                log.info("Sending Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
+                hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, authorisationToken);
+            }
+        }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).warnings(warnings).build());
     }
 
