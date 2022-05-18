@@ -1,0 +1,73 @@
+{
+  "token": "token_test",
+  "event_id": "some_event_id",
+  "case_details": {
+    "id": "12345678",
+    "jurisdiction": "DIVORCE",
+    "state": "applicationIssued",
+    "case_type_id": "FinancialRemedyContested",
+    "case_data": {
+      "applicantFMName": "John",
+      "applicantLName": "Smith",
+      "nocParty": "respondent",
+      "natureOfRepresentationChange": "adding",
+      "updateIncludesRepresentativeChange" : "Yes",
+      "ApplicantOrganisationPolicy": {
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
+      },
+      "RespondentOrganisationPolicy": {
+        "OrgPolicyCaseAssignedRole": "[RESPSOLICITOR]"
+      },
+      "dateOfSepration": "2014-01-11",
+      "propertyAddress": "102",
+      "respondentEmail": "padmaja102.ramisetti@gmail.com",
+      "appRespondentLName": "Smith",
+      "respondentPhone": "7411201631",
+      "appRespondentFMName": "Jane",
+      "changeOrganisationRequestField": {
+        "Reason": null,
+        "CaseRoleId": {
+          "value": {
+            "code": "[RESPSOLICITOR]",
+            "label": "[RESPSOLICITOR]"
+          },
+          "list_items": [
+            {
+              "code": "[RESPSOLICITOR]",
+              "label": "[RESPSOLICITOR]"
+            }
+          ]
+        },
+        "NotesReason": null,
+        "ApprovalStatus": "1",
+        "RequestTimestamp": "2020-05-25T14:25:01.000",
+        "OrganisationToAdd": {
+          "OrganisationID": "A31PTVU",
+          "OrganisationName": "FRApplicantSolicitorFirm"
+        },
+        "ApprovalRejectionTimestamp": "2020-05-25T14:25:01.000"
+      },
+      "RepresentationUpdateHistory":
+      [
+          {
+            "id": "60dbe6bc-c1a7-11ec-9d64-0242ac120002",
+            "value": {
+              "party": "Respondent",
+              "name": "Jane Smith",
+              "date": "2020-06-01T15:00:00.000",
+              "by": "Test respondent Solicitor",
+              "via": "Notice of Change",
+              "added": {
+                "name": "Test respondent Solicitor",
+                "email": "padmaja.ramisetti@gmail.com",
+                "organisation": {
+                  "OrganisationID": "A31PTVU",
+                  "OrganisationName": "FRRespondentSolicitorFirm"
+                }
+              }
+            }
+          }
+      ]
+    }
+  }
+}
