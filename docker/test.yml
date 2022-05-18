@@ -1,9 +1,0 @@
----
-version: '3'
-
-services:
-  finrem-case-orchestration:
-    image: "hmctspublic.azurecr.io/finrem/cos:latest"
-    container_name: finrem-case-orchestration
-    ports:
-      - 9000:9000
