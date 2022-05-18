@@ -110,7 +110,7 @@ def versions = [
         jackson              : '2.13.2',
         jsonAssert           : '1.2.3',
         junit                : '4.13.1',
-        lombok               : '1.18.12',
+        lombok               : '1.18.20',
         mockito              : '3.4.4',
         nimbus               : '5.1',
         pact_version         : '4.1.11',
@@ -204,6 +204,12 @@ dependencies {
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
     implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign'
+    implementation group: 'io.github.openfeign', name: 'feign-jackson', version: '11.6'
+    implementation group: 'io.github.openfeign', name: 'feign-httpclient', version: '11.6'
+    implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign'
+    implementation group: 'io.github.openfeign.form', name: 'feign-form', version: '3.8.0'
+
+    implementation 'com.github.hmcts:idam-java-client:2.0.1'
 
     implementation group: 'com.github.hmcts', name: 'ccd-client', version: versions.ccdClient
     implementation group: 'com.github.hmcts.java-logging', name: 'java-logging', version: versions.reformLogging
@@ -350,7 +356,8 @@ pitest {
     excludedClasses.set(['uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication',
                          'uk.gov.hmcts.reform.finrem.caseorchestration.model.*',
                          'uk.gov.hmcts.reform.finrem.caseorchestration.config.*',
-                         'uk.gov.hmcts.reform.finrem.caseorchestration.controllers.PaymentByAccountStub'])
+                         'uk.gov.hmcts.reform.finrem.caseorchestration.controllers.PaymentByAccountStub',
+                         'uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService'])
     threads.set(4)
     outputFormats.set(['XML', 'HTML'])
     timestampedReports.set(false)

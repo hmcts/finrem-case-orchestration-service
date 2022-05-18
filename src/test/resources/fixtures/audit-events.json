@@ -1,0 +1,25 @@
+{
+  "auditEvents": [
+    {
+      "id": "nocRequest",
+      "user_id": "1111",
+      "user_first_name": "Sir",
+      "user_last_name": "Solicitor",
+      "created_date": "2022-01-01T10:46:03.123"
+    },
+    {
+      "id": "FR_updateContactDetails",
+      "user_id": "11145",
+      "user_first_name": "Claire",
+      "user_last_name": "Mumford",
+      "created_date": "2020-01-01T10:46:03.123"
+    },
+    {
+      "id": "FR_updateContactDetails",
+      "user_id": "19123",
+      "user_first_name": "Claire",
+      "user_last_name": "Mumford",
+      "created_date": "2020-06-01T10:46:03.123"
+    }
+  ]
+}
