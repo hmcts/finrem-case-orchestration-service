@@ -27,6 +27,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.when;
@@ -93,6 +94,12 @@ public class GeneralApplicationServiceTest {
         String convertedDocumentName =
             ((CaseDocument) caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST)).getDocumentFilename();
         assertThat(convertedDocumentName, containsString(PDF_FORMAT_EXTENSION));
+    }
+
+    @Test
+    public void whenDraftOrderNotUploaded() {
+        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
+        assertNull(caseDetails.getData().get(GENERAL_APPLICATION_DRAFT_ORDER));
     }
 
     @Test

@@ -1,0 +1,136 @@
+{
+  "event_id": "some_event_id",
+  "case_details": {
+    "id": "123",
+    "jurisdiction": "DIVORCE",
+    "state": "applicationDrafted",
+    "case_type_id": "FinancialRemedyContested",
+    "case_data": {
+      "helpWithFeesQuestion": "No",
+      "applicantLName": "Guy",
+      "dateOfMarriage": "1111-01-01",
+      "mortgageDetail": "test",
+      "netValueOfHome": "dfdf",
+      "applicantFMName": "Poor",
+      "dateOfSepration": "1111-01-01",
+      "propertyAddress": "test",
+      "respondentEmail": null,
+      "respondentLName": "test",
+      "respondentPhone": null,
+      "respondentFMName": "test",
+      "divorceCaseNumber": "DD12D12345",
+      "fastTrackDecision": "Yes",
+      "respondentAddress": {
+        "County": "",
+        "Country": "",
+        "PostCode": "",
+        "PostTown": "SRIKALAHASTI",
+        "AddressLine1": "House no: 6-354-2, Gandhi Street, Srikalahasti, Chittor District",
+        "AddressLine2": "Srikalahasti, Chittor District",
+        "AddressLine3": ""
+      },
+      "allocatedCourtList": "nottingham",
+      "familyMediatorMIAM": "Yes",
+      "petitionIssuedDate": "1111-01-01",
+      "solicitorReference": "LL01",
+      "divorceStageReached": "Decree Nisi",
+      "nottinghamCourtList": "FR_s_NottinghamList_2",
+      "reasonForLocalCourt": "dfff",
+      "uploadScanned4AForm": {
+        "document_url": "http://dm-store:8080/documents/728daa26-507e-4c53-8c5b-a86d14d7aa82",
+        "document_filename": "Test Document 1.doc",
+        "document_binary_url": "http://dm-store:8080/documents/728daa26-507e-4c53-8c5b-a86d14d7aa82/binary"
+      },
+      "promptForAnyDocument": "No",
+      "applicantAttendedMIAM": "No",
+      "claimingExemptionMIAM": "Yes",
+      "divorceDecreeNisiDate": "1111-01-01",
+      "isApplicantsHomeCourt": "No",
+      "respondentRepresented": "No",
+      "applicantSolicitorFirm": "test firm",
+      "applicantSolicitorName": "Test",
+      "divorceUploadEvidence1": {
+        "document_url": "http://dm-store:8080/documents/f406f22d-ed3b-4aba-beda-88e008b61301",
+        "document_filename": "Test Document 1.doc",
+        "document_binary_url": "http://dm-store:8080/documents/f406f22d-ed3b-4aba-beda-88e008b61301/binary"
+      },
+      "applicantSolicitorEmail": "test@admin.com",
+      "applicantSolicitorPhone": "9963472494",
+      "benefitPaymentChecklist": [
+        "Step child or step children",
+        "In addition to child support maintenance already paid under a Child Support Agency assessment",
+        "To meet expenses arising from a child’s disability",
+        "To meet expenses incurred by a child being in educated or training for work",
+        "The child or the person with care of the child or the absent parent of the child is not habitually resident in the United Kingdom"
+      ],
+      "fastTrackDecisionReason": [
+        "reason_1",
+        "reason_2",
+        "reason_3"
+      ],
+      "estimatedAssetsChecklist": [
+        "estimatedAssetsChecklist_1",
+        "estimatedAssetsChecklist_2",
+        "estimatedAssetsChecklist_3",
+        "estimatedAssetsChecklist_4"
+      ],
+      "nameOfCourtDivorceCentre": "test",
+      "otherReasonForComplexity": "Yes",
+      "applicantSolicitorAddress": {
+        "County": "",
+        "Country": "United Kingdom",
+        "PostCode": "SE12 9SE",
+        "PostTown": "London",
+        "AddressLine1": "250 Marvels Lane",
+        "AddressLine2": "Srikalahasti, Chittor District",
+        "AddressLine3": ""
+      },
+      "detailPotentialAllegation": "sfsffsd",
+      "applicantSolicitorDXnumber": null,
+      "benefitForChildrenDecision": "No",
+      "paymentForChildrenDecision": "Yes",
+      "addToComplexityListOfCourts": "trueDontKnow",
+      "natureOfApplicationChecklist": [
+        "periodicalPaymentOrder",
+        "propertyAdjustmentOrder",
+        "Pension Compensation Attachment Order",
+        "Pension Compensation Sharing Order",
+        "Pension Attachment Order",
+        "Pension Sharing Order",
+        "Lump Sum Order"
+      ],
+      "otherReasonForComplexityText": "sdff",
+      "potentialAllegationChecklist": [
+        "potentialAllegationChecklist_1",
+        "potentialAllegationChecklist_2",
+        "potentialAllegationChecklist_3",
+        "notApplicable"
+      ],
+      "additionalPropertyOrderDecision": "No",
+      "applicantSolicitorConsentForEmails": "No",
+      "regionList": "london",
+      "londonFRCList": "cfc",
+      "cfcCourtList": "FR_s_CFCList_9",
+      "RepresentationUpdateHistory": [
+        {
+          "id": "60dbe6bc-c1a7-11ec-9d64-0242ac120002",
+          "value": {
+            "party": "Applicant",
+            "name": "Poor Guy",
+            "date": "2020-06-01T15:00:00.000",
+            "by": "Test Applicant Solicitor",
+            "via": "Notice of Change",
+            "removed": {
+              "name": "Sir Solicitor",
+              "email": "sirsolicitor1@gmail.com",
+              "organisation": {
+                "OrganisationID": "A31PTVA",
+                "OrganisationName": "FRApplicantSolicitorFirmR1"
+              }
+            }
+          }
+        }
+      ]
+    }
+    }
+}
