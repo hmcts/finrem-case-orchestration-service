@@ -19,6 +19,8 @@ public class HearingBundle {
 
     @JsonProperty("hearingBundleDate")
     private LocalDate hearingBundleDate;
+    @JsonProperty("hearingBundleFdr")
+    private String hearingBundleFdr;
     @JsonProperty("hearingBundleDocuments")
     private List<HearingUploadBundle> hearingBundleDocuments;
     @JsonProperty("hearingBundleDescription")

@@ -120,6 +120,8 @@ public class ContestedOrderControllerTest extends BaseControllerTest {
                 .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.hearingUploadBundle").isArray())
+            .andExpect(jsonPath("$.data.hearingUploadBundle[0].value.hearingBundleFdr",
+                is("NO")))
             .andExpect(jsonPath("$.data.hearingUploadBundle[0].id",
                 is("83922295-dbaa-471f-95ff-93efdf200fab")))
             .andExpect(jsonPath("$.data.hearingUploadBundle[1].value.hearingBundleDate",
@@ -131,7 +133,10 @@ public class ContestedOrderControllerTest extends BaseControllerTest {
                     + ".value.bundleDocuments.document_filename",
                 is("InterimHearingNotice-1649341720076259.pdf")))
             .andExpect(jsonPath("$.data.hearingUploadBundle[1].id",
-                is("d090f7a0-5897-4577-a07f-2137483cb1f9")));
+                is("d090f7a0-5897-4577-a07f-2137483cb1f9")))
+            .andExpect(jsonPath("$.data.hearingUploadBundle[1].value.hearingBundleFdr",
+                is("YES")));;
+
     }
 
     @Test

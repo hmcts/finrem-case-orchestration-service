@@ -68,6 +68,7 @@
           "id": "d090f7a0-5897-4577-a07f-2137483cb1f9",
           "value": {
             "hearingBundleDate": "2022-08-20",
+            "hearingBundleFdr": "YES",
             "hearingBundleDocuments": [
               {
                 "id": "d389989b-4ac5-49e4-9164-31054f0bdfdc",
@@ -99,6 +100,7 @@
           "id": "83922295-dbaa-471f-95ff-93efdf200fab",
           "value": {
             "hearingBundleDate": "2022-12-31",
+            "hearingBundleFdr": "NO",
             "hearingBundleDocuments": [
               {
                 "id": "257c7adf-0f89-4e90-a79f-7146dadaa815",

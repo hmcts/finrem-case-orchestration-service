@@ -129,6 +129,7 @@ public class ContestedOrderController implements BaseController {
                     .id(hd.getId())
                     .value(HearingBundle.builder()
                         .hearingBundleDate(hd.getValue().getHearingBundleDate())
+                        .hearingBundleFdr(hd.getValue().getHearingBundleFdr())
                         .hearingBundleDocuments(hd.getValue().getHearingBundleDocuments().stream()
                              .map(hdi -> HearingUploadBundle.builder().id(hdi.getId())
                                  .value(HearingBundleItems.builder().bundleDocuments(getBundleDocuments(hdi, errors))
