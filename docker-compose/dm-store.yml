@@ -1,0 +1,112 @@
+---
+version: '3'
+
+services:
+  ccd-case-management-web:
+    environment:
+      DM_URL: http://localhost:3453/documents
+      DM_URL_REMOTE: http://dm-store:5005/documents
+    depends_on:
+      - dm-store
+
+  ccd-api-gateway:
+    environment:
+      PROXY_DOCUMENT_MANAGEMENT: http://dm-store:5005
+    depends_on:
+      - dm-store
+
+  service-auth-provider-api:
+    environment:
+      MICROSERVICE_KEYS_EM_GW: "${IDAM_KEY_DM_STORE}"
+
+  rpa-dg-docassembly-api:
+    image: docassembly:arm64
+    environment:
+      - S2S_BASE_URI=http://service-auth-provider-api:8080
+      - IDAM_API_BASE_URI=${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}
+      - APPINSIGHTS_INSTRUMENTATIONKEY=test-key
+      - OPEN_ID_API_BASE_URI=${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}/o
+      - OIDC_ISSUER_BASE_URI=http://fr-am:8080/openam/oauth2/hmcts
+      - DM_STORE_APP_URL=http://dm-store:5005
+      - S2S_NAMES_WHITELIST=sscs,divorce,ccd,em_gw,document-management-store,ccd_gw,idam-api,fpl_case_service,xui_webapp,ccd_case_document_am_api
+      # You need to add the below two keys for this service to work on docker locally
+      - DOCMOSIS_ACCESS_KEY=${DOCMOSIS_ACCESS_KEY}
+      - DOCMOSIS_TEMPLATES_ENDPOINT_AUTH=${DOCMOSIS_TEMPLATES_ENDPOINT_AUTH}
+    links:
+      - service-auth-provider-api
+    depends_on:
+      - service-auth-provider-api
+    ports:
+      - 4631:8080
+    extra_hosts:
+      - "docmosis.aat.platform.hmcts.net:10.10.161.121"
+    networks:
+      - ccd-network
+
+  dm-store:
+    image: dm-store:arm64
+    healthcheck:
+      disable: true
+    environment:
+      SERVER_PORT: 5005
+      IDAM_SUPERUSER_EMAIL:
+      IDAM_SECRET_KEY: "${IDAM_KEY_DM_STORE}"
+      GOV_NOTIFY_API_KEY:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://ccd-shared-database:5432/evidence
+      SPRING_DATASOURCE_USERNAME: "${DB_USERNAME}"
+      SPRING_DATASOURCE_PASSWORD: "${DB_PASSWORD}"
+      ENABLE_AZURE_STORAGE_CONTAINER: "true"
+      ENABLE_POSTGRES_BLOB_STORAGE: "false"
+      STORAGEACCOUNT_PRIMARY_CONNECTION_STRING: "${STORAGEACCOUNT_PRIMARY_CONNECTION_STRING:-DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azure-storage-emulator-azurite:10000/devstoreaccount1}"
+      STORAGE_CONTAINER_DOCUMENT_CONTAINER_NAME: "${STORAGE_CONTAINER_DOCUMENT_CONTAINER_NAME:-hmctstestcontainer}"
+      BLOBSTORE_MIGRATE_CCD_PUBLIC_KEY_REQUIRED: "${BLOBSTORE_MIGRATE_CCD_PUBLIC_KEY_REQUIRED:-false}"
+      BLOBSTORE_MIGRATE_CCD_PUBLIC_KEY: "${BLOBSTORE_MIGRATE_CCD_PUBLIC_KEY:-ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDiQ//gc/G53d9dLCtf123fIYo49gUySuJuxOcw2GtieWTMSy+O7RNtsAIjVf3mCOdDNuN69tZNPEWMdaW8n11s9MwYFahtxDecyn0KIP9MvPsfSMSbxhp/f7kfbdB/H/S5eYea66JTyeJS6uNd76RdHttx0mLO30ZkRcXB25c2SIXhRYsdoeKS5GXHDdNejkQM0S/Ev94x2UunApmYHjWN1XcDhsEsAeF4WHnvYh2XiMn9vHY44AqvbWLlAmCgzaXpz8Xhl0fO7jDKSeReDyuM3UTMaiFFaxuvliGol7aIXq/aVe/miiD2SLxHZ6RxAPW80bhXrzJMTLTCqhCEhzfv someone@somewhere.sometime}"
+      SPRING_PROFILES_ACTIVE: dev
+      IDAM_TESTING_SUPPORT_ENABLED: "true"
+      LOGGING_LEVEL_UK_GOV_HMCTS_IDAM: DEBUG
+      IDAM_USER_BASE_URI: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
+      IDAM_S2S_BASE_URI: http://service-auth-provider-api:8080
+      S2S_NAMES_WHITELIST: sscs,divorce,em_gw,em_ccd_orchestrator,ccd,document-management-store,ccd_gw,idam-api,fpl_case_service,em_stitching_api,sscs_bulkscan,ccd_data,dg_docassembly_api,xui_webapp,ccd_case_document_am_api
+      http_proxy:
+      https_proxy:
+      no_proxy:
+      REFORM_SERVICE_TYPE: java
+      REFORM_SERVICE_NAME: document-management-store
+      REFORM_TEAM: ccd
+      REFORM_ENVIRONMENT: docker
+      #      healthcheck env vars
+      PACKAGES_ENVIRONMENT: docker
+      PACKAGES_PROJECT: evidence
+      PACKAGES_NAME: document-management-store
+      PACKAGES_VERSION: unknown
+      ENABLE_DB_MIGRATE: "true"
+    #      debug mode
+    #    JAVA_OPTS: -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005
+    depends_on:
+      - ccd-shared-database
+      - service-auth-provider-api
+      - azure-storage-emulator-azurite
+    ports:
+      - 5005:5005
+    #   debug port exposed
+    #   - 5006:5005
+    networks:
+      - ccd-network
+
+  azure-storage-emulator-azurite:
+    image: arafato/azurite
+    ports:
+      - 10000:10000
+    environment:
+      executable: "blob"
+    volumes:
+      - ccd-docker-azure-blob-data:/opt/azurite/folder
+    networks:
+      - ccd-network
+
+volumes:
+  ccd-docker-azure-blob-data:
+
+networks:
+  ccd-network:
+    external: true

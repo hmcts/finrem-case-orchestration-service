@@ -1,0 +1,43 @@
+{
+  "token": "token_test",
+  "event_id": "some_event_id",
+  "case_details": {
+    "jurisdiction": "DIVORCE",
+    "state": "applicationIssued",
+    "case_type_id": "ContestedFinancialRemedy",
+    "case_data": {
+      "applicantFMName": "John",
+      "applicantLName": "Smith",
+      "respondentRepresented": "No",
+      "applicantRepresented": "No",
+      "dateOfSepration": "2014-01-11",
+      "propertyAddress": "102",
+      "respondentEmail": "padmaja102.ramisetti@gmail.com",
+      "respondentLName": "Smith",
+      "respondentPhone": "7411201631",
+      "respondentFMName": "Jane",
+      "RepresentationUpdateHistory": {
+        "ChangeOfRepresentation": [
+          {
+            "id": "",
+            "value": {
+              "party": "applicant",
+              "name": "John Smith",
+              "date": "2020-06-01T15:00:00.000",
+              "by": "Claire Mumford",
+              "via": "Notice of Change",
+              "added": {
+                "name": "Sir Solicitor",
+                "email": "sirsolicitor1@gmail.com",
+                "organisation": {
+                  "OrganisationID": "A31PTVA",
+                  "OrganisationName": "FRApplicantSolicitorFirm"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

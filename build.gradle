@@ -23,6 +23,7 @@ plugins {
     id 'org.owasp.dependencycheck' version '6.2.2'
     id 'org.sonarqube' version '3.0'
     id 'org.springframework.boot' version '2.3.11.RELEASE'
+    id 'com.github.hmcts.rse-cft-lib' version '0.15.99'
 }
 
 apply plugin: 'au.com.dius.pact'
@@ -96,6 +97,7 @@ sourceSets {
 configurations {
     functionalImplementation.extendsFrom testImplementation
     functionalRuntimeOnly.extendsFrom testRuntimeOnly
+    cftlibRuntimeClasspath.extendsFrom runtimeClasspath
 }
 
 def versions = [
@@ -108,7 +110,7 @@ def versions = [
         jackson              : '2.13.2',
         jsonAssert           : '1.2.3',
         junit                : '4.13.1',
-        lombok               : '1.18.12',
+        lombok               : '1.18.20',
         mockito              : '3.4.4',
         nimbus               : '5.1',
         pact_version         : '4.1.11',
@@ -202,6 +204,12 @@ dependencies {
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
     implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign'
+    implementation group: 'io.github.openfeign', name: 'feign-jackson', version: '11.6'
+    implementation group: 'io.github.openfeign', name: 'feign-httpclient', version: '11.6'
+    implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign'
+    implementation group: 'io.github.openfeign.form', name: 'feign-form', version: '3.8.0'
+
+    implementation 'com.github.hmcts:idam-java-client:2.0.1'
 
     implementation group: 'com.github.hmcts', name: 'ccd-client', version: versions.ccdClient
     implementation group: 'com.github.hmcts.java-logging', name: 'java-logging', version: versions.reformLogging
@@ -348,7 +356,8 @@ pitest {
     excludedClasses.set(['uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication',
                          'uk.gov.hmcts.reform.finrem.caseorchestration.model.*',
                          'uk.gov.hmcts.reform.finrem.caseorchestration.config.*',
-                         'uk.gov.hmcts.reform.finrem.caseorchestration.controllers.PaymentByAccountStub'])
+                         'uk.gov.hmcts.reform.finrem.caseorchestration.controllers.PaymentByAccountStub',
+                         'uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService'])
     threads.set(4)
     outputFormats.set(['XML', 'HTML'])
     timestampedReports.set(false)
@@ -432,5 +441,31 @@ task fortifyScan(type: JavaExec)  {
     mainClass.set("uk.gov.hmcts.fortifyclient.FortifyClientMainApp")
     classpath += sourceSets.test.runtimeClasspath
     jvmArgs = ['--add-opens=java.base/java.lang.reflect=ALL-UNNAMED']
+}
+
+task buildCCDXlsx(type: Exec) {
+    group 'ccd tasks'
+    commandLine './bin/build-finrem-xlxs-definitions.sh'
+}
+
+bootWithCCD {
+    dependsOn(buildCCDXlsx)
+
+    doFirst() {
+        project.file('./.aat-env').readLines().each() {
+            def index = it.indexOf("=")
+            def key = it.substring(0, index)
+            def value = it.substring(index + 1)
+            environment(key, value)
+        }
+    }
+
+    //AAT or Local (IDAM and S2S Simulators)
+    authMode = uk.gov.hmcts.rse.AuthMode.AAT
+
+    environment("FEATURE_MANAGE_BUNDLE", "true");
+    environment("FEATURE_RESPONDENT_JOURNEY", "true")
+    environment("FEATURE_ASSIGN_CASE_ACCESS", "false")
+    environment("FEATURE_USE_USER_TOKEN", "true")
 }
 

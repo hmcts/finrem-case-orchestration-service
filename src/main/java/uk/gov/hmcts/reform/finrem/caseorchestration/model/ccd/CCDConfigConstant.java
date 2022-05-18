@@ -16,6 +16,7 @@ public class CCDConfigConstant {
     public static final String APPLICANT_CONFIDENTIAL_ADDRESS = "applicantAddressConfidential";
     public static final String APPLICANT_PHONE = "applicantPhone";
     public static final String APPLICANT_EMAIL = "applicantEmail";
+    public static final String APPLICANT = "Applicant";
 
     public static final String CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME = "appRespondentFMName";
     public static final String CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME = "respondentFMName";
@@ -25,6 +26,7 @@ public class CCDConfigConstant {
     public static final String RESPONDENT_CONFIDENTIAL_ADDRESS = "respondentAddressConfidential";
     public static final String RESPONDENT_PHONE = "respondentPhone";
     public static final String RESPONDENT_EMAIL = "respondentEmail";
+    public static final String RESPONDENT = "Respondent";
 
     //Applicant Solicitor related
     public static final String SOLICITOR_REFERENCE = "solicitorReference";
@@ -41,8 +43,10 @@ public class CCDConfigConstant {
     public static final String APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED = "applicantSolicitorConsentForEmails";
     public static final String APPLICANT_REPRESENTED = "applicantRepresented";
     public static final String APPLICANT_REPRESENTED_PAPER = "applicantRepresentedPaper";
+    public static final String CONTESTED_SOLICITOR_DX_NUMBER = "applicantSolicitorDXnumber";
     public static final String CONSENTED_SOLICITOR_DX_NUMBER = "solicitorDXnumber";
     public static final String APPLICANT_SHARE_DOCUMENTS = "applicantShareDocs";
+    public static final String APPLICANT_ORGANISATION_POLICY = "ApplicantOrganisationPolicy";
 
     //Respondent Solicitor Related
     public static final String CONSENTED_RESPONDENT_REPRESENTED = "appRespondentRep";
@@ -56,6 +60,8 @@ public class CCDConfigConstant {
     public static final String RESP_SOLICITOR_DX_NUMBER = "rSolicitorDXnumber";
     public static final String RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT = "RespSolNotificationsEmailConsent";
     public static final String RESPONDENT_SHARE_DOCUMENTS = "respondentShareDocs";
+    public static final String RESPONDENT_ORGANISATION_POLICY = "RespondentOrganisationPolicy";
+
 
     //Court related
     public static final String REGION = "regionList";
@@ -492,6 +498,16 @@ public class CCDConfigConstant {
     //Interim Documents
     public static final String INTERIM_HEARING_DOCUMENT = "interimHearingDirectionsDocument";
     public static final String INTERIM_HEARING_UPLOADED_DOCUMENT = "interimUploadAdditionalDocument";
+
+    //NoC
+    public static final String NOC_PARTY = "nocParty";
+    public static final String CHANGE_ORGANISATION_REQUEST = "changeOrganisationRequestField";
+    public static final String INCLUDES_REPRESENTATION_CHANGE = "updateIncludesRepresentativeChange";
+    public static final String REPRESENTATION_UPDATE_HISTORY = "RepresentationUpdateHistory";
+    public static final String CHANGE_REQUEST_FIELD = "changeOrganisationRequestField";
+    public static final String INCLUDES_REPRESENTATIVE_UPDATE = "updateIncludesRepresentativeChange";
+    public static final String UPDATE_CONTACT_DETAILS_EVENT = "FR_updateContactDetails";
+
 
     public static final String HEARING_UPLOAD_BUNDLE_COLLECTION = "hearingUploadBundle";
 
