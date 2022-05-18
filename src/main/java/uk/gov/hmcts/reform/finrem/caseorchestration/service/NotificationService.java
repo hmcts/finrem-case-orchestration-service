@@ -333,11 +333,11 @@ public class NotificationService {
     }
 
     public void sendUpdateFrcInformationEmailToAppSolicitor(CaseDetails caseDetails) {
-        sendUpdateFrcInformationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(caseDetails));
+        sendUpdateFrcInformationEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
 
     public void sendUpdateFrcInformationEmailToRespondentSolicitor(CaseDetails caseDetails) {
-        sendUpdateFrcInformationEmail(notificationRequestMapper.createNotificationRequestForRespSolicitor(caseDetails));
+        sendUpdateFrcInformationEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
 
     public void sendUpdateFrcInformationEmail(NotificationRequest notificationRequest) {
@@ -348,7 +348,7 @@ public class NotificationService {
     public void sendUpdateFrcInformationEmailToCourt(CaseDetails caseDetails) throws JsonProcessingException {
         String recipientEmail = getRecipientEmail(caseDetails);
 
-        NotificationRequest notificationRequest = notificationRequestMapper.createNotificationRequestForAppSolicitor(caseDetails);
+        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
         notificationRequest.setNotificationEmail(recipientEmail);
         URI uri = buildUri(notificationServiceConfiguration.getUpdateFRCInformationCourt());
         sendNotificationEmail(notificationRequest, uri);
