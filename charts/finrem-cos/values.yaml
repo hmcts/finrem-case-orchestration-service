@@ -26,3 +26,6 @@ java:
         - AppInsightsInstrumentationKey
         - finrem-case-orchestration-service-s2s-key
         - idam-secret
+        - finrem-system-update-username
+        - finrem-system-update-password
+        - finrem-idam-client-secret
