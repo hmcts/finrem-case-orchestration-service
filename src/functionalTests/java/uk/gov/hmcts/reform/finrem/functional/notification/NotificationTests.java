@@ -109,10 +109,17 @@ public class NotificationTests extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyNotifyContestDraftOrderIsOkay() {
+    public void verifyNotifyContestedNoticeOfChangeIsOkay() {
 
         utils.validatePostSuccess(contestDraftOrderApiUri,
-            "applicant-solicitor-to-draft-order-with-email-consent.json", contestedDir);
+            "notice-of-change-notification.json", contestedDir);
+    }
+
+    @Test
+    public void verifyNotifyConsentedNoticeOfChangeIsOkay() {
+
+        utils.validatePostSuccess(contestDraftOrderApiUri,
+            "notice-of-change-notification.json", contestedDir);
     }
 
     @Test

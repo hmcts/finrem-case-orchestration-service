@@ -16,14 +16,20 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateRepresentationWorkflowService;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
@@ -32,7 +38,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_DX_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INCLUDES_REPRESENTATION_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_DX_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
@@ -43,6 +54,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -55,8 +67,11 @@ public class UpdateConsentedCaseController implements BaseController {
     private static final String DIVORCE_UPLOAD_EVIDENCE_1 = "divorceUploadEvidence1";
     private static final String DIVORCE_DECREE_NISI_DATE = "divorceDecreeNisiDate";
 
-    @Autowired
-    private ConsentOrderService consentOrderService;
+    @Autowired private ConsentOrderService consentOrderService;
+
+    @Autowired private UpdateRepresentationWorkflowService nocWorkflowService;
+
+    @Autowired private FeatureToggleService featureToggleService;
 
     @PostMapping(path = "/update-case", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles update case details and cleans up the data fields based on the options chosen for Consented Cases")
@@ -83,6 +98,42 @@ public class UpdateConsentedCaseController implements BaseController {
         updateApplicantOrSolicitorContactDetails(caseData);
         updateLatestConsentOrder(ccdRequest);
 
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+    }
+
+    @PostMapping(path = "/update-contact-details", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Handles update case details and cleans up the data fields based on the options chosen for Consented Cases")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
+            response = AboutToStartOrSubmitCallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request"),
+        @ApiResponse(code = 500, message = "Internal Server Error")})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> updateDetails(
+        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
+        @RequestBody CallbackRequest ccdRequest) {
+
+        CaseDetails caseDetails = ccdRequest.getCaseDetails();
+        log.info("Received request to update consented case with Case ID: {}", caseDetails.getId());
+
+        validateCaseData(ccdRequest);
+        Map<String, Object> caseData = caseDetails.getData();
+
+        updateRespondentSolicitorAddress(caseData);
+        updateApplicantOrSolicitorContactDetails(caseData);
+
+        if (featureToggleService.isCaseworkerNoCEnabled()) {
+
+            if (Optional.ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
+                && caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE)) {
+                CaseDetails originalCaseDetails = ccdRequest.getCaseDetailsBefore();
+                return ResponseEntity.ok(nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails,
+                    authToken,
+                    originalCaseDetails));
+            }
+
+        }
+
+        persistOrgPolicies(caseData, ccdRequest.getCaseDetailsBefore());
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
@@ -135,8 +186,10 @@ public class UpdateConsentedCaseController implements BaseController {
     }
 
     private void updateRespondentSolicitorAddress(Map<String, Object> caseData) {
-        if (equalsTo((String) caseData.get(CONSENTED_RESPONDENT_REPRESENTED), "No")) {
+        if (NO_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(CONSENTED_RESPONDENT_REPRESENTED)))) {
             removeRespondentSolicitorAddress(caseData);
+        } else {
+            removeRespondentAddress(caseData);
         }
     }
 
@@ -188,11 +241,22 @@ public class UpdateConsentedCaseController implements BaseController {
         caseData.put(APPLICANT_EMAIL, null);
     }
 
+    private void removeRespondentAddress(Map<String, Object> caseData) {
+        caseData.put(RESPONDENT_ADDRESS, null);
+        caseData.put(RESPONDENT_PHONE, null);
+        caseData.put(RESPONDENT_EMAIL, null);
+    }
+
     private boolean equalsTo(String fieldData, String value) {
         return nonNull(fieldData) && value.equalsIgnoreCase(fieldData.trim());
     }
 
     private boolean hasNotSelected(List<String> list, String option) {
         return nonNull(list) && !list.contains(option);
+    }
+
+    private void persistOrgPolicies(Map<String, Object> caseData, CaseDetails originalDetails) {
+        caseData.put(APPLICANT_ORGANISATION_POLICY, originalDetails.getData().get(APPLICANT_ORGANISATION_POLICY));
+        caseData.put(RESPONDENT_ORGANISATION_POLICY, originalDetails.getData().get(RESPONDENT_ORGANISATION_POLICY));
     }
 }

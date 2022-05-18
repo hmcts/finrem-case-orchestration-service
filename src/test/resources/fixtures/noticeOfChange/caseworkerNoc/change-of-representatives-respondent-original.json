@@ -1,0 +1,36 @@
+{
+  "token": "token_test",
+  "event_id": "some_event_id",
+  "case_details": {
+    "jurisdiction": "DIVORCE",
+    "state": "applicationIssued",
+    "case_type_id": "ContestedFinancialRemedy",
+    "case_data": {
+      "applicantFMName": "John",
+      "applicantLName": "Smith",
+      "applicantSolicitorName": "Sir Solicitor",
+      "applicantSolicitorEmail": "sirsolicitor1@gmail.com",
+      "nocParty": "respondent",
+      "natureOfRepresentationChange": "adding",
+      "updateIncludesRepresentativeChange" : "Yes",
+      "ApplicantOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "A31PTVA",
+          "OrganisationName": "FRApplicantSolicitorFirm"
+        },
+        "OrgPolicyReference": "FRApplicant",
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
+      },
+      "RespondentOrganisationPolicy": {
+        "OrgPolicyCaseAssignedRole": "[RESPSOLICITOR]"
+      },
+      "dateOfSepration": "2014-01-11",
+      "propertyAddress": "102",
+      "respondentEmail": "padmaja102.ramisetti@gmail.com",
+      "respondentLName": "Smith",
+      "respondentPhone": "7411201631",
+      "respondentRepresented": "No",
+      "respondentFMName": "Jane"
+    }
+  }
+}
