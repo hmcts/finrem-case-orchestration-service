@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -20,9 +21,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.genera
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static uk.gov.hmcts.reform.bsp.common.mapper.AddressMapper.Field.LINE_1;
+import static uk.gov.hmcts.reform.bsp.common.mapper.AddressMapper.Field.POSTCODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REPRESENTATION_UPDATE_HISTORY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
@@ -105,9 +109,15 @@ public abstract class AbstractLetterHandler implements LetterHandler {
         return representationUpdate.getParty().equals(COR_APPLICANT);
     }
 
+    protected boolean isCaseFieldPopulated(CaseDetails caseDetails, String caseDataField) {
+        return StringUtils.isNotEmpty(nullToEmpty(caseDetails.getData().get(caseDataField)));
+    }
 
-    protected boolean isCaseFieldPopulated(CaseDetails caseDetails, String emailField) {
-        return StringUtils.isNotEmpty(nullToEmpty(caseDetails.getData().get(emailField)));
+    protected boolean isAddressFieldPopulated(CaseDetails caseDetails, String addressField) {
+        Map addressMap = (Map) caseDetails.getData().get(addressField);
+        return ObjectUtils.isNotEmpty(addressMap)
+            && StringUtils.isNotBlank((String) addressMap.get(LINE_1))
+            && StringUtils.isNotBlank((String) addressMap.get(POSTCODE));
     }
 
     protected abstract boolean shouldALetterBeSent(RepresentationUpdate representationUpdate, CaseDetails caseDetailsToUse);
