@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateRepresentationService;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateRepresentation
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INCLUDES_REPRESENTATIVE_UPDATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOC_PARTY;
 
@@ -83,5 +85,41 @@ public class UpdateRepresentationController implements BaseController {
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+    }
+
+    @PostMapping(path = "/clear-noc-requests")
+    @ApiOperation(value = "Clears current noc requests")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
+            response = AboutToStartOrSubmitCallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request"),
+        @ApiResponse(code = 500, message = "Internal Server Error")})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> clearNocRequests(
+        @RequestBody CallbackRequest ccdRequest) {
+        log.info("Received request to set default values for Update Contact Details Event for case {}",
+            ccdRequest.getCaseDetails().getId());
+
+        Map<String, Object> caseData = ccdRequest.getCaseDetails().getData();
+        validateCaseData(ccdRequest);
+
+        if (featureToggleService.isCaseworkerNoCEnabled() || featureToggleService.isSolicitorNoticeOfChangeEnabled()) {
+            addDefaultChangeOrganisationRequest(caseData);
+        }
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+    }
+
+    private void addDefaultChangeOrganisationRequest(Map<String, Object> caseData) {
+        ChangeOrganisationRequest defaultChangeRequest = ChangeOrganisationRequest
+            .builder()
+            .requestTimestamp(null)
+            .approvalRejectionTimestamp(null)
+            .caseRoleId(null)
+            .approvalStatus(null)
+            .organisationToAdd(null)
+            .organisationToRemove(null)
+            .reason(null)
+            .build();
+        caseData.put(CHANGE_ORGANISATION_REQUEST, defaultChangeRequest);
     }
 }
