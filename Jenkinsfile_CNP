@@ -33,7 +33,7 @@ def checkForLabel(branch_name, test_name) {
     return new GithubAPI(this).getLabelsbyPattern(branch_name, "enable").contains(test_name)
 }
 
-def all = checkForLabel(env.BRANCH_NAME, "enable_all")
+def enableAll = checkForLabel(env.BRANCH_NAME, "enable_all")
 def securityScan = checkForLabel(env.BRANCH_NAME, "enable_security_scan")
 def mutationTest = checkForLabel(env.BRANCH_NAME, "enable_mutation_test")
 def fortifyScan = checkForLabel(env.BRANCH_NAME, "enable_fortify_scan")
@@ -75,7 +75,7 @@ withPipeline(type, product, app) {
 
     onPR() {
         enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
-        if (all || securityScan || mutationTest || fortifyScan) {
+        if (enableAll || securityScan || mutationTest || fortifyScan) {
             properties([
                 parameters([
                     string(name: 'URL_TO_TEST', defaultValue: 'http://finrem-cos-aat.service.core-compute-aat.internal',
@@ -90,13 +90,13 @@ withPipeline(type, product, app) {
             env.TEST_URL = params.URL_TO_TEST
             env.Rules = params.SecurityRules
         }
-        if (all || securityScan) {
+        if (enableAll || securityScan) {
             enableSecurityScan()
         }
-        if (all || mutationTest) {
+        if (enableAll || mutationTest) {
             enableMutationTest()
         }
-        if (all || fortifyScan) {
+        if (enableAll || fortifyScan) {
             enableFortifyScan()
 
             after('fortify-scan') {
