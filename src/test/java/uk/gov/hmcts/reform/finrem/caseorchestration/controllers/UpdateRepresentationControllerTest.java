@@ -27,6 +27,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -34,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.noSuchFieldExistsCaseDataError;
 
 @WebMvcTest(UpdateRepresentationController.class)
 public class UpdateRepresentationControllerTest extends BaseControllerTest {
@@ -58,6 +60,10 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
 
     protected String setDefaultsEndpoint() {
         return "/case-orchestration/set-update-defaults";
+    }
+
+    protected String setClearCOREndpoint() {
+        return "/case-orchestration/clear-noc-requests";
     }
 
     String beforeFixture() {
@@ -182,5 +188,18 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.updateIncludesRepresentativeChange", is("Yes")))
             .andExpect(jsonPath("$.data.nocParty", is("applicant")));
+    }
+
+    @Test
+    public void shouldClearChangeOrgRequestField() throws Exception {
+        doRequestSetUp();
+        when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(true);
+
+        mvc.perform(post(setClearCOREndpoint())
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.changeOrganisationRequestField").exists());
     }
 }
