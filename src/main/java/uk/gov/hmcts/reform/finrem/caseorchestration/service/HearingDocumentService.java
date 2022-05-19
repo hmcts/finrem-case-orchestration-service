@@ -91,11 +91,6 @@ public class HearingDocumentService {
         return caseDetails;
     }
 
-    public void getCaseDocs(CaseDetails caseDetails, String caseId) {
-        List<BulkPrintDocument> caseDocuments = getHearingCaseDocuments(caseDetails.getData(), caseId);
-        caseDetails.getData().put("caseDocuments", caseDocuments);
-    }
-
     public void sendFormCAndGForBulkPrint(CaseDetails caseDetails, String authorisationToken) {
         String caseId = caseDetails.getId() == null ? "noId" : caseDetails.getId().toString();
         List<BulkPrintDocument> caseDocuments = getHearingCaseDocuments(caseDetails.getData(), caseId);
