@@ -75,7 +75,7 @@ withPipeline(type, product, app) {
 
     onPR() {
         enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
-        // if (enableAll || securityScan || mutationTest || fortifyScan) {
+        if (enableAll || securityScan || mutationTest || fortifyScan) {
             properties([
                 parameters([
                     string(name: 'URL_TO_TEST', defaultValue: 'http://finrem-cos-aat.service.core-compute-aat.internal',
@@ -89,19 +89,19 @@ withPipeline(type, product, app) {
 
             env.TEST_URL = params.URL_TO_TEST
             env.Rules = params.SecurityRules
-        // }
+        }
         if (enableAll || securityScan) {
             enableSecurityScan()
         }
         if (enableAll || mutationTest) {
             enableMutationTest()
         }
-        // if (enableAll || fortifyScan) {
+        if (enableAll || fortifyScan) {
             enableFortifyScan()
 
             after('fortify-scan') {
                 steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Fortify Scan/**/*'
             }
-        // }
+        }
     }
 }
