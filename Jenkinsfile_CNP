@@ -98,6 +98,10 @@ withPipeline(type, product, app) {
         }
         if (all || fortifyScan) {
             enableFortifyScan()
+
+            after('fortify-scan') {
+                steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Fortify Scan/**/*'
+            }
         }
     }
 }
