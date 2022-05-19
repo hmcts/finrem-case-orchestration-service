@@ -30,7 +30,7 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 }
 
 def checkForLabel(branch_name, test_name) {
-    return new GithubApi(this).getLabelsbyPattern(branch_name, "enable").contains(test_name)
+    return new GithubAPI(this).getLabelsbyPattern(branch_name, "enable").contains(test_name)
 }
 
 def all = checkForLabel(env.BRANCH_NAME, "enable_all")
