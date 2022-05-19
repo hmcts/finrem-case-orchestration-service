@@ -8,3 +8,6 @@ spring:
         AppInsightsInstrumentationKey: azure.application-insights.instrumentation-key
         finrem-case-orchestration-service-s2s-key: AUTH_PROVIDER_SERVICE_CLIENT_KEY
         idam-secret: OAUTH2_CLIENT_FINREM
+        finrem-system-update-username: FINREM_SYSTEMUPDATE_USERNAME
+        finrem-system-update-password: FINREM_SYSTEMUPDATE_PASSWORD
+        finrem-idam-client-secret: FINREM_IDAM_CLIENT_SECRET

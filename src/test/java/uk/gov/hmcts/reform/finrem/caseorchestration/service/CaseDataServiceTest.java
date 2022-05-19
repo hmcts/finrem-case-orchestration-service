@@ -490,7 +490,6 @@ public class  CaseDataServiceTest extends BaseServiceTest {
         assertThat(caseDataService.isContestedPaperApplication(caseDetails), is(false));
     }
 
-
     @Test
     public void isApplicantAddressConfidentialTrueWhenApplicantAddressIsMarkedAsConfidential() {
         Map<String, Object> data = new HashMap<>();
