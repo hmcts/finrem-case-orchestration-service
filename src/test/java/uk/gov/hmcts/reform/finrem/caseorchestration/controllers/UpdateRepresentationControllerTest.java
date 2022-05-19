@@ -193,7 +193,7 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
         doRequestSetUp();
         when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(true);
 
-        mvc.perform(post(setClearCOREndpoint())
+        mvc.perform(post(setClearCorEndpoint())
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN))
