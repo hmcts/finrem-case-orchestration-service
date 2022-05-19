@@ -1,0 +1,22 @@
+---
+version: '3'
+
+services:
+  aac-manage-case-assignment:
+    image: hmctspublic.azurecr.io/aac/manage-case-assignment:latest  #Not Multi-Arch yet :(
+    container_name: aac-manage-case-assignment
+    environment:
+      CCD_DATA_STORE_API_BASE_URL: http://localhost:4452
+      CCD_DEFINITION_STORE_API_BASE_URL: http://localhost:4451
+      IDAM_API_URL: http://localhost:5000
+      MANAGE_CASE_S2S_AUTHORISED_SERVICES: xui_webapp,ccd_data,fpl_case_service,divorce_frontend,divorce_ccd_submission,finrem_case_orchestration
+      MCA_DEF_STORE_PROXY_URLS_ALLOWED_LIST: /api/display/challenge-questions.*
+      MCA_DS_PROXY_URLS_ALLOWED_LIST: /searchCases.*,/internal/searchCases.*,/internal/cases.*
+      ROLE_ASSIGNMENT_URL: http://localhost:4096
+      S2S_URL: http://localhost:8489
+      NOTIFY_EMAIL_TEMPLATE_ID: 85f22924-7b45-4fc6-9954-c08a8833f6a0
+      NOTIFY_MCA_API_KEY: ${UK_GOV_NOTIFY_API_KEY}
+    ports:
+      - 4454:4454
+    healthcheck:
+      retries: 40
