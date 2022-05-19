@@ -29,11 +29,16 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
@@ -66,6 +71,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHeari
 public class HearingNonFastTrackDocumentTest extends BaseTest {
 
     private static final String GENERATE_DOCUMENT_CONTEXT_PATH = "/version/1/generate-pdf";
+    private static final String GENERATE_BULK_PRINT_CONTEXT_PATH = "/version/1/bulk-print";
     private static final String API_URL = "/case-orchestration/documents/hearing";
     private static final String JSON_CONTENT_PATH = "/fixtures/contested/validate-hearing-withoutfastTrackDecision.json";
 
@@ -167,6 +173,10 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         return documentRequest(config.getFormCNonFastTrackTemplate(), config.getFormCFileName());
     }
 
+    private DocumentGenerationRequest coverSheetDocumentRequest() {
+        return documentRequest(config.getBulkPrintTemplate(), config.getBulkPrintFileName());
+    }
+
     private String expectedErrorData() throws JsonProcessingException {
         return objectMapper.writeValueAsString(
             AboutToStartOrSubmitCallbackResponse.builder()
@@ -178,6 +188,8 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         CaseDetails caseDetails = request.getCaseDetails();
         caseDetails.getData().put("formC", caseDocument());
         caseDetails.getData().put("formG", caseDocument());
+        caseDetails.getData().put("bulkPrintCoverSheetApp", caseDocument());
+        caseDetails.getData().put("bulkPrintCoverSheetRes", caseDocument());
 
         return objectMapper.writeValueAsString(
             AboutToStartOrSubmitCallbackResponse.builder()
@@ -194,7 +206,30 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
             .build();
     }
 
+    protected BulkPrintRequest bulkPrintRequest() {
+        List<BulkPrintDocument> caseDocuments = new ArrayList<>();
+        String binaryUrl = "http://dm-store/lhjbyuivu87y989hijbb/binary";
+        BulkPrintDocument doc1 = BulkPrintDocument.builder().binaryFileUrl(binaryUrl).build();
+        BulkPrintDocument doc2 = BulkPrintDocument.builder().binaryFileUrl(binaryUrl).build();
+        caseDocuments.add(doc1);
+        caseDocuments.add(doc2);
+        return BulkPrintRequest.builder()
+            .caseId("123")
+            .letterType("FINANCIAL_REMEDY_PACK")
+            .bulkPrintDocuments(caseDocuments)
+            .build();
+    }
+
     private void generateDocumentServiceSuccessStub(DocumentGenerationRequest documentRequest) throws JsonProcessingException {
+        documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
+            .withRequestBody(equalToJson(objectMapper.writeValueAsString(coverSheetDocumentRequest()), true, true))
+            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
+            .withHeader(CONTENT_TYPE, equalTo("application/json"))
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withBody(objectMapper.writeValueAsString(document()))));
+
         documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
             .withRequestBody(equalToJson(objectMapper.writeValueAsString(documentRequest),
                 true, true))
@@ -204,6 +239,14 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .withBody(objectMapper.writeValueAsString(document()))));
+
+        documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_BULK_PRINT_CONTEXT_PATH))
+            .withRequestBody(equalToJson(objectMapper.writeValueAsString(bulkPrintRequest()), true, true))
+            .withHeader(CONTENT_TYPE, equalTo("application/json"))
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withBody(objectMapper.writeValueAsString(UUID.randomUUID()))));
     }
 
     private void generateDocumentServiceErrorStub(DocumentGenerationRequest documentRequest) throws JsonProcessingException {
