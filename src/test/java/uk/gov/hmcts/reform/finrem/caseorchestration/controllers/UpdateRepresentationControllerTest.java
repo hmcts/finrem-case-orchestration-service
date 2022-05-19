@@ -27,7 +27,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -35,7 +34,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.noSuchFieldExistsCaseDataError;
 
 @WebMvcTest(UpdateRepresentationController.class)
 public class UpdateRepresentationControllerTest extends BaseControllerTest {
@@ -62,7 +60,7 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
         return "/case-orchestration/set-update-defaults";
     }
 
-    protected String setClearCOREndpoint() {
+    protected String setClearCorEndpoint() {
         return "/case-orchestration/clear-noc-requests";
     }
 
