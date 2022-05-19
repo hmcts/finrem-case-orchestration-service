@@ -17,13 +17,14 @@ public class SolicitorChangedRespondentLetterHandler extends AbstractLetterHandl
 
     public SolicitorChangedRespondentLetterHandler(
         NocLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator,
-        NocDocumentService nocDocumentService, BulkPrintService bulkPrintService, NoticeType noticeType) {
+        NocDocumentService nocDocumentService, BulkPrintService bulkPrintService,
+        NoticeType noticeType) {
         super(noticeOfChangeLetterDetailsGenerator, nocDocumentService, bulkPrintService, noticeType, RESPONDENT);
     }
 
     @Override
     protected boolean shouldALetterBeSent(RepresentationUpdate representationUpdate, CaseDetails caseDetailsToUse) {
-        log.info("Now check if solicitor notification letter is required for applicant");
-        return !isApplicant(representationUpdate) && isCaseFieldPopulated(caseDetailsToUse, RESPONDENT_ADDRESS);
+        log.info("Now check if notification letter is required for respondent");
+        return !isApplicant(representationUpdate) && isAddressFieldPopulated(caseDetailsToUse, RESPONDENT_ADDRESS);
     }
 }
