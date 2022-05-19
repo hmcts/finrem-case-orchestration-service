@@ -117,13 +117,13 @@ public class PaperNotificationService {
         printRespondentUpdateFrcInfoNotification(caseDetails, authToken);
     }
 
-    public void printApplicantUpdateFrcInfoNotification(CaseDetails caseDetails, String authToken) {
+    private void printApplicantUpdateFrcInfoNotification(CaseDetails caseDetails, String authToken) {
         Optional<CaseDocument> applicantLetter = updateFrcInfoApplicantDocumentService.getUpdateFrcInfoLetter(caseDetails,
             authToken);
         applicantLetter.ifPresent(letter -> bulkPrintService.sendDocumentForPrint(letter, caseDetails));
     }
 
-    public void printRespondentUpdateFrcInfoNotification(CaseDetails caseDetails, String authToken) {
+    private void printRespondentUpdateFrcInfoNotification(CaseDetails caseDetails, String authToken) {
         Optional<CaseDocument> respondentLetter = updateFrcInfoRespondentDocumentService.getUpdateFrcInfoLetter(caseDetails,
             authToken);
         respondentLetter.ifPresent(letter -> bulkPrintService.sendDocumentForPrint(letter, caseDetails));
