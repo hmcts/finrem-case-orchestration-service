@@ -104,6 +104,7 @@ public class UpdateRepresentationController implements BaseController {
 
         if (featureToggleService.isCaseworkerNoCEnabled() || featureToggleService.isSolicitorNoticeOfChangeEnabled()) {
             addDefaultChangeOrganisationRequest(caseData);
+            log.info("Change org request defaulted to: {}", caseData.get(CHANGE_ORGANISATION_REQUEST).toString());
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
