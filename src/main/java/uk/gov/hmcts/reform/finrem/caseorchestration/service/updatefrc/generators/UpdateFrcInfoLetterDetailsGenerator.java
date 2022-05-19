@@ -56,11 +56,11 @@ public class UpdateFrcInfoLetterDetailsGenerator {
 
         if (isApplicantSolicitor(caseData, recipient)) {
             log.info("Recipient is Applicant's Solicitor");
-            return buildAddressee(nullToEmpty((caseData.get(CONTESTED_SOLICITOR_NAME))),
+            return buildAddressee(nullToEmpty(caseData.get(CONTESTED_SOLICITOR_NAME)),
                 getSolicitorFormattedAddress(caseDetails, CONTESTED_SOLICITOR_ADDRESS));
         } else if (isRespondentSolicitor(caseData, recipient)) {
             log.info("Recipient is Respondent's Solicitor");
-            return buildAddressee(nullToEmpty((caseData.get(RESP_SOLICITOR_NAME))),
+            return buildAddressee(nullToEmpty(caseData.get(RESP_SOLICITOR_NAME)),
                 getSolicitorFormattedAddress(caseDetails, RESP_SOLICITOR_ADDRESS));
         }
 
@@ -76,8 +76,7 @@ public class UpdateFrcInfoLetterDetailsGenerator {
     }
 
     private String getLitigantName(CaseDetails caseDetails, DocumentHelper.PaperNotificationRecipient recipient) {
-        boolean isApplicant = recipient == APPLICANT;
-        return isApplicant
+        return recipient == APPLICANT
             ? caseDataService.buildFullApplicantName(caseDetails)
             : caseDataService.buildFullRespondentName(caseDetails);
     }
@@ -85,8 +84,7 @@ public class UpdateFrcInfoLetterDetailsGenerator {
     private String getLitigantFormattedAddress(CaseDetails caseDetails,
                                                DocumentHelper.PaperNotificationRecipient recipient) {
         Map<String, Object> caseData = caseDetails.getData();
-        boolean isApplicant = recipient == APPLICANT;
-        return documentHelper.formatAddressForLetterPrinting((Map) caseData.get(isApplicant ? APPLICANT_ADDRESS : RESPONDENT_ADDRESS));
+        return documentHelper.formatAddressForLetterPrinting((Map) caseData.get(getLitigantAddressKey(recipient)));
     }
 
     private String getSolicitorFormattedAddress(CaseDetails caseDetails, String addressKey) {
@@ -105,8 +103,14 @@ public class UpdateFrcInfoLetterDetailsGenerator {
 
     private String getSolicitorReference(CaseDetails caseDetails,
                                          DocumentHelper.PaperNotificationRecipient recipient) {
-        return nullToEmpty(caseDetails.getData().get(recipient == APPLICANT
-            ? SOLICITOR_REFERENCE
-            : RESP_SOLICITOR_REFERENCE));
+        return nullToEmpty(caseDetails.getData().get(getSolicitorReferenceKey(recipient)));
+    }
+
+    private String getSolicitorReferenceKey(DocumentHelper.PaperNotificationRecipient recipient) {
+        return recipient == APPLICANT ? SOLICITOR_REFERENCE : RESP_SOLICITOR_REFERENCE;
+    }
+
+    private String getLitigantAddressKey(DocumentHelper.PaperNotificationRecipient recipient) {
+        return recipient == APPLICANT ? APPLICANT_ADDRESS : RESPONDENT_ADDRESS;
     }
 }
