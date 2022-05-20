@@ -36,13 +36,20 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 //     return false;
 // }
 
+def checkForLabel(branch_name) {
+    if (new GithubAPI(this).getLabelsbyPattern(branch_name, "enable_fortify_scan").contains("enable_fortify_scan")) {
+        return true;
+    }
+    return false;
+}
+
 // def checkForNoCleanupLabel(branch_name) {
 //   return new GithubAPI(this).getLabelsbyPattern(branch_name, "cleanup").contains("no_cleanup")
 // }
 
-def checkForLabel(branch_name) {
-  return new GithubAPI(this).getLabelsbyPattern(branch_name, "enable_fortify_scan").contains("enable_fortify_scan")
-}
+// def checkForLabel(branch_name) {
+//   return new GithubAPI(this).getLabelsbyPattern(branch_name, "enable_fortify_scan").contains("enable_fortify_scan")
+// }
 
 // Vars for Kubernetes
 env.PACT_BROKER_FULL_URL = 'https://pact-broker.platform.hmcts.net'
