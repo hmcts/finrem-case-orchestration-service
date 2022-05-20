@@ -37,19 +37,11 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 // }
 
 def checkForLabel(branch_name) {
-    if (new GithubAPI(this).getLabelsbyPattern(branch_name, "enable_fortify_scan").contains("enable_fortify_scan")) {
+    if (new GithubAPI(this).getLabelsbyPattern(branch_name, "enable_fortify_scan").contains(test_name)) {
         return true;
     }
     return false;
 }
-
-// def checkForNoCleanupLabel(branch_name) {
-//   return new GithubAPI(this).getLabelsbyPattern(branch_name, "cleanup").contains("no_cleanup")
-// }
-
-// def checkForLabel(branch_name) {
-//   return new GithubAPI(this).getLabelsbyPattern(branch_name, "enable_fortify_scan").contains("enable_fortify_scan")
-// }
 
 // Vars for Kubernetes
 env.PACT_BROKER_FULL_URL = 'https://pact-broker.platform.hmcts.net'
@@ -114,10 +106,6 @@ withPipeline(type, product, app) {
             enableMutationTest()
         }
         if (enableAll || fortifyScan) {
-            enableFortifyScan()
-        }
-    
-        if (checkForLabel(env.BRANCH_NAME)) {
             enableFortifyScan()
 
             after('fortify-scan') {
