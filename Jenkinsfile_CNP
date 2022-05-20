@@ -44,7 +44,7 @@ labelMap = [
 ]
 
 def checkLabels(branch_name) {
-    def labels = []
+    def labels = [:]
     labelMap.each { label ->
         labels.put(label.key, checkForLabel(branch_name, label.value))
     }
