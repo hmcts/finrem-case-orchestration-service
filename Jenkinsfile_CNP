@@ -134,7 +134,7 @@ withPipeline(type, product, app) {
     }
 }
 
-if (checkForLabel(env.BRANCH_NAME, 'enable_nightly')) {
+if (checkRepoForLabel(env.BRANCH_NAME, 'enable_nightly')) {
     properties([
         pipelineTriggers([cron('H 23 * * *')]),
         parameters([
