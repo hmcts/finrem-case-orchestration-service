@@ -37,28 +37,19 @@ def checkForLabel(branch_name, test_name) {
 }
 
 def labelMap = [
-    enableAll: [
-        label: "enable_all",
-        exists: false
-    ],
-    securityScan: [
-        label: "enable_security_scan",
-        exists: false
-    ],
-    mutationTest: [
-        label: "enable_mutation_test",
-        exists: false
-    ],
-    fortifyScan: [
-        label: "enable_fortify_scan",
-        exists: false
-    ]
+    enableAll: "enable_all",
+    securityScan: "enable_security_scan",
+    mutationTest: "enable_mutation_test",
+    fortifyScan: "enable_fortify_scan"
 ]
 
 def checkLabels(branch_name) {
+    def labels = []
     labelMap.each { label ->
-        label.value.exists = checkForLabel(branch_name, label.value.label)
+        labels.put(label.key, checkForLabel(branch_name, label.value))
     }
+
+    return labels
 }
 
 // Vars for Kubernetes
@@ -97,11 +88,11 @@ withPipeline(type, product, app) {
     }
 
     onPR() {
-        checkLabels(env.BRANCH_NAME)
-        def enableAll = labelList.enableAll.exists
-        def securityScan = labelList.securityScan.exists
-        def mutationTest = labelList.mutationTest.exists
-        def fortifyScan = labelList.fortifyScan.exists
+        def labels = checkLabels(env.BRANCH_NAME)
+        def enableAll = labels.enableAll
+        def securityScan = labels.securityScan
+        def mutationTest = labels.mutationTest
+        def fortifyScan = labels.fortifyScan
         enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
         if (enableAll || securityScan || mutationTest || fortifyScan) {
             properties([
@@ -134,7 +125,7 @@ withPipeline(type, product, app) {
     }
 }
 
-if (checkForLabel(env.BRANCH_NAME, 'run_nightly')) {
+if (checkForLabel(env.BRANCH_NAME, 'enable_nightly')) {
     properties([
         pipelineTriggers([cron('H 23 * * *')]),
         parameters([
