@@ -13,8 +13,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentat
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.events.AuditEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.GetAddedSolicitorService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.GetRemovedSolicitorService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.AddedSolicitorService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.RemovedSolicitorService;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.util.Map;
@@ -42,8 +42,8 @@ public class UpdateRepresentationService {
     private final PrdOrganisationService organisationService;
     private final UpdateSolicitorDetailsService updateSolicitorDetailsService;
     private final ChangeOfRepresentationService changeOfRepresentationService;
-    private final GetAddedSolicitorService getAddedSolicitorService;
-    private final GetRemovedSolicitorService getRemovedSolicitorService;
+    private final AddedSolicitorService addedSolicitorService;
+    private final RemovedSolicitorService removedSolicitorService;
 
     private static final String CHANGE_ORGANISATION_REQUEST = "changeOrganisationRequestField";
     private static final String NOC_EVENT = "nocRequest";
@@ -57,9 +57,9 @@ public class UpdateRepresentationService {
         final UserDetails solicitorToAdd = getInvokerDetails(authToken, caseDetails);
         final ChangeOrganisationRequest changeRequest = getChangeOrganisationRequest(caseDetails);
 
-        final ChangedRepresentative addedSolicitor = getAddedSolicitorService.getAddedSolicitorAsSolicitor(solicitorToAdd,
+        final ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsSolicitor(solicitorToAdd,
             changeRequest);
-        final ChangedRepresentative removedSolicitor = getRemovedSolicitorService.getRemovedSolicitorAsSolicitor(caseDetails,
+        final ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsSolicitor(caseDetails,
             changeRequest);
 
         log.info("About to start updating solicitor details in the case data for caseId: {}", caseDetails.getId());

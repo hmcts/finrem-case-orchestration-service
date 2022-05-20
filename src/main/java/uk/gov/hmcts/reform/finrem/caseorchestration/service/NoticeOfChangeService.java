@@ -17,8 +17,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistory;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.GetAddedSolicitorService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.GetRemovedSolicitorService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.AddedSolicitorService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.RemovedSolicitorService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -45,23 +45,23 @@ public class NoticeOfChangeService {
     private final IdamService idamService;
     private final ChangeOfRepresentationService changeOfRepresentationService;
     private final ObjectMapper objectMapper;
-    private final GetAddedSolicitorService getAddedSolicitorService;
-    private final GetRemovedSolicitorService getRemovedSolicitorService;
+    private final AddedSolicitorService addedSolicitorService;
+    private final RemovedSolicitorService removedSolicitorService;
 
     @Autowired
     public NoticeOfChangeService(CaseDataService caseDataService,
                                  IdamService idamService,
                                  ChangeOfRepresentationService changeOfRepresentationService,
-                                 GetAddedSolicitorService getAddedSolicitorService,
-                                 GetRemovedSolicitorService getRemovedSolicitorService) {
+                                 AddedSolicitorService addedSolicitorService,
+                                 RemovedSolicitorService removedSolicitorService) {
         this.caseDataService = caseDataService;
         this.idamService = idamService;
         this.objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         this.changeOfRepresentationService = changeOfRepresentationService;
-        this.getAddedSolicitorService = getAddedSolicitorService;
-        this.getRemovedSolicitorService = getRemovedSolicitorService;
+        this.addedSolicitorService = addedSolicitorService;
+        this.removedSolicitorService = removedSolicitorService;
     }
 
     public Map<String, Object> updateRepresentation(CaseDetails caseDetails,
@@ -150,8 +150,8 @@ public class NoticeOfChangeService {
             .clientName(isApplicant ? caseDataService.buildFullApplicantName(caseDetails)
                 : caseDataService.buildFullRespondentName(caseDetails))
             .current(current)
-            .addedRepresentative(getAddedSolicitorService.getAddedSolicitorAsCaseworker(caseDetails))
-            .removedRepresentative(getRemovedSolicitorService.getRemovedSolicitorAsCaseworker(originalDetails))
+            .addedRepresentative(addedSolicitorService.getAddedSolicitorAsCaseworker(caseDetails))
+            .removedRepresentative(removedSolicitorService.getRemovedSolicitorAsCaseworker(originalDetails))
             .build();
     }
 

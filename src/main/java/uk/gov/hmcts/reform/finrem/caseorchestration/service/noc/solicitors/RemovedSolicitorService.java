@@ -37,7 +37,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class GetRemovedSolicitorService {
+public class RemovedSolicitorService {
 
     private final CaseDataService caseDataService;
     private final CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
@@ -61,7 +61,7 @@ public class GetRemovedSolicitorService {
     public ChangedRepresentative getRemovedSolicitorAsCaseworker(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 
-        boolean isApplicant = ((String) caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
+        final boolean isApplicant = ((String) caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
         final String litigantOrgPolicy = isApplicant ? APPLICANT_ORGANISATION_POLICY : RESPONDENT_ORGANISATION_POLICY;
 
         if (caseData.get(getLitigantRepresentedKey(caseDetails, isApplicant)).equals(YES_VALUE)) {

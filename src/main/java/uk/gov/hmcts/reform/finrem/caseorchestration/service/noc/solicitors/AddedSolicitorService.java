@@ -29,7 +29,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class GetAddedSolicitorService {
+public class AddedSolicitorService {
 
     private final CaseDataService caseDataService;
 
