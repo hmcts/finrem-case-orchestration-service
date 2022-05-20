@@ -36,7 +36,7 @@ def checkForLabel(branch_name, test_name) {
     return false;
 }
 
-def labelMap = [
+labelMap = [
     enableAll: "enable_all",
     securityScan: "enable_security_scan",
     mutationTest: "enable_mutation_test",
