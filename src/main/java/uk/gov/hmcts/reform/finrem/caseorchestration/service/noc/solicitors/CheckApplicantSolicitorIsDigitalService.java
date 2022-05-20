@@ -1,10 +1,12 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 
 import java.util.Map;
 import java.util.Optional;
@@ -15,6 +17,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 public class CheckApplicantSolicitorIsDigitalService extends CheckSolicitorIsDigitalServiceBase {
 
+    @Autowired
     public CheckApplicantSolicitorIsDigitalService(CaseDataService caseDataService) {
         super(caseDataService);
     }

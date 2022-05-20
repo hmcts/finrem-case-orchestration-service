@@ -15,8 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CheckApplicantSolicitorIsDigitalService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CheckRespondentSolicitorIsDigitalService;
 
 import java.util.HashMap;
 import java.util.List;

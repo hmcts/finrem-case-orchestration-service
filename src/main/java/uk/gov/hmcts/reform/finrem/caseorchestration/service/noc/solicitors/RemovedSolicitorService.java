@@ -1,8 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
@@ -10,9 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentat
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CheckApplicantSolicitorIsDigitalService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CheckRespondentSolicitorIsDigitalService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CheckSolicitorIsDigitalServiceBase;
 
 import java.util.Map;
 import java.util.Optional;
@@ -36,12 +33,21 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class RemovedSolicitorService {
 
     private final CaseDataService caseDataService;
     private final CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
     private final CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
+
+    @Autowired
+    public RemovedSolicitorService(CaseDataService caseDataService,
+                                   CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService,
+                                   CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService) {
+        this.caseDataService = caseDataService;
+        this.checkApplicantSolicitorIsDigitalService = checkApplicantSolicitorIsDigitalService;
+        this.checkRespondentSolicitorIsDigitalService = checkRespondentSolicitorIsDigitalService;
+
+    }
 
     public ChangedRepresentative getRemovedSolicitorAsSolicitor(CaseDetails caseDetails,
                                                       ChangeOrganisationRequest changeRequest) {

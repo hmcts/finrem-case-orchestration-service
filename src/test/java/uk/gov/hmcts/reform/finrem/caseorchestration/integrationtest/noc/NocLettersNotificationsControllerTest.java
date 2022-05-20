@@ -39,7 +39,6 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
 
     @Autowired
     private NocLetterNotificationService nocLetterNotificationService;
-
     @Autowired
     private NotificationsController notificationsController;
     @MockBean
