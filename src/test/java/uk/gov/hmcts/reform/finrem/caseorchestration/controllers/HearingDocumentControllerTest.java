@@ -259,7 +259,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(false);
 
         requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/validate-hearing-successfully.json").toURI()));
+            .getResource("/fixtures/contested/hearing-with-case-details-before.json").toURI()));
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -276,7 +276,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
 
         requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/validate-hearing-successfully.json").toURI()));
+            .getResource("/fixtures/contested/hearing-with-case-details-before.json").toURI()));
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
