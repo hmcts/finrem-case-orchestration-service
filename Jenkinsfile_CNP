@@ -29,6 +29,17 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
     ]
 }
 
+// def checkForLabel(branch_name, test_name) {
+//     if (new GithubAPI(this).getLabelsbyPattern(branch_name, "enable").contains(test_name)) {
+//         return true;
+//     }
+//     return false;
+// }
+
+def checkForLabel(test_name) {
+  return new GithubAPI(this).getLabelsbyPattern(test_name, "enable_fortify_scan")
+}
+
 // Vars for Kubernetes
 env.PACT_BROKER_FULL_URL = 'https://pact-broker.platform.hmcts.net'
 
@@ -64,13 +75,11 @@ withPipeline(type, product, app) {
         enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
     }
 
-onPR() {
+    onPR() {
         def enableAll = checkForLabel(env.BRANCH_NAME, "enable_all")
         def securityScan = checkForLabel(env.BRANCH_NAME, "enable_security_scan")
         def mutationTest = checkForLabel(env.BRANCH_NAME, "enable_mutation_test")
         def fortifyScan = checkForLabel(env.BRANCH_NAME, "enable_fortify_scan"){
-            return new GithubAPI(this).getLabelsbyPattern(env.BRANCH_NAME, "enable_fortify_scan")
-        }
         enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
         if (enableAll || securityScan || mutationTest || fortifyScan) {
             properties([
