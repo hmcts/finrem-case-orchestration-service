@@ -58,6 +58,15 @@ withPipeline(type, product, app) {
                 reportName           : "Preview Functional Tests",
                 alwaysLinkToLastBuild: true
         ]
+    onPR() {
+        if (checkForLabel(env.BRANCH_NAME)) {
+            enableFortifyScan();
+
+            after('fortify-scan') {
+            steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Fortify Scan/**/*'
+        }
+      }
+  }
     }
 
     enableSlackNotifications('#finrem-dev')
@@ -68,14 +77,6 @@ withPipeline(type, product, app) {
         enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
     }
 
-    onPR() {
-    
-    if (checkForLabel(env.BRANCH_NAME)) {
-            enableFortifyScan();
+    onPR() {}
 
-            after('fortify-scan') {
-            steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Fortify Scan/**/*'
-        }
-    }
-    }
 }
