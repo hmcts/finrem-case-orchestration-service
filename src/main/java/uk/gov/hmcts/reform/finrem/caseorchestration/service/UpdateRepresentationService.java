@@ -13,10 +13,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentat
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.events.AuditEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.GetAddedSolicitorService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.GetRemovedSolicitorService;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.util.Map;
-import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
@@ -24,16 +25,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
 
 @Slf4j
 @Service
@@ -47,6 +42,8 @@ public class UpdateRepresentationService {
     private final PrdOrganisationService organisationService;
     private final UpdateSolicitorDetailsService updateSolicitorDetailsService;
     private final ChangeOfRepresentationService changeOfRepresentationService;
+    private final GetAddedSolicitorService getAddedSolicitorService;
+    private final GetRemovedSolicitorService getRemovedSolicitorService;
 
     private static final String CHANGE_ORGANISATION_REQUEST = "changeOrganisationRequestField";
     private static final String NOC_EVENT = "nocRequest";
@@ -60,8 +57,10 @@ public class UpdateRepresentationService {
         final UserDetails solicitorToAdd = getInvokerDetails(authToken, caseDetails);
         final ChangeOrganisationRequest changeRequest = getChangeOrganisationRequest(caseDetails);
 
-        final ChangedRepresentative addedSolicitor = getAddedSolicitor(solicitorToAdd, changeRequest);
-        final ChangedRepresentative removedSolicitor = getRemovedSolicitor(caseDetails, changeRequest);
+        final ChangedRepresentative addedSolicitor = getAddedSolicitorService.getAddedSolicitorAsSolicitor(solicitorToAdd,
+            changeRequest);
+        final ChangedRepresentative removedSolicitor = getRemovedSolicitorService.getRemovedSolicitorAsSolicitor(caseDetails,
+            changeRequest);
 
         log.info("About to start updating solicitor details in the case data for caseId: {}", caseDetails.getId());
         caseDetails.getData().putAll(updateCaseDataWithNewSolDetails(caseDetails, addedSolicitor, changeRequest));
@@ -107,20 +106,12 @@ public class UpdateRepresentationService {
 
         Map<String, Object> caseData = caseDetails.getData();
         boolean isConsented = caseDataService.isConsentedApplication(caseDetails);
-        String appSolicitorAddressField = isConsented ? CONSENTED_SOLICITOR_ADDRESS : CONTESTED_SOLICITOR_ADDRESS;
-        String solicitorAddressField = changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY)
-            ? appSolicitorAddressField : RESP_SOLICITOR_ADDRESS;
+        addSolicitorAddressToCaseData(addedSolicitor, caseDetails, changeRequest, isConsented);
 
         caseData.put(changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY)
             ? APPLICANT_REPRESENTED
             : getRespondentRepresentedKey(caseDetails),
             YES_VALUE);
-
-        OrganisationsResponse organisationsResponse = organisationService
-            .findOrganisationByOrgId(addedSolicitor.getOrganisation().getOrganisationID());
-
-        caseData.put(solicitorAddressField,
-            updateSolicitorDetailsService.convertOrganisationAddressToSolicitorAddress(organisationsResponse));
 
         Map<String, Object> updatedCaseData = updateSolicitorDetailsService.updateSolicitorContactDetails(addedSolicitor,
              caseData, isConsented, changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY));
@@ -138,44 +129,24 @@ public class UpdateRepresentationService {
             ChangeOrganisationRequest.class);
     }
 
-    private String getApplicantSolicitorName(CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
-        return caseDataService.isConsentedApplication(caseDetails)
-            ? (String) caseData.get(CONSENTED_SOLICITOR_NAME) : (String) caseData.get(CONTESTED_SOLICITOR_NAME);
-    }
+    private void addSolicitorAddressToCaseData(ChangedRepresentative addedSolicitor,
+                                               CaseDetails caseDetails,
+                                               ChangeOrganisationRequest changeRequest,
+                                               boolean isConsented) {
+        String appSolicitorAddressField = isConsented ? CONSENTED_SOLICITOR_ADDRESS : CONTESTED_SOLICITOR_ADDRESS;
+        String solicitorAddressField = changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY)
+            ? appSolicitorAddressField : RESP_SOLICITOR_ADDRESS;
 
-    private String getApplicantSolicitorEmail(CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
-        return caseDataService.isConsentedApplication(caseDetails)
-            ? (String) caseData.get(SOLICITOR_EMAIL) : (String) caseData.get(CONTESTED_SOLICITOR_EMAIL);
+        OrganisationsResponse organisationsResponse = organisationService
+            .findOrganisationByOrgId(addedSolicitor.getOrganisation().getOrganisationID());
+
+        caseDetails.getData().put(solicitorAddressField,
+            updateSolicitorDetailsService.convertOrganisationAddressToSolicitorAddress(organisationsResponse));
     }
 
     private String getRespondentRepresentedKey(CaseDetails caseDetails) {
         return caseDataService.isConsentedApplication(caseDetails)
             ? CONSENTED_RESPONDENT_REPRESENTED : CONTESTED_RESPONDENT_REPRESENTED;
-    }
-
-    private ChangedRepresentative getAddedSolicitor(UserDetails solicitorToAdd,
-                                                    ChangeOrganisationRequest changeRequest) {
-        return ChangedRepresentative.builder()
-            .name(solicitorToAdd.getFullName())
-            .email(solicitorToAdd.getEmail())
-            .organisation(changeRequest.getOrganisationToAdd())
-            .build();
-    }
-
-    private ChangedRepresentative getRemovedSolicitor(CaseDetails caseDetails,
-                                                      ChangeOrganisationRequest changeRequest) {
-        return Optional.ofNullable(changeRequest.getOrganisationToRemove())
-            .map(org -> ChangedRepresentative.builder()
-                .name(changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY)
-                    ? getApplicantSolicitorName(caseDetails)
-                    : (String) caseDetails.getData().get(RESP_SOLICITOR_NAME))
-                .email(changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY)
-                    ? getApplicantSolicitorEmail(caseDetails)
-                    : (String) caseDetails.getData().get(RESP_SOLICITOR_EMAIL))
-                .organisation(org).build())
-            .orElse(null);
     }
 
     private RepresentationUpdateHistory getCurrentRepresentationUpdateHistory(Map<String, Object> caseData) {
