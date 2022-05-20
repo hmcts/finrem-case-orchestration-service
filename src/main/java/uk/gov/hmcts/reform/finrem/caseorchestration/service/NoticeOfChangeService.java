@@ -107,7 +107,7 @@ public class NoticeOfChangeService {
     }
 
     // aac handles org policy modification based on the Change Organisation Request,
-    // so we want to revert the org policies to their value before the event started
+    // so we need to revert the org policies to their value before the event started
     public CaseDetails persistOriginalOrgPoliciesWhenRevokingAccess(CaseDetails caseDetails,
                                                                     CaseDetails originalCaseDetails) {
         final boolean isApplicant = ((String)caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);

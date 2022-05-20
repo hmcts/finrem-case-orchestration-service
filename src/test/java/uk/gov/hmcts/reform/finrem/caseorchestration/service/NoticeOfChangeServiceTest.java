@@ -9,10 +9,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.AddedSolicitorService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.RemovedSolicitorService;
 
 import java.io.InputStream;
 import java.util.HashMap;
@@ -42,6 +45,10 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
 
     @MockBean private IdamService mockIdamService;
 
+    @MockBean private AddedSolicitorService addedSolicitorService;
+
+    @MockBean private RemovedSolicitorService removedSolicitorService;
+
     private CallbackRequest callbackRequest;
 
     private final Function<Map<String, Object>, List<Element<RepresentationUpdate>>> getFirstChangeElement =
@@ -65,6 +72,14 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
         setUpCaseDetails("change-of-representatives.json");
 
         setUpHelper();
+        when(addedSolicitorService.getAddedSolicitorAsCaseworker(any())).thenReturn(ChangedRepresentative.builder()
+            .name("Sir Solicitor")
+            .email("sirsolicitor1@gmail.com")
+            .organisation(Organisation.builder()
+                .organisationID("A31PTVA")
+                .organisationName("FRApplicantSolicitorFirm")
+                .build())
+            .build());
 
         try (InputStream resourceAsStream = getClass()
             .getResourceAsStream(PATH + "change-of-representatives-before.json")) {
@@ -93,6 +108,15 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
         setUpCaseDetails("change-of-representatives.json");
         setUpHelper();
 
+        when(addedSolicitorService.getAddedSolicitorAsCaseworker(any())).thenReturn(ChangedRepresentative.builder()
+            .name("Sir Solicitor")
+            .email("sirsolicitor1@gmail.com")
+            .organisation(Organisation.builder()
+                .organisationID("A31PTVA")
+                .organisationName("FRApplicantSolicitorFirm")
+                .build())
+            .build());
+
         try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH + "change-of-representatives.json")) {
             CallbackRequest actualRequest = mapper.readValue(resourceAsStream, CallbackRequest.class);
             InputStream is = getClass().getResourceAsStream(PATH + "change-of-reps-populated-original.json");
@@ -116,6 +140,15 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
     @Test
     public void inConsented_shouldUpdateRepresentationUpdateHistory_whenChangeCurrentlyUnpopulated() throws Exception {
         setUpCaseDetails("consented-change-of-reps.json");
+
+        when(addedSolicitorService.getAddedSolicitorAsCaseworker(any())).thenReturn(ChangedRepresentative.builder()
+            .name("Sir Solicitor")
+            .email("sirsolicitor1@gmail.com")
+            .organisation(Organisation.builder()
+                .organisationID("A31PTVA")
+                .organisationName("FRApplicantSolicitorFirm")
+                .build())
+            .build());
 
         setUpHelper();
         when(mockCaseDataService.isConsentedApplication(any())).thenReturn(true);
@@ -142,6 +175,16 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
     public void inConsented_shouldUpdateRepresentationUpdateHistory_whenChangeCurrentlyPopulated() throws Exception  {
         setUpCaseDetails("consented-change-of-reps.json");
         setUpHelper();
+
+        when(addedSolicitorService.getAddedSolicitorAsCaseworker(any())).thenReturn(ChangedRepresentative.builder()
+            .name("Sir Solicitor")
+            .email("sirsolicitor1@gmail.com")
+            .organisation(Organisation.builder()
+                .organisationID("A31PTVA")
+                .organisationName("FRApplicantSolicitorFirm")
+                .build())
+            .build());
+
         when(mockCaseDataService.isConsentedApplication(any())).thenReturn(true);
         try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH + "consented-change-of-reps.json")) {
             CallbackRequest actualRequest = mapper.readValue(resourceAsStream, CallbackRequest.class);
@@ -168,6 +211,16 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
         setUpHelper();
         when(mockCaseDataService.isConsentedApplication(any())).thenReturn(true);
 
+        when(removedSolicitorService.getRemovedSolicitorAsCaseworker(any())).thenReturn(
+            ChangedRepresentative.builder()
+                .name("Sir Solicitor")
+                .email("sirsolicitor1@gmail.com")
+                .organisation(Organisation.builder()
+                    .organisationID("A31PTVA")
+                    .organisationName("FRApplicantSolicitorFirm")
+                    .build())
+                .build());
+
         try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH + "change-of-reps-removing-before.json")) {
             CallbackRequest actualRequest = mapper.readValue(resourceAsStream, CallbackRequest.class);
 
@@ -192,6 +245,25 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
         setUpCaseDetails("change-of-reps-replacing.json");
 
         setUpHelper();
+
+        when(addedSolicitorService.getAddedSolicitorAsCaseworker(any())).thenReturn(
+            ChangedRepresentative.builder()
+                .name("TestAppSolName")
+                .email("testappsol123@gmail.com")
+                .organisation(Organisation.builder()
+                    .organisationID("A31PTVU")
+                    .organisationName("FRApplicantNewSolFirm")
+                    .build())
+                .build());
+        when(removedSolicitorService.getRemovedSolicitorAsCaseworker(any())).thenReturn(
+            ChangedRepresentative.builder()
+                .name("Sir Solicitor")
+                .email("sirsolicitor1@gmail.com")
+                .organisation(Organisation.builder()
+                    .organisationID("A31PTVA")
+                    .organisationName("FRApplicantSolicitorFirm")
+                    .build())
+                .build());
 
         try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH
             + "change-of-reps-replacing-before.json")) {
@@ -221,6 +293,15 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
         when(mockCaseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
         when(mockCaseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
         when(mockCaseDataService.buildFullRespondentName(any())).thenReturn("Jane Smith");
+        when(addedSolicitorService.getAddedSolicitorAsCaseworker(any())).thenReturn(
+            ChangedRepresentative.builder()
+                .name("Test respondent Solicitor")
+                .email("padmaja.ramisetti@gmail.com")
+                .organisation(Organisation.builder()
+                    .organisationID("A31PTVU")
+                    .organisationName("FRRespondentSolicitorFirm")
+                    .build())
+                .build());
 
         try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH
             + "change-of-representatives-respondent-before.json")) {

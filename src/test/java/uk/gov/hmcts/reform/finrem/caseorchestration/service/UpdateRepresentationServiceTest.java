@@ -17,6 +17,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpda
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.events.AuditEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationContactInformation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.AddedSolicitorService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.RemovedSolicitorService;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.io.InputStream;
@@ -91,6 +93,12 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
 
     @MockBean
     private ChangeOfRepresentationService changeOfRepresentationService;
+
+    @MockBean
+    private AddedSolicitorService addedSolicitorService;
+
+    @MockBean
+    private RemovedSolicitorService removedSolicitorService;
 
     private UserDetails testAppSolicitor;
     private UserDetails testRespSolicitor;
@@ -198,6 +206,16 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     public void givenConsentedCaseAndEmptyChangeOfReps_WhenUpdateRepresentation_thenReturnCorrectCaseData() throws Exception {
         String fixture = "consentedAppSolicitorAdding";
         setUpMockContext(testAppSolicitor, orgResponse, this::getChangeOfRepsAppContested, fixture, true);
+        when(addedSolicitorService.getAddedSolicitorAsSolicitor(any(), any())).thenReturn(
+            ChangedRepresentative.builder()
+                .name(testAppSolicitor.getFullName())
+                .email(testAppSolicitor.getEmail())
+                .organisation(Organisation.builder()
+                    .organisationID("A31PTVA")
+                    .organisationName("FRApplicantSolicitorFirm")
+                    .build())
+                .build()
+        );
         setUpCaseDetails("consentedAppSolicitorAdding/after-update-details.json");
         try (InputStream resourceAsStream = getClass()
             .getResourceAsStream(PATH + "consentedAppSolicitorAdding/change-of-representatives-before.json")) {
@@ -235,6 +253,16 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     public void givenEmptyChangeOfRepsAndRespSolicitor_WhenUpdateRepresentation_thenReturnCorrectCaseData() throws Exception {
         String fixture = "RespSolicitorAdding";
         setUpMockContext(testRespSolicitor, orgResponse, this::getChangeOfRepsRespondent, fixture, false);
+        when(addedSolicitorService.getAddedSolicitorAsSolicitor(any(), any())).thenReturn(
+            ChangedRepresentative.builder()
+                .name(testRespSolicitor.getFullName())
+                .email(testRespSolicitor.getEmail())
+                .organisation(Organisation.builder()
+                    .organisationID("A31PTVU")
+                    .organisationName("FRRespondentSolicitorFirm")
+                    .build())
+                .build()
+        );
         setUpCaseDetails("RespSolicitorAdding/after-update-details.json");
         InputStream resourceAsStream = getClass()
             .getResourceAsStream(PATH + "RespSolicitorAdding/change-of-representatives-before.json");
@@ -280,6 +308,22 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
             .organisationIdentifier("FRApplicantSolicitorFirm2").build();
 
         setUpMockContextReplacing(replacingSolicitor, secondOrgResponse, secondAppOrg);
+        when(addedSolicitorService.getAddedSolicitorAsSolicitor(any(), any())).thenReturn(
+            ChangedRepresentative.builder()
+                .name(replacingSolicitor.getFullName())
+                .email(replacingSolicitor.getEmail())
+                .organisation(secondAppOrg)
+                .build());
+        when(removedSolicitorService.getRemovedSolicitorAsSolicitor(any(), any())).thenReturn(
+            ChangedRepresentative.builder()
+                .name(testAppSolicitor.getFullName())
+                .email(testAppSolicitor.getEmail())
+                .organisation(Organisation.builder()
+                    .organisationID("A31PTVA")
+                    .organisationName("FRApplicantSolicitorFirm")
+                    .build())
+                .build());
+
         setUpCaseDetails("AppSolReplacing/after-update-details.json");
 
         InputStream resourceAsStream = getClass().getResourceAsStream(PATH
@@ -329,6 +373,15 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
             .thenReturn(getUpdatedContactData("contestedAppSolicitorAdding"));
         when(updateSolicitorDetailsService.removeSolicitorFields(any(), anyBoolean(), anyBoolean()))
             .thenReturn(getUpdatedContactData("contestedAppSolicitorAdding"));
+        when(addedSolicitorService.getAddedSolicitorAsSolicitor(any(), any())).thenReturn(
+            ChangedRepresentative.builder()
+                .name("Sir Solicitor")
+                .email("sirsolicitor1@gmail.com")
+                .organisation(Organisation.builder()
+                    .organisationID("A31PTVA")
+                    .organisationName("FRApplicantSolicitorFirm")
+                    .build())
+                .build());
     }
 
     private void setUpMockContext(UserDetails solicitor,
