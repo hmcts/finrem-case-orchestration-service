@@ -36,6 +36,10 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 //     return false;
 // }
 
+// def checkForNoCleanupLabel(branch_name) {
+//   return new GithubAPI(this).getLabelsbyPattern(branch_name, "cleanup").contains("no_cleanup")
+// }
+
 def checkForLabel(branch_name) {
   return new GithubAPI(this).getLabelsbyPattern(branch_name, "enable_fortify_scan").contains("enable_fortify_scan")
 }
@@ -79,7 +83,7 @@ withPipeline(type, product, app) {
         def enableAll = checkForLabel(env.BRANCH_NAME, "enable_all")
         def securityScan = checkForLabel(env.BRANCH_NAME, "enable_security_scan")
         def mutationTest = checkForLabel(env.BRANCH_NAME, "enable_mutation_test")
-        def fortifyScan = checkForLabel(env.BRANCH_NAME)
+        def fortifyScan = checkForLabel(env.BRANCH_NAME,"enable_fortify_scan")
         enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
         if (enableAll || securityScan || mutationTest || fortifyScan) {
             properties([
@@ -103,6 +107,10 @@ withPipeline(type, product, app) {
             enableMutationTest()
         }
         if (enableAll || fortifyScan) {
+            enableFortifyScan()
+        }
+    
+        if (checkForLabel(env.BRANCH_NAME)) {
             enableFortifyScan()
 
             after('fortify-scan') {
