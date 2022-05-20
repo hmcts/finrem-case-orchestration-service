@@ -12,6 +12,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
+
 import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
@@ -20,6 +23,8 @@ import java.util.Objects;
 
 import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_RECIPIENT;
@@ -41,6 +46,8 @@ public class NotificationService {
     private final ObjectMapper objectMapper;
     private final NotificationRequestMapper notificationRequestMapper;
     private final CaseDataService caseDataService;
+    private final CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
+    private final CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
 
     private String recipientEmail = "fr_applicant_sol@sharklasers.com";
 
@@ -368,14 +375,35 @@ public class NotificationService {
 
     public void sendNoticeOfChangeEmail(CaseDetails caseDetails) {
         URI uri = getNoticeOfChangeUri(caseDetails);
-        sendNotificationEmail(notificationRequestMapper
-            .getNotificationRequestForNoticeOfChange(caseDetails), uri);
+        NotificationRequest notificationRequest = notificationRequestMapper
+            .getNotificationRequestForNoticeOfChange(caseDetails);
+        sendEmailIfSolicitorIsDigital(caseDetails, notificationRequest, uri);
     }
 
     public void sendNoticeOfChangeEmailCaseworker(CaseDetails caseDetails) {
         URI uri = getNoticeOfChangeUriCaseworker(caseDetails);
-        sendNotificationEmail(notificationRequestMapper
-            .getNotificationRequestForNoticeOfChange(caseDetails), uri);
+        NotificationRequest notificationRequest = notificationRequestMapper
+            .getNotificationRequestForNoticeOfChange(caseDetails);
+        sendEmailIfSolicitorIsDigital(caseDetails, notificationRequest, uri);
+    }
+
+    private void sendEmailIfSolicitorIsDigital(CaseDetails caseDetails,
+                                               NotificationRequest notificationRequest,
+                                               URI uri) {
+
+        if (isApplicantNoticeOfChangeRequest(notificationRequest, caseDetails)) {
+            if (checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)) {
+                sendNotificationEmail(notificationRequestMapper
+                    .getNotificationRequestForNoticeOfChange(caseDetails), uri);
+            }
+            return;
+        }
+
+        if (checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)) {
+            sendNotificationEmail(notificationRequestMapper
+                .getNotificationRequestForNoticeOfChange(caseDetails), uri);
+        }
+
     }
 
     private URI getNoticeOfChangeUri(CaseDetails caseDetails) {
@@ -389,5 +417,17 @@ public class NotificationService {
             ? notificationServiceConfiguration.getConsentedNoCCaseworker()
             : notificationServiceConfiguration.getContestedNoCCaseworker());
 
+    }
+
+    private boolean isApplicantNoticeOfChangeRequest(NotificationRequest notificationRequest,
+                                                     CaseDetails caseDetails) {
+        return notificationRequest.getName().equalsIgnoreCase(
+            nullToEmpty(caseDetails.getData().get(getSolicitorNameKey(caseDetails))));
+    }
+
+    private String getSolicitorNameKey(CaseDetails caseDetails) {
+        return caseDataService.isConsentedApplication(caseDetails)
+            ? nullToEmpty(caseDetails.getData().get(CONSENTED_SOLICITOR_NAME))
+            : nullToEmpty(caseDetails.getData().get(CONTESTED_SOLICITOR_NAME));
     }
 }

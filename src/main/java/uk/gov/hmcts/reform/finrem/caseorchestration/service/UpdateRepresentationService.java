@@ -65,10 +65,8 @@ public class UpdateRepresentationService {
         log.info("About to start updating solicitor details in the case data for caseId: {}", caseDetails.getId());
         caseDetails.getData().putAll(updateCaseDataWithNewSolDetails(caseDetails, addedSolicitor, changeRequest));
 
-        Map<String, Object> updatedCaseData = updateRepresentationUpdateHistory(caseDetails,
-            addedSolicitor,
-            removedSolicitor,
-            changeRequest);
+        Map<String, Object> updatedCaseData = updateRepresentationUpdateHistory(caseDetails, addedSolicitor,
+            removedSolicitor, changeRequest);
 
         return updatedCaseData;
     }
@@ -105,20 +103,17 @@ public class UpdateRepresentationService {
                                                                 ChangeOrganisationRequest changeRequest) {
 
         Map<String, Object> caseData = caseDetails.getData();
+        boolean isApplicant = changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY);
         boolean isConsented = caseDataService.isConsentedApplication(caseDetails);
         addSolicitorAddressToCaseData(addedSolicitor, caseDetails, changeRequest, isConsented);
 
         caseData.put(changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY)
-            ? APPLICANT_REPRESENTED
-            : getRespondentRepresentedKey(caseDetails),
-            YES_VALUE);
+            ? APPLICANT_REPRESENTED : getRespondentRepresentedKey(caseDetails), YES_VALUE);
 
-        Map<String, Object> updatedCaseData = updateSolicitorDetailsService.updateSolicitorContactDetails(addedSolicitor,
-             caseData, isConsented, changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY));
+        Map<String, Object> updatedCaseData = updateSolicitorDetailsService.updateSolicitorContactDetails(
+            addedSolicitor, caseData, isConsented, isApplicant);
 
-        updatedCaseData = updateSolicitorDetailsService.removeSolicitorFields(updatedCaseData,
-            isConsented,
-            changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY));
+        updatedCaseData = updateSolicitorDetailsService.removeSolicitorFields(updatedCaseData, isConsented, isApplicant);
 
         return updatedCaseData;
     }

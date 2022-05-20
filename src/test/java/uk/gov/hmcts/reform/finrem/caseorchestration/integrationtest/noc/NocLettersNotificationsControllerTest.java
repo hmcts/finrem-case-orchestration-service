@@ -91,12 +91,45 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
 
     }
 
+    @Test
+    public void shouldCallNotificationServiceCorrectlyNonDigitalSolicitorRemoved() {
+        CaseDocument litigantSolicitorAddedCaseDocument = CaseDocument.builder().documentFilename("docFileNameAdded").build();
+        when(genericDocumentServiceMock.generateDocumentFromPlaceholdersMap(anyString(), anyMap(),
+            eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorAddedTemplate()),
+            eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorAddedFileName()))).thenReturn(
+            litigantSolicitorAddedCaseDocument);
+
+        notificationsController.sendNoticeOfChangeNotifications("authToken", buildNonDigitalCallbackRequest());
+
+        verify(notificationService).sendNoticeOfChangeEmail(caseDetails);
+        verify(genericDocumentServiceMock).generateDocumentFromPlaceholdersMap(eq("authToken"), placeholdersMapArgumentCaptor.capture(),
+            eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorAddedTemplate()),
+            eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorAddedFileName()));
+
+        Map letterAddedDetailsMap = placeholdersMapArgumentCaptor.getValue();
+
+        assertNotificationLetterDetails(letterAddedDetailsMap);
+
+        verify(bulkPrintService).sendDocumentForPrint(litigantSolicitorAddedCaseDocument, caseDetails);
+    }
+
     @Override
     protected CallbackRequest buildCallbackRequest() {
         caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke.json",
             new ObjectMapper());
         caseDetailsBefore =
             caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke-before.json",
+                new ObjectMapper());
+        return CallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
+    }
+
+    protected CallbackRequest buildNonDigitalCallbackRequest() {
+        caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/"
+                + "noc-letter-notifications-add-and-revoke-non-digital.json",
+            new ObjectMapper());
+        caseDetailsBefore =
+            caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications"
+                    + "-add-and-revoke-non-digital-before.json",
                 new ObjectMapper());
         return CallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
     }
