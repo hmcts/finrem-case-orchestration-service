@@ -36,8 +36,8 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 //     return false;
 // }
 
-def checkForLabel(test_name) {
-  return new GithubAPI(this).getLabelsbyPattern(test_name, "enable_fortify_scan")
+def checkForLabel(branch_name, test_name) {
+  return new GithubAPI(this).getLabelsbyPattern(branch_name, "enable_fortify_scan").contains(test_name)
 }
 
 // Vars for Kubernetes
