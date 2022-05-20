@@ -211,7 +211,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
         setUpHelper();
         when(mockCaseDataService.isConsentedApplication(any())).thenReturn(true);
 
-        when(removedSolicitorService.getRemovedSolicitorAsCaseworker(any())).thenReturn(
+        when(removedSolicitorService.getRemovedSolicitorAsCaseworker(any(), any())).thenReturn(
             ChangedRepresentative.builder()
                 .name("Sir Solicitor")
                 .email("sirsolicitor1@gmail.com")
@@ -255,7 +255,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
                     .organisationName("FRApplicantNewSolFirm")
                     .build())
                 .build());
-        when(removedSolicitorService.getRemovedSolicitorAsCaseworker(any())).thenReturn(
+        when(removedSolicitorService.getRemovedSolicitorAsCaseworker(any(), any())).thenReturn(
             ChangedRepresentative.builder()
                 .name("Sir Solicitor")
                 .email("sirsolicitor1@gmail.com")

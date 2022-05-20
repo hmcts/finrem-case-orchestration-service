@@ -205,7 +205,8 @@ public class RemovedSolicitorServiceTest {
         when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(true);
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(false);
 
-        ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsCaseworker(caseDetails);
+        ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsCaseworker(caseDetails,
+            true);
         assertEquals(removedSolicitor.getName(), APP_SOL_NAME);
         assertEquals(removedSolicitor.getEmail(), APP_SOL_EMAIL);
         assertEquals(removedSolicitor.getOrganisation().getOrganisationID(), TEST_APP_ORG_ID);
@@ -223,7 +224,8 @@ public class RemovedSolicitorServiceTest {
         when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(true);
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
 
-        ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsCaseworker(caseDetails);
+        ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsCaseworker(caseDetails,
+            true);
 
         assertEquals(removedSolicitor.getName(), APP_SOL_NAME);
         assertEquals(removedSolicitor.getEmail(), APP_SOL_EMAIL);
@@ -242,7 +244,8 @@ public class RemovedSolicitorServiceTest {
         when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(false);
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
 
-        ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsCaseworker(caseDetails);
+        ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsCaseworker(caseDetails,
+            true);
 
         assertEquals(removedSolicitor.getName(), APP_SOL_NAME);
         assertEquals(removedSolicitor.getEmail(), APP_SOL_EMAIL);
@@ -260,7 +263,8 @@ public class RemovedSolicitorServiceTest {
         when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(true);
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(false);
 
-        ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsCaseworker(caseDetails);
+        ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsCaseworker(caseDetails,
+            false);
 
         assertEquals(removedSolicitor.getName(), RESP_SOL_NAME);
         assertEquals(removedSolicitor.getEmail(), RESP_SOL_EMAIL);
@@ -279,7 +283,8 @@ public class RemovedSolicitorServiceTest {
         when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(true);
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
 
-        ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsCaseworker(caseDetails);
+        ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsCaseworker(caseDetails,
+            false);
 
         assertEquals(removedSolicitor.getName(), RESP_SOL_NAME);
         assertEquals(removedSolicitor.getEmail(), RESP_SOL_EMAIL);
@@ -298,7 +303,8 @@ public class RemovedSolicitorServiceTest {
         when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(false);
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
 
-        ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsCaseworker(caseDetails);
+        ChangedRepresentative removedSolicitor = removedSolicitorService.getRemovedSolicitorAsCaseworker(caseDetails,
+            false);
 
         assertEquals(removedSolicitor.getName(), RESP_SOL_NAME);
         assertEquals(removedSolicitor.getEmail(), RESP_SOL_EMAIL);

@@ -64,10 +64,9 @@ public class RemovedSolicitorService {
         return getDigitalRemovedRepresentative(caseDetails, isApplicant, changeRequest);
     }
 
-    public ChangedRepresentative getRemovedSolicitorAsCaseworker(CaseDetails caseDetails) {
+    public ChangedRepresentative getRemovedSolicitorAsCaseworker(CaseDetails caseDetails, final boolean isApplicant) {
         Map<String, Object> caseData = caseDetails.getData();
 
-        final boolean isApplicant = ((String) caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
         final String litigantOrgPolicy = isApplicant ? APPLICANT_ORGANISATION_POLICY : RESPONDENT_ORGANISATION_POLICY;
 
         if (caseData.get(getLitigantRepresentedKey(caseDetails, isApplicant)).equals(YES_VALUE)) {

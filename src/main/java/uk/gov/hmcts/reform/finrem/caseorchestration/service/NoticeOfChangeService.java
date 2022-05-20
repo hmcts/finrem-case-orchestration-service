@@ -151,7 +151,7 @@ public class NoticeOfChangeService {
                 : caseDataService.buildFullRespondentName(caseDetails))
             .current(current)
             .addedRepresentative(addedSolicitorService.getAddedSolicitorAsCaseworker(caseDetails))
-            .removedRepresentative(removedSolicitorService.getRemovedSolicitorAsCaseworker(originalDetails))
+            .removedRepresentative(removedSolicitorService.getRemovedSolicitorAsCaseworker(originalDetails, isApplicant))
             .build();
     }
 
