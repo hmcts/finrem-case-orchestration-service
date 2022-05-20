@@ -59,13 +59,11 @@ withPipeline(type, product, app) {
                 alwaysLinkToLastBuild: true
         ]
     onPR() {
-        if (checkForLabel(env.BRANCH_NAME)) {
-            enableFortifyScan();
+            enableFortifyScan()
 
             after('fortify-scan') {
             steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Fortify Scan/**/*'
         }
-      }
   }
     }
 
