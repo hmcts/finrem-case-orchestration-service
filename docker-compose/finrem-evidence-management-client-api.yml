@@ -1,0 +1,13 @@
+---
+version: '3'
+
+services:
+  finrem-evidence-management-client-api:
+    image: hmctspublic.azurecr.io/finrem/emca:latest
+    container_name: finrem-evidence-management-client-api
+    environment:
+      AUTH_PROVIDER_SERVICE_CLIENT_BASEURL: http://localhost:8489
+      DOCUMENT_MANAGEMENT_STORE_URL: http://localhost:0000 #TODO:right port to be added
+      IDAM_API_URL: http://localhost:5000
+    ports:
+      - 4006:4006

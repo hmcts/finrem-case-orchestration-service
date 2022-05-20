@@ -57,4 +57,11 @@ public class DocumentConfiguration {
     private String additionalHearingFileName;
     private String generalApplicationInterimHearingNoticeTemplate;
     private String generalApplicationInterimHearingNoticeFileName;
+    private String nocLetterNotificationSolicitorTemplate;
+    private String nocLetterNotificationSolicitorFileName;
+    private String nocLetterNotificationLitigantSolicitorAddedTemplate;
+    private String nocLetterNotificationLitigantSolicitorAddedFileName;
+    private String nocLetterNotificationLitigantSolicitorRevokedTemplate;
+    private String nocLetterNotificationLitigantSolicitorRevokedFileName;
+
 }

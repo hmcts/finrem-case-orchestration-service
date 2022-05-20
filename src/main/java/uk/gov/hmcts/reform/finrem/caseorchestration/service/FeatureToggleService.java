@@ -18,9 +18,11 @@ import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.ASSIGN_CASE_ACCESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.MANAGE_BUNDLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CASEWORKER_NOTICE_OF_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.PAYMENT_REQUEST_USING_CASE_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.RESPONDENT_JOURNEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_TO_FRC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SOLICITOR_NOTICE_OF_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.USE_USER_TOKEN;
 
 /**
@@ -75,6 +77,10 @@ public class FeatureToggleService {
         return isFeatureEnabled(USE_USER_TOKEN);
     }
 
+    public boolean isSolicitorNoticeOfChangeEnabled() {
+        return isFeatureEnabled(SOLICITOR_NOTICE_OF_CHANGE);
+    }
+
     /*
      * Used for sending emails to FRC in Notification Service
      * Removing will result in test account being emailed, rather than actual FRCs
@@ -82,6 +88,10 @@ public class FeatureToggleService {
      */
     public boolean isSendToFRCEnabled() {
         return isFeatureEnabled(SEND_TO_FRC);
+    }
+
+    public boolean isCaseworkerNoCEnabled() {
+        return isFeatureEnabled(CASEWORKER_NOTICE_OF_CHANGE);
     }
 
     /**
