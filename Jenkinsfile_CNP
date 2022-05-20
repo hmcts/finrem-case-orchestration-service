@@ -64,10 +64,10 @@ withPipeline(type, product, app) {
     }
 
 onPR() {
-        def enableAll = getLabels(env.BRANCH_NAME, "enable_all")
-        def securityScan = getLabels(env.BRANCH_NAME, "enable_security_scan")
-        def mutationTest = getLabels(env.BRANCH_NAME, "enable_mutation_test")
-        def fortifyScan = getLabels(env.BRANCH_NAME, "enable_fortify_scan")
+        def enableAll = getLabelsbyPattern(env.BRANCH_NAME, "enable_all")
+        def securityScan = getLabelsbyPattern(env.BRANCH_NAME, "enable_security_scan")
+        def mutationTest = getLabelsbyPattern(env.BRANCH_NAME, "enable_mutation_test")
+        def fortifyScan = getLabelsbyPattern(env.BRANCH_NAME, "enable_fortify_scan")
         enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
         if (enableAll || securityScan || mutationTest || fortifyScan) {
             properties([
