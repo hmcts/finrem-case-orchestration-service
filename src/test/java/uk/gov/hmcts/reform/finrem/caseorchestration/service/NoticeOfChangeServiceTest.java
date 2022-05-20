@@ -25,6 +25,7 @@ import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
@@ -211,7 +212,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
         setUpHelper();
         when(mockCaseDataService.isConsentedApplication(any())).thenReturn(true);
 
-        when(removedSolicitorService.getRemovedSolicitorAsCaseworker(any(), any())).thenReturn(
+        when(removedSolicitorService.getRemovedSolicitorAsCaseworker(any(), eq(true))).thenReturn(
             ChangedRepresentative.builder()
                 .name("Sir Solicitor")
                 .email("sirsolicitor1@gmail.com")
@@ -255,7 +256,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
                     .organisationName("FRApplicantNewSolFirm")
                     .build())
                 .build());
-        when(removedSolicitorService.getRemovedSolicitorAsCaseworker(any(), any())).thenReturn(
+        when(removedSolicitorService.getRemovedSolicitorAsCaseworker(any(), eq(true))).thenReturn(
             ChangedRepresentative.builder()
                 .name("Sir Solicitor")
                 .email("sirsolicitor1@gmail.com")
