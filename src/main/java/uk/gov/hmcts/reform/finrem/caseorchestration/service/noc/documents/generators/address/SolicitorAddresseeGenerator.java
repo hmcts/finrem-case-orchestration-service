@@ -38,8 +38,7 @@ public class SolicitorAddresseeGenerator implements AddresseeGenerator {
     private String getSolicitorAddressKey(String party, CaseDetails caseDetails) {
         String applicantSolicitorAddressKey = getApplicantSolicitorAddressKey(caseDetails);
         return party.equalsIgnoreCase(APPLICANT)
-            ? applicantSolicitorAddressKey
-            : RESP_SOLICITOR_ADDRESS;
+            ? applicantSolicitorAddressKey : RESP_SOLICITOR_ADDRESS;
     }
 
     private String getApplicantSolicitorAddressKey(CaseDetails caseDetails) {
