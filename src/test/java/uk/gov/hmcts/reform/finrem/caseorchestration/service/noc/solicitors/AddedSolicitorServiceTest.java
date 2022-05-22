@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
@@ -56,6 +57,12 @@ public class AddedSolicitorServiceTest {
 
     @Mock
     private CaseDataService caseDataService;
+
+    @Mock
+    private CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
+
+    @Mock
+    private CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
 
     @InjectMocks
     private AddedSolicitorService addedSolicitorService;
@@ -116,6 +123,7 @@ public class AddedSolicitorServiceTest {
         caseDetails.getData().put(APPLICANT_ORGANISATION_POLICY, applicantOrgPolicy);
 
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(false);
+        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(true);
 
         ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsCaseworker(caseDetails);
         assertEquals(addedSolicitor.getName(), APP_SOL_NAME);
@@ -137,6 +145,7 @@ public class AddedSolicitorServiceTest {
         caseDetails.getData().put(APPLICANT_ORGANISATION_POLICY, applicantOrgPolicy);
 
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
+        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(true);
 
         ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsCaseworker(caseDetails);
         assertEquals(addedSolicitor.getName(), APP_SOL_NAME);
@@ -157,11 +166,54 @@ public class AddedSolicitorServiceTest {
         caseDetails.getData().put(NOC_PARTY, RESPONDENT);
         caseDetails.getData().put(RESPONDENT_ORGANISATION_POLICY, respondentOrgPolicy);
 
+        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(true);
+
         ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsCaseworker(caseDetails);
         assertEquals(addedSolicitor.getName(), RESP_SOL_NAME);
         assertEquals(addedSolicitor.getEmail(), RESP_SOL_EMAIL);
         assertEquals(addedSolicitor.getOrganisation().getOrganisationID(), TEST_RESP_ORG_ID);
         assertEquals(addedSolicitor.getOrganisation().getOrganisationName(), TEST_RESP_ORG_NAME);
+    }
+
+    @Test
+    public void givenNonDigitalApplicantSolicitor_whenGetAddedSolicitorAsCaseworker_thenGetCorrectAddedSolicitor() {
+        OrganisationPolicy applicantOrgPolicy = OrganisationPolicy.builder()
+            .orgPolicyCaseAssignedRole(APP_SOLICITOR_POLICY)
+            .organisation(Organisation.builder().build())
+            .build();
+
+        caseDetails.getData().put(CONTESTED_SOLICITOR_NAME, APP_SOL_NAME);
+        caseDetails.getData().put(CONTESTED_SOLICITOR_EMAIL, APP_SOL_EMAIL);
+        caseDetails.getData().put(NOC_PARTY, APPLICANT);
+        caseDetails.getData().put(APPLICANT_ORGANISATION_POLICY, applicantOrgPolicy);
+
+        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(false);
+        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(false);
+
+        ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsCaseworker(caseDetails);
+        assertEquals(addedSolicitor.getName(), APP_SOL_NAME);
+        assertEquals(addedSolicitor.getEmail(), APP_SOL_EMAIL);
+        assertNull(addedSolicitor.getOrganisation());
+    }
+
+    @Test
+    public void givenNonDigitalRespondentSolicitor_whenGetAddedSolicitorAsCaseworker_thenGetCorrectAddedSolicitor() {
+        OrganisationPolicy respondentOrgPolicy = OrganisationPolicy.builder()
+            .orgPolicyCaseAssignedRole(RESP_SOLICITOR_POLICY)
+            .organisation(Organisation.builder().build())
+            .build();
+
+        caseDetails.getData().put(RESP_SOLICITOR_NAME, RESP_SOL_NAME);
+        caseDetails.getData().put(RESP_SOLICITOR_EMAIL, RESP_SOL_EMAIL);
+        caseDetails.getData().put(NOC_PARTY, RESPONDENT);
+        caseDetails.getData().put(RESPONDENT_ORGANISATION_POLICY, respondentOrgPolicy);
+
+        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(false);
+
+        ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsCaseworker(caseDetails);
+        assertEquals(addedSolicitor.getName(), RESP_SOL_NAME);
+        assertEquals(addedSolicitor.getEmail(), RESP_SOL_EMAIL);
+        assertNull(addedSolicitor.getOrganisation());
     }
 
     private DynamicList getApplicantCaseRole() {

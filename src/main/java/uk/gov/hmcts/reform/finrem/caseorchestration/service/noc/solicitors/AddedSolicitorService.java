@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -32,6 +33,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 public class AddedSolicitorService {
 
     private final CaseDataService caseDataService;
+    private final CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
+    private final CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
 
     public ChangedRepresentative getAddedSolicitorAsSolicitor(UserDetails solicitorToAdd,
                                                     ChangeOrganisationRequest changeRequest) {
@@ -46,12 +49,13 @@ public class AddedSolicitorService {
         final boolean isApplicant = ((String) caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
         final String litigantOrgPolicy = isApplicant ? APPLICANT_ORGANISATION_POLICY : RESPONDENT_ORGANISATION_POLICY;
 
+        if (!isSolicitorDigital(caseDetails, isApplicant)) {
+            return getAddedSolicitor(caseDetails, isApplicant, null);
+        }
+
         return Optional.ofNullable(getOrgPolicy(caseDetails, litigantOrgPolicy).getOrganisation())
-            .map(organisation -> ChangedRepresentative.builder()
-                .name(getSolicitorName(caseDetails, isApplicant))
-                .email(getSolicitorEmail(caseDetails, isApplicant))
-                .organisation(organisation)
-                .build()).orElse(null);
+            .map(organisation -> getAddedSolicitor(caseDetails, isApplicant, organisation))
+            .orElse(null);
     }
 
     private OrganisationPolicy getOrgPolicy(CaseDetails caseDetails, String orgPolicy) {
@@ -81,5 +85,22 @@ public class AddedSolicitorService {
         Map<String, Object> caseData = caseDetails.getData();
         return caseDataService.isConsentedApplication(caseDetails)
             ? nullToEmpty(caseData.get(SOLICITOR_EMAIL)) : nullToEmpty(caseData.get(CONTESTED_SOLICITOR_EMAIL));
+    }
+
+    private boolean isSolicitorDigital(CaseDetails caseDetails, boolean isApplicant) {
+        return isApplicant
+            ? checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)
+            : checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails);
+    }
+
+    private ChangedRepresentative getAddedSolicitor(CaseDetails caseDetails,
+                                                           boolean isApplicant,
+                                                           Organisation organisation) {
+        return ChangedRepresentative.builder()
+            .name(getSolicitorName(caseDetails, isApplicant))
+            .email(getSolicitorEmail(caseDetails, isApplicant))
+            .organisation(organisation)
+            .build();
+
     }
 }
