@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.gener
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
@@ -14,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.genera
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 import java.util.Objects;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
@@ -43,8 +45,6 @@ public class NocLetterDetailsGenerator {
                                                 DocumentHelper.PaperNotificationRecipient recipient,
                                                 NoticeType noticeType) {
 
-        boolean isConsentedApplication = caseDataService.isConsentedApplication(caseDetails);
-
         return NoticeOfChangeLetterDetails.builder()
             .letterDate(DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()))
             .divorceCaseNumber(Objects.toString(caseDetails.getData().get(DIVORCE_CASE_NUMBER)))
@@ -52,17 +52,40 @@ public class NocLetterDetailsGenerator {
             .reference(getSolicitorReference(noticeType == NoticeType.ADD ? caseDetails : caseDetailsBefore, representationUpdate))
             .applicantName(documentHelper.getApplicantFullName(caseDetails))
             .solicitorFirmName(getSolicitorFirmName(representationUpdate, noticeType))
-            .respondentName(isConsentedApplication ? documentHelper.getRespondentFullNameConsented(caseDetails) :
-                documentHelper.getRespondentFullNameContested(caseDetails))
-            .courtDetails(isConsentedApplication ? buildConsentedFrcCourtDetails() : buildFrcCourtDetails(caseDetails.getData()))
-            .addressee(addresseeGeneratorService.generateAddressee(
-                noticeType == NoticeType.ADD ? caseDetailsBefore : caseDetails,
-                noticeType == NoticeType.ADD ? representationUpdate.getAdded() : representationUpdate.getRemoved(),
-                recipient,
-                representationUpdate.getParty()))
-            .noticeOfChangeText(recipient == DocumentHelper.PaperNotificationRecipient.SOLICITOR
-                ? noticeType == NoticeType.ADD ? SOLICITOR_ADD_NOC_TEXT : SOLICITOR_REVOKED_NOC_TEXT : null)
+            .respondentName(getRespondentName(caseDetails))
+            .courtDetails(getCourtDetails(caseDetails))
+            .addressee(getAddressee(noticeType, caseDetails, caseDetailsBefore, recipient, representationUpdate))
+            .noticeOfChangeText(getNoticeOfChangeText(recipient, noticeType))
             .build();
+    }
+
+    private Addressee getAddressee(NoticeType noticeType,
+                                   CaseDetails caseDetails,
+                                   CaseDetails caseDetailsBefore,
+                                   DocumentHelper.PaperNotificationRecipient recipient,
+                                   RepresentationUpdate representationUpdate) {
+        final boolean isAddNoticeType = noticeType == NoticeType.ADD;
+        return addresseeGeneratorService.generateAddressee(
+            isAddNoticeType ? caseDetails : caseDetailsBefore,
+            isAddNoticeType ? representationUpdate.getAdded() : representationUpdate.getRemoved(),
+            recipient, representationUpdate.getParty());
+    }
+
+    private String getRespondentName(CaseDetails caseDetails) {
+        boolean isConsentedApplication = caseDataService.isConsentedApplication(caseDetails);
+        return isConsentedApplication ? documentHelper.getRespondentFullNameConsented(caseDetails) :
+            documentHelper.getRespondentFullNameContested(caseDetails);
+    }
+
+    private Map getCourtDetails(CaseDetails caseDetails) {
+        boolean isConsentedApplication = caseDataService.isConsentedApplication(caseDetails);
+        return isConsentedApplication ? buildConsentedFrcCourtDetails() : buildFrcCourtDetails(caseDetails.getData());
+    }
+
+    private String getNoticeOfChangeText(DocumentHelper.PaperNotificationRecipient recipient, NoticeType noticeType) {
+        String solicitorText = noticeType == NoticeType.ADD ? SOLICITOR_ADD_NOC_TEXT : SOLICITOR_REVOKED_NOC_TEXT;
+
+        return recipient == DocumentHelper.PaperNotificationRecipient.SOLICITOR ? solicitorText : null;
     }
 
     private String getSolicitorReference(CaseDetails caseDetails, RepresentationUpdate representationUpdate) {

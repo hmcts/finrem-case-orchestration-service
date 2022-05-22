@@ -87,7 +87,7 @@ public class NocLetterDetailsGeneratorTest {
     public void shouldGenerateNoticeOfChangeLetterDetailsForApplicantWhenSolicitorAdded() {
 
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.FALSE);
-        when(addresseeBuilder.generateAddressee(caseDetailsBefore, changedRepresentativeAdded,
+        when(addresseeBuilder.generateAddressee(caseDetails, changedRepresentativeAdded,
             DocumentHelper.PaperNotificationRecipient.APPLICANT, "applicant"))
             .thenReturn(Addressee.builder().formattedAddress(
                 FORMATTED_ADDRESS).name(ADDRESSEE_NAME).build());
@@ -109,7 +109,7 @@ public class NocLetterDetailsGeneratorTest {
     public void shouldGenerateNoticeOfChangeLetterDetailsForApplicantWhenSolicitorRemoved() {
 
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.TRUE);
-        when(addresseeBuilder.generateAddressee(caseDetails, changedRepresentativeRemoved,
+        when(addresseeBuilder.generateAddressee(caseDetailsBefore, changedRepresentativeRemoved,
             DocumentHelper.PaperNotificationRecipient.APPLICANT, "applicant"))
             .thenReturn(Addressee.builder().formattedAddress(
                 FORMATTED_ADDRESS).name(ADDRESSEE_NAME).build());
@@ -132,7 +132,7 @@ public class NocLetterDetailsGeneratorTest {
     public void shouldGenerateNoticeOfChangeLetterDetailsForSolicitorWhenAdded() {
 
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.FALSE);
-        when(addresseeBuilder.generateAddressee(caseDetailsBefore, changedRepresentativeAdded,
+        when(addresseeBuilder.generateAddressee(caseDetails, changedRepresentativeAdded,
             DocumentHelper.PaperNotificationRecipient.SOLICITOR, "applicant"))
             .thenReturn(Addressee.builder().formattedAddress(
                 FORMATTED_ADDRESS).name(ADDRESSEE_NAME).build());
@@ -156,7 +156,7 @@ public class NocLetterDetailsGeneratorTest {
     public void shouldGenerateNoticeOfChangeLetterDetailsForSolicitorWhenRemoved() {
 
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.FALSE);
-        when(addresseeBuilder.generateAddressee(caseDetails, changedRepresentativeRemoved,
+        when(addresseeBuilder.generateAddressee(caseDetailsBefore, changedRepresentativeRemoved,
             DocumentHelper.PaperNotificationRecipient.SOLICITOR, "applicant"))
             .thenReturn(Addressee.builder().formattedAddress(
                 FORMATTED_ADDRESS).name(ADDRESSEE_NAME).build());
