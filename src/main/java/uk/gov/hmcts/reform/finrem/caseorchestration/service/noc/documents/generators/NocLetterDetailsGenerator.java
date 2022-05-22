@@ -55,8 +55,11 @@ public class NocLetterDetailsGenerator {
             .respondentName(isConsentedApplication ? documentHelper.getRespondentFullNameConsented(caseDetails) :
                 documentHelper.getRespondentFullNameContested(caseDetails))
             .courtDetails(isConsentedApplication ? buildConsentedFrcCourtDetails() : buildFrcCourtDetails(caseDetails.getData()))
-            .addressee(addresseeGeneratorService.generateAddressee(noticeType == NoticeType.ADD ? caseDetailsBefore
-                : caseDetails, noticeType == NoticeType.ADD ? representationUpdate.getAdded() : representationUpdate.getRemoved(), recipient))
+            .addressee(addresseeGeneratorService.generateAddressee(
+                noticeType == NoticeType.ADD ? caseDetailsBefore : caseDetails,
+                noticeType == NoticeType.ADD ? representationUpdate.getAdded() : representationUpdate.getRemoved(),
+                recipient,
+                representationUpdate.getParty()))
             .noticeOfChangeText(recipient == DocumentHelper.PaperNotificationRecipient.SOLICITOR
                 ? noticeType == NoticeType.ADD ? SOLICITOR_ADD_NOC_TEXT : SOLICITOR_REVOKED_NOC_TEXT : null)
             .build();
@@ -75,6 +78,9 @@ public class NocLetterDetailsGenerator {
     }
 
     private String getSolicitorFirmNameFromOrganisationService(String organisationId) {
+        if (organisationId == null) {
+            return "";
+        }
         OrganisationsResponse organisationsResponse = prdOrganisationService.findOrganisationByOrgId(organisationId);
         if (organisationsResponse != null) {
             return organisationsResponse.getName();

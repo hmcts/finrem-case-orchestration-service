@@ -56,8 +56,7 @@ public class UpdateRepresentationWorkflowService {
         ChangeOrganisationRequest changeRequest =  new ObjectMapper().registerModule(new JavaTimeModule())
             .convertValue(caseDetails.getData().get(CHANGE_ORGANISATION_REQUEST), ChangeOrganisationRequest.class);
 
-        return Optional.ofNullable(changeRequest.getOrganisationToAdd()).isEmpty()
-            && Optional.ofNullable(changeRequest.getOrganisationToRemove()).isEmpty();
+        return isOrganisationsEmpty(changeRequest);
     }
 
     private void setDefaultChangeOrganisationRequest(CaseDetails caseDetails) {
@@ -72,5 +71,15 @@ public class UpdateRepresentationWorkflowService {
             .build();
 
         caseDetails.getData().put(CHANGE_ORGANISATION_REQUEST, defaultRequest);
+    }
+
+    private boolean isOrganisationsEmpty(ChangeOrganisationRequest changeRequest) {
+        boolean addedIsEmpty = Optional.ofNullable(changeRequest.getOrganisationToAdd()).isEmpty()
+            || Optional.ofNullable(changeRequest.getOrganisationToAdd().getOrganisationID()).isEmpty();
+
+        boolean removedIsEmpty = Optional.ofNullable(changeRequest.getOrganisationToRemove()).isEmpty()
+            || Optional.ofNullable(changeRequest.getOrganisationToRemove().getOrganisationID()).isEmpty();
+
+        return addedIsEmpty && removedIsEmpty;
     }
 }

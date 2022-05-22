@@ -31,22 +31,25 @@ public class AddresseeBuilderServiceTest {
     @Test
     public void givenRecipientIsSolicitorThenShouldCallSolicitorAddressGenerator() {
 
-        addresseeBuilderService.generateAddressee(caseDetails, changedRepresentative, DocumentHelper.PaperNotificationRecipient.SOLICITOR);
-        verify(solicitorAddresseeGenerator).generate(caseDetails, changedRepresentative);
+        addresseeBuilderService.generateAddressee(caseDetails, changedRepresentative,
+            DocumentHelper.PaperNotificationRecipient.SOLICITOR, "applicant");
+        verify(solicitorAddresseeGenerator).generate(caseDetails, changedRepresentative, "applicant");
     }
 
     @Test
     public void givenRecipientIsApplicantThenShouldCallApplicantAddressGenerator() {
 
-        addresseeBuilderService.generateAddressee(caseDetails, changedRepresentative, DocumentHelper.PaperNotificationRecipient.APPLICANT);
-        verify(applicantAddresseeGenerator).generate(caseDetails, changedRepresentative);
+        addresseeBuilderService.generateAddressee(caseDetails, changedRepresentative,
+            DocumentHelper.PaperNotificationRecipient.APPLICANT, "applicant");
+        verify(applicantAddresseeGenerator).generate(caseDetails, changedRepresentative, "applicant");
     }
 
     @Test
     public void givenRecipientIsRespondenthenShouldCallRespondentAddressGenerator() {
 
-        addresseeBuilderService.generateAddressee(caseDetails, changedRepresentative, DocumentHelper.PaperNotificationRecipient.RESPONDENT);
-        verify(respondentAddresseeGenerator).generate(caseDetails, changedRepresentative);
+        addresseeBuilderService.generateAddressee(caseDetails, changedRepresentative,
+            DocumentHelper.PaperNotificationRecipient.RESPONDENT, "respondent");
+        verify(respondentAddresseeGenerator).generate(caseDetails, changedRepresentative, "respondent");
     }
 
 }
