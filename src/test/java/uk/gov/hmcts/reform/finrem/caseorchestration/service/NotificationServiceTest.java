@@ -29,6 +29,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
@@ -83,6 +85,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Autowired private RestTemplate restTemplate;
 
     @MockBean private FeatureToggleService featureToggleService;
+    @MockBean private RestTemplate mockRestTemplate;
     @MockBean private NotificationRequestMapper notificationRequestMapper;
     @MockBean private CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
     @MockBean private CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
@@ -1094,5 +1097,6 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(getContestedCallbackRequest().getCaseDetails());
         verify(notificationServiceConfiguration).getContestedNoCCaseworker();
+        verify(mockRestTemplate, never()).exchange(any(), eq(HttpMethod.POST), any(), eq(String.class));
     }
 }

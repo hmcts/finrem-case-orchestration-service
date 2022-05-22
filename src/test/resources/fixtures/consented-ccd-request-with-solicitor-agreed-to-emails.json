@@ -20,6 +20,14 @@
         "document_filename": "file1",
         "document_binary_url": "http://file1.binary"
       },
+      "ApplicantOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "testID",
+          "OrganisationName": "tesName"
+        },
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
+      },
+      "applicantRepresented": "Yes",
       "d81Applicant": {
         "document_url": "http://file1",
         "document_filename": "file1",

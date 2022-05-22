@@ -393,15 +393,13 @@ public class NotificationService {
 
         if (isApplicantNoticeOfChangeRequest(notificationRequest, caseDetails)) {
             if (checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)) {
-                sendNotificationEmail(notificationRequestMapper
-                    .getNotificationRequestForNoticeOfChange(caseDetails), uri);
+                sendNotificationEmail(notificationRequest, uri);
             }
             return;
         }
 
         if (checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)) {
-            sendNotificationEmail(notificationRequestMapper
-                .getNotificationRequestForNoticeOfChange(caseDetails), uri);
+            sendNotificationEmail(notificationRequest, uri);
         }
 
     }
@@ -427,7 +425,7 @@ public class NotificationService {
 
     private String getSolicitorNameKey(CaseDetails caseDetails) {
         return caseDataService.isConsentedApplication(caseDetails)
-            ? nullToEmpty(caseDetails.getData().get(CONSENTED_SOLICITOR_NAME))
-            : nullToEmpty(caseDetails.getData().get(CONTESTED_SOLICITOR_NAME));
+            ? CONSENTED_SOLICITOR_NAME
+            : CONTESTED_SOLICITOR_NAME;
     }
 }
