@@ -107,8 +107,6 @@ public class UpdateSolicitorDetailsService {
         caseData.put(isConsented ? CONSENTED_SOLICITOR_NAME : CONTESTED_SOLICITOR_NAME,
             addedSolicitor.getName());
         caseData.put(isConsented ? SOLICITOR_EMAIL : CONTESTED_SOLICITOR_EMAIL, addedSolicitor.getEmail());
-        caseData.put(isConsented ? CONSENTED_SOLICITOR_FIRM : CONTESTED_SOLICITOR_FIRM,
-            addedSolicitor.getOrganisation().getOrganisationName());
     }
 
     private void removeAppSolFields(Map<String, Object> caseData,
@@ -123,7 +121,6 @@ public class UpdateSolicitorDetailsService {
                                      ChangedRepresentative addedSolicitor) {
         caseData.put(RESP_SOLICITOR_NAME, addedSolicitor.getName());
         caseData.put(RESP_SOLICITOR_EMAIL, addedSolicitor.getEmail());
-        caseData.put(RESP_SOLICITOR_FIRM, addedSolicitor.getOrganisation().getOrganisationName());
     }
 
     private void removeRespSolFields(Map<String, Object> caseData) {
