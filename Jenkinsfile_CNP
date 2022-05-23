@@ -29,44 +29,44 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
     ]
 }
 
-labelMap = [
-    enableAll: "enable_all",
-    securityScan: "enable_security_scan",
-    mutationTest: "enable_mutation_test",
-    fortifyScan: "enable_fortify_scan",
-    enableNightly: "enable_nightly"
+labels = [
+    "enable_security_scan",
+    "enable_mutation_test",
+    "enable_fortify_scan",
+    "enable_nightly"
 ]
 
-def checkRepoForLabel(branch_name, test_name) {
-    if (new GithubAPI(this).getLabelsbyPattern(branch_name, "enable").contains(test_name)) {
+def checkRepoForLabel(label) {
+    if (new GithubAPI(this).getLabelsbyPattern(env.BRANCH_NAME, "enable").contains(label)) {
         return true;
     }
     return false;
 }
 
-labels = [:]
-def checkLabels(branch_name) {
-    def labelStates = [
-        atLeastOneEnabled : false
-    ]
-    labelMap.each { label ->
-        def labelExists = checkRepoForLabel(branch_name, label.value)
-        labelStates.put(label.key, labelExists)
-        if (labelExists && !labelStates.atLeastOneEnabled) {
-            labelStates.atLeastOneEnabled = true
-        }
+labelStates = [atLeastOneEnabled: false]
+def testLabel(label) {
+    def labelExists = checkRepoForLabel(label)
+    labelStates.put(label, labelExists)
+    if (labelExists && !labelStates.atLeastOneEnabled) {
+        labelStates.atLeastOneEnabled = true
     }
-    return labelStates
 }
 
-def checkLabel(key) {
-    if (labels.enableAll || labels.get(key)) {
+def checkLabels() {
+    labels.each { label ->
+        testLabel(label)
+    }
+    // Hardcode enable_all label
+    testLabel("enable_all")
+}
+checkLabels()
+
+def checkLabel(label) {
+    if (labelStates.enable_all || labelStates.get(label)) {
         return true
     }
     return false
 }
-
-checkLabels(env.BRANCH_NAME)
 
 // Vars for Kubernetes
 env.PACT_BROKER_FULL_URL = 'https://pact-broker.platform.hmcts.net'
@@ -120,13 +120,13 @@ withPipeline(type, product, app) {
             env.TEST_URL = params.URL_TO_TEST
             env.Rules = params.SecurityRules
         }
-        if (checkLabel("securityScan")) {
+        if (checkLabel("enable_security_scan")) {
             enableSecurityScan()
         }
-        if (checkLabel("mutationTest")) {
+        if (checkLabel("enable_mutation_test")) {
             enableMutationTest()
         }
-        if (checkLabel("fortifyScan")) {
+        if (checkLabel("enable_fortify_scan")) {
             enableFortifyScan()
 
             after('fortify-scan') {
@@ -136,7 +136,7 @@ withPipeline(type, product, app) {
     }
 }
 
-if (checkLabel("enableNightly")) {
+if (checkLabel("enable_nightly")) {
     properties([
         pipelineTriggers([cron('H 23 * * *')]),
         parameters([
