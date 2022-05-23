@@ -1,0 +1,46 @@
+---
+version: '3'
+
+services:
+  finrem-payment-service:
+    image: hmctspublic.azurecr.io/finrem/ps:latest   #Not Multi-Arch yet :(
+    container_name: finrem-payment-service
+    environment:
+      AUTH_PROVIDER_SERVICE_CLIENT_BASEURL: http://localhost:8489
+      IDAM_API_URL: http://localhost:5000
+      IDAM_S2S_URL: http://localhost:8489
+      FEES_API_URL: http://fees-register-api-aat.service.core-compute-aat.internal
+      PAYMENT_API_URL: http://payment-api-aat.service.core-compute-aat.internal
+      PRD_API_URL: http://rd-professional-api-aat.service.core-compute-aat.internal
+      PASSWORD_SOLICITOR: ${USERNAME_SOLICITOR}
+      USERNAME_SOLICITOR: ${PASSWORD_SOLICITOR}
+    ports:
+      - 9001:9001
+
+  fees-register-api:
+    image: hmctspublic.azurecr.io/fees-register/api:latest    #Not Multi-Arch yet :(
+    container_name: fees-register-api
+    environment:
+      ENABLE_FEE_LOADER: false
+      IDAM_API_URL: http://localhost:5000
+      IDAM_CLIENT_BASE_URL: http://localhost:5000
+      OIDC_AUDIENCE_LIST: fees_admin_frontend,paybubble
+      POSTGRES_CONNECTION_OPTIONS: ?sslmode=require
+      POSTGRES_HOST: fees-register-postgres-db-v11-aat.postgres.database.azure.com
+      POSTGRES_NAME: fees_register
+      POSTGRES_PORT: 6432
+      POSTGRES_USERNAME: fees_register@fees-register-postgres-db-v11-aat
+      REFORM_SERVICE_NAME: fees-register-api
+      REFORM_TEAM: cc
+      SPRING_LIQUIBASE_ENABLED: false
+    ports:
+      - 9001:9001
+
+  payment-api-service:
+    image: hmctspublic.azurecr.io/finrem/ps:latest   #Not Multi-Arch yet :(
+    container_name: payment-api-service
+    environment:
+      AUTH_PROVIDER_SERVICE_CLIENT_BASEURL: http://localhost:8489
+      IDAM_API_URL: http://localhost:5000
+    ports:
+      - 9001:9001

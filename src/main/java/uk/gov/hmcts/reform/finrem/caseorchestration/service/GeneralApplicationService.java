@@ -50,10 +50,11 @@ public class GeneralApplicationService {
             documentHelper.convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DOCUMENT)), authorisationToken);
         caseData.put(GENERAL_APPLICATION_DOCUMENT_LATEST, applicationDocument);
 
-        CaseDocument draftOrderPdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(
-            documentHelper.convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DRAFT_ORDER)), authorisationToken);
-        caseData.put(GENERAL_APPLICATION_DRAFT_ORDER, draftOrderPdfDocument);
-
+        if (caseData.get(GENERAL_APPLICATION_DRAFT_ORDER) != null) {
+            CaseDocument draftOrderPdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(
+                documentHelper.convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DRAFT_ORDER)), authorisationToken);
+            caseData.put(GENERAL_APPLICATION_DRAFT_ORDER, draftOrderPdfDocument);
+        }
         updateGeneralApplicationDocumentCollection(caseData, applicationDocument);
     }
 
