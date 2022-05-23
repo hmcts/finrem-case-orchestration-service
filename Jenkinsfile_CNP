@@ -38,13 +38,16 @@ labels = [
 
 def checkRepoForLabel(label) {
     if (new GithubAPI(this).getLabelsbyPattern(env.BRANCH_NAME, "enable").contains(label)) {
-        return true;
+        return true
     }
-    return false;
+    return false
 }
 
 labelStates = [atLeastOneEnabled: false]
 def testLabel(label) {
+    if (label === "atLeastOneEnabled") {
+        return
+    }
     def labelExists = checkRepoForLabel(label)
     labelStates.put(label, labelExists)
     if (labelExists && !labelStates.atLeastOneEnabled) {
@@ -57,7 +60,9 @@ def checkLabels() {
         testLabel(label)
     }
     // Hardcode enable_all label
-    testLabel("enable_all")
+    if (!labelStates.containsKey("enable_all")) {
+        testLabel("enable_all")
+    }
 }
 checkLabels()
 
@@ -105,7 +110,7 @@ withPipeline(type, product, app) {
 
     onPR() {
         enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
-        if (labelStates.atLeastOneEnabled) {
+        if (checkLabel("atLeastOneEnabled")) {
             properties([
                 parameters([
                     string(name: 'URL_TO_TEST', defaultValue: 'http://finrem-cos-aat.service.core-compute-aat.internal',
