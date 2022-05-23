@@ -7,9 +7,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLetterDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.address.AddresseeGeneratorService;
 
@@ -18,9 +16,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Objects;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_FIRM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildConsentedFrcCourtDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
 
@@ -38,7 +40,6 @@ public class NocLetterDetailsGenerator {
     private final AddresseeGeneratorService addresseeGeneratorService;
     private final DocumentHelper documentHelper;
     private final CaseDataService caseDataService;
-    private final PrdOrganisationService prdOrganisationService;
 
     public NoticeOfChangeLetterDetails generate(CaseDetails caseDetails, CaseDetails caseDetailsBefore,
                                                 RepresentationUpdate representationUpdate,
@@ -51,7 +52,7 @@ public class NocLetterDetailsGenerator {
             .caseNumber(caseDetails.getId().toString())
             .reference(getSolicitorReference(noticeType == NoticeType.ADD ? caseDetails : caseDetailsBefore, representationUpdate))
             .applicantName(documentHelper.getApplicantFullName(caseDetails))
-            .solicitorFirmName(getSolicitorFirmName(representationUpdate, noticeType))
+            .solicitorFirmName(getSolicitorFirmName(representationUpdate, noticeType, caseDetails, caseDetailsBefore))
             .respondentName(getRespondentName(caseDetails))
             .courtDetails(getCourtDetails(caseDetails))
             .addressee(getAddressee(noticeType, caseDetails, caseDetailsBefore, recipient, representationUpdate))
@@ -93,25 +94,29 @@ public class NocLetterDetailsGenerator {
             Objects.toString(caseDetails.getData().get(RESP_SOLICITOR_REFERENCE));
     }
 
-    private String getSolicitorFirmName(RepresentationUpdate representationUpdate, NoticeType noticeType) {
+    private String getSolicitorFirmName(RepresentationUpdate representationUpdate,
+                                        NoticeType noticeType,
+                                        CaseDetails caseDetails,
+                                        CaseDetails caseDetailsBefore) {
 
         return noticeType == NoticeType.ADD
-            ? getSolicitorFirmNameFromOrganisationService(representationUpdate.getAdded().getOrganisation().getOrganisationID())
-            : getSolicitorFirmNameFromOrganisationService(representationUpdate.getRemoved().getOrganisation().getOrganisationID());
+            ? getSolicitorFirmName(caseDetails, representationUpdate)
+            : getSolicitorFirmName(caseDetailsBefore, representationUpdate);
     }
 
-    private String getSolicitorFirmNameFromOrganisationService(String organisationId) {
-        if (organisationId == null) {
-            return "";
-        }
-        OrganisationsResponse organisationsResponse = prdOrganisationService.findOrganisationByOrgId(organisationId);
-        if (organisationsResponse != null) {
-            return organisationsResponse.getName();
-        }
-        return "";
+    private String getSolicitorFirmName(CaseDetails caseDetails, RepresentationUpdate representationUpdate) {
+        return isApplicant(representationUpdate)
+            ? nullToEmpty(caseDetails.getData().get(getAppSolicitorFirmKey(caseDetails)))
+            : nullToEmpty(caseDetails.getData().get(RESP_SOLICITOR_FIRM));
     }
 
     private boolean isApplicant(RepresentationUpdate representationUpdate) {
         return representationUpdate.getParty().equals(COR_APPLICANT);
+    }
+
+    private String getAppSolicitorFirmKey(CaseDetails caseDetails) {
+        return caseDataService.isConsentedApplication(caseDetails)
+            ? CONSENTED_SOLICITOR_FIRM
+            : CONTESTED_SOLICITOR_FIRM;
     }
 }

@@ -9,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLetterDetails;
@@ -71,29 +70,16 @@ public abstract class AbstractLetterHandler implements LetterHandler {
         RepresentationUpdate representationUpdate = getLatestRepresentationUpdate(caseDetails);
         if (representationUpdate != null) {
             log.info("Got the representationUpdate");
-            ChangedRepresentative changedRepresentative = getChangedRepresentative(representationUpdate);
-            if (recipient == DocumentHelper.PaperNotificationRecipient.SOLICITOR || areOrganisationDetailsPopulated(changedRepresentative)) {
-                CaseDetails caseDetailsToUse = noticeType == NoticeType.ADD ? caseDetailsBefore : caseDetails;
-                if (shouldALetterBeSent(representationUpdate, caseDetailsToUse)) {
-                    log.info("The recipient is a {} with an address", recipient);
-                    return
-                        Optional.ofNullable(
-                            noticeOfChangeLetterDetailsGenerator.generate(caseDetails, caseDetailsBefore, representationUpdate, recipient,
-                                noticeType));
-                }
+            CaseDetails caseDetailsToUse = noticeType == NoticeType.ADD ? caseDetailsBefore : caseDetails;
+            if (shouldALetterBeSent(representationUpdate, caseDetailsToUse)) {
+                log.info("The recipient is a {} with an address", recipient);
+                return
+                    Optional.ofNullable(
+                        noticeOfChangeLetterDetailsGenerator.generate(caseDetails, caseDetailsBefore, representationUpdate, recipient,
+                            noticeType));
             }
         }
         return Optional.empty();
-    }
-
-    protected boolean areOrganisationDetailsPopulated(ChangedRepresentative changedRepresentative) {
-        log.info("Check if the organisation details are populated for Changed Representative");
-        return changedRepresentative != null && changedRepresentative.getOrganisation() != null
-            && changedRepresentative.getOrganisation().getOrganisationID() != null;
-    }
-
-    protected ChangedRepresentative getChangedRepresentative(RepresentationUpdate representationUpdate) {
-        return noticeType == NoticeType.ADD ? representationUpdate.getAdded() : representationUpdate.getRemoved();
     }
 
     protected RepresentationUpdate getLatestRepresentationUpdate(CaseDetails caseDetails) {

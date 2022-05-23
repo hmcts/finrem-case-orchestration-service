@@ -31,10 +31,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_FIRM;
 
 @Slf4j
 @Service
@@ -134,13 +137,15 @@ public class UpdateRepresentationService {
                                                CaseDetails caseDetails,
                                                ChangeOrganisationRequest changeRequest,
                                                boolean isConsented) {
+        final boolean isApplicant = changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY);
         String appSolicitorAddressField = isConsented ? CONSENTED_SOLICITOR_ADDRESS : CONTESTED_SOLICITOR_ADDRESS;
-        String solicitorAddressField = changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY)
-            ? appSolicitorAddressField : RESP_SOLICITOR_ADDRESS;
+        String solicitorAddressField = isApplicant ? appSolicitorAddressField : RESP_SOLICITOR_ADDRESS;
 
         OrganisationsResponse organisationsResponse = organisationService
             .findOrganisationByOrgId(addedSolicitor.getOrganisation().getOrganisationID());
+        String firmName = organisationsResponse.getName();
 
+        caseDetails.getData().put(getSolicitorFirmNameKey(caseDetails, isApplicant), firmName);
         caseDetails.getData().put(solicitorAddressField,
             updateSolicitorDetailsService.convertOrganisationAddressToSolicitorAddress(organisationsResponse));
     }
@@ -148,6 +153,18 @@ public class UpdateRepresentationService {
     private String getRespondentRepresentedKey(CaseDetails caseDetails) {
         return caseDataService.isConsentedApplication(caseDetails)
             ? CONSENTED_RESPONDENT_REPRESENTED : CONTESTED_RESPONDENT_REPRESENTED;
+    }
+
+    private String getSolicitorFirmNameKey(CaseDetails caseDetails, boolean isApplicant) {
+        return isApplicant
+            ? getAppSolicitorFirmNameKey(caseDetails)
+            : RESP_SOLICITOR_FIRM;
+    }
+
+    private String getAppSolicitorFirmNameKey(CaseDetails caseDetails) {
+        return caseDataService.isConsentedApplication(caseDetails)
+            ? CONSENTED_SOLICITOR_FIRM
+            : CONTESTED_SOLICITOR_FIRM;
     }
 
     private RepresentationUpdateHistory getCurrentRepresentationUpdateHistory(Map<String, Object> caseData) {

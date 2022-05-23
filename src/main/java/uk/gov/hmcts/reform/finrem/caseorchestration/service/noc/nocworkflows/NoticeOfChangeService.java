@@ -108,19 +108,6 @@ public class NoticeOfChangeService {
         return buildChangeOrganisationRequest(role, organisationToAdd, organisationToRemove);
     }
 
-    // aac handles org policy modification based on the Change Organisation Request,
-    // so we need to revert the org policies to their value before the event started
-    public CaseDetails persistOriginalOrgPoliciesWhenRevokingAccess(CaseDetails caseDetails,
-                                                                    CaseDetails originalCaseDetails) {
-        final boolean isApplicant = ((String)caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
-        final String litigantOrgPolicy = isApplicant ? APPLICANT_ORGANISATION_POLICY : RESPONDENT_ORGANISATION_POLICY;
-
-        if (hasInvalidOrgPolicy(caseDetails, isApplicant)) {
-            caseDetails.getData().put(litigantOrgPolicy, getOrgPolicy(originalCaseDetails, litigantOrgPolicy));
-        }
-        return caseDetails;
-    }
-
     private OrganisationPolicy getOrgPolicy(CaseDetails caseDetails, String orgPolicy) {
         return objectMapper.convertValue(caseDetails.getData().get(orgPolicy),
             OrganisationPolicy.class);
@@ -143,14 +130,11 @@ public class NoticeOfChangeService {
                                                                              CaseDetails caseDetails,
                                                                              RepresentationUpdateHistory current,
                                                                              CaseDetails originalDetails) {
-
         final boolean isApplicant = ((String) caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
-
         return ChangeOfRepresentationRequest.builder()
             .by(idamService.getIdamFullName(authToken))
             .party(isApplicant ? APPLICANT : RESPONDENT)
-            .clientName(isApplicant ? caseDataService.buildFullApplicantName(caseDetails)
-                : caseDataService.buildFullRespondentName(caseDetails))
+            .clientName(getClientName(caseDetails, isApplicant))
             .current(current)
             .addedRepresentative(addedSolicitorService.getAddedSolicitorAsCaseworker(caseDetails))
             .removedRepresentative(removedSolicitorService.getRemovedSolicitorAsCaseworker(originalDetails, isApplicant))
@@ -162,6 +146,19 @@ public class NoticeOfChangeService {
             .representationUpdateHistory(objectMapper.convertValue(caseData.get(REPRESENTATION_UPDATE_HISTORY),
                 new TypeReference<>() {}))
             .build();
+    }
+
+    // aac handles org policy modification based on the Change Organisation Request,
+    // so we need to revert the org policies to their value before the event started
+    public CaseDetails persistOriginalOrgPoliciesWhenRevokingAccess(CaseDetails caseDetails,
+                                                                    CaseDetails originalCaseDetails) {
+        final boolean isApplicant = ((String)caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
+        final String litigantOrgPolicy = isApplicant ? APPLICANT_ORGANISATION_POLICY : RESPONDENT_ORGANISATION_POLICY;
+
+        if (hasInvalidOrgPolicy(caseDetails, isApplicant)) {
+            caseDetails.getData().put(litigantOrgPolicy, getOrgPolicy(originalCaseDetails, litigantOrgPolicy));
+        }
+        return caseDetails;
     }
 
     private boolean hasInvalidOrgPolicy(CaseDetails caseDetails, boolean isApplicant) {
@@ -185,5 +182,11 @@ public class NoticeOfChangeService {
             .value(roleItem)
             .listItems(List.of(roleItem))
             .build();
+    }
+
+    private String getClientName(CaseDetails caseDetails, boolean isApplicant) {
+        return isApplicant
+            ? caseDataService.buildFullApplicantName(caseDetails)
+            : caseDataService.buildFullRespondentName(caseDetails);
     }
 }

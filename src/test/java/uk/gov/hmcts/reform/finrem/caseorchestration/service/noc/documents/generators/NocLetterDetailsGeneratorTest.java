@@ -14,9 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentat
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLetterDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.address.AddresseeGeneratorService;
 
@@ -47,8 +45,8 @@ public class NocLetterDetailsGeneratorTest {
     protected static final String FORMATTED_ADDRESS = "formattedAddress";
     protected static final String ADDRESSEE_NAME = "addresseeName";
 
-    protected static final String ORGANISATION_ADDED_NAME = "organisationAdded";
-    protected static final String ORGANISATION_REMOVED_NAME = "organisationRemoved";
+    protected static final String ORGANISATION_ADDED_NAME = "test firm";
+    protected static final String ORGANISATION_REMOVED_NAME = "FRApplicantSolicitorFirmRemoved";
     protected static final String ORGANISATION_ID_ADDED = "A31PTVA";
     protected static final String ORGANISATION_ID_REMOVED = "A31PTVAR";
 
@@ -58,8 +56,6 @@ public class NocLetterDetailsGeneratorTest {
     private DocumentHelper documentHelper;
     @Mock
     private CaseDataService caseDataService;
-    @Mock
-    private PrdOrganisationService prdOrganisationService;
 
     @InjectMocks
     private NocLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator;
@@ -91,8 +87,6 @@ public class NocLetterDetailsGeneratorTest {
             DocumentHelper.PaperNotificationRecipient.APPLICANT, "applicant"))
             .thenReturn(Addressee.builder().formattedAddress(
                 FORMATTED_ADDRESS).name(ADDRESSEE_NAME).build());
-        when(prdOrganisationService.findOrganisationByOrgId(ORGANISATION_ID_ADDED))
-            .thenReturn(OrganisationsResponse.builder().name(ORGANISATION_ADDED_NAME).build());
 
         NoticeOfChangeLetterDetails noticeOfChangeLetterDetails =
             noticeOfChangeLetterDetailsGenerator.generate(caseDetails, caseDetailsBefore, buildChangeOfRepresentation(),
@@ -113,8 +107,6 @@ public class NocLetterDetailsGeneratorTest {
             DocumentHelper.PaperNotificationRecipient.APPLICANT, "applicant"))
             .thenReturn(Addressee.builder().formattedAddress(
                 FORMATTED_ADDRESS).name(ADDRESSEE_NAME).build());
-        when(prdOrganisationService.findOrganisationByOrgId(ORGANISATION_ID_REMOVED))
-            .thenReturn(OrganisationsResponse.builder().name(ORGANISATION_REMOVED_NAME).build());
 
         NoticeOfChangeLetterDetails noticeOfChangeLetterDetails =
             noticeOfChangeLetterDetailsGenerator.generate(caseDetails, caseDetailsBefore, representationUpdate,
@@ -136,8 +128,6 @@ public class NocLetterDetailsGeneratorTest {
             DocumentHelper.PaperNotificationRecipient.SOLICITOR, "applicant"))
             .thenReturn(Addressee.builder().formattedAddress(
                 FORMATTED_ADDRESS).name(ADDRESSEE_NAME).build());
-        when(prdOrganisationService.findOrganisationByOrgId(ORGANISATION_ID_ADDED))
-            .thenReturn(OrganisationsResponse.builder().name(ORGANISATION_ADDED_NAME).build());
 
         NoticeOfChangeLetterDetails noticeOfChangeLetterDetails =
             noticeOfChangeLetterDetailsGenerator.generate(caseDetails, caseDetailsBefore, buildChangeOfRepresentation(),
@@ -160,8 +150,6 @@ public class NocLetterDetailsGeneratorTest {
             DocumentHelper.PaperNotificationRecipient.SOLICITOR, "applicant"))
             .thenReturn(Addressee.builder().formattedAddress(
                 FORMATTED_ADDRESS).name(ADDRESSEE_NAME).build());
-        when(prdOrganisationService.findOrganisationByOrgId(ORGANISATION_ID_REMOVED))
-            .thenReturn(OrganisationsResponse.builder().name(ORGANISATION_REMOVED_NAME).build());
 
         NoticeOfChangeLetterDetails noticeOfChangeLetterDetails =
             noticeOfChangeLetterDetailsGenerator.generate(caseDetails, caseDetailsBefore, buildChangeOfRepresentation(),
