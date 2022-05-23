@@ -87,10 +87,8 @@ public class HearingDocumentController extends BaseController {
 
         List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
 
-        boolean shouldEmailRespondentSolicitor = notificationService.shouldEmailRespondentSolicitor(caseDetails.getData());
-
         // NOTE TO SELF, TEST BOTH PAPER AND DIGITAL JOURNEYS
-        if (!shouldEmailRespondentSolicitor && caseDataService.isContestedApplication(caseDetails)) {
+        if (!notificationService.shouldEmailRespondentSolicitor(caseDetails.getData()) && caseDataService.isContestedApplication(caseDetails)) {
             CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
             if (null != caseDetailsBefore && hearingDocumentService.alreadyHadFirstHearing(caseDetailsBefore)) {
                 log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
