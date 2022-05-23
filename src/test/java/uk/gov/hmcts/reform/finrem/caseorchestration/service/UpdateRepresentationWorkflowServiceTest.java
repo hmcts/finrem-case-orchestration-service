@@ -28,8 +28,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOC_PARTY;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UpdateRepresentationWorkflowServiceTest {
@@ -85,6 +87,7 @@ public class UpdateRepresentationWorkflowServiceTest {
     @Test
     public void givenChangeRequestWithUnpopulatedOrg_whenHandleWorkflow_thenNoCallToAssignCaseAccessService() {
         setNoOrgsChangeOrganisationRequest();
+        caseDetails.getData().put(NOC_PARTY, APPLICANT);
         when(noticeOfChangeService.updateRepresentation(caseDetails, AUTH_TOKEN, caseDetails))
             .thenReturn(caseDetails.getData());
 
