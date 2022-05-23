@@ -105,7 +105,7 @@ withPipeline(type, product, app) {
 
     onPR() {
         enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
-        if (labels.atLeastOneEnabled) {
+        if (labelStates.atLeastOneEnabled) {
             properties([
                 parameters([
                     string(name: 'URL_TO_TEST', defaultValue: 'http://finrem-cos-aat.service.core-compute-aat.internal',
