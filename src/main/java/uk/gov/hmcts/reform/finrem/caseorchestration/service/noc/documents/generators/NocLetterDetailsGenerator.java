@@ -67,7 +67,7 @@ public class NocLetterDetailsGenerator {
                                    RepresentationUpdate representationUpdate) {
         final boolean isAddNoticeType = noticeType == NoticeType.ADD;
         return addresseeGeneratorService.generateAddressee(
-            isAddNoticeType ? caseDetails : caseDetailsBefore,
+            getCaseDetailsToUse(caseDetails, caseDetailsBefore, recipient, noticeType),
             isAddNoticeType ? representationUpdate.getAdded() : representationUpdate.getRemoved(),
             recipient, representationUpdate.getParty());
     }
@@ -118,5 +118,30 @@ public class NocLetterDetailsGenerator {
         return caseDataService.isConsentedApplication(caseDetails)
             ? CONSENTED_SOLICITOR_FIRM
             : CONTESTED_SOLICITOR_FIRM;
+    }
+
+    private CaseDetails getCaseDetailsToUse(CaseDetails caseDetails,
+                                            CaseDetails caseDetailsBefore,
+                                            DocumentHelper.PaperNotificationRecipient recipient,
+                                            NoticeType noticeType) {
+        return noticeType == NoticeType.ADD
+            ? getCaseDetailsToUseFromRecipientForAdd(caseDetails, caseDetailsBefore, recipient)
+            : getCaseDetailsToUseFromRecipientForRemove(caseDetails, caseDetailsBefore, recipient);
+    }
+
+    private CaseDetails getCaseDetailsToUseFromRecipientForAdd(CaseDetails caseDetails,
+                                                    CaseDetails caseDetailsBefore,
+                                                    DocumentHelper.PaperNotificationRecipient recipient) {
+        return recipient == DocumentHelper.PaperNotificationRecipient.SOLICITOR
+            ? caseDetails
+            : caseDetailsBefore;
+    }
+
+    private CaseDetails getCaseDetailsToUseFromRecipientForRemove(CaseDetails caseDetails,
+                                                             CaseDetails caseDetailsBefore,
+                                                             DocumentHelper.PaperNotificationRecipient recipient) {
+        return recipient == DocumentHelper.PaperNotificationRecipient.SOLICITOR
+            ? caseDetailsBefore
+            : caseDetails;
     }
 }

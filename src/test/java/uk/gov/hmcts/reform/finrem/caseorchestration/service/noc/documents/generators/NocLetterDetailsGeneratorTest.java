@@ -83,7 +83,7 @@ public class NocLetterDetailsGeneratorTest {
     public void shouldGenerateNoticeOfChangeLetterDetailsForApplicantWhenSolicitorAdded() {
 
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.FALSE);
-        when(addresseeBuilder.generateAddressee(caseDetails, changedRepresentativeAdded,
+        when(addresseeBuilder.generateAddressee(caseDetailsBefore, changedRepresentativeAdded,
             DocumentHelper.PaperNotificationRecipient.APPLICANT, "applicant"))
             .thenReturn(Addressee.builder().formattedAddress(
                 FORMATTED_ADDRESS).name(ADDRESSEE_NAME).build());
@@ -103,7 +103,7 @@ public class NocLetterDetailsGeneratorTest {
     public void shouldGenerateNoticeOfChangeLetterDetailsForApplicantWhenSolicitorRemoved() {
 
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.TRUE);
-        when(addresseeBuilder.generateAddressee(caseDetailsBefore, changedRepresentativeRemoved,
+        when(addresseeBuilder.generateAddressee(caseDetails, changedRepresentativeRemoved,
             DocumentHelper.PaperNotificationRecipient.APPLICANT, "applicant"))
             .thenReturn(Addressee.builder().formattedAddress(
                 FORMATTED_ADDRESS).name(ADDRESSEE_NAME).build());
