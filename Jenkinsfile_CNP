@@ -45,7 +45,7 @@ def checkRepoForLabel(label) {
 
 labelStates = [atLeastOneEnabled: false]
 def testLabel(label) {
-    if (label === "atLeastOneEnabled") {
+    if (label == "atLeastOneEnabled") {
         return
     }
     def labelExists = checkRepoForLabel(label)
