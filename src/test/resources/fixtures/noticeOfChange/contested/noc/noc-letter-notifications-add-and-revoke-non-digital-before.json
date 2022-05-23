@@ -13,6 +13,14 @@
       "netValueOfHome": "dfdf",
       "applicantFMName": "Poor",
       "dateOfSepration": "1111-01-01",
+      "applicantRepresented": "Yes",
+      "ApplicantOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": null,
+          "OrganisationName": null
+        },
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
+      },
       "propertyAddress": "test",
       "respondentEmail": null,
       "respondentLName": "test",

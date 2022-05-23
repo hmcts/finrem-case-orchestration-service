@@ -8,6 +8,14 @@
     "case_data": {
       "helpWithFeesQuestion": "No",
       "applicantLName": "Guy",
+      "applicantRepresented": "Yes",
+      "ApplicantOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "A31PTVU",
+          "OrganisationName": "FRApplicantSolicitorFirmAdded"
+        },
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
+      },
       "dateOfMarriage": "1111-01-01",
       "mortgageDetail": "test",
       "netValueOfHome": "dfdf",

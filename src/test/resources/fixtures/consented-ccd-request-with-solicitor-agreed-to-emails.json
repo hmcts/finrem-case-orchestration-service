@@ -23,7 +23,7 @@
       "ApplicantOrganisationPolicy": {
         "Organisation": {
           "OrganisationID": "testID",
-          "OrganisationName": "tesName"
+          "OrganisationName": "testName"
         },
         "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
       },
@@ -370,6 +370,14 @@
       "authorisation3": "2010-01-01",
       "solicitorEmail": "test@admin.com",
       "solicitorPhone": "1234",
+      "ApplicantOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "A31PTVA",
+          "OrganisationName": "FRApplicantSolicitorFirm"
+        },
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
+      },
+      "applicantRepresented": "Yes",
       "applicantFMName": "Poor",
       "authorisation2b": "test",
       "otherCollection": [
