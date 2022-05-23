@@ -66,6 +66,8 @@ def checkLabel(key) {
     return false
 }
 
+checkLabels(env.BRANCH_NAME)
+
 // Vars for Kubernetes
 env.PACT_BROKER_FULL_URL = 'https://pact-broker.platform.hmcts.net'
 
@@ -102,7 +104,6 @@ withPipeline(type, product, app) {
     }
 
     onPR() {
-        checkLabels(env.BRANCH_NAME)
         enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
         if (labels.atLeastOneEnabled) {
             properties([
@@ -149,14 +150,16 @@ if (checkLabel("enableNightly")) {
     ])
 
     withNightlyPipeline(type, product, app) {
-        env.TEST_URL = params.URL_TO_TEST
-        env.Rules = params.SecurityRules
-        enableSecurityScan()
-        enableMutationTest()
-        enableFortifyScan()
+        onPR() {
+            env.TEST_URL = params.URL_TO_TEST
+            env.Rules = params.SecurityRules
+            enableSecurityScan()
+            enableMutationTest()
+            enableFortifyScan()
 
-        after('fortify-scan') {
-            steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Fortify Scan/**/*'
+            after('fortify-scan') {
+                steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Fortify Scan/**/*'
+            }
         }
     }
 }
