@@ -34,6 +34,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -127,19 +128,7 @@ public class ContestedOrderController implements BaseController {
             List<HearingUploadBundleData> updateUploadDateList = hearingBundleDataList.stream()
                     .map(hd -> HearingUploadBundleData.builder()
                     .id(hd.getId())
-                    .value(HearingBundle.builder()
-                        .hearingBundleDate(hd.getValue().getHearingBundleDate())
-                        .hearingBundleFdr(hd.getValue().getHearingBundleFdr())
-                        .hearingBundleDocuments(hd.getValue().getHearingBundleDocuments().stream()
-                             .map(hdi -> HearingUploadBundle.builder().id(hdi.getId())
-                                 .value(HearingBundleItems.builder().bundleDocuments(getBundleDocuments(hdi, errors))
-                                     .bundleUploadDate(hdi.getValue().getBundleUploadDate() == null
-                                         ? LocalDateTime.now() : hdi.getValue().getBundleUploadDate())
-                                     .build()).build())
-                                 .sorted(Comparator.nullsLast((e1, e2) -> e2.getValue().getBundleUploadDate()
-                                    .compareTo(e1.getValue().getBundleUploadDate()))).collect(Collectors.toList()))
-                        .hearingBundleDescription(hd.getValue().getHearingBundleDescription())
-                        .build())
+                    .value(getHearingBundle(errors, hd))
                     .build())
                     .sorted(Comparator.nullsLast((e1, e2) -> e2.getValue().getHearingBundleDate()
                     .compareTo(e1.getValue().getHearingBundleDate())))
@@ -151,6 +140,26 @@ public class ContestedOrderController implements BaseController {
             .data(caseData)
             .errors(errors)
             .build());
+    }
+
+    private HearingBundle getHearingBundle(List<String> errors, HearingUploadBundleData hd) {
+        return HearingBundle.builder()
+            .hearingBundleDate(hd.getValue().getHearingBundleDate())
+            .hearingBundleFdr(hd.getValue().getHearingBundleFdr())
+            .hearingBundleDocuments(hd.getValue().getHearingBundleDocuments().stream()
+                .map(getHearingUploadBundleFunction(errors))
+                .sorted(Comparator.nullsLast((e1, e2) -> e2.getValue().getBundleUploadDate()
+                    .compareTo(e1.getValue().getBundleUploadDate()))).collect(Collectors.toList()))
+            .hearingBundleDescription(hd.getValue().getHearingBundleDescription())
+            .build();
+    }
+
+    private Function<HearingUploadBundle, HearingUploadBundle> getHearingUploadBundleFunction(List<String> errors) {
+        return hdi -> HearingUploadBundle.builder().id(hdi.getId())
+            .value(HearingBundleItems.builder().bundleDocuments(getBundleDocuments(hdi, errors))
+                .bundleUploadDate(hdi.getValue().getBundleUploadDate() == null
+                    ? LocalDateTime.now() : hdi.getValue().getBundleUploadDate())
+                .build()).build();
     }
 
     private CaseDocument getBundleDocuments(HearingUploadBundle hdi, List<String> errors) {
