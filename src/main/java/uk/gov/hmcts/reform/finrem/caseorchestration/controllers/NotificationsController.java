@@ -667,6 +667,7 @@ public class NotificationsController implements BaseController {
         @ApiResponse(code = 204, message = "Update FRC information notificatons sent successfully",
             response = AboutToStartOrSubmitCallbackResponse.class)})
     ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendUpdateFrcNotifications(
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @RequestBody CallbackRequest callbackRequest) throws JsonProcessingException {
         log.info("Received request to send update FRC info notifications for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
@@ -686,6 +687,7 @@ public class NotificationsController implements BaseController {
 
         log.info("Sending email notification to court for 'Update Frc Information'");
         notificationService.sendUpdateFrcInformationEmailToCourt(caseDetails);
+        paperNotificationService.printUpdateFrcInformationNotification(caseDetails, authToken);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }

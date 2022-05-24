@@ -970,10 +970,11 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class))).thenReturn(true);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
 
-        notificationsController.sendUpdateFrcNotifications(buildCallbackRequest());
+        notificationsController.sendUpdateFrcNotifications(AUTH_TOKEN, buildCallbackRequest());
         verify(notificationService, times(1)).sendUpdateFrcInformationEmailToAppSolicitor(any());
         verify(notificationService, times(1)).sendUpdateFrcInformationEmailToRespondentSolicitor(any());
         verify(notificationService, times(1)).sendUpdateFrcInformationEmailToCourt(any());
+        verify(paperNotificationService, times(1)).printUpdateFrcInformationNotification(any(), any());
     }
 
     @Test
@@ -982,10 +983,11 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class))).thenReturn(false);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
 
-        notificationsController.sendUpdateFrcNotifications(buildCallbackRequest());
+        notificationsController.sendUpdateFrcNotifications(AUTH_TOKEN, buildCallbackRequest());
         verify(notificationService, never()).sendUpdateFrcInformationEmailToAppSolicitor(any());
         verify(notificationService, times(1)).sendUpdateFrcInformationEmailToRespondentSolicitor(any());
         verify(notificationService, times(1)).sendUpdateFrcInformationEmailToCourt(any());
+        verify(paperNotificationService, times(1)).printUpdateFrcInformationNotification(any(), any());
     }
 
     @Test
@@ -994,10 +996,11 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class))).thenReturn(true);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
 
-        notificationsController.sendUpdateFrcNotifications(buildCallbackRequest());
+        notificationsController.sendUpdateFrcNotifications(AUTH_TOKEN, buildCallbackRequest());
         verify(notificationService, times(1)).sendUpdateFrcInformationEmailToAppSolicitor(any());
         verify(notificationService, never()).sendUpdateFrcInformationEmailToRespondentSolicitor(any());
         verify(notificationService, times(1)).sendUpdateFrcInformationEmailToCourt(any());
+        verify(paperNotificationService, times(1)).printUpdateFrcInformationNotification(any(), any());
     }
 
     private CallbackRequest createCallbackRequestWithFinalOrder() {
