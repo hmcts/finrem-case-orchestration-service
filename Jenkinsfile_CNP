@@ -29,13 +29,13 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
     ]
 }
 
-labels = [
+def labels = [
     "enable_security_scan",
     "enable_mutation_test",
     "enable_fortify_scan",
 ]
 
-def populateLabelStates() {
+def populateLabelStates(labels) {
     def states = [:]
     // Get labels from GitHub repo
     def repoLabels = new GithubAPI(this).getLabelsbyPattern(env.BRANCH_NAME, "enable_")
@@ -62,7 +62,7 @@ def populateLabelStates() {
 
     return states
 }
-labelStates = populateLabelStates()
+labelStates = populateLabelStates(labels)
 
 def checkLabel(label) {
     return (labelStates.enable_all || labelStates.get(label))
