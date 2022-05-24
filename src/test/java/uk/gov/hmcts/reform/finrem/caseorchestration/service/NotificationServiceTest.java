@@ -1103,7 +1103,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         verify(mockRestTemplate, never()).exchange(any(), eq(HttpMethod.POST), any(), eq(String.class));
     }
 
-  public void sendUpdateFrcInformationEmailToAppSolicitor() {
+    public void sendUpdateFrcInformationEmailToAppSolicitor() {
         callbackRequest = getContestedCallbackRequest();
 
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_UPDATE_FRC_INFORMATION))
