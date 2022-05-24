@@ -35,29 +35,24 @@ labels = [
     "enable_fortify_scan",
 ]
 
-def checkRepoForLabel(label) {
-    if (new GithubAPI(this).getLabelsbyPattern(env.BRANCH_NAME, "enable").contains(label)) {
-        return true
-    }
-    return false
-}
-
 labelStates = [atLeastOneEnabled: false]
-def testLabel(label) {
-    if (label == "atLeastOneEnabled") {
-        return
-    }
-    def labelExists = checkRepoForLabel(label)
-    labelStates.put(label, labelExists)
-    if (labelExists && !labelStates.atLeastOneEnabled) {
-        labelStates.atLeastOneEnabled = true
-    }
-}
-
 def checkLabels() {
+    def repoLabels = new GithubAPI(this).getLabelsbyPattern(env.BRANCH_NAME, "enable_")
+    def testLabel = { label ->
+        if (label == "atLeastOneEnabled") {
+            return
+        }
+        def labelExists = repoLabels.contains(label) ? true : false
+        labelStates.put(label, labelExists)
+        if (labelExists && !labelStates.atLeastOneEnabled) {
+            labelStates.atLeastOneEnabled = true
+        }
+    }
+
     labels.each { label ->
         testLabel(label)
     }
+
     // Hardcode enable_all label
     if (!labelStates.containsKey("enable_all")) {
         testLabel("enable_all")
