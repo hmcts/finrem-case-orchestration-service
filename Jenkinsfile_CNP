@@ -29,7 +29,7 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
     ]
 }
 
-labels = [
+def labels = [
     "enable_security_scan",
     "enable_mutation_test",
     "enable_fortify_scan",
@@ -42,7 +42,7 @@ def checkRepoForLabel(label) {
     return false
 }
 
-labelStates = [atLeastOneEnabled: false]
+def labelStates = [atLeastOneEnabled: false]
 def testLabel(label) {
     if (label == "atLeastOneEnabled") {
         return
