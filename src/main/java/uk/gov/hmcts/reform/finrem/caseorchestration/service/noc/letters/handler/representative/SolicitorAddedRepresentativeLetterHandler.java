@@ -7,7 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.SolicitorNocDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.NocLetterDetailsGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.SolicitorAddedLetterDetailsGenerator;
 
 @Slf4j
 @Component
@@ -15,7 +15,7 @@ public class SolicitorAddedRepresentativeLetterHandler extends RepresentativeLet
 
     @Autowired
     public SolicitorAddedRepresentativeLetterHandler(
-        NocLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator,
+        SolicitorAddedLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator,
         SolicitorNocDocumentService solicitorNocDocumentService,
         BulkPrintService bulkPrintService,
         CaseDataService caseDataService) {

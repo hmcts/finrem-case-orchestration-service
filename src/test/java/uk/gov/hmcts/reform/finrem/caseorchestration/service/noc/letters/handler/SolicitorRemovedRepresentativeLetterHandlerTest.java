@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.SolicitorNocDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.SolicitorRemovedLetterDetailsGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler.representative.SolicitorRemovedRepresentativeLetterHandler;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -26,7 +27,7 @@ public class SolicitorRemovedRepresentativeLetterHandlerTest extends LetterHandl
     SolicitorRemovedRepresentativeLetterHandler solicitorRemovedRepresentativeLetterHandler;
 
     public SolicitorRemovedRepresentativeLetterHandlerTest() {
-        super(Mockito.mock(SolicitorNocDocumentService.class), NoticeType.REMOVE, DocumentHelper.PaperNotificationRecipient.SOLICITOR);
+        super(Mockito.mock(SolicitorRemovedLetterDetailsGenerator.class),  Mockito.mock(SolicitorNocDocumentService.class), NoticeType.REMOVE, DocumentHelper.PaperNotificationRecipient.SOLICITOR);
     }
 
     @Before

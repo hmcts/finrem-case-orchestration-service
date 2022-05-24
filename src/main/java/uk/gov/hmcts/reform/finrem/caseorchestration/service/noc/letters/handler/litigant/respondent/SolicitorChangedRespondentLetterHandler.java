@@ -6,7 +6,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpda
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.NocDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.NocLetterDetailsGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.AbstractLetterDetailsGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler.AbstractLetterHandler;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
@@ -16,10 +16,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class SolicitorChangedRespondentLetterHandler extends AbstractLetterHandler {
 
     public SolicitorChangedRespondentLetterHandler(
-        NocLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator,
+        AbstractLetterDetailsGenerator letterDetailsGenerator,
         NocDocumentService nocDocumentService, BulkPrintService bulkPrintService,
         NoticeType noticeType) {
-        super(noticeOfChangeLetterDetailsGenerator, nocDocumentService, bulkPrintService, noticeType, RESPONDENT);
+        super(letterDetailsGenerator, nocDocumentService, bulkPrintService, noticeType, RESPONDENT);
     }
 
     @Override

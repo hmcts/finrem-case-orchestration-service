@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLett
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.NocDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.NocLetterDetailsGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.AbstractLetterDetailsGenerator;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -33,7 +33,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 @Slf4j
 public abstract class AbstractLetterHandler implements LetterHandler {
 
-    protected final NocLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator;
+    protected final AbstractLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator;
     protected final NocDocumentService nocDocumentService;
     protected final BulkPrintService bulkPrintService;
 
@@ -43,7 +43,7 @@ public abstract class AbstractLetterHandler implements LetterHandler {
     public static final String COR_RESPONDENT = "Respondent";
 
     public AbstractLetterHandler(
-        NocLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator, NocDocumentService nocDocumentService,
+        AbstractLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator, NocDocumentService nocDocumentService,
         BulkPrintService bulkPrintService,
         NoticeType noticeType, DocumentHelper.PaperNotificationRecipient recipient) {
 
@@ -78,8 +78,7 @@ public abstract class AbstractLetterHandler implements LetterHandler {
                 log.info("The recipient is a {} with an address", recipient);
                 return
                     Optional.ofNullable(
-                        noticeOfChangeLetterDetailsGenerator.generate(caseDetails, caseDetailsBefore, representationUpdate, recipient,
-                            noticeType));
+                        noticeOfChangeLetterDetailsGenerator.generate(caseDetails, caseDetailsBefore, representationUpdate, recipient));
             }
         }
         return Optional.empty();

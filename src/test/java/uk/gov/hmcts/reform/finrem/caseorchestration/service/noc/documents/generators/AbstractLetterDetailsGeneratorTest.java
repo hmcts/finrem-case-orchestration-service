@@ -2,11 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.gener
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -36,8 +32,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.NocLetterDetailsGenerator.LETTER_DATE_FORMAT;
 
-@RunWith(MockitoJUnitRunner.class)
-public class NocLetterDetailsGeneratorTest {
+public class AbstractLetterDetailsGeneratorTest {
 
     protected static final String APPLICANT_FULL_NAME = "applicantFullName";
     protected static final String RESPONDENT_FULL_NAME_CONTESTED = "respondentFullNameContested";
@@ -51,19 +46,17 @@ public class NocLetterDetailsGeneratorTest {
     protected static final String ORGANISATION_ID_REMOVED = "A31PTVAR";
 
     @Mock
-    private AddresseeGeneratorService addresseeBuilder;
+    protected AddresseeGeneratorService addresseeGeneratorService;
     @Mock
-    private DocumentHelper documentHelper;
+    protected DocumentHelper documentHelper;
     @Mock
-    private CaseDataService caseDataService;
+    protected CaseDataService caseDataService;
 
-    @InjectMocks
-    private NocLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator;
-    private CaseDetails caseDetails;
-    private CaseDetails caseDetailsBefore;
-    private RepresentationUpdate representationUpdate;
-    private ChangedRepresentative changedRepresentativeRemoved;
-    private ChangedRepresentative changedRepresentativeAdded;
+    protected CaseDetails caseDetails;
+    protected CaseDetails caseDetailsBefore;
+    protected RepresentationUpdate representationUpdate;
+    protected ChangedRepresentative changedRepresentativeRemoved;
+    protected ChangedRepresentative changedRepresentativeAdded;
 
     @Before
     public void setUpTest() {
@@ -73,99 +66,13 @@ public class NocLetterDetailsGeneratorTest {
             "/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke-before.json",
             new ObjectMapper());
         when(documentHelper.getApplicantFullName(any(CaseDetails.class))).thenReturn(APPLICANT_FULL_NAME);
-        when(documentHelper.getRespondentFullNameContested(any(CaseDetails.class))).thenReturn(RESPONDENT_FULL_NAME_CONTESTED);
-        when(documentHelper.getRespondentFullNameConsented(any(CaseDetails.class))).thenReturn(RESPONDENT_FULL_NAME_CONSENTED);
 
         representationUpdate = buildChangeOfRepresentation();
     }
 
-    @Test
-    public void shouldGenerateNoticeOfChangeLetterDetailsForApplicantWhenSolicitorAdded() {
 
-        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.FALSE);
-        when(addresseeBuilder.generateAddressee(caseDetailsBefore, changedRepresentativeAdded,
-            DocumentHelper.PaperNotificationRecipient.APPLICANT, "applicant"))
-            .thenReturn(Addressee.builder().formattedAddress(
-                FORMATTED_ADDRESS).name(ADDRESSEE_NAME).build());
-
-        NoticeOfChangeLetterDetails noticeOfChangeLetterDetails =
-            noticeOfChangeLetterDetailsGenerator.generate(caseDetails, caseDetailsBefore, buildChangeOfRepresentation(),
-                DocumentHelper.PaperNotificationRecipient.APPLICANT,
-                NoticeType.ADD);
-
-        assertLetterDetails(noticeOfChangeLetterDetails, NoticeType.ADD, Boolean.FALSE);
-        assertContestedCourtDetails(noticeOfChangeLetterDetails);
-        assertAddresseeDetails(noticeOfChangeLetterDetails);
-
-    }
-
-    @Test
-    public void shouldGenerateNoticeOfChangeLetterDetailsForApplicantWhenSolicitorRemoved() {
-
-        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.TRUE);
-        when(addresseeBuilder.generateAddressee(caseDetails, changedRepresentativeRemoved,
-            DocumentHelper.PaperNotificationRecipient.APPLICANT, "applicant"))
-            .thenReturn(Addressee.builder().formattedAddress(
-                FORMATTED_ADDRESS).name(ADDRESSEE_NAME).build());
-
-        NoticeOfChangeLetterDetails noticeOfChangeLetterDetails =
-            noticeOfChangeLetterDetailsGenerator.generate(caseDetails, caseDetailsBefore, representationUpdate,
-                DocumentHelper.PaperNotificationRecipient.APPLICANT,
-                NoticeType.REMOVE);
-
-        assertLetterDetails(noticeOfChangeLetterDetails, NoticeType.REMOVE, Boolean.TRUE);
-        assertConsentedCourtDetails(noticeOfChangeLetterDetails);
-        assertAddresseeDetails(noticeOfChangeLetterDetails);
-
-
-    }
-
-    @Test
-    public void shouldGenerateNoticeOfChangeLetterDetailsForSolicitorWhenAdded() {
-
-        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.FALSE);
-        when(addresseeBuilder.generateAddressee(caseDetails, changedRepresentativeAdded,
-            DocumentHelper.PaperNotificationRecipient.SOLICITOR, "applicant"))
-            .thenReturn(Addressee.builder().formattedAddress(
-                FORMATTED_ADDRESS).name(ADDRESSEE_NAME).build());
-
-        NoticeOfChangeLetterDetails noticeOfChangeLetterDetails =
-            noticeOfChangeLetterDetailsGenerator.generate(caseDetails, caseDetailsBefore, buildChangeOfRepresentation(),
-                DocumentHelper.PaperNotificationRecipient.SOLICITOR,
-                NoticeType.ADD);
-
-        assertLetterDetails(noticeOfChangeLetterDetails, NoticeType.ADD, Boolean.FALSE);
-        assertContestedCourtDetails(noticeOfChangeLetterDetails);
-        assertAddresseeDetails(noticeOfChangeLetterDetails);
-        assertThat(noticeOfChangeLetterDetails.getNoticeOfChangeText(),
-            is("Your notice of change has been completed successfully. You can now view your client's case."));
-
-    }
-
-    @Test
-    public void shouldGenerateNoticeOfChangeLetterDetailsForSolicitorWhenRemoved() {
-
-        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.FALSE);
-        when(addresseeBuilder.generateAddressee(caseDetailsBefore, changedRepresentativeRemoved,
-            DocumentHelper.PaperNotificationRecipient.SOLICITOR, "applicant"))
-            .thenReturn(Addressee.builder().formattedAddress(
-                FORMATTED_ADDRESS).name(ADDRESSEE_NAME).build());
-
-        NoticeOfChangeLetterDetails noticeOfChangeLetterDetails =
-            noticeOfChangeLetterDetailsGenerator.generate(caseDetails, caseDetailsBefore, buildChangeOfRepresentation(),
-                DocumentHelper.PaperNotificationRecipient.SOLICITOR,
-                NoticeType.REMOVE);
-
-        assertLetterDetails(noticeOfChangeLetterDetails, NoticeType.REMOVE, Boolean.FALSE);
-        assertContestedCourtDetails(noticeOfChangeLetterDetails);
-        assertAddresseeDetails(noticeOfChangeLetterDetails);
-        assertThat(noticeOfChangeLetterDetails.getNoticeOfChangeText(),
-            is("You've completed notice of acting on this, your access to this case has now been revoked."));
-
-    }
-
-    private void assertLetterDetails(NoticeOfChangeLetterDetails noticeOfChangeLetterDetails,
-                                     NoticeType noticeType, boolean isConsented) {
+    protected void assertLetterDetails(NoticeOfChangeLetterDetails noticeOfChangeLetterDetails,
+                                       NoticeType noticeType, boolean isConsented) {
         assertThat(noticeOfChangeLetterDetails.getCaseNumber(), is(caseDetails.getId().toString()));
         assertThat(noticeOfChangeLetterDetails.getReference(), is(caseDetails.getData().get(SOLICITOR_REFERENCE).toString()));
         assertThat(noticeOfChangeLetterDetails.getReference(), is(caseDetails.getData().get(SOLICITOR_REFERENCE).toString()));
@@ -180,7 +87,7 @@ public class NocLetterDetailsGeneratorTest {
             : ORGANISATION_REMOVED_NAME));
     }
 
-    private void assertContestedCourtDetails(NoticeOfChangeLetterDetails noticeOfChangeLetterDetails) {
+    protected void assertContestedCourtDetails(NoticeOfChangeLetterDetails noticeOfChangeLetterDetails) {
         Map<String, Object> courtDetails = noticeOfChangeLetterDetails.getCourtDetails();
         assertThat(courtDetails.get(COURT_DETAILS_NAME_KEY), is("Central Family Court"));
         assertThat(courtDetails.get(COURT_DETAILS_ADDRESS_KEY),
@@ -189,7 +96,7 @@ public class NocLetterDetailsGeneratorTest {
         assertThat(courtDetails.get(COURT_DETAILS_EMAIL_KEY), is("cfc.fru@justice.gov.uk"));
     }
 
-    private void assertConsentedCourtDetails(NoticeOfChangeLetterDetails noticeOfChangeLetterDetails) {
+    protected void assertConsentedCourtDetails(NoticeOfChangeLetterDetails noticeOfChangeLetterDetails) {
         Map<String, Object> courtDetails = noticeOfChangeLetterDetails.getCourtDetails();
         assertThat(courtDetails.get(COURT_DETAILS_NAME_KEY), is("Family Court at the Courts and Tribunal Service Centre"));
         assertThat(courtDetails.get(COURT_DETAILS_ADDRESS_KEY), is("PO Box 12746, Harlow, CM20 9QZ"));
@@ -197,13 +104,13 @@ public class NocLetterDetailsGeneratorTest {
         assertThat(courtDetails.get(COURT_DETAILS_EMAIL_KEY), is("contactFinancialRemedy@justice.gov.uk"));
     }
 
-    private void assertAddresseeDetails(NoticeOfChangeLetterDetails noticeOfChangeLetterDetails) {
+    protected void assertAddresseeDetails(NoticeOfChangeLetterDetails noticeOfChangeLetterDetails) {
         Addressee addressee = noticeOfChangeLetterDetails.getAddressee();
         assertThat(addressee.getFormattedAddress(), is(FORMATTED_ADDRESS));
         assertThat(addressee.getName(), is(ADDRESSEE_NAME));
     }
 
-    private RepresentationUpdate buildChangeOfRepresentation() {
+    protected RepresentationUpdate buildChangeOfRepresentation() {
         changedRepresentativeRemoved = ChangedRepresentative.builder()
             .name("Sir Solicitor Remove")
             .email("sirsolicitor1@gmail.com")
@@ -227,5 +134,4 @@ public class NocLetterDetailsGeneratorTest {
             .added(changedRepresentativeAdded)
             .removed(changedRepresentativeRemoved).build();
     }
-
 }

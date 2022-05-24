@@ -7,7 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.SolicitorNocDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.NocLetterDetailsGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.AbstractLetterDetailsGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler.AbstractLetterHandler;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.SOLICITOR;
@@ -21,7 +21,7 @@ public class RepresentativeLetterHandler extends AbstractLetterHandler {
     private final CaseDataService caseDataService;
 
     public RepresentativeLetterHandler(
-        NocLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator,
+        AbstractLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator,
         SolicitorNocDocumentService solicitorNocDocumentService,
         BulkPrintService bulkPrintService,
         CaseDataService caseDataService, NoticeType noticeType) {
@@ -42,7 +42,7 @@ public class RepresentativeLetterHandler extends AbstractLetterHandler {
                                                                            boolean isConsentedApplication) {
         return (representationUpdate.getParty().equalsIgnoreCase(COR_APPLICANT))
             && (isConsentedApplication && !isCaseFieldPopulated(caseDetailsToUse, SOLICITOR_EMAIL)
-                || (!isConsentedApplication && !isCaseFieldPopulated(caseDetailsToUse, CONTESTED_SOLICITOR_EMAIL)));
+            || (!isConsentedApplication && !isCaseFieldPopulated(caseDetailsToUse, CONTESTED_SOLICITOR_EMAIL)));
     }
 
     private boolean isRespondentChangeOfRepresentativeWithoutSolcitorEmail(RepresentationUpdate representationUpdate, CaseDetails caseDetailsToUse) {
