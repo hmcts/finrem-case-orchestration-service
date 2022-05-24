@@ -29,11 +29,11 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
     ]
 }
 
+def prIngress = "https://finrem-cos-pr-${CHANGE_ID}.service.core-compute-preview.internal"
 labels = [
     "enable_security_scan",
     "enable_mutation_test",
     "enable_fortify_scan",
-    "enable_nightly"
 ]
 
 def checkRepoForLabel(label) {
@@ -73,20 +73,6 @@ def checkLabel(label) {
     return false
 }
 
-if (checkLabel("atLeastOneEnabled")) {
-    properties([
-        pipelineTriggers([cron('H 23 * * *')]),
-        parameters([
-            string(name: 'URL_TO_TEST', defaultValue: 'http://finrem-cos-aat.service.core-compute-aat.internal',
-                description: 'The URL you want to run these tests against'),
-            string(name: 'SecurityRules',
-                defaultValue: 'https://raw.githubusercontent.com/hmcts/security-test-rules/2366efe631a60672ff8d0698bd9cb07f0e878faa/conf/security-rules.conf',
-                description: 'The URL you want to run these tests against'),
-
-        ])
-    ])
-}
-
 // Vars for Kubernetes
 env.PACT_BROKER_FULL_URL = 'https://pact-broker.platform.hmcts.net'
 
@@ -124,37 +110,38 @@ withPipeline(type, product, app) {
 
     onPR() {
         enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
-        if (checkLabel("atLeastOneEnabled")) {
-            env.TEST_URL = params.URL_TO_TEST
-            env.Rules = params.SecurityRules
-        }
-        if (checkLabel("enable_security_scan")) {
-            enableSecurityScan()
-        }
-        if (checkLabel("enable_mutation_test")) {
-            enableMutationTest()
-        }
-        if (checkLabel("enable_fortify_scan")) {
-            enableFortifyScan()
-
-            after('fortify-scan') {
-                steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Fortify Scan/**/*'
-            }
-        }
     }
 }
 
-if (checkLabel("enable_nightly")) {
+if (checkLabel("atLeastOneEnabled")) {
+    properties([
+        pipelineTriggers([cron('H 23 * * *')]),
+        parameters([
+            string(name: 'URL_TO_TEST', defaultValue: prIngress,
+                description: 'The URL you want to run these tests against'),
+            string(name: 'SecurityRules',
+                defaultValue: 'https://raw.githubusercontent.com/hmcts/security-test-rules/2366efe631a60672ff8d0698bd9cb07f0e878faa/conf/security-rules.conf',
+                description: 'The URL you want to run these tests against'),
+
+        ])
+    ])
+
     withNightlyPipeline(type, product, app) {
         onPR() {
             env.TEST_URL = params.URL_TO_TEST
             env.Rules = params.SecurityRules
-            enableSecurityScan()
-            enableMutationTest()
-            enableFortifyScan()
+            if (checkLabel("enable_security_scan")) {
+                enableSecurityScan()
+            }
+            if (checkLabel("enable_mutation_test")) {
+                enableMutationTest()
+            }
+            if (checkLabel("enable_fortify_scan")) {
+                enableFortifyScan()
 
-            after('fortify-scan') {
-                steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Fortify Scan/**/*'
+                after('fortify-scan') {
+                    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Fortify Scan/**/*'
+                }
             }
         }
     }
