@@ -58,7 +58,7 @@ def populateLabelStates() {
     }
 
     // Check if at least one label is true
-    states.put("atLeastOneEnabled", states.any { it == true })
+    states.put("atLeastOneEnabled", states.any {key, value -> value == true })
 
     return states
 }
