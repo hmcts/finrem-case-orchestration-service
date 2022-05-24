@@ -73,8 +73,9 @@ public abstract class AbstractLetterHandler implements LetterHandler {
         if (representationUpdate != null) {
             log.info("Got the representationUpdate");
             CaseDetails caseDetailsToUse = noticeType == NoticeType.ADD ? caseDetailsBefore : caseDetails;
+            CaseDetails otherCaseDetails = noticeType == NoticeType.ADD ? caseDetails : caseDetailsBefore;
             if (changedRepresentativeIsPresent(representationUpdate)
-                && shouldALetterBeSent(representationUpdate, caseDetailsToUse)) {
+                && shouldALetterBeSent(representationUpdate, caseDetailsToUse, otherCaseDetails)) {
                 log.info("The recipient is a {} with an address", recipient);
                 return
                     Optional.ofNullable(
@@ -120,5 +121,7 @@ public abstract class AbstractLetterHandler implements LetterHandler {
             : representationUpdate.getRemoved();
     }
 
-    protected abstract boolean shouldALetterBeSent(RepresentationUpdate representationUpdate, CaseDetails caseDetailsToUse);
+    protected abstract boolean shouldALetterBeSent(RepresentationUpdate representationUpdate,
+                                                   CaseDetails caseDetailsToUse,
+                                                   CaseDetails otherCaseDetails);
 }

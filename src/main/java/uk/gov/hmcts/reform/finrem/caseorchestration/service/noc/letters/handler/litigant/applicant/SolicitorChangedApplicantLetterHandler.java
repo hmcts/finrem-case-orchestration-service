@@ -23,7 +23,9 @@ public class SolicitorChangedApplicantLetterHandler extends AbstractLetterHandle
     }
 
     @Override
-    protected boolean shouldALetterBeSent(RepresentationUpdate representationUpdate, CaseDetails caseDetailsToUse) {
+    protected boolean shouldALetterBeSent(RepresentationUpdate representationUpdate,
+                                          CaseDetails caseDetailsToUse,
+                                          CaseDetails otherCaseDetails) {
         log.info("Now check if solicitor notification letter is required for applicant");
         return isApplicant(representationUpdate) && isAddressFieldPopulated(caseDetailsToUse, APPLICANT_ADDRESS);
     }

@@ -8,6 +8,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.SolicitorNocDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.NocLetterDetailsGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 
 @Slf4j
 @Component
@@ -18,9 +20,12 @@ public class SolicitorAddedRepresentativeLetterHandler extends RepresentativeLet
         NocLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator,
         SolicitorNocDocumentService solicitorNocDocumentService,
         BulkPrintService bulkPrintService,
-        CaseDataService caseDataService) {
+        CaseDataService caseDataService,
+        CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService,
+        CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService) {
         super(noticeOfChangeLetterDetailsGenerator, solicitorNocDocumentService,
-            bulkPrintService, caseDataService, NoticeType.ADD);
+            bulkPrintService, caseDataService, NoticeType.ADD, checkApplicantSolicitorIsDigitalService,
+            checkRespondentSolicitorIsDigitalService);
     }
 
 }
