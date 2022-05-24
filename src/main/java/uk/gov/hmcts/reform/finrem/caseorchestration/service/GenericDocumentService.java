@@ -30,13 +30,14 @@ public class GenericDocumentService {
     }
 
     public CaseDocument generateDocumentFromPlaceholdersMap(String authorisationToken, Map placeholders,
-                                         String template, String fileName) {
+                                                            String template, String fileName) {
         Document generatedPdf = documentClient.generatePdf(
             DocumentGenerationRequest.builder().template(template).fileName(fileName).values(placeholders).build(),
             authorisationToken
         );
         return toCaseDocument(generatedPdf);
     }
+
 
     public UUID bulkPrint(BulkPrintRequest bulkPrintRequest) {
         return documentClient.bulkPrint(bulkPrintRequest);

@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
@@ -105,7 +104,6 @@ public class UpdateRepresentationWorkflowService {
     private void persistDefaultApplicantOrganisationPolicy(CaseDetails caseDetails) {
         caseDetails.getData().put(APPLICANT_ORGANISATION_POLICY,
             OrganisationPolicy.builder()
-                .organisation(Organisation.builder().build())
                 .orgPolicyReference(null)
                 .orgPolicyCaseAssignedRole(APP_SOLICITOR_POLICY)
                 .build());
@@ -114,7 +112,6 @@ public class UpdateRepresentationWorkflowService {
     private void persistDefaultRespondentOrganisationPolicy(CaseDetails caseDetails) {
         caseDetails.getData().put(RESPONDENT_ORGANISATION_POLICY,
             OrganisationPolicy.builder()
-                .organisation(Organisation.builder().build())
                 .orgPolicyReference(null)
                 .orgPolicyCaseAssignedRole(RESP_SOLICITOR_POLICY)
                 .build());
