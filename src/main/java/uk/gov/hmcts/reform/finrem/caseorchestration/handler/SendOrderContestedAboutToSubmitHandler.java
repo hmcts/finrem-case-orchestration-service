@@ -1,14 +1,25 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.CallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +38,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ContestedCaseOrderService {
+public class SendOrderContestedAboutToSubmitHandler implements CallbackHandler {
 
     private final BulkPrintService bulkPrintService;
     private final GeneralOrderService generalOrderService;
@@ -36,7 +47,44 @@ public class ContestedCaseOrderService {
     private final CaseDataService caseDataService;
     private final DocumentHelper documentHelper;
 
-    public void printAndMailGeneralOrderToParties(CaseDetails caseDetails, String authorisationToken) {
+    @Override
+    public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
+        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
+            && CaseType.CONTESTED.equals(caseType)
+            && EventType.SEND_ORDER.equals(eventType);
+    }
+
+    @Override
+    public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
+                                                       String userAuthorisation) {
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+
+        printAndMailGeneralOrderToParties(caseDetails, userAuthorisation);
+        printAndMailHearingDocuments(caseDetails, userAuthorisation);
+        stampFinalOrder(caseDetails, userAuthorisation);
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build();
+    }
+
+    private void stampFinalOrder(CaseDetails caseDetails, String authToken) {
+        Map<String, Object> caseData = caseDetails.getData();
+
+        List<HearingOrderCollectionData> hearingOrderCollectionData = documentHelper.getHearingOrderDocuments(caseData);
+
+        if (hearingOrderCollectionData != null && !hearingOrderCollectionData.isEmpty()) {
+            CaseDocument latestHearingOrder = hearingOrderCollectionData
+                .get(hearingOrderCollectionData.size() - 1)
+                .getHearingOrderDocuments().getUploadDraftDocument();
+
+            log.info("Received request to stampFinalOrder called with Case ID = {}, latestHearingOrder = {}", caseDetails.getId(),
+                latestHearingOrder);
+
+            stampAndAddToCollection(caseData, latestHearingOrder, authToken);
+        }
+    }
+
+    private void printAndMailGeneralOrderToParties(CaseDetails caseDetails, String authorisationToken) {
         if (contestedGeneralOrderPresent(caseDetails)) {
             BulkPrintDocument generalOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(caseDetails.getData());
 
@@ -50,7 +98,7 @@ public class ContestedCaseOrderService {
         }
     }
 
-    public void printAndMailHearingDocuments(CaseDetails caseDetails, String authorisationToken) {
+    private void printAndMailHearingDocuments(CaseDetails caseDetails, String authorisationToken) {
         if (caseDataService.isContestedPaperApplication(caseDetails)) {
             Map<String, Object> caseData = caseDetails.getData();
 
@@ -92,23 +140,6 @@ public class ContestedCaseOrderService {
 
     private boolean contestedGeneralOrderPresent(CaseDetails caseDetails) {
         return !isNull(caseDetails.getData().get(GENERAL_ORDER_LATEST_DOCUMENT));
-    }
-
-    public void stampFinalOrder(CaseDetails caseDetails, String authToken) {
-        Map<String, Object> caseData = caseDetails.getData();
-
-        List<HearingOrderCollectionData> hearingOrderCollectionData = documentHelper.getHearingOrderDocuments(caseData);
-
-        if (hearingOrderCollectionData != null && !hearingOrderCollectionData.isEmpty()) {
-            CaseDocument latestHearingOrder = hearingOrderCollectionData
-                .get(hearingOrderCollectionData.size() - 1)
-                .getHearingOrderDocuments().getUploadDraftDocument();
-
-            log.info("Received request to stampFinalOrder called with Case ID = {}, latestHearingOrder = {}", caseDetails.getId(),
-                latestHearingOrder);
-
-            stampAndAddToCollection(caseData, latestHearingOrder, authToken);
-        }
     }
 
     private void stampAndAddToCollection(Map<String, Object> caseData, CaseDocument latestHearingOrder, String authToken) {

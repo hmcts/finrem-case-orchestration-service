@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedCaseOrderService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.SendOrderContestedAboutToSubmitHandler;
 
 import javax.validation.constraints.NotNull;
 
@@ -26,9 +26,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(value = "/case-orchestration")
+//TODO: Delete this class and its test class when DFR1018 is active in Prod
 public class ContestedOrderController implements BaseController {
 
-    private final ContestedCaseOrderService contestedCaseOrderService;
+    private final SendOrderContestedAboutToSubmitHandler sendOrderContestedAboutToSubmitHandler;
 
     @PostMapping(path = "/contested/send-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles Consent order approved generation. Serves as a callback from CCD")
@@ -47,9 +48,7 @@ public class ContestedOrderController implements BaseController {
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Starting to send contested order for case {}", caseDetails.getId());
 
-        contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, authToken);
-        contestedCaseOrderService.printAndMailHearingDocuments(caseDetails, authToken);
-        contestedCaseOrderService.stampFinalOrder(caseDetails, authToken);
+        sendOrderContestedAboutToSubmitHandler.handle(callback, authToken);
 
         log.info("Finished sending contested order for case {}", caseDetails.getId());
 

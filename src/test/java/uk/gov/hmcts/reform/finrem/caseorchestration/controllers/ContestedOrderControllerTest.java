@@ -6,7 +6,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedCaseOrderService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.SendOrderContestedAboutToSubmitHandler;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +25,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 public class ContestedOrderControllerTest extends BaseControllerTest {
 
     @MockBean
-    private ContestedCaseOrderService contestedCaseOrderService;
+    private SendOrderContestedAboutToSubmitHandler sendOrderContestedAboutToSubmitHandler;
 
     private static final String SEND_ORDER_ENDPOINT = "/case-orchestration/contested/send-order";
 
@@ -58,8 +58,6 @@ public class ContestedOrderControllerTest extends BaseControllerTest {
         result.andExpect(status().isOk());
         result.andDo(print());
 
-        verify(contestedCaseOrderService).printAndMailHearingDocuments(any(), eq(AUTH_TOKEN));
-        verify(contestedCaseOrderService).printAndMailHearingDocuments(any(), eq(AUTH_TOKEN));
-        verify(contestedCaseOrderService).stampFinalOrder(any(), eq(AUTH_TOKEN));
+        verify(sendOrderContestedAboutToSubmitHandler).handle(any(), eq(AUTH_TOKEN));
     }
 }
