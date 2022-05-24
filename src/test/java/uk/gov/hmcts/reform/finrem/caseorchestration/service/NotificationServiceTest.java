@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.hamcrest.core.Is;
 import org.junit.Before;
 import org.junit.Test;
@@ -76,6 +77,8 @@ public class NotificationServiceTest extends BaseServiceTest {
     private static final String END_POINT_NOTICE_OF_CHANGE_CONTESTED = "http://localhost:8086/notify/contested/notice-of-change";
     private static final String END_POINT_NOC_CASEWORKER_CONTESTED = "http://localhost:8086/notify/contested/notice-of-change/caseworker";
     private static final String END_POINT_NOC_CASEWORKER_CONSENTED = "http://localhost:8086/notify/notice-of-change/caseworker";
+    private static final String END_POINT_UPDATE_FRC_INFORMATION = "http://localhost:8086/notify/contested/update-frc-information";
+    private static final String END_POINT_UPDATE_FRC_INFO_COURT = "http://localhost:8086/notify/contested/update-frc-information/court";
 
     private static final String ERROR_500_MESSAGE = "500 Internal Server Error";
     private static final String TEST_USER_EMAIL = "fr_applicant_sol@sharklasers.com";
@@ -735,7 +738,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_GENERAL_APPLICATION_OUTCOME))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andExpect(MockRestRequestMatchers.jsonPath("notificationEmail")
-                .value(TEST_USER_EMAIL))
+                .value("fr_applicant_solicitor1@mailinator.com"))
             .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestedGeneralApplicationOutcomeEmail(callbackRequest.getCaseDetails());
 
@@ -1098,5 +1101,39 @@ public class NotificationServiceTest extends BaseServiceTest {
         verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(getContestedCallbackRequest().getCaseDetails());
         verify(notificationServiceConfiguration).getContestedNoCCaseworker();
         verify(mockRestTemplate, never()).exchange(any(), eq(HttpMethod.POST), any(), eq(String.class));
+    }
+
+  public void sendUpdateFrcInformationEmailToAppSolicitor() {
+        callbackRequest = getContestedCallbackRequest();
+
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_UPDATE_FRC_INFORMATION))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendUpdateFrcInformationEmailToAppSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+    }
+
+    @Test
+    public void sendUpdateFrcInformationEmailToRespSolicitor() {
+        callbackRequest = getContestedCallbackRequest();
+
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_UPDATE_FRC_INFORMATION))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendUpdateFrcInformationEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+    }
+
+    @Test
+    public void sendUpdateFrcInformationEmailToCourt() throws JsonProcessingException {
+        when(featureToggleService.isSendToFRCEnabled()).thenReturn(true);
+
+        callbackRequest = getContestedCallbackRequest();
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_UPDATE_FRC_INFO_COURT))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+
+        notificationService.sendUpdateFrcInformationEmailToCourt(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
     }
 }

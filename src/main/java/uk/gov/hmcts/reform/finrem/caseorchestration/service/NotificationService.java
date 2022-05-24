@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,7 +50,7 @@ public class NotificationService {
     private final CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
     private final CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
 
-    private String recipientEmail = "fr_applicant_sol@sharklasers.com";
+    private static final String DEFAULT_EMAIL = "fr_applicant_solicitor1@mailinator.com";
 
     public void sendConsentedHWFSuccessfulConfirmationEmail(CaseDetails caseDetails) {
         URI uri = buildUri(notificationServiceConfiguration.getHwfSuccessful());
@@ -285,6 +286,7 @@ public class NotificationService {
     }
 
     public void sendContestedGeneralApplicationOutcomeEmail(CaseDetails caseDetails) throws IOException {
+        String recipientEmail = DEFAULT_EMAIL;
         if (featureToggleService.isSendToFRCEnabled()) {
             Map<String, Object> data = caseDetails.getData();
             Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
@@ -333,6 +335,28 @@ public class NotificationService {
         notificationRequest.setGeneralEmailBody("The Judge has also ordered that:\n"
             + Objects.toString(caseDetails.getData().get(TRANSFER_COURTS_INSTRUCTIONS)));
 
+        sendNotificationEmail(notificationRequest, uri);
+    }
+
+    public void sendUpdateFrcInformationEmailToAppSolicitor(CaseDetails caseDetails) {
+        sendUpdateFrcInformationEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
+    }
+
+    public void sendUpdateFrcInformationEmailToRespondentSolicitor(CaseDetails caseDetails) {
+        sendUpdateFrcInformationEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
+    }
+
+    public void sendUpdateFrcInformationEmail(NotificationRequest notificationRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getUpdateFRCInformation());
+        sendNotificationEmail(notificationRequest, uri);
+    }
+
+    public void sendUpdateFrcInformationEmailToCourt(CaseDetails caseDetails) throws JsonProcessingException {
+        String recipientEmail = getRecipientEmail(caseDetails);
+
+        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
+        notificationRequest.setNotificationEmail(recipientEmail);
+        URI uri = buildUri(notificationServiceConfiguration.getUpdateFRCInformationCourt());
         sendNotificationEmail(notificationRequest, uri);
     }
 
@@ -427,5 +451,16 @@ public class NotificationService {
         return caseDataService.isConsentedApplication(caseDetails)
             ? CONSENTED_SOLICITOR_NAME
             : CONTESTED_SOLICITOR_NAME;
+    }
+  
+    private String getRecipientEmail(CaseDetails caseDetails) throws JsonProcessingException {
+        if (featureToggleService.isSendToFRCEnabled()) {
+            Map<String, Object> data = caseDetails.getData();
+            Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
+            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(data.get(CaseHearingFunctions.getSelectedCourt(data)));
+
+            return (String) courtDetails.get(COURT_DETAILS_EMAIL_KEY);
+        }
+        return DEFAULT_EMAIL;
     }
 }
