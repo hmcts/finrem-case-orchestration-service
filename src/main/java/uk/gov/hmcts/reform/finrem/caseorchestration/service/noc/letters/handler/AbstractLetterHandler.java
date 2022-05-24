@@ -79,8 +79,8 @@ public abstract class AbstractLetterHandler implements LetterHandler {
                 log.info("The recipient is a {} with an address", recipient);
                 return
                     Optional.ofNullable(
-                        noticeOfChangeLetterDetailsGenerator.generate(caseDetails, caseDetailsBefore, representationUpdate, recipient,
-                            noticeType));
+                        noticeOfChangeLetterDetailsGenerator.generate(caseDetails, caseDetailsBefore,
+                            representationUpdate, recipient, noticeType));
             }
         }
         return Optional.empty();
@@ -88,10 +88,12 @@ public abstract class AbstractLetterHandler implements LetterHandler {
 
     protected RepresentationUpdate getLatestRepresentationUpdate(CaseDetails caseDetails) {
         log.info("Get the latest Representation Update");
-        List<Element<RepresentationUpdate>> representationUpdates = new ObjectMapper().registerModule(new JavaTimeModule())
+        List<Element<RepresentationUpdate>> representationUpdates = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
             .convertValue(caseDetails.getData().get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {
             });
-        return Collections.max(representationUpdates, Comparator.comparing(representationUpdate -> representationUpdate.getValue().getDate()))
+        return Collections.max(representationUpdates, Comparator.comparing(
+            representationUpdate -> representationUpdate.getValue().getDate()))
             .getValue();
     }
 
@@ -111,14 +113,13 @@ public abstract class AbstractLetterHandler implements LetterHandler {
     }
 
     private boolean changedRepresentativeIsPresent(RepresentationUpdate representationUpdate) {
-        return Optional.ofNullable(getChangedRepresentative(representationUpdate)).isPresent()
-            && Optional.ofNullable(getChangedRepresentative(representationUpdate).getName()).isPresent();
+        ChangedRepresentative changedRepresentative = getChangedRepresentative(representationUpdate);
+        return Optional.ofNullable(changedRepresentative).isPresent()
+            && StringUtils.isNotBlank(changedRepresentative.getName());
     }
 
     private ChangedRepresentative getChangedRepresentative(RepresentationUpdate representationUpdate) {
-        return noticeType == NoticeType.ADD
-            ? representationUpdate.getAdded()
-            : representationUpdate.getRemoved();
+        return noticeType == NoticeType.ADD ? representationUpdate.getAdded() : representationUpdate.getRemoved();
     }
 
     protected abstract boolean shouldALetterBeSent(RepresentationUpdate representationUpdate,

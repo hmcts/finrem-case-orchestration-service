@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 
 import java.util.Map;
-import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 
@@ -33,7 +32,7 @@ public class CheckApplicantSolicitorIsDigitalService extends CheckSolicitorIsDig
                 caseDetails.getId()));
         }
 
-        return Optional.ofNullable(applicantPolicy.getOrganisation()).isPresent() && isApplicantRepresented;
+        return !isOrganisationEmpty(applicantPolicy) && isApplicantRepresented;
     }
 
     private OrganisationPolicy getApplicantOrganisationPolicy(Map<String, Object> caseData) {
