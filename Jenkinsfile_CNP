@@ -36,7 +36,7 @@ labels = [
 ]
 
 labelStates = [atLeastOneEnabled: false]
-def checkLabels() {
+def checkLabelStates() {
     def repoLabels = new GithubAPI(this).getLabelsbyPattern(env.BRANCH_NAME, "enable_")
     def testLabel = { label ->
         if (label == "atLeastOneEnabled") {
@@ -58,13 +58,10 @@ def checkLabels() {
         testLabel("enable_all")
     }
 }
-checkLabels()
+checkLabelStates()
 
 def checkLabel(label) {
-    if (labelStates.enable_all || labelStates.get(label)) {
-        return true
-    }
-    return false
+    return (labelStates.enable_all || labelStates.get(label))
 }
 
 // Vars for Kubernetes
