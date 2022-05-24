@@ -18,7 +18,8 @@ public class SolicitorRemovedApplicantLetterHandlerTest extends LetterHandlerTes
     SolicitorRemovedApplicantLetterHandler solicitorRemovedApplicantLetterHandler;
 
     public SolicitorRemovedApplicantLetterHandlerTest() {
-        super(Mockito.mock(SolicitorRemovedLetterDetailsGenerator.class), Mockito.mock(LitigantSolicitorRemovedNocDocumentService.class), NoticeType.REMOVE, DocumentHelper.PaperNotificationRecipient.APPLICANT);
+        super(Mockito.mock(SolicitorRemovedLetterDetailsGenerator.class), Mockito.mock(LitigantSolicitorRemovedNocDocumentService.class),
+            NoticeType.REMOVE, DocumentHelper.PaperNotificationRecipient.APPLICANT);
     }
 
     @Test

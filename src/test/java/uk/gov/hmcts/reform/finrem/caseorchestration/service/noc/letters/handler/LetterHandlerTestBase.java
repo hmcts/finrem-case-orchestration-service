@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.NocDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.AbstractLetterDetailsGenerator;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.NocLetterDetailsGenerator;
 
 import java.util.UUID;
 
@@ -46,7 +45,8 @@ public abstract class LetterHandlerTestBase {
     @Captor
     ArgumentCaptor<DocumentHelper.PaperNotificationRecipient> paperNotificationRecipientArgumentCaptor;
 
-    public LetterHandlerTestBase(AbstractLetterDetailsGenerator letterDetailsGenerator, NocDocumentService nocDocumentService, NoticeType noticeType, DocumentHelper.PaperNotificationRecipient recipient) {
+    public LetterHandlerTestBase(AbstractLetterDetailsGenerator letterDetailsGenerator, NocDocumentService nocDocumentService, NoticeType noticeType,
+                                 DocumentHelper.PaperNotificationRecipient recipient) {
         this.letterDetailsGenerator = letterDetailsGenerator;
         this.nocDocumentService = nocDocumentService;
         this.noticeType = noticeType;
@@ -111,7 +111,8 @@ public abstract class LetterHandlerTestBase {
     protected NoticeOfChangeLetterDetails setUpNoticeOfChangeLetterDetailsInteraction() {
         NoticeOfChangeLetterDetails noticeOfChangeLetterDetails = NoticeOfChangeLetterDetails.builder().build();
         when(letterDetailsGenerator.generate(caseDetailsArgumentCaptor.capture(), caseDetailsBeforeArgumentCaptor.capture(),
-            representationUpdateArgumentCaptor.capture(), paperNotificationRecipientArgumentCaptor.capture())).thenReturn(noticeOfChangeLetterDetails);
+            representationUpdateArgumentCaptor.capture(), paperNotificationRecipientArgumentCaptor.capture())).thenReturn(
+            noticeOfChangeLetterDetails);
         return noticeOfChangeLetterDetails;
     }
 

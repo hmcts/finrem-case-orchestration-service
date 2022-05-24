@@ -27,7 +27,8 @@ public class SolicitorRemovedRepresentativeLetterHandlerTest extends LetterHandl
     SolicitorRemovedRepresentativeLetterHandler solicitorRemovedRepresentativeLetterHandler;
 
     public SolicitorRemovedRepresentativeLetterHandlerTest() {
-        super(Mockito.mock(SolicitorRemovedLetterDetailsGenerator.class),  Mockito.mock(SolicitorNocDocumentService.class), NoticeType.REMOVE, DocumentHelper.PaperNotificationRecipient.SOLICITOR);
+        super(Mockito.mock(SolicitorRemovedLetterDetailsGenerator.class), Mockito.mock(SolicitorNocDocumentService.class), NoticeType.REMOVE,
+            DocumentHelper.PaperNotificationRecipient.SOLICITOR);
     }
 
     @Before
