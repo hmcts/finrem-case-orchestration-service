@@ -111,7 +111,7 @@ public class NocLetterDetailsGenerator {
     }
 
     private boolean isApplicant(RepresentationUpdate representationUpdate) {
-        return representationUpdate.getParty().equals(COR_APPLICANT);
+        return representationUpdate.getParty().equalsIgnoreCase(COR_APPLICANT);
     }
 
     private String getAppSolicitorFirmKey(CaseDetails caseDetails) {

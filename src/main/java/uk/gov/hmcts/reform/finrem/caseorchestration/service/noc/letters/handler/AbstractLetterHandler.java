@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLetterDetails;
@@ -65,13 +66,15 @@ public abstract class AbstractLetterHandler implements LetterHandler {
         });
     }
 
-    private Optional<NoticeOfChangeLetterDetails> getNoticeOfChangeLetterDetails(CaseDetails caseDetails, CaseDetails caseDetailsBefore) {
+    private Optional<NoticeOfChangeLetterDetails> getNoticeOfChangeLetterDetails(CaseDetails caseDetails,
+                                                                                 CaseDetails caseDetailsBefore) {
 
         RepresentationUpdate representationUpdate = getLatestRepresentationUpdate(caseDetails);
         if (representationUpdate != null) {
             log.info("Got the representationUpdate");
             CaseDetails caseDetailsToUse = noticeType == NoticeType.ADD ? caseDetailsBefore : caseDetails;
-            if (shouldALetterBeSent(representationUpdate, caseDetailsToUse)) {
+            if (changedRepresentativeIsPresent(representationUpdate)
+                && shouldALetterBeSent(representationUpdate, caseDetailsToUse)) {
                 log.info("The recipient is a {} with an address", recipient);
                 return
                     Optional.ofNullable(
@@ -104,6 +107,17 @@ public abstract class AbstractLetterHandler implements LetterHandler {
         return ObjectUtils.isNotEmpty(addressMap)
             && StringUtils.isNotBlank((String) addressMap.get(LINE_1))
             && StringUtils.isNotBlank((String) addressMap.get(POSTCODE));
+    }
+
+    private boolean changedRepresentativeIsPresent(RepresentationUpdate representationUpdate) {
+        return Optional.ofNullable(getChangedRepresentative(representationUpdate)).isPresent()
+            && Optional.ofNullable(getChangedRepresentative(representationUpdate).getName()).isPresent();
+    }
+
+    private ChangedRepresentative getChangedRepresentative(RepresentationUpdate representationUpdate) {
+        return noticeType == NoticeType.ADD
+            ? representationUpdate.getAdded()
+            : representationUpdate.getRemoved();
     }
 
     protected abstract boolean shouldALetterBeSent(RepresentationUpdate representationUpdate, CaseDetails caseDetailsToUse);
