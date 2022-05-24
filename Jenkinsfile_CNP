@@ -35,30 +35,34 @@ labels = [
     "enable_fortify_scan",
 ]
 
-labelStates = [atLeastOneEnabled: false]
-def checkLabelStates() {
+def populateLabelStates() {
+    def states = [:]
+    // Get labels from GitHub repo
     def repoLabels = new GithubAPI(this).getLabelsbyPattern(env.BRANCH_NAME, "enable_")
-    def testLabel = { label ->
+
+    // Check existence of provided label, and store in labelStates map
+    def getLabelState = { label ->
         if (label == "atLeastOneEnabled") {
             return
         }
         def labelExists = repoLabels.contains(label) ? true : false
-        labelStates.put(label, labelExists)
-        if (labelExists && !labelStates.atLeastOneEnabled) {
-            labelStates.atLeastOneEnabled = true
-        }
+        states.put(label, labelExists)
     }
 
-    labels.each { label ->
-        testLabel(label)
-    }
+    // Iterate over labels List to build labelStates map
+    labels.each { label -> getLabelState(label) }
 
     // Hardcode enable_all label
-    if (!labelStates.containsKey("enable_all")) {
-        testLabel("enable_all")
+    if (!states.containsKey("enable_all")) {
+        getLabelState("enable_all")
     }
+
+    // Check if at least one label is true
+    states.put("atLeastOneEnabled", states.any { it == true })
+
+    return states
 }
-checkLabelStates()
+labelStates = populateLabelStates()
 
 def checkLabel(label) {
     return (labelStates.enable_all || labelStates.get(label))
