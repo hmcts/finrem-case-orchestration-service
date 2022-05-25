@@ -30,7 +30,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @RequestMapping(value = "/case-orchestration")
 @RequiredArgsConstructor
 @Slf4j
-public class GeneralApplicationDirectionsController implements BaseController {
+public class GeneralApplicationDirectionsController extends BaseController {
 
     private final GeneralApplicationDirectionsService generalApplicationDirectionsService;
 

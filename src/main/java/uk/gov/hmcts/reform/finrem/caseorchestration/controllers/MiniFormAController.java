@@ -33,7 +33,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RestController
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-public class MiniFormAController implements BaseController {
+public class MiniFormAController extends BaseController {
 
     @Autowired private OnlineFormDocumentService service;
     @Autowired private DefaultsConfiguration defaultsConfiguration;

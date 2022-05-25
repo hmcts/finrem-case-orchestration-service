@@ -50,7 +50,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 @RequestMapping(value = "/case-orchestration")
 @RequiredArgsConstructor
 @Slf4j
-public class RemoveApplicantDetailsController implements BaseController {
+public class RemoveApplicantDetailsController extends BaseController {
 
     @Autowired private final UpdateRepresentationWorkflowService nocWorkflowService;
 

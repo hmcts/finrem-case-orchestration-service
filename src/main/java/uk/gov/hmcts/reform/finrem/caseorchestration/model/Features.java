@@ -13,6 +13,7 @@ public enum Features {
     SEND_TO_FRC("send_to_frc"),
     PAYMENT_REQUEST_USING_CASE_TYPE("pba_case_type"),
     USE_USER_TOKEN("use_user_token"),
+    MANAGE_BUNDLE("manage_bundle"),
     SOLICITOR_NOTICE_OF_CHANGE("solicitor_notice_of_change");
 
     private final String name;
