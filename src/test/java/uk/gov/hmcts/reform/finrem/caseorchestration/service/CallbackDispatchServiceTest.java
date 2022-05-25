@@ -7,9 +7,8 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.CallbackDispatcher;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.CallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 
@@ -29,7 +28,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class CallbackDispatcherTest extends BaseServiceTest {
+public class CallbackDispatchServiceTest extends BaseServiceTest {
     private static final String USER_AUTHORISATION = "Bearer token";
 
     @Mock
@@ -47,11 +46,11 @@ public class CallbackDispatcherTest extends BaseServiceTest {
     @Mock
     private AboutToStartOrSubmitCallbackResponse response2;
 
-    private CallbackDispatcher callbackDispatcher;
+    private CallbackDispatchService callbackDispatchService;
 
     @Before
     public void setUp() {
-        callbackDispatcher = new CallbackDispatcher(
+        callbackDispatchService = new CallbackDispatchService(
             Arrays.asList(
                 handler1,
                 handler2
@@ -76,7 +75,7 @@ public class CallbackDispatcherTest extends BaseServiceTest {
         when(handler2.handle(any(CallbackRequest.class), anyString())).thenReturn(response2);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse =
-            callbackDispatcher.dispatchToHandlers(CallbackType.ABOUT_TO_SUBMIT, callbackRequest, USER_AUTHORISATION);
+            callbackDispatchService.dispatchToHandlers(CallbackType.ABOUT_TO_SUBMIT, callbackRequest, USER_AUTHORISATION);
 
         assertNotNull(callbackResponse);
         List<String> expectedErrors = List.of("error1", "error2", "error3");
@@ -98,7 +97,7 @@ public class CallbackDispatcherTest extends BaseServiceTest {
         when(handler2.canHandle(any(CallbackType.class), any(CaseType.class), any(EventType.class))).thenReturn(false);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse =
-            callbackDispatcher.dispatchToHandlers(CallbackType.ABOUT_TO_SUBMIT, callbackRequest, USER_AUTHORISATION);
+            callbackDispatchService.dispatchToHandlers(CallbackType.ABOUT_TO_SUBMIT, callbackRequest, USER_AUTHORISATION);
 
         assertNotNull(callbackResponse);
         assertTrue(callbackResponse.getErrors().isEmpty());
@@ -113,14 +112,14 @@ public class CallbackDispatcherTest extends BaseServiceTest {
     @Test
     public void givenNoHandler_WhenDispatch_ThenNoErrors() {
 
-        CallbackDispatcher callbackDispatcher =
-            new CallbackDispatcher(Collections.emptyList());
+        CallbackDispatchService callbackDispatchService =
+            new CallbackDispatchService(Collections.emptyList());
 
         try {
 
             when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
 
-            AboutToStartOrSubmitCallbackResponse callbackResponse = callbackDispatcher
+            AboutToStartOrSubmitCallbackResponse callbackResponse = callbackDispatchService
                 .dispatchToHandlers(CallbackType.ABOUT_TO_SUBMIT, callbackRequest, USER_AUTHORISATION);
 
             assertNotNull(callbackResponse);
@@ -133,7 +132,7 @@ public class CallbackDispatcherTest extends BaseServiceTest {
     @Test
     public void givenNullArguments_WhenDispatch_ThenThrowError() {
 
-        assertThatThrownBy(() -> callbackDispatcher
+        assertThatThrownBy(() -> callbackDispatchService
             .dispatchToHandlers(CallbackType.ABOUT_TO_SUBMIT, null, USER_AUTHORISATION))
             .hasMessage("callback must not be null")
             .isExactlyInstanceOf(NullPointerException.class);

@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.ccd;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;

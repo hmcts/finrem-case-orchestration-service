@@ -7,7 +7,9 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public enum EventType {
 
-    SEND_ORDER("FR_sendOrder");
+    SEND_ORDER("FR_sendOrder"),
+    PREPARE_FOR_HEARING("FR_prepareForHearing"),
+    CLOSE("FR_close");
 
     private final String ccdType;
 

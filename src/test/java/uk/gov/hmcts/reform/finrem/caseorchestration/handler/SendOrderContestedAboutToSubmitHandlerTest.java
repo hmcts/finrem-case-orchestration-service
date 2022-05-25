@@ -1,16 +1,17 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.handler.SendOrderContestedAboutToSubmitHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -18,6 +19,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -49,23 +55,28 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_OTHER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
 
-public class SendOrderContestedAboutToSubmitHandlerTest extends BaseServiceTest {
+@RunWith(MockitoJUnitRunner.class)
+public class SendOrderContestedAboutToSubmitHandlerTest {
 
-    @Autowired
+    @InjectMocks
     private SendOrderContestedAboutToSubmitHandler sendOrderContestedAboutToSubmitHandler;
-    @MockBean
+    @Mock
     private GenericDocumentService genericDocumentService;
-    @MockBean
+    @Mock
     private BulkPrintService bulkPrintService;
-    @MockBean
+    @Mock
     private PaperNotificationService paperNotificationService;
-    @MockBean
+    @Mock
     private DocumentHelper documentHelper;
-    @MockBean
+    @Mock
     private CaseDataService caseDataService;
+    @Mock
+    private GeneralOrderService generalOrderService;
 
     @Captor
     private ArgumentCaptor<List<BulkPrintDocument>> bulkPrintArgumentCaptor;
+
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     public void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanHandle() {
@@ -90,7 +101,8 @@ public class SendOrderContestedAboutToSubmitHandlerTest extends BaseServiceTest 
     public void givenShouldPrintAppAndResp_whenPrintAndMailGeneralOrderTriggered_thenBothAppAndRespPacksPrinted() {
         when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
         when(paperNotificationService.shouldPrintForRespondent(any())).thenReturn(true);
-        when(documentHelper.convertToCaseDocument(any())).thenReturn(new CaseDocument());
+        when(generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(any()))
+            .thenReturn(BulkPrintDocument.builder().build());
 
         CallbackRequest callbackRequest =
             CallbackRequest.builder().caseDetails(generalOrderContestedCaseDetails()).build();
@@ -104,7 +116,6 @@ public class SendOrderContestedAboutToSubmitHandlerTest extends BaseServiceTest 
     public void givenShouldNotPrintPackForApplicant_whenPrintAndMailGeneralOrderTriggered_thenOnlyRespondentPacksIsPrinted() {
         when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(false);
         when(paperNotificationService.shouldPrintForRespondent(any())).thenReturn(true);
-        when(documentHelper.convertToCaseDocument(any())).thenReturn(new CaseDocument());
 
         CallbackRequest callbackRequest =
             CallbackRequest.builder().caseDetails(generalOrderContestedCaseDetails()).build();
@@ -277,7 +288,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest extends BaseServiceTest 
 
     private CaseDetails generalOrderContestedCaseDetails() {
         try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/general-order-contested.json")) {
-            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+            return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

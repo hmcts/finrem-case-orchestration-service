@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.SystemUpdateUserConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.wrapper.IdamToken;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
 @Service
 @Slf4j
@@ -18,6 +20,19 @@ public class SystemUserService {
     @Cacheable("systemUserTokenCache")
     public String getSysUserToken() {
         return idamClient.getAccessToken(userConfig.getUserName(), userConfig.getPassword());
+    }
+
+    public IdamToken getIdamToken() {
+
+        UserInfo user = idamClient.getUserInfo(getSysUserToken());
+
+        return IdamToken.builder()
+            .idamOauth2Token(getSysUserToken())
+            .serviceAuthorization(idamClient.getServiceAuthorization())
+            .userId(user.getUid())
+            .email(user.getSub())
+            .roles(user.getRoles())
+            .build();
     }
 
 }

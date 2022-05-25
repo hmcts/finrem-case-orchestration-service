@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.CallbackDispatcher;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CallbackDispatchService;
 
 import javax.validation.constraints.NotNull;
 
@@ -36,7 +36,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.Callback
 @RequestMapping(value = "/case-orchestration")
 public class CcdCallbackController {
 
-    private final CallbackDispatcher callbackDispatcher;
+    private final CallbackDispatchService callbackDispatchService;
 
 
     @PostMapping(path = "/ccdAboutToStartEvent")
@@ -148,7 +148,7 @@ public class CcdCallbackController {
                                                                                 String userAuthorisation) {
 
         AboutToStartOrSubmitCallbackResponse callbackResponse =
-            callbackDispatcher.dispatchToHandlers(callbackType, callbackRequest, userAuthorisation);
+            callbackDispatchService.dispatchToHandlers(callbackType, callbackRequest, userAuthorisation);
 
         log.info("Financial Remedy Case CCD callback `{}` handled for Case ID `{}`",
             callbackRequest.getEventId(),

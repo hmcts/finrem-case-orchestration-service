@@ -6,8 +6,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.CallbackDispatcher;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CallbackDispatchService;
 
 import java.io.File;
 
@@ -28,7 +28,7 @@ public class CcdCallbackControllerTest extends BaseControllerTest {
     private static final String COS_SUBMITTED_ENDPOINT = "/case-orchestration/ccdSubmittedEvent";
 
     @MockBean
-    private CallbackDispatcher callbackDispatcher;
+    private CallbackDispatchService callbackDispatchService;
 
 
     @Before
@@ -61,7 +61,7 @@ public class CcdCallbackControllerTest extends BaseControllerTest {
         result.andExpect(status().isOk());
         result.andDo(print());
 
-        verify(callbackDispatcher).dispatchToHandlers(eq(CallbackType.ABOUT_TO_SUBMIT), any(), eq(AUTH_TOKEN));
+        verify(callbackDispatchService).dispatchToHandlers(eq(CallbackType.ABOUT_TO_SUBMIT), any(), eq(AUTH_TOKEN));
     }
 
     @Test
@@ -75,7 +75,7 @@ public class CcdCallbackControllerTest extends BaseControllerTest {
         result.andExpect(status().isOk());
         result.andDo(print());
 
-        verify(callbackDispatcher).dispatchToHandlers(eq(CallbackType.ABOUT_TO_START), any(), eq(AUTH_TOKEN));
+        verify(callbackDispatchService).dispatchToHandlers(eq(CallbackType.ABOUT_TO_START), any(), eq(AUTH_TOKEN));
     }
 
     @Test
@@ -89,7 +89,7 @@ public class CcdCallbackControllerTest extends BaseControllerTest {
         result.andExpect(status().isOk());
         result.andDo(print());
 
-        verify(callbackDispatcher).dispatchToHandlers(eq(CallbackType.MID_EVENT), any(), eq(AUTH_TOKEN));
+        verify(callbackDispatchService).dispatchToHandlers(eq(CallbackType.MID_EVENT), any(), eq(AUTH_TOKEN));
     }
 
     @Test
@@ -103,6 +103,6 @@ public class CcdCallbackControllerTest extends BaseControllerTest {
         result.andExpect(status().isOk());
         result.andDo(print());
 
-        verify(callbackDispatcher).dispatchToHandlers(eq(CallbackType.SUBMITTED), any(), eq(AUTH_TOKEN));
+        verify(callbackDispatchService).dispatchToHandlers(eq(CallbackType.SUBMITTED), any(), eq(AUTH_TOKEN));
     }
 }

@@ -1,10 +1,11 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.ccd;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,8 +15,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType.getCas
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.getEventType;
 
 @RequiredArgsConstructor
-@Component
-public class CallbackDispatcher {
+@Service
+public class CallbackDispatchService {
 
     private final List<CallbackHandler> callbackHandlers;
 
