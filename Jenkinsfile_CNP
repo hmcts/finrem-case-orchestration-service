@@ -65,7 +65,7 @@ def populateLabelStates(labels) {
 labelStates = populateLabelStates(labels)
 
 def checkLabel(label) {
-    return (labelStates.enable_all || labelStates.get(label))
+    return (labelStates.enable_all_tests_and_scans || labelStates.get(label))
 }
 
 // Vars for Kubernetes
