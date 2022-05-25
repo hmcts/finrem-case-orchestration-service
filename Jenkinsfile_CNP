@@ -62,10 +62,10 @@ def populateLabelStates(labels) {
 
     return states
 }
-labelStates = populateLabelStates(labels)
+def labelStates = populateLabelStates(labels)
 
-def checkLabel(label) {
-    return (labelStates.enable_all || labelStates.get(label))
+def checkLabel(label, states = labelStates) {
+    return (states.enable_all || states.get(label))
 }
 
 // Vars for Kubernetes
