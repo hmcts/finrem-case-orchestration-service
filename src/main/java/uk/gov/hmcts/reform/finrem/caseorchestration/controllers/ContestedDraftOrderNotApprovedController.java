@@ -39,7 +39,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequestMapping(value = "/case-orchestration")
 @RequiredArgsConstructor
 @Slf4j
-public class ContestedDraftOrderNotApprovedController implements BaseController {
+public class ContestedDraftOrderNotApprovedController extends BaseController {
 
     private final ContestedDraftOrderNotApprovedService contestedNotApprovedService;
     private final BulkPrintService bulkPrintService;
