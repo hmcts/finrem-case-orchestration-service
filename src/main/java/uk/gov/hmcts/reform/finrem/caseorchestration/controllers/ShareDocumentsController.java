@@ -40,7 +40,7 @@ public class ShareDocumentsController extends BaseController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> shareDocumentsWithRespondent(
         @RequestBody CallbackRequest ccdRequest) {
         log.info("Received request to share documents with respondent");
-        validateRequest(ccdRequest);
+        validateCaseData(ccdRequest);
 
         CaseDetails caseDetails = ccdRequest.getCaseDetails();
         String applicantShareDocumentsValue = nullToEmpty(caseDetails.getData().get(APPLICANT_SHARE_DOCUMENTS));
@@ -64,7 +64,7 @@ public class ShareDocumentsController extends BaseController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> shareDocumentsWithApplicant(
         @RequestBody CallbackRequest ccdRequest) {
         log.info("Received request to share documents with applicant");
-        validateRequest(ccdRequest);
+        validateCaseData(ccdRequest);
 
         CaseDetails caseDetails = ccdRequest.getCaseDetails();
         String respondentShareDocumentsValue = nullToEmpty(caseDetails.getData().get(RESPONDENT_SHARE_DOCUMENTS));

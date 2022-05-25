@@ -43,7 +43,7 @@ public class GeneralApplicationController extends BaseController {
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to submit general application for Case ID: {}", caseDetails.getId());
-        validateRequest(callback);
+        validateCaseData(callback);
 
         CaseDetails caseDetailsBefore = callback.getCaseDetailsBefore();
         generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, authorisationToken);
@@ -67,7 +67,7 @@ public class GeneralApplicationController extends BaseController {
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to start general application for Case ID: {}", caseDetails.getId());
-        validateRequest(callback);
+        validateCaseData(callback);
 
         generalApplicationService.updateCaseDataStart(caseDetails.getData(), authorisationToken);
 

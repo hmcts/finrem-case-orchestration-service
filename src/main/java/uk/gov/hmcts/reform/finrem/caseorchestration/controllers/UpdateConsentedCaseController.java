@@ -87,7 +87,7 @@ public class UpdateConsentedCaseController extends BaseController {
         CaseDetails caseDetails = ccdRequest.getCaseDetails();
         log.info("Received request to update consented case with Case ID: {}", caseDetails.getId());
 
-        validateRequest(ccdRequest);
+        validateCaseData(ccdRequest);
         Map<String, Object> caseData = caseDetails.getData();
 
         updateDivorceDetails(caseData);

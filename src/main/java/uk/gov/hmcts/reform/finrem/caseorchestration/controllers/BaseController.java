@@ -13,7 +13,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public abstract class BaseController {
 
-    public void validateRequest(CallbackRequest callbackRequest) {
+    public void validateCaseData(CallbackRequest callbackRequest) {
         if (callbackRequest == null
             || callbackRequest.getCaseDetails() == null
             || callbackRequest.getCaseDetails().getData() == null) {

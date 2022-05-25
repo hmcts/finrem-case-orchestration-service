@@ -57,7 +57,7 @@ public class HearingDocumentController extends BaseController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request for validating a hearing for Case ID: {}", caseDetails.getId());
 
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
 
         List<String> errors = validateHearingService.validateHearingErrors(caseDetails);
         if (!errors.isEmpty()) {
@@ -89,7 +89,7 @@ public class HearingDocumentController extends BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
         CaseDetails caseDetails = callback.getCaseDetails();
-        validateRequest(callback);
+        validateCaseData(callback);
         Map<String, Object> caseData = caseDetails.getData();
         List<String> errors = new ArrayList<>();
 

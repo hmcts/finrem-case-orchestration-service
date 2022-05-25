@@ -52,7 +52,7 @@ public class FeeLookupController extends BaseController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request for Fee lookup for Case ID {}", caseDetails.getId());
 
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
 
         ApplicationType applicationType = caseDataService.isConsentedApplication(caseDetails) ? CONSENTED : CONTESTED;
         FeeResponse feeResponse = feeService.getApplicationFee(applicationType);

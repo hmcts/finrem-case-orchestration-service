@@ -42,7 +42,7 @@ public class ContestedOrderController extends BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
-        validateRequest(callback);
+        validateCaseData(callback);
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Starting to send contested order for case {}", caseDetails.getId());

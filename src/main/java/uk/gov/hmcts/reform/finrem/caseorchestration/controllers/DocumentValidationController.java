@@ -52,7 +52,7 @@ public class DocumentValidationController extends BaseController {
         Optional<Long> caseId = Optional.ofNullable(callbackRequest.getCaseDetails().getId());
         log.info("Received request for checkUploadedFileType for Case ID: {}", caseId);
 
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
         return ResponseEntity.ok(response(callbackRequest, field, authorisationToken));
     }
 

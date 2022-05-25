@@ -44,7 +44,7 @@ public class CurrentDateController extends BaseController {
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to generate current date for '{}' in the URL path : {}", field, caseDetails.getId());
 
-        validateRequest(callback);
+        validateCaseData(callback);
 
         Map<String, Object> caseData = caseDetails.getData();
         caseData.put(field, LocalDate.now());

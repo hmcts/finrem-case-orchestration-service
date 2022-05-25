@@ -49,7 +49,7 @@ public class GeneralEmailStartController extends BaseController {
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to pre populate general email fields for Case ID: {}", caseDetails.getId());
 
-        validateRequest(callback);
+        validateCaseData(callback);
 
         Map<String, Object> caseData = caseDetails.getData();
         caseData.put(GENERAL_EMAIL_RECIPIENT, null);

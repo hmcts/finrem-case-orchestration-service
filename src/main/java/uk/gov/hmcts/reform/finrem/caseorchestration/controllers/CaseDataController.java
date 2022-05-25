@@ -76,7 +76,7 @@ public class CaseDataController extends BaseController {
     }
 
     private void setDefaultValues(CallbackRequest callbackRequest, String authToken) {
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
         final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         setData(authToken, caseData);
         setOrganisationPolicy(callbackRequest.getCaseDetails());
@@ -102,7 +102,7 @@ public class CaseDataController extends BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken,
         @RequestBody final CallbackRequest callbackRequest) {
         log.info("Setting default values for contested paper case journey.");
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
         final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         setData(authToken, caseData);
         setPaperCaseData(caseData);
@@ -116,7 +116,7 @@ public class CaseDataController extends BaseController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setContestedPaperCaseOrganisationPolicy(
         @RequestBody final CallbackRequest callbackRequest) {
         log.info("Setting default values for contested paper case journey.");
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
         setOrganisationPolicyForNewPaperCase(callbackRequest.getCaseDetails());
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build());
     }
@@ -128,7 +128,7 @@ public class CaseDataController extends BaseController {
         @PathVariable("source") final String source,
         @PathVariable("destination") final String destination) {
 
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
 
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         caseDataService.moveCollection(caseData, source, destination);

@@ -71,7 +71,7 @@ public class RemoveApplicantDetailsController extends BaseController {
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request for removing Applicant/Applicants Solicitor details for Case ID: {}", caseDetails.getId());
 
-        validateRequest(callback);
+        validateCaseData(callback);
 
         Map<String, Object> caseData = caseDetails.getData();
 

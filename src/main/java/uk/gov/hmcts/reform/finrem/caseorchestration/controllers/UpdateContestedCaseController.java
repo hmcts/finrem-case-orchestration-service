@@ -72,7 +72,7 @@ public class UpdateContestedCaseController extends BaseController {
         CaseDetails caseDetails = ccdRequest.getCaseDetails();
         log.info("Received request to update Contested case with Case ID: {}", caseDetails.getId());
 
-        validateRequest(ccdRequest);
+        validateCaseData(ccdRequest);
 
         Map<String, Object> caseData = caseDetails.getData();
         updateDivorceDetailsForContestedCase(caseData);

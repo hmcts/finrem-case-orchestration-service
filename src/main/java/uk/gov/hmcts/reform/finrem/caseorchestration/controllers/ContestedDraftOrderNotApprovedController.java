@@ -61,7 +61,7 @@ public class ContestedDraftOrderNotApprovedController extends BaseController {
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to clear contested application not approved fields for Case ID: {}", caseDetails.getId());
 
-        validateRequest(callback);
+        validateCaseData(callback);
 
         Map<String, Object> caseData = caseDetails.getData();
         caseData.put(CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_TYPE, null);
@@ -88,7 +88,7 @@ public class ContestedDraftOrderNotApprovedController extends BaseController {
         Map<String, Object> caseData = caseDetails.getData();
 
         log.info("Received request to preview application not approved document for Case ID: {}", caseDetails.getId());
-        validateRequest(callback);
+        validateCaseData(callback);
 
         Map<String, Object> refusalOrder = contestedNotApprovedService.createRefusalOrder(authorisationToken, caseDetails);
         caseData.putAll(refusalOrder);
@@ -108,7 +108,7 @@ public class ContestedDraftOrderNotApprovedController extends BaseController {
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request for storing general order with Case ID: {}", caseDetails.getId());
-        validateRequest(callback);
+        validateCaseData(callback);
 
         Map<String, Object> caseData = contestedNotApprovedService.populateRefusalOrderCollection(caseDetails);
 
@@ -129,7 +129,7 @@ public class ContestedDraftOrderNotApprovedController extends BaseController {
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request for send refusal reason for case with Case ID: {}", caseDetails.getId());
 
-        validateRequest(callback);
+        validateCaseData(callback);
 
         Optional<CaseDocument> refusalReason = contestedNotApprovedService.getLatestRefusalReason(caseDetails);
 

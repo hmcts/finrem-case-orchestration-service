@@ -47,7 +47,7 @@ public class GeneralApplicationDirectionsController extends BaseController {
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to submit general application directions for Case ID: {}", caseDetails.getId());
-        validateRequest(callback);
+        validateCaseData(callback);
 
         List<String> errors = new ArrayList<>();
         try {
@@ -76,7 +76,7 @@ public class GeneralApplicationDirectionsController extends BaseController {
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to start general application directions for Case ID: {}", caseDetails.getId());
-        validateRequest(callback);
+        validateCaseData(callback);
 
         generalApplicationDirectionsService.startGeneralApplicationDirections(caseDetails);
 
@@ -99,7 +99,7 @@ public class GeneralApplicationDirectionsController extends BaseController {
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to submit for interim hearing for Case ID: {}", caseDetails.getId());
-        validateRequest(callback);
+        validateCaseData(callback);
 
         List<String> errors = new ArrayList<>();
         try {

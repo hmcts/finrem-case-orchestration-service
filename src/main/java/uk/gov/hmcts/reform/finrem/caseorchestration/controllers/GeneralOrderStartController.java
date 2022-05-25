@@ -54,7 +54,7 @@ public class GeneralOrderStartController extends BaseController {
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to clear general order fields for Case ID: {}", caseDetails.getId());
 
-        validateRequest(callback);
+        validateCaseData(callback);
 
         Map<String, Object> caseData = caseDetails.getData();
         caseData.put(GENERAL_ORDER_ADDRESS_TO, null);

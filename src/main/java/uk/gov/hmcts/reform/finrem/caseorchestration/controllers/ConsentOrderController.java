@@ -47,7 +47,7 @@ public class ConsentOrderController extends BaseController {
 
         log.info("Received request to update latest Consent Order with Case ID : {}", callbackRequest.getCaseDetails().getId());
 
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         CaseDocument caseDocument = consentOrderService.getLatestConsentOrderData(callbackRequest);
         caseData.put(LATEST_CONSENT_ORDER, caseDocument);

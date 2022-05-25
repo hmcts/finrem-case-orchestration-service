@@ -41,7 +41,7 @@ public class PBAValidateController extends BaseController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request to validate PBA number for Case ID: {}", caseDetails.getId());
 
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
 
         Map<String, Object> caseData = caseDetails.getData();
         if (isPBAPayment(caseData)) {

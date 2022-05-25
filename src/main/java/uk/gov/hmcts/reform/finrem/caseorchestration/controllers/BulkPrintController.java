@@ -46,7 +46,7 @@ public class BulkPrintController extends BaseController {
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request for Bulk Print for Case ID {}", caseDetails.getId());
-        validateRequest(callback);
+        validateCaseData(callback);
 
         consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, authorisationToken);
 

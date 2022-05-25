@@ -77,7 +77,7 @@ public class HearingOrderController extends BaseController {
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to store hearing order for case: {}", caseDetails.getId());
 
-        validateRequest(callback);
+        validateCaseData(callback);
 
         Map<String, Object> caseData = caseDetails.getData();
         hearingOrderService.convertToPdfAndStampAndStoreLatestDraftHearingOrder(caseDetails, authorisationToken);
@@ -98,7 +98,7 @@ public class HearingOrderController extends BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
         CaseDetails caseDetails = callback.getCaseDetails();
-        validateRequest(callback);
+        validateCaseData(callback);
 
         prepareFieldsForOrderApprovedCoverLetter(caseDetails, authorisationToken);
 
@@ -124,7 +124,7 @@ public class HearingOrderController extends BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
         CaseDetails caseDetails = callback.getCaseDetails();
-        validateRequest(callback);
+        validateCaseData(callback);
 
         Map<String, Object> caseData = caseDetails.getData();
 

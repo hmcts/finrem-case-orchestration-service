@@ -51,7 +51,7 @@ public class GeneralLetterController extends BaseController {
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to clear general letter fields for Case ID: {}", caseDetails.getId());
 
-        validateRequest(callback);
+        validateCaseData(callback);
 
         Map<String, Object> caseData = caseDetails.getData();
         caseData.put(GENERAL_LETTER_ADDRESS_TO, null);
@@ -77,7 +77,7 @@ public class GeneralLetterController extends BaseController {
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to preview general letter for Case ID: {}", caseDetails.getId());
-        validateRequest(callback);
+        validateCaseData(callback);
 
         if (generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails).isEmpty()) {
             generalLetterService.previewGeneralLetter(authorisationToken, caseDetails);
@@ -102,7 +102,7 @@ public class GeneralLetterController extends BaseController {
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request for generating general letter with Case ID: {}", caseDetails.getId());
-        validateRequest(callback);
+        validateCaseData(callback);
 
         if (generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails).isEmpty()) {
             generalLetterService.createGeneralLetter(authorisationToken, caseDetails);

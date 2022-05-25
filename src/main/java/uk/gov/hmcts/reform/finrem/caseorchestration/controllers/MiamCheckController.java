@@ -46,7 +46,7 @@ public class MiamCheckController extends BaseController {
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request for validating MIAM exemption for Case ID: {}", caseDetails.getId());
 
-        validateRequest(callback);
+        validateCaseData(callback);
         return ResponseEntity.ok(response(callback));
     }
 

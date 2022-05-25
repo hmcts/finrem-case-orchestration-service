@@ -64,7 +64,7 @@ public class NotificationsController extends BaseController {
         @RequestBody CallbackRequest callbackRequest) {
 
         log.info("Received request to send email for HWF Successful for Case ID: {}", callbackRequest.getCaseDetails().getId());
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
@@ -94,7 +94,7 @@ public class NotificationsController extends BaseController {
 
         log.info("Received request to notify solicitor for Judge successfully assigned to case for Case ID: {}",
             callbackRequest.getCaseDetails().getId());
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
@@ -125,7 +125,7 @@ public class NotificationsController extends BaseController {
 
         log.info("Received request to notify applicant and respondent for Judge successfully assigned to case for Case ID: {}",
             callbackRequest.getCaseDetails().getId());
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         paperNotificationService.printConsentInContestedAssignToJudgeConfirmationNotification(caseDetails, authToken);
@@ -142,7 +142,7 @@ public class NotificationsController extends BaseController {
         @RequestBody CallbackRequest callbackRequest) {
 
         log.info("Received request to send email for 'Consent Order Made' for Case ID: {}", callbackRequest.getCaseDetails().getId());
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
@@ -170,7 +170,7 @@ public class NotificationsController extends BaseController {
         @RequestBody CallbackRequest callbackRequest) {
         log.info("Received request to send email for 'Consent/Contest Order Not Approved' for Case ID: {}", callbackRequest.getCaseDetails().getId());
 
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
@@ -206,7 +206,7 @@ public class NotificationsController extends BaseController {
         @RequestBody CallbackRequest callbackRequest) {
 
         log.info("Received request to send email for 'Contested Consent Order Approved' for Case ID: {}", callbackRequest.getCaseDetails().getId());
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
@@ -230,7 +230,7 @@ public class NotificationsController extends BaseController {
             response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendContestedConsentOrderNotApprovedEmail(
         @RequestBody CallbackRequest callbackRequest) {
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
@@ -256,7 +256,7 @@ public class NotificationsController extends BaseController {
         @RequestBody CallbackRequest callbackRequest) {
 
         log.info("Received request to send email for General Order raised for Case ID: {}", callbackRequest.getCaseDetails().getId());
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
@@ -302,7 +302,7 @@ public class NotificationsController extends BaseController {
         @RequestBody CallbackRequest callbackRequest) {
 
         log.info("Received request to send email for 'Consent Order Available' for Case ID: {}", callbackRequest.getCaseDetails().getId());
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
@@ -330,7 +330,7 @@ public class NotificationsController extends BaseController {
         @RequestBody CallbackRequest callbackRequest) {
 
         log.info("Received request to send email for 'Prepare for Hearing' for Case ID: {}", callbackRequest.getCaseDetails().getId());
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
@@ -366,7 +366,7 @@ public class NotificationsController extends BaseController {
 
         log.info("Received request to send email for 'Prepare for Hearing (after order sent)' for Case ID: {}",
             callbackRequest.getCaseDetails().getId());
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
@@ -391,7 +391,7 @@ public class NotificationsController extends BaseController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendContestedApplicationIssuedEmail(
         @RequestBody CallbackRequest callbackRequest) {
         log.info("Received request to send email for Contested 'Application Issued' for Case ID: {}", callbackRequest.getCaseDetails().getId());
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
@@ -416,7 +416,7 @@ public class NotificationsController extends BaseController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendContestOrderApprovedEmail(
         @RequestBody CallbackRequest callbackRequest) {
 
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
@@ -446,7 +446,7 @@ public class NotificationsController extends BaseController {
         @RequestBody CallbackRequest callbackRequest) {
 
         log.info("Received request to send email for 'Solicitor To Draft Order' for Case ID: {}", callbackRequest.getCaseDetails().getId());
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
@@ -475,7 +475,7 @@ public class NotificationsController extends BaseController {
         @RequestBody CallbackRequest callbackRequest) {
 
         log.info("Received request to send general email for Case ID: {}", callbackRequest.getCaseDetails().getId());
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
 
         log.info("Sending general email notification");
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
@@ -500,7 +500,7 @@ public class NotificationsController extends BaseController {
         @RequestBody CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request to send Manual Payment Letter for Case ID: {}", caseDetails.getId());
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
 
         paperNotificationService.printManualPaymentNotification(caseDetails, authToken);
 
@@ -515,7 +515,7 @@ public class NotificationsController extends BaseController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendGeneralApplicationReferToJudgeEmail(
         @RequestBody CallbackRequest callbackRequest) {
         log.info("Received request to send general application refer to judge email for Case ID: {}", callbackRequest.getCaseDetails().getId());
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         notificationService.sendContestedGeneralApplicationReferToJudgeEmail(caseDetails);
@@ -531,7 +531,7 @@ public class NotificationsController extends BaseController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendGeneralApplicationOutcomeEmail(
         @RequestBody CallbackRequest callbackRequest) throws IOException {
         log.info("Received request to send General Application Outcome email for Case ID: {}", callbackRequest.getCaseDetails().getId());
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         notificationService.sendContestedGeneralApplicationOutcomeEmail(caseDetails);
@@ -546,7 +546,7 @@ public class NotificationsController extends BaseController {
             response = SubmittedCallbackResponse.class)})
     public ResponseEntity<SubmittedCallbackResponse> sendConsentOrderNotApprovedSentEmail(
         @RequestBody CallbackRequest callbackRequest) {
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
@@ -575,7 +575,7 @@ public class NotificationsController extends BaseController {
         @RequestBody CallbackRequest callbackRequest) {
 
         log.info("Received request to send transfer courts email for Case ID: {}", callbackRequest.getCaseDetails().getId());
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
@@ -597,7 +597,7 @@ public class NotificationsController extends BaseController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendInterimHearingNotification(
         @RequestBody CallbackRequest callbackRequest) {
         log.info("Received request to send general application refer to judge email for Case ID: {}", callbackRequest.getCaseDetails().getId());
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();

@@ -46,7 +46,7 @@ public class PaymentConfirmationController extends BaseController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request for PBA confirmation for Case ID: {}", caseDetails.getId());
 
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
 
         return ResponseEntity.ok(SubmittedCallbackResponse.builder()
             .confirmationBody(confirmationBody(caseDetails))

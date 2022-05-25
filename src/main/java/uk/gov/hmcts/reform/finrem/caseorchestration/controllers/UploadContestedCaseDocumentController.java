@@ -38,7 +38,7 @@ public class UploadContestedCaseDocumentController extends BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false)
         @RequestBody CallbackRequest ccdRequest) {
 
-        validateRequest(ccdRequest);
+        validateCaseData(ccdRequest);
 
         CaseDetails caseDetails = ccdRequest.getCaseDetails();
         Long caseId = caseDetails.getId();

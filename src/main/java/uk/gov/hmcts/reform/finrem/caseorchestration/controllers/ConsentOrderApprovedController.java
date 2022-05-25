@@ -73,7 +73,7 @@ public class ConsentOrderApprovedController extends BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
-        validateRequest(callback);
+        validateCaseData(callback);
         CaseDetails caseDetails = callback.getCaseDetails();
         CaseDocument latestConsentOrder = getLatestConsentOrder(caseDetails.getData());
 
@@ -104,7 +104,7 @@ public class ConsentOrderApprovedController extends BaseController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> consentInContestedConsentOrderApproved(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
-        validateRequest(callback);
+        validateCaseData(callback);
         CaseDetails caseDetails = callback.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 

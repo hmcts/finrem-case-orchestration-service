@@ -71,7 +71,7 @@ public class PBAPaymentController extends BaseController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request for PBA payment for consented for Case ID: {}", caseDetails.getId());
 
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
 
         final Map<String, Object> mapOfCaseData = caseDetails.getData();
         feeLookup(authToken, callbackRequest, mapOfCaseData);
@@ -105,7 +105,7 @@ public class PBAPaymentController extends BaseController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request for assign applicant solicitor for Case ID: {}", caseDetails.getId());
 
-        validateRequest(callbackRequest);
+        validateCaseData(callbackRequest);
         final Map<String, Object> mapOfCaseData = caseDetails.getData();
 
         if (featureToggleService.isAssignCaseAccessEnabled()) {

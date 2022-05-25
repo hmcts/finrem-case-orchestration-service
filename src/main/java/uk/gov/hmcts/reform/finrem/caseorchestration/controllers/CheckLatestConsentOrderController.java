@@ -41,7 +41,7 @@ public class CheckLatestConsentOrderController extends BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
-        validateRequest(callback);
+        validateCaseData(callback);
 
         Map<String, Object> caseData = callback.getCaseDetails().getData();
         long caseId = callback.getCaseDetails().getId();
