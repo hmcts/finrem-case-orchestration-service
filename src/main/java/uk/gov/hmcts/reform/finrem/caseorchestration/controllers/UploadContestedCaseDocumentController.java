@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import com.google.common.collect.ImmutableList;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -16,9 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadContestedCaseDocumentsService;
-
-import java.util.Map;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadCaseFilesAboutToSubmitHandler;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 
@@ -26,9 +23,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(value = "/case-orchestration")
-public class UploadContestedCaseDocumentController implements BaseController {
+public class UploadContestedCaseDocumentController extends BaseController {
 
-    private final UploadContestedCaseDocumentsService service;
+    private final UploadCaseFilesAboutToSubmitHandler uploadCaseFilesAboutToSubmitHandler;
 
     @PostMapping(path = "/upload-contested-case-documents", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles update Contested Case details and cleans up the data fields based on the options chosen for Contested Cases")
@@ -44,17 +41,13 @@ public class UploadContestedCaseDocumentController implements BaseController {
         validateCaseData(ccdRequest);
 
         CaseDetails caseDetails = ccdRequest.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
-        log.info("Received request to upload Contested case documents for Case ID: {}", caseDetails.getId());
+        Long caseId = caseDetails.getId();
+        log.info("Received request to upload Contested case documents for Case ID: {}", caseId);
 
-        caseData = service.filterDocumentsToRelevantParty(caseData);
-        log.info("Successfully filtered documents to relevant party for Case ID: {}", caseDetails.getId());
+        AboutToStartOrSubmitCallbackResponse response =
+            uploadCaseFilesAboutToSubmitHandler.handle(caseDetails.getData());
+        log.info("Successfully filtered documents to relevant party for Case ID: {}", caseId);
 
-        return ResponseEntity.ok(
-            AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseData)
-                .errors(ImmutableList.of())
-                .warnings(ImmutableList.of())
-                .build());
+        return ResponseEntity.ok(response);
     }
 }

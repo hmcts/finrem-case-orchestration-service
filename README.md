@@ -139,6 +139,17 @@ To run all mutation tests execute the following command:
 4. Start the app with AAT config using `./gradlew clean bootRunAat`
 5. Start the test with AAT config using `./gradlew clean functional`
 
+### Running additional tests in the Jenkins PR Pipeline
+
+1. Add one or more appropriate labels to your PR in GitHub. Valid labels are:
+
+- ```enable_security_scan```
+- ```enable_mutation_test```
+- ```enable_fortify_scan```
+- ```enable_all_tests_and_scans```
+
+2. Trigger a build of your PR in Jenkins.  Once the regular pipeline completes, the nightly pipeline will trigger to execute your chosen test(s).
+
 ## Versioning
 
 We use [SemVer](http://semver.org/) for versioning.

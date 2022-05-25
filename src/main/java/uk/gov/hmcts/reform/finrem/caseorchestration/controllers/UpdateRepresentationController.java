@@ -28,7 +28,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RestController
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-public class UpdateRepresentationController implements BaseController {
+public class UpdateRepresentationController extends BaseController {
 
     @Autowired
     private UpdateRepresentationService updateRepresentationService;

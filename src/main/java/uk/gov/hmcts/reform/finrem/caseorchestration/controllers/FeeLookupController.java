@@ -38,7 +38,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
 @SuppressWarnings("unchecked")
-public class FeeLookupController implements BaseController {
+public class FeeLookupController extends BaseController {
 
     private final FeeService feeService;
     private final CaseDataService caseDataService;

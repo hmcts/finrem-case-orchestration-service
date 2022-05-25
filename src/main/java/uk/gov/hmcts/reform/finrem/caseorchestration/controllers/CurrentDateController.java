@@ -27,7 +27,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @RestController
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-public class CurrentDateController implements BaseController {
+public class CurrentDateController extends BaseController {
 
     @PostMapping(path = "/fields/{field}/get-current-date", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Generates current date for the supplied field in the URL path. Serves as a callback from CCD")

@@ -42,7 +42,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 @RequestMapping(value = "/case-orchestration/notify")
 @RequiredArgsConstructor
-public class NotificationsController implements BaseController {
+public class NotificationsController extends BaseController {
 
     private final NotificationService notificationService;
     private final PaperNotificationService paperNotificationService;
