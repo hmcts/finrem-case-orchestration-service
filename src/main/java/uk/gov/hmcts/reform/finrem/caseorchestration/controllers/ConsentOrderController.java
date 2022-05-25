@@ -29,7 +29,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RestController
 @RequestMapping(value = "/case-orchestration")
 @RequiredArgsConstructor
-public class ConsentOrderController implements BaseController {
+public class ConsentOrderController extends BaseController {
 
     private final ConsentOrderService consentOrderService;
     private final IdamService idamService;
