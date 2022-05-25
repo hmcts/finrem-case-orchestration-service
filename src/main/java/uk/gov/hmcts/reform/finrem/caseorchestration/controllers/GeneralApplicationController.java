@@ -26,7 +26,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @RequestMapping(value = "/case-orchestration")
 @RequiredArgsConstructor
 @Slf4j
-public class GeneralApplicationController implements BaseController {
+public class GeneralApplicationController extends BaseController {
 
     private final GeneralApplicationService generalApplicationService;
 

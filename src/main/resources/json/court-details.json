@@ -553,7 +553,7 @@
   },
   "FR_bedfordshireList_5": {
     "courtName": "Ipswich County Court and Family Hearing Centre",
-    "courtAddress": "The Law courts, Bishopgate, Norwich, NR3 1UR",
+    "courtAddress": "8 Arcade Street , Ipswich, IP1 1EJ",
     "phoneNumber": "0344 892 4000",
     "email": "FRC.NES.BCH@justice.gov.uk"
   },
@@ -612,8 +612,8 @@
     "email": "FRCThamesValley@justice.gov.uk"
   },
   "FR_thamesvalleyList_4": {
-    "courtName": "Slough County Court and Family Court",
-    "courtAddress": "Administration Centre, Reading County Court, 160-163 Friar Stret, Reading, RG1 1HE",
+    "courtName": "Slough County Court",
+    "courtAddress": "The Law Courts, Windsor Road, Slough, SL1 2HE",
     "phoneNumber": "01865 264 200",
     "email": "FRCThamesValley@justice.gov.uk"
   },

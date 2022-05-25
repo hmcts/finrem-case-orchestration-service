@@ -41,7 +41,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RestController
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-public class UpdateContestedCaseController implements BaseController {
+public class UpdateContestedCaseController extends BaseController {
 
     private static final String DIVORCE_STAGE_REACHED = "divorceStageReached";
     private static final String DIVORCE_UPLOAD_EVIDENCE_2 = "divorceUploadEvidence2";

@@ -47,7 +47,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequiredArgsConstructor
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-public class CaseDataController implements BaseController {
+public class CaseDataController extends BaseController {
 
     private static final String CHANGE_ORGANISATION_REQUEST = "changeOrganisationRequestField";
     private final UpdateSolicitorDetailsService solicitorService;
