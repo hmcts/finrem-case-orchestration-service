@@ -417,5 +417,7 @@
   "100000_A Client Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/apply-noc-decision_POST":"ignore",
   "100000_A Client Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/notify/notice-of-change_POST":"ignore",
   "90033_Loosely Scoped Cookie_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/apply-noc-decision_POST":"ignore",
-  "100000_A Server Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/notify/notice-of-change_POST": "ignore"
+  "100000_A Server Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/notify/notice-of-change_POST": "ignore",
+  "100000_A Server Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/notify/update-frc_POST": "ignore",
+  "100001_Unexpected Content-Type was returned_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/notify/update-frc_POST": "ignore"
 }
