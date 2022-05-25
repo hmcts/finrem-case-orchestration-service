@@ -40,7 +40,7 @@ def populateLabelStates(labels) {
     // Get labels from GitHub repo
     def repoLabels = new GithubAPI(this).getLabelsbyPattern(env.BRANCH_NAME, "enable_")
 
-    // Check existence of provided label, and store in labelStates map
+    // Check existence of provided label, and store in states map
     def getLabelState = { label ->
         if (label == "atLeastOneEnabled") {
             return
@@ -52,9 +52,9 @@ def populateLabelStates(labels) {
     // Iterate over labels List to build labelStates map
     labels.each { label -> getLabelState(label) }
 
-    // Hardcode enable_all label
-    if (!states.containsKey("enable_all")) {
-        getLabelState("enable_all")
+    // Hardcode enable_all_tests_and_scans label
+    if (!states.containsKey("enable_all_tests_and_scans")) {
+        getLabelState("enable_all_tests_and_scans")
     }
 
     // Check if at least one label is true
