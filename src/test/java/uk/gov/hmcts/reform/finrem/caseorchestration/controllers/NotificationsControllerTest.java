@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
+
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -57,7 +59,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @MockBean private CaseDataService caseDataService;
     @MockBean private TransferCourtService transferCourtService;
     @MockBean private FeatureToggleService featureToggleService;
-
 
     @Test
     public void sendHwfSuccessfulConfirmationEmailIfDigitalCase() {
@@ -910,6 +911,45 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         verify(nocLetterNotificationService, times(1))
             .sendNoticeOfChangeLetters(any(CaseDetails.class), any(CaseDetails.class), anyString());
+    }
+
+    @Test
+    public void givenUpdateFrc_whenSendEmail_thenNotificationServiceCalledThreeTimes() throws JsonProcessingException {
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class))).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+
+        notificationsController.sendUpdateFrcNotifications(AUTH_TOKEN, buildCallbackRequest());
+        verify(notificationService, times(1)).sendUpdateFrcInformationEmailToAppSolicitor(any());
+        verify(notificationService, times(1)).sendUpdateFrcInformationEmailToRespondentSolicitor(any());
+        verify(notificationService, times(1)).sendUpdateFrcInformationEmailToCourt(any());
+        verify(paperNotificationService, times(1)).printUpdateFrcInformationNotification(any(), any());
+    }
+
+    @Test
+    public void givenUpdateFrc_whenAppSolNotAgreeToReceiveEmails_thenNotificationServiceCalledTwice() throws JsonProcessingException {
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class))).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+
+        notificationsController.sendUpdateFrcNotifications(AUTH_TOKEN, buildCallbackRequest());
+        verify(notificationService, never()).sendUpdateFrcInformationEmailToAppSolicitor(any());
+        verify(notificationService, times(1)).sendUpdateFrcInformationEmailToRespondentSolicitor(any());
+        verify(notificationService, times(1)).sendUpdateFrcInformationEmailToCourt(any());
+        verify(paperNotificationService, times(1)).printUpdateFrcInformationNotification(any(), any());
+    }
+
+    @Test
+    public void givenUpdateFrc_whenRespSolNotAgreeToReceiveEmails_thenNotificationServiceCalledTwice() throws JsonProcessingException {
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class))).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+
+        notificationsController.sendUpdateFrcNotifications(AUTH_TOKEN, buildCallbackRequest());
+        verify(notificationService, times(1)).sendUpdateFrcInformationEmailToAppSolicitor(any());
+        verify(notificationService, never()).sendUpdateFrcInformationEmailToRespondentSolicitor(any());
+        verify(notificationService, times(1)).sendUpdateFrcInformationEmailToCourt(any());
+        verify(paperNotificationService, times(1)).printUpdateFrcInformationNotification(any(), any());
     }
 
     private CallbackRequest createCallbackRequestWithFinalOrder() {

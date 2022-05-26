@@ -39,7 +39,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequestMapping(value = "/case-orchestration")
 @RequiredArgsConstructor
 @Slf4j
-public class HearingOrderController implements BaseController {
+public class HearingOrderController extends BaseController {
 
     private final HearingOrderService hearingOrderService;
     private final ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;

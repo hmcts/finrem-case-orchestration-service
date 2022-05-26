@@ -24,7 +24,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
 @SuppressWarnings("unchecked")
-public class RemoveCaseDataStateController implements BaseController {
+public class RemoveCaseDataStateController extends BaseController {
 
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/remove-case-data-state", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)

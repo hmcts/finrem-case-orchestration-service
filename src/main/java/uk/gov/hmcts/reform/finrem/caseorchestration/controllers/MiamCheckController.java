@@ -27,7 +27,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @RestController
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-public class MiamCheckController implements BaseController {
+public class MiamCheckController extends BaseController {
 
     @Autowired
     private MiamCheckService service;

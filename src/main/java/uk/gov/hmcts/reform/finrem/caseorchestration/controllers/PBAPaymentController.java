@@ -51,7 +51,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
 @SuppressWarnings("unchecked")
-public class PBAPaymentController implements BaseController {
+public class PBAPaymentController extends BaseController {
 
     private final FeeService feeService;
     private final PBAPaymentService pbaPaymentService;

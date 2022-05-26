@@ -26,7 +26,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(value = "/case-orchestration")
-public class ShareDocumentsController implements BaseController {
+public class ShareDocumentsController extends BaseController {
 
     private final ShareDocumentsService shareDocumentsService;
 
