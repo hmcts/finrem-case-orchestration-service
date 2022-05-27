@@ -25,7 +25,7 @@ public class RespondentAddresseeGenerator implements AddresseeGenerator {
     private final CaseDataService caseDataService;
     private final DocumentHelper documentHelper;
 
-    public Addressee generate(CaseDetails caseDetails, ChangedRepresentative changedRepresentative) {
+    public Addressee generate(CaseDetails caseDetails, ChangedRepresentative changedRepresentative, String party) {
         boolean isConsentedApplication = caseDataService.isConsentedApplication(caseDetails);
         log.info("In the generate addressee method for Respondent for caseType isConsented {}", isConsentedApplication);
         return Addressee.builder()

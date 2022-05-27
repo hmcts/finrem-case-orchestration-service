@@ -23,7 +23,7 @@ public class ApplicantAddresseeGenerator implements AddresseeGenerator {
     private final CaseDataService caseDataService;
     private final DocumentHelper documentHelper;
 
-    public Addressee generate(CaseDetails caseDetails, ChangedRepresentative changedRepresentative) {
+    public Addressee generate(CaseDetails caseDetails, ChangedRepresentative changedRepresentative, String party) {
         log.info("In the generate addressee method for Applicant");
         return Addressee.builder()
             .name(caseDataService.buildFullName(caseDetails.getData(), APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME))

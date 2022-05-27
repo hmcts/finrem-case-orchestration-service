@@ -15,6 +15,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationSer
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateSolicitorDetailsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.NoticeOfChangeService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 @TestConfiguration
 @ComponentScan(basePackages = {"uk.gov.hmcts.reform.finrem.caseorchestration.service.noc",
@@ -48,6 +51,12 @@ public class NocTestConfig {
     private TransferCourtService transferCourtService;
     @MockBean
     private FeatureToggleService featureToggleService;
+    @MockBean
+    private NoticeOfChangeService noticeOfChangeService;
+    @MockBean
+    private UpdateRepresentationWorkflowService updateRepresentationWorkflowService;
+    @MockBean
+    private UpdateRepresentationService updateRepresentationService;
 
 }
 

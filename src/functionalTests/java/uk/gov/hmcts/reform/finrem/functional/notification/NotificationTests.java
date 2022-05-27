@@ -109,20 +109,6 @@ public class NotificationTests extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyNotifyContestedNoticeOfChangeIsOkay() {
-
-        utils.validatePostSuccess(contestDraftOrderApiUri,
-            "notice-of-change-notification.json", contestedDir);
-    }
-
-    @Test
-    public void verifyNotifyConsentedNoticeOfChangeIsOkay() {
-
-        utils.validatePostSuccess(contestDraftOrderApiUri,
-            "notice-of-change-notification.json", contestedDir);
-    }
-
-    @Test
     public void verifyNotifyUpdateFrcInfoIsOkay() {
         utils.validatePostSuccess(updateFrcInfoUri, "update-frc-info.json", contestedDir);
     }

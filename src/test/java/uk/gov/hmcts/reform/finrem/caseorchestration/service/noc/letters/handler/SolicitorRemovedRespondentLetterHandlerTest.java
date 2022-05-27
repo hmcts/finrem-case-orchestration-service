@@ -8,6 +8,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.LitigantSolicitorRemovedNocDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.SolicitorRemovedLetterDetailsGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler.litigant.respondent.SolicitorRemovedRespondentLetterHandler;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -17,7 +18,8 @@ public class SolicitorRemovedRespondentLetterHandlerTest extends LetterHandlerTe
     SolicitorRemovedRespondentLetterHandler solicitorRemovedRespondentLetterHandler;
 
     public SolicitorRemovedRespondentLetterHandlerTest() {
-        super(Mockito.mock(LitigantSolicitorRemovedNocDocumentService.class), NoticeType.REMOVE,
+        super(Mockito.mock(SolicitorRemovedLetterDetailsGenerator.class), Mockito.mock(LitigantSolicitorRemovedNocDocumentService.class),
+            NoticeType.REMOVE,
             DocumentHelper.PaperNotificationRecipient.RESPONDENT);
     }
 

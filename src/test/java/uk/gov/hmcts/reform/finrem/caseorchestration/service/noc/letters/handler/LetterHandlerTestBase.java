@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLett
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.NocDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.NocLetterDetailsGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.AbstractLetterDetailsGenerator;
 
 import java.util.UUID;
 
@@ -28,11 +28,11 @@ public abstract class LetterHandlerTestBase {
     protected static final String AUTH_TOKEN = "AUTH_TOKEN";
     protected static final String DOCUMENT_UUID = "dd153d4c-d2bd-11ec-9d64-0242ac120002";
 
+    private AbstractLetterDetailsGenerator letterDetailsGenerator;
     protected final NocDocumentService nocDocumentService;
     private final NoticeType noticeType;
     private final DocumentHelper.PaperNotificationRecipient recipient;
-    @Mock
-    NocLetterDetailsGenerator nocLetterDetailsGenerator;
+
     @Mock
     BulkPrintService bulkPrintService;
 
@@ -43,11 +43,11 @@ public abstract class LetterHandlerTestBase {
     @Captor
     ArgumentCaptor<RepresentationUpdate> representationUpdateArgumentCaptor;
     @Captor
-    ArgumentCaptor<NoticeType> noticeTypeArgumentCaptor;
-    @Captor
     ArgumentCaptor<DocumentHelper.PaperNotificationRecipient> paperNotificationRecipientArgumentCaptor;
 
-    public LetterHandlerTestBase(NocDocumentService nocDocumentService, NoticeType noticeType, DocumentHelper.PaperNotificationRecipient recipient) {
+    public LetterHandlerTestBase(AbstractLetterDetailsGenerator letterDetailsGenerator, NocDocumentService nocDocumentService, NoticeType noticeType,
+                                 DocumentHelper.PaperNotificationRecipient recipient) {
+        this.letterDetailsGenerator = letterDetailsGenerator;
         this.nocDocumentService = nocDocumentService;
         this.noticeType = noticeType;
         this.recipient = recipient;
@@ -78,7 +78,7 @@ public abstract class LetterHandlerTestBase {
         getLetterHandler().handle(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
         assertThat(paperNotificationRecipientArgumentCaptor.getValue(), is(recipient));
-        assertThat(noticeTypeArgumentCaptor.getValue(), is(noticeType));
+
         if (recipient != DocumentHelper.PaperNotificationRecipient.SOLICITOR) {
             assertThat(representationUpdateArgumentCaptor.getValue().getParty(),
                 is(recipient == DocumentHelper.PaperNotificationRecipient.APPLICANT ? "Applicant" : "Respondent"));
@@ -110,9 +110,9 @@ public abstract class LetterHandlerTestBase {
 
     protected NoticeOfChangeLetterDetails setUpNoticeOfChangeLetterDetailsInteraction() {
         NoticeOfChangeLetterDetails noticeOfChangeLetterDetails = NoticeOfChangeLetterDetails.builder().build();
-        when(nocLetterDetailsGenerator.generate(caseDetailsArgumentCaptor.capture(), caseDetailsBeforeArgumentCaptor.capture(),
-            representationUpdateArgumentCaptor.capture(), paperNotificationRecipientArgumentCaptor.capture(),
-            noticeTypeArgumentCaptor.capture())).thenReturn(noticeOfChangeLetterDetails);
+        when(letterDetailsGenerator.generate(caseDetailsArgumentCaptor.capture(), caseDetailsBeforeArgumentCaptor.capture(),
+            representationUpdateArgumentCaptor.capture(), paperNotificationRecipientArgumentCaptor.capture())).thenReturn(
+            noticeOfChangeLetterDetails);
         return noticeOfChangeLetterDetails;
     }
 

@@ -62,7 +62,8 @@ public class RespondentAddresseeGeneratorTest {
             CONTESTED_FULL_NAME);
         when(documentHelper.formatAddressForLetterPrinting(RESPONDENT_ADDRESS_VALUE)).thenReturn(FORMATTED_ADDRESS);
 
-        Addressee addressee = respondentAddresseeGenerator.generate(caseDetails, ChangedRepresentative.builder().build());
+        Addressee addressee = respondentAddresseeGenerator.generate(caseDetails,
+            ChangedRepresentative.builder().build(), "respondent");
 
         assertThat(addressee.getName(), is(CONTESTED_FULL_NAME));
         assertThat(addressee.getFormattedAddress(), is(FORMATTED_ADDRESS));
@@ -77,7 +78,9 @@ public class RespondentAddresseeGeneratorTest {
             CONSESNED_FULL_NAME);
         when(documentHelper.formatAddressForLetterPrinting(RESPONDENT_ADDRESS_VALUE)).thenReturn(FORMATTED_ADDRESS);
 
-        Addressee addressee = respondentAddresseeGenerator.generate(caseDetails, ChangedRepresentative.builder().build());
+        Addressee addressee = respondentAddresseeGenerator.generate(caseDetails,
+            ChangedRepresentative.builder().build(),
+            "respondent");
 
         assertThat(addressee.getName(), is(CONSESNED_FULL_NAME));
         assertThat(addressee.getFormattedAddress(), is(FORMATTED_ADDRESS));
