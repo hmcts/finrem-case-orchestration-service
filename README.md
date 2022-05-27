@@ -60,11 +60,10 @@ are also made available so there is no dependency on AAT.
 On both scenarios an automated process will generate and import the definitions directly from your checked out
 `finrem-ccd-definitions` project, which must be present on the same directory level as the `finrem-case-orchestration` folder.
 
-In case you are not logged in you must run the below commands 
+In case you are not logged in you must run the below command
 (only the first time you are spinning up the service) 
 to download the service images from Azure Registry.
 ```bash
-az acr login --name hmctspublic --subscription DCD-CNP-Prod
 az acr login --name hmctsprivate --subscription DCD-CNP-Prod
 ```
 #### Gotchas on macOS
