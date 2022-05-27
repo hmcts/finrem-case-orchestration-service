@@ -69,16 +69,16 @@ public class SendOrderContestedSubmittedHandler implements CallbackHandler {
         SendOrderPostStateOption sendOrderPostStateOption =
             getSendOrderPostStateOption(sendOrderPostStateOptionCcdField);
 
-        CaseDetails updatedCaseDetails = callbackRequest.getCaseDetails();
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
         if (PREPARE_FOR_HEARING.equals(sendOrderPostStateOption)) {
-            updatedCaseDetails =
-                ccdService.executeCcdEventOnCase(callbackRequest, EventType.PREPARE_FOR_HEARING.getCcdType());
+            caseDetails =
+                ccdService.executeCcdEventOnCase(caseDetails, EventType.PREPARE_FOR_HEARING.getCcdType());
         } else if (CLOSE.equals(sendOrderPostStateOption)) {
-            updatedCaseDetails =
-                ccdService.executeCcdEventOnCase(callbackRequest, EventType.CLOSE.getCcdType());
+            caseDetails =
+                ccdService.executeCcdEventOnCase(caseDetails, EventType.CLOSE.getCcdType());
         }
 
-        callbackRequest.setCaseDetails(updatedCaseDetails);
+        callbackRequest.setCaseDetails(caseDetails);
     }
 
     private void sendNotifications(CallbackRequest callbackRequest) {

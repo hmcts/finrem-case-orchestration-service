@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
@@ -23,23 +22,22 @@ public class CcdService {
     private final CoreCaseDataApi coreCaseDataApi;
     private final SystemUserService systemUserService;
 
-    private Map<String, Map<String, Object>> supplementaryDataRequestMap = new HashMap<>() {
+    private final Map<String, Map<String, Object>> supplementaryDataRequestMap = new HashMap<>() {
         {
             put("$set", hmctsServiceIdMap);
         }
     };
 
-    private Map<String, Object> hmctsServiceIdMap = new HashMap<>() {
+    private final Map<String, Object> hmctsServiceIdMap = new HashMap<>() {
         {
             put("HMCTSServiceId", "BBA3");
         }
     };
 
-    public CaseDetails executeCcdEventOnCase(CallbackRequest callbackRequest,
+    public CaseDetails executeCcdEventOnCase(CaseDetails caseDetails,
                                              String eventType) {
 
 
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Long caseId = caseDetails.getId();
         String caseTypeId = caseDetails.getCaseTypeId();
 

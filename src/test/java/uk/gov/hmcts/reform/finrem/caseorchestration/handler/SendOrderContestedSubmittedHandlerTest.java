@@ -37,6 +37,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RunWith(MockitoJUnitRunner.class)
 public class SendOrderContestedSubmittedHandlerTest {
 
+    public static final String PREPARE_FOR_HEARING_STATE = "prepareForHearing";
+    public static final String CLOSE_STATE = "close";
     @Mock
     private CaseDataService caseDataService;
     @Mock
@@ -60,32 +62,42 @@ public class SendOrderContestedSubmittedHandlerTest {
     @Test
     public void givenPrepareForHearingPostStateOption_WhenHandle_ThenRunPrepareForHearingEvent() {
         CallbackRequest callbackRequest = createCallbackRequestWithFinalOrder();
-        callbackRequest.getCaseDetails().getData().put(SEND_ORDER_POST_STATE_OPTION_FIELD,
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        caseDetails.getData().put(SEND_ORDER_POST_STATE_OPTION_FIELD,
             SendOrderPostStateOption.PREPARE_FOR_HEARING.getCcdType());
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+        when(ccdService.executeCcdEventOnCase(caseDetails, EventType.PREPARE_FOR_HEARING.getCcdType()))
+            .thenReturn(CaseDetails.builder().state(PREPARE_FOR_HEARING_STATE)
+                .data(caseDetails.getData())
+                .build());
 
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(ccdService).executeCcdEventOnCase(any(), EventType.PREPARE_FOR_HEARING.getCcdType());
+        verify(ccdService).executeCcdEventOnCase(caseDetails, EventType.PREPARE_FOR_HEARING.getCcdType());
     }
 
     @Test
     public void givenClosePostStateOption_WhenHandle_ThenRunPrepareForHearingEvent() {
         CallbackRequest callbackRequest = createCallbackRequestWithFinalOrder();
-        callbackRequest.getCaseDetails().getData().put(SEND_ORDER_POST_STATE_OPTION_FIELD,
-            SendOrderPostStateOption.PREPARE_FOR_HEARING.getCcdType());
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        caseDetails.getData().put(SEND_ORDER_POST_STATE_OPTION_FIELD,
+            SendOrderPostStateOption.CLOSE.getCcdType());
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+        when(ccdService.executeCcdEventOnCase(caseDetails, EventType.CLOSE.getCcdType()))
+            .thenReturn(CaseDetails.builder().state(CLOSE_STATE)
+                .data(caseDetails.getData())
+                .build());
 
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(ccdService).executeCcdEventOnCase(any(), EventType.CLOSE.getCcdType());
+        verify(ccdService).executeCcdEventOnCase(caseDetails, EventType.CLOSE.getCcdType());
     }
 
     @Test
     public void givenOrderSentPostStateOption_WhenHandle_ThenDoNotRunUpdateCaseAndStateIsOrderSent() {
         CallbackRequest callbackRequest = createCallbackRequestWithFinalOrder();
         callbackRequest.getCaseDetails().getData().put(SEND_ORDER_POST_STATE_OPTION_FIELD,
-            SendOrderPostStateOption.PREPARE_FOR_HEARING.getCcdType());
+            SendOrderPostStateOption.ORDER_SENT.getCcdType());
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
 
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
@@ -141,7 +153,7 @@ public class SendOrderContestedSubmittedHandlerTest {
 
     private CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(123)).data(caseData).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
         return CallbackRequest.builder().eventId("SomeEventId").caseDetails(caseDetails).build();
     }
 
