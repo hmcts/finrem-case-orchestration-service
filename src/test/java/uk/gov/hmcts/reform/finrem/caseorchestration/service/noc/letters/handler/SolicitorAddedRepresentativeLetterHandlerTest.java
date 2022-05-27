@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.SolicitorNocDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.SolicitorAddedLetterDetailsGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler.representative.SolicitorAddedRepresentativeLetterHandler;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -26,7 +27,8 @@ public class SolicitorAddedRepresentativeLetterHandlerTest extends LetterHandler
     SolicitorAddedRepresentativeLetterHandler solicitorAddedRepresentativeLetterHandler;
 
     public SolicitorAddedRepresentativeLetterHandlerTest() {
-        super(Mockito.mock(SolicitorNocDocumentService.class), NoticeType.ADD, DocumentHelper.PaperNotificationRecipient.SOLICITOR);
+        super(Mockito.mock(SolicitorAddedLetterDetailsGenerator.class), Mockito.mock(SolicitorNocDocumentService.class), NoticeType.ADD,
+            DocumentHelper.PaperNotificationRecipient.SOLICITOR);
     }
 
     @Before

@@ -1,9 +1,10 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
+package uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.controller.helper;
 
+import org.hamcrest.MatcherAssert;
 import org.junit.Test;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedCourtHelper;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ALDERSHOT;
@@ -874,6 +875,6 @@ public class ConsentedCourtHelperTest {
                                             String courtListName, String court, String expectedValue) {
         details = getCaseDetailsWithAllocatedValues(region, subRegionListName, subRegion, courtListName,
             court);
-        assertThat(ConsentedCourtHelper.getSelectedCourt(details), is(expectedValue));
+        MatcherAssert.assertThat(ConsentedCourtHelper.getSelectedCourt(details), is(expectedValue));
     }
 }

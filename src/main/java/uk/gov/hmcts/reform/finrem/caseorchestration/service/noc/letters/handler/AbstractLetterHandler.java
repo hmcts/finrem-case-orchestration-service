@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLett
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.NocDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.NocLetterDetailsGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.AbstractLetterDetailsGenerator;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -33,7 +33,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 @Slf4j
 public abstract class AbstractLetterHandler implements LetterHandler {
 
-    protected final NocLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator;
+    protected final AbstractLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator;
     protected final NocDocumentService nocDocumentService;
     protected final BulkPrintService bulkPrintService;
 
@@ -43,7 +43,7 @@ public abstract class AbstractLetterHandler implements LetterHandler {
     public static final String COR_RESPONDENT = "Respondent";
 
     public AbstractLetterHandler(
-        NocLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator, NocDocumentService nocDocumentService,
+        AbstractLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator, NocDocumentService nocDocumentService,
         BulkPrintService bulkPrintService,
         NoticeType noticeType, DocumentHelper.PaperNotificationRecipient recipient) {
 
@@ -66,42 +66,33 @@ public abstract class AbstractLetterHandler implements LetterHandler {
         });
     }
 
-    private Optional<NoticeOfChangeLetterDetails> getNoticeOfChangeLetterDetails(CaseDetails caseDetails, CaseDetails caseDetailsBefore) {
+    private Optional<NoticeOfChangeLetterDetails> getNoticeOfChangeLetterDetails(CaseDetails caseDetails,
+                                                                                 CaseDetails caseDetailsBefore) {
 
         RepresentationUpdate representationUpdate = getLatestRepresentationUpdate(caseDetails);
         if (representationUpdate != null) {
             log.info("Got the representationUpdate");
-            ChangedRepresentative changedRepresentative = getChangedRepresentative(representationUpdate);
-            if (recipient == DocumentHelper.PaperNotificationRecipient.SOLICITOR || areOrganisationDetailsPopulated(changedRepresentative)) {
-                CaseDetails caseDetailsToUse = noticeType == NoticeType.ADD ? caseDetailsBefore : caseDetails;
-                if (shouldALetterBeSent(representationUpdate, caseDetailsToUse)) {
-                    log.info("The recipient is a {} with an address", recipient);
-                    return
-                        Optional.ofNullable(
-                            noticeOfChangeLetterDetailsGenerator.generate(caseDetails, caseDetailsBefore, representationUpdate, recipient,
-                                noticeType));
-                }
+            CaseDetails caseDetailsToUse = noticeType == NoticeType.ADD ? caseDetailsBefore : caseDetails;
+            CaseDetails otherCaseDetails = noticeType == NoticeType.ADD ? caseDetails : caseDetailsBefore;
+            if (changedRepresentativeIsPresent(representationUpdate)
+                && shouldALetterBeSent(representationUpdate, caseDetailsToUse, otherCaseDetails)) {
+                log.info("The recipient is a {} with an address", recipient);
+                return
+                    Optional.ofNullable(
+                        noticeOfChangeLetterDetailsGenerator.generate(caseDetails, caseDetailsBefore, representationUpdate, recipient));
             }
         }
         return Optional.empty();
     }
 
-    protected boolean areOrganisationDetailsPopulated(ChangedRepresentative changedRepresentative) {
-        log.info("Check if the organisation details are populated for Changed Representative");
-        return changedRepresentative != null && changedRepresentative.getOrganisation() != null
-            && changedRepresentative.getOrganisation().getOrganisationID() != null;
-    }
-
-    protected ChangedRepresentative getChangedRepresentative(RepresentationUpdate representationUpdate) {
-        return noticeType == NoticeType.ADD ? representationUpdate.getAdded() : representationUpdate.getRemoved();
-    }
-
     protected RepresentationUpdate getLatestRepresentationUpdate(CaseDetails caseDetails) {
         log.info("Get the latest Representation Update");
-        List<Element<RepresentationUpdate>> representationUpdates = new ObjectMapper().registerModule(new JavaTimeModule())
+        List<Element<RepresentationUpdate>> representationUpdates = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
             .convertValue(caseDetails.getData().get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {
             });
-        return Collections.max(representationUpdates, Comparator.comparing(representationUpdate -> representationUpdate.getValue().getDate()))
+        return Collections.max(representationUpdates, Comparator.comparing(
+            representationUpdate -> representationUpdate.getValue().getDate()))
             .getValue();
     }
 
@@ -120,5 +111,17 @@ public abstract class AbstractLetterHandler implements LetterHandler {
             && StringUtils.isNotBlank((String) addressMap.get(POSTCODE));
     }
 
-    protected abstract boolean shouldALetterBeSent(RepresentationUpdate representationUpdate, CaseDetails caseDetailsToUse);
+    private boolean changedRepresentativeIsPresent(RepresentationUpdate representationUpdate) {
+        ChangedRepresentative changedRepresentative = getChangedRepresentative(representationUpdate);
+        return Optional.ofNullable(changedRepresentative).isPresent()
+            && StringUtils.isNotBlank(changedRepresentative.getName());
+    }
+
+    private ChangedRepresentative getChangedRepresentative(RepresentationUpdate representationUpdate) {
+        return noticeType == NoticeType.ADD ? representationUpdate.getAdded() : representationUpdate.getRemoved();
+    }
+
+    protected abstract boolean shouldALetterBeSent(RepresentationUpdate representationUpdate,
+                                                   CaseDetails caseDetailsToUse,
+                                                   CaseDetails otherCaseDetails);
 }

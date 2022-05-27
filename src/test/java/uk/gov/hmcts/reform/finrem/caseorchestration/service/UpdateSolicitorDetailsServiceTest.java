@@ -38,7 +38,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_DX_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_PHONE;
@@ -183,7 +182,6 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
 
         assertEquals(caseData.get(CONTESTED_SOLICITOR_NAME), "Sir Solicitor");
         assertEquals(caseData.get(CONTESTED_SOLICITOR_EMAIL), "sirsolicitor1@gmail.com");
-        assertEquals(caseData.get(CONTESTED_SOLICITOR_FIRM), "FRApplicantSolicitorFirm");
     }
 
     @Test
@@ -210,7 +208,6 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
 
         assertEquals(caseData.get(CONSENTED_SOLICITOR_NAME), "Sir Solicitor");
         assertEquals(caseData.get(SOLICITOR_EMAIL), "sirsolicitor1@gmail.com");
-        assertEquals(caseData.get(CONSENTED_SOLICITOR_FIRM), "FRApplicantSolicitorFirm");
     }
 
     @Test
@@ -237,7 +234,6 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
 
         assertEquals(caseData.get(RESP_SOLICITOR_NAME), "Sir Solicitor");
         assertEquals(caseData.get(RESP_SOLICITOR_EMAIL), "sirsolicitor1@gmail.com");
-        assertEquals(caseData.get(RESP_SOLICITOR_FIRM), "FRRespondentSolicitorFirm");
 
     }
 
