@@ -17,7 +17,7 @@
       "respondentAddress": {
         "County": "",
         "Country": "",
-        "PostCode": "",
+        "PostCode": "HA5 1BJ",
         "PostTown": "SRIKALAHASTI",
         "AddressLine1": "House no: 6-354-2, Gandhi Street, Srikalahasti, Chittor District",
         "AddressLine2": "Srikalahasti, Chittor District",
@@ -35,6 +35,14 @@
       "solicitorReference": "LL01",
       "divorceStageReached": "Decree Nisi",
       "nottinghamCourtList": "FR_s_NottinghamList_2",
+      "appRespondentRep": "Yes",
+      "RespondentOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "testID",
+          "OrganisationName": "respfirmname"
+        },
+        "OrgPolicyCaseAssignedRole": "[RESPSOLICITOR]"
+      },
       "reasonForLocalCourt": "dfff",
       "uploadScanned4AForm": {
         "document_url": "http://dm-store:8080/documents/728daa26-507e-4c53-8c5b-a86d14d7aa82",

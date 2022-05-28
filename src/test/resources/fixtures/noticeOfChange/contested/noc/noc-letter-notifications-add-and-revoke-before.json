@@ -8,8 +8,16 @@
     "case_data": {
       "helpWithFeesQuestion": "No",
       "applicantLName": "Guy",
+      "ApplicantOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "A31PTVA",
+          "OrganisationName": "FRApplicantSolicitorFirmRemoved"
+        },
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
+      },
       "dateOfMarriage": "1111-01-01",
       "mortgageDetail": "test",
+      "applicantRepresented": "Yes",
       "netValueOfHome": "dfdf",
       "applicantFMName": "Poor",
       "dateOfSepration": "1111-01-01",
@@ -32,7 +40,7 @@
       "respondentAddress": {
         "County": "",
         "Country": "",
-        "PostCode": "",
+        "PostCode": "SE12 9SE",
         "PostTown": "SRIKALAHASTI",
         "AddressLine1": "House no: 6-354-2, Gandhi Street, Srikalahasti, Chittor District",
         "AddressLine2": "Srikalahasti, Chittor District",

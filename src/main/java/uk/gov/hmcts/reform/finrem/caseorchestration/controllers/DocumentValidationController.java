@@ -32,7 +32,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @RestController
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-public class DocumentValidationController implements BaseController {
+public class DocumentValidationController extends BaseController {
 
     @Autowired
     private DocumentValidationService service;

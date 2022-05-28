@@ -23,6 +23,7 @@ plugins {
     id 'org.owasp.dependencycheck' version '6.2.2'
     id 'org.sonarqube' version '3.0'
     id 'org.springframework.boot' version '2.3.11.RELEASE'
+    id 'com.github.hmcts.rse-cft-lib' version '0.15.99'
 }
 
 apply plugin: 'au.com.dius.pact'
@@ -97,6 +98,7 @@ sourceSets {
 configurations {
     functionalImplementation.extendsFrom testImplementation
     functionalRuntimeOnly.extendsFrom testRuntimeOnly
+    cftlibRuntimeClasspath.extendsFrom runtimeClasspath
 }
 
 def versions = [
@@ -123,7 +125,7 @@ def versions = [
         serviceTokenGenerator: '3.1.1',
         springfoxSwagger     : '2.9.2',
         sonarPitest          : '0.5',
-        tomcat               : '9.0.58',
+        tomcat               : '9.0.63',
         wiremock             : '2.27.2',
         apacheLogging        : '2.17.1'
 ]
@@ -440,5 +442,31 @@ task fortifyScan(type: JavaExec)  {
     mainClass.set("uk.gov.hmcts.fortifyclient.FortifyClientMainApp")
     classpath += sourceSets.test.runtimeClasspath
     jvmArgs = ['--add-opens=java.base/java.lang.reflect=ALL-UNNAMED']
+}
+
+task buildCCDXlsx(type: Exec) {
+    group 'ccd tasks'
+    commandLine './bin/build-finrem-xlxs-definitions.sh'
+}
+
+bootWithCCD {
+    dependsOn(buildCCDXlsx)
+
+    doFirst() {
+        project.file('./.aat-env').readLines().each() {
+            def index = it.indexOf("=")
+            def key = it.substring(0, index)
+            def value = it.substring(index + 1)
+            environment(key, value)
+        }
+    }
+
+    //AAT or Local (IDAM and S2S Simulators)
+    authMode = uk.gov.hmcts.rse.AuthMode.AAT
+
+    environment("FEATURE_MANAGE_BUNDLE", "true");
+    environment("FEATURE_RESPONDENT_JOURNEY", "true")
+    environment("FEATURE_ASSIGN_CASE_ACCESS", "false")
+    environment("FEATURE_USE_USER_TOKEN", "true")
 }
 

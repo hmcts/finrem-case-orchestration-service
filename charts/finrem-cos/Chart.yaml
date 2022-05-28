@@ -1,7 +1,7 @@
 name: finrem-cos
 apiVersion: v2
 home: https://github.com/hmcts/finrem-case-orchestration-service
-version: 0.2.11
+version: 0.2.12
 description: Financial Remedy Case Orchestration Service
 maintainers:
   - name: HMCTS Financial Remedy Team

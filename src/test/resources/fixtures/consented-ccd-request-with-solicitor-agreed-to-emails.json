@@ -20,6 +20,14 @@
         "document_filename": "file1",
         "document_binary_url": "http://file1.binary"
       },
+      "ApplicantOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "testID",
+          "OrganisationName": "testName"
+        },
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
+      },
+      "applicantRepresented": "Yes",
       "d81Applicant": {
         "document_url": "http://file1",
         "document_filename": "file1",
@@ -53,7 +61,7 @@
       ],
       "respondentEmail": "test@test.com",
       "respondentPhone": "9963472494",
-      "appRespondentRep": "No",
+      "appRespondentRep": "Yes",
       "consentOrderText": {
         "document_url": "http://file1",
         "document_filename": "file1",
@@ -130,6 +138,13 @@
         "document_url": "http://file2",
         "document_filename": "file2",
         "document_binary_url": "http://file2.binary"
+      },
+      "RespondentOrganisationPolicy": {
+        "OrgPolicyCaseAssignedRole": "[RESPSOLICITOR]",
+        "Organisation": {
+          "OrganisationID": "A31PTVU",
+          "OrganisationName": "FRRespondentSolicitorFirm"
+        }
       },
       "divorceDecreeAbsoluteDate": "2010-01-01",
       "orderForChildrenQuestion1": "Yes",
@@ -355,6 +370,14 @@
       "authorisation3": "2010-01-01",
       "solicitorEmail": "test@admin.com",
       "solicitorPhone": "1234",
+      "ApplicantOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "A31PTVA",
+          "OrganisationName": "FRApplicantSolicitorFirm"
+        },
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
+      },
+      "applicantRepresented": "Yes",
       "applicantFMName": "Poor",
       "authorisation2b": "test",
       "otherCollection": [

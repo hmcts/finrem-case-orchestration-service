@@ -27,7 +27,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @RestController
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-public class GeneralOrderController implements BaseController {
+public class GeneralOrderController extends BaseController {
     @Autowired
     private GeneralOrderService service;
 

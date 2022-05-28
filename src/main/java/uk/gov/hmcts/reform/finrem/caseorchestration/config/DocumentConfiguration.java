@@ -63,5 +63,8 @@ public class DocumentConfiguration {
     private String nocLetterNotificationLitigantSolicitorAddedFileName;
     private String nocLetterNotificationLitigantSolicitorRevokedTemplate;
     private String nocLetterNotificationLitigantSolicitorRevokedFileName;
-
+    private String updateFRCInformationSolicitorTemplate;
+    private String updateFRCInformationSolicitorFilename;
+    private String updateFRCInformationLitigantTemplate;
+    private String updateFRCInformationLitigantFilename;
 }

@@ -24,7 +24,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_DX_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_PHONE;
@@ -107,8 +106,6 @@ public class UpdateSolicitorDetailsService {
         caseData.put(isConsented ? CONSENTED_SOLICITOR_NAME : CONTESTED_SOLICITOR_NAME,
             addedSolicitor.getName());
         caseData.put(isConsented ? SOLICITOR_EMAIL : CONTESTED_SOLICITOR_EMAIL, addedSolicitor.getEmail());
-        caseData.put(isConsented ? CONSENTED_SOLICITOR_FIRM : CONTESTED_SOLICITOR_FIRM,
-            addedSolicitor.getOrganisation().getOrganisationName());
     }
 
     private void removeAppSolFields(Map<String, Object> caseData,
@@ -123,7 +120,6 @@ public class UpdateSolicitorDetailsService {
                                      ChangedRepresentative addedSolicitor) {
         caseData.put(RESP_SOLICITOR_NAME, addedSolicitor.getName());
         caseData.put(RESP_SOLICITOR_EMAIL, addedSolicitor.getEmail());
-        caseData.put(RESP_SOLICITOR_FIRM, addedSolicitor.getOrganisation().getOrganisationName());
     }
 
     private void removeRespSolFields(Map<String, Object> caseData) {
