@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationContactInformation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 
@@ -18,15 +19,19 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_DX_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_FIRM;
@@ -36,6 +41,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IS_ADMIN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_DX_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
@@ -85,6 +91,9 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
     @Test
     public void shouldSuccessfullySetApplicantSolicitorOrganisationDetailsContested() {
         CaseDetails caseDetails = buildCaseDetails();
+        caseDetails.getData().put(IS_ADMIN, NO_VALUE);
+        caseDetails.getData().put(APPLICANT_ORGANISATION_POLICY,
+            OrganisationPolicy.builder().orgPolicyCaseAssignedRole(APP_SOLICITOR_POLICY).build());
 
         updateSolicitorDetailsService.setApplicantSolicitorOrganisationDetails(AUTH_TOKEN, caseDetails);
 
@@ -99,6 +108,8 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
         Assert.assertEquals(addressMap.get("PostCode"), organisationContactInformation.getPostcode());
         Assert.assertEquals(caseDetails.getData().get(CONTESTED_SOLICITOR_FIRM), TEST_SOLICITOR_NAME);
         Assert.assertEquals(caseDetails.getData().get(SOLICITOR_REFERENCE), TEST_SOLICITOR_REFERENCE);
+        Assert.assertEquals(getOrganisationPolicy(caseDetails).getOrganisation().getOrganisationID(),
+            TEST_SOLICITOR_REFERENCE);
     }
 
 
@@ -127,6 +138,9 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
     @Test
     public void shouldSuccessfullySetApplicantSolicitorOrganisationDetailsConsented() {
         CaseDetails caseDetails = buildCaseDetails();
+        caseDetails.getData().put(IS_ADMIN, NO_VALUE);
+        caseDetails.getData().put(APPLICANT_ORGANISATION_POLICY,
+            OrganisationPolicy.builder().orgPolicyCaseAssignedRole(APP_SOLICITOR_POLICY).build());
 
         when(caseDataService.isContestedApplication(caseDetails)).thenReturn(false);
 
@@ -143,6 +157,33 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
         Assert.assertEquals(addressMap.get("PostCode"), organisationContactInformation.getPostcode());
         Assert.assertEquals(caseDetails.getData().get(CONSENTED_SOLICITOR_FIRM), TEST_SOLICITOR_NAME);
         Assert.assertEquals(caseDetails.getData().get(SOLICITOR_REFERENCE), TEST_SOLICITOR_REFERENCE);
+        Assert.assertEquals(getOrganisationPolicy(caseDetails).getOrganisation().getOrganisationID(),
+            TEST_SOLICITOR_REFERENCE);
+    }
+
+    @Test
+    public void shouldSuccessfullySetApplicantSolicitorOrganisationDetailsConsentedAsAdmin() {
+        CaseDetails caseDetails = buildCaseDetails();
+        caseDetails.getData().put(IS_ADMIN, YES_VALUE);
+        caseDetails.getData().put(APPLICANT_ORGANISATION_POLICY,
+            OrganisationPolicy.builder().orgPolicyCaseAssignedRole(APP_SOLICITOR_POLICY).build());
+
+        when(caseDataService.isContestedApplication(caseDetails)).thenReturn(false);
+
+        updateSolicitorDetailsService.setApplicantSolicitorOrganisationDetails(AUTH_TOKEN, caseDetails);
+
+        Map<String, Object> addressMap = (Map<String, Object>) caseDetails.getData().get(CONSENTED_SOLICITOR_ADDRESS);
+
+        Assert.assertEquals(addressMap.get("AddressLine1"), organisationContactInformation.getAddressLine1());
+        Assert.assertEquals(addressMap.get("AddressLine2"), organisationContactInformation.getAddressLine2());
+        Assert.assertEquals(addressMap.get("AddressLine3"), organisationContactInformation.getAddressLine3());
+        Assert.assertEquals(addressMap.get("County"), organisationContactInformation.getCounty());
+        Assert.assertEquals(addressMap.get("Country"), organisationContactInformation.getCountry());
+        Assert.assertEquals(addressMap.get("PostTown"), organisationContactInformation.getTownCity());
+        Assert.assertEquals(addressMap.get("PostCode"), organisationContactInformation.getPostcode());
+        Assert.assertEquals(caseDetails.getData().get(CONSENTED_SOLICITOR_FIRM), TEST_SOLICITOR_NAME);
+        Assert.assertEquals(caseDetails.getData().get(SOLICITOR_REFERENCE), TEST_SOLICITOR_REFERENCE);
+        assertNull(getOrganisationPolicy(caseDetails).getOrganisation());
     }
 
     @Test
@@ -287,5 +328,9 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
         assertFalse(caseData.containsKey(RESP_SOLICITOR_PHONE));
         assertFalse(caseData.containsKey(CONSENTED_SOLICITOR_DX_NUMBER));
         assertFalse(caseData.containsKey(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED));
+    }
+
+    private OrganisationPolicy getOrganisationPolicy(CaseDetails caseDetails) {
+        return mapper.convertValue(caseDetails.getData().get(APPLICANT_ORGANISATION_POLICY), OrganisationPolicy.class);
     }
 }
