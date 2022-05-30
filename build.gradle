@@ -461,7 +461,7 @@ bootWithCCD {
     }
 
     //AAT or Local (IDAM and S2S Simulators)
-    authMode = AuthMode.AAT
+    authMode = uk.gov.hmcts.rse.AuthMode.AAT
 
     environment("FEATURE_MANAGE_BUNDLE", "true")
     environment("FEATURE_RESPONDENT_JOURNEY", "true")
