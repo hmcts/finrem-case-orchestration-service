@@ -20,16 +20,10 @@ public class IdamAuthService {
     private final IdamAuthApi idamAuthApi;
     private final OAuth2Configuration oAuth2Configuration;
 
-    private final AuthTokenGenerator authTokenGenerator;
     private static final String COURT_ADMIN_ROLE = "caseworker-divorce-financialremedy-courtadmin";
 
     public String getAccessToken(String username, String password) {
         return BEARER_AUTH_TYPE + " " + idamAuthApi.generateOpenIdToken(buildTokenRequest(username, password)).accessToken;
-    }
-
-    public boolean isUserCourtAdmin(String authorisation, String userId) {
-        UserDetails user = getUserByUserId(authorisation, userId);
-        return user.getRoles().contains(COURT_ADMIN_ROLE);
     }
 
     public UserDetails getUserByUserId(String authorisation, String userId) {
@@ -38,10 +32,6 @@ public class IdamAuthService {
 
     public UserInfo getUserInfo(String bearerToken) {
         return idamAuthApi.retrieveUserInfo(bearerToken);
-    }
-
-    public String getServiceAuthorization() {
-        return authTokenGenerator.generate();
     }
 
     private TokenRequest buildTokenRequest(String username, String password) {

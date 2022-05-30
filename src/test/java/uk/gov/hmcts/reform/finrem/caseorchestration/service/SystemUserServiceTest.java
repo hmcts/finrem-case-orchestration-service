@@ -1,0 +1,64 @@
+package uk.gov.hmcts.reform.finrem.caseorchestration.service;
+
+import javax.management.relation.Role;
+
+import java.util.Collections;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.SystemUpdateUserConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.wrapper.IdamToken;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
+
+@RunWith(MockitoJUnitRunner.class)
+public class SystemUserServiceTest {
+
+    @Mock
+    private SystemUpdateUserConfiguration systemUpdateUserConfiguration;
+    @Mock
+    private IdamAuthService idamAuthService;
+
+    @Mock
+    private AuthTokenGenerator authTokenGenerator;
+    @InjectMocks
+    private SystemUserService systemUserService;
+
+    @Test
+    public void givenSysUserConfig_WhenGetSysUserToken_ThenReturnToken(){
+        when(systemUpdateUserConfiguration.getUserName()).thenReturn("username");
+        when(systemUpdateUserConfiguration.getPassword()).thenReturn("password");
+
+        systemUserService.getSysUserToken();
+
+        verify(idamAuthService).getAccessToken("username", "password");
+    }
+
+    @Test
+    public void givenSysUserConfig_WhenGetIdamToken_ThenReturnToken(){
+        when(systemUpdateUserConfiguration.getUserName()).thenReturn("username");
+        when(systemUpdateUserConfiguration.getPassword()).thenReturn("password");
+        when(idamAuthService.getAccessToken("username", "password"))
+            .thenReturn("token");
+        when(idamAuthService.getUserInfo("token"))
+            .thenReturn(UserInfo.builder()
+                .uid("uid")
+                .sub("sub@mail.com")
+                .roles(Collections.singletonList("role"))
+                .build());
+
+        IdamToken idamToken = systemUserService.getIdamToken();
+
+        assertThat(idamToken.getIdamOauth2Token()).isEqualTo("token");
+        assertThat(idamToken.getUserId()).isEqualTo("uid");
+        assertThat(idamToken.getEmail()).isEqualTo("sub@mail.com");
+    }
+}

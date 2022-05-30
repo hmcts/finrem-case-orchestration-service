@@ -41,10 +41,10 @@ public class CcdService {
         Long caseId = caseDetails.getId();
         String caseTypeId = caseDetails.getCaseTypeId();
 
-        log.info("UpdateCase for caseId {} and eventType {}", caseId, eventType);
+        log.info("Executing eventType {} on caseId {}", eventType, caseId);
 
         StartEventResponse startEventResponse =
-            startCaseForCaseworker(systemUserService.getIdamToken(), eventType, caseTypeId);
+            startCaseForCaseworker(systemUserService.getIdamToken(), eventType, caseTypeId, caseDetails.getId());
 
         CaseDataContent caseDataContent =
             getCaseDataContent(caseDetails.getData(), startEventResponse, eventType);
@@ -52,13 +52,14 @@ public class CcdService {
         return submitEventForCaseworker(systemUserService.getIdamToken(), caseId, caseDataContent, caseTypeId);
     }
 
-    private StartEventResponse startCaseForCaseworker(IdamToken idamToken, String eventId, String caseTypeId) {
-        return coreCaseDataApi.startForCaseworker(
+    private StartEventResponse startCaseForCaseworker(IdamToken idamToken, String eventId, String caseTypeId, Long caseId) {
+        return coreCaseDataApi.startEventForCaseWorker(
             idamToken.getIdamOauth2Token(),
             idamToken.getServiceAuthorization(),
             idamToken.getUserId(),
             "DIVORCE",
             caseTypeId,
+            caseId.toString(),
             eventId);
     }
 
@@ -75,7 +76,7 @@ public class CcdService {
             caseDataContent);
     }
 
-    public CaseDataContent getCaseDataContent(Map caseData,
+    private CaseDataContent getCaseDataContent(Object caseData,
                                               StartEventResponse startEventResponse,
                                               String summary) {
         return CaseDataContent.builder()

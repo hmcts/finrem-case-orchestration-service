@@ -61,11 +61,10 @@ public class SendOrderContestedSubmittedHandlerTest {
 
     @Test
     public void givenPrepareForHearingPostStateOption_WhenHandle_ThenRunPrepareForHearingEvent() {
-        CallbackRequest callbackRequest = createCallbackRequestWithFinalOrder();
+        CallbackRequest callbackRequest = buildCallbackRequest();
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         caseDetails.getData().put(SEND_ORDER_POST_STATE_OPTION_FIELD,
             SendOrderPostStateOption.PREPARE_FOR_HEARING.getCcdType());
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
         when(ccdService.executeCcdEventOnCase(caseDetails, EventType.PREPARE_FOR_HEARING.getCcdType()))
             .thenReturn(CaseDetails.builder().state(PREPARE_FOR_HEARING_STATE)
                 .data(caseDetails.getData())
@@ -78,11 +77,10 @@ public class SendOrderContestedSubmittedHandlerTest {
 
     @Test
     public void givenClosePostStateOption_WhenHandle_ThenRunPrepareForHearingEvent() {
-        CallbackRequest callbackRequest = createCallbackRequestWithFinalOrder();
+        CallbackRequest callbackRequest = buildCallbackRequest();
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         caseDetails.getData().put(SEND_ORDER_POST_STATE_OPTION_FIELD,
             SendOrderPostStateOption.CLOSE.getCcdType());
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
         when(ccdService.executeCcdEventOnCase(caseDetails, EventType.CLOSE.getCcdType()))
             .thenReturn(CaseDetails.builder().state(CLOSE_STATE)
                 .data(caseDetails.getData())
@@ -95,10 +93,9 @@ public class SendOrderContestedSubmittedHandlerTest {
 
     @Test
     public void givenOrderSentPostStateOption_WhenHandle_ThenDoNotRunUpdateCaseAndStateIsOrderSent() {
-        CallbackRequest callbackRequest = createCallbackRequestWithFinalOrder();
+        CallbackRequest callbackRequest = buildCallbackRequest();
         callbackRequest.getCaseDetails().getData().put(SEND_ORDER_POST_STATE_OPTION_FIELD,
             SendOrderPostStateOption.ORDER_SENT.getCcdType());
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
 
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
