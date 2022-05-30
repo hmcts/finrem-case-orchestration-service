@@ -89,7 +89,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
     public void givenACcdCallbackConsentedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanNotHandle() {
         assertThat(sendOrderContestedAboutToSubmitHandler
                 .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.SEND_ORDER),
-            is(true));
+            is(false));
     }
 
     @Test
