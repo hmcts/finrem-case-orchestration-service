@@ -75,14 +75,6 @@ public class CaseDataController extends BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build());
     }
 
-    private void setDefaultValues(CallbackRequest callbackRequest, String authToken) {
-        validateCaseData(callbackRequest);
-        final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        setData(authToken, caseData);
-        setOrganisationPolicy(callbackRequest.getCaseDetails());
-        setApplicantSolicitorOrganisationDetails(callbackRequest.getCaseDetails(), authToken);
-    }
-
     @PostMapping(path = "/contested/set-frc-details",
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
@@ -160,6 +152,15 @@ public class CaseDataController extends BaseController {
         addOrganisationPoliciesIfPartiesNotRepresented(caseData);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
+
+    private void setDefaultValues(CallbackRequest callbackRequest, String authToken) {
+        validateCaseData(callbackRequest);
+        final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        setData(authToken, caseData);
+        setOrganisationPolicy(callbackRequest.getCaseDetails());
+        setApplicantSolicitorOrganisationDetails(callbackRequest.getCaseDetails(), authToken);
+    }
+
 
     private void addDefaultChangeOrganisationRequest(Map<String, Object> caseData) {
         ChangeOrganisationRequest defaultChangeRequest = ChangeOrganisationRequest

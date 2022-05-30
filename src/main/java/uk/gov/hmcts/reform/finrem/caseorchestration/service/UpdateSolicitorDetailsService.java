@@ -7,10 +7,14 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
@@ -22,6 +26,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IS_ADMIN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_DX_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
@@ -30,6 +35,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
 @Service
 @Slf4j
@@ -52,8 +58,25 @@ public class UpdateSolicitorDetailsService {
                 caseDetails.getData().put(CONSENTED_SOLICITOR_FIRM, organisationsResponse.getName());
             }
 
+            if (nullToEmpty(caseDetails.getData().get(IS_ADMIN)).equalsIgnoreCase(NO_VALUE)) {
+                OrganisationPolicy applicantOrgPolicy = getApplicantOrganisationPolicy(caseDetails);
+                applicantOrgPolicy.setOrganisation(getApplicantSolicitorOrganisation(organisationsResponse));
+                caseDetails.getData().put(APPLICANT_ORGANISATION_POLICY, applicantOrgPolicy);
+            }
             caseDetails.getData().put(SOLICITOR_REFERENCE, organisationsResponse.getOrganisationIdentifier());
         }
+    }
+
+    private OrganisationPolicy getApplicantOrganisationPolicy(CaseDetails caseDetails) {
+        return objectMapper.convertValue(caseDetails.getData().get(APPLICANT_ORGANISATION_POLICY),
+            OrganisationPolicy.class);
+    }
+
+    private Organisation getApplicantSolicitorOrganisation(OrganisationsResponse organisationsResponse) {
+        return Organisation
+            .builder()
+            .organisationID(organisationsResponse.getOrganisationIdentifier())
+            .build();
     }
 
     public Map<String, Object> convertOrganisationAddressToSolicitorAddress(String organisationId) {
@@ -61,7 +84,6 @@ public class UpdateSolicitorDetailsService {
         return this.convertOrganisationAddressToSolicitorAddress(organisationResponse);
 
     }
-
 
     public Map<String, Object> convertOrganisationAddressToSolicitorAddress(OrganisationsResponse organisationData) {
         return objectMapper.convertValue(Address.builder()
