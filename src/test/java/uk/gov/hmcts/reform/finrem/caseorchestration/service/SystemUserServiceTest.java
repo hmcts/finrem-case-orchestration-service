@@ -23,7 +23,6 @@ public class SystemUserServiceTest {
     private SystemUpdateUserConfiguration systemUpdateUserConfiguration;
     @Mock
     private IdamAuthService idamAuthService;
-
     @Mock
     private AuthTokenGenerator authTokenGenerator;
     @InjectMocks
