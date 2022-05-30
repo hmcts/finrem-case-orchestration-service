@@ -8,7 +8,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandler;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType.getCaseType;
@@ -41,8 +43,10 @@ public class CallbackDispatchService {
                     callbackHandler.handle(callbackRequest, userAuthorisation);
 
                 callbackResponse.setData(handlerCallbackResponse.getData());
-                callbackResponse.getErrors().addAll(handlerCallbackResponse.getErrors());
-                callbackResponse.getWarnings().addAll(handlerCallbackResponse.getWarnings());
+                List<String> errors = Optional.ofNullable(handlerCallbackResponse.getErrors()).orElse(Collections.EMPTY_LIST);
+                callbackResponse.getErrors().addAll(errors);
+                List<String> warnings = Optional.ofNullable(handlerCallbackResponse.getWarnings()).orElse(Collections.EMPTY_LIST);
+                callbackResponse.getWarnings().addAll(warnings);
             }
         }
 

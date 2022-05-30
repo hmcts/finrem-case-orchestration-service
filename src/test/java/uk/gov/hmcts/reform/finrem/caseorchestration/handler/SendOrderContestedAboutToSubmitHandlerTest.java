@@ -76,12 +76,19 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
     @Captor
     private ArgumentCaptor<List<BulkPrintDocument>> bulkPrintArgumentCaptor;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     public void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanHandle() {
         assertThat(sendOrderContestedAboutToSubmitHandler
                 .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.SEND_ORDER),
+            is(true));
+    }
+
+    @Test
+    public void givenACcdCallbackConsentedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanNotHandle() {
+        assertThat(sendOrderContestedAboutToSubmitHandler
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.SEND_ORDER),
             is(true));
     }
 

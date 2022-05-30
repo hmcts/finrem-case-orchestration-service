@@ -60,6 +60,13 @@ public class SendOrderContestedSubmittedHandlerTest {
     }
 
     @Test
+    public void givenACcdCallbackConsentedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanNotHandle() {
+        assertThat(sendOrderContestedSubmittedHandler
+                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.SEND_ORDER),
+            is(false));
+    }
+
+    @Test
     public void givenPrepareForHearingPostStateOption_WhenHandle_ThenRunPrepareForHearingEvent() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
