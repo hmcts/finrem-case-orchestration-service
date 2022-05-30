@@ -10,8 +10,7 @@ import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.wrapper.IdamToken;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collections;
 
 @Service
 @Slf4j
@@ -21,18 +20,6 @@ public class CcdService {
     public static final String CCD_EVENT_DESCRIPTION = "Updated case state through financial remedy services";
     private final CoreCaseDataApi coreCaseDataApi;
     private final SystemUserService systemUserService;
-
-    private final Map<String, Map<String, Object>> supplementaryDataRequestMap = new HashMap<>() {
-        {
-            put("$set", hmctsServiceIdMap);
-        }
-    };
-
-    private final Map<String, Object> hmctsServiceIdMap = new HashMap<>() {
-        {
-            put("HMCTSServiceId", "BBA3");
-        }
-    };
 
     public CaseDetails executeCcdEventOnCase(CaseDetails caseDetails,
                                              String eventType) {
@@ -77,8 +64,8 @@ public class CcdService {
     }
 
     private CaseDataContent getCaseDataContent(Object caseData,
-                                              StartEventResponse startEventResponse,
-                                              String summary) {
+                                               StartEventResponse startEventResponse,
+                                               String summary) {
         return CaseDataContent.builder()
             .eventToken(startEventResponse.getToken())
             .event(Event.builder()
@@ -87,7 +74,8 @@ public class CcdService {
                 .description(CCD_EVENT_DESCRIPTION)
                 .build())
             .data(caseData)
-            .supplementaryDataRequest(supplementaryDataRequestMap)
+            .supplementaryDataRequest(
+                Collections.singletonMap("$set", Collections.singletonMap("HMCTSServiceId", "BBA3")))
             .build();
     }
 }
