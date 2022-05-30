@@ -1,14 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import javax.management.relation.Role;
-
-import java.util.Collections;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -18,6 +9,12 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.SystemUpdateUserConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.wrapper.IdamToken;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
+
+import java.util.Collections;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SystemUserServiceTest {
@@ -33,7 +30,7 @@ public class SystemUserServiceTest {
     private SystemUserService systemUserService;
 
     @Test
-    public void givenSysUserConfig_WhenGetSysUserToken_ThenReturnToken(){
+    public void givenSysUserConfig_WhenGetSysUserToken_ThenReturnToken() {
         when(systemUpdateUserConfiguration.getUserName()).thenReturn("username");
         when(systemUpdateUserConfiguration.getPassword()).thenReturn("password");
 
@@ -43,7 +40,7 @@ public class SystemUserServiceTest {
     }
 
     @Test
-    public void givenSysUserConfig_WhenGetIdamToken_ThenReturnToken(){
+    public void givenSysUserConfig_WhenGetIdamToken_ThenReturnToken() {
         when(systemUpdateUserConfiguration.getUserName()).thenReturn("username");
         when(systemUpdateUserConfiguration.getPassword()).thenReturn("password");
         when(idamAuthService.getAccessToken("username", "password"))
