@@ -26,10 +26,12 @@ public class SystemUserService {
 
     public IdamToken getIdamToken() {
 
-        UserInfo user = idamAuthService.getUserInfo(getSysUserToken());
+        String sysUserToken = getSysUserToken();
+
+        UserInfo user = idamAuthService.getUserInfo(sysUserToken);
 
         return IdamToken.builder()
-            .idamOauth2Token(getSysUserToken())
+            .idamOauth2Token(sysUserToken)
             .serviceAuthorization(getServiceAuthorization())
             .userId(user.getUid())
             .email(user.getSub())
