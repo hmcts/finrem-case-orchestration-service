@@ -304,6 +304,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
         verify(additionalHearingDocumentService).sendAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
     }
+    
     @Test
     public void givenHadPreviousHearing_thenPrintAdditionalHearingDocumentsForApplicantSolicitor() throws Exception {
         when(notificationService.shouldEmailContestedAppSolicitor(any())).thenReturn(false);
