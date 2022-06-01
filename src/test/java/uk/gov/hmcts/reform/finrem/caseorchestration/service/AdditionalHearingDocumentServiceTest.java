@@ -63,6 +63,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
 
     @MockBean GenericDocumentService genericDocumentService;
     @MockBean BulkPrintService bulkPrintService;
+    @MockBean NotificationService notificationService;
 
     @Before
     public void setUp() {
@@ -377,5 +378,57 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         hearingOrderCollectionList.add(hearingOrderCollectionData);
 
         return hearingOrderCollectionList;
+    }
+
+    @Test
+    public void printAdditionalHearingDocuments_forBothSolicitors() throws JsonProcessingException {
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
+        additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
+
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+        when(notificationService.shouldEmailContestedAppSolicitor(any())).thenReturn(false);
+        additionalHearingDocumentService.bulkPrintAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
+
+        verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
+    }
+
+    @Test
+    public void printAdditionalHearingDocuments_forNeitherSolicitor() throws JsonProcessingException {
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
+        additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
+
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(notificationService.shouldEmailContestedAppSolicitor(any())).thenReturn(true);
+        additionalHearingDocumentService.bulkPrintAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
+
+        verify(bulkPrintService, never()).printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService, never()).printApplicantDocuments(any(), any(), any());
+    }
+
+    @Test
+    public void printAdditionalHearingDocuments_forRespondentSolicitor() throws JsonProcessingException {
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
+        additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
+
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+        when(notificationService.shouldEmailContestedAppSolicitor(any())).thenReturn(true);
+        additionalHearingDocumentService.bulkPrintAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
+
+        verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService, never()).printApplicantDocuments(any(), any(), any());
+    }
+
+    @Test
+    public void printAdditionalHearingDocuments_forContestedAppSolicitor() throws JsonProcessingException {
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
+        additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
+
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(notificationService.shouldEmailContestedAppSolicitor(any())).thenReturn(false);
+        additionalHearingDocumentService.bulkPrintAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
+
+        verify(bulkPrintService, never()).printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
     }
 }
