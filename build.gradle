@@ -366,6 +366,10 @@ pitest {
 compileJava.dependsOn(processResources)
 build.dependsOn jacocoTestReport
 
+compileJava {
+    options.compilerArgs << '-parameters'
+}
+
 bootJar {
     manifest {
         attributes 'Implementation-Title': project.name,
