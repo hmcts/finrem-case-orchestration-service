@@ -53,6 +53,8 @@ public class AdditionalHearingDocumentService {
     private final ObjectMapper objectMapper;
     private final BulkPrintService bulkPrintService;
     private final CaseDataService caseDataService;
+    private final NotificationService notificationService;
+
 
     public void createAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) throws JsonProcessingException {
         Map<String, Object> caseData = caseDetails.getData();
@@ -191,7 +193,11 @@ public class AdditionalHearingDocumentService {
         List<BulkPrintDocument> document = singletonList(documentHelper.getBulkPrintDocumentFromCaseDocument(
                 additionalHearingDocument.getAdditionalHearingDocument().getDocument()));
 
-        bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, document);
-        bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, document);
+        if (!notificationService.shouldEmailContestedAppSolicitor(caseDetails.getData())) {
+            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, document);
+        }
+        if (!notificationService.shouldEmailRespondentSolicitor(caseDetails.getData())) {
+            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, document);
+        }
     }
 }
