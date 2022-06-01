@@ -41,10 +41,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_JUDGE_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
 
 public class NotificationServiceTest extends BaseServiceTest {
 
@@ -908,6 +911,45 @@ public class NotificationServiceTest extends BaseServiceTest {
         caseData.put(CONTESTED_RESPONDENT_REPRESENTED, YES_VALUE);
 
         assertFalse(notificationService.shouldEmailRespondentSolicitor(caseData));
+    }
+
+    @Test
+    public void shouldEmailContestedAppSolicitor_shouldReturnTrue() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(PAPER_APPLICATION, NO_VALUE);
+        caseData.put(APPLICANT_REPRESENTED, YES_VALUE);
+        caseData.put(CONTESTED_SOLICITOR_EMAIL, TEST_USER_EMAIL);
+
+        assertTrue(notificationService.shouldEmailContestedAppSolicitor(caseData));
+    }
+
+    @Test
+    public void shouldEmailContestedAppSolicitor_paperApplication() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(PAPER_APPLICATION, YES_VALUE);
+        caseData.put(APPLICANT_REPRESENTED, YES_VALUE);
+        caseData.put(CONTESTED_SOLICITOR_EMAIL, TEST_USER_EMAIL);
+
+        assertFalse(notificationService.shouldEmailContestedAppSolicitor(caseData));
+    }
+
+    @Test
+    public void shouldEmailContestedAppSolicitor_notRepresented() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(PAPER_APPLICATION, NO_VALUE);
+        caseData.put(APPLICANT_REPRESENTED, NO_VALUE);
+        caseData.put(CONTESTED_SOLICITOR_EMAIL, TEST_USER_EMAIL);
+
+        assertFalse(notificationService.shouldEmailContestedAppSolicitor(caseData));
+    }
+
+    @Test
+    public void shouldEmailContestedAppSolicitor_emailNotProvided() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(PAPER_APPLICATION, NO_VALUE);
+        caseData.put(APPLICANT_REPRESENTED, YES_VALUE);
+
+        assertFalse(notificationService.shouldEmailContestedAppSolicitor(caseData));
     }
 
     @Test
