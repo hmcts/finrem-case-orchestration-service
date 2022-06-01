@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +42,8 @@ public class HearingDocumentService {
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
     private final BulkPrintService bulkPrintService;
+    private final NotificationService notificationService;
+
 
     public Map<String, Object> generateHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
         CaseDetails courtDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
@@ -94,8 +97,13 @@ public class HearingDocumentService {
     public void sendFormCAndGForBulkPrint(CaseDetails caseDetails, String authorisationToken) {
         String caseId = caseDetails.getId() == null ? "noId" : caseDetails.getId().toString();
         List<BulkPrintDocument> caseDocuments = getHearingCaseDocuments(caseDetails.getData(), caseId);
-        bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, caseDocuments);
-        bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, caseDocuments);
+
+        if (!notificationService.shouldEmailContestedAppSolicitor(caseDetails.getData())) {
+            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, caseDocuments);
+        }
+        if (!notificationService.shouldEmailRespondentSolicitor(caseDetails.getData())) {
+            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, caseDocuments);
+        }
     }
 
     /**
