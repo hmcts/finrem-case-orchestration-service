@@ -16,7 +16,6 @@ plugins {
     id 'application'
     id 'checkstyle'
     id 'com.github.ben-manes.versions' version '0.36.0'
-    id 'io.franzbecker.gradle-lombok' version '4.0.0'
     id 'io.spring.dependency-management' version '1.0.10.RELEASE'
     id "info.solidsoft.pitest" version "1.5.1"
     id 'jacoco'
@@ -110,7 +109,7 @@ def versions = [
         jackson              : '2.13.2',
         jsonAssert           : '1.2.3',
         junit                : '4.13.1',
-        lombok               : '1.18.20',
+        lombok               : '1.18.22',
         mockito              : '3.4.4',
         nimbus               : '5.1',
         pact_version         : '4.1.11',
