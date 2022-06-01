@@ -24,7 +24,9 @@ import java.util.Objects;
 
 import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL;
@@ -379,6 +381,13 @@ public class NotificationService {
             && !NO_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT)));
     }
 
+    public boolean shouldEmailContestedAppSolicitor(Map<String, Object> caseData) {
+        return !caseDataService.isPaperApplication(caseData)
+            && caseDataService.isApplicantRepresentedByASolicitor(caseData)
+            && caseDataService.isNotEmpty(CONTESTED_SOLICITOR_EMAIL, caseData)
+            && !NO_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED)));
+    }
+
     public boolean shouldEmailApplicantSolicitor(CaseDetails caseDetails) {
         return caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails);
     }
@@ -452,7 +461,7 @@ public class NotificationService {
             ? CONSENTED_SOLICITOR_NAME
             : CONTESTED_SOLICITOR_NAME;
     }
-  
+
     private String getRecipientEmail(CaseDetails caseDetails) throws JsonProcessingException {
         if (featureToggleService.isSendToFRCEnabled()) {
             Map<String, Object> data = caseDetails.getData();
