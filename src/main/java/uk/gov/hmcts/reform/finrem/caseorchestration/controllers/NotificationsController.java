@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -41,7 +42,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 @RequestMapping(value = "/case-orchestration/notify")
 @RequiredArgsConstructor
-public class NotificationsController implements BaseController {
+public class NotificationsController extends BaseController {
 
     private final NotificationService notificationService;
     private final PaperNotificationService paperNotificationService;
@@ -614,6 +615,7 @@ public class NotificationsController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
 
+
     @PostMapping(value = "/notice-of-change", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Send a notice of change to the Solicitor email and a letter to the organization.")
     @ApiResponses(value = {
@@ -657,6 +659,37 @@ public class NotificationsController implements BaseController {
         caseDetails.getData().put(INCLUDES_REPRESENTATIVE_UPDATE, null);
         caseDetails.getData().put(NOC_PARTY, null);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+    }
+
+    @PostMapping(value = "/update-frc", consumes = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Send FRC change update notifications")
+    @ApiResponses(value = {
+        @ApiResponse(code = 204, message = "Update FRC information notificatons sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
+    ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendUpdateFrcNotifications(
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
+        @RequestBody CallbackRequest callbackRequest) throws JsonProcessingException {
+        log.info("Received request to send update FRC info notifications for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        validateCaseData(callbackRequest);
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        Map<String, Object> caseData = caseDetails.getData();
+
+        if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
+            log.info("Sending email notification to Applicant Solicitor for 'Update Frc information'");
+            notificationService.sendUpdateFrcInformationEmailToAppSolicitor(caseDetails);
+        }
+
+        if (featureToggleService.isRespondentJourneyEnabled() && notificationService.shouldEmailRespondentSolicitor(caseData)) {
+            log.info("Sending email notification to Respondent Solicitor for 'Update Frc information'");
+            notificationService.sendUpdateFrcInformationEmailToRespondentSolicitor(caseDetails);
+        }
+
+        log.info("Sending email notification to court for 'Update Frc Information'");
+        notificationService.sendUpdateFrcInformationEmailToCourt(caseDetails);
+        paperNotificationService.printUpdateFrcInformationNotification(caseDetails, authToken);
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
     private boolean requiresNotifications(CallbackRequest callbackRequest) {

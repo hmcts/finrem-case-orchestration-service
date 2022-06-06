@@ -11,23 +11,23 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HELP_WITH_FEES_QUESTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_PAYMENT_REFERENCE;
 
-public interface BaseController {
+public abstract class BaseController {
 
-    /**
-     * Throws exception if callback request is missing case data.
-     */
-    default void validateCaseData(CallbackRequest callbackRequest) {
-        if (callbackRequest == null || callbackRequest.getCaseDetails() == null
+    public void validateCaseData(CallbackRequest callbackRequest) {
+        if (callbackRequest == null
+            || callbackRequest.getCaseDetails() == null
             || callbackRequest.getCaseDetails().getData() == null) {
             throw new InvalidCaseDataException(BAD_REQUEST.value(), "Missing data from callbackRequest.");
         }
     }
 
-    default boolean isPBAPayment(Map<String, Object> caseData) {
+    //TODO: These 2 methods for Payments should not be here,
+    // if you see this and have time please refactor to a service class
+    public boolean isPBAPayment(Map<String, Object> caseData) {
         return Objects.toString(caseData.get(HELP_WITH_FEES_QUESTION)).equalsIgnoreCase("no");
     }
 
-    default boolean isPBAPaymentReferenceDoesNotExists(Map<String, Object> caseData) {
+    public boolean isPBAPaymentReferenceDoesNotExists(Map<String, Object> caseData) {
         return isEmpty((String) caseData.get(PBA_PAYMENT_REFERENCE));
     }
 }

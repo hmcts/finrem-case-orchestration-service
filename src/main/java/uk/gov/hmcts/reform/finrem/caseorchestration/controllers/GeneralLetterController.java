@@ -32,7 +32,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequestMapping(value = "/case-orchestration")
 @RequiredArgsConstructor
 @Slf4j
-public class GeneralLetterController implements BaseController {
+public class GeneralLetterController extends BaseController {
 
     private final IdamService idamService;
     private final GeneralLetterService generalLetterService;

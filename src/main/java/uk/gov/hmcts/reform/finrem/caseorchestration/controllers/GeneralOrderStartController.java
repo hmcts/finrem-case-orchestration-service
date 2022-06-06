@@ -35,7 +35,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RestController
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-public class GeneralOrderStartController implements BaseController {
+public class GeneralOrderStartController extends BaseController {
 
     @Autowired
     private IdamService service;

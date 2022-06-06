@@ -17,7 +17,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateRepresentationWorkflowService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 import java.util.List;
 import java.util.Map;
@@ -59,7 +59,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 @RestController
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-public class UpdateConsentedCaseController implements BaseController {
+public class UpdateConsentedCaseController extends BaseController {
 
     private static final String DIVORCE_STAGE_REACHED = "divorceStageReached";
     private static final String DIVORCE_UPLOAD_EVIDENCE_2 = "divorceUploadEvidence2";

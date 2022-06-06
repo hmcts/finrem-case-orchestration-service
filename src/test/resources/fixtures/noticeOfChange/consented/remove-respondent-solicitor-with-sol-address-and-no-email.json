@@ -35,6 +35,14 @@
       "solicitorReference": "LL01",
       "divorceStageReached": "Decree Nisi",
       "nottinghamCourtList": "FR_s_NottinghamList_2",
+      "appRespondentRep": "Yes",
+      "RespondentOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "testID",
+          "OrganisationName": "respfirmname"
+        },
+        "OrgPolicyCaseAssignedRole": "[RESPSOLICITOR]"
+      },
       "reasonForLocalCourt": "dfff",
       "uploadScanned4AForm": {
         "document_url": "http://dm-store:8080/documents/728daa26-507e-4c53-8c5b-a86d14d7aa82",

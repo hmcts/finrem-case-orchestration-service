@@ -31,7 +31,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequestMapping(value = "/case-orchestration")
 @RequiredArgsConstructor
 @Slf4j
-public class GeneralEmailStartController implements BaseController {
+public class GeneralEmailStartController extends BaseController {
 
     private final IdamService idamService;
 

@@ -27,7 +27,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
 @SuppressWarnings("unchecked")
-public class PBAValidateController implements BaseController {
+public class PBAValidateController extends BaseController {
 
     private final PBAValidationService pbaValidationService;
 

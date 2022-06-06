@@ -17,7 +17,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateRepresentationWorkflowService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 import javax.validation.constraints.NotNull;
 
@@ -50,7 +50,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 @RequestMapping(value = "/case-orchestration")
 @RequiredArgsConstructor
 @Slf4j
-public class RemoveApplicantDetailsController implements BaseController {
+public class RemoveApplicantDetailsController extends BaseController {
 
     @Autowired private final UpdateRepresentationWorkflowService nocWorkflowService;
 

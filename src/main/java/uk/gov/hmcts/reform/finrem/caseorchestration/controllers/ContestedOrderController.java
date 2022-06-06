@@ -47,7 +47,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(value = "/case-orchestration")
-public class ContestedOrderController implements BaseController {
+public class ContestedOrderController extends BaseController {
 
     private final ObjectMapper objectMapper;
     private final ContestedCaseOrderService contestedCaseOrderService;

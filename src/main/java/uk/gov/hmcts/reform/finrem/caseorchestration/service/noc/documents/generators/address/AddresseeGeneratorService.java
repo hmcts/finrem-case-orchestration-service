@@ -23,9 +23,9 @@ public class AddresseeGeneratorService {
     private final SolicitorAddresseeGenerator solicitorAddresseeGenerator;
 
     public Addressee generateAddressee(CaseDetails caseDetails, ChangedRepresentative changedRepresentative,
-                                       DocumentHelper.PaperNotificationRecipient recipient) {
+                                       DocumentHelper.PaperNotificationRecipient recipient, String party) {
         log.info("In the buildAddressee method for case {} and recipient type {}", caseDetails.getId(), recipient);
-        return this.addresseeGeneratorMap().get(recipient).generate(caseDetails, changedRepresentative);
+        return this.addresseeGeneratorMap().get(recipient).generate(caseDetails, changedRepresentative, party);
     }
 
     private Map<DocumentHelper.PaperNotificationRecipient, AddresseeGenerator> addresseeGeneratorMap() {
