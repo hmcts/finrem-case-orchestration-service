@@ -101,7 +101,7 @@ configurations {
 
 def versions = [
         bspCommonLib         : '0.0.50',
-        ccdClient            : '4.7.5',
+        ccdClient            : '4.8.6',
         commonsBeanUtils     : '1.9.4',
         commonsIo            : '2.7',
         commonsLang3         : '3.11',
@@ -210,8 +210,7 @@ dependencies {
 
     implementation 'com.github.hmcts:idam-java-client:2.0.1'
 
-    implementation group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: versions.ccdClient
-
+    implementation group: 'com.github.hmcts', name: 'ccd-client', version: versions.ccdClient
     implementation group: 'com.github.hmcts.java-logging', name: 'java-logging', version: versions.reformLogging
     implementation group: 'com.github.hmcts.java-logging', name: 'java-logging-appinsights', version: versions.reformLogging
     implementation group: 'com.github.hmcts.java-logging', name: 'java-logging-spring', version: versions.reformLogging
