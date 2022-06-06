@@ -19,8 +19,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.SendOrderPostStateOption.CLOSE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.SendOrderPostStateOption.PREPARE_FOR_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.SendOrderPostStateOption.getSendOrderPostStateOption;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SEND_ORDER_POST_STATE_OPTION_FIELD;
@@ -57,6 +55,7 @@ public class SendOrderContestedSubmittedHandler implements CallbackHandler {
             .build();
     }
 
+    //TODO: This null check should be removed when DFR-1018 is released
     private void processPostEventStateOptions(CallbackRequest callbackRequest) {
         Optional
             .ofNullable((String) callbackRequest.getCaseDetails().getData().get(SEND_ORDER_POST_STATE_OPTION_FIELD))
@@ -69,16 +68,10 @@ public class SendOrderContestedSubmittedHandler implements CallbackHandler {
         SendOrderPostStateOption sendOrderPostStateOption =
             getSendOrderPostStateOption(sendOrderPostStateOptionCcdField);
 
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        if (PREPARE_FOR_HEARING.equals(sendOrderPostStateOption)) {
-            caseDetails =
-                ccdService.executeCcdEventOnCase(caseDetails, EventType.PREPARE_FOR_HEARING.getCcdType());
-        } else if (CLOSE.equals(sendOrderPostStateOption)) {
-            caseDetails =
-                ccdService.executeCcdEventOnCase(caseDetails, EventType.CLOSE.getCcdType());
+        if (!SendOrderPostStateOption.ORDER_SENT.equals(sendOrderPostStateOption)) {
+            ccdService.executeCcdEventOnCase(callbackRequest.getCaseDetails(),
+                sendOrderPostStateOption.getEventToTrigger().getCcdType());
         }
-
-        callbackRequest.setCaseDetails(caseDetails);
     }
 
     private void sendNotifications(CallbackRequest callbackRequest) {
