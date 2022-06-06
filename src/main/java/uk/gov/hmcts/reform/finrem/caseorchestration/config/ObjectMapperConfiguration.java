@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.config;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,12 +13,17 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static com.fasterxml.jackson.databind.DeserializationFeature.READ_ENUMS_USING_TO_STRING;
+import static com.fasterxml.jackson.databind.DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE;
+import static com.fasterxml.jackson.databind.SerializationFeature.WRITE_ENUMS_USING_TO_STRING;
 
 @Configuration
 @RequiredArgsConstructor
@@ -27,14 +33,22 @@ public class ObjectMapperConfiguration {
 
     @Bean
     public ObjectMapper objectMapper() {
-        ObjectMapper objectMapper = new ObjectMapper()
-            .registerModule(new JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        Jackson2ObjectMapperBuilder objectMapperBuilder =
+            new Jackson2ObjectMapperBuilder()
+                .featuresToEnable(READ_ENUMS_USING_TO_STRING)
+                .featuresToEnable(READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE)
+                .featuresToEnable(WRITE_ENUMS_USING_TO_STRING)
+                .serializationInclusion(JsonInclude.Include.NON_ABSENT);
 
-        featureToggleSerialisation(objectMapper);
+        ObjectMapper mapper = objectMapperBuilder.createXmlMapper(false).build();
+        mapper.configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true);
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
-        return objectMapper;
+        featureToggleSerialisation(mapper);
+
+        return mapper;
     }
 
     private void featureToggleSerialisation(ObjectMapper objectMapper) {
