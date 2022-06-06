@@ -42,7 +42,6 @@ sourceCompatibility = 11
 targetCompatibility = 11
 
 repositories {
-    jcenter()
     mavenLocal()
     mavenCentral()
     maven { url "https://jitpack.io" }
