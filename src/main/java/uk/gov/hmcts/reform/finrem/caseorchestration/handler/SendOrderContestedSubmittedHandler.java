@@ -47,7 +47,7 @@ public class SendOrderContestedSubmittedHandler implements CallbackHandler {
 
         sendNotifications(callbackRequest);
 
-        processPostEventStateOptions(callbackRequest);
+        processPostEventStateOptions(callbackRequest, userAuthorisation);
 
         return AboutToStartOrSubmitCallbackResponse
             .builder()
@@ -56,20 +56,24 @@ public class SendOrderContestedSubmittedHandler implements CallbackHandler {
     }
 
     //TODO: This null check should be removed when DFR-1018 is released
-    private void processPostEventStateOptions(CallbackRequest callbackRequest) {
+    private void processPostEventStateOptions(CallbackRequest callbackRequest, String userAuthorisation) {
         Optional
             .ofNullable((String) callbackRequest.getCaseDetails().getData().get(SEND_ORDER_POST_STATE_OPTION_FIELD))
-            .ifPresent(postStateOptionField -> updateCaseWithPostStateOption(postStateOptionField, callbackRequest));
+            .ifPresent(postStateOptionField ->
+                updateCaseWithPostStateOption(postStateOptionField, callbackRequest, userAuthorisation));
     }
 
     private void updateCaseWithPostStateOption(String sendOrderPostStateOptionCcdField,
-                                               CallbackRequest callbackRequest) {
+                                               CallbackRequest callbackRequest,
+                                               String userAuthorisation) {
 
         SendOrderPostStateOption sendOrderPostStateOption =
             getSendOrderPostStateOption(sendOrderPostStateOptionCcdField);
 
         if (!SendOrderPostStateOption.ORDER_SENT.equals(sendOrderPostStateOption)) {
-            ccdService.executeCcdEventOnCase(callbackRequest.getCaseDetails(),
+            ccdService.executeCcdEventOnCase(
+                userAuthorisation,
+                callbackRequest.getCaseDetails(),
                 sendOrderPostStateOption.getEventToTrigger().getCcdType());
         }
     }

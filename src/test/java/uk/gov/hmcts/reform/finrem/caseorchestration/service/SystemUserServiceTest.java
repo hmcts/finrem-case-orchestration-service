@@ -19,6 +19,8 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class SystemUserServiceTest {
 
+    public static final String AUTH_TOKEN = "tokien:)";
+
     @Mock
     private SystemUpdateUserConfiguration systemUpdateUserConfiguration;
     @Mock
@@ -40,20 +42,16 @@ public class SystemUserServiceTest {
 
     @Test
     public void givenSysUserConfig_WhenGetIdamToken_ThenReturnToken() {
-        when(systemUpdateUserConfiguration.getUserName()).thenReturn("username");
-        when(systemUpdateUserConfiguration.getPassword()).thenReturn("password");
-        when(idamAuthService.getAccessToken("username", "password"))
-            .thenReturn("token");
-        when(idamAuthService.getUserInfo("token"))
+        when(idamAuthService.getUserInfo(AUTH_TOKEN))
             .thenReturn(UserInfo.builder()
                 .uid("uid")
                 .sub("sub@mail.com")
                 .roles(Collections.singletonList("role"))
                 .build());
 
-        IdamToken idamToken = systemUserService.getIdamToken();
+        IdamToken idamToken = systemUserService.getIdamToken(AUTH_TOKEN);
 
-        assertThat(idamToken.getIdamOauth2Token()).isEqualTo("token");
+        assertThat(idamToken.getIdamOauth2Token()).isEqualTo(AUTH_TOKEN);
         assertThat(idamToken.getUserId()).isEqualTo("uid");
         assertThat(idamToken.getEmail()).isEqualTo("sub@mail.com");
     }

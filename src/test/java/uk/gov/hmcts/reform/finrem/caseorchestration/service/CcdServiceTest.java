@@ -22,6 +22,8 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class CcdServiceTest {
 
+    public static final String AUTH_TOKEN = "tokien:)";
+
     @Mock
     private CoreCaseDataApi coreCaseDataApi;
     @Mock
@@ -33,9 +35,9 @@ public class CcdServiceTest {
     public void givenCallback_WhenExecuteEvent_ThenCcdApiCalled() {
         when(coreCaseDataApi.startEventForCaseWorker(any(), any(), any(), any(), any(), any(), any()))
             .thenReturn(StartEventResponse.builder().build());
-        when(systemUserService.getIdamToken()).thenReturn(IdamToken.builder().build());
+        when(systemUserService.getIdamToken(AUTH_TOKEN)).thenReturn(IdamToken.builder().build());
 
-        ccdService.executeCcdEventOnCase(buildCaseDetails(), EventType.CLOSE.getCcdType());
+        ccdService.executeCcdEventOnCase(AUTH_TOKEN, buildCaseDetails(), EventType.CLOSE.getCcdType());
 
         verify(coreCaseDataApi).startEventForCaseWorker(any(), any(), any(), any(), any(), any(), any());
         verify(coreCaseDataApi).submitEventForCaseWorker(any(), any(), any(), any(), any(), any(), anyBoolean(), any());

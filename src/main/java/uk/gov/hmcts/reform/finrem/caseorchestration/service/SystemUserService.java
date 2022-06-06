@@ -24,22 +24,16 @@ public class SystemUserService {
         return idamAuthService.getAccessToken(systemUpdateUserConfiguration.getUserName(), systemUpdateUserConfiguration.getPassword());
     }
 
-    public IdamToken getIdamToken() {
+    public IdamToken getIdamToken(String authorisation) {
 
-        String sysUserToken = getSysUserToken();
-
-        UserInfo user = idamAuthService.getUserInfo(sysUserToken);
+        UserInfo user = idamAuthService.getUserInfo(authorisation);
 
         return IdamToken.builder()
-            .idamOauth2Token(sysUserToken)
-            .serviceAuthorization(getServiceAuthorization())
+            .idamOauth2Token(authorisation)
+            .serviceAuthorization(authTokenGenerator.generate())
             .userId(user.getUid())
             .email(user.getSub())
             .roles(user.getRoles())
             .build();
-    }
-
-    private String getServiceAuthorization() {
-        return authTokenGenerator.generate();
     }
 }

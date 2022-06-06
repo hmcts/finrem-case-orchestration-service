@@ -37,6 +37,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RunWith(MockitoJUnitRunner.class)
 public class SendOrderContestedSubmittedHandlerTest {
 
+    public static final String AUTH_TOKEN = "tokien:)";
     public static final String PREPARE_FOR_HEARING_STATE = "prepareForHearing";
     public static final String CLOSE_STATE = "close";
     @Mock
@@ -72,14 +73,14 @@ public class SendOrderContestedSubmittedHandlerTest {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         caseDetails.getData().put(SEND_ORDER_POST_STATE_OPTION_FIELD,
             SendOrderPostStateOption.PREPARE_FOR_HEARING.getCcdField());
-        when(ccdService.executeCcdEventOnCase(caseDetails, EventType.PREPARE_FOR_HEARING.getCcdType()))
+        when(ccdService.executeCcdEventOnCase(AUTH_TOKEN, caseDetails, EventType.PREPARE_FOR_HEARING.getCcdType()))
             .thenReturn(CaseDetails.builder().state(PREPARE_FOR_HEARING_STATE)
                 .data(caseDetails.getData())
                 .build());
 
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(ccdService).executeCcdEventOnCase(caseDetails, EventType.PREPARE_FOR_HEARING.getCcdType());
+        verify(ccdService).executeCcdEventOnCase(AUTH_TOKEN, caseDetails, EventType.PREPARE_FOR_HEARING.getCcdType());
     }
 
     @Test
@@ -88,14 +89,14 @@ public class SendOrderContestedSubmittedHandlerTest {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         caseDetails.getData().put(SEND_ORDER_POST_STATE_OPTION_FIELD,
             SendOrderPostStateOption.CLOSE.getCcdField());
-        when(ccdService.executeCcdEventOnCase(caseDetails, EventType.CLOSE.getCcdType()))
+        when(ccdService.executeCcdEventOnCase(AUTH_TOKEN, caseDetails, EventType.CLOSE.getCcdType()))
             .thenReturn(CaseDetails.builder().state(CLOSE_STATE)
                 .data(caseDetails.getData())
                 .build());
 
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(ccdService).executeCcdEventOnCase(caseDetails, EventType.CLOSE.getCcdType());
+        verify(ccdService).executeCcdEventOnCase(AUTH_TOKEN, caseDetails, EventType.CLOSE.getCcdType());
     }
 
     @Test
@@ -106,7 +107,7 @@ public class SendOrderContestedSubmittedHandlerTest {
 
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(ccdService, never()).executeCcdEventOnCase(any(), any());
+        verify(ccdService, never()).executeCcdEventOnCase(any(), any(), any());
     }
 
     @Test

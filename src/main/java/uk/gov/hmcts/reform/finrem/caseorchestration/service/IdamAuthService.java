@@ -9,6 +9,9 @@ import uk.gov.hmcts.reform.idam.client.models.TokenRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
+import java.util.List;
+import java.util.Map;
+
 import static uk.gov.hmcts.reform.idam.client.IdamClient.BEARER_AUTH_TYPE;
 import static uk.gov.hmcts.reform.idam.client.IdamClient.OPENID_GRANT_TYPE;
 
@@ -19,8 +22,6 @@ public class IdamAuthService {
     private final IdamAuthApi idamAuthApi;
     private final OAuth2Configuration oAuth2Configuration;
 
-    private static final String COURT_ADMIN_ROLE = "caseworker-divorce-financialremedy-courtadmin";
-
     public String getAccessToken(String username, String password) {
         return BEARER_AUTH_TYPE + " " + idamAuthApi.generateOpenIdToken(buildTokenRequest(username, password)).accessToken;
     }
@@ -30,7 +31,18 @@ public class IdamAuthService {
     }
 
     public UserInfo getUserInfo(String bearerToken) {
-        return idamAuthApi.retrieveUserInfo(bearerToken);
+        //TODO: deserialization issue workaround
+        Map<String, Object> userInfoMap = idamAuthApi.retrieveUserInfo(bearerToken);
+        UserInfo userInfo = UserInfo.builder()
+            .roles((List<String>) userInfoMap.get("roles"))
+            .sub((String) userInfoMap.get("sub"))
+            .uid((String) userInfoMap.get("uid"))
+            .name((String) userInfoMap.get("name"))
+            .givenName((String) userInfoMap.get("given_name"))
+            .familyName((String) userInfoMap.get("family_name"))
+            .build();
+
+        return userInfo;
     }
 
     private TokenRequest buildTokenRequest(String username, String password) {
