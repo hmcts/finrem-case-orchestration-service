@@ -509,4 +509,6 @@ public class CCDConfigConstant {
     public static final String UPDATE_CONTACT_DETAILS_EVENT = "FR_updateContactDetails";
 
 
+    public static final String HEARING_UPLOAD_BUNDLE_COLLECTION = "hearingUploadBundle";
+
 }
