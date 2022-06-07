@@ -20,9 +20,8 @@ public class CcdService {
     private final CoreCaseDataApi coreCaseDataApi;
     private final SystemUserService systemUserService;
 
-    public CaseDetails executeCcdEventOnCase(String authorisation, CaseDetails caseDetails,
-                                             String eventType) {
-
+    public void executeCcdEventOnCase(String authorisation, CaseDetails caseDetails,
+                                      String eventType) {
 
         Long caseId = caseDetails.getId();
         String caseTypeId = caseDetails.getCaseTypeId();
@@ -31,30 +30,16 @@ public class CcdService {
 
         IdamToken idamToken = systemUserService.getIdamToken(authorisation);
 
-        StartEventResponse startEventResponse =
-            startCaseForCaseworker(idamToken, eventType, caseTypeId, caseDetails.getId());
+        StartEventResponse startEventResponse = coreCaseDataApi
+            .startEventForCaseWorker(idamToken.getIdamOauth2Token(),
+                idamToken.getServiceAuthorization(),
+                idamToken.getUserId(),
+                "DIVORCE",
+                caseTypeId,
+                caseId.toString(),
+                eventType);
 
-        return submitEventForCaseworker(
-            idamToken,
-            caseId,
-            getCaseDataContent(caseDetails.getData(), startEventResponse),
-            caseTypeId);
-    }
-
-    private StartEventResponse startCaseForCaseworker(IdamToken idamToken, String eventId, String caseTypeId, Long caseId) {
-        return coreCaseDataApi.startEventForCaseWorker(
-            idamToken.getIdamOauth2Token(),
-            idamToken.getServiceAuthorization(),
-            idamToken.getUserId(),
-            "DIVORCE",
-            caseTypeId,
-            caseId.toString(),
-            eventId);
-    }
-
-    private CaseDetails submitEventForCaseworker(IdamToken idamToken, Long caseId,
-                                                 CaseDataContent caseDataContent, String caseTypeId) {
-        return coreCaseDataApi.submitEventForCaseWorker(
+        coreCaseDataApi.submitEventForCaseWorker(
             idamToken.getIdamOauth2Token(),
             idamToken.getServiceAuthorization(),
             idamToken.getUserId(),
@@ -62,7 +47,8 @@ public class CcdService {
             caseTypeId,
             caseId.toString(),
             true,
-            caseDataContent);
+            getCaseDataContent(caseDetails.getData(), startEventResponse));
+
     }
 
     private CaseDataContent getCaseDataContent(Object caseData,

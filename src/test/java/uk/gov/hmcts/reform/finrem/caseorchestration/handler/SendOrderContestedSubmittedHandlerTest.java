@@ -72,10 +72,6 @@ public class SendOrderContestedSubmittedHandlerTest {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         caseDetails.getData().put(SEND_ORDER_POST_STATE_OPTION_FIELD,
             PostStateOption.PREPARE_FOR_HEARING.getCcdField());
-        when(ccdService.executeCcdEventOnCase(AUTH_TOKEN, caseDetails, EventType.PREPARE_FOR_HEARING.getCcdType()))
-            .thenReturn(CaseDetails.builder().state(PREPARE_FOR_HEARING_STATE)
-                .data(caseDetails.getData())
-                .build());
 
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -88,10 +84,6 @@ public class SendOrderContestedSubmittedHandlerTest {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         caseDetails.getData().put(SEND_ORDER_POST_STATE_OPTION_FIELD,
             PostStateOption.CLOSE.getCcdField());
-        when(ccdService.executeCcdEventOnCase(AUTH_TOKEN, caseDetails, EventType.CLOSE.getCcdType()))
-            .thenReturn(CaseDetails.builder().state(CLOSE_STATE)
-                .data(caseDetails.getData())
-                .build());
 
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
