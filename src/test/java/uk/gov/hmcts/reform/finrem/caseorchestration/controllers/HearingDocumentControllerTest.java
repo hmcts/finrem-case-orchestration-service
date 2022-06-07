@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingServi
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Objects;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
@@ -56,6 +57,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @MockBean private ValidateHearingService validateHearingService;
     @MockBean private CaseDataService caseDataService;
 
+
     @Before
     public void setUp() {
         super.setUp();
@@ -70,8 +72,8 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     }
 
     private void doRequestSetUp() throws IOException, URISyntaxException {
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/validate-hearing-with-fastTrackDecision.json").toURI()));
+        requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
+            .getResource("/fixtures/contested/validate-hearing-with-fastTrackDecision.json")).toURI()));
     }
 
     @Test
@@ -102,8 +104,8 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void generateHearingDocumentPaperApplication() throws Exception {
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/validate-hearing-with-fastTrackDecision-paperApplication.json").toURI()));
+        requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
+            .getResource("/fixtures/contested/validate-hearing-with-fastTrackDecision-paperApplication.json")).toURI()));
 
         when(hearingDocumentService.generateHearingDocuments(eq(AUTH_TOKEN), isA(CaseDetails.class)))
             .thenReturn(ImmutableMap.of("formC", caseDocument()));
@@ -186,8 +188,8 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
         when(validateHearingService.validateHearingErrors(isA(CaseDetails.class)))
             .thenReturn(ImmutableList.of(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY));
 
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/pba-validate.json").toURI()));
+        requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
+            .getResource("/fixtures/pba-validate.json")).toURI()));
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -204,8 +206,8 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
         when(validateHearingService.validateHearingWarnings(isA(CaseDetails.class)))
             .thenReturn(ImmutableList.of("Date of the hearing must be between 12 and 14 weeks."));
 
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/validate-hearing-withoutfastTrackDecision.json").toURI()));
+        requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
+            .getResource("/fixtures/contested/validate-hearing-withoutfastTrackDecision.json")).toURI()));
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -222,8 +224,8 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
         when(validateHearingService.validateHearingWarnings(isA(CaseDetails.class)))
             .thenReturn(ImmutableList.of("Date of the Fast Track hearing must be between 6 and 10 weeks."));
 
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/validate-hearing-with-fastTrackDecision.json").toURI()));
+        requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
+            .getResource("/fixtures/contested/validate-hearing-with-fastTrackDecision.json")).toURI()));
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -239,8 +241,8 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
         when(validateHearingService.validateHearingErrors(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
         when(validateHearingService.validateHearingWarnings(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
 
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/validate-hearing-successfully.json").toURI()));
+        requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
+            .getResource("/fixtures/contested/validate-hearing-successfully.json")).toURI()));
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -248,5 +250,21 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.warnings").isEmpty());
+    }
+
+    @Test
+    public void generateHearingDocumentDirectionOrderMostRecentEnteredAtTheTop() throws Exception {
+        requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
+            .getResource("/fixtures/contested/validate-hearing-successfully.json")).toURI()));
+        mvc.perform(post(DIRECTION_ORDER_URL)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.directionDetailsCollection[0].value.dateOfHearing", is("2020-07-01")))
+            .andExpect(jsonPath("$.data.directionDetailsCollection[1].value.dateOfHearing", is("2022-12-01")))
+            .andExpect(jsonPath("$.data.directionDetailsCollection[2].value.dateOfHearing", is("2023-10-01")));
+
+        verify(additionalHearingDocumentService, times(1)).createAndStoreAdditionalHearingDocuments(any(), any());
     }
 }
