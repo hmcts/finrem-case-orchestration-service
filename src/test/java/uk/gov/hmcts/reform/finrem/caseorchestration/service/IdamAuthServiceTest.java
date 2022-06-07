@@ -12,9 +12,6 @@ import uk.gov.hmcts.reform.idam.client.models.TokenResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -53,10 +50,8 @@ public class IdamAuthServiceTest {
 
     @Test
     public void givenToken_whenGetUserInfo_ThenReturnUserInfo() {
-        Map userMap = new HashMap<>();
-        userMap.put("uid", "uidTest");
         when(idamAuthApi.retrieveUserInfo("token"))
-            .thenReturn(userMap);
+            .thenReturn(UserInfo.builder().uid("uidTest").build());
 
         UserInfo userInfo = idamAuthService.getUserInfo("token");
 

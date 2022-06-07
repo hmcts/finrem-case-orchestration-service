@@ -17,7 +17,6 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class CcdService {
 
-    public static final String CCD_EVENT_DESCRIPTION = "Updated case state through financial remedy services";
     private final CoreCaseDataApi coreCaseDataApi;
     private final SystemUserService systemUserService;
 
@@ -34,7 +33,7 @@ public class CcdService {
             startCaseForCaseworker(systemUserService.getIdamToken(authorisation), eventType, caseTypeId, caseDetails.getId());
 
         CaseDataContent caseDataContent =
-            getCaseDataContent(caseDetails.getData(), startEventResponse, eventType);
+            getCaseDataContent(caseDetails.getData(), startEventResponse);
 
         return submitEventForCaseworker(systemUserService.getIdamToken(authorisation), caseId, caseDataContent, caseTypeId);
     }
@@ -64,14 +63,11 @@ public class CcdService {
     }
 
     private CaseDataContent getCaseDataContent(Object caseData,
-                                               StartEventResponse startEventResponse,
-                                               String summary) {
+                                               StartEventResponse startEventResponse) {
         return CaseDataContent.builder()
             .eventToken(startEventResponse.getToken())
             .event(Event.builder()
                 .id(startEventResponse.getEventId())
-                .summary(summary)
-                .description(CCD_EVENT_DESCRIPTION)
                 .build())
             .data(caseData)
             .supplementaryDataRequest(

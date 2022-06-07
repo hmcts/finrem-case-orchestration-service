@@ -12,8 +12,7 @@ import uk.gov.hmcts.reform.idam.client.CoreFeignConfiguration;
 import uk.gov.hmcts.reform.idam.client.models.TokenRequest;
 import uk.gov.hmcts.reform.idam.client.models.TokenResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-
-import java.util.Map;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
 @FeignClient(name = "idam-api", url = "${idam.api.url}", configuration = CoreFeignConfiguration.class)
 public interface IdamAuthApi {
@@ -30,7 +29,7 @@ public interface IdamAuthApi {
     );
 
     @GetMapping("/o/userinfo")
-    Map<String, Object> retrieveUserInfo(
+    UserInfo retrieveUserInfo(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation
     );
 }
