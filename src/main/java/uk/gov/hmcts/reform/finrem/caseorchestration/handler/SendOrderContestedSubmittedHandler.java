@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.SendOrderPostStateOption;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.PostStateOption;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
@@ -18,7 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import java.util.Map;
 import java.util.Objects;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.SendOrderPostStateOption.getSendOrderPostStateOption;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.PostStateOption.getSendOrderPostStateOption;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SEND_ORDER_POST_STATE_OPTION_FIELD;
 
@@ -55,22 +55,22 @@ public class SendOrderContestedSubmittedHandler implements CallbackHandler {
 
     private void updateCaseWithPostStateOption(CallbackRequest callbackRequest, String userAuthorisation) {
 
-        SendOrderPostStateOption sendOrderPostStateOption =
+        PostStateOption postStateOption =
             getSendOrderPostStateOption(
                 (String) callbackRequest.getCaseDetails().getData().get(SEND_ORDER_POST_STATE_OPTION_FIELD));
 
-        if (isOptionThatRequireUpdate(sendOrderPostStateOption)) {
+        if (isOptionThatRequireUpdate(postStateOption)) {
             callbackRequest.getCaseDetails().getData().put(SEND_ORDER_POST_STATE_OPTION_FIELD, null);
             ccdService.executeCcdEventOnCase(
                 userAuthorisation,
                 callbackRequest.getCaseDetails(),
-                sendOrderPostStateOption.getEventToTrigger().getCcdType());
+                postStateOption.getEventToTrigger().getCcdType());
         }
     }
 
-    private boolean isOptionThatRequireUpdate(SendOrderPostStateOption sendOrderPostStateOption) {
-        return SendOrderPostStateOption.PREPARE_FOR_HEARING.equals(sendOrderPostStateOption)
-            || SendOrderPostStateOption.CLOSE.equals(sendOrderPostStateOption);
+    private boolean isOptionThatRequireUpdate(PostStateOption postStateOption) {
+        return PostStateOption.PREPARE_FOR_HEARING.equals(postStateOption)
+            || PostStateOption.CLOSE.equals(postStateOption);
     }
 
     private void sendNotifications(CallbackRequest callbackRequest) {

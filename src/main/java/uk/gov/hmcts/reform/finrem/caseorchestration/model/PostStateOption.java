@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.Arrays;
 
 @RequiredArgsConstructor
-public enum SendOrderPostStateOption {
+public enum PostStateOption {
 
     PREPARE_FOR_HEARING("prepareForHearing", EventType.PREPARE_FOR_HEARING),
     CLOSE("close", EventType.CLOSE),
@@ -24,9 +24,9 @@ public enum SendOrderPostStateOption {
         return eventToTrigger;
     }
 
-    public static SendOrderPostStateOption getSendOrderPostStateOption(String ccdType) {
-        return Arrays.stream(SendOrderPostStateOption.values())
+    public static PostStateOption getSendOrderPostStateOption(String ccdType) {
+        return Arrays.stream(PostStateOption.values())
             .filter(option -> option.ccdField.equals(ccdType))
-            .findFirst().orElse(SendOrderPostStateOption.NONE);
+            .findFirst().orElse(PostStateOption.NONE);
     }
 }

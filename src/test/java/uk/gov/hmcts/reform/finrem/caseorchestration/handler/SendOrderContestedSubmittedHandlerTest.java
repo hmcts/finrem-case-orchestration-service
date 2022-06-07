@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.SendOrderPostStateOption;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.PostStateOption;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
@@ -71,7 +71,7 @@ public class SendOrderContestedSubmittedHandlerTest {
         CallbackRequest callbackRequest = buildCallbackRequest();
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         caseDetails.getData().put(SEND_ORDER_POST_STATE_OPTION_FIELD,
-            SendOrderPostStateOption.PREPARE_FOR_HEARING.getCcdField());
+            PostStateOption.PREPARE_FOR_HEARING.getCcdField());
         when(ccdService.executeCcdEventOnCase(AUTH_TOKEN, caseDetails, EventType.PREPARE_FOR_HEARING.getCcdType()))
             .thenReturn(CaseDetails.builder().state(PREPARE_FOR_HEARING_STATE)
                 .data(caseDetails.getData())
@@ -87,7 +87,7 @@ public class SendOrderContestedSubmittedHandlerTest {
         CallbackRequest callbackRequest = buildCallbackRequest();
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         caseDetails.getData().put(SEND_ORDER_POST_STATE_OPTION_FIELD,
-            SendOrderPostStateOption.CLOSE.getCcdField());
+            PostStateOption.CLOSE.getCcdField());
         when(ccdService.executeCcdEventOnCase(AUTH_TOKEN, caseDetails, EventType.CLOSE.getCcdType()))
             .thenReturn(CaseDetails.builder().state(CLOSE_STATE)
                 .data(caseDetails.getData())
@@ -102,7 +102,7 @@ public class SendOrderContestedSubmittedHandlerTest {
     public void givenOrderSentPostStateOption_WhenHandle_ThenDoNotRunUpdateCaseAndStateIsOrderSent() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         callbackRequest.getCaseDetails().getData().put(SEND_ORDER_POST_STATE_OPTION_FIELD,
-            SendOrderPostStateOption.ORDER_SENT.getCcdField());
+            PostStateOption.ORDER_SENT.getCcdField());
 
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
