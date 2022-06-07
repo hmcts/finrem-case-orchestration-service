@@ -71,6 +71,7 @@ public class SendOrderContestedSubmittedHandler implements CallbackHandler {
             getSendOrderPostStateOption(sendOrderPostStateOptionCcdField);
 
         if (!SendOrderPostStateOption.ORDER_SENT.equals(sendOrderPostStateOption)) {
+            callbackRequest.getCaseDetails().getData().put(SEND_ORDER_POST_STATE_OPTION_FIELD, null);
             ccdService.executeCcdEventOnCase(
                 userAuthorisation,
                 callbackRequest.getCaseDetails(),

@@ -29,13 +29,16 @@ public class CcdService {
 
         log.info("Executing eventType {} on caseId {}", eventType, caseId);
 
+        IdamToken idamToken = systemUserService.getIdamToken(authorisation);
+
         StartEventResponse startEventResponse =
-            startCaseForCaseworker(systemUserService.getIdamToken(authorisation), eventType, caseTypeId, caseDetails.getId());
+            startCaseForCaseworker(idamToken, eventType, caseTypeId, caseDetails.getId());
 
-        CaseDataContent caseDataContent =
-            getCaseDataContent(caseDetails.getData(), startEventResponse);
-
-        return submitEventForCaseworker(systemUserService.getIdamToken(authorisation), caseId, caseDataContent, caseTypeId);
+        return submitEventForCaseworker(
+            idamToken,
+            caseId,
+            getCaseDataContent(caseDetails.getData(), startEventResponse),
+            caseTypeId);
     }
 
     private StartEventResponse startCaseForCaseworker(IdamToken idamToken, String eventId, String caseTypeId, Long caseId) {

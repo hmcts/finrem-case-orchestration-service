@@ -12,7 +12,7 @@ public enum SendOrderPostStateOption {
     PREPARE_FOR_HEARING("prepareForHearing", EventType.PREPARE_FOR_HEARING),
     CLOSE("close", EventType.CLOSE),
     @JsonProperty("orderSent")
-    ORDER_SENT("orderSent", null);
+    ORDER_SENT("orderSent", EventType.NONE);
 
     private final String ccdField;
 
