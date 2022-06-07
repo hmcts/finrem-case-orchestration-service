@@ -6,7 +6,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpda
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.NocDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.NocLetterDetailsGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.AbstractLetterDetailsGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler.AbstractLetterHandler;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
@@ -16,14 +16,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class SolicitorChangedApplicantLetterHandler extends AbstractLetterHandler {
 
     public SolicitorChangedApplicantLetterHandler(
-        NocLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator,
+        AbstractLetterDetailsGenerator letterDetailsGenerator,
         NocDocumentService nocDocumentService, BulkPrintService bulkPrintService,
         NoticeType noticeType) {
-        super(noticeOfChangeLetterDetailsGenerator, nocDocumentService, bulkPrintService, noticeType, APPLICANT);
+        super(letterDetailsGenerator, nocDocumentService, bulkPrintService, noticeType, APPLICANT);
     }
 
     @Override
-    protected boolean shouldALetterBeSent(RepresentationUpdate representationUpdate, CaseDetails caseDetailsToUse) {
+    protected boolean shouldALetterBeSent(RepresentationUpdate representationUpdate,
+                                          CaseDetails caseDetailsToUse,
+                                          CaseDetails otherCaseDetails) {
         log.info("Now check if solicitor notification letter is required for applicant");
         return isApplicant(representationUpdate) && isAddressFieldPopulated(caseDetailsToUse, APPLICANT_ADDRESS);
     }

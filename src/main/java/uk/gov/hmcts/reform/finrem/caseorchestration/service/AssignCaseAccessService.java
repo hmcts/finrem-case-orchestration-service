@@ -72,6 +72,7 @@ public class AssignCaseAccessService {
             log.info("No creator role found for caseId {}", caseDetails.getId());
             return null;
         }
+
         if (creatorRoles.size() > 1) {
             throw new IllegalStateException("Multiple creator roles found for case");
         }

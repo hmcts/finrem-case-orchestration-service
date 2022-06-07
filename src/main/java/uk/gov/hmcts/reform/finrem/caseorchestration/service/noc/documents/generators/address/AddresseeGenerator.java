@@ -6,5 +6,5 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentat
 
 public interface AddresseeGenerator {
 
-    Addressee generate(CaseDetails caseDetails, ChangedRepresentative changedRepresentative);
+    Addressee generate(CaseDetails caseDetails, ChangedRepresentative changedRepresentative, String party);
 }
