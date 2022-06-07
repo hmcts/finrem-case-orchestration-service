@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.SendOrderPostStateOption.getSendOrderPostStateOption;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
@@ -46,7 +45,7 @@ public class SendOrderContestedSubmittedHandler implements CallbackHandler {
 
         sendNotifications(callbackRequest);
 
-        processPostEventStateOptions(callbackRequest, userAuthorisation);
+        updateCaseWithPostStateOption(callbackRequest, userAuthorisation);
 
         return AboutToStartOrSubmitCallbackResponse
             .builder()
@@ -54,20 +53,11 @@ public class SendOrderContestedSubmittedHandler implements CallbackHandler {
             .build();
     }
 
-    //TODO: This null check should be removed when DFR-1018 is released
-    private void processPostEventStateOptions(CallbackRequest callbackRequest, String userAuthorisation) {
-        Optional
-            .ofNullable((String) callbackRequest.getCaseDetails().getData().get(SEND_ORDER_POST_STATE_OPTION_FIELD))
-            .ifPresent(postStateOptionField ->
-                updateCaseWithPostStateOption(postStateOptionField, callbackRequest, userAuthorisation));
-    }
-
-    private void updateCaseWithPostStateOption(String sendOrderPostStateOptionCcdField,
-                                               CallbackRequest callbackRequest,
-                                               String userAuthorisation) {
+    private void updateCaseWithPostStateOption(CallbackRequest callbackRequest, String userAuthorisation) {
 
         SendOrderPostStateOption sendOrderPostStateOption =
-            getSendOrderPostStateOption(sendOrderPostStateOptionCcdField);
+            getSendOrderPostStateOption(
+                (String) callbackRequest.getCaseDetails().getData().get(SEND_ORDER_POST_STATE_OPTION_FIELD));
 
         if (!SendOrderPostStateOption.ORDER_SENT.equals(sendOrderPostStateOption)) {
             callbackRequest.getCaseDetails().getData().put(SEND_ORDER_POST_STATE_OPTION_FIELD, null);

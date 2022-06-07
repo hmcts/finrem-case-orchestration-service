@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
@@ -8,11 +7,10 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public enum SendOrderPostStateOption {
 
-    @JsonProperty("prepareForHearing")
     PREPARE_FOR_HEARING("prepareForHearing", EventType.PREPARE_FOR_HEARING),
     CLOSE("close", EventType.CLOSE),
-    @JsonProperty("orderSent")
-    ORDER_SENT("orderSent", EventType.NONE);
+    ORDER_SENT("orderSent", EventType.NONE),
+    NONE("", EventType.NONE);
 
     private final String ccdField;
 
@@ -29,8 +27,6 @@ public enum SendOrderPostStateOption {
     public static SendOrderPostStateOption getSendOrderPostStateOption(String ccdType) {
         return Arrays.stream(SendOrderPostStateOption.values())
             .filter(option -> option.ccdField.equals(ccdType))
-            .findFirst().orElseThrow(IllegalArgumentException::new);
+            .findFirst().orElse(SendOrderPostStateOption.NONE);
     }
-
-
 }
