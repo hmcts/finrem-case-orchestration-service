@@ -560,10 +560,6 @@ public class UploadCaseFilesAboutToSubmitHandler {
 
         List<ContestedUploadedDocumentData> correspondenceCollection = getDocumentCollection(caseData, collection);
         correspondenceCollection.addAll(correspondenceDocsFiltered);
-
-        if(!correspondenceCollection.isEmpty()) {
-            caseData.put(party.equals(APPLICANT) ? CONTESTED_APPLICANT_DOCUMENTS_UPLOADED : CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED, getDocumentDetails(correspondenceCollection));
-        }
         log.info("Adding items: {}, to Correspondence Docs Collection", correspondenceDocsFiltered);
         uploadedDocuments.removeAll(correspondenceDocsFiltered);
 
