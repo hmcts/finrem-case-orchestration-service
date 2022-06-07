@@ -7,16 +7,24 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentDetailsData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.lang.System.currentTimeMillis;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ALL_DOCUMENTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CONFIDENTIAL_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CORRESPONDENCE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_EVIDENCE_COLLECTION;
@@ -32,6 +40,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_OTHER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_QUESTIONNAIRES_ANSWERS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_STATEMENTS_EXHIBITS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICANT_DOCUMENTS_UPLOADED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CASE_DOCUMENTS_UPLOADED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_CORRESPONDENCE_COLLECTION;
@@ -73,6 +84,8 @@ public class UploadCaseFilesAboutToSubmitHandler {
 
         List<ContestedUploadedDocumentData> uploadedDocuments = getDocumentCollection(caseData, CONTESTED_UPLOADED_DOCUMENTS);
 
+        caseData.put(ALL_DOCUMENTS, uploadedDocuments);
+
         if (respondentJourneyEnabled) {
             filterConfidentialDocs(uploadedDocuments, caseData, APPLICANT_CONFIDENTIAL_DOCS_COLLECTION, APPLICANT);
             filterHearingBundles(uploadedDocuments, caseData, APP_HEARING_BUNDLES_COLLECTION, APPLICANT);
@@ -109,7 +122,17 @@ public class UploadCaseFilesAboutToSubmitHandler {
             filterTrialBundle(uploadedDocuments, caseData, RESPONDENT_TRIAL_BUNDLE_COLLECTION, RESPONDENT);
         }
 
+        caseData.put(CONTESTED_APPLICANT_DOCUMENTS_UPLOADED, getDocumentDetails(getPartyDocuments(caseData, APPLICANT)));
+        caseData.put(CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED, getDocumentDetails(getPartyDocuments(caseData, RESPONDENT)));
+        caseData.put(CONTESTED_CASE_DOCUMENTS_UPLOADED, getDocumentDetails(getPartyDocuments(caseData, null)));
+
         caseData.put(CONTESTED_UPLOADED_DOCUMENTS, uploadedDocuments);
+    }
+
+    private List<ContestedUploadedDocumentData> getPartyDocuments(Map<String, Object> caseData, String party) {
+        return getAllUploadedDocuments(caseData).stream().filter(d -> d.getUploadedCaseDocument().getCaseDocuments() != null
+            && d.getUploadedCaseDocument().getCaseDocumentParty() != null
+            && d.getUploadedCaseDocument().getCaseDocumentParty().equals(party)).collect(Collectors.toList());
     }
 
     private List<ContestedUploadedDocumentData> getDocumentCollection(Map<String, Object> caseData, String collection) {
@@ -119,6 +142,31 @@ public class UploadCaseFilesAboutToSubmitHandler {
 
         return mapper.convertValue(caseData.get(collection), new TypeReference<>() {
         });
+    }
+
+    private List<DocumentDetailsData> getDocumentDetails(List<ContestedUploadedDocumentData> documentDetails) {
+
+        List<DocumentDetailsData> documents = new ArrayList<>();
+
+        for(int i = 0; i < documentDetails.size(); i++) {
+            DocumentDetailsData data = new DocumentDetailsData();
+            DocumentDetails details = new DocumentDetails();
+
+            details.setDocumentDateAdded(String.valueOf(new SimpleDateFormat("dd/MM/yyyy").format(currentTimeMillis())));
+            ContestedUploadedDocument uploadedDocument = documentDetails.get(i).getUploadedCaseDocument();
+            if(uploadedDocument.getCaseDocuments() != null) {
+                details.setDocumentFileName(uploadedDocument.getCaseDocuments().getDocumentFilename());
+            }
+            data.setId(documentDetails.get(i).getId());
+            details.setDocumentType(uploadedDocument.getCaseDocumentType());
+            details.setRemoveLink("Remove");
+
+            data.setDocumentDetails(details);
+
+            documents.add(data);
+        }
+
+        return documents;
     }
 
     private boolean isTypeValidForCorrespondence(String caseDocumentType) {
@@ -509,6 +557,10 @@ public class UploadCaseFilesAboutToSubmitHandler {
 
         List<ContestedUploadedDocumentData> correspondenceCollection = getDocumentCollection(caseData, collection);
         correspondenceCollection.addAll(correspondenceDocsFiltered);
+
+        if(!correspondenceCollection.isEmpty()) {
+            caseData.put(party.equals(APPLICANT) ? CONTESTED_APPLICANT_DOCUMENTS_UPLOADED : CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED, getDocumentDetails(correspondenceCollection));
+        }
         log.info("Adding items: {}, to Correspondence Docs Collection", correspondenceDocsFiltered);
         uploadedDocuments.removeAll(correspondenceDocsFiltered);
 
@@ -585,5 +637,39 @@ public class UploadCaseFilesAboutToSubmitHandler {
             .map(ContestedUploadedDocument::getCaseDocumentType)
             .filter(type -> type.equals(TRIAL_BUNDLE_TYPE))
             .isPresent();
+    }
+
+    public void removeDeletedFilesFromCaseData(CaseDetails caseDetails) {
+
+        List<ContestedUploadedDocumentData> allDocuments = getDocumentCollection(caseDetails.getData(), ALL_DOCUMENTS);
+
+        Set<String> documentId = mapper.convertValue(caseDetails.getData().get(CONTESTED_CASE_DOCUMENTS_UPLOADED), new TypeReference<List<DocumentDetailsData>>() { })
+            .stream().map(DocumentDetailsData::getId).collect(Collectors.toSet());
+
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, allDocuments.stream().filter(document -> documentId.contains(document.getId())).collect(Collectors.toList()));
+
+        caseDetails.getData().put(CONTESTED_APPLICANT_DOCUMENTS_UPLOADED, allDocuments.stream()
+            .filter(document -> documentId.contains(document.getId()) && document.getUploadedCaseDocument().getCaseDocuments() != null
+            && document.getUploadedCaseDocument().getCaseDocumentParty() != null
+            && document.getUploadedCaseDocument().getCaseDocumentParty().equals(APPLICANT)).collect(Collectors.toList()));
+
+        caseDetails.getData().put(CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED, allDocuments.stream().filter(document -> documentId.contains(document.getId()) && document.getUploadedCaseDocument().getCaseDocuments() != null
+            && document.getUploadedCaseDocument().getCaseDocumentParty() != null
+            && document.getUploadedCaseDocument().getCaseDocumentParty().equals(RESPONDENT)).collect(Collectors.toList()));
+    }
+
+    List<ContestedUploadedDocumentData> getAllUploadedDocuments(Map<String, Object> caseData) {
+
+        Set<String> documentTypes = Set.of("appChronologiesCollection", "respChronologiesCollection", "formG", "appCaseSummariesCollection", "respFormEExhibitsCollection", "appOtherCollection",
+            "copyOfPaperFormA", "miniFormA", "formC", "respOtherCollection");
+
+       // Set<String> getAllDocumentIds =
+
+            return mapper.convertValue(caseData.entrySet().stream().filter(collection -> documentTypes.contains(collection.getKey()))
+                    .collect(Collectors.toList()), new TypeReference<>() {
+            });
+
+            //.stream().map(DocumentDetailsData::getId).collect(Collectors.toSet());
+        
     }
 }
