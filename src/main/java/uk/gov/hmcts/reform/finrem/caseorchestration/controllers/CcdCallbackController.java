@@ -57,9 +57,6 @@ public class CcdCallbackController {
 
         validateCaseData(callbackRequest);
 
-        //TODO: add Authorisation service logic
-        //authorisationService.authorise(authToken);
-
         return performRequest(ABOUT_TO_START, callbackRequest, authorisationToken);
     }
 
@@ -80,9 +77,6 @@ public class CcdCallbackController {
             callbackRequest.getCaseDetails().getId());
 
         validateCaseData(callbackRequest);
-
-        //TODO: add Authorisation service logic
-        //authorisationService.authorise(authToken);
 
         return performRequest(ABOUT_TO_SUBMIT, callbackRequest, authorisationToken);
     }
@@ -105,9 +99,6 @@ public class CcdCallbackController {
 
         validateCaseData(callbackRequest);
 
-        //TODO: add Authorisation service logic
-        //authorisationService.authorise(authToken);
-
         return performRequest(MID_EVENT, callbackRequest, authorisationToken);
     }
 
@@ -128,9 +119,6 @@ public class CcdCallbackController {
             callbackRequest.getCaseDetails().getId());
 
         validateCaseData(callbackRequest);
-
-        //TODO: add Authorisation service logic
-        //authorisationService.authorise(authToken);
 
         return performRequest(SUBMITTED, callbackRequest, authorisationToken);
     }
