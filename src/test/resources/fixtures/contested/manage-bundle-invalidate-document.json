@@ -1,0 +1,180 @@
+{
+  "event_id": "some_event_id",
+  "case_details": {
+    "id": "123",
+    "jurisdiction": "DIVORCE",
+    "state": "applicationDrafted",
+    "case_type_id": "FinancialRemedyContested",
+    "case_data": {
+      "PBANumber": "PBA123",
+      "PBAreference": "ABCD",
+      "consentOrder": {
+        "document_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d",
+        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+        "document_binary_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"
+      },
+      "d81Applicant": {
+        "document_url": "http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0635b",
+        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+        "document_binary_url": "http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0635b/binary"
+      },
+      "d81Respondent": {
+        "document_url": "http://document-management-store:8080/documents/e284fb20-47c6-4b3a-bd17-cb005666ab5f",
+        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+        "document_binary_url": "http://document-management-store:8080/documents/e284fb20-47c6-4b3a-bd17-cb005666ab5f/binary"
+      },
+      "solicitorFirm": "Mr",
+      "solicitorName": "Solictor",
+      "applicantLName": "Guy",
+      "authorisation3": "2010-01-01",
+      "solicitorEmail": "test@admin.com",
+      "solicitorPhone": "9963472494",
+      "applicantFMName": "Poor",
+      "authorisation2b": "test",
+      "otherCollection": [
+        {
+          "id": "c0c5b8cc-8bb5-41da-84bf-06be40b8fa77",
+          "value": {
+            "typeOfDocument": "ScheduleOfAssets",
+            "uploadedDocument": {
+              "document_url": "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-c06d1e6344ee",
+              "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+              "document_binary_url": "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-c06d1e6344ee/binary"
+            }
+          }
+        }
+      ],
+      "respondentEmail": null,
+      "respondentPhone": "9963472494",
+      "appRespondentRep": "No",
+      "consentOrderText": {
+        "document_url": "http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69",
+        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+        "document_binary_url": "http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69/binary"
+      },
+      "solicitorAddress": {
+        "County": "test",
+        "Country": "United Kingdom",
+        "PostCode": "b1 1ab",
+        "PostTown": "SRIKALAHASTI",
+        "AddressLine1": "House no: 6-354-2, Gandhi Street",
+        "AddressLine2": "Srikalahasti, Chittor District",
+        "AddressLine3": "test"
+      },
+      "authorisationFirm": "test",
+      "authorisationName": "test",
+      "hearingUploadBundle": [
+        {
+          "id": "d090f7a0-5897-4577-a07f-2137483cb1f9",
+          "value": {
+            "hearingBundleDate": "2022-08-20",
+            "hearingBundleDocuments": [
+              {
+                "id": "d389989b-4ac5-49e4-9164-31054f0bdfdc",
+                "value": {
+                  "bundleDocuments": {
+                    "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/676bc5f8-020d-4504-8143-369aeedb130e",
+                    "document_filename": "NocLitigantSolicitorAddedLetter.docx",
+                    "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/676bc5f8-020d-4504-8143-369aeedb130e/binary"
+                  },
+                  "bundleUploadDate": "2022-05-05T18:09:42.411"
+                }
+              },
+              {
+                "id": "1e2d6f5e-bcb0-48cd-a43d-6d21cc993f8d",
+                "value": {
+                  "bundleDocuments": {
+                    "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/acafec84-71e6-4d7c-8490-c59af095b63c",
+                    "document_filename": "InterimHearingNotice-1649341720076259.txt",
+                    "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/acafec84-71e6-4d7c-8490-c59af095b63c/binary"
+                  },
+                  "bundleUploadDate": "2022-05-05T17:09:42.411"
+                }
+              }
+            ],
+            "hearingBundleDescription": "This is First Hearing Set"
+          }
+        },
+        {
+          "id": "83922295-dbaa-471f-95ff-93efdf200fab",
+          "value": {
+            "hearingBundleDate": "2022-12-31",
+            "hearingBundleDocuments": [
+              {
+                "id": "257c7adf-0f89-4e90-a79f-7146dadaa815",
+                "value": {
+                  "bundleDocuments": {
+                    "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/1fe5a5dc-02d3-430a-a036-974e1823c1e7",
+                    "document_filename": "NocLitigantSolicitorAddedLetter.pdf",
+                    "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/1fe5a5dc-02d3-430a-a036-974e1823c1e7/binary"
+                  },
+                  "bundleUploadDate": "2022-07-07T17:09:42.411"
+                }
+              }
+            ],
+            "hearingBundleDescription": "This is second Hearing Set"
+          }
+        }
+      ],
+      "divorceCaseNumber": "DD12D12345",
+      "issueDate": "2019-03-04",
+      "fastTrackDecision": "Yes",
+      "pensionCollection": [
+        {
+          "id": "ad403dd7-75da-4ca6-8cf6-24a5e42f5bf4",
+          "value": {
+            "typeOfDocument": "Form P2",
+            "uploadedDocument": {
+              "document_url": "http://document-management-store:8080/documents/fcecdc83-2070-4d3d-923e-5cca58f8a589",
+              "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+              "document_binary_url": "http://document-management-store:8080/documents/fcecdc83-2070-4d3d-923e-5cca58f8a589/binary"
+            }
+          }
+        }
+      ],
+      "respondentAddress": {
+        "County": "Essex",
+        "Country": "United Kingdom",
+        "PostCode": "SE12 9SE",
+        "PostTown": "London",
+        "AddressLine1": "252 Marvels Lane",
+        "AddressLine2": "AddressGlobalUK",
+        "AddressLine3": "London"
+      },
+      "solicitorDXnumber": null,
+      "appRespondentLName": "Korivi",
+      "solicitorReference": "LL01",
+      "appRespondentFMName": "test",
+      "divorceStageReached": "Decree Nisi",
+      "helpWithFeesQuestion": "No",
+      "natureOfApplication2": [
+        "Lump Sum Order",
+        "Periodical Payment Order",
+        "Pension Sharing Order",
+        "Pension Attachment Order",
+        "Pension Compensation Sharing Order",
+        "Pension Compensation Attachment Order",
+        "A settlement or a transfer of property",
+        "Property Adjustment Order"
+      ],
+      "natureOfApplication5": "No",
+      "natureOfApplication6": [
+        "Step Child or Step Children",
+        "disability expenses",
+        "In addition to child support",
+        "training",
+        "When not habitually resident"
+      ],
+      "natureOfApplication7": "test",
+      "natureOfApplication3a": "test",
+      "natureOfApplication3b": "test",
+      "divorceUploadEvidence1": {
+        "document_url": "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336",
+        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+        "document_binary_url": "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336/binary"
+      },
+      "orderForChildrenQuestion1": "Yes",
+      "solicitorAgreeToReceiveEmails": "No"
+    }
+  }
+}
