@@ -31,7 +31,6 @@ public class SendOrderContestedSubmittedHandler implements CallbackHandler {
     private final CaseDataService caseDataService;
     private final FeatureToggleService featureToggleService;
     private final NotificationService notificationService;
-
     private final CcdService ccdService;
 
     @Override
