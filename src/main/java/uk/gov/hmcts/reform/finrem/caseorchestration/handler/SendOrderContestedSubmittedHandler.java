@@ -69,8 +69,8 @@ public class SendOrderContestedSubmittedHandler implements CallbackHandler {
     }
 
     private boolean isOptionThatRequireUpdate(SendOrderPostStateOption sendOrderPostStateOption) {
-        return !SendOrderPostStateOption.ORDER_SENT.equals(sendOrderPostStateOption)
-            && !SendOrderPostStateOption.NONE.equals(sendOrderPostStateOption);
+        return SendOrderPostStateOption.PREPARE_FOR_HEARING.equals(sendOrderPostStateOption)
+            || SendOrderPostStateOption.CLOSE.equals(sendOrderPostStateOption);
     }
 
     private void sendNotifications(CallbackRequest callbackRequest) {
