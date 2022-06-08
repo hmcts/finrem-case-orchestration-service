@@ -89,7 +89,7 @@ public class HearingDocumentController extends BaseController {
 
         // NOTE TO SELF, TEST BOTH PAPER AND DIGITAL JOURNEYS
         if (caseDataService.isContestedApplication(caseDetails) && (!notificationService.shouldEmailRespondentSolicitor(caseDetails.getData())
-            || !notificationService.shouldEmailContestedAppSolicitor(caseDetails.getData()))){
+            || !notificationService.shouldEmailContestedAppSolicitor(caseDetails.getData()))) {
             CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
             if (caseDetailsBefore != null && hearingDocumentService.alreadyHadFirstHearing(caseDetailsBefore)) {
                 log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
