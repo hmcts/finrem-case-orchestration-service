@@ -34,7 +34,7 @@ You can run the application by executing following command:
 
 The application will start locally on: `http://localhost:9000`
 
-### Running the service with CCD (and IDAM) locally (Developers and QA)
+### Running the service with CCD (and IDAM) locally (Developers and QAs)
 
 The best way to develop and test services in Financial Remedy is to use `rse-cft-lib` plugin by running:
 
