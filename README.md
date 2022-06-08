@@ -67,8 +67,11 @@ to download the service images from Azure Registry.
 az acr login --name hmctspublic --subscription DCD-CNP-Prod
 az acr login --name hmctsprivate --subscription DCD-CNP-Prod
 ```
+
+- XUI can be accessed on localhost:3000
+
 #### Gotchas
-when Running for the first time ever the services it's advised to run each service build with:
+When Running for the first time ever the services, it's advised to run each service build with:
 
 ```bash
 ./gradlew clean build
