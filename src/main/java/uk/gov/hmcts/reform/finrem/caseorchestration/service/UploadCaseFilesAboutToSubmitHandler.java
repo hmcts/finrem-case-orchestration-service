@@ -615,7 +615,8 @@ public class UploadCaseFilesAboutToSubmitHandler {
 
         for (String collection : collectionTypes) {
 
-            Set<String> remainingDocumentsInCollection = findDocumentIdsForRemainingDocumentsInCollection(caseData, documentType);
+            Set<String> remainingDocumentsInCollection = mapper.convertValue(caseData.get(documentType), new TypeReference<List<DocumentDetailsData>>() { })
+                .stream().map(DocumentDetailsData::getId).collect(Collectors.toSet());
 
             List<ContestedUploadedDocumentData> collectionReturned = ( List<ContestedUploadedDocumentData>) caseData.get(collection);
 
@@ -626,11 +627,6 @@ public class UploadCaseFilesAboutToSubmitHandler {
             caseData.put(collection, mapper.convertValue(caseData.get(collection), new TypeReference<List<ContestedUploadedDocumentData>>() {
             }).stream().filter(contestedUploadedDocumentData -> remainingDocumentsInCollection.contains(contestedUploadedDocumentData.getId())).collect(Collectors.toList()));
         }
-    }
-
-    private Set<String> findDocumentIdsForRemainingDocumentsInCollection(Map<String, Object> caseData, String collection) {
-        return mapper.convertValue(caseData.get(collection), new TypeReference<List<DocumentDetailsData>>() { })
-            .stream().map(DocumentDetailsData::getId).collect(Collectors.toSet());
     }
 
     private List<ContestedUploadedDocumentData> filterApplicantOrRespondentDocuments(Map<String, Object> caseData, String party) {
