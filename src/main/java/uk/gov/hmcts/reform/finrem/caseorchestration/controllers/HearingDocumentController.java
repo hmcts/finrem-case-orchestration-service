@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -17,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
@@ -27,11 +30,16 @@ import javax.validation.constraints.NotNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
 
 @RestController
 @RequiredArgsConstructor
@@ -44,6 +52,7 @@ public class HearingDocumentController extends BaseController {
     private final ValidateHearingService validateHearingService;
     private final CaseDataService caseDataService;
     private final NotificationService notificationService;
+    private final ObjectMapper objectMapper;
 
     @PostMapping(path = "/documents/hearing", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles Form C and G generation. Serves as a callback from CCD")
@@ -112,6 +121,7 @@ public class HearingDocumentController extends BaseController {
         log.info("Storing Additional Hearing Document for Case ID: {}", caseDetails.getId());
         try {
             additionalHearingDocumentService.createAndStoreAdditionalHearingDocuments(authorisationToken, caseDetails);
+            sortDirectionDetailsCollection(caseData);
         } catch (CourtDetailsParseException | JsonProcessingException e) {
             log.error(e.getMessage());
             errors.add(e.getMessage());
@@ -122,5 +132,24 @@ public class HearingDocumentController extends BaseController {
             .data(caseData)
             .errors(errors)
             .build());
+    }
+
+    private void sortDirectionDetailsCollection(Map<String, Object> caseData) {
+        List<DirectionDetailsCollectionData> directionDetailsCollectionList = Optional.ofNullable(caseData.get(DIRECTION_DETAILS_COLLECTION_CT))
+            .map(this::convertToDirectionDetailsDataList).orElse(Collections.emptyList());
+
+        if (! directionDetailsCollectionList.isEmpty()) {
+            List<DirectionDetailsCollectionData> sortedDirectionDetailsCollectionList = directionDetailsCollectionList
+                .stream()
+                .filter(e -> (e.getDirectionDetailsCollection() != null &&  e.getDirectionDetailsCollection().getDateOfHearing() != null))
+                .sorted(Comparator.comparing(e -> e.getDirectionDetailsCollection().getDateOfHearing()))
+                .collect(Collectors.toList());
+            caseData.put(DIRECTION_DETAILS_COLLECTION_CT, sortedDirectionDetailsCollectionList);
+        }
+    }
+
+    private List<DirectionDetailsCollectionData> convertToDirectionDetailsDataList(Object object) {
+        return objectMapper.convertValue(object, new TypeReference<>() {
+        });
     }
 }
