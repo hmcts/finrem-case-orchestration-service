@@ -7,17 +7,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentDetailsData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,7 +22,6 @@ import java.util.stream.Collectors;
 
 import static java.lang.System.currentTimeMillis;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ALL_DOCUMENTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CONFIDENTIAL_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CORRESPONDENCE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_EVIDENCE_COLLECTION;
@@ -86,8 +81,6 @@ public class UploadCaseFilesAboutToSubmitHandler {
 
         List<ContestedUploadedDocumentData> uploadedDocuments = getDocumentCollection(caseData, CONTESTED_UPLOADED_DOCUMENTS);
 
-        caseData.put(ALL_DOCUMENTS, uploadedDocuments);
-
         if (respondentJourneyEnabled) {
             filterConfidentialDocs(uploadedDocuments, caseData, APPLICANT_CONFIDENTIAL_DOCS_COLLECTION, APPLICANT);
             filterHearingBundles(uploadedDocuments, caseData, APP_HEARING_BUNDLES_COLLECTION, APPLICANT);
@@ -124,18 +117,11 @@ public class UploadCaseFilesAboutToSubmitHandler {
             filterTrialBundle(uploadedDocuments, caseData, RESPONDENT_TRIAL_BUNDLE_COLLECTION, RESPONDENT);
         }
 
-        caseData.put(CONTESTED_APPLICANT_DOCUMENTS_UPLOADED, getDocumentDetails(getPartyDocuments(caseData, APPLICANT)));
-        caseData.put(CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED, getDocumentDetails(getPartyDocuments(caseData, RESPONDENT)));
-        caseData.put(CONTESTED_CASE_DOCUMENTS_UPLOADED, getDocumentDetails(getPartyDocuments(caseData, null)));
+        caseData.put(CONTESTED_APPLICANT_DOCUMENTS_UPLOADED, extractFieldsToDocumentDetailsCollection(filterApplicantOrRespondentDocuments(caseData, APPLICANT)));
+        caseData.put(CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED, extractFieldsToDocumentDetailsCollection(filterApplicantOrRespondentDocuments(caseData, RESPONDENT)));
+        caseData.put(CONTESTED_CASE_DOCUMENTS_UPLOADED, extractFieldsToDocumentDetailsCollection(filterApplicantOrRespondentDocuments(caseData, null)));
 
         caseData.put(CONTESTED_UPLOADED_DOCUMENTS, uploadedDocuments);
-    }
-
-    private List<ContestedUploadedDocumentData> getPartyDocuments(Map<String, Object> caseData, String party) {
-        return getAllUploadedDocuments(caseData).stream().filter(document -> document.getUploadedCaseDocument() != null &&
-            document.getUploadedCaseDocument().getCaseDocuments() != null
-            && document.getUploadedCaseDocument().getCaseDocumentParty() != null
-            && document.getUploadedCaseDocument().getCaseDocumentParty().equals(party)).collect(Collectors.toList());
     }
 
     private List<ContestedUploadedDocumentData> getDocumentCollection(Map<String, Object> caseData, String collection) {
@@ -146,32 +132,6 @@ public class UploadCaseFilesAboutToSubmitHandler {
         return mapper.convertValue(caseData.get(collection), new TypeReference<>() {
         });
     }
-
-    private List<DocumentDetailsData> getDocumentDetails(List<ContestedUploadedDocumentData> documentDetails) {
-
-        List<DocumentDetailsData> documents = new ArrayList<>();
-
-        for(int i = 0; i < documentDetails.size(); i++) {
-            DocumentDetailsData data = new DocumentDetailsData();
-            DocumentDetails details = new DocumentDetails();
-
-            details.setDocumentDateAdded(String.valueOf(new SimpleDateFormat("dd/MM/yyyy").format(currentTimeMillis())));
-            ContestedUploadedDocument uploadedDocument = documentDetails.get(i).getUploadedCaseDocument();
-            if(uploadedDocument.getCaseDocuments() != null) {
-                details.setDocumentFileName(uploadedDocument.getCaseDocuments().getDocumentFilename());
-            }
-            data.setId(documentDetails.get(i).getId());
-            details.setDocumentType(uploadedDocument.getCaseDocumentType());
-            details.setRemoveLink("Remove");
-
-            data.setDocumentDetails(details);
-
-            documents.add(data);
-        }
-
-        return documents;
-    }
-
     private boolean isTypeValidForCorrespondence(String caseDocumentType) {
         return caseDocumentType.equals("Letter from Applicant");
     }
@@ -638,25 +598,46 @@ public class UploadCaseFilesAboutToSubmitHandler {
             .isPresent();
     }
 
-    public void removeDeletedFilesFromCaseData(CaseDetails caseDetails) {
+    public Map<String, Object> removeDeletedFilesFromCaseData(Map<String, Object> caseData) {
 
-        List<ContestedUploadedDocumentData> allDocuments = getAllUploadedDocuments(caseDetails.getData());
+        Set<String> appCollectionTypes = Set.of("appChronologiesCollection", "appCaseSummariesCollection", "appOtherCollection");
 
-        getIdsForCollection(caseDetails, allDocuments, CONTESTED_CASE_DOCUMENTS_UPLOADED, null);
+        Set<String> respCollectionTypes = Set.of("respChronologiesCollection", "respFormEExhibitsCollection", "respOtherCollection");
 
-        getIdsForCollection(caseDetails, allDocuments, CONTESTED_APPLICANT_DOCUMENTS_UPLOADED, APPLICANT);
+        removeDeletedFilesFromCollections(caseData, appCollectionTypes, CONTESTED_APPLICANT_DOCUMENTS_UPLOADED);
 
-        getIdsForCollection(caseDetails, allDocuments, CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED, RESPONDENT);
+        removeDeletedFilesFromCollections(caseData, respCollectionTypes, CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED);
+
+        return caseData;
     }
 
-    private void getIdsForCollection(CaseDetails caseDetails, List<ContestedUploadedDocumentData> allDocuments, String collection, String party) {
-        Set<String> documentIds = mapper.convertValue(caseDetails.getData().get(collection), new TypeReference<List<DocumentDetailsData>>() { })
-            .stream().map(DocumentDetailsData::getId).collect(Collectors.toSet());
+    private void removeDeletedFilesFromCollections(Map<String, Object> caseData, Set<String> collectionTypes, String documentType) {
 
-        caseDetails.getData().put(collection, allDocuments.stream()
-            .filter(document -> documentIds.contains(document.getId()) && document.getUploadedCaseDocument().getCaseDocuments() != null
+        for (String collection : collectionTypes) {
+
+            Set<String> remainingDocumentsInCollection = findDocumentIdsForRemainingDocumentsInCollection(caseData, documentType);
+
+            List<ContestedUploadedDocumentData> collectionReturned = ( List<ContestedUploadedDocumentData>) caseData.get(collection);
+
+            if(collectionReturned == null) {
+                continue;
+            }
+
+            caseData.put(collection, mapper.convertValue(caseData.get(collection), new TypeReference<List<ContestedUploadedDocumentData>>() {
+            }).stream().filter(contestedUploadedDocumentData -> remainingDocumentsInCollection.contains(contestedUploadedDocumentData.getId())).collect(Collectors.toList()));
+        }
+    }
+
+    private Set<String> findDocumentIdsForRemainingDocumentsInCollection(Map<String, Object> caseData, String collection) {
+        return mapper.convertValue(caseData.get(collection), new TypeReference<List<DocumentDetailsData>>() { })
+            .stream().map(DocumentDetailsData::getId).collect(Collectors.toSet());
+    }
+
+    private List<ContestedUploadedDocumentData> filterApplicantOrRespondentDocuments(Map<String, Object> caseData, String party) {
+        return getAllUploadedDocuments(caseData).stream().filter(document -> document.getUploadedCaseDocument() != null &&
+            document.getUploadedCaseDocument().getCaseDocuments() != null
             && document.getUploadedCaseDocument().getCaseDocumentParty() != null
-            && document.getUploadedCaseDocument().getCaseDocumentParty().equals(party)).collect(Collectors.toList()));
+            && document.getUploadedCaseDocument().getCaseDocumentParty().equals(party)).collect(Collectors.toList());
     }
 
     private List<ContestedUploadedDocumentData> getAllUploadedDocuments(Map<String, Object> caseData) {
@@ -667,10 +648,39 @@ public class UploadCaseFilesAboutToSubmitHandler {
 
         for (String collection : collectionTypes) {
 
-            allDocuments.addAll(mapper.convertValue(caseData.get(collection), new TypeReference<List<ContestedUploadedDocumentData>>() {
-            }));
+            if(caseData.get(collection) != null) {
+                allDocuments.addAll(mapper.convertValue(caseData.get(collection), new TypeReference<List<ContestedUploadedDocumentData>>() {
+                }));
+            }
         }
 
         return allDocuments;
+    }
+
+    private List<DocumentDetailsData> extractFieldsToDocumentDetailsCollection(List<ContestedUploadedDocumentData> documentDetails) {
+
+        List<DocumentDetailsData> documents = new ArrayList<>();
+
+        for (ContestedUploadedDocumentData documentDetail : documentDetails) {
+            DocumentDetailsData documentDetailsData = new DocumentDetailsData();
+            DocumentDetails details = new DocumentDetails();
+
+            details.setDocumentDateAdded(new SimpleDateFormat("dd/MM/yyyy").format(currentTimeMillis()));
+
+            ContestedUploadedDocument uploadedDocument = documentDetail.getUploadedCaseDocument();
+
+            if (uploadedDocument.getCaseDocuments() != null) {
+                details.setDocumentFileName(uploadedDocument.getCaseDocuments().getDocumentFilename());
+            }
+            documentDetailsData.setId(documentDetail.getId());
+            details.setDocumentType(uploadedDocument.getCaseDocumentType());
+            details.setRemoveLink("Remove");
+
+            documentDetailsData.setDocumentDetails(details);
+
+            documents.add(documentDetailsData);
+        }
+
+        return documents;
     }
 }

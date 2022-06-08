@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -66,10 +67,6 @@ public class ManageCaseDocumentsContoller extends BaseController{
         AboutToStartOrSubmitCallbackResponse response =
             uploadCaseFilesAboutToSubmitHandler.handle(caseDetails.getData());
 
-        caseDetails.getData().put(CONTESTED_APPLICANT_DOCUMENTS_UPLOADED, caseDetails.getData().get(CONTESTED_APPLICANT_DOCUMENTS_UPLOADED));
-        caseDetails.getData().put(CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED, caseDetails.getData().get(CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED));
-        caseDetails.getData().put(CONTESTED_CASE_DOCUMENTS_UPLOADED, caseDetails.getData().get(CONTESTED_CASE_DOCUMENTS_UPLOADED));
-
         log.info("Successfully filtered documents to relevant party for Case ID: {}", caseId);
 
         return ResponseEntity.ok(response);
@@ -92,7 +89,7 @@ public class ManageCaseDocumentsContoller extends BaseController{
         Long caseId = caseDetails.getId();
         log.info("Received request to upload Contested case documents for Case ID: {}", caseId);
 
-        uploadCaseFilesAboutToSubmitHandler.removeDeletedFilesFromCaseData(caseDetails);
+        uploadCaseFilesAboutToSubmitHandler.handle(uploadCaseFilesAboutToSubmitHandler.removeDeletedFilesFromCaseData(caseDetails.getData()));
 
         log.info("Successfully filtered documents to relevant party for Case ID: {}", caseId);
 
