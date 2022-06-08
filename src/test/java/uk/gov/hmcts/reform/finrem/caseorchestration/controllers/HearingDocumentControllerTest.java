@@ -327,19 +327,19 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
         verify(additionalHearingDocumentService).sendAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
     }
 
-        public void generateHearingDocumentDirectionOrderMostRecentEnteredAtTheTop() throws Exception {
-            requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
-                .getResource("/fixtures/contested/validate-hearing-successfully.json")).toURI()));
-            mvc.perform(post(DIRECTION_ORDER_URL)
-                    .content(requestContent.toString())
-                    .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                    .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.directionDetailsCollection[0].value.dateOfHearing", is("2020-07-01")))
-                .andExpect(jsonPath("$.data.directionDetailsCollection[1].value.dateOfHearing", is("2022-12-01")))
-                .andExpect(jsonPath("$.data.directionDetailsCollection[2].value.dateOfHearing", is("2023-10-01")));
+    public void generateHearingDocumentDirectionOrderMostRecentEnteredAtTheTop() throws Exception {
+        requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
+            .getResource("/fixtures/contested/validate-hearing-successfully.json")).toURI()));
+        mvc.perform(post(DIRECTION_ORDER_URL)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.directionDetailsCollection[0].value.dateOfHearing", is("2020-07-01")))
+            .andExpect(jsonPath("$.data.directionDetailsCollection[1].value.dateOfHearing", is("2022-12-01")))
+            .andExpect(jsonPath("$.data.directionDetailsCollection[2].value.dateOfHearing", is("2023-10-01")));
 
-            verify(additionalHearingDocumentService, times(1)).createAndStoreAdditionalHearingDocuments(any(), any());
+        verify(additionalHearingDocumentService, times(1)).createAndStoreAdditionalHearingDocuments(any(), any());
 
     }
 }
