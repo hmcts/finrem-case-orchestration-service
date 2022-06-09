@@ -10,6 +10,7 @@ public enum EventType {
     SEND_ORDER("FR_sendOrder"),
     PREPARE_FOR_HEARING("FR_prepareForHearing"),
     CLOSE("FR_close"),
+    UPLOAD_APPROVED_ORDER("FR_uploadApprovedOrder"),
     NONE("");
 
     private final String ccdType;
