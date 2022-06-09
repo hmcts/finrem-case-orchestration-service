@@ -34,7 +34,7 @@ You can run the application by executing following command:
 
 The application will start locally on: `http://localhost:9000`
 
-### Running the service with CCD (and IDAM) locally (Developers and QA)
+### Running the service with CCD (and IDAM) locally (Developers and QAs)
 
 The best way to develop and test services in Financial Remedy is to use `rse-cft-lib` plugin by running:
 
@@ -46,12 +46,6 @@ This will spin up finrem-case-orchestration along with the base CCD services
 and a few docker containers for Postgres, ES, LS and XUI:
 
 on `build.gradle` you can find our customisation for the plugin task on `bootWithCCD`:
-
-- if running it with `authMode = uk.gov.hmcts.rse.AuthMode.AAT`, 
-an `.aat-env` file is needed so the automated process can set up the environment variables
-to point the services to AAT. As these will contain service keys, we are not keeping these under source control, 
-ask a colleague to provide them or copy them from the pods running in AAT.
-(As AAT is heavily used on this setup you must be always on the VPN)
 
 - if running it with `authMode = uk.gov.hmcts.rse.AuthMode.Local` in addition to CCD services an IDAM and S2S simulators
 are also made available so there is no dependency on AAT. 
@@ -67,9 +61,27 @@ to download the service images from Azure Registry.
 az acr login --name hmctspublic --subscription DCD-CNP-Prod
 az acr login --name hmctsprivate --subscription DCD-CNP-Prod
 ```
-#### Gotchas on macOS
+
+- XUI can be accessed on localhost:3000
+
+(As AAT is heavily used on this setup you must be always on the VPN)
+
+#### Gotchas
+When Running for the first time ever the services, it's advised to run each service build with:
+
+```bash
+./gradlew clean build
+```
+
+and on finrem-ccd-definitions folder, please run:
+
+```bash
+yarn install && yarn reset-ccd-submodule
+```
+
 - You must have Docker Desktop running; the AAT setup requires 3GB memory minimum and the Local setup will vary depending on how many services you will be running locally
 
+on macOS:
 - The IDAM Simulator runs on port 5000, so it is necessary to disable macOS' AirPlay Receiver server in: 
 Settings > Sharing > AirPlay Receiver
 
