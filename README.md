@@ -47,12 +47,6 @@ and a few docker containers for Postgres, ES, LS and XUI:
 
 on `build.gradle` you can find our customisation for the plugin task on `bootWithCCD`:
 
-- if running it with `authMode = uk.gov.hmcts.rse.AuthMode.AAT`, 
-an `.aat-env` file is needed so the automated process can set up the environment variables
-to point the services to AAT. As these will contain service keys, we are not keeping these under source control, 
-ask a colleague to provide them or copy them from the pods running in AAT.
-(As AAT is heavily used on this setup you must be always on the VPN)
-
 - if running it with `authMode = uk.gov.hmcts.rse.AuthMode.Local` in addition to CCD services an IDAM and S2S simulators
 are also made available so there is no dependency on AAT. 
 
@@ -69,6 +63,8 @@ az acr login --name hmctsprivate --subscription DCD-CNP-Prod
 ```
 
 - XUI can be accessed on localhost:3000
+
+(As AAT is heavily used on this setup you must be always on the VPN)
 
 #### Gotchas
 When Running for the first time ever the services, it's advised to run each service build with:
