@@ -3,14 +3,13 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.SendOrderContestedAboutToSubmitHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -29,13 +28,13 @@ public class ContestedOrderControllerTest extends BaseControllerTest {
 
     @MockBean
     private IdamService idamService;
+
     @MockBean
-    private CaseDataService caseDataService;
+    private SendOrderContestedAboutToSubmitHandler sendOrderContestedAboutToSubmitHandler;
 
     @Test
     public void shouldThrowExceptionWhenHearingDateNotFound() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
-        when(caseDataService.isContestedApplication(any())).thenReturn(true);
 
         loadRequestContentWith(CONTESTED_VALIDATE_HEARING_DATE_JSON);
         mvc.perform(post("/case-orchestration//contested/validateHearingDate")
@@ -51,7 +50,6 @@ public class ContestedOrderControllerTest extends BaseControllerTest {
     @Test
     public void shouldSuccessfullyProcessWhenHearingDateFound() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
-        when(caseDataService.isContestedApplication(any())).thenReturn(true);
 
         loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
         mvc.perform(post("/case-orchestration//contested/validateHearingDate")
@@ -65,7 +63,6 @@ public class ContestedOrderControllerTest extends BaseControllerTest {
     @Test
     public void putLastetBundleOnTop() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
-        when(caseDataService.isContestedApplication(any())).thenReturn(true);
 
         loadRequestContentWith(CONTESTED_VALIDATE_HEARING_DATE_JSON);
         mvc.perform(post("/case-orchestration/contested/sortUploadedHearingBundles")
@@ -96,7 +93,6 @@ public class ContestedOrderControllerTest extends BaseControllerTest {
     @Test
     public void shouldThrowErrorWhenUploadedDocIsNotPdf() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
-        when(caseDataService.isContestedApplication(any())).thenReturn(true);
 
         loadRequestContentWith(CONTESTED_VALIDATE_INVALID_DOC_JSON);
         mvc.perform(post("/case-orchestration//contested/sortUploadedHearingBundles")

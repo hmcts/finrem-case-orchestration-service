@@ -11,12 +11,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.SendOrderContestedAboutToSubmitHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingBundle;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingBundleItems;
@@ -37,6 +39,7 @@ import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_UPLOAD_BUNDLE_COLLECTION;
 
@@ -47,6 +50,33 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class ContestedOrderController extends BaseController {
 
     private final ObjectMapper objectMapper;
+    private final SendOrderContestedAboutToSubmitHandler sendOrderContestedAboutToSubmitHandler;
+
+    @PostMapping(path = "/contested/send-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Handles Consent order approved generation. Serves as a callback from CCD")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
+            response = AboutToStartOrSubmitCallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request"),
+        @ApiResponse(code = 500, message = "Internal Server Error")
+    })
+    //Todo: to be removed once dfr1018 merged to prod
+    @Deprecated
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> stampFinalOrder(
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+
+        validateCaseData(callback);
+
+        CaseDetails caseDetails = callback.getCaseDetails();
+        log.info("Starting to send contested order for case {}", caseDetails.getId());
+
+        sendOrderContestedAboutToSubmitHandler.handle(callback, authToken);
+
+        log.info("Finished sending contested order for case {}", caseDetails.getId());
+
+        return ResponseEntity.ok(sendOrderContestedAboutToSubmitHandler.handle(callback, authToken));
+    }
 
     @PostMapping(path = "/contested/validateHearingDate", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "check hearing date")
