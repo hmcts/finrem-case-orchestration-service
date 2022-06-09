@@ -28,13 +28,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotific
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INCLUDES_REPRESENTATIVE_UPDATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOC_PARTY;
 
@@ -403,35 +401,6 @@ public class NotificationsController extends BaseController {
         if (featureToggleService.isRespondentJourneyEnabled() && notificationService.shouldEmailRespondentSolicitor(caseData)) {
             log.info("Sending Contested 'Application Issued' email notification to Respondent Solicitor");
             notificationService.sendContestedApplicationIssuedEmailToRespondentSolicitor(caseDetails);
-        }
-
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
-    }
-
-    @PostMapping(value = "/contest-order-approved", consumes = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "send e-mail for 'Contest Order Approved'.")
-    @ApiResponses(value = {
-        @ApiResponse(code = 204, message = "Contest order approved e-mail sent successfully",
-            response = AboutToStartOrSubmitCallbackResponse.class)})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendContestOrderApprovedEmail(
-        @RequestBody CallbackRequest callbackRequest) {
-
-        validateCaseData(callbackRequest);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
-
-        if (!caseDataService.isPaperApplication(caseData) && Objects.nonNull(caseData.get(FINAL_ORDER_COLLECTION))) {
-            log.info("Received request to send email for 'Contest Order Approved' for Case ID: {}", callbackRequest.getCaseDetails().getId());
-            if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-                log.info("Sending 'Contest Order Approved' email notification to Applicant Solicitor");
-                notificationService.sendContestOrderApprovedEmailApplicant(caseDetails);
-            }
-
-            if (featureToggleService.isRespondentJourneyEnabled()
-                && notificationService.shouldEmailRespondentSolicitor(caseData)) {
-                log.info("Sending 'Contest Order Approved' email notification to Respondent Solicitor");
-                notificationService.sendContestOrderApprovedEmailRespondent(caseDetails);
-            }
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());

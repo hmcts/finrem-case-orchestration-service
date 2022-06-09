@@ -63,9 +63,61 @@
       },
       "authorisationFirm": "test",
       "authorisationName": "test",
+      "hearingUploadBundle": [
+        {
+          "id": "d090f7a0-5897-4577-a07f-2137483cb1f9",
+          "value": {
+            "hearingBundleDate": "2022-08-20",
+            "hearingBundleDocuments": [
+              {
+                "id": "d389989b-4ac5-49e4-9164-31054f0bdfdc",
+                "value": {
+                  "bundleDocuments": {
+                    "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/676bc5f8-020d-4504-8143-369aeedb130e",
+                    "document_filename": "NocLitigantSolicitorAddedLetter.docx",
+                    "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/676bc5f8-020d-4504-8143-369aeedb130e/binary"
+                  },
+                  "bundleUploadDate": "2022-05-05T18:09:42.411"
+                }
+              },
+              {
+                "id": "1e2d6f5e-bcb0-48cd-a43d-6d21cc993f8d",
+                "value": {
+                  "bundleDocuments": {
+                    "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/acafec84-71e6-4d7c-8490-c59af095b63c",
+                    "document_filename": "InterimHearingNotice-1649341720076259.txt",
+                    "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/acafec84-71e6-4d7c-8490-c59af095b63c/binary"
+                  },
+                  "bundleUploadDate": "2022-05-05T17:09:42.411"
+                }
+              }
+            ],
+            "hearingBundleDescription": "This is First Hearing Set"
+          }
+        },
+        {
+          "id": "83922295-dbaa-471f-95ff-93efdf200fab",
+          "value": {
+            "hearingBundleDate": "2022-12-31",
+            "hearingBundleDocuments": [
+              {
+                "id": "257c7adf-0f89-4e90-a79f-7146dadaa815",
+                "value": {
+                  "bundleDocuments": {
+                    "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/1fe5a5dc-02d3-430a-a036-974e1823c1e7",
+                    "document_filename": "NocLitigantSolicitorAddedLetter.pdf",
+                    "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/1fe5a5dc-02d3-430a-a036-974e1823c1e7/binary"
+                  },
+                  "bundleUploadDate": "2022-07-07T17:09:42.411"
+                }
+              }
+            ],
+            "hearingBundleDescription": "This is second Hearing Set"
+          }
+        }
+      ],
       "divorceCaseNumber": "DD12D12345",
       "issueDate": "2019-03-04",
-      "hearingDate": "2019-05-04",
       "fastTrackDecision": "Yes",
       "pensionCollection": [
         {
@@ -121,128 +173,6 @@
         "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
         "document_binary_url": "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336/binary"
       },
-      "directionDetailsCollection": [
-        {
-          "id": "93416183-2f26-49b6-a61b-4c35e9412f27",
-          "value": {
-            "cfcList": null,
-            "localCourt": {
-              "region": "southeast",
-              "walesList": null,
-              "londonList": null,
-              "cfcCourtList": null,
-              "midlandsList": null,
-              "northEastList": null,
-              "northWestList": null,
-              "southEastList": "thamesvalley",
-              "southWestList": null,
-              "devonCourtList": null,
-              "dorsetCourtList": null,
-              "humberCourtList": null,
-              "bristolCourtList": null,
-              "newportCourtList": null,
-              "swanseaCourtList": null,
-              "liverpoolCourtList": null,
-              "birminghamCourtList": null,
-              "cleavelandCourtList": null,
-              "kentSurreyCourtList": null,
-              "lancashireCourtList": null,
-              "manchesterCourtList": null,
-              "northWalesCourtList": null,
-              "nottinghamCourtList": null,
-              "nwyorkshireCourtList": null,
-              "bedfordshireCourtList": null,
-              "thamesvalleyCourtList": "FR_thamesvalleyList_4"
-            },
-            "hearingTime": "1400",
-            "timeEstimate": "2 hour",
-            "dateOfHearing": "2023-10-01",
-            "typeOfHearing": "Directions (DIR)",
-            "nottinghamList": null,
-            "isAnotherHearingYN": "Yes"
-          }
-        },
-        {
-          "id": "fdf05db5-f98c-4658-85b6-99fb42a24d2c",
-          "value": {
-            "cfcList": null,
-            "localCourt": {
-              "region": "wales",
-              "walesList": "swansea",
-              "londonList": null,
-              "cfcCourtList": null,
-              "midlandsList": null,
-              "northEastList": null,
-              "northWestList": null,
-              "southEastList": null,
-              "southWestList": null,
-              "devonCourtList": null,
-              "dorsetCourtList": null,
-              "humberCourtList": null,
-              "bristolCourtList": null,
-              "newportCourtList": null,
-              "swanseaCourtList": "FR_swansea_hc_list_5",
-              "liverpoolCourtList": null,
-              "birminghamCourtList": null,
-              "cleavelandCourtList": null,
-              "kentSurreyCourtList": null,
-              "lancashireCourtList": null,
-              "manchesterCourtList": null,
-              "northWalesCourtList": null,
-              "nottinghamCourtList": null,
-              "nwyorkshireCourtList": null,
-              "bedfordshireCourtList": null,
-              "thamesvalleyCourtList": null
-            },
-            "hearingTime": "1900",
-            "timeEstimate": "5 hours",
-            "dateOfHearing": "2022-12-01",
-            "typeOfHearing": "Directions (DIR)",
-            "nottinghamList": null,
-            "isAnotherHearingYN": "Yes"
-          }
-        },
-        {
-          "id": "fdf05db5-f98c-4658-85b6-88fb42a24d2c",
-          "value": {
-            "cfcList": null,
-            "localCourt": {
-              "region": "wales",
-              "walesList": "swansea",
-              "londonList": null,
-              "cfcCourtList": null,
-              "midlandsList": null,
-              "northEastList": null,
-              "northWestList": null,
-              "southEastList": null,
-              "southWestList": null,
-              "devonCourtList": null,
-              "dorsetCourtList": null,
-              "humberCourtList": null,
-              "bristolCourtList": null,
-              "newportCourtList": null,
-              "swanseaCourtList": "FR_swansea_hc_list_5",
-              "liverpoolCourtList": null,
-              "birminghamCourtList": null,
-              "cleavelandCourtList": null,
-              "kentSurreyCourtList": null,
-              "lancashireCourtList": null,
-              "manchesterCourtList": null,
-              "northWalesCourtList": null,
-              "nottinghamCourtList": null,
-              "nwyorkshireCourtList": null,
-              "bedfordshireCourtList": null,
-              "thamesvalleyCourtList": null
-            },
-            "hearingTime": "1900",
-            "timeEstimate": "5 hours",
-            "dateOfHearing": "2020-07-01",
-            "typeOfHearing": "Directions (DIR)",
-            "nottinghamList": null,
-            "isAnotherHearingYN": "Yes"
-          }
-        }
-      ],
       "orderForChildrenQuestion1": "Yes",
       "solicitorAgreeToReceiveEmails": "No"
     }
