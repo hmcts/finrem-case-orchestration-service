@@ -21,6 +21,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
@@ -137,11 +138,15 @@ public class NotificationService {
     }
 
     public void sendContestOrderApprovedEmailApplicant(CaseDetails caseDetails) {
-        sendContestOrderApprovedEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
+        CompletableFuture.runAsync(() ->
+            sendContestOrderApprovedEmail(
+                notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails)));
     }
 
     public void sendContestOrderApprovedEmailRespondent(CaseDetails caseDetails) {
-        sendContestOrderApprovedEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
+        CompletableFuture.runAsync(() ->
+            sendContestOrderApprovedEmail(
+                notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails)));
     }
 
     public void sendContestOrderApprovedEmail(NotificationRequest notificationRequest) {

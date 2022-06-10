@@ -32,6 +32,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
@@ -462,7 +463,8 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestOrderApprovedEmailApplicant(callbackRequest.getCaseDetails());
 
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper, timeout(100).times(1))
+            .getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
     }
 
     @Test
@@ -476,7 +478,8 @@ public class NotificationServiceTest extends BaseServiceTest {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
 
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper, timeout(100).times(1))
+            .getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
     }
 
     @Test
@@ -486,7 +489,8 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestOrderApprovedEmailRespondent(callbackRequest.getCaseDetails());
 
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper, timeout(100).times(1))
+            .getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
     }
 
     @Test
@@ -500,7 +504,7 @@ public class NotificationServiceTest extends BaseServiceTest {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
 
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper, timeout(100).times(1)).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
     }
 
     @Test
@@ -558,7 +562,8 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestOrderApprovedEmailApplicant(callbackRequest.getCaseDetails());
 
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper, timeout(100).times(1))
+            .getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
     }
 
     @Test
@@ -572,7 +577,8 @@ public class NotificationServiceTest extends BaseServiceTest {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
 
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper, timeout(100).times(1))
+            .getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
     }
 
     @Test

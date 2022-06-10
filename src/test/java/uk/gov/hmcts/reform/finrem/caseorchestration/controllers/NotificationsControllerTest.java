@@ -362,57 +362,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldSendContestOrderApprovedEmailWhenAgreed() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
-
-        notificationsController.sendContestOrderApprovedEmail(createCallbackRequestWithFinalOrder());
-
-        verify(notificationService).sendContestOrderApprovedEmailApplicant(any());
-    }
-
-    @Test
-    public void shouldNotSendContestOrderApprovedEmailWhenNotAgreed() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
-
-        notificationsController.sendContestOrderApprovedEmail(buildCallbackRequest());
-
-        verifyNoInteractions(notificationService);
-    }
-
-    @Test
-    public void shouldSendContestOrderApprovedEmailWhenAgreed_andNotifyRespondentSolicitorWhenShould() {
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
-
-        notificationsController.sendContestOrderApprovedEmail(createCallbackRequestWithFinalOrder());
-
-        verify(notificationService).sendContestOrderApprovedEmailRespondent(any());
-    }
-
-    @Test
-    public void shouldSendContestOrderApprovedEmailWhenAgreed_andNotSendRespondentNotificationWhenToggledOff() {
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
-
-        notificationsController.sendContestOrderApprovedEmail(createCallbackRequestWithFinalOrder());
-
-        verify(notificationService, never()).sendContestOrderApprovedEmailRespondent(any());
-    }
-
-    @Test
-    public void shouldNotSendContestOrderApprovedEmailWhenNotAgreed_andDontNotifyRespondentSolicitor() {
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
-
-        notificationsController.sendContestOrderApprovedEmail(createCallbackRequestWithFinalOrder());
-
-        verify(notificationService, never()).sendContestOrderApprovedEmailRespondent(any());
-    }
-
-
-    @Test
     public void sendDraftOrderEmailWhenApplicantSolicitorIsNominatedAndIsAcceptingEmails() {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);

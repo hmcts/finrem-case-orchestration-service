@@ -1,18 +1,29 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -44,38 +55,65 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_OTHER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
 
-public class ContestedCaseOrderServiceTest extends BaseServiceTest {
+@RunWith(MockitoJUnitRunner.class)
+public class SendOrderContestedAboutToSubmitHandlerTest {
 
-    @Autowired private ContestedCaseOrderService contestedCaseOrderService;
-
-    @MockBean private GenericDocumentService genericDocumentService;
-    @MockBean private BulkPrintService bulkPrintService;
-    @MockBean private PaperNotificationService paperNotificationService;
-    @MockBean private DocumentHelper documentHelper;
-    @MockBean private CaseDataService caseDataService;
+    @InjectMocks
+    private SendOrderContestedAboutToSubmitHandler sendOrderContestedAboutToSubmitHandler;
+    @Mock
+    private GenericDocumentService genericDocumentService;
+    @Mock
+    private BulkPrintService bulkPrintService;
+    @Mock
+    private PaperNotificationService paperNotificationService;
+    @Mock
+    private DocumentHelper documentHelper;
+    @Mock
+    private CaseDataService caseDataService;
+    @Mock
+    private GeneralOrderService generalOrderService;
 
     @Captor
     private ArgumentCaptor<List<BulkPrintDocument>> bulkPrintArgumentCaptor;
 
-    @Test
-    public void givenNoGeneralOrderPresent_whenPrintAndMailGeneralOrderTriggered_thenDocumentsAreNotPrinted() {
-        CaseDetails caseDetails = generalOrderContestedCaseDetails();
-        caseDetails.getData().remove(GENERAL_ORDER_LATEST_DOCUMENT);
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-        contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, AUTH_TOKEN);
+    @Test
+    public void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanHandle() {
+        assertThat(sendOrderContestedAboutToSubmitHandler
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.SEND_ORDER),
+            is(true));
+    }
+
+    @Test
+    public void givenACcdCallbackConsentedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanNotHandle() {
+        assertThat(sendOrderContestedAboutToSubmitHandler
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.SEND_ORDER),
+            is(false));
+    }
+
+    @Test
+    public void givenNoGeneralOrderPresent_whenHandlePrintAndMailGeneralOrderTriggered_thenDocumentsAreNotPrinted() {
+        CallbackRequest callbackRequest =
+            CallbackRequest.builder().caseDetails(generalOrderContestedCaseDetails()).build();
+        callbackRequest.getCaseDetails().getData().remove(GENERAL_ORDER_LATEST_DOCUMENT);
+
+        sendOrderContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(bulkPrintService, never()).printApplicantDocuments(any(), any(), any());
         verify(bulkPrintService, never()).printRespondentDocuments(any(), any(), any());
     }
 
     @Test
-    public void whenPrintAndMailGeneralOrderTriggered_thenBothApplicantAndRespondentPacksArePrinted() {
+    public void givenShouldPrintAppAndResp_whenPrintAndMailGeneralOrderTriggered_thenBothAppAndRespPacksPrinted() {
         when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
         when(paperNotificationService.shouldPrintForRespondent(any())).thenReturn(true);
-        when(documentHelper.convertToCaseDocument(any())).thenReturn(new CaseDocument());
+        when(generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(any()))
+            .thenReturn(BulkPrintDocument.builder().build());
 
-        CaseDetails caseDetails = generalOrderContestedCaseDetails();
-        contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, AUTH_TOKEN);
+        CallbackRequest callbackRequest =
+            CallbackRequest.builder().caseDetails(generalOrderContestedCaseDetails()).build();
+        sendOrderContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
         verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
@@ -85,24 +123,24 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     public void givenShouldNotPrintPackForApplicant_whenPrintAndMailGeneralOrderTriggered_thenOnlyRespondentPacksIsPrinted() {
         when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(false);
         when(paperNotificationService.shouldPrintForRespondent(any())).thenReturn(true);
-        when(documentHelper.convertToCaseDocument(any())).thenReturn(new CaseDocument());
 
-        CaseDetails caseDetails = generalOrderContestedCaseDetails();
-        contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, AUTH_TOKEN);
+        CallbackRequest callbackRequest =
+            CallbackRequest.builder().caseDetails(generalOrderContestedCaseDetails()).build();
+        sendOrderContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(bulkPrintService, never()).printApplicantDocuments(any(), any(), any());
         verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
     }
 
     @Test
-    public void givenAllHearingDocumentsArePresentThenSendToBulkPrintWhenPaperCase() {
+    public void givenAllHearingDocumentsArePresent_WhenPrintAndMailHearingDocuments_ThenSendToBulkPrintWhenPaperCase() {
         when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
         when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
         when(paperNotificationService.shouldPrintForRespondent(any())).thenReturn(true);
         when(documentHelper.hasAnotherHearing(any())).thenReturn(true);
         mockDocumentHelperToReturnDefaultExpectedDocuments();
 
-        contestedCaseOrderService.printAndMailHearingDocuments(CaseDetails.builder().build(), AUTH_TOKEN);
+        sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 
         verify(bulkPrintService).printApplicantDocuments(any(), any(), bulkPrintArgumentCaptor.capture());
         verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
@@ -114,13 +152,13 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenAllHearingDocumentsArePresentThenSendToBulkPrintWhenPaperCase_noNextHearing() {
+    public void givenAllHearingDocumentsArePresent_WhenHandle_ThenSendToBulkPrintWhenPaperCase_noNextHearing() {
         when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
         when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
         when(paperNotificationService.shouldPrintForRespondent(any())).thenReturn(true);
         when(documentHelper.hasAnotherHearing(any())).thenReturn(false);
 
-        contestedCaseOrderService.printAndMailHearingDocuments(CaseDetails.builder().build(), AUTH_TOKEN);
+        sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 
         verify(bulkPrintService).printApplicantDocuments(any(), any(), bulkPrintArgumentCaptor.capture());
         verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
@@ -132,21 +170,22 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenAllHearingDocumentsArePresentThenDoNotSendToBulkPrintWhenDigitalCase() {
-        contestedCaseOrderService.printAndMailHearingDocuments(CaseDetails.builder().build(), AUTH_TOKEN);
+    public void givenAllHearingDocumentsArePresent_WhenHandle_ThenDoNotSendToBulkPrintWhenDigitalCase() {
+
+        sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 
         verifyNoInteractions(bulkPrintService);
     }
 
     @Test
-    public void latestDraftedHearingOrderDocumentIsNotAddedToPack() {
+    public void givenLatestDraftedHearingOrderDocumentIsNotAddedToPack_WhenHandle_ThenPrintApplicantDocuments() {
         when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
         when(documentHelper.hasAnotherHearing(any())).thenReturn(true);
         mockDocumentHelperToReturnDefaultExpectedDocuments();
         when(documentHelper.getDocumentLinkAsBulkPrintDocument(any(), eq(LATEST_DRAFT_HEARING_ORDER))).thenReturn(Optional.empty());
         when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
 
-        contestedCaseOrderService.printAndMailHearingDocuments(CaseDetails.builder().build(), AUTH_TOKEN);
+        sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 
         verify(bulkPrintService).printApplicantDocuments(any(), any(), bulkPrintArgumentCaptor.capture());
 
@@ -157,12 +196,12 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void latestDraftedHearingOrderDocumentIsNotAddedToPack_noNextHearing() {
+    public void givenLatestDraftedHearingOrderDocumentIsNotAddedToPack_WhenHandle_ThenNoNextHearing() {
         when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
         when(documentHelper.hasAnotherHearing(any())).thenReturn(false);
         when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
 
-        contestedCaseOrderService.printAndMailHearingDocuments(CaseDetails.builder().build(), AUTH_TOKEN);
+        sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 
         verify(bulkPrintService).printApplicantDocuments(any(), any(), bulkPrintArgumentCaptor.capture());
 
@@ -172,15 +211,16 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
             not(contains(notExpectedBulkPrintDocument)));
     }
 
+
     @Test
-    public void latestAdditionalHearingDocumentIsNotAddedToPack() {
+    public void givenLatestAdditionalHearingDocumentIsNotAddedToPack_WhenHandle_ThenPrintApplicantDocuments() {
         when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
         when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
         when(documentHelper.hasAnotherHearing(any())).thenReturn(true);
         mockDocumentHelperToReturnDefaultExpectedDocuments();
         when(documentHelper.getLatestAdditionalHearingDocument(any())).thenReturn(Optional.empty());
 
-        contestedCaseOrderService.printAndMailHearingDocuments(CaseDetails.builder().build(), AUTH_TOKEN);
+        sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 
         verify(bulkPrintService).printApplicantDocuments(any(), any(), bulkPrintArgumentCaptor.capture());
 
@@ -191,45 +231,45 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void finalOrderSuccess() {
+    public void givenFinalOrderSuccess_WhenHandle_ThenStampFinalOrder() {
         mockDocumentHelperToReturnDefaultExpectedDocuments();
         when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN))).thenReturn(caseDocument());
 
-        CaseDetails caseDetails = CaseDetails.builder().data(new HashMap<>()).build();
-        contestedCaseOrderService.stampFinalOrder(caseDetails, AUTH_TOKEN);
+        AboutToStartOrSubmitCallbackResponse response =
+            sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 
         verify(genericDocumentService).stampDocument(caseDocument(), AUTH_TOKEN);
 
         List<HearingOrderCollectionData> expectedFinalOrderCollection =
-            (List<HearingOrderCollectionData>) caseDetails.getData().get(FINAL_ORDER_COLLECTION);
+            (List<HearingOrderCollectionData>) response.getData().get(FINAL_ORDER_COLLECTION);
 
         assertThat(expectedFinalOrderCollection, hasSize(1));
         assertThat(expectedFinalOrderCollection.get(0).getHearingOrderDocuments().getUploadDraftDocument(), is(caseDocument()));
     }
 
     @Test
-    public void finalOrderSuccessWithoutAnyHearingOrder() {
+    public void givenFinalOrderSuccessWithoutAnyHearingOrder_WhenHandle_ThenStampFinalOrder() {
         CaseDetails caseDetails = CaseDetails.builder().data(new HashMap<>()).build();
 
-        contestedCaseOrderService.stampFinalOrder(caseDetails, AUTH_TOKEN);
+        AboutToStartOrSubmitCallbackResponse response =
+            sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 
-        assertThat(caseDetails.getData(), not(hasKey(FINAL_ORDER_COLLECTION)));
+        assertThat(response.getData(), not(hasKey(FINAL_ORDER_COLLECTION)));
     }
 
     @Test
-    public void finalOrderSuccessWithFinalOrder() {
+    public void givenFinalOrderSuccessWithFinalOrder_WhenHandle_ThenStampDocument() {
         mockDocumentHelperToReturnDefaultExpectedDocuments();
         when(documentHelper.getFinalOrderDocuments(any())).thenReturn(new ArrayList<>(List.of(HearingOrderCollectionData.builder().build())));
         when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN))).thenReturn(caseDocument());
 
-        CaseDetails caseDetails = CaseDetails.builder().data(new HashMap<>()).build();
-
-        contestedCaseOrderService.stampFinalOrder(caseDetails, AUTH_TOKEN);
+        AboutToStartOrSubmitCallbackResponse response =
+            sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 
         verify(genericDocumentService).stampDocument(caseDocument(), AUTH_TOKEN);
 
         List<HearingOrderCollectionData> expectedFinalOrderCollection =
-            (List<HearingOrderCollectionData>) caseDetails.getData().get(FINAL_ORDER_COLLECTION);
+            (List<HearingOrderCollectionData>) response.getData().get(FINAL_ORDER_COLLECTION);
 
         assertThat(expectedFinalOrderCollection, hasSize(2));
         assertThat(expectedFinalOrderCollection.get(1).getHearingOrderDocuments().getUploadDraftDocument(), is(caseDocument()));
@@ -255,9 +295,17 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
 
     private CaseDetails generalOrderContestedCaseDetails() {
         try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/general-order-contested.json")) {
-            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+            return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private CallbackRequest getEmptyCallbackRequest() {
+        return CallbackRequest
+            .builder()
+            .caseDetails(CaseDetails.builder().data(new HashMap<>()).build())
+            .build();
+
     }
 }
