@@ -217,6 +217,11 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void createAndStoreAdditionalHearingDocuments_caseworkerUploadsOrder() throws JsonProcessingException {
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(
+            CaseDocument.builder().documentBinaryUrl("docBin")
+                .documentFilename("docFilename.pdf")
+                .documentUrl("docUrl").build()
+        );
         Map<String, Object> caseData = baseCaseData();
         List<HearingOrderCollectionData> hearingOrderCollectionData = buildHearingOrderCollectionData();
         caseData.put(DIRECTION_DETAILS_COLLECTION_CT, buildDirectionDetailsCollectionDataList(true));

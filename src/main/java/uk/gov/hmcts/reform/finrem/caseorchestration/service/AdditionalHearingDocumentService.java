@@ -36,6 +36,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ADDITIONAL_INFO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TIME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
@@ -82,6 +83,8 @@ public class AdditionalHearingDocumentService {
         if (hearingOrderCollectionData != null
             && !hearingOrderCollectionData.isEmpty()
             && hearingOrderCollectionData.get(hearingOrderCollectionData.size() - 1).getHearingOrderDocuments() != null) {
+            hearingOrderCollectionData.forEach(element -> convertHearingOrderCollectionDocumentsToPdf(element, authorisationToken));
+            caseDetails.getData().put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
             caseDetails.getData().put(LATEST_DRAFT_HEARING_ORDER,
                 hearingOrderCollectionData.get(hearingOrderCollectionData.size() - 1).getHearingOrderDocuments().getUploadDraftDocument());
         }
@@ -193,5 +196,12 @@ public class AdditionalHearingDocumentService {
 
         bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, document);
         bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, document);
+    }
+
+    private void convertHearingOrderCollectionDocumentsToPdf(HearingOrderCollectionData element,
+                                                             String authorisationToken) {
+        CaseDocument pdfApprovedOrder = genericDocumentService.convertDocumentIfNotPdfAlready(
+            element.getHearingOrderDocuments().getUploadDraftDocument(), authorisationToken);
+        element.getHearingOrderDocuments().setUploadDraftDocument(pdfApprovedOrder);
     }
 }
