@@ -41,6 +41,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TIME_ESTIMATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
 
 @Service
@@ -100,7 +101,7 @@ public class AdditionalHearingDocumentService {
                 directionDetailsCollectionList.get(directionDetailsCollectionList.size() - 1).getDirectionDetailsCollection();
 
             //if the latest court hearing has specified another hearing as No, dont create an additional hearing document
-            if (NO_VALUE.equalsIgnoreCase(caseDataService.nullToEmpty(latestDirectionDetailsCollectionItem.getIsAnotherHearingYN()))) {
+            if (NO_VALUE.equalsIgnoreCase(nullToEmpty(latestDirectionDetailsCollectionItem.getIsAnotherHearingYN()))) {
                 log.info("Additional hearing document not required for case: {}", caseDetails.getId());
                 return;
             }

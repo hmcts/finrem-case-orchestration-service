@@ -113,9 +113,7 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
     @Test
     public void givenNoExceptions_whenHandleUploadApprovedOrderAboutToSubmit_thenReturnValidatedResponse() throws JsonProcessingException {
         uploadApprovedOrderService.handleUploadApprovedOrderAboutToSubmit(caseDetails, AUTH_TOKEN);
-
-        verify(hearingOrderService, times(1))
-            .convertToPdfAndStampAndStoreLatestDraftHearingOrder(caseDetails, AUTH_TOKEN);
+        
         verify(contestedOrderApprovedLetterService, times(1))
             .generateAndStoreContestedOrderApprovedLetter(caseDetails, AUTH_TOKEN);
         verify(caseDataService, times(1))
@@ -137,8 +135,6 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
         assertThat(response.getErrors(), hasSize(1));
         assertEquals(response.getErrors().get(0), COURT_DETAILS_PARSE_EXCEPTION_MESSAGE);
 
-        verify(hearingOrderService, times(1))
-            .convertToPdfAndStampAndStoreLatestDraftHearingOrder(caseDetails, AUTH_TOKEN);
         verify(contestedOrderApprovedLetterService, times(1))
             .generateAndStoreContestedOrderApprovedLetter(caseDetails, AUTH_TOKEN);
         verify(caseDataService, times(1))
