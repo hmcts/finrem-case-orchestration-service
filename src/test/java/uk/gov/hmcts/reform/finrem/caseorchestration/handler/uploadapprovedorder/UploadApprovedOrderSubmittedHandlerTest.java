@@ -12,9 +12,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDi
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DIRECTION_ORDER_IS_FINAL;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UploadApprovedOrderSubmittedHandlerTest extends UploadApprovedOrderBaseHandlerTest {
@@ -41,9 +44,18 @@ public class UploadApprovedOrderSubmittedHandlerTest extends UploadApprovedOrder
 
     @Test
     public void givenContestedCase_whenSubmittedUploadApprovedOrder_thenHandle() {
+        callbackRequest.getCaseDetails().getData().put(LATEST_DIRECTION_ORDER_IS_FINAL, YES_VALUE);
         uploadApprovedOrderSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(generalApplicationDirectionsService, times(1))
+            .submitGeneralApplicationDirections(callbackRequest.getCaseDetails(), AUTH_TOKEN);
+    }
+
+    @Test
+    public void givenContestedCase_whenSubmittedUploadApprovedOrderAndNotFinalHearing_thenHandle() {
+        uploadApprovedOrderSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(generalApplicationDirectionsService, never())
             .submitGeneralApplicationDirections(callbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 }

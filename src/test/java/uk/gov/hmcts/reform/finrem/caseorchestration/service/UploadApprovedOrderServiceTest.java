@@ -11,25 +11,34 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DRAFT_DIRECTION_DETAILS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DRAFT_DIRECTION_DETAILS_COLLECTION_RO;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DIRECTION_ORDER_IS_FINAL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_DIRECTION_ORDER;
 
 public class UploadApprovedOrderServiceTest extends BaseServiceTest {
@@ -134,5 +143,28 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
             .generateAndStoreContestedOrderApprovedLetter(caseDetails, AUTH_TOKEN);
         verify(caseDataService, times(1))
             .moveCollection(caseDetails.getData(), DRAFT_DIRECTION_DETAILS_COLLECTION, DRAFT_DIRECTION_DETAILS_COLLECTION_RO);
+    }
+
+    @Test
+    public void givenDirectionDetailsTailIsPresent_whenSetIsFinalHearingMidEvent_thenSetLatestDirectionOrderIsFinalField() {
+        List<Element<DraftDirectionDetails>> draftDirectionDetailsCollection = new ArrayList<>();
+        draftDirectionDetailsCollection.add(Element.element(UUID.randomUUID(), DraftDirectionDetails.builder()
+                .isFinal(YES_VALUE)
+                .isAnotherHearing(NO_VALUE)
+                .typeOfHearing("TEST_TYPE")
+            .build()));
+
+        caseDetails.getData().put(DRAFT_DIRECTION_DETAILS_COLLECTION, draftDirectionDetailsCollection);
+
+        Map<String, Object> caseData = uploadApprovedOrderService.setIsFinalHearingFieldMidEvent(caseDetails);
+        assertTrue(caseData.containsKey(LATEST_DIRECTION_ORDER_IS_FINAL));
+        assertEquals(caseData.get(LATEST_DIRECTION_ORDER_IS_FINAL), YES_VALUE);
+    }
+
+    @Test
+    public void givenDirectionDetailsTailNotPresent_whenSetIsFinalHearingMidEvent_thenSetLatestDirectionOrderIsFinalToNo() {
+        Map<String, Object> caseData = uploadApprovedOrderService.setIsFinalHearingFieldMidEvent(caseDetails);
+        assertTrue(caseData.containsKey(LATEST_DIRECTION_ORDER_IS_FINAL));
+        assertEquals(caseData.get(LATEST_DIRECTION_ORDER_IS_FINAL), NO_VALUE);
     }
 }
