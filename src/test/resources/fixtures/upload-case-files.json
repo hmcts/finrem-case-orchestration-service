@@ -1,0 +1,324 @@
+{
+  "token": "test_token",
+  "event_id": "event1",
+  "case_details": {
+    "id": "12345678",
+    "jurisdiction": "divorce",
+    "state": "created",
+    "case_type_id": "FinancialRemedyMVP2",
+    "case_data": {
+      "PBANumber": "PBA123456",
+      "d81Question": "No",
+      "PBAreference": "ABCD",
+      "consentOrder": {
+        "document_url": "http://file1",
+        "document_filename": "file1",
+        "document_binary_url": "http://file1.binary"
+      },
+      "d81Joint": {
+        "document_url": "http://file1",
+        "document_filename": "file1",
+        "document_binary_url": "http://file1.binary"
+      },
+      "d81Applicant": {
+        "document_url": "http://file1",
+        "document_filename": "file1",
+        "document_binary_url": "http://file1.binary"
+      },
+      "d81Respondent": {
+        "document_url": "http://file1",
+        "document_filename": "file1",
+        "document_binary_url": "http://file1.binary"
+      },
+      "solicitorFirm": "Michael Jones & Partners",
+      "solicitorName": "Jane Smith",
+      "applicantLName": "Williams",
+      "authorisation3": "2010-01-01",
+      "feeAmountToPay": "150",
+      "solicitorEmail": "test@admin.com",
+      "solicitorPhone": "1234",
+      "applicantFMName": "James Arthur",
+      "authorisation2b": "test",
+      "otherCollection": [
+        {
+          "id": "1",
+          "value": {
+            "typeOfDocument": "pdf",
+            "uploadedDocument": {
+              "document_url": "http://file1",
+              "document_filename": "file1",
+              "document_binary_url": "http://file1.binary"
+            }
+          }
+        }
+      ],
+      "appChronologiesCollection": [
+        {
+          "id": "1",
+          "value": {
+            "typeOfDocument": "pdf",
+            "uploadedDocument": {
+              "document_url": "http://file1",
+              "document_filename": "file1",
+              "document_binary_url": "http://file1.binary"
+            }
+          }
+        },
+        {
+          "id": "2",
+          "value": {
+            "typeOfDocument": "pdf",
+            "uploadedDocument": {
+              "document_url": "http://file1",
+              "document_filename": "file1",
+              "document_binary_url": "http://file1.binary"
+            }
+          }
+        }
+      ],
+      "applicantDocuments": [
+        {
+          "id": "1",
+          "value": {
+            "typeOfDocument": "pdf",
+            "uploadedDocument": {
+              "document_url": "http://file1",
+              "document_filename": "file1",
+              "document_binary_url": "http://file1.binary"
+            }
+          }
+        }
+      ],
+      "respondentDocuments": [
+        {
+          "id": "1",
+          "value": {
+            "typeOfDocument": "pdf",
+            "uploadedDocument": {
+              "document_url": "http://file1",
+              "document_filename": "file1",
+              "document_binary_url": "http://file1.binary"
+            }
+          }
+        }
+      ],
+      "respondentEmail": "test@test.com",
+      "respondentPhone": "9963472494",
+      "appRespondentRep": "No",
+      "consentOrderText": {
+        "document_url": "http://file1",
+        "document_filename": "file1",
+        "document_binary_url": "http://file1.binary"
+      },
+      "solicitorAddress": {
+        "County": "essex",
+        "Country": "UK",
+        "PostCode": "b1 1ab",
+        "PostTown": "london",
+        "AddressLine1": "line1",
+        "AddressLine2": "line2",
+        "AddressLine3": "line3"
+      },
+      "authorisationFirm": "test",
+      "authorisationName": "test",
+      "divorceCaseNumber": "DD12D12345",
+      "pensionCollection": [
+        {
+          "id": "1",
+          "value": {
+            "typeOfDocument": "pdf",
+            "uploadedDocument": {
+              "document_url": "http://file1",
+              "document_filename": "file1",
+              "document_binary_url": "http://file1.binary"
+            }
+          }
+        }
+      ],
+      "respondentAddress": {
+        "County": "essex",
+        "Country": "UK",
+        "PostCode": "b1 1ab",
+        "PostTown": "london",
+        "AddressLine1": "line1",
+        "AddressLine2": "line2",
+        "AddressLine3": "line3"
+      },
+      "solicitorDXnumber": "dx1",
+      "appRespondentLName": "smith",
+      "solicitorReference": "JAW052018",
+      "appRespondentFMName": "john",
+      "divorceStageReached": "Decree Nisi",
+      "helpWithFeesQuestion": "No",
+      "natureOfApplication2": [
+        "item1",
+        "item2"
+      ],
+      "natureOfApplication5": "No",
+      "natureOfApplication6": [
+        "item1",
+        "item2"
+      ],
+      "natureOfApplication7": "test",
+      "natureOfApplication3a": "test",
+      "natureOfApplication3b": "test",
+      "divorceUploadEvidence1": {
+        "document_url": "http://file1",
+        "document_filename": "file1",
+        "document_binary_url": "http://file1.binary"
+      },
+      "divorceUploadEvidence2": {
+        "document_url": "http://file2",
+        "document_filename": "file2",
+        "document_binary_url": "http://file2.binary"
+      },
+      "orderForChildrenQuestion1": "Yes",
+      "solicitorAgreeToReceiveEmails": "No",
+      "orderDirection": "test",
+      "orderDirectionOpt1": {
+        "document_url": "http://file1",
+        "document_filename": "file1",
+        "document_binary_url": "http://file1.binary"
+      },
+      "orderDirectionAbsolute": "test",
+      "orderDirectionJudge": "test",
+      "orderDirectionJudgeName": "test",
+      "orderDirectionDate": "2010-01-01",
+      "dueDate": "2010-01-01",
+      "issueDate": "2010-01-01",
+      "orderDirectionAddComments": "test",
+      "orderDirectionOpt2": "test",
+      "assignedToJudgeReason": "test",
+      "assignedToJudge": "judge1",
+      "referToJudgeText": "test",
+      "referToJudgeTextFromAwaitingResponse": "test",
+      "referToJudgeTextFromOrderMade": "test",
+      "referToJudgeTextFromConsentOrdApproved": "test",
+      "referToJudgeTextFromConsOrdMade": "test",
+      "orderRefusalCollection": [
+        {
+          "id": "1",
+          "value": {
+            "orderRefusal": [
+              "Other"
+            ],
+            "orderRefusalDate": "2003-02-01",
+            "orderRefusalDocs": {
+              "document_url": "http://doc1",
+              "document_filename": "doc1",
+              "document_binary_url": "http://doc1.binary"
+            },
+            "orderRefusalJudge": "District Judge",
+            "orderRefusalOther": "test1",
+            "otherHearingDetails": "test2",
+            "orderRefusalJudgeName": "test3",
+            "orderRefusalNotEnough": [
+              "reason1"
+            ],
+            "estimateLengthOfHearing": "10",
+            "orderRefusalAddComments": "comment1",
+            "orderRefusalNotEnoughOther": "test",
+            "whenShouldHearingTakePlace": "today",
+            "whereShouldHearingTakePlace": "EZ801"
+          }
+        }
+      ],
+      "orderRefusalCollectionNew": [
+        {
+          "id": "1",
+          "value": {
+            "orderRefusal": [
+              "Other"
+            ],
+            "orderRefusalDate": "2003-02-01",
+            "orderRefusalDocs": {
+              "document_url": "http://doc1",
+              "document_filename": "doc1",
+              "document_binary_url": "http://doc1.binary"
+            },
+            "orderRefusalJudge": "District Judge",
+            "orderRefusalOther": "test1",
+            "otherHearingDetails": "test2",
+            "orderRefusalJudgeName": "test3",
+            "orderRefusalNotEnough": [
+              "reason1"
+            ],
+            "estimateLengthOfHearing": "10",
+            "orderRefusalAddComments": "comment1",
+            "orderRefusalNotEnoughOther": "test",
+            "whenShouldHearingTakePlace": "today",
+            "whereShouldHearingTakePlace": "EZ801"
+          }
+        }
+      ],
+      "uploadConsentOrderDocuments": [
+        {
+          "id": "1",
+          "value": {
+            "DocumentType": "pdf",
+            "DocumentLink": {
+              "document_url": "http://doc1",
+              "document_filename": "doc1",
+              "document_binary_url": "http://doc1.binary"
+            },
+            "DocumentEmailContent": "email-content",
+            "DocumentDateAdded": "2010-01-02",
+            "DocumentComment": "doc-comment",
+            "DocumentFileName": "file1"
+          }
+        }
+      ],
+      "uploadOrder": [
+        {
+          "id": "1",
+          "value": {
+            "DocumentType": "pdf",
+            "DocumentLink": {
+              "document_url": "http://doc1",
+              "document_filename": "doc1",
+              "document_binary_url": "http://doc1.binary"
+            },
+            "DocumentEmailContent": "email-content",
+            "DocumentDateAdded": "2010-01-02",
+            "DocumentComment": "doc-comment",
+            "DocumentFileName": "file1"
+          }
+        }
+      ],
+      "uploadDocuments": [
+        {
+          "id": "1",
+          "value": {
+            "DocumentType": "pdf",
+            "DocumentLink": {
+              "document_url": "http://doc1",
+              "document_filename": "doc1",
+              "document_binary_url": "http://doc1.binary"
+            },
+            "DocumentEmailContent": "email-content",
+            "DocumentDateAdded": "2010-01-02",
+            "DocumentComment": "doc-comment",
+            "DocumentFileName": "file1"
+          }
+        }
+      ],
+      "generalOrderCollection": [
+        {
+          "id": "1",
+          "value": {
+            "generalOrder_order": "order1",
+            "generalOrder_documentUpload": {
+              "document_url": "http://doc1",
+              "document_filename": "doc1",
+              "document_binary_url": "http://doc1.binary"
+            },
+            "generalOrder_judgeList": "district judge",
+            "generalOrder_judgeName": "judge1",
+            "generalOrder_dateOfOrder": "2010-01-02",
+            "generalOrder_comments": "comment1"
+          }
+        }
+      ]
+    }
+  }
+}
