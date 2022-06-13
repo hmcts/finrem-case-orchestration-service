@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
@@ -26,6 +27,8 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -38,6 +41,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DRAFT_DIRECTION_DETAILS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DRAFT_DIRECTION_DETAILS_COLLECTION_RO;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DIRECTION_ORDER_IS_FINAL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_DIRECTION_ORDER;
 
@@ -62,6 +66,8 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
     private ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
     @MockBean
     private AdditionalHearingDocumentService additionalHearingDocumentService;
+    @MockBean
+    private GenericDocumentService genericDocumentService;
     @Autowired
     private UploadApprovedOrderService uploadApprovedOrderService;
 
@@ -112,8 +118,12 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
 
     @Test
     public void givenNoExceptions_whenHandleUploadApprovedOrderAboutToSubmit_thenReturnValidatedResponse() throws JsonProcessingException {
+        caseDetails.getData().put(HEARING_ORDER_COLLECTION, getDirectionOrderCollection());
         uploadApprovedOrderService.handleUploadApprovedOrderAboutToSubmit(caseDetails, AUTH_TOKEN);
-        
+
+        verify(hearingOrderService, times(1))
+            .updateCaseDataForLatestHearingOrderCollection(any(), any());
+        verify(genericDocumentService, times(1)).convertDocumentIfNotPdfAlready(any(), eq(AUTH_TOKEN));
         verify(contestedOrderApprovedLetterService, times(1))
             .generateAndStoreContestedOrderApprovedLetter(caseDetails, AUTH_TOKEN);
         verify(caseDataService, times(1))
@@ -129,12 +139,16 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
         doThrow(new CourtDetailsParseException()).when(additionalHearingDocumentService)
             .createAndStoreAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
 
+        caseDetails.getData().put(HEARING_ORDER_COLLECTION, getDirectionOrderCollection());
         AboutToStartOrSubmitCallbackResponse response = uploadApprovedOrderService
             .handleUploadApprovedOrderAboutToSubmit(caseDetails, AUTH_TOKEN);
 
         assertThat(response.getErrors(), hasSize(1));
         assertEquals(response.getErrors().get(0), COURT_DETAILS_PARSE_EXCEPTION_MESSAGE);
 
+        verify(hearingOrderService, times(1))
+            .updateCaseDataForLatestHearingOrderCollection(any(), any());
+        verify(genericDocumentService, times(1)).convertDocumentIfNotPdfAlready(any(), eq(AUTH_TOKEN));
         verify(contestedOrderApprovedLetterService, times(1))
             .generateAndStoreContestedOrderApprovedLetter(caseDetails, AUTH_TOKEN);
         verify(caseDataService, times(1))
@@ -162,5 +176,13 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
         Map<String, Object> caseData = uploadApprovedOrderService.setIsFinalHearingFieldMidEvent(caseDetails);
         assertTrue(caseData.containsKey(LATEST_DIRECTION_ORDER_IS_FINAL));
         assertEquals(caseData.get(LATEST_DIRECTION_ORDER_IS_FINAL), NO_VALUE);
+    }
+
+    private List<Element<DirectionOrder>> getDirectionOrderCollection() {
+        DirectionOrder directionOrder = DirectionOrder.builder()
+            .uploadDraftDocument(CaseDocument.builder()
+                .documentFilename("directionOrder.pdf").documentBinaryUrl("aBinaryurl").build()).build();
+
+        return List.of(Element.element(UUID.randomUUID(), directionOrder));
     }
 }
