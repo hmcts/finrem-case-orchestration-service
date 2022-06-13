@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import org.hamcrest.Matchers;
+import org.hamcrest.core.IsNot;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -28,10 +29,12 @@ import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
@@ -40,6 +43,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.INTE_D
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.INTE_FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ANOTHER_HEARING_TO_BE_LISTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_ADDITIONAL_INFORMATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_BEDFORDSHIRE_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_BIRMINGHAM_COURT;
@@ -106,7 +110,6 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     @Before
     public void setup() {
         caseDetails = caseDetailsFromResource("/fixtures/general-application-directions.json", objectMapper);
-
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument(DOC_URL, FILE_NAME,
             GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL));
     }
@@ -185,6 +188,57 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             hasKey("letterDate")));
 
         assertDocumentPrintRequestContainsExpectedDocuments();
+    }
+
+    @Test
+    public void givenHearingRequired_whenSubmitNoticeOfHearing_thenHearingNoticeIsPrinted() {
+        caseDetails.getData().put(ANOTHER_HEARING_TO_BE_LISTED, YES_VALUE);
+        generalApplicationDirectionsService.submitNoticeOfHearing(caseDetails, AUTH_TOKEN);
+
+        assertCaseDataHasGeneralApplicationDirectionsDocument();
+
+        verify(genericDocumentService, times(1)).generateDocument(
+            eq(AUTH_TOKEN),
+            documentGenerationRequestCaseDetailsCaptor.capture(),
+            eq(documentConfiguration.getGeneralApplicationHearingNoticeTemplate()),
+            eq(documentConfiguration.getGeneralApplicationHearingNoticeFileName()));
+        verify(bulkPrintService, times(1)).printApplicantDocuments(any(), eq(AUTH_TOKEN), any());
+        verify(bulkPrintService, times(1)).printRespondentDocuments(any(), eq(AUTH_TOKEN),
+            printDocumentsRequestDocumentListCaptor.capture());
+
+        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
+
+        assertThat(data, allOf(
+            Matchers.<String, Object>hasEntry("ccdCaseNumber", 1234567890L),
+            hasEntry("courtDetails", ImmutableMap.of(
+                "courtName", "Kingston-Upon-Thames County Court And Family Court",
+                "courtAddress", "Kingston upon Thames County Court, St James Road, Kingston-upon-Thames, KT1 2AD",
+                "phoneNumber", "0208 972 8700",
+                "email", "enquiries.kingston.countycourt@justice.gov.uk")),
+            Matchers.<String, Object>hasEntry("applicantName", "Poor Guy"),
+            Matchers.<String, Object>hasEntry("respondentName", "test Korivi"),
+            Matchers.<String, Object>hasEntry("hearingVenue",
+                "Croydon County Court And Family Court, Croydon County Court, Altyre Road, Croydon, CR9 5AB"),
+            hasKey("letterDate")));
+
+        assertDocumentPrintRequestContainsExpectedDocuments();
+    }
+
+    @Test
+    public void givenNoHearingRequired_whenSubmitNoticeOfHearing_thenNothingIsPrinted() {
+        caseDetails.getData().put(ANOTHER_HEARING_TO_BE_LISTED, NO_VALUE);
+        generalApplicationDirectionsService.submitNoticeOfHearing(caseDetails, AUTH_TOKEN);
+
+        assertThat(caseDetails.getData(), IsNot.not(hasKey(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT)));
+
+        verify(genericDocumentService, never()).generateDocument(
+            eq(AUTH_TOKEN),
+            documentGenerationRequestCaseDetailsCaptor.capture(),
+            eq(documentConfiguration.getGeneralApplicationHearingNoticeTemplate()),
+            eq(documentConfiguration.getGeneralApplicationHearingNoticeFileName()));
+        verify(bulkPrintService, never()).printApplicantDocuments(any(), eq(AUTH_TOKEN), any());
+        verify(bulkPrintService, never()).printRespondentDocuments(any(), eq(AUTH_TOKEN),
+            printDocumentsRequestDocumentListCaptor.capture());
     }
 
     @Test

@@ -25,13 +25,13 @@ import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ANOTHER_HEARING_TO_BE_LISTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DRAFT_DIRECTION_DETAILS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DRAFT_DIRECTION_DETAILS_COLLECTION_RO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DIRECTION_ORDER_IS_FINAL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_DIRECTION_ORDER;
 
 @Service
@@ -65,8 +65,8 @@ public class UploadApprovedOrderService {
             getDraftDirectionDetailsCollectionTail(caseDetails);
 
         draftDirectionDetailsOptional.ifPresentOrElse(
-            latestDraftDirections -> caseDetails.getData().put(LATEST_DIRECTION_ORDER_IS_FINAL, latestDraftDirections.getIsFinal()),
-            () -> caseDetails.getData().put(LATEST_DIRECTION_ORDER_IS_FINAL, NO_VALUE)
+            latestDraftDirections -> caseDetails.getData().put(ANOTHER_HEARING_TO_BE_LISTED, latestDraftDirections.getIsFinal()),
+            () -> caseDetails.getData().put(ANOTHER_HEARING_TO_BE_LISTED, NO_VALUE)
         );
 
         return caseDetails.getData();

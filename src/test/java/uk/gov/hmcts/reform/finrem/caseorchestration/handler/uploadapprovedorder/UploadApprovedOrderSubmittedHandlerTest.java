@@ -17,7 +17,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DIRECTION_ORDER_IS_FINAL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ANOTHER_HEARING_TO_BE_LISTED;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UploadApprovedOrderSubmittedHandlerTest extends UploadApprovedOrderBaseHandlerTest {
@@ -44,11 +44,11 @@ public class UploadApprovedOrderSubmittedHandlerTest extends UploadApprovedOrder
 
     @Test
     public void givenContestedCase_whenSubmittedUploadApprovedOrder_thenHandle() {
-        callbackRequest.getCaseDetails().getData().put(LATEST_DIRECTION_ORDER_IS_FINAL, YES_VALUE);
+        callbackRequest.getCaseDetails().getData().put(ANOTHER_HEARING_TO_BE_LISTED, YES_VALUE);
         uploadApprovedOrderSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(generalApplicationDirectionsService, times(1))
-            .submitGeneralApplicationDirections(callbackRequest.getCaseDetails(), AUTH_TOKEN);
+            .submitNoticeOfHearing(callbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 
     @Test

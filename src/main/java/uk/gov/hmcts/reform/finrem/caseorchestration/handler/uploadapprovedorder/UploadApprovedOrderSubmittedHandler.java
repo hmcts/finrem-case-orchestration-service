@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DIRECTION_ORDER_IS_FINAL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ANOTHER_HEARING_TO_BE_LISTED;
 
 @Slf4j
 @Service
@@ -32,13 +32,13 @@ public class UploadApprovedOrderSubmittedHandler implements CallbackHandler {
     @Override
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest, String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        if (isFinalHearing(caseDetails)) {
-            generalApplicationDirectionsService.submitGeneralApplicationDirections(caseDetails, userAuthorisation);
+        if (isAnotherHearingToBeListed(caseDetails)) {
+            generalApplicationDirectionsService.submitNoticeOfHearing(caseDetails, userAuthorisation);
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build();
     }
 
-    private boolean isFinalHearing(CaseDetails caseDetails) {
-        return YES_VALUE.equals(caseDetails.getData().get(LATEST_DIRECTION_ORDER_IS_FINAL));
+    private boolean isAnotherHearingToBeListed(CaseDetails caseDetails) {
+        return YES_VALUE.equals(caseDetails.getData().get(ANOTHER_HEARING_TO_BE_LISTED));
     }
 }

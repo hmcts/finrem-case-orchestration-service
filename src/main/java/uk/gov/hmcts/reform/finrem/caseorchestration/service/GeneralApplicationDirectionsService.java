@@ -18,12 +18,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ANOTHER_HEARING_TO_BE_LISTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
@@ -202,6 +204,41 @@ public class GeneralApplicationDirectionsService {
         List<BulkPrintDocument> documents = prepareDocumentsToPrint(caseDetails, authorisationToken);
         printDocumentPackAndSendToApplicantAndRespondent(caseDetails, authorisationToken, documents);
         resetStateToGeneralApplicationPrestate(caseDetails);
+    }
+
+    public void submitNoticeOfHearing(CaseDetails caseDetails, String authorisationToken) {
+        Optional<List<BulkPrintDocument>> documentsOptional =
+            prepareHearingRequiredNoticeDocumentsForPrint(caseDetails, authorisationToken);
+
+        documentsOptional.ifPresent(documents ->
+            printDocumentPackAndSendToApplicantAndRespondent(caseDetails, authorisationToken, documents));
+    }
+
+    private Optional<List<BulkPrintDocument>> prepareHearingRequiredNoticeDocumentsForPrint(CaseDetails caseDetails,
+                                                                                            String authToken) {
+        Map<String, Object> caseData = caseDetails.getData();
+        List<BulkPrintDocument> documents = new ArrayList<>();
+        Optional<CaseDocument> directionsDocument = caseData.get(ANOTHER_HEARING_TO_BE_LISTED).equals(YES_VALUE)
+            ? Optional.of(prepareHearingRequiredNoticeDocument(caseDetails, authToken))
+            : Optional.empty();
+
+        if (directionsDocument.isEmpty()) {
+            return Optional.empty();
+        }
+        documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(directionsDocument.get()));
+        caseData.put(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT, directionsDocument.get());
+        addCaseDocuments(documents, caseData);
+        return Optional.of(documents);
+    }
+
+    private List<BulkPrintDocument> addCaseDocuments(List<BulkPrintDocument> documents, Map<String, Object> caseData) {
+        Stream.of(GENERAL_APPLICATION_DOCUMENT_LATEST, GENERAL_APPLICATION_DRAFT_ORDER).forEach(documentFieldName -> {
+            if (caseData.get(documentFieldName) != null) {
+                documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(
+                    documentHelper.convertToCaseDocument(caseData.get(documentFieldName))));
+            }
+        });
+        return documents;
     }
 
     private List<BulkPrintDocument> prepareDocumentsToPrint(CaseDetails caseDetails, String authorisationToken) {

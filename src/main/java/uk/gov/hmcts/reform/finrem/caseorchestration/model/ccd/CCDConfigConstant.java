@@ -476,6 +476,7 @@ public class CCDConfigConstant {
     public static final String LATEST_DRAFT_DIRECTION_ORDER = "latestDraftDirectionOrder";
     public static final String JUDGES_AMENDED_DIRECTION_ORDER_COLLECTION = "judgesAmendedOrderCollection";
     public static final String LATEST_DIRECTION_ORDER_IS_FINAL = "finalOrderYN";
+    public static final String ANOTHER_HEARING_TO_BE_LISTED = "anotherHearingYN";
 
     //transfer to local courts
     public static final String TRANSFER_COURTS_COLLECTION = "transferLocalCourtEmailCollection";

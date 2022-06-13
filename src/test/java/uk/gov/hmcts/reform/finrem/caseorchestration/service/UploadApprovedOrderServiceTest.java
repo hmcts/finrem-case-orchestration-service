@@ -36,13 +36,13 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ANOTHER_HEARING_TO_BE_LISTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DRAFT_DIRECTION_DETAILS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DRAFT_DIRECTION_DETAILS_COLLECTION_RO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DIRECTION_ORDER_IS_FINAL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_DIRECTION_ORDER;
 
 public class UploadApprovedOrderServiceTest extends BaseServiceTest {
@@ -160,22 +160,22 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
         List<Element<DraftDirectionDetails>> draftDirectionDetailsCollection = new ArrayList<>();
         draftDirectionDetailsCollection.add(Element.element(UUID.randomUUID(), DraftDirectionDetails.builder()
                 .isFinal(YES_VALUE)
-                .isAnotherHearing(NO_VALUE)
+                .isAnotherHearing(YES_VALUE)
                 .typeOfHearing("TEST_TYPE")
             .build()));
 
         caseDetails.getData().put(DRAFT_DIRECTION_DETAILS_COLLECTION, draftDirectionDetailsCollection);
 
         Map<String, Object> caseData = uploadApprovedOrderService.setIsFinalHearingFieldMidEvent(caseDetails);
-        assertTrue(caseData.containsKey(LATEST_DIRECTION_ORDER_IS_FINAL));
-        assertEquals(caseData.get(LATEST_DIRECTION_ORDER_IS_FINAL), YES_VALUE);
+        assertTrue(caseData.containsKey(ANOTHER_HEARING_TO_BE_LISTED));
+        assertEquals(caseData.get(ANOTHER_HEARING_TO_BE_LISTED), YES_VALUE);
     }
 
     @Test
     public void givenDirectionDetailsTailNotPresent_whenSetIsFinalHearingMidEvent_thenSetLatestDirectionOrderIsFinalToNo() {
         Map<String, Object> caseData = uploadApprovedOrderService.setIsFinalHearingFieldMidEvent(caseDetails);
-        assertTrue(caseData.containsKey(LATEST_DIRECTION_ORDER_IS_FINAL));
-        assertEquals(caseData.get(LATEST_DIRECTION_ORDER_IS_FINAL), NO_VALUE);
+        assertTrue(caseData.containsKey(ANOTHER_HEARING_TO_BE_LISTED));
+        assertEquals(caseData.get(ANOTHER_HEARING_TO_BE_LISTED), NO_VALUE);
     }
 
     private List<Element<DirectionOrder>> getDirectionOrderCollection() {
