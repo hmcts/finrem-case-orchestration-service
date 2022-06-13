@@ -125,6 +125,22 @@
       "regionList": "london",
       "londonFRCList": "cfc",
       "cfcCourtList": "FR_s_CFCList_4",
+      "directionDetailsCollection": [
+        {
+          "id": "1",
+          "value": {
+            "localCourt": {
+              "region": "southeast",
+              "southEastList": "kentfrc",
+              "kentSurreyCourtList": "FR_kent_surrey_hc_list_9"
+            },
+            "hearingTime": "1pm",
+            "timeEstimate": "1hr",
+            "typeOfHearing": "Final Hearing (FH)",
+            "isAnotherHearingYN": "No"
+          }
+        }
+      ],
       "generalApplicationDirectionsHearingRequired": "Yes",
       "generalApplicationDirectionsHearingDate": "2020-06-01",
       "generalApplicationDirectionsHearingTime": "2:00 pm",

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.io.IOException;
@@ -29,6 +32,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_ADDITIONAL_INFORMATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_BEDFORDSHIRE_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_BIRMINGHAM_COURT;
@@ -79,6 +83,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFu
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildInterimFrcCourtDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getFrcCourtDetailsAsOneLineAddressString;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getSelectedCourtComplexType;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getSelectedCourtGA;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getSelectedCourtIH;
 
@@ -219,7 +224,7 @@ public class GeneralApplicationDirectionsService {
         Map<String, Object> caseData = caseDetails.getData();
         List<BulkPrintDocument> documents = new ArrayList<>();
         Optional<CaseDocument> directionsDocument = caseData.get(ANOTHER_HEARING_TO_BE_LISTED).equals(YES_VALUE)
-            ? Optional.of(prepareHearingRequiredNoticeDocument(caseDetails, authToken))
+            ? Optional.of(prepareHearingRequiredNoticeDocumentComplexType(caseDetails, authToken))
             : Optional.empty();
 
         if (directionsDocument.isEmpty()) {
@@ -304,6 +309,26 @@ public class GeneralApplicationDirectionsService {
             documentConfiguration.getGeneralApplicationHearingNoticeFileName());
     }
 
+    private CaseDocument prepareHearingRequiredNoticeDocumentComplexType(CaseDetails caseDetails, String authorisationToken) {
+        CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
+        Map<String, Object> caseData = caseDetailsCopy.getData();
+
+        addDetails(caseData, caseDetails, caseDetailsCopy);
+        addHearingVenueDetailsFromDirectionDetailsCollection(caseDetailsCopy);
+        caseData.put("letterDate", String.valueOf(LocalDate.now()));
+
+        return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
+            documentConfiguration.getGeneralApplicationHearingNoticeTemplate(),
+            documentConfiguration.getGeneralApplicationHearingNoticeFileName());
+    }
+
+    private void addDetails(Map<String, Object> caseData, CaseDetails caseDetails, CaseDetails caseDetailsCopy) {
+        caseData.put("ccdCaseNumber", caseDetails.getId());
+        caseData.put("courtDetails", buildFrcCourtDetails(caseData));
+        caseData.put("applicantName", documentHelper.getApplicantFullName(caseDetailsCopy));
+        caseData.put("respondentName", documentHelper.getRespondentFullNameContested(caseDetailsCopy));
+    }
+
     private void addHearingVenueDetails(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
         try {
@@ -313,6 +338,26 @@ public class GeneralApplicationDirectionsService {
         } catch (IOException exception) {
             throw new IllegalStateException(exception);
         }
+    }
+
+    private void addHearingVenueDetailsFromDirectionDetailsCollection(CaseDetails caseDetails) {
+        Map<String, Object> caseData = caseDetails.getData();
+        Map<String, Object> courtDetails = getCourtDetailsFromLatestDirectionDetailsItem(caseData);
+        caseData.put("hearingVenue", getFrcCourtDetailsAsOneLineAddressString(courtDetails));
+    }
+
+    private Map<String, Object> getCourtDetailsFromLatestDirectionDetailsItem(Map<String, Object> caseData) {
+        try {
+            Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
+            Optional<DirectionDetailsCollection> latestDirectionDetails = getLatestDirectionDetails(caseData);
+            if (latestDirectionDetails.isPresent()) {
+                Map<String, Object> courtListMap = latestDirectionDetails.get().getLocalCourt();
+                return (Map<String, Object>) courtDetailsMap.get(courtListMap.get(getSelectedCourtComplexType(courtListMap)));
+            }
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException(e);
+        }
+        return new HashMap<>();
     }
 
     private boolean isPaperApplication(Map<String, Object> caseData) {
@@ -338,5 +383,15 @@ public class GeneralApplicationDirectionsService {
 
     public boolean isNotEmpty(String field, Map<String, Object> caseData) {
         return StringUtils.isNotEmpty(nullToEmpty(caseData.get(field)));
+    }
+
+    private Optional<DirectionDetailsCollection> getLatestDirectionDetails(Map<String, Object> caseData) {
+        List<DirectionDetailsCollectionData> directionDetailsCollectionList =
+            documentHelper.convertToDirectionDetailsCollectionData(caseData.get(DIRECTION_DETAILS_COLLECTION_CT));
+
+        return Optional.ofNullable(directionDetailsCollectionList).isEmpty()
+            ? Optional.empty()
+            : Optional.of(directionDetailsCollectionList.get(directionDetailsCollectionList.size() - 1)
+            .getDirectionDetailsCollection());
     }
 }

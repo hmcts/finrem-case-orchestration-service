@@ -218,8 +218,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             Matchers.<String, Object>hasEntry("applicantName", "Poor Guy"),
             Matchers.<String, Object>hasEntry("respondentName", "test Korivi"),
             Matchers.<String, Object>hasEntry("hearingVenue",
-                "Croydon County Court And Family Court, Croydon County Court, Altyre Road, Croydon, CR9 5AB"),
-            hasKey("letterDate")));
+                "Hastings County Court And Family Court Hearing Centre, The Law Courts, Bohemia Road, Hastings, TN34 1QX")));
 
         assertDocumentPrintRequestContainsExpectedDocuments();
     }
