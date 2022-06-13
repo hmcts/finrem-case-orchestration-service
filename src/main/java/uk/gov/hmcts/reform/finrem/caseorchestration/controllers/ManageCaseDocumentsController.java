@@ -46,7 +46,6 @@ public class ManageCaseDocumentsController extends BaseController {
         Long caseId = caseDetails.getId();
         log.info("Received request to upload Contested case documents for Case ID: {}", caseId);
 
-        caseDetails.getData().remove("allDocuments");
         AboutToStartOrSubmitCallbackResponse response =
             uploadCaseFilesAboutToSubmitHandler.handle(caseDetails.getData());
 

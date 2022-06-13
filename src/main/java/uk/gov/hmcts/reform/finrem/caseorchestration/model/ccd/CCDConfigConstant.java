@@ -411,7 +411,6 @@ public class CCDConfigConstant {
     public static final String CONTESTED_UPLOADED_DOCUMENTS = "uploadCaseDocument";
     public static final String CONTESTED_CASE_DOCUMENTS_UPLOADED = "caseDocumentsUploaded";
     public static final String CONTESTED_APPLICANT_DOCUMENTS_UPLOADED = "applicantDocuments";
-    public static final String ALL_DOCUMENTS = "allDocuments";
     public static final String CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED = "respondentDocuments";
     public static final String APPLICANT_CORRESPONDENCE_COLLECTION = "appCorrespondenceCollection";
     public static final String APPLICANT_FR_FORM_COLLECTION = "appFRFormsCollection";
