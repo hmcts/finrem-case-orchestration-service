@@ -14,7 +14,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @Component
 @Slf4j
-public class FdrDocumentsHandler extends DocumentHandler {
+public class FdrDocumentsHandler extends CaseDocumentHandler {
 
     @Autowired
     public FdrDocumentsHandler(ObjectMapper objectMapper) {
@@ -22,7 +22,7 @@ public class FdrDocumentsHandler extends DocumentHandler {
     }
 
     @Override
-    void handle(List<ContestedUploadedDocumentData> uploadedDocuments, Map<String, Object> caseData) {
+    public void handle(List<ContestedUploadedDocumentData> uploadedDocuments, Map<String, Object> caseData) {
         log.info("UploadDocuments Collection: {}", uploadedDocuments);
         List<ContestedUploadedDocumentData> fdrFiltered = uploadedDocuments.stream()
             .filter(d -> d.getUploadedCaseDocument().getCaseDocuments() != null

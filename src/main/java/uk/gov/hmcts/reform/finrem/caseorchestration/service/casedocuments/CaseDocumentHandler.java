@@ -9,11 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public abstract class DocumentHandler {
+public abstract class CaseDocumentHandler {
 
     private final ObjectMapper objectMapper;
 
-    public DocumentHandler(ObjectMapper objectMapper) {
+    public CaseDocumentHandler(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
 
@@ -25,6 +25,6 @@ public abstract class DocumentHandler {
         });
     }
 
-    abstract void handle(List<ContestedUploadedDocumentData> uploadedDocuments,
+    public abstract void handle(List<ContestedUploadedDocumentData> uploadedDocuments,
                          Map<String, Object> caseData);
 }

@@ -15,7 +15,7 @@ import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 
-abstract public class CaseDocumentHandlerTest {
+public abstract class CaseDocumentHandlerTest {
 
     protected CaseDetails caseDetails;
     protected Map<String, Object> caseData;

@@ -8,7 +8,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FDR_DOCS_COLLECTION;
 
-public class FDRDocumentsHandlerTest extends CaseDocumentHandlerTest {
+public class FdrDocumentsHandlerTest extends CaseDocumentHandlerTest {
 
     FdrDocumentsHandler fdrDocumentsHandler = new FdrDocumentsHandler(new ObjectMapper());
 

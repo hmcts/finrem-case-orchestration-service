@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
-abstract public class PartyDocumentHandler extends DocumentHandler {
+public abstract class PartyDocumentHandler extends CaseDocumentHandler {
 
     private final String collectionName;
     private final String party;
@@ -45,5 +45,5 @@ abstract public class PartyDocumentHandler extends DocumentHandler {
         }
     }
 
-    abstract protected boolean isDocumentTypeValid(String caseDocumentType);
+    protected abstract boolean isDocumentTypeValid(String caseDocumentType);
 }

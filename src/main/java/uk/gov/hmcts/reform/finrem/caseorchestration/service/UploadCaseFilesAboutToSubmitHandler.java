@@ -63,7 +63,6 @@ public class UploadCaseFilesAboutToSubmitHandler {
     private void setUploadedDocumentsToCollections(Map<String, Object> caseData) {
 
 
-
         List<ContestedUploadedDocumentData> uploadedDocuments = getDocumentCollection(caseData, CONTESTED_UPLOADED_DOCUMENTS);
 
         filterConfidentialDocs(uploadedDocuments, caseData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);

@@ -16,7 +16,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @Component
 @Slf4j
-public class ConfidentialDocumentsHandler extends DocumentHandler {
+public class ConfidentialDocumentsHandler extends CaseDocumentHandler {
 
     @Autowired
     public ConfidentialDocumentsHandler(ObjectMapper objectMapper) {
