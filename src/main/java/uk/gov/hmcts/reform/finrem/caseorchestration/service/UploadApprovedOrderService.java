@@ -69,7 +69,6 @@ public class UploadApprovedOrderService {
             () -> caseDetails.getData().put(LATEST_DIRECTION_ORDER_IS_FINAL, NO_VALUE)
         );
 
-
         return caseDetails.getData();
     }
 

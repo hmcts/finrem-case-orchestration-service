@@ -56,28 +56,6 @@ public class HearingOrderService {
         }
     }
 
-    public void convertToPdfAndStoreApprovedHearingOrder(CaseDetails caseDetails, String authorisationToken) {
-        Map<String, Object> caseData = caseDetails.getData();
-        List<CollectionElement<DirectionOrder>> directionOrders = Optional.ofNullable(caseData.get(HEARING_ORDER_COLLECTION))
-            .map(this::convertToListOfDirectionOrder)
-            .orElse(new ArrayList<>());
-
-        Optional<CollectionElement<DirectionOrder>> latestDirectionOrder = getLatestDirectionOrder(directionOrders);
-        if (latestDirectionOrder.isPresent()) {
-            CaseDocument pdfOrder = genericDocumentService
-                .convertDocumentIfNotPdfAlready(latestDirectionOrder.get().getValue().getUploadDraftDocument(), authorisationToken);
-            updateCaseDataForLatestHearingOrderCollection(caseData, pdfOrder);
-        } else {
-            throw new InvalidCaseDataException(BAD_REQUEST.value(), "Missing data from callbackRequest.");
-        }
-    }
-
-    private Optional<CollectionElement<DirectionOrder>> getLatestDirectionOrder(List<CollectionElement<DirectionOrder>> directionOrders) {
-        return directionOrders.isEmpty()
-            ? Optional.empty()
-            : Optional.of(directionOrders.get(directionOrders.size() - 1));
-    }
-
     public boolean latestDraftDirectionOrderOverridesSolicitorCollection(CaseDetails caseDetails) {
         DraftDirectionOrder draftDirectionOrderCollectionTail = draftDirectionOrderCollectionTail(caseDetails)
             .orElseThrow(IllegalArgumentException::new);
