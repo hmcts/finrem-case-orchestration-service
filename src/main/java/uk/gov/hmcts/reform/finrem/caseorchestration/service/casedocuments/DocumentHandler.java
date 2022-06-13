@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-abstract public class DocumentHandler {
+public abstract class DocumentHandler {
 
     private final ObjectMapper objectMapper;
 

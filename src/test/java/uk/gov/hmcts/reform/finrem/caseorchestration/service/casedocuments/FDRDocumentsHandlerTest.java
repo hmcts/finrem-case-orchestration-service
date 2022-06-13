@@ -10,7 +10,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class FDRDocumentsHandlerTest extends CaseDocumentHandlerTest {
 
-    FDRDocumentsHandler fdrDocumentsHandler = new FDRDocumentsHandler(new ObjectMapper());
+    FdrDocumentsHandler fdrDocumentsHandler = new FdrDocumentsHandler(new ObjectMapper());
 
     @Test
     public void shouldFilterFdrDocuments() {

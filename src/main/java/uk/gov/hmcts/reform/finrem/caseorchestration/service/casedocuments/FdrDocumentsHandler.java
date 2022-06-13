@@ -14,10 +14,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @Component
 @Slf4j
-public class FDRDocumentsHandler extends DocumentHandler {
+public class FdrDocumentsHandler extends DocumentHandler {
 
     @Autowired
-    public FDRDocumentsHandler(ObjectMapper objectMapper) {
+    public FdrDocumentsHandler(ObjectMapper objectMapper) {
         super(objectMapper);
     }
 

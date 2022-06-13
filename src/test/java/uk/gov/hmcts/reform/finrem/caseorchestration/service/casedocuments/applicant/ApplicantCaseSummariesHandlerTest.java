@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandlerTest;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,7 +21,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_CASE_SUMMARIES_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 
-public class ApplicantCaseSummariesHandlerTest {
+public class ApplicantCaseSummariesHandlerTest extends CaseDocumentHandlerTest {
 
     private CaseDetails caseDetails;
     private Map<String, Object> caseData;
@@ -37,9 +38,9 @@ public class ApplicantCaseSummariesHandlerTest {
 
     @Test
     public void appCaseSummariesFiltered() {
-        uploadDocumentList.add(createContestedUploadDocumentItem("Position Statement", "applicant", "no", null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Skeleton Argument", "applicant", "no", null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Case Summary", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Position Statement", "applicant", "no", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Skeleton Argument", "applicant", "no", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Case Summary", "applicant", "no", "no", null));
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
@@ -48,30 +49,4 @@ public class ApplicantCaseSummariesHandlerTest {
         assertThat(getDocumentCollection(caseData, APP_CASE_SUMMARIES_COLLECTION), hasSize(3));
     }
 
-
-    private ContestedUploadedDocumentData createContestedUploadDocumentItem(String type, String party,
-                                                                            String isConfidential, String other) {
-        return ContestedUploadedDocumentData.builder()
-            .uploadedCaseDocument(ContestedUploadedDocument
-                .builder()
-                .caseDocuments(new CaseDocument())
-                .caseDocumentType(type)
-                .caseDocumentParty(party)
-                .caseDocumentConfidential(isConfidential)
-                .caseDocumentOther(other)
-                .hearingDetails(null)
-                .build())
-            .build();
-    }
-
-    protected CaseDetails buildCaseDetails() {
-        Map<String, Object> caseData = new HashMap<>();
-        return CaseDetails.builder().id(Long.valueOf(123)).caseTypeId(CASE_TYPE_ID_CONTESTED).data(caseData).build();
-    }
-
-    private List<ContestedUploadedDocumentData> getDocumentCollection(Map<String, Object> data, String field) {
-        return mapper.convertValue(data.get(field),
-            new TypeReference<>() {
-            });
-    }
 }
