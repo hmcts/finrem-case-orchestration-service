@@ -13,8 +13,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentDetailsData;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +41,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_OTHER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_QUESTIONNAIRES_ANSWERS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_STATEMENTS_EXHIBITS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICANT_DOCUMENTS_UPLOADED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_CORRESPONDENCE_COLLECTION;
@@ -594,6 +599,62 @@ public class UploadCaseFilesAboutToSubmitHandlerTest extends BaseServiceTest {
 
         assertThat(response.getErrors().size(), is(0));
     }
+
+    @Test
+    public void applicantDocumentsUploaded() {
+
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
+        uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "applicant", "no", null));
+
+        caseDetails.getData().put(APP_CHRONOLOGIES_STATEMENTS_COLLECTION, uploadDocumentList);
+
+        uploadCaseFilesService.handle(caseData);
+
+        assertThat(getDocumentCollection(caseData, CONTESTED_APPLICANT_DOCUMENTS_UPLOADED), hasSize(1));
+    }
+
+    @Test
+    public void respondentDocumentsUploaded() {
+
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
+        uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "respondent", "no", null));
+
+        caseDetails.getData().put(RESP_CHRONOLOGIES_STATEMENTS_COLLECTION, uploadDocumentList);
+
+        uploadCaseFilesService.handle(caseData);
+
+        assertThat(getDocumentCollection(caseData, CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED), hasSize(1));
+    }
+
+    @Test
+    public void removeDeletedFileFromCaseDataCollection() {
+
+        uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "applicant", "no", null));
+
+        uploadDocumentList.get(0).setId("123");
+        uploadDocumentList.get(1).setId("456");
+
+        DocumentDetailsData data = new DocumentDetailsData();
+        data.setId("123");
+        data.setDocumentDetails(new DocumentDetails());
+
+        List<DocumentDetailsData> documentDetailsData = new ArrayList<>();
+        documentDetailsData.add(data);
+
+        Map<String, Object> chronologiesCollection = new LinkedHashMap<>();
+        chronologiesCollection.put(RESP_CHRONOLOGIES_STATEMENTS_COLLECTION, uploadDocumentList);
+
+        caseDetails.getData().put(CONTESTED_APPLICANT_DOCUMENTS_UPLOADED, documentDetailsData);
+        caseDetails.getData().put(CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED, documentDetailsData);
+
+        caseDetails.getData().put(RESP_CHRONOLOGIES_STATEMENTS_COLLECTION, uploadDocumentList);
+
+        uploadCaseFilesService.removeDeletedFilesFromCaseData(caseData);
+
+        assertThat(getDocumentCollection(caseData, RESP_CHRONOLOGIES_STATEMENTS_COLLECTION), hasSize(1));
+    }
+
 
 
     private ContestedUploadedDocumentData createContestedUploadDocumentItem(String type, String party,
