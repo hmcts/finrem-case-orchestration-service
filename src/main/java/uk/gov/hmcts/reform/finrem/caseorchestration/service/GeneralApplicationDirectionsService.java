@@ -313,7 +313,6 @@ public class GeneralApplicationDirectionsService {
 
     private void addDetails(Map<String, Object> caseData, CaseDetails caseDetails, CaseDetails caseDetailsCopy) {
         caseData.put("ccdCaseNumber", caseDetails.getId());
-        caseData.put("courtDetails", buildFrcCourtDetails(caseData));
         caseData.put("applicantName", documentHelper.getApplicantFullName(caseDetailsCopy));
         caseData.put("respondentName", documentHelper.getRespondentFullNameContested(caseDetailsCopy));
     }
