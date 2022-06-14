@@ -57,7 +57,8 @@ public class ApplicantAddresseeGeneratorTest {
             APPLICANT_FULL_NAME);
         when(documentHelper.formatAddressForLetterPrinting(APPLICANT_ADDRESS_VALUE)).thenReturn(FORMATTED_ADDRESS);
 
-        Addressee addressee = applicantAddresseeGenerator.generate(caseDetails, ChangedRepresentative.builder().build());
+        Addressee addressee = applicantAddresseeGenerator.generate(caseDetails,
+            ChangedRepresentative.builder().build(), "applicant");
 
         assertThat(addressee.getName(), is(APPLICANT_FULL_NAME));
         assertThat(addressee.getFormattedAddress(), is(FORMATTED_ADDRESS));

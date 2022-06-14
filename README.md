@@ -34,7 +34,7 @@ You can run the application by executing following command:
 
 The application will start locally on: `http://localhost:9000`
 
-### Running the service with CCD (and IDAM) locally (Developers and QA)
+### Running the service with CCD (and IDAM) locally (Developers and QAs)
 
 The best way to develop and test services in Financial Remedy is to use `rse-cft-lib` plugin by running:
 
@@ -67,9 +67,27 @@ to download the service images from Azure Registry.
 az acr login --name hmctspublic --subscription DCD-CNP-Prod
 az acr login --name hmctsprivate --subscription DCD-CNP-Prod
 ```
-#### Gotchas on macOS
+
+- XUI can be accessed on localhost:3000
+
+(As AAT is heavily used on this setup you must be always on the VPN)
+
+#### Gotchas
+When Running for the first time ever the services, it's advised to run each service build with:
+
+```bash
+./gradlew clean build
+```
+
+and on finrem-ccd-definitions folder, please run:
+
+```bash
+yarn install && yarn reset-ccd-submodule
+```
+
 - You must have Docker Desktop running; the AAT setup requires 3GB memory minimum and the Local setup will vary depending on how many services you will be running locally
 
+on macOS:
 - The IDAM Simulator runs on port 5000, so it is necessary to disable macOS' AirPlay Receiver server in: 
 Settings > Sharing > AirPlay Receiver
 

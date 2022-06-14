@@ -1,0 +1,12 @@
+{
+  "event_id": "FR_sendOrder",
+  "case_details": {
+    "id": 100,
+    "jurisdiction": "DIVORCE",
+    "state": "applicationDrafted",
+    "case_type_id": "FinancialRemedyMVP2",
+    "case_data": {
+
+    }
+  }
+}

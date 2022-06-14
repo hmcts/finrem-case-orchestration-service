@@ -37,7 +37,14 @@
       "claimingExemptionMIAM": "Yes",
       "divorceDecreeNisiDate": "1111-01-01",
       "isApplicantsHomeCourt": "No",
-      "respondentRepresented": "Yes",
+      "appRespondentRep": "Yes",
+      "RespondentOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "testID",
+          "OrganisationName": "respfirmname"
+        },
+        "OrgPolicyCaseAssignedRole": "[RESPSOLICITOR]"
+      },
       "respondentSolicitorFirm": "test firm",
       "respondentSolicitorName": "Test",
       "divorceUploadEvidence1": {
