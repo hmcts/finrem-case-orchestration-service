@@ -67,7 +67,7 @@ public class MiniFormAController extends BaseController {
             caseData.put(MINI_FORM_A, document);
 
             log.info("Defaulting AssignedToJudge fields for Case ID: {}", callback.getCaseDetails().getId());
-            populateAssignToJudgeFields(caseData);
+            populateAssignToJudgeFields(caseData, caseDetails);
         } else {
             CaseDocument document = service.generateConsentedInContestedMiniFormA(callback.getCaseDetails(), authorisationToken);
             caseData.put(MINI_FORM_A_CONSENTED_IN_CONTESTED, document);
@@ -76,10 +76,12 @@ public class MiniFormAController extends BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    private void populateAssignToJudgeFields(Map<String, Object> caseData) {
+    private void populateAssignToJudgeFields(Map<String, Object> caseData, CaseDetails caseDetails) {
         caseData.put(assignedToJudge, defaultsConfiguration.getAssignedToJudgeDefault());
-        caseData.put(assignedToJudgeReason, assignedToJudgeReasonDefault);
-        caseData.put(referToJudgeDate, LocalDate.now());
-        caseData.put(referToJudgeText, referToJudgeTextDefault);
+        if (caseDataService.isConsentedApplication(caseDetails)) {
+            caseData.put(assignedToJudgeReason, assignedToJudgeReasonDefault);
+            caseData.put(referToJudgeDate, LocalDate.now());
+            caseData.put(referToJudgeText, referToJudgeTextDefault);
+        }
     }
 }
