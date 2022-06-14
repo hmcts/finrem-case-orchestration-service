@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentDetailsData;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +19,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static java.lang.System.currentTimeMillis;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CONFIDENTIAL_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CORRESPONDENCE_COLLECTION;
