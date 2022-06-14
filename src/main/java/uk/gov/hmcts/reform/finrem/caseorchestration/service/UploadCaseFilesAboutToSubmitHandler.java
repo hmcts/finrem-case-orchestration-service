@@ -601,22 +601,26 @@ public class UploadCaseFilesAboutToSubmitHandler {
 
     public Map<String, Object> removeDeletedFilesFromCaseData(Map<String, Object> caseData) {
 
-        Set<String> appCollectionTypes = Set.of("appChronologiesCollection", "appCaseSummariesCollection", "appOtherCollection");
+        removeDeletedFilesFromCollections(caseData, getContestedUploadDocumentCollections(),
+            CONTESTED_APPLICANT_DOCUMENTS_UPLOADED, CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED);
 
-        Set<String> respCollectionTypes = Set.of("respChronologiesCollection", "respFormEExhibitsCollection", "respOtherCollection");
-
-        removeDeletedFilesFromCollections(caseData, appCollectionTypes, CONTESTED_APPLICANT_DOCUMENTS_UPLOADED);
-
-        removeDeletedFilesFromCollections(caseData, respCollectionTypes, CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED);
+        caseData.remove(CONTESTED_APPLICANT_DOCUMENTS_UPLOADED);
+        caseData.remove(CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED);
 
         return caseData;
     }
 
-    private void removeDeletedFilesFromCollections(Map<String, Object> caseData, Set<String> collectionTypes, String documentType) {
+    private void removeDeletedFilesFromCollections(Map<String, Object> caseData, Set<String> collectionTypes, String... documentType) {
 
-        Set<String> remainingDocumentsInCollection = mapper.convertValue(caseData.get(documentType), new TypeReference<List<DocumentDetailsData>>() {
-            })
-            .stream().map(DocumentDetailsData::getId).collect(Collectors.toSet());
+        List<DocumentDetailsData> allDocumentDetailsData = new ArrayList<>();
+
+        for (String document : documentType) {
+
+            allDocumentDetailsData.addAll(mapper.convertValue(caseData.get(document), new TypeReference<List<DocumentDetailsData>>() {
+            }));
+        }
+
+        Set<String> remainingDocumentsInCollection = allDocumentDetailsData.stream().map(DocumentDetailsData::getId).collect(Collectors.toSet());
 
         for (String collection : collectionTypes) {
 
@@ -641,8 +645,7 @@ public class UploadCaseFilesAboutToSubmitHandler {
 
     private List<ContestedUploadedDocumentData> getAllUploadedDocuments(Map<String, Object> caseData) {
 
-        Set<String> collectionTypes = Set.of("appChronologiesCollection", "respChronologiesCollection",
-            "appCaseSummariesCollection", "respFormEExhibitsCollection", "appOtherCollection", "respOtherCollection");
+        Set<String> collectionTypes = getContestedUploadDocumentCollections();
 
         List<ContestedUploadedDocumentData> allDocuments = new ArrayList<>();
 
@@ -654,6 +657,19 @@ public class UploadCaseFilesAboutToSubmitHandler {
         }
 
         return allDocuments;
+    }
+
+    private Set<String> getContestedUploadDocumentCollections() {
+
+        return Set.of(APPLICANT_CORRESPONDENCE_COLLECTION, APPLICANT_FR_FORM_COLLECTION, APPLICANT_EVIDENCE_COLLECTION,
+            APPLICANT_TRIAL_BUNDLE_COLLECTION, APPLICANT_CONFIDENTIAL_DOCS_COLLECTION, RESPONDENT_CORRESPONDENCE_COLLECTION,
+            RESPONDENT_FR_FORM_COLLECTION, RESPONDENT_EVIDENCE_COLLECTION, RESPONDENT_TRIAL_BUNDLE_COLLECTION,
+            RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION, APP_HEARING_BUNDLES_COLLECTION, APP_FORM_E_EXHIBITS_COLLECTION,
+            APP_CHRONOLOGIES_STATEMENTS_COLLECTION, APP_QUESTIONNAIRES_ANSWERS_COLLECTION, APP_STATEMENTS_EXHIBITS_COLLECTION,
+            APP_CASE_SUMMARIES_COLLECTION, APP_FORMS_H_COLLECTION, APP_EXPERT_EVIDENCE_COLLECTION, APP_CORRESPONDENCE_COLLECTION,
+            APP_OTHER_COLLECTION, RESP_HEARING_BUNDLES_COLLECTION, RESP_FORM_E_EXHIBITS_COLLECTION, RESP_CHRONOLOGIES_STATEMENTS_COLLECTION,
+            RESP_QUESTIONNAIRES_ANSWERS_COLLECTION, RESP_STATEMENTS_EXHIBITS_COLLECTION, RESP_CASE_SUMMARIES_COLLECTION, RESP_FORM_H_COLLECTION,
+            RESP_EXPERT_EVIDENCE_COLLECTION, RESP_CORRESPONDENCE_COLLECTION, RESP_OTHER_COLLECTION);
     }
 
     private List<DocumentDetailsData> extractFieldsToDocumentDetailsCollection(List<ContestedUploadedDocumentData> documentDetails) {

@@ -25,6 +25,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CONFIDENTIAL_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CORRESPONDENCE_COLLECTION;
@@ -629,6 +630,23 @@ public class UploadCaseFilesAboutToSubmitHandlerTest extends BaseServiceTest {
     @Test
     public void removeDeletedFileFromCaseDataCollection() {
 
+        uploadCaseFilesService.removeDeletedFilesFromCaseData(populateCaseData().getData());
+
+        assertThat(getDocumentCollection(caseData, RESP_CHRONOLOGIES_STATEMENTS_COLLECTION), hasSize(1));
+    }
+
+    @Test
+    public void applicantAndRespondentKeysDoNotExistInCaseData() {
+
+        uploadCaseFilesService.removeDeletedFilesFromCaseData(populateCaseData().getData());
+
+        assertNull(caseData.get(CONTESTED_APPLICANT_DOCUMENTS_UPLOADED));
+        assertNull(caseData.get(CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED));
+    }
+
+
+    private CaseDetails populateCaseData() {
+
         uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "applicant", "no", null));
         uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "applicant", "no", null));
 
@@ -642,20 +660,13 @@ public class UploadCaseFilesAboutToSubmitHandlerTest extends BaseServiceTest {
         List<DocumentDetailsData> documentDetailsData = new ArrayList<>();
         documentDetailsData.add(data);
 
-        Map<String, Object> chronologiesCollection = new LinkedHashMap<>();
-        chronologiesCollection.put(RESP_CHRONOLOGIES_STATEMENTS_COLLECTION, uploadDocumentList);
-
         caseDetails.getData().put(CONTESTED_APPLICANT_DOCUMENTS_UPLOADED, documentDetailsData);
         caseDetails.getData().put(CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED, documentDetailsData);
 
         caseDetails.getData().put(RESP_CHRONOLOGIES_STATEMENTS_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.removeDeletedFilesFromCaseData(caseData);
-
-        assertThat(getDocumentCollection(caseData, RESP_CHRONOLOGIES_STATEMENTS_COLLECTION), hasSize(1));
+        return caseDetails;
     }
-
-
 
     private ContestedUploadedDocumentData createContestedUploadDocumentItem(String type, String party,
                                                                             String isConfidential, String other) {
