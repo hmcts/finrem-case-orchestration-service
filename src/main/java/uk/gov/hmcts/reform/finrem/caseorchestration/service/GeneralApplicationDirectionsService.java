@@ -332,10 +332,10 @@ public class GeneralApplicationDirectionsService {
     private void addHearingVenueDetailsFromDirectionDetailsCollection(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
         Optional<DirectionDetailsCollection> latestDirectionDetails = getLatestDirectionDetails(caseData);
-        System.out.println(latestDirectionDetails);
         if (latestDirectionDetails.isPresent()) {
             Map<String, Object> courtDetails = getCourtDetailsFromLatestDirectionDetailsItem(latestDirectionDetails.get());
             caseData.put("hearingVenue", getFrcCourtDetailsAsOneLineAddressString(courtDetails));
+            caseData.put("courtDetails", courtDetails);
             caseData.put(GENERAL_APPLICATION_DIRECTIONS_HEARING_DATE, latestDirectionDetails.get().getDateOfHearing());
             caseData.put(GENERAL_APPLICATION_DIRECTIONS_HEARING_TIME, latestDirectionDetails.get().getHearingTime());
             caseData.put(GENERAL_APPLICATION_DIRECTIONS_HEARING_TIME_ESTIMATE, latestDirectionDetails.get().getTimeEstimate());
