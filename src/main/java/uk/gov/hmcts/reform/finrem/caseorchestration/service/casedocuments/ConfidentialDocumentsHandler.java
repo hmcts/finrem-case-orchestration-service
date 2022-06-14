@@ -47,7 +47,8 @@ public class ConfidentialDocumentsHandler extends CaseDocumentHandler {
 
     private ConfidentialUploadedDocumentData buildConfidentialDocument(ContestedUploadedDocumentData doc) {
 
-        log.info("Build doc with filename {}, and comments {}",   doc.getUploadedCaseDocument().getCaseDocuments().getDocumentFilename(), doc.getUploadedCaseDocument().getHearingDetails());
+        log.info("Build doc with filename {}, and comments {}", doc.getUploadedCaseDocument().getCaseDocuments().getDocumentFilename(),
+            doc.getUploadedCaseDocument().getHearingDetails());
         return ConfidentialUploadedDocumentData.builder()
             .confidentialUploadedDocument(ConfidentialUploadedDocument.builder()
                 .documentFileName(doc.getUploadedCaseDocument().getCaseDocuments().getDocumentFilename())
