@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ApprovedOrderNoticeOfHearingService;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ANOTHER_HEARING_TO_BE_LISTED;
@@ -20,7 +20,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequiredArgsConstructor
 public class UploadApprovedOrderSubmittedHandler implements CallbackHandler {
 
-    private final GeneralApplicationDirectionsService generalApplicationDirectionsService;
+    private final ApprovedOrderNoticeOfHearingService approvedOrderNoticeOfHearingService;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -33,7 +33,7 @@ public class UploadApprovedOrderSubmittedHandler implements CallbackHandler {
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest, String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         if (isAnotherHearingToBeListed(caseDetails)) {
-            generalApplicationDirectionsService.submitNoticeOfHearing(caseDetails, userAuthorisation);
+            approvedOrderNoticeOfHearingService.submitNoticeOfHearing(caseDetails, userAuthorisation);
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build();
     }

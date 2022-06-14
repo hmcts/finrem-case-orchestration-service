@@ -8,7 +8,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ApprovedOrderNoticeOfHearingService;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -26,7 +26,7 @@ public class UploadApprovedOrderSubmittedHandlerTest extends UploadApprovedOrder
     UploadApprovedOrderSubmittedHandler uploadApprovedOrderSubmittedHandler;
 
     @Mock
-    GeneralApplicationDirectionsService generalApplicationDirectionsService;
+    ApprovedOrderNoticeOfHearingService approvedOrderNoticeOfHearingService;
 
     @Test
     public void givenContestedCase_whenAboutToSubmitUploadApprovedOrder_thenCanHandle() {
@@ -47,7 +47,7 @@ public class UploadApprovedOrderSubmittedHandlerTest extends UploadApprovedOrder
         callbackRequest.getCaseDetails().getData().put(ANOTHER_HEARING_TO_BE_LISTED, YES_VALUE);
         uploadApprovedOrderSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(generalApplicationDirectionsService, times(1))
+        verify(approvedOrderNoticeOfHearingService, times(1))
             .submitNoticeOfHearing(callbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 
@@ -55,7 +55,7 @@ public class UploadApprovedOrderSubmittedHandlerTest extends UploadApprovedOrder
     public void givenContestedCase_whenSubmittedUploadApprovedOrderAndNotFinalHearing_thenHandle() {
         uploadApprovedOrderSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(generalApplicationDirectionsService, never())
-            .submitGeneralApplicationDirections(callbackRequest.getCaseDetails(), AUTH_TOKEN);
+        verify(approvedOrderNoticeOfHearingService, never())
+            .submitNoticeOfHearing(callbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 }
