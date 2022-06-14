@@ -41,7 +41,7 @@ public class UploadContestedCaseDocumentsHandler implements CallbackHandler {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         List<ContestedUploadedDocumentData> uploadedDocuments = getDocumentCollection(caseData, CONTESTED_UPLOADED_DOCUMENTS);
         caseDocumentHandlers.stream().forEach(h -> h.handle(uploadedDocuments, caseData));
-
+        caseData.put(CONTESTED_UPLOADED_DOCUMENTS, uploadedDocuments);
         return AboutToStartOrSubmitCallbackResponse
             .builder()
             .data(caseData)

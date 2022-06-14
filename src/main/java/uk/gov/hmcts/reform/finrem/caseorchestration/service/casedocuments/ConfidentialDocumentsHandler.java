@@ -40,13 +40,19 @@ public class ConfidentialDocumentsHandler extends CaseDocumentHandler {
 
         if (!confidentialDocsCollection.isEmpty()) {
             List<ConfidentialUploadedDocumentData> confidentialDocs = confidentialDocsCollection.stream().map(
-                doc -> ConfidentialUploadedDocumentData.builder()
-                    .confidentialUploadedDocument(ConfidentialUploadedDocument.builder()
-                        .documentFileName(doc.getUploadedCaseDocument().getCaseDocuments().getDocumentFilename())
-                        .documentComment(doc.getUploadedCaseDocument().getHearingDetails())
-                        .documentLink(doc.getUploadedCaseDocument().getCaseDocuments())
-                        .build()).build()).collect((Collectors.toList()));
+                doc -> buildConfidentialDocument(doc)).collect((Collectors.toList()));
             caseData.put(CONFIDENTIAL_DOCS_UPLOADED_COLLECTION, confidentialDocs);
         }
+    }
+
+    private ConfidentialUploadedDocumentData buildConfidentialDocument(ContestedUploadedDocumentData doc) {
+
+        log.info("Build doc with filename {}, and comments {}",   doc.getUploadedCaseDocument().getCaseDocuments().getDocumentFilename(), doc.getUploadedCaseDocument().getHearingDetails());
+        return ConfidentialUploadedDocumentData.builder()
+            .confidentialUploadedDocument(ConfidentialUploadedDocument.builder()
+                .documentFileName(doc.getUploadedCaseDocument().getCaseDocuments().getDocumentFilename())
+                .documentComment(doc.getUploadedCaseDocument().getHearingDetails())
+                .documentLink(doc.getUploadedCaseDocument().getCaseDocuments())
+                .build()).build();
     }
 }
