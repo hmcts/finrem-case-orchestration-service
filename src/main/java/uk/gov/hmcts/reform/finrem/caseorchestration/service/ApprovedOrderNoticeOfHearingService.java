@@ -24,7 +24,9 @@ import java.util.Optional;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ANOTHER_HEARING_TO_BE_LISTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getFrcCourtDetailsAsOneLineAddressString;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getSelectedCourtComplexType;
@@ -71,6 +73,7 @@ public class ApprovedOrderNoticeOfHearingService {
         NoticeOfHearingLetterDetails noticeOfHearingLetterDetails = NoticeOfHearingLetterDetails.builder()
             .applicantName(documentHelper.getApplicantFullName(caseDetails))
             .respondentName(documentHelper.getRespondentFullNameContested(caseDetails))
+            .divorceCaseNumber(nullToEmpty(caseDetails.getData().get(DIVORCE_CASE_NUMBER)))
             .ccdCaseNumber(caseDetails.getId())
             .letterDate(String.valueOf(LocalDate.now()))
             .build();

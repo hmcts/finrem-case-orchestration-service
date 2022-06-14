@@ -12,6 +12,7 @@ import java.util.Map;
 public class NoticeOfHearingLetterDetails {
     private Map<String, Object> courtDetails;
     private long ccdCaseNumber;
+    private String divorceCaseNumber;
     private String applicantName;
     private String respondentName;
     private String hearingVenue;
