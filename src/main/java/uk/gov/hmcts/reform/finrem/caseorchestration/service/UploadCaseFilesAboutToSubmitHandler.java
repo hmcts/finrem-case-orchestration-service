@@ -680,16 +680,14 @@ public class UploadCaseFilesAboutToSubmitHandler {
             DocumentDetailsData documentDetailsData = new DocumentDetailsData();
             DocumentDetails details = new DocumentDetails();
 
-            details.setDocumentDateAdded(new SimpleDateFormat("dd/MM/yyyy").format(currentTimeMillis()));
-
             ContestedUploadedDocument uploadedDocument = documentDetail.getUploadedCaseDocument();
 
             if (uploadedDocument.getCaseDocuments() != null) {
                 details.setDocumentFileName(uploadedDocument.getCaseDocuments().getDocumentFilename());
             }
+
             documentDetailsData.setId(documentDetail.getId());
             details.setDocumentType(uploadedDocument.getCaseDocumentType());
-            details.setRemoveLink("Remove");
 
             documentDetailsData.setDocumentDetails(details);
 

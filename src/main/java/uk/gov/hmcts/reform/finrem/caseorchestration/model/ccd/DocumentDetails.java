@@ -17,12 +17,6 @@ public class DocumentDetails {
     @JsonProperty("DocumentFileName")
     private String documentFileName;
 
-    @JsonProperty("DocumentDateAdded")
-    private String documentDateAdded;
-
     @JsonProperty("DocumentType")
     private String documentType;
-
-    @JsonProperty("remove")
-    private String removeLink;
 }
