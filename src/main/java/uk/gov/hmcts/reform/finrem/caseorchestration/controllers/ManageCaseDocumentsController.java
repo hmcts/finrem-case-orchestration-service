@@ -30,7 +30,7 @@ public class ManageCaseDocumentsController extends BaseController {
     private final ObjectMapper mapper;
 
     @PostMapping(path = "/manage-case-documents", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Handles update Contested Case details and cleans up the data fields based on the options chosen for Contested Cases")
+    @ApiOperation(value = "Handles collection of documents that are marked as deleted for Contested Cases")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
             response = AboutToStartOrSubmitCallbackResponse.class),
@@ -44,18 +44,18 @@ public class ManageCaseDocumentsController extends BaseController {
 
         CaseDetails caseDetails = ccdRequest.getCaseDetails();
         Long caseId = caseDetails.getId();
-        log.info("Received request to upload Contested case documents for Case ID: {}", caseId);
+        log.info("Received request to remove deleted documents from case data for Case ID: {}", caseId);
 
         AboutToStartOrSubmitCallbackResponse response =
             uploadCaseFilesAboutToSubmitHandler.handle(caseDetails.getData());
 
-        log.info("Successfully filtered documents to relevant party for Case ID: {}", caseId);
+        log.info("Successfully filtered documents to be removed from case data for Case ID: {}", caseId);
 
         return ResponseEntity.ok(response);
     }
 
     @PostMapping(path = "/manage-case-documents-submit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Handles update Contested Case details and cleans up the data fields based on the options chosen for Contested Cases")
+    @ApiOperation(value = "Handles removal of deleted documents from data fields for Contested Cases")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
             response = AboutToStartOrSubmitCallbackResponse.class),
@@ -69,11 +69,11 @@ public class ManageCaseDocumentsController extends BaseController {
 
         CaseDetails caseDetails = ccdRequest.getCaseDetails();
         Long caseId = caseDetails.getId();
-        log.info("Received request to upload Contested case documents for Case ID: {}", caseId);
+        log.info("Received request to remove deleted documents from case data for Case ID: {}", caseId);
 
         uploadCaseFilesAboutToSubmitHandler.handle(uploadCaseFilesAboutToSubmitHandler.removeDeletedFilesFromCaseData(caseDetails.getData()));
 
-        log.info("Successfully filtered documents to relevant party for Case ID: {}", caseId);
+        log.info("Successfully removed documents from case data for Case ID: {}", caseId);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
