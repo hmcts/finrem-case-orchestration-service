@@ -220,7 +220,10 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             Matchers.<String, Object>hasEntry("hearingVenue",
                 "Hastings County Court And Family Court Hearing Centre, The Law Courts, Bohemia Road, Hastings, TN34 1QX")));
 
-        assertDocumentPrintRequestContainsExpectedDocuments();
+        assertThat(printDocumentsRequestDocumentListCaptor.getValue(), containsInAnyOrder(BulkPrintDocument
+            .builder()
+            .binaryFileUrl(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL)
+            .build()));
     }
 
     @Test

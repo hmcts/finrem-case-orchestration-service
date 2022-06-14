@@ -232,18 +232,7 @@ public class GeneralApplicationDirectionsService {
         }
         documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(directionsDocument.get()));
         caseData.put(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT, directionsDocument.get());
-        addCaseDocuments(documents, caseData);
         return Optional.of(documents);
-    }
-
-    private List<BulkPrintDocument> addCaseDocuments(List<BulkPrintDocument> documents, Map<String, Object> caseData) {
-        Stream.of(GENERAL_APPLICATION_DOCUMENT_LATEST, GENERAL_APPLICATION_DRAFT_ORDER).forEach(documentFieldName -> {
-            if (caseData.get(documentFieldName) != null) {
-                documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(
-                    documentHelper.convertToCaseDocument(caseData.get(documentFieldName))));
-            }
-        });
-        return documents;
     }
 
     private List<BulkPrintDocument> prepareDocumentsToPrint(CaseDetails caseDetails, String authorisationToken) {
