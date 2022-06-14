@@ -23,10 +23,10 @@ public class ConfidentialUploadedDocument {
     @JsonProperty("DocumentDateAdded")
     private String documentDateAdded;
 
-    @JsonProperty("documentFileName")
+    @JsonProperty("DocumentFileName")
     private String documentFileName;
 
-    @JsonProperty("documentComment")
+    @JsonProperty("DocumentComment")
     private String documentComment;
 
 }
