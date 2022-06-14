@@ -38,7 +38,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_QUESTIONNAIRES_ANSWERS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_STATEMENTS_EXHIBITS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICANT_DOCUMENTS_UPLOADED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CASE_DOCUMENTS_UPLOADED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION;
@@ -121,8 +120,6 @@ public class UploadCaseFilesAboutToSubmitHandler {
             filterApplicantOrRespondentDocuments(caseData, APPLICANT)));
         caseData.put(CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED, extractFieldsToDocumentDetailsCollection(
             filterApplicantOrRespondentDocuments(caseData, RESPONDENT)));
-        caseData.put(CONTESTED_CASE_DOCUMENTS_UPLOADED, extractFieldsToDocumentDetailsCollection(
-            filterApplicantOrRespondentDocuments(caseData, null)));
 
         caseData.put(CONTESTED_UPLOADED_DOCUMENTS, uploadedDocuments);
     }
