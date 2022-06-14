@@ -331,22 +331,25 @@ public class GeneralApplicationDirectionsService {
 
     private void addHearingVenueDetailsFromDirectionDetailsCollection(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
-        Map<String, Object> courtDetails = getCourtDetailsFromLatestDirectionDetailsItem(caseData);
-        caseData.put("hearingVenue", getFrcCourtDetailsAsOneLineAddressString(courtDetails));
+        Optional<DirectionDetailsCollection> latestDirectionDetails = getLatestDirectionDetails(caseData);
+        System.out.println(latestDirectionDetails);
+        if (latestDirectionDetails.isPresent()) {
+            Map<String, Object> courtDetails = getCourtDetailsFromLatestDirectionDetailsItem(latestDirectionDetails.get());
+            caseData.put("hearingVenue", getFrcCourtDetailsAsOneLineAddressString(courtDetails));
+            caseData.put(GENERAL_APPLICATION_DIRECTIONS_HEARING_DATE, latestDirectionDetails.get().getDateOfHearing());
+            caseData.put(GENERAL_APPLICATION_DIRECTIONS_HEARING_TIME, latestDirectionDetails.get().getHearingTime());
+            caseData.put(GENERAL_APPLICATION_DIRECTIONS_HEARING_TIME_ESTIMATE, latestDirectionDetails.get().getTimeEstimate());
+        }
     }
 
-    private Map<String, Object> getCourtDetailsFromLatestDirectionDetailsItem(Map<String, Object> caseData) {
+    private Map<String, Object> getCourtDetailsFromLatestDirectionDetailsItem(DirectionDetailsCollection latestDirectionDetails) {
         try {
-            Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
-            Optional<DirectionDetailsCollection> latestDirectionDetails = getLatestDirectionDetails(caseData);
-            if (latestDirectionDetails.isPresent()) {
-                Map<String, Object> courtListMap = latestDirectionDetails.get().getLocalCourt();
-                return (Map<String, Object>) courtDetailsMap.get(courtListMap.get(getSelectedCourtComplexType(courtListMap)));
-            }
+            Map<String, Object> listOfCourtDetails = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
+            Map<String, Object> hearingCourtMap = latestDirectionDetails.getLocalCourt();
+            return (Map<String, Object>) listOfCourtDetails.get(hearingCourtMap.get(getSelectedCourtComplexType(hearingCourtMap)));
         } catch (JsonProcessingException e) {
             throw new IllegalStateException(e);
         }
-        return new HashMap<>();
     }
 
     private boolean isPaperApplication(Map<String, Object> caseData) {
