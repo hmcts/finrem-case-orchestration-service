@@ -211,10 +211,10 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         assertThat(data, allOf(
             Matchers.<String, Object>hasEntry("ccdCaseNumber", 1234567890L),
             hasEntry("courtDetails", ImmutableMap.of(
-                "courtName", "Kingston-Upon-Thames County Court And Family Court",
-                "courtAddress", "Kingston upon Thames County Court, St James Road, Kingston-upon-Thames, KT1 2AD",
-                "phoneNumber", "0208 972 8700",
-                "email", "enquiries.kingston.countycourt@justice.gov.uk")),
+                "courtName", "Hastings County Court And Family Court Hearing Centre",
+                "courtAddress", "The Law Courts, Bohemia Road, Hastings, TN34 1QX",
+                "phoneNumber", "01634 887900",
+                "email", "FRCKSS@justice.gov.uk")),
             Matchers.<String, Object>hasEntry("applicantName", "Poor Guy"),
             Matchers.<String, Object>hasEntry("respondentName", "test Korivi"),
             Matchers.<String, Object>hasEntry("hearingVenue",
