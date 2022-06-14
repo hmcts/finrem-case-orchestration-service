@@ -54,6 +54,7 @@ public class ConfidentialDocumentsHandler extends CaseDocumentHandler {
                 .documentFileName(doc.getUploadedCaseDocument().getCaseDocuments().getDocumentFilename())
                 .documentComment(doc.getUploadedCaseDocument().getHearingDetails())
                 .documentLink(doc.getUploadedCaseDocument().getCaseDocuments())
+                .documentType(doc.getUploadedCaseDocument().getCaseDocumentType())
                 .build()).build();
     }
 }
