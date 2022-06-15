@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadCaseFilesAboutToSubmitHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ManageCaseDocumentsService;
 
 import java.io.InputStream;
 
@@ -27,10 +27,10 @@ public class ManageCaseDocumentsAboutToSubmitCaseHandlerTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Mock
-    private UploadCaseFilesAboutToSubmitHandler uploadCaseFilesAboutToSubmitHandler;
+    private ManageCaseDocumentsService manageCaseDocumentsService;
 
     @InjectMocks
-    private ManageCaseDocumentsAboutToSubmitCaseHandler manageCaseDocumentsAboutToSubmitCaseHandler;
+    private ManageCaseDocumentsContestedAboutToSubmitCaseHandler manageCaseDocumentsAboutToSubmitCaseHandler;
 
     @Test
     public void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventManageCaseDocuments_thenHandlerCanHandle() {
@@ -53,7 +53,7 @@ public class ManageCaseDocumentsAboutToSubmitCaseHandlerTest {
             CallbackRequest.builder().caseDetails(generalOrderContestedCaseDetails()).build();
         manageCaseDocumentsAboutToSubmitCaseHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(uploadCaseFilesAboutToSubmitHandler).handle(any());
+        verify(manageCaseDocumentsService).removeDeletedFilesFromCaseData(any());
     }
 
     private CaseDetails generalOrderContestedCaseDetails() {

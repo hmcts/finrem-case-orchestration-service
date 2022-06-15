@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadCaseFilesAboutToSubmitHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ManageCaseDocumentsService;
 
 import java.io.InputStream;
 
@@ -23,15 +23,15 @@ import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ManageCaseDocumentsAboutToStartCaseHandlerTest {
+public class ManageCaseDocumentsContestedAboutToStartCaseHandlerTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Mock
-    private UploadCaseFilesAboutToSubmitHandler uploadCaseFilesAboutToSubmitHandler;
+    private ManageCaseDocumentsService manageCaseDocumentsService;
 
     @InjectMocks
-    private ManageCaseDocumentsAboutToStartCaseHandler manageCaseDocumentsAboutToStartCaseHandler;
+    private ManageCaseDocumentsContestedAboutToStartCaseHandler manageCaseDocumentsAboutToStartCaseHandler;
 
     @Test
     public void givenACcdCallbackContestedCase_WhenAnAboutToStartEventManageCaseDocuments_thenHandlerCanHandle() {
@@ -54,7 +54,7 @@ public class ManageCaseDocumentsAboutToStartCaseHandlerTest {
             CallbackRequest.builder().caseDetails(generalOrderContestedCaseDetails()).build();
         manageCaseDocumentsAboutToStartCaseHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(uploadCaseFilesAboutToSubmitHandler).handle(any());
+        verify(manageCaseDocumentsService).setApplicantAndRespondentDocumentsCollection(any());
     }
 
     private CaseDetails generalOrderContestedCaseDetails() {
