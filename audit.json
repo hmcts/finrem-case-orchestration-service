@@ -445,5 +445,6 @@
   "90033_Loosely Scoped Cookie_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/ccdAboutToStartEvent_POST":"ignore",
   "90033_Loosely Scoped Cookie_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/ccdAboutToSubmitEvent_POST":"ignore",
   "90033_Loosely Scoped Cookie_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/ccdMidEvent_POST":"ignore",
-  "90033_Loosely Scoped Cookie_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/ccdSubmittedEvent_POST":"ignore"
+  "90033_Loosely Scoped Cookie_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/ccdSubmittedEvent_POST":"ignore",
+  "100000_A Client Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/notify/contest-order-approved_POST":"ignore"
 }
