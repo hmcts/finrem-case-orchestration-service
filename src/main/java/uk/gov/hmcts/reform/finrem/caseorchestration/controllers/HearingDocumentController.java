@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 
 import javax.validation.constraints.NotNull;
 
@@ -53,6 +54,7 @@ public class HearingDocumentController extends BaseController {
     private final CaseDataService caseDataService;
     private final NotificationService notificationService;
     private final ObjectMapper objectMapper;
+    private final CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
 
     @PostMapping(path = "/documents/hearing", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles Form C and G generation. Serves as a callback from CCD")
@@ -87,9 +89,10 @@ public class HearingDocumentController extends BaseController {
 
         List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
 
+
         // NOTE TO SELF, TEST BOTH PAPER AND DIGITAL JOURNEYS
         if (caseDataService.isContestedApplication(caseDetails) && (!notificationService.shouldEmailRespondentSolicitor(caseDetails.getData())
-            || !notificationService.shouldEmailContestedAppSolicitor(caseDetails.getData()))) {
+            || !notificationService.shouldEmailContestedAppSolicitor(caseDetails.getData()) || !checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails))) {
             CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
             if (caseDetailsBefore != null && hearingDocumentService.alreadyHadFirstHearing(caseDetailsBefore)) {
                 log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
