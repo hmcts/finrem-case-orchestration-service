@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocumentData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 
 import java.util.List;
@@ -16,7 +17,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @Component
 @Slf4j
-public class ConfidentialDocumentsHandler extends CaseDocumentHandler {
+public class ConfidentialDocumentsHandler extends CaseDocumentHandler<ConfidentialUploadedDocumentData> {
 
     @Autowired
     public ConfidentialDocumentsHandler(ObjectMapper objectMapper) {
@@ -33,30 +34,32 @@ public class ConfidentialDocumentsHandler extends CaseDocumentHandler {
                 && d.getUploadedCaseDocument().getCaseDocumentConfidential().equalsIgnoreCase("Yes"))
             .collect(Collectors.toList());
 
-        List<ContestedUploadedDocumentData> confidentialDocsCollection = getDocumentCollection(caseData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
-        confidentialDocsCollection.addAll(confidentialFiltered);
+
         log.info("Adding items: {}, to Confidential Documents Collection", confidentialFiltered);
         uploadedDocuments.removeAll(confidentialFiltered);
 
-        if (!confidentialDocsCollection.isEmpty()) {
-            List<ConfidentialUploadedDocumentData> confidentialDocs = confidentialDocsCollection.stream().map(
+        List<ConfidentialUploadedDocumentData> confidentialDocsCollection = getDocumentCollection(caseData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
+        if (!confidentialFiltered.isEmpty()) {
+            List<ConfidentialUploadedDocumentData> confidentialDocs = confidentialFiltered.stream().map(
                 doc -> buildConfidentialDocument(doc)).collect((Collectors.toList()));
-            caseData.put(CONFIDENTIAL_DOCS_UPLOADED_COLLECTION, confidentialDocs);
+            confidentialDocsCollection.addAll(confidentialDocs);
+            caseData.put(CONFIDENTIAL_DOCS_UPLOADED_COLLECTION, confidentialDocsCollection);
         }
     }
 
     private ConfidentialUploadedDocumentData buildConfidentialDocument(ContestedUploadedDocumentData doc) {
 
+        ContestedUploadedDocument uploadedCaseDocument = doc.getUploadedCaseDocument();
         log.info("Build doc with filename {}, and comments {} and document type {}",
-            doc.getUploadedCaseDocument().getCaseDocuments().getDocumentFilename(),
-            doc.getUploadedCaseDocument().getHearingDetails(),
-            doc.getUploadedCaseDocument().getCaseDocumentType());
+            uploadedCaseDocument.getCaseDocuments().getDocumentFilename(),
+            uploadedCaseDocument.getHearingDetails(),
+            uploadedCaseDocument.getCaseDocumentType());
         return ConfidentialUploadedDocumentData.builder()
             .confidentialUploadedDocument(ConfidentialUploadedDocument.builder()
-                .documentFileName(doc.getUploadedCaseDocument().getCaseDocuments().getDocumentFilename())
-                .documentComment(doc.getUploadedCaseDocument().getHearingDetails())
-                .documentLink(doc.getUploadedCaseDocument().getCaseDocuments())
-                .documentType(doc.getUploadedCaseDocument().getCaseDocumentType())
+                .documentFileName(uploadedCaseDocument.getCaseDocuments().getDocumentFilename())
+                .documentComment(uploadedCaseDocument.getHearingDetails())
+                .documentLink(uploadedCaseDocument.getCaseDocuments())
+                .documentType(uploadedCaseDocument.getCaseDocumentType())
                 .build()).build();
     }
 }

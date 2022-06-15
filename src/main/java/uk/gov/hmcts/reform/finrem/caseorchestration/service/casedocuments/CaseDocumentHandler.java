@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public abstract class CaseDocumentHandler {
+public abstract class CaseDocumentHandler<T> {
 
     private final ObjectMapper objectMapper;
 
@@ -17,7 +17,7 @@ public abstract class CaseDocumentHandler {
         this.objectMapper = objectMapper;
     }
 
-    protected List<ContestedUploadedDocumentData> getDocumentCollection(Map<String, Object> caseData, String collection) {
+    protected List<T> getDocumentCollection(Map<String, Object> caseData, String collection) {
         if (StringUtils.isEmpty(caseData.get(collection))) {
             return new ArrayList<>();
         }

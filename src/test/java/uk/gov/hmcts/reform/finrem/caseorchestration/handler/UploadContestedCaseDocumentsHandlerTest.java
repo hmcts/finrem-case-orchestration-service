@@ -39,13 +39,13 @@ public class UploadContestedCaseDocumentsHandlerTest extends CaseDocumentHandler
     ApplicantChronologiesStatementHandler applicantChronologiesStatementHandler;
 
     ObjectMapper objectMapper = new ObjectMapper();
-    private UploadContestedCaseDocumentsHandler uploadContestedCaseDocumentsHandler;
+    private UploadContestedCaseDocumentsAboutToSubmitHandler uploadContestedCaseDocumentsHandler;
 
     private final List<ContestedUploadedDocumentData> uploadDocumentList = new ArrayList<>();
 
     @Before
     public void setUpTest() {
-        uploadContestedCaseDocumentsHandler = new UploadContestedCaseDocumentsHandler(
+        uploadContestedCaseDocumentsHandler = new UploadContestedCaseDocumentsAboutToSubmitHandler(
             Arrays.asList(applicantCaseSummariesHandler, applicantChronologiesStatementHandler), objectMapper);
     }
 

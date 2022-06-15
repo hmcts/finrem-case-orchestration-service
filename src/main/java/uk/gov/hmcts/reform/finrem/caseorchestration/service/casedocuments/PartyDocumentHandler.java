@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
-public abstract class PartyDocumentHandler extends CaseDocumentHandler {
+public abstract class PartyDocumentHandler extends CaseDocumentHandler<ContestedUploadedDocumentData> {
 
     private final String collectionName;
     private final String party;
@@ -28,9 +29,12 @@ public abstract class PartyDocumentHandler extends CaseDocumentHandler {
     public void handle(List<ContestedUploadedDocumentData> uploadedDocuments,
                        Map<String, Object> caseData) {
         List<ContestedUploadedDocumentData> documentsFiltered = uploadedDocuments.stream()
-            .filter(d -> d.getUploadedCaseDocument().getCaseDocuments() != null
-                && d.getUploadedCaseDocument().getCaseDocumentParty() != null
-                && d.getUploadedCaseDocument().getCaseDocumentParty().equals(party))
+            .filter(d -> {
+                ContestedUploadedDocument uploadedCaseDocument = d.getUploadedCaseDocument();
+                return uploadedCaseDocument.getCaseDocuments() != null
+                    && uploadedCaseDocument.getCaseDocumentParty() != null
+                    && uploadedCaseDocument.getCaseDocumentParty().equals(party);
+            })
             .filter(d -> d.getUploadedCaseDocument().getCaseDocumentType() != null
                 && isDocumentTypeValid(d.getUploadedCaseDocument().getCaseDocumentType()))
             .collect(Collectors.toList());

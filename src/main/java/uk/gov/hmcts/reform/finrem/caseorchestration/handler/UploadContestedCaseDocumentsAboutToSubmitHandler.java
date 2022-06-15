@@ -23,7 +23,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UploadContestedCaseDocumentsHandler implements CallbackHandler {
+public class UploadContestedCaseDocumentsAboutToSubmitHandler implements CallbackHandler {
 
     private final List<CaseDocumentHandler> caseDocumentHandlers;
     private final ObjectMapper objectMapper;

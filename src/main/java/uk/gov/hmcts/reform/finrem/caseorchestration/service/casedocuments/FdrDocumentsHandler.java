@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 
 import java.util.List;
@@ -14,7 +15,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @Component
 @Slf4j
-public class FdrDocumentsHandler extends CaseDocumentHandler {
+public class FdrDocumentsHandler extends CaseDocumentHandler<ContestedUploadedDocumentData> {
 
     @Autowired
     public FdrDocumentsHandler(ObjectMapper objectMapper) {
@@ -25,10 +26,13 @@ public class FdrDocumentsHandler extends CaseDocumentHandler {
     public void handle(List<ContestedUploadedDocumentData> uploadedDocuments, Map<String, Object> caseData) {
         log.info("UploadDocuments Collection: {}", uploadedDocuments);
         List<ContestedUploadedDocumentData> fdrFiltered = uploadedDocuments.stream()
-            .filter(d -> d.getUploadedCaseDocument().getCaseDocuments() != null
-                && d.getUploadedCaseDocument().getCaseDocumentType() != null
-                && d.getUploadedCaseDocument().getCaseDocumentFdr() != null
-                && d.getUploadedCaseDocument().getCaseDocumentFdr().equalsIgnoreCase("Yes"))
+            .filter(d -> {
+                ContestedUploadedDocument uploadedCaseDocument = d.getUploadedCaseDocument();
+                return uploadedCaseDocument.getCaseDocuments() != null
+                    && uploadedCaseDocument.getCaseDocumentType() != null
+                    && uploadedCaseDocument.getCaseDocumentFdr() != null
+                    && uploadedCaseDocument.getCaseDocumentFdr().equalsIgnoreCase("Yes");
+            })
             .collect(Collectors.toList());
 
         List<ContestedUploadedDocumentData> fdrDocsCollection = getDocumentCollection(caseData, FDR_DOCS_COLLECTION);

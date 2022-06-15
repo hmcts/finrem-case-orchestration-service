@@ -7,8 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 
@@ -19,6 +17,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CONFIDENTIAL_DOCS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CORRESPONDENCE_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_EVIDENCE_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FR_FORM_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_TRIAL_BUNDLE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_CASE_SUMMARIES_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_CHRONOLOGIES_STATEMENTS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_CORRESPONDENCE_COLLECTION;
@@ -29,9 +32,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_OTHER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_QUESTIONNAIRES_ANSWERS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_STATEMENTS_EXHIBITS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONFIDENTIAL_DOCS_UPLOADED_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FDR_DOCS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_CORRESPONDENCE_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_EVIDENCE_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_FR_FORM_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_TRIAL_BUNDLE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_CASE_SUMMARIES_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_CORRESPONDENCE_COLLECTION;
@@ -62,34 +68,46 @@ public class UploadCaseFilesAboutToSubmitHandler {
 
     private void setUploadedDocumentsToCollections(Map<String, Object> caseData) {
 
+        boolean respondentJourneyEnabled = featureToggleService.isRespondentJourneyEnabled();
+        log.info("Respondent Solicitor Journey toggle is: {}", respondentJourneyEnabled);
 
         List<ContestedUploadedDocumentData> uploadedDocuments = getDocumentCollection(caseData, CONTESTED_UPLOADED_DOCUMENTS);
 
-        filterConfidentialDocs(uploadedDocuments, caseData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
-        filterFdrDocs(uploadedDocuments, caseData, FDR_DOCS_COLLECTION);
+        if (respondentJourneyEnabled) {
+            filterConfidentialDocs(uploadedDocuments, caseData, APPLICANT_CONFIDENTIAL_DOCS_COLLECTION, APPLICANT);
+            filterHearingBundles(uploadedDocuments, caseData, APP_HEARING_BUNDLES_COLLECTION, APPLICANT);
+            filterFormEExhibits(uploadedDocuments, caseData, APP_FORM_E_EXHIBITS_COLLECTION, APPLICANT);
+            filterChronologiesStatements(uploadedDocuments, caseData, APP_CHRONOLOGIES_STATEMENTS_COLLECTION, APPLICANT);
+            filterQuestionnairesAnswers(uploadedDocuments, caseData, APP_QUESTIONNAIRES_ANSWERS_COLLECTION, APPLICANT);
+            filterStatementsExhibits(uploadedDocuments, caseData, APP_STATEMENTS_EXHIBITS_COLLECTION, APPLICANT);
+            filterCaseSummaries(uploadedDocuments, caseData, APP_CASE_SUMMARIES_COLLECTION, APPLICANT);
+            filterFormsH(uploadedDocuments, caseData, APP_FORMS_H_COLLECTION, APPLICANT);
+            filterExpertEvidence(uploadedDocuments, caseData, APP_EXPERT_EVIDENCE_COLLECTION, APPLICANT);
+            filterCorrespondenceDocs(uploadedDocuments, caseData, APP_CORRESPONDENCE_COLLECTION, APPLICANT);
+            filterOtherDocs(uploadedDocuments, caseData, APP_OTHER_COLLECTION, APPLICANT);
 
-        filterHearingBundles(uploadedDocuments, caseData, APP_HEARING_BUNDLES_COLLECTION, APPLICANT);
-        filterFormEExhibits(uploadedDocuments, caseData, APP_FORM_E_EXHIBITS_COLLECTION, APPLICANT);
-        filterChronologiesStatements(uploadedDocuments, caseData, APP_CHRONOLOGIES_STATEMENTS_COLLECTION, APPLICANT);
-        filterQuestionnairesAnswers(uploadedDocuments, caseData, APP_QUESTIONNAIRES_ANSWERS_COLLECTION, APPLICANT);
-        filterStatementsExhibits(uploadedDocuments, caseData, APP_STATEMENTS_EXHIBITS_COLLECTION, APPLICANT);
-        filterCaseSummaries(uploadedDocuments, caseData, APP_CASE_SUMMARIES_COLLECTION, APPLICANT);
-        filterFormsH(uploadedDocuments, caseData, APP_FORMS_H_COLLECTION, APPLICANT);
-        filterExpertEvidence(uploadedDocuments, caseData, APP_EXPERT_EVIDENCE_COLLECTION, APPLICANT);
-        filterCorrespondenceDocs(uploadedDocuments, caseData, APP_CORRESPONDENCE_COLLECTION, APPLICANT);
-        filterOtherDocs(uploadedDocuments, caseData, APP_OTHER_COLLECTION, APPLICANT);
+            filterConfidentialDocs(uploadedDocuments, caseData, RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION, RESPONDENT);
+            filterHearingBundles(uploadedDocuments, caseData, RESP_HEARING_BUNDLES_COLLECTION, RESPONDENT);
+            filterFormEExhibits(uploadedDocuments, caseData, RESP_FORM_E_EXHIBITS_COLLECTION, RESPONDENT);
+            filterChronologiesStatements(uploadedDocuments, caseData, RESP_CHRONOLOGIES_STATEMENTS_COLLECTION, RESPONDENT);
+            filterQuestionnairesAnswers(uploadedDocuments, caseData, RESP_QUESTIONNAIRES_ANSWERS_COLLECTION, RESPONDENT);
+            filterStatementsExhibits(uploadedDocuments, caseData, RESP_STATEMENTS_EXHIBITS_COLLECTION, RESPONDENT);
+            filterCaseSummaries(uploadedDocuments, caseData, RESP_CASE_SUMMARIES_COLLECTION, RESPONDENT);
+            filterFormsH(uploadedDocuments, caseData, RESP_FORM_H_COLLECTION, RESPONDENT);
+            filterExpertEvidence(uploadedDocuments, caseData, RESP_EXPERT_EVIDENCE_COLLECTION, RESPONDENT);
+            filterCorrespondenceDocs(uploadedDocuments, caseData, RESP_CORRESPONDENCE_COLLECTION, RESPONDENT);
+            filterOtherDocs(uploadedDocuments, caseData, RESP_OTHER_COLLECTION, RESPONDENT);
+        } else {
+            filterCorrespondence(uploadedDocuments, caseData, APPLICANT_CORRESPONDENCE_COLLECTION, APPLICANT);
+            filterForms(uploadedDocuments, caseData, APPLICANT_FR_FORM_COLLECTION, APPLICANT);
+            filterEvidence(uploadedDocuments, caseData, APPLICANT_EVIDENCE_COLLECTION, APPLICANT);
+            filterTrialBundle(uploadedDocuments, caseData, APPLICANT_TRIAL_BUNDLE_COLLECTION, APPLICANT);
 
-        filterHearingBundles(uploadedDocuments, caseData, RESP_HEARING_BUNDLES_COLLECTION, RESPONDENT);
-        filterFormEExhibits(uploadedDocuments, caseData, RESP_FORM_E_EXHIBITS_COLLECTION, RESPONDENT);
-        filterChronologiesStatements(uploadedDocuments, caseData, RESP_CHRONOLOGIES_STATEMENTS_COLLECTION, RESPONDENT);
-        filterQuestionnairesAnswers(uploadedDocuments, caseData, RESP_QUESTIONNAIRES_ANSWERS_COLLECTION, RESPONDENT);
-        filterStatementsExhibits(uploadedDocuments, caseData, RESP_STATEMENTS_EXHIBITS_COLLECTION, RESPONDENT);
-        filterCaseSummaries(uploadedDocuments, caseData, RESP_CASE_SUMMARIES_COLLECTION, RESPONDENT);
-        filterFormsH(uploadedDocuments, caseData, RESP_FORM_H_COLLECTION, RESPONDENT);
-        filterExpertEvidence(uploadedDocuments, caseData, RESP_EXPERT_EVIDENCE_COLLECTION, RESPONDENT);
-        filterCorrespondenceDocs(uploadedDocuments, caseData, RESP_CORRESPONDENCE_COLLECTION, RESPONDENT);
-        filterOtherDocs(uploadedDocuments, caseData, RESP_OTHER_COLLECTION, RESPONDENT);
-
+            filterCorrespondence(uploadedDocuments, caseData, RESPONDENT_CORRESPONDENCE_COLLECTION, RESPONDENT);
+            filterForms(uploadedDocuments, caseData, RESPONDENT_FR_FORM_COLLECTION, RESPONDENT);
+            filterEvidence(uploadedDocuments, caseData, RESPONDENT_EVIDENCE_COLLECTION, RESPONDENT);
+            filterTrialBundle(uploadedDocuments, caseData, RESPONDENT_TRIAL_BUNDLE_COLLECTION, RESPONDENT);
+        }
 
         caseData.put(CONTESTED_UPLOADED_DOCUMENTS, uploadedDocuments);
     }
@@ -101,6 +119,39 @@ public class UploadCaseFilesAboutToSubmitHandler {
 
         return mapper.convertValue(caseData.get(collection), new TypeReference<>() {
         });
+    }
+
+    private boolean isTypeValidForCorrespondence(String caseDocumentType) {
+        return caseDocumentType.equals("Letter from Applicant");
+    }
+
+    private boolean isTypeValidForForms(String caseDocumentType) {
+        return caseDocumentType.equals("Form B")
+            || caseDocumentType.equals("Applicant - Form E")
+            || caseDocumentType.equals("Form F")
+            || caseDocumentType.equals("Form G")
+            || caseDocumentType.equals("Form H");
+    }
+
+    private boolean isTypeValidForEvidence(String caseDocumentType) {
+        return caseDocumentType.equals("Statement of Issues")
+            || caseDocumentType.equals("Chronology")
+            || caseDocumentType.equals("Case Summary")
+            || caseDocumentType.equals("Questionnaire")
+            || caseDocumentType.equals("Reply to Questionnaire")
+            || caseDocumentType.equals("Valuation Report")
+            || caseDocumentType.equals("Pension Plan")
+            || caseDocumentType.equals("Position Statement")
+            || caseDocumentType.equals("Skeleton Argument")
+            || caseDocumentType.equals("Expert Evidence")
+            || caseDocumentType.equals("Witness Statement/Affidavit")
+            || caseDocumentType.equals("Care Plan")
+            || caseDocumentType.equals("Offers")
+            || caseDocumentType.equals("other");
+    }
+
+    private boolean isTypeValidForTrialBundle(String caseDocumentType) {
+        return caseDocumentType.equals("Trial Bundle");
     }
 
     private boolean isTypeValidForHearingBundle(String caseDocumentType) {
@@ -155,58 +206,117 @@ public class UploadCaseFilesAboutToSubmitHandler {
             || caseDocumentType.equals("Pension Plan");
     }
 
+    private void filterCorrespondence(List<ContestedUploadedDocumentData> uploadedDocuments,
+                                      Map<String, Object> caseData,
+                                      String collection,
+                                      String party) {
+        List<ContestedUploadedDocumentData> correspondenceFiltered = uploadedDocuments.stream()
+            .filter(d -> d.getUploadedCaseDocument().getCaseDocuments() != null
+                && d.getUploadedCaseDocument().getCaseDocumentParty() != null
+                && d.getUploadedCaseDocument().getCaseDocumentParty().equals(party))
+            .filter(d -> d.getUploadedCaseDocument().getCaseDocumentType() != null
+                && isTypeValidForCorrespondence(d.getUploadedCaseDocument().getCaseDocumentType()))
+            .collect(Collectors.toList());
+
+        List<ContestedUploadedDocumentData> correspondenceCollection = getDocumentCollection(caseData, collection);
+        correspondenceCollection.addAll(correspondenceFiltered);
+        log.info("Adding items: {}, to Correspondence Collection", correspondenceFiltered);
+        uploadedDocuments.removeAll(correspondenceFiltered);
+
+        if (!correspondenceCollection.isEmpty()) {
+            caseData.put(collection, correspondenceCollection);
+        }
+    }
+
+    private void filterForms(List<ContestedUploadedDocumentData> uploadedDocuments,
+                             Map<String, Object> caseData,
+                             String collection,
+                             String party) {
+        List<ContestedUploadedDocumentData> frFormsFiltered = uploadedDocuments.stream()
+            .filter(d -> d.getUploadedCaseDocument().getCaseDocuments() != null
+                && d.getUploadedCaseDocument().getCaseDocumentParty() != null
+                && d.getUploadedCaseDocument().getCaseDocumentParty().equals(party))
+            .filter(d -> d.getUploadedCaseDocument().getCaseDocumentType() != null
+                && isTypeValidForForms(d.getUploadedCaseDocument().getCaseDocumentType()))
+            .collect(Collectors.toList());
+
+        List<ContestedUploadedDocumentData> formCollection = getDocumentCollection(caseData, collection);
+        formCollection.addAll(frFormsFiltered);
+        log.info("Adding items: {}, to FR Forms Collection", frFormsFiltered);
+        uploadedDocuments.removeAll(frFormsFiltered);
+
+        if (!formCollection.isEmpty()) {
+            caseData.put(collection, formCollection);
+        }
+    }
+
+    private void filterEvidence(List<ContestedUploadedDocumentData> uploadedDocuments,
+                                Map<String, Object> caseData,
+                                String collection,
+                                String party) {
+        List<ContestedUploadedDocumentData> evidenceInSupportFiltered = uploadedDocuments.stream()
+            .filter(d -> d.getUploadedCaseDocument().getCaseDocuments() != null
+                && d.getUploadedCaseDocument().getCaseDocumentParty() != null
+                && d.getUploadedCaseDocument().getCaseDocumentParty().equals(party))
+            .filter(d -> d.getUploadedCaseDocument().getCaseDocumentType() != null
+                && isTypeValidForEvidence(d.getUploadedCaseDocument().getCaseDocumentType()))
+            .collect(Collectors.toList());
+
+        List<ContestedUploadedDocumentData> evidenceCollection = getDocumentCollection(caseData, collection);
+        evidenceCollection.addAll(evidenceInSupportFiltered);
+        log.info("Adding items: {}, to Evidence In Support Collection", evidenceInSupportFiltered);
+        uploadedDocuments.removeAll(evidenceInSupportFiltered);
+
+        if (!evidenceCollection.isEmpty()) {
+            caseData.put(collection, evidenceCollection);
+        }
+    }
+
+    private void filterTrialBundle(List<ContestedUploadedDocumentData> uploadedDocuments,
+                                   Map<String, Object> caseData,
+                                   String collection,
+                                   String party) {
+        List<ContestedUploadedDocumentData> trialBundleFiltered = uploadedDocuments.stream()
+            .filter(d -> d.getUploadedCaseDocument().getCaseDocuments() != null
+                && d.getUploadedCaseDocument().getCaseDocumentParty() != null
+                && d.getUploadedCaseDocument().getCaseDocumentParty().equals(party))
+            .filter(d -> d.getUploadedCaseDocument().getCaseDocumentType() != null
+                && isTypeValidForTrialBundle(d.getUploadedCaseDocument().getCaseDocumentType()))
+            .collect(Collectors.toList());
+
+        List<ContestedUploadedDocumentData> trialBundleCollection = getDocumentCollection(caseData, collection);
+        trialBundleCollection.addAll(trialBundleFiltered);
+        log.info("Adding items: {}, to Trial Bundle Collection", trialBundleFiltered);
+        uploadedDocuments.removeAll(trialBundleFiltered);
+
+        if (!trialBundleCollection.isEmpty()) {
+            caseData.put(collection, trialBundleCollection);
+        }
+    }
 
     private void filterConfidentialDocs(List<ContestedUploadedDocumentData> uploadedDocuments,
                                         Map<String, Object> caseData,
-                                        String collectionName) {
+                                        String collection,
+                                        String party) {
 
         log.info("UploadDocuments Collection: {}", uploadedDocuments);
         List<ContestedUploadedDocumentData> confidentialFiltered = uploadedDocuments.stream()
             .filter(d -> d.getUploadedCaseDocument().getCaseDocuments() != null
-                && d.getUploadedCaseDocument().getCaseDocumentType() != null
+                && d.getUploadedCaseDocument().getCaseDocumentParty() != null
+                && d.getUploadedCaseDocument().getCaseDocumentParty().equals(party))
+            .filter(d -> d.getUploadedCaseDocument().getCaseDocumentType() != null
                 && d.getUploadedCaseDocument().getCaseDocumentConfidential() != null
                 && d.getUploadedCaseDocument().getCaseDocumentConfidential().equalsIgnoreCase("Yes"))
             .collect(Collectors.toList());
 
-        List<ContestedUploadedDocumentData> confidentialDocsCollection = getDocumentCollection(caseData, collectionName);
+        List<ContestedUploadedDocumentData> confidentialDocsCollection = getDocumentCollection(caseData, collection);
         confidentialDocsCollection.addAll(confidentialFiltered);
         log.info("Adding items: {}, to Confidential Documents Collection", confidentialFiltered);
         uploadedDocuments.removeAll(confidentialFiltered);
 
         if (!confidentialDocsCollection.isEmpty()) {
-            List<ConfidentialUploadedDocumentData> confidentialDocs = confidentialDocsCollection.stream().map(
-                doc -> ConfidentialUploadedDocumentData.builder()
-                    .confidentialUploadedDocument(ConfidentialUploadedDocument.builder()
-                        .documentFileName(doc.getUploadedCaseDocument().getCaseDocuments().getDocumentFilename())
-                        .documentComment(doc.getUploadedCaseDocument().getHearingDetails())
-                        .documentLink(doc.getUploadedCaseDocument().getCaseDocuments())
-                        .build()).build()).collect((Collectors.toList()));
-            caseData.put(collectionName, confidentialDocs);
+            caseData.put(collection, confidentialDocsCollection);
         }
-    }
-
-    private void filterFdrDocs(List<ContestedUploadedDocumentData> uploadedDocuments,
-                               Map<String, Object> caseData,
-                               String collectionName) {
-
-        log.info("UploadDocuments Collection: {}", uploadedDocuments);
-        List<ContestedUploadedDocumentData> fdrFiltered = uploadedDocuments.stream()
-            .filter(d -> d.getUploadedCaseDocument().getCaseDocuments() != null
-                && d.getUploadedCaseDocument().getCaseDocumentType() != null
-                && d.getUploadedCaseDocument().getCaseDocumentFdr() != null
-                && d.getUploadedCaseDocument().getCaseDocumentFdr().equalsIgnoreCase("Yes"))
-            .collect(Collectors.toList());
-
-        List<ContestedUploadedDocumentData> fdrDocsCollection = getDocumentCollection(caseData, collectionName);
-        fdrDocsCollection.addAll(fdrFiltered);
-        log.info("Adding items: {}, to FDR Documents Collection", fdrFiltered);
-        uploadedDocuments.removeAll(fdrFiltered);
-
-
-        if (!fdrDocsCollection.isEmpty()) {
-            caseData.put(collectionName, fdrDocsCollection);
-        }
-
     }
 
     private void filterHearingBundles(List<ContestedUploadedDocumentData> uploadedDocuments,
