@@ -54,8 +54,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @MockBean private PaperNotificationService paperNotificationService;
     @MockBean private GeneralEmailService generalEmailService;
     @MockBean private HelpWithFeesDocumentService helpWithFeesDocumentService;
-    // @MockBean private HearingDocumentService hearingDocumentService;
-    // @MockBean private AdditionalHearingDocumentService additionalHearingDocumentService;
     @MockBean private CaseDataService caseDataService;
     @MockBean private TransferCourtService transferCourtService;
     @MockBean private FeatureToggleService featureToggleService;
