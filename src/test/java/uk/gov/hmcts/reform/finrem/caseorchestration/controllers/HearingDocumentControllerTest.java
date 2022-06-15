@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 
 import java.io.File;
 import java.io.IOException;
@@ -63,6 +64,8 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     private CaseDataService caseDataService;
     @MockBean
     private NotificationService notificationService;
+    @MockBean
+    private CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
 
 
     @Before
@@ -264,6 +267,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(false);
+        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(false);
 
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/hearing-with-case-details-before.json").toURI()));
