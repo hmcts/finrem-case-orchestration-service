@@ -87,7 +87,8 @@ public class AdditionalHearingDocumentService {
             hearingOrderCollectionData.forEach(element -> convertHearingOrderCollectionDocumentsToPdf(element, authorisationToken));
             caseDetails.getData().put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
             caseDetails.getData().put(LATEST_DRAFT_HEARING_ORDER,
-                hearingOrderCollectionData.get(hearingOrderCollectionData.size() - 1).getHearingOrderDocuments().getUploadDraftDocument());
+                hearingOrderCollectionData.get(hearingOrderCollectionData.size() - 1)
+                    .getHearingOrderDocuments().getUploadDraftDocument());
         }
 
         List<DirectionDetailsCollectionData> directionDetailsCollectionList = documentHelper

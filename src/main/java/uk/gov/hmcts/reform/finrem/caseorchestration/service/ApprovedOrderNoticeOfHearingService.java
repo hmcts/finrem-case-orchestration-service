@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocu
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.NoticeOfHearingLetterDetails;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,27 +45,24 @@ public class ApprovedOrderNoticeOfHearingService {
     private final ObjectMapper objectMapper;
 
     public void submitNoticeOfHearing(CaseDetails caseDetails, String authorisationToken) {
-        Optional<List<BulkPrintDocument>> documentsOptional =
+        Optional<BulkPrintDocument> documentOptional =
             prepareHearingRequiredNoticeDocumentsForPrint(caseDetails, authorisationToken);
 
-        documentsOptional.ifPresent(documents ->
-            printDocumentPackAndSendToApplicantAndRespondent(caseDetails, authorisationToken, documents));
+        documentOptional.ifPresent(document ->
+            printDocumentPackAndSendToApplicantAndRespondent(caseDetails, authorisationToken, List.of(document)));
     }
 
-    private Optional<List<BulkPrintDocument>> prepareHearingRequiredNoticeDocumentsForPrint(CaseDetails caseDetails,
+    /*TODO create a new collection field for hearing notices and put the directions document there instead of in the
+       GENERAL_APPLICATION_DIRECTIONS_DOCUMENT, display new collection in scheduling and listing tab */
+    private Optional<BulkPrintDocument> prepareHearingRequiredNoticeDocumentsForPrint(CaseDetails caseDetails,
                                                                                             String authToken) {
         Map<String, Object> caseData = caseDetails.getData();
-        List<BulkPrintDocument> documents = new ArrayList<>();
         Optional<CaseDocument> directionsDocument = caseData.get(ANOTHER_HEARING_TO_BE_LISTED).equals(YES_VALUE)
             ? Optional.of(prepareHearingRequiredNoticeDocumentComplexType(caseDetails, authToken))
             : Optional.empty();
+        directionsDocument.ifPresent(document -> caseData.put(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT, document));
 
-        if (directionsDocument.isEmpty()) {
-            return Optional.empty();
-        }
-        documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(directionsDocument.get()));
-        caseData.put(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT, directionsDocument.get());
-        return Optional.of(documents);
+        return directionsDocument.map(documentHelper::getCaseDocumentAsBulkPrintDocument);
     }
 
     private CaseDocument prepareHearingRequiredNoticeDocumentComplexType(CaseDetails caseDetails, String authorisationToken) {
