@@ -1,6 +1,9 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.document;
 
-public enum ContestedUploadCaseFilesCollections {
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+public enum ContestedUploadCaseFilesCollectionType {
 
     APPLICANT_CORRESPONDENCE_COLLECTION("appCorrespondenceCollection"),
     APPLICANT_FR_FORM_COLLECTION("appFRFormsCollection"),
@@ -33,14 +36,9 @@ public enum ContestedUploadCaseFilesCollections {
     RESP_CORRESPONDENCE_COLLECTION("respCorrespondenceDocsColl"),
     RESP_OTHER_COLLECTION("respOtherCollection");
 
-    ContestedUploadCaseFilesCollections(String value) {
-        this.value = value;
-    }
+   private final String ccdKey;
 
-    String value;
-
-    @Override
-    public String toString() {
-        return value;
+    public String getCcdKey() {
+        return ccdKey;
     }
 }

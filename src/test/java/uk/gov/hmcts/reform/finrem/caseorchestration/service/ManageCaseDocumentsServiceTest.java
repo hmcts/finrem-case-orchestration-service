@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentDetailsCol
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentDetailsData;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -49,7 +50,7 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void applicantDocumentsUploaded() {
+    public void givenCaseData_whenSetApplicantAndRespondentDocumentsCollection_thenApplicantDocumentsUploaded() {
 
         uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "Applicant", "no", null));
 
@@ -61,7 +62,7 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void respondentDocumentsUploaded() {
+    public void givenCaseData_whenSetApplicantAndRespondentDocumentsCollection_thenRespondentDocumentsUploaded() {
 
         uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "Respondent", "no", null));
 
@@ -73,7 +74,7 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void removeDeletedFileFromCaseDataCollection() {
+    public void givenCaseDataMap_whenRemoveDeletedFilesFromCaseData_thenApplicantAndRespondentKeysDoNotExistInCaseData() {
 
         manageCaseDocumentsService.removeDeletedFilesFromCaseData(populateCaseData().getData());
 
@@ -81,16 +82,6 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
         assertNull(caseData.get(CONTESTED_APPLICANT_DOCUMENTS_UPLOADED));
         assertNull(caseData.get(CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED));
     }
-
-    @Test
-    public void applicantAndRespondentKeysDoNotExistInCaseData() {
-
-        manageCaseDocumentsService.removeDeletedFilesFromCaseData(populateCaseData().getData());
-
-        assertNull(caseData.get(CONTESTED_APPLICANT_DOCUMENTS_UPLOADED));
-        assertNull(caseData.get(CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED));
-    }
-
 
     private CaseDetails populateCaseData() {
 

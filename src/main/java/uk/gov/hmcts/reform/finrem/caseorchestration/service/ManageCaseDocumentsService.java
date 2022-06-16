@@ -11,9 +11,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentDetailsData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollections;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,7 +45,7 @@ public class ManageCaseDocumentsService {
 
     public Map<String, Object> removeDeletedFilesFromCaseData(Map<String, Object> caseData) {
 
-        removeDeletedFilesFromCollections(caseData, ContestedUploadCaseFilesCollections.values(),
+        removeDeletedFilesFromCollections(caseData, ContestedUploadCaseFilesCollectionType.values(),
             CONTESTED_APPLICANT_DOCUMENTS_UPLOADED, CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED);
 
         caseData.remove(CONTESTED_APPLICANT_DOCUMENTS_UPLOADED);
@@ -54,25 +55,20 @@ public class ManageCaseDocumentsService {
     }
 
     private void removeDeletedFilesFromCollections(Map<String, Object> caseData,
-                                                   ContestedUploadCaseFilesCollections[] collectionTypes, String... documentType) {
+                                                   ContestedUploadCaseFilesCollectionType[] collectionTypes, String... documentType) {
 
         List<DocumentDetailsData> allDocumentDetailsData = new ArrayList<>();
 
-        for (String document : documentType) {
-
-            allDocumentDetailsData.addAll(mapper.convertValue(caseData.get(document), new TypeReference<List<DocumentDetailsData>>() {
-            }));
-        }
+        Arrays.stream(documentType).forEach(document -> allDocumentDetailsData.addAll(
+            mapper.convertValue(caseData.get(document),
+                new TypeReference<List<DocumentDetailsData>>() {
+                })));
 
         Set<String> remainingDocumentsInCollection = allDocumentDetailsData.stream().map(DocumentDetailsData::getId).collect(Collectors.toSet());
 
-        for (ContestedUploadCaseFilesCollections collection : collectionTypes) {
+        for (ContestedUploadCaseFilesCollectionType collection : collectionTypes) {
 
-            if (caseData.get(collection.toString()) == null) {
-                continue;
-            }
-
-            caseData.put(collection.toString(), mapper.convertValue(caseData.get(collection.toString()),
+            caseData.computeIfPresent(collection.toString(), (key, value) -> mapper.convertValue(caseData.get(key),
                     new TypeReference<List<ContestedUploadedDocumentData>>() {
                     })
                 .stream().filter(contestedUploadedDocumentData -> remainingDocumentsInCollection.contains(
@@ -81,13 +77,13 @@ public class ManageCaseDocumentsService {
     }
 
 
-    private List<ContestedUploadedDocumentData> getAllUploadedDocuments(Map<String, Object> caseData) {
+    private List<ContestedUploadedDocumentData> getAllContestedUploadedDocumentsData(Map<String, Object> caseData) {
 
         List<ContestedUploadedDocumentData> allDocuments = new ArrayList<>();
 
-        for (ContestedUploadCaseFilesCollections collection : ContestedUploadCaseFilesCollections.values()) {
-            caseData.computeIfPresent(collection.toString(),
-                (key, value) -> allDocuments.addAll(getDocumentCollection(caseData, key)));
+        for (ContestedUploadCaseFilesCollectionType collection : ContestedUploadCaseFilesCollectionType.values()) {
+            caseData.computeIfPresent(collection.getCcdKey(),
+                (key, value) -> allDocuments.addAll(mapper.convertValue(value, new TypeReference<>() {})));
         }
 
         return allDocuments;
@@ -103,7 +99,7 @@ public class ManageCaseDocumentsService {
     }
 
     private List<ContestedUploadedDocumentData> filterApplicantOrRespondentDocuments(Map<String, Object> caseData, String party) {
-        return getAllUploadedDocuments(caseData).stream()
+        return getAllContestedUploadedDocumentsData(caseData).stream()
             .filter(document -> document.getUploadedCaseDocument() != null
                 && document.getUploadedCaseDocument().getCaseDocuments() != null
                 && document.getUploadedCaseDocument().getCaseDocumentParty() != null
@@ -115,21 +111,21 @@ public class ManageCaseDocumentsService {
         List<DocumentDetailsData> documents = new ArrayList<>();
 
         for (ContestedUploadedDocumentData documentDetail : filterApplicantOrRespondentDocuments(caseData, party)) {
-            DocumentDetailsData documentDetailsData = new DocumentDetailsData();
-            DocumentDetailsCollection details = new DocumentDetailsCollection();
 
             ContestedUploadedDocument uploadedDocument = documentDetail.getUploadedCaseDocument();
 
             if (uploadedDocument.getCaseDocuments() != null) {
-                details.setDocumentFileName(uploadedDocument.getCaseDocuments().getDocumentFilename());
+                documents.add(DocumentDetailsData.builder()
+                    .id(documentDetail.getId())
+                    .documentDetails(DocumentDetailsCollection.builder()
+                        .documentFileName(uploadedDocument.getCaseDocuments().getDocumentFilename())
+                        .documentType(uploadedDocument.getCaseDocumentType()).build()).build());
+            } else {
+                documents.add(DocumentDetailsData.builder()
+                    .id(documentDetail.getId())
+                    .documentDetails(DocumentDetailsCollection.builder()
+                        .documentType(uploadedDocument.getCaseDocumentType()).build()).build());
             }
-
-            documentDetailsData.setId(documentDetail.getId());
-            details.setDocumentType(uploadedDocument.getCaseDocumentType());
-
-            documentDetailsData.setDocumentDetails(details);
-
-            documents.add(documentDetailsData);
         }
 
         return documents;
