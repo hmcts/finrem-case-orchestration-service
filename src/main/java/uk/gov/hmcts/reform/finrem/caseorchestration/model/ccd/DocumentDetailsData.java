@@ -17,5 +17,5 @@ public class DocumentDetailsData {
     @JsonProperty("id")
     private String id;
     @JsonProperty("value")
-    private DocumentDetails documentDetails;
+    private DocumentDetailsCollection documentDetails;
 }

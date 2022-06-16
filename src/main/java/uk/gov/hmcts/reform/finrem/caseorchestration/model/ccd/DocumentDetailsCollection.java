@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DocumentDetails {
+public class DocumentDetailsCollection {
 
     @JsonProperty("DocumentFileName")
     private String documentFileName;

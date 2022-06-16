@@ -9,7 +9,7 @@ import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentDetailsData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollections;
 
@@ -86,10 +86,8 @@ public class ManageCaseDocumentsService {
         List<ContestedUploadedDocumentData> allDocuments = new ArrayList<>();
 
         for (ContestedUploadCaseFilesCollections collection : ContestedUploadCaseFilesCollections.values()) {
-
-            if (caseData.get(collection.toString()) != null) {
-                allDocuments.addAll(getDocumentCollection(caseData, collection.toString()));
-            }
+            caseData.computeIfPresent(collection.toString(),
+                (key, value) -> allDocuments.addAll(getDocumentCollection(caseData, key)));
         }
 
         return allDocuments;
@@ -118,7 +116,7 @@ public class ManageCaseDocumentsService {
 
         for (ContestedUploadedDocumentData documentDetail : filterApplicantOrRespondentDocuments(caseData, party)) {
             DocumentDetailsData documentDetailsData = new DocumentDetailsData();
-            DocumentDetails details = new DocumentDetails();
+            DocumentDetailsCollection details = new DocumentDetailsCollection();
 
             ContestedUploadedDocument uploadedDocument = documentDetail.getUploadedCaseDocument();
 

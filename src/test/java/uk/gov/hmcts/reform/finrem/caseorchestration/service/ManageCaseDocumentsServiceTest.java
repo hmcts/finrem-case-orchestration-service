@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentDetailsData;
 
 import java.util.ArrayList;
@@ -102,7 +102,7 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
 
         DocumentDetailsData data = new DocumentDetailsData();
         data.setId("123");
-        data.setDocumentDetails(new DocumentDetails());
+        data.setDocumentDetails(new DocumentDetailsCollection());
 
         List<DocumentDetailsData> documentDetailsData = new ArrayList<>();
         documentDetailsData.add(data);
