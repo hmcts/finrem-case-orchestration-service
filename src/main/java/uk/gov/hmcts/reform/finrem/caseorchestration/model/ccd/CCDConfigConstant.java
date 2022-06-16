@@ -420,7 +420,7 @@ public class CCDConfigConstant {
     public static final String RESPONDENT_TRIAL_BUNDLE_COLLECTION = "respTrialBundleCollection";
     public static final String RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION = "respConfidentialDocsCollection";
     public static final String CONFIDENTIAL_DOCS_UPLOADED_COLLECTION = "confidentialDocumentsUploaded";
-    public static final String FDR_DOCS_COLLECTION = "fdrCaseDocuments";
+    public static final String FDR_DOCS_COLLECTION = "fdrCaseDocumentCollection";
 
     //Contested Case New Documents collections
     public static final String APP_HEARING_BUNDLES_COLLECTION = "appHearingBundlesCollection";
