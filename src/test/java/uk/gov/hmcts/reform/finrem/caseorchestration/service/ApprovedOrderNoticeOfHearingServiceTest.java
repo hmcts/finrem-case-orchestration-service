@@ -82,8 +82,8 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
         verify(genericDocumentService, times(1)).generateDocumentFromPlaceholdersMap(
             eq(AUTH_TOKEN),
             placeholdersMapCaptor.capture(),
-            eq(documentConfiguration.getGeneralApplicationHearingNoticeTemplate()),
-            eq(documentConfiguration.getGeneralApplicationHearingNoticeFileName()));
+            eq(documentConfiguration.getAdditionalHearingTemplate()),
+            eq(documentConfiguration.getAdditionalHearingFileName()));
         verify(bulkPrintService, times(1)).printApplicantDocuments(any(), eq(AUTH_TOKEN), any());
         verify(bulkPrintService, times(1)).printRespondentDocuments(any(), eq(AUTH_TOKEN),
             printDocumentsRequestDocumentListCaptor.capture());

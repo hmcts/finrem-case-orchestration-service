@@ -78,8 +78,8 @@ public class ApprovedOrderNoticeOfHearingService {
         Map<String, Object> mapOfLetterDetails = convertLetterDetailsToMap(noticeOfHearingLetterDetails);
 
         return genericDocumentService.generateDocumentFromPlaceholdersMap(authorisationToken, mapOfLetterDetails,
-            documentConfiguration.getGeneralApplicationHearingNoticeTemplate(),
-            documentConfiguration.getGeneralApplicationHearingNoticeFileName());
+            documentConfiguration.getAdditionalHearingTemplate(),
+            documentConfiguration.getAdditionalHearingFileName());
     }
 
     private void addHearingVenueDetailsFromDirectionDetailsCollection(CaseDetails caseDetails,
