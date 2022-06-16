@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -81,9 +82,9 @@ public class ManageCaseDocumentsService {
 
         List<ContestedUploadedDocumentData> allDocuments = new ArrayList<>();
 
-        for (ContestedUploadCaseFilesCollectionType collection : ContestedUploadCaseFilesCollectionType.values()) {
-            caseData.computeIfPresent(collection.getCcdKey(),
-                (key, value) -> allDocuments.addAll(mapper.convertValue(value, new TypeReference<>() {})));
+        for (ContestedUploadCaseFilesCollectionType collectionType : ContestedUploadCaseFilesCollectionType.values()) {
+            Optional.ofNullable(caseData.get(collectionType.getCcdKey()))
+                .ifPresent(mapValue -> allDocuments.addAll(mapper.convertValue(mapValue, new TypeReference<>() {})));
         }
 
         return allDocuments;
