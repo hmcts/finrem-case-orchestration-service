@@ -19,7 +19,6 @@ import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_CHRONOLOGIES_STATEMENTS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICANT_DOCUMENTS_UPLOADED;
@@ -78,8 +77,6 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
         manageCaseDocumentsService.removeDeletedFilesFromCaseData(populateCaseData().getData());
 
         assertThat(getDocumentCollection(caseData, RESP_CHRONOLOGIES_STATEMENTS_COLLECTION), hasSize(1));
-        assertNull(caseData.get(CONTESTED_APPLICANT_DOCUMENTS_UPLOADED));
-        assertNull(caseData.get(CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED));
     }
 
     private CaseDetails populateCaseData() {

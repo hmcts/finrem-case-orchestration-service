@@ -47,9 +47,6 @@ public class ManageCaseDocumentsService {
         removeDeletedFilesFromCollections(caseData, ContestedUploadCaseFilesCollectionType.values(),
             CONTESTED_APPLICANT_DOCUMENTS_UPLOADED, CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED);
 
-        caseData.remove(CONTESTED_APPLICANT_DOCUMENTS_UPLOADED);
-        caseData.remove(CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED);
-
         return caseData;
     }
 
