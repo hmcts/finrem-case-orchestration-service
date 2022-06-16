@@ -63,15 +63,16 @@ public class ManageCaseDocumentsService {
                 new TypeReference<List<DocumentDetailsData>>() {
                 })));
 
-        Set<String> findIdsOfRemainingDocumentsInApplicantAndRespondentDocumentDetailsDataCollection = mergeApplicantAndRespondentDocumentDetailsData.stream().map(DocumentDetailsData::getId).
-            collect(Collectors.toSet());
+        Set<String> findRemainingApplicantAndRespondentDocumentIds =
+            mergeApplicantAndRespondentDocumentDetailsData.stream().map(DocumentDetailsData::getId)
+                .collect(Collectors.toSet());
 
         Arrays.stream(collectionTypes).forEach(collection ->
             Optional.ofNullable(caseData.get(collection.getCcdKey()))
                 .ifPresent(mapValue -> caseData.put(collection.getCcdKey(), mapper.convertValue(mapValue,
                         new TypeReference<List<ContestedUploadedDocumentData>>() {
                         })
-                    .stream().filter(contestedUploadedDocumentData -> findIdsOfRemainingDocumentsInApplicantAndRespondentDocumentDetailsDataCollection.contains(
+                    .stream().filter(contestedUploadedDocumentData -> findRemainingApplicantAndRespondentDocumentIds.contains(
                         contestedUploadedDocumentData.getId())).collect(Collectors.toList()))));
     }
 
