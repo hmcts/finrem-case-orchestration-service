@@ -94,7 +94,7 @@ public class ManageCaseDocumentsService {
             .filter(document -> document.getUploadedCaseDocument() != null
                 && document.getUploadedCaseDocument().getCaseDocuments() != null
                 && document.getUploadedCaseDocument().getCaseDocumentParty() != null
-                && document.getUploadedCaseDocument().getCaseDocumentParty().equals(party)).collect(Collectors.toList());
+                && document.getUploadedCaseDocument().getCaseDocumentParty().equalsIgnoreCase(party)).collect(Collectors.toList());
     }
 
     private List<DocumentDetailsData> extractFieldsToDocumentDetailsCollection(Map<String, Object> caseData, String party) {
