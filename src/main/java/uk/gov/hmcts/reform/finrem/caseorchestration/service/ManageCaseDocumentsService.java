@@ -67,14 +67,14 @@ public class ManageCaseDocumentsService {
 
         for (ContestedUploadCaseFilesCollectionType collection : collectionTypes) {
 
-           if(caseData.get(collection.getCcdKey()) != null) {
+            if (caseData.get(collection.getCcdKey()) != null) {
 
-               caseData.put(collection.getCcdKey(), mapper.convertValue(caseData.get(collection.getCcdKey()),
-                       new TypeReference<List<ContestedUploadedDocumentData>>() {
-                       })
-                   .stream().filter(contestedUploadedDocumentData -> remainingDocumentsInCollection.contains(
-                       contestedUploadedDocumentData.getId())).collect(Collectors.toList()));
-           }
+                caseData.put(collection.getCcdKey(), mapper.convertValue(caseData.get(collection.getCcdKey()),
+                        new TypeReference<List<ContestedUploadedDocumentData>>() {
+                        })
+                    .stream().filter(contestedUploadedDocumentData -> remainingDocumentsInCollection.contains(
+                        contestedUploadedDocumentData.getId())).collect(Collectors.toList()));
+            }
         }
     }
 
