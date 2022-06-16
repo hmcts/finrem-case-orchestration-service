@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentDetailsCol
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentDetailsData;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -85,8 +84,8 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
 
     private CaseDetails populateCaseData() {
 
-        uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "applicant", "no", null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "Respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "Respondent", "no", null));
 
         uploadDocumentList.get(0).setId("123");
         uploadDocumentList.get(1).setId("456");

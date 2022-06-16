@@ -36,7 +36,7 @@ public enum ContestedUploadCaseFilesCollectionType {
     RESP_CORRESPONDENCE_COLLECTION("respCorrespondenceDocsColl"),
     RESP_OTHER_COLLECTION("respOtherCollection");
 
-   private final String ccdKey;
+    private final String ccdKey;
 
     public String getCcdKey() {
         return ccdKey;

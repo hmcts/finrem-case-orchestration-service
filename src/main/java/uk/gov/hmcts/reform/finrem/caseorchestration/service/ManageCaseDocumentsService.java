@@ -5,9 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentDetailsData;
@@ -69,11 +67,14 @@ public class ManageCaseDocumentsService {
 
         for (ContestedUploadCaseFilesCollectionType collection : collectionTypes) {
 
-            caseData.computeIfPresent(collection.toString(), (key, value) -> mapper.convertValue(caseData.get(key),
-                    new TypeReference<List<ContestedUploadedDocumentData>>() {
-                    })
-                .stream().filter(contestedUploadedDocumentData -> remainingDocumentsInCollection.contains(
-                    contestedUploadedDocumentData.getId())).collect(Collectors.toList()));
+           if(caseData.get(collection.getCcdKey()) != null) {
+
+               caseData.put(collection.getCcdKey(), mapper.convertValue(caseData.get(collection.getCcdKey()),
+                       new TypeReference<List<ContestedUploadedDocumentData>>() {
+                       })
+                   .stream().filter(contestedUploadedDocumentData -> remainingDocumentsInCollection.contains(
+                       contestedUploadedDocumentData.getId())).collect(Collectors.toList()));
+           }
         }
     }
 
@@ -90,15 +91,6 @@ public class ManageCaseDocumentsService {
         return allDocuments;
     }
 
-    private List<ContestedUploadedDocumentData> getDocumentCollection(Map<String, Object> caseData, String collection) {
-
-        if (StringUtils.isEmpty(caseData.get(collection))) {
-            return new ArrayList<>();
-        }
-
-        return mapper.convertValue(caseData.get(collection), new TypeReference<>() {});
-    }
-
     private List<ContestedUploadedDocumentData> filterApplicantOrRespondentDocuments(Map<String, Object> caseData, String party) {
         return getAllContestedUploadedDocumentsData(caseData).stream()
             .filter(document -> document.getUploadedCaseDocument() != null
@@ -109,26 +101,13 @@ public class ManageCaseDocumentsService {
 
     private List<DocumentDetailsData> extractFieldsToDocumentDetailsCollection(Map<String, Object> caseData, String party) {
 
-        List<DocumentDetailsData> documents = new ArrayList<>();
-
-        for (ContestedUploadedDocumentData documentDetail : filterApplicantOrRespondentDocuments(caseData, party)) {
-
-            ContestedUploadedDocument uploadedDocument = documentDetail.getUploadedCaseDocument();
-
-            if (uploadedDocument.getCaseDocuments() != null) {
-                documents.add(DocumentDetailsData.builder()
-                    .id(documentDetail.getId())
-                    .documentDetails(DocumentDetailsCollection.builder()
-                        .documentFileName(uploadedDocument.getCaseDocuments().getDocumentFilename())
-                        .documentType(uploadedDocument.getCaseDocumentType()).build()).build());
-            } else {
-                documents.add(DocumentDetailsData.builder()
-                    .id(documentDetail.getId())
-                    .documentDetails(DocumentDetailsCollection.builder()
-                        .documentType(uploadedDocument.getCaseDocumentType()).build()).build());
-            }
-        }
-
-        return documents;
+        return filterApplicantOrRespondentDocuments(caseData, party).stream().filter(
+            document -> document.getUploadedCaseDocument().getCaseDocuments() != null
+        ).map(detail -> DocumentDetailsData.builder()
+            .id(detail.getId())
+            .documentDetails(DocumentDetailsCollection.builder()
+                .documentFileName(detail.getUploadedCaseDocument().getCaseDocuments().getDocumentFilename())
+                .documentType(detail.getUploadedCaseDocument().getCaseDocumentType())
+                .build()).build()).collect(Collectors.toList());
     }
 }
