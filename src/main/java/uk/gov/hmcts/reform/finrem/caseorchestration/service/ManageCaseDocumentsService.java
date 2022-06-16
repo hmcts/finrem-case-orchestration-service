@@ -56,26 +56,23 @@ public class ManageCaseDocumentsService {
     private void removeDeletedFilesFromCollections(Map<String, Object> caseData,
                                                    ContestedUploadCaseFilesCollectionType[] collectionTypes, String... documentType) {
 
-        List<DocumentDetailsData> allDocumentDetailsData = new ArrayList<>();
+        List<DocumentDetailsData> mergeApplicantAndRespondentDocumentDetailsData = new ArrayList<>();
 
-        Arrays.stream(documentType).forEach(document -> allDocumentDetailsData.addAll(
+        Arrays.stream(documentType).forEach(document -> mergeApplicantAndRespondentDocumentDetailsData.addAll(
             mapper.convertValue(caseData.get(document),
                 new TypeReference<List<DocumentDetailsData>>() {
                 })));
 
-        Set<String> remainingDocumentsInCollection = allDocumentDetailsData.stream().map(DocumentDetailsData::getId).collect(Collectors.toSet());
+        Set<String> findIdsOfRemainingDocumentsInApplicantAndRespondentDocumentDetailsDataCollection = mergeApplicantAndRespondentDocumentDetailsData.stream().map(DocumentDetailsData::getId).
+            collect(Collectors.toSet());
 
-        for (ContestedUploadCaseFilesCollectionType collection : collectionTypes) {
-
-            if (caseData.get(collection.getCcdKey()) != null) {
-
-                caseData.put(collection.getCcdKey(), mapper.convertValue(caseData.get(collection.getCcdKey()),
+        Arrays.stream(collectionTypes).forEach(collection ->
+            Optional.ofNullable(caseData.get(collection.getCcdKey()))
+                .ifPresent(mapValue -> caseData.put(collection.getCcdKey(), mapper.convertValue(mapValue,
                         new TypeReference<List<ContestedUploadedDocumentData>>() {
                         })
-                    .stream().filter(contestedUploadedDocumentData -> remainingDocumentsInCollection.contains(
-                        contestedUploadedDocumentData.getId())).collect(Collectors.toList()));
-            }
-        }
+                    .stream().filter(contestedUploadedDocumentData -> findIdsOfRemainingDocumentsInApplicantAndRespondentDocumentDetailsDataCollection.contains(
+                        contestedUploadedDocumentData.getId())).collect(Collectors.toList()))));
     }
 
 
