@@ -74,6 +74,7 @@ public class MiniFormAControllerTest extends BaseControllerTest {
     public void generateMiniFormA() throws Exception {
         doRequestSetUpConsented();
         whenServiceGeneratesDocument().thenReturn(caseDocument());
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
 
         mvc.perform(post(endpoint())
             .content(requestContent.toString())
@@ -127,5 +128,19 @@ public class MiniFormAControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.consentMiniFormA.document_url", is(DOC_URL)))
             .andExpect(jsonPath("$.data.consentMiniFormA.document_filename", is(FILE_NAME)))
             .andExpect(jsonPath("$.data.consentMiniFormA.document_binary_url", is(BINARY_URL)));
+    }
+
+    @Test
+    public void generateMiniFormAWhenConsentedInContestedExpectContestedFieldToBePopulated() throws Exception {
+        doRequestSetUpContested();
+        whenServiceGeneratesConsentedInContestedMiniFormA().thenReturn(caseDocument());
+        when(caseDataService.isConsentedInContestedCase(any())).thenReturn(false);
+
+        mvc.perform(post(endpoint())
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.assignedToJudge", is(defaultsConfiguration.getAssignedToJudgeDefault())));
     }
 }
