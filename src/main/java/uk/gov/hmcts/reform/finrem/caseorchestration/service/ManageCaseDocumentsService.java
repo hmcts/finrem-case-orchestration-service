@@ -44,10 +44,8 @@ public class ManageCaseDocumentsService {
 
     public Map<String, Object> removeDeletedFilesFromCaseData(Map<String, Object> caseData) {
 
-        if (caseData.get("applicantDocuments") != null && caseData.get("respondentDocuments") != null) {
-            removeDeletedFilesFromCollections(caseData, ContestedUploadCaseFilesCollectionType.values(),
-                CONTESTED_APPLICANT_DOCUMENTS_UPLOADED, CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED);
-        }
+        removeDeletedFilesFromCollections(caseData, ContestedUploadCaseFilesCollectionType.values(),
+            CONTESTED_APPLICANT_DOCUMENTS_UPLOADED, CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED);
 
         return caseData;
     }

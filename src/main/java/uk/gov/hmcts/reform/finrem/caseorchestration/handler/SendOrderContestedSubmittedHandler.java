@@ -44,10 +44,6 @@ public class SendOrderContestedSubmittedHandler implements CallbackHandler {
                                                        String userAuthorisation) {
 
         sendNotifications(callbackRequest);
-
-        callbackRequest.getCaseDetails().getData().put("applicantDocuments", "");
-        callbackRequest.getCaseDetails().getData().put("respondentDocuments", "");
-
         updateCaseWithPostStateOption(callbackRequest, userAuthorisation);
 
         return AboutToStartOrSubmitCallbackResponse
