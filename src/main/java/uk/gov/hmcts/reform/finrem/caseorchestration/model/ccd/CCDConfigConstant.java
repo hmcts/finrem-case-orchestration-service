@@ -286,6 +286,7 @@ public class CCDConfigConstant {
     public static final String APPROVED_ORDER_COLLECTION = "approvedOrderCollection";
     public static final String FINAL_ORDER_COLLECTION = "finalOrderCollection";
     public static final String HEARING_ORDER_COLLECTION = "uploadHearingOrder";
+    public static final String HEARING_NOTICES_COLLECTION = "hearingNoticesDocumentCollection";
     public static final String RESPOND_TO_ORDER_DOCUMENTS = "respondToOrderDocuments";
     public static final String CONSENT_ORDER = "consentOrder";
     public static final String CONSENT_ORDER_FRC_NAME = "consentOrderFRCName";
