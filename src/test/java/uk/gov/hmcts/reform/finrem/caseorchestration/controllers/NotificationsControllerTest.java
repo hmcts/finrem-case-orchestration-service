@@ -13,11 +13,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
-// import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
-// import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
@@ -224,19 +222,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
         verify(notificationService).sendPrepareForHearingEmailApplicant(any());
     }
 
-    //    @Test
-    //    public void givenSolAgreedToEmails_and_noPreviousHearing_shouldSendPrepareForHearingEmail_and_PrintHearingDocuments() {
-    //        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
-    //        when(caseDataService.isContestedApplication(any())).thenReturn(true);
-    //        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
-    //        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(false);
-    //
-    //        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
-    //
-    //        verify(notificationService).sendPrepareForHearingEmailApplicant(any());
-    //        verify(hearingDocumentService).sendFormCAndGForBulkPrint(any(), eq(AUTH_TOKEN));
-    //    }
-
     @Test
     public void shouldNotSendPrepareForHearingEmailWhenNotAgreed() {
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
@@ -247,17 +232,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
         verify(notificationService, never()).sendPrepareForHearingEmailApplicant(any());
         verify(notificationService, never()).sendPrepareForHearingEmailRespondent(any());
     }
-
-    //    @Test
-    //    public void givenHadPreviousHearing_whenNotifyHearingInvoked_thenPrintAdditionalHearingDocuments() {
-    //        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
-    //        when(caseDataService.isContestedApplication(any())).thenReturn(true);
-    //        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
-    //
-    //        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
-    //
-    //        verify(additionalHearingDocumentService).sendAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
-    //    }
 
     @Test
     public void shouldSendPrepareForHearingOrderSentEmailWhenAgreed() {
