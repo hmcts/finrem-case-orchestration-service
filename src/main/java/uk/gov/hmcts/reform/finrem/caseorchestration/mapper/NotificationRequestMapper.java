@@ -129,6 +129,7 @@ public class NotificationRequestMapper {
 
             log.info("selectedCourt is {} for case ID: {}", selectedCourt, notificationRequest.getCaseReferenceNumber());
         }
+        log.info("Notification request for caseID {}: {}", caseDetails.getId(), notificationRequest);
 
         return notificationRequest;
     }
