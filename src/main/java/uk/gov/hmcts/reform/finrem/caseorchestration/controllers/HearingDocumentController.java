@@ -89,8 +89,6 @@ public class HearingDocumentController extends BaseController {
 
         List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
 
-
-        // NOTE TO SELF, TEST BOTH PAPER AND DIGITAL JOURNEYS
         if (caseDataService.isContestedApplication(caseDetails) && (!notificationService.shouldEmailRespondentSolicitor(caseDetails.getData())
             || !notificationService.shouldEmailContestedAppSolicitor(caseDetails.getData())
             || !checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails))) {
