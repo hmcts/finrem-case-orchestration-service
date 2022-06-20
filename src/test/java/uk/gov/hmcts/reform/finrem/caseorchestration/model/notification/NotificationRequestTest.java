@@ -58,6 +58,6 @@ public class NotificationRequestTest {
         assertEquals("nottingham", underTest.getSelectedCourt());
         assertEquals("consented", underTest.getCaseType());
         assertEquals("general body", underTest.getGeneralEmailBody());
-        assertEquals(PHONE_OPENING_HOURS, PHONE_OPENING_HOURS);
+        assertEquals(PHONE_OPENING_HOURS, underTest.getPhoneOpeningHours());
     }
 }
