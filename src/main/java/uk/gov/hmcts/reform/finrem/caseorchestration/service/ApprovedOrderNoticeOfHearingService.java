@@ -65,8 +65,8 @@ public class ApprovedOrderNoticeOfHearingService {
                 .orElse(new ArrayList<>());
             hearingNoticeDocuments.add(noticeOfHearingDocument);
             caseData.put(HEARING_NOTICES_COLLECTION, hearingNoticeDocuments);
-            Optional.ofNullable((CaseDocument) caseDetails.getData().get(LATEST_DRAFT_HEARING_ORDER))
-                .ifPresent(latestDraftHearingOrder -> directionsDocuments.add(latestDraftHearingOrder));
+            Optional.ofNullable(documentHelper.convertToCaseDocument(caseDetails.getData().get(LATEST_DRAFT_HEARING_ORDER)))
+                .ifPresent(directionsDocuments::add);
         }
         return documentHelper.getCaseDocumentsAsBulkPrintDocuments(directionsDocuments);
     }
