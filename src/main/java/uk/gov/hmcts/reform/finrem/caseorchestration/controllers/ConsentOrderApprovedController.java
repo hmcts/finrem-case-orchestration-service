@@ -186,7 +186,7 @@ public class ConsentOrderApprovedController extends BaseController {
                 caseData.put(STATE, CONSENT_ORDER_MADE.toString());
                 notificationService.sendConsentOrderAvailableCtscEmail(caseDetails);
 
-                if (notificationService.shouldEmailApplicantSolicitor(caseDetails)) {
+                if (notificationService.isApplicantSolicitorEmailCommunicationEnabled(caseDetails)) {
                     log.info("case - {}: Sending email notification for to Applicant Solicitor for 'Consent Order Available'", caseDetails.getId());
                     notificationService.sendConsentOrderAvailableEmailToApplicantSolicitor(caseDetails);
                 }

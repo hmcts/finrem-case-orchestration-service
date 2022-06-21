@@ -516,7 +516,7 @@ public class NotificationsController extends BaseController {
         Map<String, Object> caseData = caseDetails.getData();
 
         if (featureToggleService.isRespondentJourneyEnabled()) {
-            if (notificationService.shouldEmailApplicantSolicitor(caseDetails)) {
+            if (notificationService.isApplicantSolicitorEmailCommunicationEnabled(caseDetails)) {
                 log.info("Sending email notification to Applicant Solicitor about consent order not approved being sent");
                 notificationService.sendConsentOrderNotApprovedSentEmailToApplicantSolicitor(caseDetails);
             }

@@ -973,7 +973,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONTESTED).data(caseData).build();
 
-        assertTrue(notificationService.shouldEmailApplicantSolicitor(caseDetails));
+        assertTrue(notificationService.isApplicantSolicitorEmailCommunicationEnabled(caseDetails));
     }
 
     @Test
@@ -983,7 +983,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONTESTED).data(caseData).build();
 
-        assertFalse(notificationService.shouldEmailApplicantSolicitor(caseDetails));
+        assertFalse(notificationService.isApplicantSolicitorEmailCommunicationEnabled(caseDetails));
     }
 
     @Test
@@ -993,7 +993,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONSENTED).data(caseData).build();
 
-        assertTrue(notificationService.shouldEmailApplicantSolicitor(caseDetails));
+        assertTrue(notificationService.isApplicantSolicitorEmailCommunicationEnabled(caseDetails));
     }
 
     @Test
@@ -1003,7 +1003,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONSENTED).data(caseData).build();
 
-        assertFalse(notificationService.shouldEmailApplicantSolicitor(caseDetails));
+        assertFalse(notificationService.isApplicantSolicitorEmailCommunicationEnabled(caseDetails));
     }
 
     @Test

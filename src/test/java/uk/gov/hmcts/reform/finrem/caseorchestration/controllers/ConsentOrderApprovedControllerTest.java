@@ -160,7 +160,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
-        when(notificationService.shouldEmailApplicantSolicitor(any())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
@@ -186,7 +186,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
-        when(notificationService.shouldEmailApplicantSolicitor(any())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
@@ -212,7 +212,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
-        when(notificationService.shouldEmailApplicantSolicitor(any())).thenReturn(false);
+        when(notificationService.isApplicantSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
