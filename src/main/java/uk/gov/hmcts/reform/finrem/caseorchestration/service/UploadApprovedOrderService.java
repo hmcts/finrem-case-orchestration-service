@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -13,26 +12,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataExcepti
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ANOTHER_HEARING_TO_BE_LISTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_TYPE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DRAFT_DIRECTION_DETAILS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DRAFT_DIRECTION_DETAILS_COLLECTION_RO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_DIRECTION_ORDER;
 
 @Service
 @RequiredArgsConstructor
@@ -40,36 +30,17 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class UploadApprovedOrderService {
 
     private final HearingOrderService hearingOrderService;
-    private final CaseDataService caseDataService;
     private final ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
     private final GenericDocumentService genericDocumentService;
 
-    public Map<String, Object> handleLatestDraftDirectionOrder(CaseDetails caseDetails) {
-        prepareFieldsForOrderApprovedCoverLetter(caseDetails);
-
+    public Map<String, Object> prepareFieldsForOrderApprovedCoverLetter(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
-        Optional<DraftDirectionOrder> draftDirectionOrderCollectionTail = hearingOrderService
-            .draftDirectionOrderCollectionTail(caseDetails);
-
-        draftDirectionOrderCollectionTail.ifPresentOrElse(
-            directionOrderTail -> caseData.put(LATEST_DRAFT_DIRECTION_ORDER, directionOrderTail),
-            () -> caseData.remove(LATEST_DRAFT_DIRECTION_ORDER)
-        );
+        caseData.remove(CONTESTED_ORDER_APPROVED_JUDGE_TYPE);
+        caseData.remove(CONTESTED_ORDER_APPROVED_JUDGE_NAME);
+        caseData.remove(CONTESTED_ORDER_APPROVED_DATE);
 
         return caseData;
-    }
-
-    public Map<String, Object> setIsFinalHearingFieldMidEvent(CaseDetails caseDetails) {
-        Optional<DraftDirectionDetails> draftDirectionDetailsOptional =
-            getDraftDirectionDetailsCollectionTail(caseDetails);
-
-        draftDirectionDetailsOptional.ifPresentOrElse(
-            latestDraftDirections -> caseDetails.getData().put(ANOTHER_HEARING_TO_BE_LISTED, latestDraftDirections.getIsFinal()),
-            () -> caseDetails.getData().put(ANOTHER_HEARING_TO_BE_LISTED, NO_VALUE)
-        );
-
-        return caseDetails.getData();
     }
 
     public AboutToStartOrSubmitCallbackResponse handleUploadApprovedOrderAboutToSubmit(CaseDetails caseDetails,
@@ -78,11 +49,10 @@ public class UploadApprovedOrderService {
 
         convertToPdfAndStoreApprovedHearingOrder(caseDetails, authorisationToken);
         contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, authorisationToken);
-        caseDataService.moveCollection(caseDetails.getData(), DRAFT_DIRECTION_DETAILS_COLLECTION, DRAFT_DIRECTION_DETAILS_COLLECTION_RO);
 
         try {
-            additionalHearingDocumentService.createAndStoreAdditionalHearingDocuments(authorisationToken, caseDetails);
-        } catch (CourtDetailsParseException | JsonProcessingException e) {
+            additionalHearingDocumentService.createAndStoreAdditionalHearingDocumentsFromApprovedOrder(authorisationToken, caseDetails);
+        } catch (CourtDetailsParseException e) {
             log.error(e.getMessage());
             errors.add(e.getMessage());
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).errors(errors).build();
@@ -92,56 +62,34 @@ public class UploadApprovedOrderService {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build();
     }
 
-    private void prepareFieldsForOrderApprovedCoverLetter(CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
-        caseData.remove(CONTESTED_ORDER_APPROVED_JUDGE_TYPE);
-        caseData.remove(CONTESTED_ORDER_APPROVED_JUDGE_NAME);
-        caseData.remove(CONTESTED_ORDER_APPROVED_DATE);
-    }
-
-    private Optional<DraftDirectionDetails> getDraftDirectionDetailsCollectionTail(CaseDetails caseDetails) {
-        List<Element<DraftDirectionDetails>> draftDirectionDetailsCollection = Optional.ofNullable(caseDetails.getData()
-            .get(DRAFT_DIRECTION_DETAILS_COLLECTION))
-            .map(this::convertToDraftDirectionDetails)
-            .orElse(Collections.emptyList());
-
-        return draftDirectionDetailsCollection.isEmpty()
-            ? Optional.empty()
-            : Optional.of(draftDirectionDetailsCollection.get(draftDirectionDetailsCollection.size() - 1).getValue());
-    }
-
     private void convertToPdfAndStoreApprovedHearingOrder(CaseDetails caseDetails, String authorisationToken) {
         Map<String, Object> caseData = caseDetails.getData();
-        List<CollectionElement<DirectionOrder>> directionOrders = getDirectionOrderList(caseData);
-        Optional<CollectionElement<DirectionOrder>> latestDirectionOrder = getLatestDirectionOrder(directionOrders);
+        List<CollectionElement<DirectionOrder>> hearingOrders = getHearingOrderList(caseData);
+        Optional<CollectionElement<DirectionOrder>> latestHearingOrder = getLatestHearingOrder(hearingOrders);
 
-        if (latestDirectionOrder.isPresent()) {
-            CaseDocument pdfOrder = genericDocumentService.convertDocumentIfNotPdfAlready(
-                    latestDirectionOrder.get().getValue().getUploadDraftDocument(),
+        if (latestHearingOrder.isPresent()) {
+            CaseDocument pdfHearingOrder = genericDocumentService.convertDocumentIfNotPdfAlready(
+                latestHearingOrder.get().getValue().getUploadDraftDocument(),
                     authorisationToken);
-            hearingOrderService.updateCaseDataForLatestHearingOrderCollection(caseData, pdfOrder);
+            hearingOrderService.updateCaseDataForLatestHearingOrderCollection(caseData, pdfHearingOrder);
         } else {
             throw new InvalidCaseDataException(BAD_REQUEST.value(), "Missing data from callbackRequest.");
         }
     }
 
-    private Optional<CollectionElement<DirectionOrder>> getLatestDirectionOrder(List<CollectionElement<DirectionOrder>> directionOrders) {
+    private Optional<CollectionElement<DirectionOrder>> getLatestHearingOrder(List<CollectionElement<DirectionOrder>> directionOrders) {
         return directionOrders.isEmpty()
             ? Optional.empty()
             : Optional.of(directionOrders.get(directionOrders.size() - 1));
     }
 
-    private List<Element<DraftDirectionDetails>> convertToDraftDirectionDetails(Object value) {
-        return new ObjectMapper().convertValue(value, new TypeReference<>() {});
-    }
-
-    private List<CollectionElement<DirectionOrder>> getDirectionOrderList(Map<String, Object> caseData) {
+    private List<CollectionElement<DirectionOrder>> getHearingOrderList(Map<String, Object> caseData) {
         return Optional.ofNullable(caseData.get(HEARING_ORDER_COLLECTION))
-            .map(this::convertToListOfDirectionOrder)
+            .map(this::convertToListOfHearingOrder)
             .orElse(new ArrayList<>());
     }
 
-    private List<CollectionElement<DirectionOrder>> convertToListOfDirectionOrder(Object value) {
+    private List<CollectionElement<DirectionOrder>> convertToListOfHearingOrder(Object value) {
         return new ObjectMapper().convertValue(value, new TypeReference<>() {});
     }
 }

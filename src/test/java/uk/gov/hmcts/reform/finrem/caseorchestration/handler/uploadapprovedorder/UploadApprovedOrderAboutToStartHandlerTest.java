@@ -44,13 +44,13 @@ public class UploadApprovedOrderAboutToStartHandlerTest extends UploadApprovedOr
 
     @Test
     public void givenContestedCase_whenAboutToStartUploadApprovedOrder_thenHandle() {
-        when(uploadApprovedOrderService.handleLatestDraftDirectionOrder(callbackRequest.getCaseDetails()))
+        when(uploadApprovedOrderService.prepareFieldsForOrderApprovedCoverLetter(callbackRequest.getCaseDetails()))
             .thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse response = uploadApprovedOrderAboutToStartHandler
             .handle(callbackRequest, AUTH_TOKEN);
 
         assertTrue(response.getData().containsKey(SUCCESS_KEY));
         verify(uploadApprovedOrderService, times(1))
-            .handleLatestDraftDirectionOrder(callbackRequest.getCaseDetails());
+            .prepareFieldsForOrderApprovedCoverLetter(callbackRequest.getCaseDetails());
     }
 }

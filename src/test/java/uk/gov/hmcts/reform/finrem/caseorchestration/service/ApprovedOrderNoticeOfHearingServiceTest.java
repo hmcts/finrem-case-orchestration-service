@@ -164,6 +164,8 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
                 "phoneNumber", "01634 887900",
                 "email", "FRCKSS@justice.gov.uk")),
             Matchers.<String, Object>hasEntry("applicantName", "Poor Guy"),
+            Matchers.<String, Object>hasEntry("generalApplicationDirectionsHearingInformation", "Yes, many"),
+            Matchers.<String, Object>hasEntry("hearingTime", "1pm"),
             Matchers.<String, Object>hasEntry("respondentName", "test Korivi"),
             Matchers.<String, Object>hasEntry("hearingVenue",
                 "Hastings County Court And Family Court Hearing Centre, The Law Courts, Bohemia Road, Hastings, TN34 1QX")));

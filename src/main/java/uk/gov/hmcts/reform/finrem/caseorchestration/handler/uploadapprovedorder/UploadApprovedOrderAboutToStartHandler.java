@@ -32,7 +32,7 @@ public class UploadApprovedOrderAboutToStartHandler implements CallbackHandler {
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest, String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        Map<String, Object> caseData = uploadApprovedOrderService.handleLatestDraftDirectionOrder(caseDetails);
+        Map<String, Object> caseData = uploadApprovedOrderService.prepareFieldsForOrderApprovedCoverLetter(caseDetails);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
     }
 }

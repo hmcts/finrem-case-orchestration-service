@@ -122,9 +122,35 @@
           }
         }
       ],
+      "uao_regionList": "southeast",
+      "uao_southEastFRCList": "kentfrc",
+      "uao_kentSurreyCourtList": "FR_kent_surrey_hc_list_9",
+      "anyOtherListingInstructions": "Yes, many",
+      "anotherHearingYN": "No",
+      "approvedOrderTimeEstimate": "1hr",
+      "approvedOrderHearingDate": "",
+      "approvedOrderHearingTime": "1pm",
       "regionList": "london",
       "londonFRCList": "cfc",
       "cfcCourtList": "FR_s_CFCList_4",
+      "hearingDirectionDetailsCollection": [
+        {
+          "id": "60dbe6bc-c1a7-11ec-9d64-0242ac120002",
+          "value": {
+            "localCourt": {
+              "region": "southeast",
+              "southEastList": "kentfrc",
+              "kentSurreyCourtList": "FR_kent_surrey_hc_list_9"
+            },
+            "hearingTime": "1pm",
+            "timeEstimate": "1hr",
+            "typeOfHearing": "Final Hearing (FH)",
+            "isAnotherHearingYN": "No",
+            "isThisFinalYN": "Yes",
+            "anyOtherListingInstructions": "Yes, many"
+          }
+        }
+      ],
       "directionDetailsCollection": [
         {
           "id": "1",

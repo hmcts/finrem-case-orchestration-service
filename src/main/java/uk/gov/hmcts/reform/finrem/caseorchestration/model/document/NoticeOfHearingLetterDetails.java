@@ -16,9 +16,10 @@ public class NoticeOfHearingLetterDetails {
     private String applicantName;
     private String respondentName;
     private String hearingVenue;
-    private String generalApplicationDirectionsHearingDate;
-    private String generalApplicationDirectionsHearingTime;
-    private String generalApplicationDirectionsHearingTimeEstimate;
+    private String HearingDate;
+    private String HearingTime;
+    private String HearingLength;
     private String generalApplicationDirectionsHearingInformation;
+    private String HearingType;
     private String letterDate;
 }

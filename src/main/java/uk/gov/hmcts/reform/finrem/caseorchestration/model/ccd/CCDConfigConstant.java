@@ -507,10 +507,12 @@ public class CCDConfigConstant {
     public static final String CHANGE_ORGANISATION_REQUEST = "changeOrganisationRequestField";
     public static final String INCLUDES_REPRESENTATION_CHANGE = "updateIncludesRepresentativeChange";
     public static final String REPRESENTATION_UPDATE_HISTORY = "RepresentationUpdateHistory";
-    public static final String CHANGE_REQUEST_FIELD = "changeOrganisationRequestField";
     public static final String INCLUDES_REPRESENTATIVE_UPDATE = "updateIncludesRepresentativeChange";
     public static final String UPDATE_CONTACT_DETAILS_EVENT = "FR_updateContactDetails";
 
     public static final String HEARING_UPLOAD_BUNDLE_COLLECTION = "hearingUploadBundle";
     public static final String SEND_ORDER_POST_STATE_OPTION_FIELD = "sendOrderPostStateOption";
+
+    //Upload Approved Order
+    public static final String HEARING_DIRECTION_DETAILS_COLLECTION = "hearingDirectionDetailsCollection";
 }

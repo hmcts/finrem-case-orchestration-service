@@ -12,11 +12,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,24 +24,17 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ANOTHER_HEARING_TO_BE_LISTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_TYPE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DRAFT_DIRECTION_DETAILS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DRAFT_DIRECTION_DETAILS_COLLECTION_RO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_DIRECTION_ORDER;
 
 public class UploadApprovedOrderServiceTest extends BaseServiceTest {
     private static final String JUDGE_TYPE = "TEST_TYPE";
@@ -60,8 +51,6 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
 
     @MockBean
     private HearingOrderService hearingOrderService;
-    @MockBean
-    private CaseDataService caseDataService;
     @MockBean
     private ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
     @MockBean
@@ -94,26 +83,15 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenDraftDirectionCollectionTailIsPresent_whenHandleLatestDraftDirectionOrder_thenAddToCaseData() {
+    public void givenAboutToStart_whenPrepareFieldsForApprovedLetter_thenRemoveFields() {
         when(hearingOrderService.draftDirectionOrderCollectionTail(caseDetails))
             .thenReturn(Optional.of(draftDirectionOrder));
 
-        Map<String, Object> caseData = uploadApprovedOrderService.handleLatestDraftDirectionOrder(caseDetails);
+        Map<String, Object> caseData = uploadApprovedOrderService.prepareFieldsForOrderApprovedCoverLetter(caseDetails);
 
-        DraftDirectionOrder actualDirectionOrder = mapper.convertValue(caseData.get(LATEST_DRAFT_DIRECTION_ORDER),
-            DraftDirectionOrder.class);
-
-        assertEquals(actualDirectionOrder, draftDirectionOrder);
-    }
-
-    @Test
-    public void givenDraftDirectionTailNotPresent_whenHandleLatestDraftDirectionOrder_thenLatestOrderKeyIsAbsent() {
-        when(hearingOrderService.draftDirectionOrderCollectionTail(caseDetails))
-            .thenReturn(Optional.empty());
-
-        Map<String, Object> caseData = uploadApprovedOrderService.handleLatestDraftDirectionOrder(caseDetails);
-
-        assertFalse(caseData.containsKey(LATEST_DRAFT_DIRECTION_ORDER));
+        assertFalse(caseData.containsKey(CONTESTED_ORDER_APPROVED_JUDGE_TYPE));
+        assertFalse(caseData.containsKey(CONTESTED_ORDER_APPROVED_JUDGE_NAME));
+        assertFalse(caseData.containsKey(CONTESTED_ORDER_APPROVED_DATE));
     }
 
     @Test
@@ -126,10 +104,8 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
         verify(genericDocumentService, times(1)).convertDocumentIfNotPdfAlready(any(), eq(AUTH_TOKEN));
         verify(contestedOrderApprovedLetterService, times(1))
             .generateAndStoreContestedOrderApprovedLetter(caseDetails, AUTH_TOKEN);
-        verify(caseDataService, times(1))
-            .moveCollection(caseDetails.getData(), DRAFT_DIRECTION_DETAILS_COLLECTION, DRAFT_DIRECTION_DETAILS_COLLECTION_RO);
         verify(additionalHearingDocumentService, times(1))
-            .createAndStoreAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
+            .createAndStoreAdditionalHearingDocumentsFromApprovedOrder(AUTH_TOKEN, caseDetails);
         verify(hearingOrderService, times(1))
             .appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(caseDetails);
     }
@@ -137,7 +113,7 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
     @Test
     public void givenExceptions_whenHandleUploadApprovedOrderAboutToSubmit_thenReturnResponseWithErrors() throws JsonProcessingException {
         doThrow(new CourtDetailsParseException()).when(additionalHearingDocumentService)
-            .createAndStoreAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
+            .createAndStoreAdditionalHearingDocumentsFromApprovedOrder(AUTH_TOKEN, caseDetails);
 
         caseDetails.getData().put(HEARING_ORDER_COLLECTION, getDirectionOrderCollection());
         AboutToStartOrSubmitCallbackResponse response = uploadApprovedOrderService
@@ -151,31 +127,6 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
         verify(genericDocumentService, times(1)).convertDocumentIfNotPdfAlready(any(), eq(AUTH_TOKEN));
         verify(contestedOrderApprovedLetterService, times(1))
             .generateAndStoreContestedOrderApprovedLetter(caseDetails, AUTH_TOKEN);
-        verify(caseDataService, times(1))
-            .moveCollection(caseDetails.getData(), DRAFT_DIRECTION_DETAILS_COLLECTION, DRAFT_DIRECTION_DETAILS_COLLECTION_RO);
-    }
-
-    @Test
-    public void givenDirectionDetailsTailIsPresent_whenSetIsFinalHearingMidEvent_thenSetLatestDirectionOrderIsFinalField() {
-        List<Element<DraftDirectionDetails>> draftDirectionDetailsCollection = new ArrayList<>();
-        draftDirectionDetailsCollection.add(Element.element(UUID.randomUUID(), DraftDirectionDetails.builder()
-                .isFinal(YES_VALUE)
-                .isAnotherHearing(YES_VALUE)
-                .typeOfHearing("TEST_TYPE")
-            .build()));
-
-        caseDetails.getData().put(DRAFT_DIRECTION_DETAILS_COLLECTION, draftDirectionDetailsCollection);
-
-        Map<String, Object> caseData = uploadApprovedOrderService.setIsFinalHearingFieldMidEvent(caseDetails);
-        assertTrue(caseData.containsKey(ANOTHER_HEARING_TO_BE_LISTED));
-        assertEquals(caseData.get(ANOTHER_HEARING_TO_BE_LISTED), YES_VALUE);
-    }
-
-    @Test
-    public void givenDirectionDetailsTailNotPresent_whenSetIsFinalHearingMidEvent_thenSetLatestDirectionOrderIsFinalToNo() {
-        Map<String, Object> caseData = uploadApprovedOrderService.setIsFinalHearingFieldMidEvent(caseDetails);
-        assertTrue(caseData.containsKey(ANOTHER_HEARING_TO_BE_LISTED));
-        assertEquals(caseData.get(ANOTHER_HEARING_TO_BE_LISTED), NO_VALUE);
     }
 
     private List<Element<DirectionOrder>> getDirectionOrderCollection() {
