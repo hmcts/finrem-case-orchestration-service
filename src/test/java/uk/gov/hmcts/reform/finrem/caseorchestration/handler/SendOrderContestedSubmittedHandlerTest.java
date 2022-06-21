@@ -131,7 +131,7 @@ public class SendOrderContestedSubmittedHandlerTest {
     @Test
     public void givenRespAgreedToReceiveEmails_WhenHandle_ThenSendContestOrderApprovedEmailToRespondent() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
 
         sendOrderContestedSubmittedHandler.handle(createCallbackRequestWithFinalOrder(), AUTH_TOKEN);
 
@@ -150,7 +150,7 @@ public class SendOrderContestedSubmittedHandlerTest {
     @Test
     public void givenRespNotAgreedToReceiveEmails_WhenHandle_ThenDoNotSendContestOrderApprovedEmailToRespondent() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
 
         sendOrderContestedSubmittedHandler.handle(createCallbackRequestWithFinalOrder(), AUTH_TOKEN);
 
