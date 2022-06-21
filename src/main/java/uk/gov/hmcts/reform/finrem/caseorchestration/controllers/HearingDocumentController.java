@@ -152,7 +152,7 @@ public class HearingDocumentController extends BaseController {
         });
     }
 
-    private boolean isSolicitorEmailCommunicationEnabled(CaseDetails caseDetails){
+    private boolean isSolicitorEmailCommunicationEnabled(CaseDetails caseDetails) {
         return caseDataService.isContestedApplication(caseDetails)
             && (!notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())
             || !notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(caseDetails.getData())
