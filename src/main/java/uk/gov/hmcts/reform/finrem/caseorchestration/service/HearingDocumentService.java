@@ -98,7 +98,7 @@ public class HearingDocumentService {
         String caseId = caseDetails.getId() == null ? "noId" : caseDetails.getId().toString();
         List<BulkPrintDocument> caseDocuments = getHearingCaseDocuments(caseDetails.getData(), caseId);
 
-        if (!notificationService.shouldEmailContestedAppSolicitor(caseDetails.getData())) {
+        if (!notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
             bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, caseDocuments);
         }
         if (!notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())) {

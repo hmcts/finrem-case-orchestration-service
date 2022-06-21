@@ -193,7 +193,7 @@ public class AdditionalHearingDocumentService {
         List<BulkPrintDocument> document = singletonList(documentHelper.getBulkPrintDocumentFromCaseDocument(
                 additionalHearingDocument.getAdditionalHearingDocument().getDocument()));
 
-        if (!notificationService.shouldEmailContestedAppSolicitor(caseDetails.getData())) {
+        if (!notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
             bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, document);
         }
         if (!notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())) {

@@ -385,7 +385,7 @@ public class NotificationService {
             && caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData)
             && !NO_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT)));
     }
-    public boolean shouldEmailContestedAppSolicitor(Map<String, Object> caseData) {
+    public boolean isContestedApplicantSolicitorEmailCommunicationEnabled(Map<String, Object> caseData) {
         return !caseDataService.isPaperApplication(caseData)
             && caseDataService.isApplicantRepresentedByASolicitor(caseData)
             && caseDataService.isNotEmpty(CONTESTED_SOLICITOR_EMAIL, caseData)

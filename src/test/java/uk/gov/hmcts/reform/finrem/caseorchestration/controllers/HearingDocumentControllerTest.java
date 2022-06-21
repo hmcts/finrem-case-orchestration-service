@@ -282,7 +282,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void givenNoPreviousHearing_shouldPrintHearingDocumentsForApplicantSolicitor() throws Exception {
-        when(notificationService.shouldEmailContestedAppSolicitor(any())).thenReturn(false);
+        when(notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(false);
 
@@ -316,7 +316,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void givenHadPreviousHearing_thenPrintAdditionalHearingDocumentsForApplicantSolicitor() throws Exception {
-        when(notificationService.shouldEmailContestedAppSolicitor(any())).thenReturn(false);
+        when(notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
 

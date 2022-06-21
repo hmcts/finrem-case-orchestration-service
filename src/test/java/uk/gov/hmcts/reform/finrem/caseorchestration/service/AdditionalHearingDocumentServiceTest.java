@@ -386,7 +386,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
 
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
-        when(notificationService.shouldEmailContestedAppSolicitor(any())).thenReturn(false);
+        when(notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
         additionalHearingDocumentService.bulkPrintAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
 
         verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
@@ -399,7 +399,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
 
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
-        when(notificationService.shouldEmailContestedAppSolicitor(any())).thenReturn(true);
+        when(notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
         additionalHearingDocumentService.bulkPrintAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
 
         verify(bulkPrintService, never()).printRespondentDocuments(any(), any(), any());
@@ -412,7 +412,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
 
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
-        when(notificationService.shouldEmailContestedAppSolicitor(any())).thenReturn(true);
+        when(notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
         additionalHearingDocumentService.bulkPrintAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
 
         verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
@@ -425,7 +425,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
 
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
-        when(notificationService.shouldEmailContestedAppSolicitor(any())).thenReturn(false);
+        when(notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
         additionalHearingDocumentService.bulkPrintAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
 
         verify(bulkPrintService, never()).printRespondentDocuments(any(), any(), any());
