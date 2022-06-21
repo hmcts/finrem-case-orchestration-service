@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimUploadAdditionalDocument;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -90,7 +91,7 @@ public class InterimHearingContestedAboutToStartHandler implements CallbackHandl
             builder.value(loadInterimHearingData(caseData));
             InterimHearingData interimHearingData = builder.build();
             List<InterimHearingData> interimHearingList = Optional.ofNullable(caseData.get(INTERIM_HEARING_COLLECTION))
-                .map(this::convertToInterimHearingDataList).orElse(Collections.emptyList());
+                .map(this::convertToInterimHearingDataList).orElse(new ArrayList<>());
             interimHearingList.add(0,interimHearingData);
             caseData.put(INTERIM_HEARING_COLLECTION,interimHearingList);
         }
