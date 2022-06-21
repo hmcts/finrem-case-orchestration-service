@@ -84,7 +84,7 @@ public class SendOrderContestedSubmittedHandler implements CallbackHandler {
             }
 
             if (featureToggleService.isRespondentJourneyEnabled()
-                && notificationService.shouldEmailRespondentSolicitor(caseData)) {
+                && notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData)) {
                 log.info("Sending 'Contest Order Approved' email notification to Respondent Solicitor");
                 notificationService.sendContestOrderApprovedEmailRespondent(caseDetails);
             }

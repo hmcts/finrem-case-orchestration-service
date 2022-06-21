@@ -196,7 +196,7 @@ public class AdditionalHearingDocumentService {
         if (!notificationService.shouldEmailContestedAppSolicitor(caseDetails.getData())) {
             bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, document);
         }
-        if (!notificationService.shouldEmailRespondentSolicitor(caseDetails.getData())) {
+        if (!notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
             bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, document);
         }
     }

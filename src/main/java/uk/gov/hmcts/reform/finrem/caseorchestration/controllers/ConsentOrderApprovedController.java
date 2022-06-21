@@ -192,7 +192,7 @@ public class ConsentOrderApprovedController extends BaseController {
                 }
 
                 if (featureToggleService.isRespondentJourneyEnabled()
-                    && notificationService.shouldEmailRespondentSolicitor(caseData)) {
+                    && notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData)) {
                     log.info("case - {}: Sending email notification to Respondent Solicitor for 'Consent Order Available'", caseDetails.getId());
                     notificationService.sendConsentOrderAvailableEmailToRespondentSolicitor(caseDetails);
                 }

@@ -886,7 +886,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         caseData.put(CONTESTED_RESPONDENT_REPRESENTED, YES_VALUE);
         caseData.put(RESP_SOLICITOR_EMAIL, TEST_USER_EMAIL);
 
-        assertTrue(notificationService.shouldEmailRespondentSolicitor(caseData));
+        assertTrue(notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData));
     }
 
     @Test
@@ -896,7 +896,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         caseData.put(CONTESTED_RESPONDENT_REPRESENTED, YES_VALUE);
         caseData.put(RESP_SOLICITOR_EMAIL, TEST_USER_EMAIL);
 
-        assertFalse(notificationService.shouldEmailRespondentSolicitor(caseData));
+        assertFalse(notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData));
     }
 
     @Test
@@ -906,7 +906,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         caseData.put(CONTESTED_RESPONDENT_REPRESENTED, NO_VALUE);
         caseData.put(RESP_SOLICITOR_EMAIL, TEST_USER_EMAIL);
 
-        assertFalse(notificationService.shouldEmailRespondentSolicitor(caseData));
+        assertFalse(notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData));
     }
 
     @Test
@@ -915,7 +915,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         caseData.put(PAPER_APPLICATION, NO_VALUE);
         caseData.put(CONTESTED_RESPONDENT_REPRESENTED, YES_VALUE);
 
-        assertFalse(notificationService.shouldEmailRespondentSolicitor(caseData));
+        assertFalse(notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData));
     }
 
     @Test
