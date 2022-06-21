@@ -150,7 +150,6 @@ public class HearingDocumentController extends BaseController {
     private List<DirectionDetailsCollectionData> convertToDirectionDetailsDataList(Object object) {
         return objectMapper.convertValue(object, new TypeReference<>() {
         });
-    }
 
     private boolean isSolicitorEmailCommunicationEnabled(CaseDetails caseDetails){
         return caseDataService.isContestedApplication(caseDetails)
