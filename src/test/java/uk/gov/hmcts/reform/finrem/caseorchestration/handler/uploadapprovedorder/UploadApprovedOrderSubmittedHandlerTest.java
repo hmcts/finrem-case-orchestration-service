@@ -8,16 +8,22 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDirectionsCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ApprovedOrderNoticeOfHearingService;
+
+import java.util.List;
+import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ANOTHER_HEARING_TO_BE_LISTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DIRECTION_DETAILS_COLLECTION;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UploadApprovedOrderSubmittedHandlerTest extends UploadApprovedOrderBaseHandlerTest {
@@ -44,7 +50,7 @@ public class UploadApprovedOrderSubmittedHandlerTest extends UploadApprovedOrder
 
     @Test
     public void givenContestedCase_whenSubmittedUploadApprovedOrder_thenHandle() {
-        callbackRequest.getCaseDetails().getData().put(ANOTHER_HEARING_TO_BE_LISTED, YES_VALUE);
+        setHearingDirectionDetailsCollection(YES_VALUE);
         uploadApprovedOrderSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(approvedOrderNoticeOfHearingService, times(1))
@@ -53,9 +59,20 @@ public class UploadApprovedOrderSubmittedHandlerTest extends UploadApprovedOrder
 
     @Test
     public void givenContestedCase_whenSubmittedUploadApprovedOrderAndNotFinalHearing_thenHandle() {
+        setHearingDirectionDetailsCollection(NO_VALUE);
         uploadApprovedOrderSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(approvedOrderNoticeOfHearingService, never())
             .submitNoticeOfHearing(callbackRequest.getCaseDetails(), AUTH_TOKEN);
+    }
+
+    private void setHearingDirectionDetailsCollection(String value) {
+        callbackRequest.getCaseDetails().getData().put(HEARING_DIRECTION_DETAILS_COLLECTION,
+            buildAdditionalHearingDetailsCollection(value));
+    }
+
+    private List<Element<AdditionalHearingDirectionsCollection>> buildAdditionalHearingDetailsCollection(String value) {
+        return List.of(Element.element(UUID.randomUUID(), AdditionalHearingDirectionsCollection.builder()
+            .isAnotherHearingYN(value).build()));
     }
 }
