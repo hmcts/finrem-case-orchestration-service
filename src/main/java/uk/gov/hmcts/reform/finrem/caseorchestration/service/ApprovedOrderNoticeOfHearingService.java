@@ -130,11 +130,12 @@ public class ApprovedOrderNoticeOfHearingService {
 
     private FrcCourtDetails getFrcCourtDetails(AdditionalHearingDirectionsCollection additionalHearingDirectionsCollection) {
         Map<String, Object> courtDetails = getCourtDetails(additionalHearingDirectionsCollection);
+        System.out.println(courtDetails);
         return FrcCourtDetails.builder()
-            .courtName((String) courtDetails.get(COURT_DETAILS_NAME_KEY))
-            .courtAddress((String) courtDetails.get(COURT_DETAILS_ADDRESS_KEY))
-            .phoneNumber((String) courtDetails.get(COURT_DETAILS_PHONE_KEY))
-            .email((String) courtDetails.get(COURT_DETAILS_EMAIL_KEY))
+            .courtName(nullToEmpty(courtDetails.get(COURT_DETAILS_NAME_KEY)))
+            .courtAddress(nullToEmpty(courtDetails.get(COURT_DETAILS_ADDRESS_KEY)))
+            .phoneNumber(nullToEmpty(courtDetails.get(COURT_DETAILS_PHONE_KEY)))
+            .email(nullToEmpty(courtDetails.get(COURT_DETAILS_EMAIL_KEY)))
             .build();
     }
 
