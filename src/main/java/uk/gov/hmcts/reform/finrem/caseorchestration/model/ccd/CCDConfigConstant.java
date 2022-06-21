@@ -407,10 +407,11 @@ public class CCDConfigConstant {
     public static final String BULK_PRINT_COVER_SHEET_RES_CONFIDENTIAL = "bulkPrintCoverSheetResConfidential";
     public static final String UPLOAD_ORDER = "uploadOrder";
 
+    // Manage litigant documents
+    public static final String CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION = "litigantDocumentsCollection";
+
     //Contested Case Documents
     public static final String CONTESTED_UPLOADED_DOCUMENTS = "uploadCaseDocument";
-    public static final String CONTESTED_APPLICANT_DOCUMENTS_UPLOADED = "applicantDocuments";
-    public static final String CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED = "respondentDocuments";
     public static final String APPLICANT_CORRESPONDENCE_COLLECTION = "appCorrespondenceCollection";
     public static final String APPLICANT_FR_FORM_COLLECTION = "appFRFormsCollection";
     public static final String APPLICANT_EVIDENCE_COLLECTION = "appEvidenceCollection";

@@ -19,10 +19,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICANT_DOCUMENTS_UPLOADED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION;
 
 @Slf4j
 @Service
@@ -33,11 +30,8 @@ public class ManageCaseDocumentsService {
 
     public Map<String, Object> setApplicantAndRespondentDocumentsCollection(CaseDetails caseDetails) {
 
-        caseDetails.getData().put(CONTESTED_APPLICANT_DOCUMENTS_UPLOADED,
-            extractFieldsToDocumentDetailsCollection(caseDetails.getData(), APPLICANT));
-
-        caseDetails.getData().put(CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED,
-            extractFieldsToDocumentDetailsCollection(caseDetails.getData(), RESPONDENT));
+        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION,
+            extractFieldsToDocumentDetailsCollection(caseDetails.getData()));
 
         return caseDetails.getData();
     }
@@ -45,20 +39,20 @@ public class ManageCaseDocumentsService {
     public Map<String, Object> removeDeletedFilesFromCaseData(Map<String, Object> caseData) {
 
         removeDeletedFilesFromCollections(caseData, ContestedUploadCaseFilesCollectionType.values(),
-            CONTESTED_APPLICANT_DOCUMENTS_UPLOADED, CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED);
+            CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
 
         return caseData;
     }
 
     private void removeDeletedFilesFromCollections(Map<String, Object> caseData,
-                                                   ContestedUploadCaseFilesCollectionType[] collectionTypes, String... documentType) {
+                                                   ContestedUploadCaseFilesCollectionType[] collectionTypes, String documentType) {
 
         List<DocumentDetailsData> mergeApplicantAndRespondentDocumentDetailsData = new ArrayList<>();
 
-        Arrays.stream(documentType).forEach(document -> mergeApplicantAndRespondentDocumentDetailsData.addAll(
-            mapper.convertValue(caseData.get(document),
+        mergeApplicantAndRespondentDocumentDetailsData.addAll(
+            mapper.convertValue(caseData.get(documentType),
                 new TypeReference<List<DocumentDetailsData>>() {
-                })));
+                }));
 
         Set<String> findRemainingApplicantAndRespondentDocumentIds =
             mergeApplicantAndRespondentDocumentDetailsData.stream().map(DocumentDetailsData::getId)
@@ -86,17 +80,16 @@ public class ManageCaseDocumentsService {
         return allDocuments;
     }
 
-    private List<ContestedUploadedDocumentData> filterApplicantOrRespondentDocuments(Map<String, Object> caseData, String party) {
+    private List<ContestedUploadedDocumentData> filterApplicantOrRespondentDocuments(Map<String, Object> caseData) {
         return getAllContestedUploadedDocumentsData(caseData).stream()
             .filter(document -> document.getUploadedCaseDocument() != null
                 && document.getUploadedCaseDocument().getCaseDocuments() != null
-                && document.getUploadedCaseDocument().getCaseDocumentParty() != null
-                && document.getUploadedCaseDocument().getCaseDocumentParty().equalsIgnoreCase(party)).collect(Collectors.toList());
+                && document.getUploadedCaseDocument().getCaseDocumentParty() != null).collect(Collectors.toList());
     }
 
-    private List<DocumentDetailsData> extractFieldsToDocumentDetailsCollection(Map<String, Object> caseData, String party) {
+    private List<DocumentDetailsData> extractFieldsToDocumentDetailsCollection(Map<String, Object> caseData) {
 
-        return filterApplicantOrRespondentDocuments(caseData, party).stream().filter(
+        return filterApplicantOrRespondentDocuments(caseData).stream().filter(
             document -> document.getUploadedCaseDocument().getCaseDocuments() != null
         ).map(detail -> DocumentDetailsData.builder()
             .id(detail.getId())

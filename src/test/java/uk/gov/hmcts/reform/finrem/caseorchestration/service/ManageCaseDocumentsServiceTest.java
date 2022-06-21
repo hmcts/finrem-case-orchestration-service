@@ -21,8 +21,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_CHRONOLOGIES_STATEMENTS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICANT_DOCUMENTS_UPLOADED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION;
 
 public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
@@ -56,7 +55,7 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
 
         manageCaseDocumentsService.setApplicantAndRespondentDocumentsCollection(caseDetails);
 
-        assertThat(getDocumentCollection(caseData, CONTESTED_APPLICANT_DOCUMENTS_UPLOADED), hasSize(1));
+        assertThat(getDocumentCollection(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION), hasSize(1));
     }
 
     @Test
@@ -68,7 +67,7 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
 
         manageCaseDocumentsService.setApplicantAndRespondentDocumentsCollection(caseDetails);
 
-        assertThat(getDocumentCollection(caseData, CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED), hasSize(1));
+        assertThat(getDocumentCollection(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION), hasSize(1));
     }
 
     @Test
@@ -94,8 +93,7 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
         List<DocumentDetailsData> documentDetailsData = new ArrayList<>();
         documentDetailsData.add(data);
 
-        caseDetails.getData().put(CONTESTED_APPLICANT_DOCUMENTS_UPLOADED, documentDetailsData);
-        caseDetails.getData().put(CONTESTED_RESPONDENT_DOCUMENTS_UPLOADED, documentDetailsData);
+        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, documentDetailsData);
 
         caseDetails.getData().put(RESP_CHRONOLOGIES_STATEMENTS_COLLECTION, uploadDocumentList);
 
