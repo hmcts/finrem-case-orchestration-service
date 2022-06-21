@@ -1,9 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,12 +12,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 
-import java.io.File;
-import java.util.Map;
-import java.util.Objects;
+import java.io.InputStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertNotNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_COLLECTION;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -52,27 +48,18 @@ public class InterimHearingContestedAboutToStartHandlerTest {
     }
 
     @Test
-    public void handle() throws JsonProcessingException {
+    public void handle() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         AboutToStartOrSubmitCallbackResponse handle = interimHearingContestedAboutToStartHandler.handle(callbackRequest, AUTH_TOKEN);
-        Assert.assertNotNull(handle.getData().get(INTERIM_HEARING_COLLECTION));
+        assertNotNull(handle.getData().get(INTERIM_HEARING_COLLECTION));
     }
 
-    private CallbackRequest buildCallbackRequest() throws JsonProcessingException {
-        JsonNode requestContent = readJsonNodeFromFile();
-        Map<String,Object> caseData = objectMapper.readValue(requestContent.toString(), Map.class);
-        CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
-        return CallbackRequest.builder().eventId("SomeEventId").caseDetails(caseDetails).build();
-    }
-
-    private JsonNode readJsonNodeFromFile() {
-        try {
-            return objectMapper.readTree(
-                new File(Objects.requireNonNull(getClass()
-                        .getResource(CONTESTED_INTERIM_HEARING_JSON))
-                    .toURI()));
+    private CallbackRequest buildCallbackRequest()  {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(CONTESTED_INTERIM_HEARING_JSON)) {
+            CaseDetails caseDetails = objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+            return CallbackRequest.builder().caseDetails(caseDetails).build();
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage(), e);
+            throw new RuntimeException(e);
         }
     }
 }
