@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,7 +21,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -136,17 +134,16 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
 
     private void assertCaseData(Map<String, Object> data) {
         assertThat(data, allOf(
-            Matchers.<String, Object>hasEntry("ccdCaseNumber", 1234567890L),
-            hasEntry("courtDetails", ImmutableMap.of(
-                "courtName", "Hastings County Court And Family Court Hearing Centre",
-                "courtAddress", "The Law Courts, Bohemia Road, Hastings, TN34 1QX",
-                "phoneNumber", "01634 887900",
-                "email", "FRCKSS@justice.gov.uk")),
-            Matchers.<String, Object>hasEntry("applicantName", "Poor Guy"),
-            Matchers.<String, Object>hasEntry("generalApplicationDirectionsHearingInformation", "Yes, many"),
-            Matchers.<String, Object>hasEntry("hearingTime", "1pm"),
-            Matchers.<String, Object>hasEntry("respondentName", "test Korivi"),
-            Matchers.<String, Object>hasEntry("hearingVenue",
+            Matchers.<String, Object>hasEntry("CCDCaseNumber", 1234567890L),
+            Matchers.hasEntry("CourtName", "Hastings County Court And Family Court Hearing Centre"),
+            Matchers.hasEntry("CourtAddress", "The Law Courts, Bohemia Road, Hastings, TN34 1QX"),
+            Matchers.hasEntry("CourtPhone", "01634 887900"),
+            Matchers.hasEntry("CourtEmail", "FRCKSS@justice.gov.uk"),
+            Matchers.hasEntry("ApplicantName", "Poor Guy"),
+            Matchers.hasEntry("AnyOtherDirections", "Yes, many"),
+            Matchers.<String, Object>hasEntry("HearingTime", "1pm"),
+            Matchers.<String, Object>hasEntry("RespondentName", "test Korivi"),
+            Matchers.<String, Object>hasEntry("HearingVenue",
                 "Hastings County Court And Family Court Hearing Centre, The Law Courts, Bohemia Road, Hastings, TN34 1QX")));
     }
 }

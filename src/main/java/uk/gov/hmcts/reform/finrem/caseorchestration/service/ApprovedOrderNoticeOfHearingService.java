@@ -13,16 +13,20 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.NoticeOfHearingLetterDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENT_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_ADDRESS_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_NAME_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_PHONE_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DIRECTION_DETAILS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
@@ -77,9 +81,8 @@ public class ApprovedOrderNoticeOfHearingService {
         if (latestAdditionalHearingDirections.isEmpty()) {
             throw new IllegalStateException("Invalid Case Data");
         }
-        NoticeOfHearingLetterDetails noticeOfHearingLetterDetails =
-            getNoticeOfHearingLetterDetails(caseDetails, latestAdditionalHearingDirections.get());
-        Map<String, Object> mapOfLetterDetails = convertLetterDetailsToMap(noticeOfHearingLetterDetails);
+        Map<String, Object> mapOfLetterDetails = getNoticeOfHearingLetterDetails(caseDetails,
+            latestAdditionalHearingDirections.get());
 
         return genericDocumentService.generateDocumentFromPlaceholdersMap(authorisationToken, mapOfLetterDetails,
             documentConfiguration.getAdditionalHearingTemplate(),
@@ -90,27 +93,6 @@ public class ApprovedOrderNoticeOfHearingService {
                                                                   List<BulkPrintDocument> documents) {
         bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
         bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documents);
-    }
-
-    private NoticeOfHearingLetterDetails getNoticeOfHearingLetterDetails(CaseDetails caseDetails,
-                                                                         AdditionalHearingDirectionsCollection
-                                                                             additionalHearingDirectionsCollection) {
-        Map<String, Object> caseData = caseDetails.getData();
-        Map<String, Object> courtDetails = getCourtDetails(additionalHearingDirectionsCollection);
-        return NoticeOfHearingLetterDetails.builder()
-            .applicantName(documentHelper.getApplicantFullName(caseDetails))
-            .respondentName(documentHelper.getRespondentFullNameContested(caseDetails))
-            .divorceCaseNumber(nullToEmpty(caseData.get(DIVORCE_CASE_NUMBER)))
-            .ccdCaseNumber(caseDetails.getId())
-            .courtDetails(courtDetails)
-            .hearingVenue(getFrcCourtDetailsAsOneLineAddressString(courtDetails))
-            .HearingDate(additionalHearingDirectionsCollection.getDateOfHearing())
-            .HearingTime(additionalHearingDirectionsCollection.getHearingTime())
-            .HearingLength(additionalHearingDirectionsCollection.getTimeEstimate())
-            .generalApplicationDirectionsHearingInformation(additionalHearingDirectionsCollection.getAnyOtherListingInstructions())
-            .HearingType(additionalHearingDirectionsCollection.getTypeOfHearing())
-            .letterDate(String.valueOf(LocalDate.now()))
-            .build();
     }
 
     private Map<String, Object> getCourtDetails(AdditionalHearingDirectionsCollection latestAdditionalHearingDirection) {
@@ -135,12 +117,50 @@ public class ApprovedOrderNoticeOfHearingService {
             : Optional.empty();
     }
 
-    private Map convertLetterDetailsToMap(NoticeOfHearingLetterDetails noticeOfHearingLetterDetails) {
+    private Map getNoticeOfHearingLetterDetails(CaseDetails caseDetails,
+                                          AdditionalHearingDirectionsCollection additionalHearingDirectionsCollection) {
+        FrcCourtDetails selectedFRCDetails = getFrcCourtDetails(additionalHearingDirectionsCollection);
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put(CASE_DATA, addValuesToPlaceHoldersMap(caseDetails, additionalHearingDirectionsCollection, selectedFRCDetails));
+        caseDataMap.put("id", caseDetails.getId());
         HashMap caseDetailsMap = new HashMap<String, Object>();
-        HashMap caseDataMap = new HashMap<String, Object>();
-        caseDataMap.put(CASE_DATA, objectMapper.convertValue(noticeOfHearingLetterDetails, Map.class));
-        caseDataMap.put("id", noticeOfHearingLetterDetails.getCcdCaseNumber());
         caseDetailsMap.put(CASE_DETAILS, caseDataMap);
         return caseDetailsMap;
+    }
+
+    private FrcCourtDetails getFrcCourtDetails(AdditionalHearingDirectionsCollection additionalHearingDirectionsCollection) {
+        Map<String, Object> courtDetails = getCourtDetails(additionalHearingDirectionsCollection);
+        return FrcCourtDetails.builder()
+            .courtName((String) courtDetails.get(COURT_DETAILS_NAME_KEY))
+            .courtAddress((String) courtDetails.get(COURT_DETAILS_ADDRESS_KEY))
+            .phoneNumber((String) courtDetails.get(COURT_DETAILS_PHONE_KEY))
+            .email((String) courtDetails.get(COURT_DETAILS_EMAIL_KEY))
+            .build();
+    }
+
+    private Map<String, Object> addValuesToPlaceHoldersMap(CaseDetails caseDetails,
+                                            AdditionalHearingDirectionsCollection additionalHearingDirectionsCollection,
+                                            FrcCourtDetails selectedFRCDetails) {
+        Map<String, Object> placeholdersMap = new HashMap<>();
+        placeholdersMap.put("HearingType", additionalHearingDirectionsCollection.getTypeOfHearing());
+        placeholdersMap.put("HearingVenue", getFrcCourtDetailsAsOneLineAddressString(getCourtDetails(additionalHearingDirectionsCollection)));
+        placeholdersMap.put("HearingDate", additionalHearingDirectionsCollection.getDateOfHearing());
+        placeholdersMap.put("HearingTime", additionalHearingDirectionsCollection.getHearingTime());
+        placeholdersMap.put("HearingLength", additionalHearingDirectionsCollection.getTimeEstimate());
+        placeholdersMap.put("AdditionalHearingDated", new Date());
+
+        placeholdersMap.put("CourtName", selectedFRCDetails.getCourtName());
+        placeholdersMap.put("CourtAddress", selectedFRCDetails.getCourtAddress());
+        placeholdersMap.put("CourtPhone", selectedFRCDetails.getPhoneNumber());
+        placeholdersMap.put("CourtEmail", selectedFRCDetails.getEmail());
+        placeholdersMap.put("AnyOtherDirections",
+            additionalHearingDirectionsCollection.getAnyOtherListingInstructions());
+
+        placeholdersMap.put("CCDCaseNumber", caseDetails.getId());
+        placeholdersMap.put("DivorceCaseNumber", nullToEmpty(caseDetails.getData().get(DIVORCE_CASE_NUMBER)));
+        placeholdersMap.put("ApplicantName", documentHelper.getApplicantFullName(caseDetails));
+        placeholdersMap.put("RespondentName", documentHelper.getRespondentFullNameContested(caseDetails));
+
+        return placeholdersMap;
     }
 }
