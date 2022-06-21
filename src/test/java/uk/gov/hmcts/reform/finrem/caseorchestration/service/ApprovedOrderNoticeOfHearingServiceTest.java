@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import org.hamcrest.Matchers;
-import org.hamcrest.core.IsNot;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -27,11 +26,9 @@ import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
@@ -39,7 +36,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_N
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ANOTHER_HEARING_TO_BE_LISTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NOTICES_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
 
@@ -91,23 +87,6 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
             .builder()
             .binaryFileUrl(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL)
             .build()));
-    }
-
-    @Test
-    public void givenNoHearingRequired_whenSubmitNoticeOfHearing_thenNothingIsPrinted() {
-        caseDetails.getData().put(ANOTHER_HEARING_TO_BE_LISTED, NO_VALUE);
-        approvedOrderNoticeOfHearingService.submitNoticeOfHearing(caseDetails, AUTH_TOKEN);
-
-        assertThat(caseDetails.getData(), IsNot.not(hasKey(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT)));
-
-        verify(genericDocumentService, never()).generateDocumentFromPlaceholdersMap(
-            eq(AUTH_TOKEN),
-            placeholdersMapCaptor.capture(),
-            eq(documentConfiguration.getGeneralApplicationHearingNoticeTemplate()),
-            eq(documentConfiguration.getGeneralApplicationHearingNoticeFileName()));
-        verify(bulkPrintService, never()).printApplicantDocuments(any(), eq(AUTH_TOKEN), any());
-        verify(bulkPrintService, never()).printRespondentDocuments(any(), eq(AUTH_TOKEN),
-            printDocumentsRequestDocumentListCaptor.capture());
     }
 
     @Test

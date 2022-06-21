@@ -22,9 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENT_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ANOTHER_HEARING_TO_BE_LISTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DIRECTION_DETAILS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NOTICES_COLLECTION;
@@ -60,17 +58,16 @@ public class ApprovedOrderNoticeOfHearingService {
                                                                                   String authToken) {
         Map<String, Object> caseData = caseDetails.getData();
         List<CaseDocument> directionsDocuments = new ArrayList<>();
-        if (caseData.get(ANOTHER_HEARING_TO_BE_LISTED).equals(YES_VALUE)) {
-            CaseDocument noticeOfHearingDocument = prepareHearingRequiredNoticeDocumentComplexType(caseDetails, authToken);
-            directionsDocuments.add(noticeOfHearingDocument);
-            List<CaseDocument> hearingNoticeDocuments = Optional.ofNullable(documentHelper.getHearingNoticeDocuments(caseData))
-                .orElse(new ArrayList<>());
-            hearingNoticeDocuments.add(noticeOfHearingDocument);
-            caseData.put(HEARING_NOTICES_COLLECTION, hearingNoticeDocuments);
-            caseData.put(ADDITIONAL_HEARING_DOCUMENT_COLLECTION, hearingNoticeDocuments);
-            Optional.ofNullable(documentHelper.convertToCaseDocument(caseDetails.getData().get(LATEST_DRAFT_HEARING_ORDER)))
-                .ifPresent(directionsDocuments::add);
-        }
+
+        CaseDocument noticeOfHearingDocument = prepareHearingRequiredNoticeDocumentComplexType(caseDetails, authToken);
+        directionsDocuments.add(noticeOfHearingDocument);
+        List<CaseDocument> hearingNoticeDocuments = Optional.ofNullable(documentHelper.getHearingNoticeDocuments(caseData))
+            .orElse(new ArrayList<>());
+        hearingNoticeDocuments.add(noticeOfHearingDocument);
+        caseData.put(ADDITIONAL_HEARING_DOCUMENT_COLLECTION, hearingNoticeDocuments);
+        Optional.ofNullable(documentHelper.convertToCaseDocument(caseDetails.getData().get(LATEST_DRAFT_HEARING_ORDER)))
+            .ifPresent(directionsDocuments::add);
+
         return documentHelper.getCaseDocumentsAsBulkPrintDocuments(directionsDocuments);
     }
 
