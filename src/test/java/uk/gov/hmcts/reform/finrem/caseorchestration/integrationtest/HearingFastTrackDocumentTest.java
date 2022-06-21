@@ -77,7 +77,7 @@ public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
     }
 
     @ClassRule
-    private static final WireMockClassRule coverSheetGeneratorService = new WireMockClassRule(4010);
+    public static final WireMockClassRule coverSheetGeneratorService = new WireMockClassRule(4010);
 
     void generateDocumentServiceSuccessStubWithCoverSheet() throws JsonProcessingException {
 
