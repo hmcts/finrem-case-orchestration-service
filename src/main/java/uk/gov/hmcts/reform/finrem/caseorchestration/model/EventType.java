@@ -9,6 +9,7 @@ public enum EventType {
 
     SEND_ORDER("FR_sendOrder"),
     PREPARE_FOR_HEARING("FR_prepareForHearing"),
+    INTERIM_HEARING("FR_listForInterimHearing"),
     CLOSE("FR_close"),
     NONE("");
 

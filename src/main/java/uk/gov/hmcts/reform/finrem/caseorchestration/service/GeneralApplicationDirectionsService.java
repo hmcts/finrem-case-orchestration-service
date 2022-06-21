@@ -186,11 +186,8 @@ public class GeneralApplicationDirectionsService {
         Map<String, Object> caseData = caseDetails.getData();
         try {
             Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
-            log.info("Interim hearing courtDetailsMap :{}", courtDetailsMap);
             String selectedCourtIH = getSelectedCourtIH(caseData);
-            log.info("Interim hearing selectedCourtIH :{}", selectedCourtIH);
             String courtDetailsObj = (String) caseData.get(selectedCourtIH);
-            log.info("Interim hearing courtDetailsObj :{}", courtDetailsObj);
             Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(courtDetailsObj);
             caseData.put("hearingVenue", getFrcCourtDetailsAsOneLineAddressString(courtDetails));
         } catch (IOException exception) {
