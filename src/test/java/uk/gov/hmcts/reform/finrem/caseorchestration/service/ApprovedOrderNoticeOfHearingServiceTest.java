@@ -35,8 +35,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_UR
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENT_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ANOTHER_HEARING_TO_BE_LISTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NOTICES_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
 
 public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
@@ -128,8 +128,8 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     }
 
     private void assertCaseDataHasHearingNoticesCollection() {
-        assertThat(caseDetails.getData(), hasKey(HEARING_NOTICES_COLLECTION));
-        List<CaseDocument> hearingNotices = (List<CaseDocument>) caseDetails.getData().get(HEARING_NOTICES_COLLECTION);
+        assertThat(caseDetails.getData(), hasKey(ADDITIONAL_HEARING_DOCUMENT_COLLECTION));
+        List<CaseDocument> hearingNotices = (List<CaseDocument>) caseDetails.getData().get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION);
         assertThat(hearingNotices.size(), is(1));
         assertThat(hearingNotices.get(0).getDocumentBinaryUrl(), is(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL));
     }
