@@ -90,7 +90,7 @@ public class HearingDocumentController extends BaseController {
         List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
 
         if (caseDataService.isContestedApplication(caseDetails) && (!notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())
-            || !notificationService.shouldEmailContestedAppSolicitor(caseDetails.getData())
+            || !notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(caseDetails.getData())
             || !checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails))) {
             CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
             if (caseDetailsBefore != null && hearingDocumentService.alreadyHadFirstHearing(caseDetailsBefore)) {
