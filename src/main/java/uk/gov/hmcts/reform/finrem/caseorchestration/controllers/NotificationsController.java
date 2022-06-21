@@ -339,7 +339,8 @@ public class NotificationsController extends BaseController {
             notificationService.sendPrepareForHearingEmailApplicant(caseDetails);
         }
 
-        if (featureToggleService.isRespondentJourneyEnabled() && notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
+        if (featureToggleService.isRespondentJourneyEnabled()
+            && notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
             log.info("Sending email notification to Respondent Solicitor for 'Prepare for Hearing'");
             notificationService.sendPrepareForHearingEmailRespondent(caseDetails);
         }
