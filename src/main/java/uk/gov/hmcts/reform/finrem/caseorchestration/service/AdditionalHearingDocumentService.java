@@ -196,7 +196,7 @@ public class AdditionalHearingDocumentService {
 
         if (!notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
             CompletableFuture.runAsync(() ->
-            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, document));
+                bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, document));
         }
         if (!notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
             CompletableFuture.runAsync(() ->
