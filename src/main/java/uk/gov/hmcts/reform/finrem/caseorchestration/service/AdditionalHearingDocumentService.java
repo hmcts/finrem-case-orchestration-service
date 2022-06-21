@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import static java.util.Collections.singletonList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
@@ -194,10 +195,12 @@ public class AdditionalHearingDocumentService {
                 additionalHearingDocument.getAdditionalHearingDocument().getDocument()));
 
         if (!notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
-            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, document);
+            CompletableFuture.runAsync(() ->
+            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, document));
         }
         if (!notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
-            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, document);
+            CompletableFuture.runAsync(() ->
+                bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, document));
         }
     }
 }
