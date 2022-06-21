@@ -14,9 +14,18 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class DocumentDetailsCollection {
 
-    @JsonProperty("DocumentFileName")
-    private String documentFileName;
+    @JsonProperty("caseDocument")
+    private String caseDocument;
 
-    @JsonProperty("DocumentType")
-    private String documentType;
+    @JsonProperty("caseDocumentType")
+    private String caseDocumentType;
+
+    @JsonProperty("caseDocumentOther")
+    private String caseDocumentOther;
+
+    @JsonProperty("caseDocumentParty")
+    private String caseDocumentParty;
+
+    @JsonProperty("hearingDetails")
+    private String hearingDetails;
 }

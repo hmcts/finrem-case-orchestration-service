@@ -7,8 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentDetailsCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentDetailsData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType;
 
 import java.util.ArrayList;
@@ -31,7 +29,7 @@ public class ManageCaseDocumentsService {
     public Map<String, Object> setApplicantAndRespondentDocumentsCollection(CaseDetails caseDetails) {
 
         caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION,
-            extractFieldsToDocumentDetailsCollection(caseDetails.getData()));
+            filterApplicantOrRespondentDocuments(caseDetails.getData()));
 
         return caseDetails.getData();
     }
@@ -46,12 +44,12 @@ public class ManageCaseDocumentsService {
     private void removeDeletedFilesFromCollections(Map<String, Object> caseData,
                                                    ContestedUploadCaseFilesCollectionType[] collectionTypes) {
 
-        List<DocumentDetailsData> mergeApplicantAndRespondentDocumentDetailsData =
+        List<ContestedUploadedDocumentData> mergeApplicantAndRespondentDocumentDetailsData =
             new ArrayList<>(mapper.convertValue(caseData.get(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION),
-            new TypeReference<List<DocumentDetailsData>>() {}));
+            new TypeReference<List<ContestedUploadedDocumentData>>() {}));
 
         Set<String> findRemainingApplicantAndRespondentDocumentIds =
-            mergeApplicantAndRespondentDocumentDetailsData.stream().map(DocumentDetailsData::getId)
+            mergeApplicantAndRespondentDocumentDetailsData.stream().map(ContestedUploadedDocumentData::getId)
                 .collect(Collectors.toSet());
 
         Arrays.stream(collectionTypes).forEach(collection ->
@@ -81,17 +79,5 @@ public class ManageCaseDocumentsService {
             .filter(document -> document.getUploadedCaseDocument() != null
                 && document.getUploadedCaseDocument().getCaseDocuments() != null
                 && document.getUploadedCaseDocument().getCaseDocumentParty() != null).collect(Collectors.toList());
-    }
-
-    private List<DocumentDetailsData> extractFieldsToDocumentDetailsCollection(Map<String, Object> caseData) {
-
-        return filterApplicantOrRespondentDocuments(caseData).stream().filter(
-            document -> document.getUploadedCaseDocument().getCaseDocuments() != null
-        ).map(detail -> DocumentDetailsData.builder()
-            .id(detail.getId())
-            .documentDetails(DocumentDetailsCollection.builder()
-                .documentFileName(detail.getUploadedCaseDocument().getCaseDocuments().getDocumentFilename())
-                .documentType(detail.getUploadedCaseDocument().getCaseDocumentType())
-                .build()).build()).collect(Collectors.toList());
     }
 }
