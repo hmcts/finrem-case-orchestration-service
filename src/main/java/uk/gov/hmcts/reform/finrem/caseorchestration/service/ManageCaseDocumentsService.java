@@ -38,21 +38,17 @@ public class ManageCaseDocumentsService {
 
     public Map<String, Object> removeDeletedFilesFromCaseData(Map<String, Object> caseData) {
 
-        removeDeletedFilesFromCollections(caseData, ContestedUploadCaseFilesCollectionType.values(),
-            CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        removeDeletedFilesFromCollections(caseData, ContestedUploadCaseFilesCollectionType.values());
 
         return caseData;
     }
 
     private void removeDeletedFilesFromCollections(Map<String, Object> caseData,
-                                                   ContestedUploadCaseFilesCollectionType[] collectionTypes, String documentType) {
+                                                   ContestedUploadCaseFilesCollectionType[] collectionTypes) {
 
-        List<DocumentDetailsData> mergeApplicantAndRespondentDocumentDetailsData = new ArrayList<>();
-
-        mergeApplicantAndRespondentDocumentDetailsData.addAll(
-            mapper.convertValue(caseData.get(documentType),
-                new TypeReference<List<DocumentDetailsData>>() {
-                }));
+        List<DocumentDetailsData> mergeApplicantAndRespondentDocumentDetailsData =
+            new ArrayList<>(mapper.convertValue(caseData.get(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION),
+            new TypeReference<List<DocumentDetailsData>>() {}));
 
         Set<String> findRemainingApplicantAndRespondentDocumentIds =
             mergeApplicantAndRespondentDocumentDetailsData.stream().map(DocumentDetailsData::getId)
