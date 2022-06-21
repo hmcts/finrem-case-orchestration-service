@@ -790,7 +790,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @Test
     public void whenConsentOrderNotApprovedSentEmail_thenNotificationEmailsSentToSolicitors() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailApplicantSolicitor(any())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
 
         notificationsController.sendConsentOrderNotApprovedSentEmail(buildCallbackRequest());
@@ -802,7 +802,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @Test
     public void given_RespondentJourneyIsToggledOff_whenConsentOrderNotApprovedSentEmail_thenNoEmailsSentToSolicitors() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
-        when(notificationService.shouldEmailApplicantSolicitor(any())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
 
         notificationsController.sendConsentOrderNotApprovedSentEmail(buildCallbackRequest());

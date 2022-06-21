@@ -392,7 +392,7 @@ public class NotificationService {
             && !NO_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED)));
     }
 
-    public boolean shouldEmailApplicantSolicitor(CaseDetails caseDetails) {
+    public boolean isApplicantSolicitorEmailCommunicationEnabled(CaseDetails caseDetails) {
         return caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails);
     }
 
