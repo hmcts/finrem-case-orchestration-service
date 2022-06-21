@@ -147,6 +147,7 @@ public class InterimHearingContestedAboutToStartHandler implements CallbackHandl
         return objectMapper.convertValue(object, new TypeReference<>() {
         });
     }
+
     private CaseDocument convertToCaseDocument(Object object) {
         return objectMapper.convertValue(object, CaseDocument.class);
     }
