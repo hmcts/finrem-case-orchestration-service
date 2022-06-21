@@ -500,7 +500,7 @@ public class CCDConfigConstant {
     public static final String INTERIM_HEARING_TYPE = "interimHearingType";
     public static final String INTERIM_HEARING_DATE = "interimHearingDate";
     public static final String INTERIM_HEARING_TIME = "interimHearingTime";
-    public static final String INTERIM_HEARING_TIME_ESTIMATE = "interimHearingTimeEstimate";
+    public static final String INTERIM_HEARING_TIME_ESTIMATE = "interimTimeEstimate";
     public static final String INTERIM_HEARING_REGION_LIST = "interim_regionList";
     public static final String INTERIM_HEARING_CFC_COURT_LIST = "interim_cfcCourtList";
     public static final String INTERIM_HEARING_WALES_FRC_COURT_LIST = "interim_walesFRCList";
