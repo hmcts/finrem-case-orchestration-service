@@ -22,10 +22,6 @@
         <packageUrl regex="true">^pkg:maven/org\.glassfish/jakarta\.el@.*$</packageUrl>
         <cve>CVE-2021-28170</cve>
     </suppress>
-    <suppress until="2022-06-23Z">
-        <notes><![CDATA[Suppress tomcat CVE as there is no updated version.]]></notes>
-        <vulnerabilityName>CVE-2022-29885</vulnerabilityName>
-    </suppress>
     <suppress until="2030-01-01">
         <notes><![CDATA[
                  https://nvd.nist.gov/vuln/detail/CVE-2021-22096#range-7096083
