@@ -22,7 +22,7 @@ public class ManageCaseDocumentsContestedAboutToStartCaseHandler implements Call
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_START.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.MANAGE_CASE_DOCUMENTS.equals(eventType);
+            && EventType.MANAGE_LITIGANT_DOCUMENT.equals(eventType);
     }
 
     @Override
