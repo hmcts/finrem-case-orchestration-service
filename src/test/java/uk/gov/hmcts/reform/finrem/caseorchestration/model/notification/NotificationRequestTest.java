@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PHONE_OPENING_HOURS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_OPENING_HOURS;
 
 public class NotificationRequestTest {
     private NotificationRequest underTest;
@@ -13,7 +13,7 @@ public class NotificationRequestTest {
     public void shouldReturnNotificationRequestData() {
         underTest = new NotificationRequest("12345", "67890", "D123",
             "Padmaja", "test@test.com", "nottingham", "consented", "general body",
-            PHONE_OPENING_HOURS);
+            CTSC_OPENING_HOURS);
         assertEquals("12345", underTest.getCaseReferenceNumber());
         assertEquals("67890", underTest.getSolicitorReferenceNumber());
         assertEquals("D123", underTest.getDivorceCaseNumber());
@@ -22,7 +22,7 @@ public class NotificationRequestTest {
         assertEquals("nottingham", underTest.getSelectedCourt());
         assertEquals("consented", underTest.getCaseType());
         assertEquals("general body", underTest.getGeneralEmailBody());
-        assertEquals(PHONE_OPENING_HOURS, underTest.getPhoneOpeningHours());
+        assertEquals(CTSC_OPENING_HOURS, underTest.getPhoneOpeningHours());
     }
 
     @Test
@@ -49,7 +49,7 @@ public class NotificationRequestTest {
         underTest.setSelectedCourt("nottingham");
         underTest.setCaseType("consented");
         underTest.setGeneralEmailBody("general body");
-        underTest.setPhoneOpeningHours(PHONE_OPENING_HOURS);
+        underTest.setPhoneOpeningHours(CTSC_OPENING_HOURS);
         assertEquals("54321", underTest.getCaseReferenceNumber());
         assertEquals("67891", underTest.getSolicitorReferenceNumber());
         assertEquals("D456", underTest.getDivorceCaseNumber());
@@ -58,6 +58,6 @@ public class NotificationRequestTest {
         assertEquals("nottingham", underTest.getSelectedCourt());
         assertEquals("consented", underTest.getCaseType());
         assertEquals("general body", underTest.getGeneralEmailBody());
-        assertEquals(PHONE_OPENING_HOURS, underTest.getPhoneOpeningHours());
+        assertEquals(CTSC_OPENING_HOURS, underTest.getPhoneOpeningHours());
     }
 }
