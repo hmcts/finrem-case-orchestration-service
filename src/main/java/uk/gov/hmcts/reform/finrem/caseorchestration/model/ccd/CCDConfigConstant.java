@@ -420,6 +420,8 @@ public class CCDConfigConstant {
     public static final String RESPONDENT_EVIDENCE_COLLECTION = "respEvidenceCollection";
     public static final String RESPONDENT_TRIAL_BUNDLE_COLLECTION = "respTrialBundleCollection";
     public static final String RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION = "respConfidentialDocsCollection";
+    public static final String CONFIDENTIAL_DOCS_UPLOADED_COLLECTION = "confidentialDocumentsUploaded";
+    public static final String FDR_DOCS_COLLECTION = "fdrCaseDocumentCollection";
 
     //Contested Case New Documents collections
     public static final String APP_HEARING_BUNDLES_COLLECTION = "appHearingBundlesCollection";
@@ -442,7 +444,6 @@ public class CCDConfigConstant {
     public static final String RESP_EXPERT_EVIDENCE_COLLECTION = "respExpertEvidenceCollection";
     public static final String RESP_CORRESPONDENCE_COLLECTION = "respCorrespondenceDocsColl";
     public static final String RESP_OTHER_COLLECTION = "respOtherCollection";
-
 
 
     public static final String AMENDED_CONSENT_ORDER = "AmendedConsentOrder";
@@ -469,8 +470,8 @@ public class CCDConfigConstant {
     public static final String DIRECTION_DETAILS_COLLECTION_CT = "directionDetailsCollection";
 
     //draft hearing order
-    public static final String LATEST_DRAFT_HEARING_ORDER  = "latestDraftHearingOrder";
-    public static final String DRAFT_DIRECTION_ORDER_COLLECTION  = "draftDirectionOrderCollection";
+    public static final String LATEST_DRAFT_HEARING_ORDER = "latestDraftHearingOrder";
+    public static final String DRAFT_DIRECTION_ORDER_COLLECTION = "draftDirectionOrderCollection";
     public static final String DRAFT_DIRECTION_DETAILS_COLLECTION = "draftDirectionDetailsCollection";
     public static final String DRAFT_DIRECTION_DETAILS_COLLECTION_RO = "draftDirectionDetailsCollectionRO";
     public static final String HEARING_ORDER_OTHER_COLLECTION = "hearingOrderOtherDocuments";
