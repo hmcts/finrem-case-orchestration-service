@@ -37,6 +37,4 @@ public class AdditionalHearingDirectionsCollection {
     @JsonProperty("isThisFinalYN")
     private String isThisFinalYN;
 
-    @JsonProperty("anyOtherListingInstructions")
-    private String anyOtherListingInstructions;
 }

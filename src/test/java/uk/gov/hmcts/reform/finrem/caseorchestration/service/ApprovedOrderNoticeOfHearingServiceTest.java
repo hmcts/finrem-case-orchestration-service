@@ -140,7 +140,6 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
             Matchers.hasEntry("CourtPhone", "01634 887900"),
             Matchers.hasEntry("CourtEmail", "FRCKSS@justice.gov.uk"),
             Matchers.hasEntry("ApplicantName", "Poor Guy"),
-            Matchers.hasEntry("AnyOtherDirections", "Yes, many"),
             Matchers.<String, Object>hasEntry("HearingTime", "1pm"),
             Matchers.<String, Object>hasEntry("RespondentName", "test Korivi"),
             Matchers.<String, Object>hasEntry("HearingVenue",
