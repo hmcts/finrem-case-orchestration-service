@@ -10,8 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentDetailsCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentDetailsData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,11 +84,11 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
         uploadDocumentList.get(0).setId("123");
         uploadDocumentList.get(1).setId("456");
 
-        DocumentDetailsData data = new DocumentDetailsData();
+        ContestedUploadedDocumentData data = new ContestedUploadedDocumentData();
         data.setId("123");
-        data.setDocumentDetails(new DocumentDetailsCollection());
+        data.setUploadedCaseDocument(new ContestedUploadedDocument());
 
-        List<DocumentDetailsData> documentDetailsData = new ArrayList<>();
+        List<ContestedUploadedDocumentData> documentDetailsData = new ArrayList<>();
         documentDetailsData.add(data);
 
         caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, documentDetailsData);
