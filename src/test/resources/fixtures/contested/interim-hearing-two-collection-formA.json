@@ -6,7 +6,6 @@
     "state": "applicationDrafted",
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
-      "paperApplication": "Yes",
       "formC": {
         "document_url": "http://document-management-store:8080/documents/3e0218a7-0646-4b29-88af-2d8eab245f8d",
         "document_filename": "Form-C.pdf",

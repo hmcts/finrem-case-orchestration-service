@@ -56,6 +56,20 @@ public class InterimHearingContestedAboutToStartHandlerTest {
     }
 
     @Test
+    public void canNotHandleWrongEventType() {
+        assertThat(interimHearingContestedAboutToStartHandler
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.CLOSE),
+            is(false));
+    }
+
+    @Test
+    public void canNotHandleWrongCallbackType() {
+        assertThat(interimHearingContestedAboutToStartHandler
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.INTERIM_HEARING),
+            is(false));
+    }
+
+    @Test
     public void handle() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         AboutToStartOrSubmitCallbackResponse handle = interimHearingContestedAboutToStartHandler.handle(callbackRequest, AUTH_TOKEN);

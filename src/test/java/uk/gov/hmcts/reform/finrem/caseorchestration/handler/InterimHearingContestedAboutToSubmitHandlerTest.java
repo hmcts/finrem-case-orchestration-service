@@ -88,6 +88,20 @@ public class InterimHearingContestedAboutToSubmitHandlerTest {
     }
 
     @Test
+    public void canNotHandleNonMatchEvent() {
+        assertThat(interimHearingContestedAboutToSubmitHandler
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.CLOSE),
+            is(false));
+    }
+
+    @Test
+    public void canNotHandleNonMatchCallbackType() {
+        assertThat(interimHearingContestedAboutToSubmitHandler
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.INTERIM_HEARING),
+            is(false));
+    }
+
+    @Test
     public void handle() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         AboutToStartOrSubmitCallbackResponse handle =
