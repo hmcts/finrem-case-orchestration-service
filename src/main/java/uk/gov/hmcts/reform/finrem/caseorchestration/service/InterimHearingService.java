@@ -180,7 +180,7 @@ public class InterimHearingService {
         caseData.put("courtDetails", buildInterimHearingFrcCourtDetails(interimHearingCaseData));
         caseData.put("applicantName", documentHelper.getApplicantFullName(caseDetailsCopy));
         caseData.put("respondentName", documentHelper.getRespondentFullNameContested(caseDetailsCopy));
-        addInterimHearingVenueDetails(caseDetailsCopy);
+        addInterimHearingVenueDetails(caseDetailsCopy, interimHearingCaseData);
         caseData.put("letterDate", String.valueOf(LocalDate.now()));
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
             documentConfiguration.getGeneralApplicationInterimHearingNoticeTemplate(),
@@ -188,12 +188,12 @@ public class InterimHearingService {
 
     }
 
-    private void addInterimHearingVenueDetails(CaseDetails caseDetails) {
+    private void addInterimHearingVenueDetails(CaseDetails caseDetails, Map<String, Object> interimHearingCaseData) {
         Map<String, Object> caseData = caseDetails.getData();
         try {
             Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), new TypeReference<>() {});
-            String selectedCourtIH = getSelectedCourtIH(caseData);
-            String courtDetailsObj = (String) caseData.get(selectedCourtIH);
+            String selectedCourtIH = getSelectedCourtIH(interimHearingCaseData);
+            String courtDetailsObj = (String) interimHearingCaseData.get(selectedCourtIH);
             Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(courtDetailsObj);
             caseData.put("hearingVenue", getFrcCourtDetailsAsOneLineAddressString(courtDetails));
         } catch (IOException exception) {
