@@ -106,10 +106,7 @@ public class ContestedUploadDocumentsHelper {
             filterEvidence(uploadedDocuments, caseData, RESPONDENT_EVIDENCE_COLLECTION, RESPONDENT);
             filterTrialBundle(uploadedDocuments, caseData, RESPONDENT_TRIAL_BUNDLE_COLLECTION, RESPONDENT);
         }
-
-        if (collection.equals(CONTESTED_UPLOADED_DOCUMENTS)) {
-            caseData.put(collection, uploadedDocuments);
-        }
+        caseData.put(collection, uploadedDocuments);
     }
 
     private List<ContestedUploadedDocumentData> getDocumentCollection(Map<String, Object> caseData, String collection) {

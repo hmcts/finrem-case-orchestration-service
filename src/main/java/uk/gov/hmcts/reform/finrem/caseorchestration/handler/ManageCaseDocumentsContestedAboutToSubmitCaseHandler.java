@@ -28,7 +28,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitCaseHandler implements Cal
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest, String userAuthorisation) {
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(
-            manageCaseDocumentsService.removeDeletedFilesFromCaseData(
+            manageCaseDocumentsService.manageLitigantDocuments(
                 callbackRequest.getCaseDetails().getData())).build();
     }
 }

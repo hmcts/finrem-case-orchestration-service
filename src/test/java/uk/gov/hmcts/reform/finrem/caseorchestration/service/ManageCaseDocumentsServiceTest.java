@@ -71,9 +71,36 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
     @Test
     public void givenCaseDataMap_whenRemoveDeletedFilesFromCaseData_thenApplicantAndRespondentKeysDoNotExistInCaseData() {
 
-        manageCaseDocumentsService.removeDeletedFilesFromCaseData(populateCaseData().getData());
+        manageCaseDocumentsService.manageLitigantDocuments(populateCaseData().getData());
 
         assertThat(getDocumentCollection(caseData, RESP_CHRONOLOGIES_STATEMENTS_COLLECTION), hasSize(1));
+    }
+
+    @Test
+    public void givenCaseDataManageLitigantDocuments_whenDocumentInWrongCollection_thenMoveItToRightCollection() {
+
+        List<ContestedUploadedDocumentData> chronologyDocs = new ArrayList<>();
+
+        chronologyDocs.add(createContestedUploadDocumentItem("Chronology", "respondent", "no", null));
+        chronologyDocs.add(createContestedUploadDocumentItem("Chronology", "applicant", "no", null));
+        chronologyDocs.get(0).setId("5");
+        chronologyDocs.get(1).setId("6");
+
+        List<ContestedUploadedDocumentData> litigantDocs = new ArrayList<>();
+        litigantDocs.add(createContestedUploadDocumentItem("Chronology", "respondent", "no", null));
+        litigantDocs.add(createContestedUploadDocumentItem("Chronology", "respondent", "no", null));
+        litigantDocs.get(0).setId("1");
+        litigantDocs.get(1).setId("2");
+
+
+
+        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, litigantDocs);
+        caseDetails.getData().put(APP_CHRONOLOGIES_STATEMENTS_COLLECTION, chronologyDocs);
+
+        manageCaseDocumentsService.manageLitigantDocuments(caseDetails.getData());
+
+        assertThat(getDocumentCollection(caseData, APP_CHRONOLOGIES_STATEMENTS_COLLECTION), hasSize(0));
+        assertThat(getDocumentCollection(caseData, RESP_CHRONOLOGIES_STATEMENTS_COLLECTION), hasSize(0));
     }
 
     private CaseDetails populateCaseData() {

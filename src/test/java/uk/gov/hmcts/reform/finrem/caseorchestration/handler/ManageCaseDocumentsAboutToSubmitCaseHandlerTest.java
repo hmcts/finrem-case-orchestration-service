@@ -53,7 +53,7 @@ public class ManageCaseDocumentsAboutToSubmitCaseHandlerTest {
             CallbackRequest.builder().caseDetails(generalOrderContestedCaseDetails()).build();
         manageCaseDocumentsAboutToSubmitCaseHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(manageCaseDocumentsService).removeDeletedFilesFromCaseData(any());
+        verify(manageCaseDocumentsService).manageLitigantDocuments(any());
     }
 
     private CaseDetails generalOrderContestedCaseDetails() {
