@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
 import org.junit.Before;
@@ -11,7 +12,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.util.List;
@@ -127,9 +130,11 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
 
     private void assertCaseDataHasHearingNoticesCollection() {
         assertThat(caseDetails.getData(), hasKey(ADDITIONAL_HEARING_DOCUMENT_COLLECTION));
-        List<CaseDocument> hearingNotices = (List<CaseDocument>) caseDetails.getData().get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION);
-        assertThat(hearingNotices.size(), is(1));
-        assertThat(hearingNotices.get(0).getDocumentBinaryUrl(), is(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL));
+        List<Element<AdditionalHearingDocument>> additionalHearingDocuments = objectMapper.convertValue(
+            caseDetails.getData().get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION), new TypeReference<>() {});
+        assertThat(additionalHearingDocuments.size(), is(1));
+        assertThat(additionalHearingDocuments.get(0).getValue().getDocument().getDocumentBinaryUrl(),
+            is(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL));
     }
 
     private void assertCaseData(Map<String, Object> data) {
