@@ -1201,7 +1201,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         interimDataMap.forEach(data -> {
             notificationService.sendInterimHearingNotificationEmailToRespondentSolicitor(callbackRequest.getCaseDetails(), data);
-            verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails(), data);
+            verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails(), data);
         });
     }
 }
