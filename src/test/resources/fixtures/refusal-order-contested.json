@@ -1,6 +1,6 @@
 {
   "token": "token_test",
-  "event_id": "some_event_id",
+  "event_id": "FR_giveAllocationDirections",
   "case_details": {
     "id": 1234567890,
     "jurisdiction": "DIVORCE",
