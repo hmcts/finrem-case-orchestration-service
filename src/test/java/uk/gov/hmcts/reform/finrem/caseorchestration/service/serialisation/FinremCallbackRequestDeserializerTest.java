@@ -4,17 +4,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.ccd.domain.EventType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class FinremCallbackRequestDeserializerTest {
@@ -41,5 +41,9 @@ public class FinremCallbackRequestDeserializerTest {
         CallbackRequest callbackRequest = callbackRequestDeserializer.deserialize(callback);
 
         assertNotNull(callbackRequest);
+        EventType eventType = callbackRequest.getEventType();
+        assertEquals(eventType, EventType.GIVE_ALLOCATION_DIRECTIONS);
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getCaseData();
+        assertEquals(caseData.getContactDetailsWrapper().getApplicantRepresented(), YesOrNo.YES);
     }
 }

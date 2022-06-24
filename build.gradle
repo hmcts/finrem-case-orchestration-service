@@ -209,7 +209,7 @@ dependencies {
     implementation group: 'io.github.openfeign.form', name: 'feign-form', version: '3.8.0'
 
     implementation 'com.github.hmcts:idam-java-client:2.0.1'
-    implementation 'com.github.hmcts:finrem-common:v1.0.1'
+    implementation 'com.github.hmcts:finrem-common:v1.0.1-RC-DFR-1074_2.3'
 
     implementation group: 'com.github.hmcts', name: 'ccd-client', version: versions.ccdClient
     implementation group: 'com.github.hmcts.java-logging', name: 'java-logging', version: versions.reformLogging

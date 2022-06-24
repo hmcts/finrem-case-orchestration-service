@@ -4,7 +4,7 @@
   "case_details": {
     "id": 1234567890,
     "jurisdiction": "DIVORCE",
-    "state": "applicationDrafted",
+    "state": "orderMade",
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
       "applicantRepresented": "Yes",
@@ -105,6 +105,12 @@
         "document_filename": "refusalOrderTestFilename.pdf",
         "document_binary_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"
       },
+      "MIAMExemptionsChecklist": [
+        "domesticViolence",
+        "urgency",
+        "previousMIAMattendance",
+        "other"
+      ],
       "refusalOrderCollection": [
         {
           "id": "1234",
