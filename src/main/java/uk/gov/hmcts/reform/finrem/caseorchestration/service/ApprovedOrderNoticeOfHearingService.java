@@ -63,15 +63,14 @@ public class ApprovedOrderNoticeOfHearingService {
 
     private List<BulkPrintDocument> prepareHearingRequiredNoticeDocumentsForPrint(CaseDetails caseDetails,
                                                                                   String authToken) {
-        Map<String, Object> caseData = caseDetails.getData();
         List<CaseDocument> directionsDocuments = new ArrayList<>();
 
         CaseDocument noticeOfHearingDocument = prepareHearingRequiredNoticeDocumentComplexType(caseDetails, authToken);
         directionsDocuments.add(noticeOfHearingDocument);
-        List<CaseDocument> hearingNoticeDocuments = Optional.ofNullable(documentHelper.getHearingNoticeDocuments(caseData))
+        List<CaseDocument> hearingNoticeDocuments = Optional.ofNullable(documentHelper.getHearingNoticeDocuments(caseDetails.getData()))
             .orElse(new ArrayList<>());
         hearingNoticeDocuments.add(noticeOfHearingDocument);
-        caseData.put(ADDITIONAL_HEARING_DOCUMENT_COLLECTION, convertToListOfAdditionalHearingDocuments(hearingNoticeDocuments));
+        caseDetails.getData().put(ADDITIONAL_HEARING_DOCUMENT_COLLECTION, convertToListOfAdditionalHearingDocuments(hearingNoticeDocuments));
         Optional.ofNullable(documentHelper.convertToCaseDocument(caseDetails.getData().get(LATEST_DRAFT_HEARING_ORDER)))
             .ifPresent(directionsDocuments::add);
 
@@ -134,7 +133,6 @@ public class ApprovedOrderNoticeOfHearingService {
 
     private FrcCourtDetails getFrcCourtDetails(AdditionalHearingDirectionsCollection additionalHearingDirectionsCollection) {
         Map<String, Object> courtDetails = getCourtDetails(additionalHearingDirectionsCollection);
-        System.out.println(courtDetails);
         return FrcCourtDetails.builder()
             .courtName(nullToEmpty(courtDetails.get(COURT_DETAILS_NAME_KEY)))
             .courtAddress(nullToEmpty(courtDetails.get(COURT_DETAILS_ADDRESS_KEY)))
