@@ -501,6 +501,43 @@
       "consentNatureOfApplicationChecklist": [
         "Maintenance Pending Suit"
       ],
+      "interimHearingDate": "2010-10-10",
+      "interimHearingTime": "5 hour",
+      "interimHearingType": "First Directions Appointment (FDA)",
+      "interim_regionList": "london",
+      "interim_cfcCourtList": "FR_s_CFCList_2",
+      "interim_walesFRCList": null,
+      "interim_londonFRCList": "cfc",
+      "interim_devonCourtList": null,
+      "interim_dorsetCourtList": null,
+      "interim_humberCourtList": null,
+      "interim_midlandsFRCList": null,
+      "interim_bristolCourtList": null,
+      "interim_newportCourtList": null,
+      "interim_northEastFRCList": null,
+      "interim_northWestFRCList": null,
+      "interim_southEastFRCList": null,
+      "interim_southWestFRCList": null,
+      "interim_swanseaCourtList": null,
+      "interimTimeEstimate": "Test",
+      "interim_liverpoolCourtList": null,
+      "interimPromptForAnyDocument": "Yes",
+      "interim_birminghamCourtList": null,
+      "interim_cleavelandCourtList": null,
+      "interim_kentSurreyCourtList": null,
+      "interim_lancashireCourtList": null,
+      "interim_manchesterCourtList": null,
+      "interim_northWalesCourtList": null,
+      "interim_nottinghamCourtList": null,
+      "interim_nwyorkshireCourtList": null,
+      "interim_bedfordshireCourtList": null,
+      "interim_thamesvalleyCourtList": null,
+      "interimUploadAdditionalDocument": {
+        "document_url": "http://document-management-store:8080/documents/2cc8a196-39a9-45d9-8f19-5f04081c3b95",
+        "document_filename": "InterimHearingNotice.pdf",
+        "document_binary_url": "http://document-management-store:8080/documents/2cc8a196-39a9-45d9-8f19-5f04081c3b95/binary"
+      },
+      "interimAdditionalInformationAboutHearing": "This is second hearing",
       "iHCollectionItemIds": []
     }
   }

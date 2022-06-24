@@ -293,6 +293,7 @@ public class InterimHearingService {
         caseData.remove(INTERIM_HEARING_THAMESVALLEY_COURT_LIST);
         caseData.remove(INTERIM_HEARING_ADDITIONAL_INFO);
         caseData.remove(INTERIM_HEARING_PROMPT_FOR_DOCUMENT);
+        caseData.remove(INTERIM_HEARING_UPLOADED_DOCUMENT);
     }
 
 }

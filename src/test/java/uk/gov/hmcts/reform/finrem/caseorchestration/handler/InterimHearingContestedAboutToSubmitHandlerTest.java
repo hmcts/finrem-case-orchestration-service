@@ -59,6 +59,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_TIME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_TIME_ESTIMATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_UPLOADED_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_WALES_FRC_COURT_LIST;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -151,6 +152,7 @@ public class InterimHearingContestedAboutToSubmitHandlerTest {
         assertNull(data.get(INTERIM_HEARING_THAMESVALLEY_COURT_LIST));
         assertNull(data.get(INTERIM_HEARING_ADDITIONAL_INFO));
         assertNull(data.get(INTERIM_HEARING_PROMPT_FOR_DOCUMENT));
+        assertNull(data.get(INTERIM_HEARING_UPLOADED_DOCUMENT));
     }
 
     private CallbackRequest buildCallbackRequest()  {
