@@ -529,6 +529,7 @@ public class CCDConfigConstant {
     public static final String INTERIM_HEARING_THAMESVALLEY_COURT_LIST = "interim_thamesvalleyCourtList";
     public static final String INTERIM_HEARING_ADDITIONAL_INFO = "interimAdditionalInformationAboutHearing";
     public static final String INTERIM_HEARING_PROMPT_FOR_DOCUMENT = "interimPromptForAnyDocument";
+    public static final String INTERIM_HEARING_TRACKING = "iHCollectionItemIds";
 
     public static final String INTERIM_HEARING_DOCUMENT = "interimHearingDirectionsDocument";
     public static final String INTERIM_HEARING_UPLOADED_DOCUMENT = "interimUploadAdditionalDocument";

@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +9,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
@@ -14,13 +18,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.Notificat
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_NAME;
@@ -28,6 +35,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RE
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REPRESENTATION_UPDATE_HISTORY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element.element;
@@ -166,6 +174,71 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         assertThat(notificationRequest.getCaseType(), is("consented"));
     }
 
+    @Test
+    public void shouldCreateNotificationRequestForAppSolicitorForContestedJourneyForInterimHearing() {
+        CallbackRequest callbackRequest = buildInterimHearingCallbackRequest();
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+
+        List<InterimHearingData> interimHearingList = Optional.ofNullable(caseData.get(INTERIM_HEARING_COLLECTION))
+            .map(this::convertToInterimHearingDataList).orElse(Collections.emptyList());
+
+        List<InterimHearingItems> interimHearingItems
+            = interimHearingList.stream().map(InterimHearingData::getValue).collect(Collectors.toList());
+
+        List<Map<String, Object>> interimDataMap = interimHearingItems.stream()
+            .map(obj -> new ObjectMapper().convertValue(obj, new TypeReference<Map<String, Object>>() {
+            })).collect(Collectors.toList());
+        interimDataMap.forEach(data -> verifyAppData(callbackRequest, data));
+    }
+
+    private void verifyAppData(CallbackRequest callbackRequest, Map<String, Object> data) {
+        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(
+            callbackRequest.getCaseDetails(), data);
+
+        assertEquals("123", notificationRequest.getCaseReferenceNumber());
+        assertEquals(TEST_SOLICITOR_REFERENCE, notificationRequest.getSolicitorReferenceNumber());
+        assertEquals(TEST_DIVORCE_CASE_NUMBER, notificationRequest.getDivorceCaseNumber());
+        assertEquals(TEST_SOLICITOR_NAME, notificationRequest.getName());
+        assertEquals(TEST_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
+        assertEquals("contested", notificationRequest.getCaseType());
+        assertThat("checking in loop", notificationRequest.getSelectedCourt(),
+            anyOf(is("Gloucester and Cheltenham County and Family Court"),
+                is("Croydon County Court And Family Court")));
+    }
+
+    @Test
+    public void shouldCreateNotificationRequestForRespSolicitorForContestedJourneyForInterimHearing() {
+        CallbackRequest callbackRequest = buildInterimHearingCallbackRequest();
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+
+        List<InterimHearingData> interimHearingList = Optional.ofNullable(caseData.get(INTERIM_HEARING_COLLECTION))
+            .map(this::convertToInterimHearingDataList).orElse(Collections.emptyList());
+
+        List<InterimHearingItems> interimHearingItems
+            = interimHearingList.stream().map(InterimHearingData::getValue).collect(Collectors.toList());
+
+        List<Map<String, Object>> interimDataMap = interimHearingItems.stream()
+                .map(obj -> new ObjectMapper().convertValue(obj, new TypeReference<Map<String, Object>>() {
+                })).collect(Collectors.toList());
+        interimDataMap.forEach(data -> verifyData(callbackRequest, data));
+    }
+
+    private void verifyData(CallbackRequest callbackRequest, Map<String, Object> data) {
+        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForRespondentSolicitor(
+            callbackRequest.getCaseDetails(), data);
+
+        assertEquals("123", notificationRequest.getCaseReferenceNumber());
+        assertEquals(TEST_RESP_SOLICITOR_REFERENCE, notificationRequest.getSolicitorReferenceNumber());
+        assertEquals(TEST_DIVORCE_CASE_NUMBER, notificationRequest.getDivorceCaseNumber());
+        assertEquals(TEST_RESP_SOLICITOR_NAME, notificationRequest.getName());
+        assertEquals(TEST_RESP_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
+        assertEquals("contested", notificationRequest.getCaseType());
+        assertThat("checking in loop", notificationRequest.getSelectedCourt(),
+            anyOf(is("Gloucester and Cheltenham County and Family Court"),
+            is("Croydon County Court And Family Court")));
+    }
+
+
     @SneakyThrows
     private List<Element<RepresentationUpdate>> getChangeOfRepresentationListJson(String party,
                                                                                   String latestSolicitorName,
@@ -207,4 +280,6 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
                 .build())
         ).collect(Collectors.toList());
     }
+
+
 }

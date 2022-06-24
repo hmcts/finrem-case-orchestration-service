@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollectionItemData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollectionItemIds;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimUploadAdditionalDocument;
@@ -21,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_ADDITIONAL_INFO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_BEDFORDSHIRE_COURT_LIST;
@@ -53,6 +56,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_THAMESVALLEY_COURT_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_TIME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_TIME_ESTIMATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_TRACKING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_UPLOADED_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_WALES_FRC_COURT_LIST;
@@ -84,17 +88,37 @@ public class InterimHearingContestedAboutToStartHandler implements CallbackHandl
     }
 
     private void loadInterimHearing(Map<String, Object> caseData) {
+
+        List<InterimHearingData> interimHearingList = Optional.ofNullable(caseData.get(INTERIM_HEARING_COLLECTION))
+            .map(this::convertToInterimHearingDataList).orElse(new ArrayList<>());
+
         if (caseData.get(INTERIM_HEARING_TYPE) != null) {
+            var collectionId = UUID.randomUUID().toString();
+            caseData.put(INTERIM_HEARING_TRACKING, setTrackingForBulkPrintAndNotification(collectionId));
+
             InterimHearingData.InterimHearingDataBuilder builder = InterimHearingData.builder();
-            builder.id(UUID.randomUUID().toString());
+            builder.id(collectionId);
             builder.value(loadInterimHearingData(caseData));
             InterimHearingData interimHearingData = builder.build();
-            List<InterimHearingData> interimHearingList = Optional.ofNullable(caseData.get(INTERIM_HEARING_COLLECTION))
-                .map(this::convertToInterimHearingDataList).orElse(new ArrayList<>());
             interimHearingList.add(0,interimHearingData);
             caseData.put(INTERIM_HEARING_COLLECTION,interimHearingList);
+        } else {
+            caseData.put(INTERIM_HEARING_TRACKING,
+                interimHearingList.stream().map(obj -> getTrackingObject(obj.getId())).collect(Collectors.toList()));
         }
     }
+
+    private List<InterimHearingCollectionItemData> setTrackingForBulkPrintAndNotification(String collectionId) {
+        List<InterimHearingCollectionItemData> list = new ArrayList<>();
+        list.add(getTrackingObject(collectionId));
+        return list;
+    }
+
+    private InterimHearingCollectionItemData getTrackingObject(String collectionId) {
+        return InterimHearingCollectionItemData.builder().id(UUID.randomUUID().toString())
+                .value(InterimHearingCollectionItemIds.builder().ihItemIds(collectionId).build()).build();
+    }
+
 
     private InterimHearingItems loadInterimHearingData(Map<String, Object> caseData) {
         return InterimHearingItems.builder()

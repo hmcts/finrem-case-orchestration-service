@@ -238,9 +238,9 @@
       "interim_bedfordshireCourtList": null,
       "interim_thamesvalleyCourtList": null,
       "interimUploadAdditionalDocument": {
-        "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/4c5d2cff-d8f3-4092-8236-267a3a0365e1",
-        "document_filename": "InterimHearingNotice-1649341720076259.pdf",
-        "document_binary_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/4c5d2cff-d8f3-4092-8236-267a3a0365e1/binary"
+        "document_url": "http://http://document-management-store:8080/documents/e92f0b10-70e7-4715-8794-68bbc6e3f568",
+        "document_filename": "NocLitigantSolicitorAddedLetter.pdf",
+        "document_binary_url": "http://http://document-management-store:8080/documents/e92f0b10-70e7-4715-8794-68bbc6e3f568/binary"
       },
       "interimHearingDirectionsDocument": {
         "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/188508f0-ba99-4ae7-960c-5cf6cd0d4f63",

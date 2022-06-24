@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -12,9 +13,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpda
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -22,6 +25,7 @@ import java.util.Objects;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_NAME_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_BODY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REPRESENTATION_UPDATE_HISTORY;
@@ -30,6 +34,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
 
 @Service
 @Slf4j
@@ -45,8 +50,20 @@ public class NotificationRequestMapper {
     private static final String CONTESTED = "contested";
 
 
+    public NotificationRequest getNotificationRequestForRespondentSolicitor(CaseDetails caseDetails,
+                                                                            Map<String, Object> interimHearingData) {
+        return buildNotificationRequest(caseDetails, getCaseDataKeysForRespondentSolicitor(), interimHearingData);
+    }
+
     public NotificationRequest getNotificationRequestForRespondentSolicitor(CaseDetails caseDetails) {
         return buildNotificationRequest(caseDetails, getCaseDataKeysForRespondentSolicitor());
+    }
+
+    public NotificationRequest getNotificationRequestForApplicantSolicitor(CaseDetails caseDetails,
+                                                                           Map<String, Object> interimHearingData) {
+        return caseDataService.isConsentedApplication(caseDetails)
+            ? buildNotificationRequest(caseDetails, getConsentedCaseDataKeysForApplicantSolicitor())
+            : buildNotificationRequest(caseDetails, getContestedCaseDataKeysForApplicantSolicitor(), interimHearingData);
     }
 
     public NotificationRequest getNotificationRequestForApplicantSolicitor(CaseDetails caseDetails) {
@@ -109,6 +126,42 @@ public class NotificationRequestMapper {
 
     private NotificationRequest buildNotificationRequest(CaseDetails caseDetails,
                                                          SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
+        NotificationRequest notificationRequest = getNotificationCoreData(caseDetails, solicitorCaseDataKeysWrapper);
+
+        if (caseDataService.isContestedApplication(caseDetails)) {
+            String selectedCourt = ContestedCourtHelper.getSelectedFrc(caseDetails);
+            notificationRequest.setSelectedCourt(selectedCourt);
+
+            log.info("selectedCourt is {} for case ID: {}", selectedCourt, notificationRequest.getCaseReferenceNumber());
+        }
+
+        return notificationRequest;
+    }
+
+    private NotificationRequest buildNotificationRequest(CaseDetails caseDetails,
+                                                         SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper,
+                                                         Map<String, Object> interimHearingData) {
+        NotificationRequest notificationRequest = getNotificationCoreData(caseDetails, solicitorCaseDataKeysWrapper);
+
+
+        if (caseDataService.isContestedApplication(caseDetails)) {
+            String selectedCourt = CaseHearingFunctions.getSelectedCourtIH(interimHearingData);
+            String courtDetailsObj = (String) interimHearingData.get(selectedCourt);
+            Map<String, Object> courtDetailsMap = new HashMap<>();
+            try {
+                courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), new TypeReference<>() {});
+            } catch (JsonProcessingException je) {
+                log.info(je.getMessage());
+            }
+            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(courtDetailsObj);
+            notificationRequest.setSelectedCourt((String) courtDetails.get(COURT_DETAILS_NAME_KEY));
+
+            log.info("selectedCourt is {} for case ID: {}", selectedCourt, notificationRequest.getCaseReferenceNumber());
+        }
+        return notificationRequest;
+    }
+
+    private NotificationRequest getNotificationCoreData(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
         NotificationRequest notificationRequest = new NotificationRequest();
         Map<String, Object> mapOfCaseData = caseDetails.getData();
 
@@ -120,13 +173,6 @@ public class NotificationRequestMapper {
         notificationRequest.setNotificationEmail(Objects.toString(mapOfCaseData.get(solicitorCaseDataKeysWrapper.getSolicitorEmailKey())));
         notificationRequest.setGeneralEmailBody(Objects.toString(mapOfCaseData.get(GENERAL_EMAIL_BODY)));
         notificationRequest.setCaseType(getCaseType(caseDetails));
-
-        if (caseDataService.isContestedApplication(caseDetails)) {
-            String selectedCourt = ContestedCourtHelper.getSelectedFrc(caseDetails);
-            notificationRequest.setSelectedCourt(selectedCourt);
-
-            log.info("selectedCourt is {} for case ID: {}", selectedCourt, notificationRequest.getCaseReferenceNumber());
-        }
 
         return notificationRequest;
     }

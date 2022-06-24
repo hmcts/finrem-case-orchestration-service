@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
@@ -8,8 +9,11 @@ import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
 
+import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
@@ -47,6 +51,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public abstract class BaseServiceTest extends BaseTest {
 
     @Autowired protected ObjectMapper mapper;
+    private static final String TEST_JSON = "/fixtures/contested/interim-hearing-two-collection.json";
 
     protected CaseDetails buildCaseDetails() {
         Map<String, Object> caseData = new HashMap<>();
@@ -171,5 +176,18 @@ public abstract class BaseServiceTest extends BaseTest {
         document.setDocumentBinaryUrl(binaryUrl);
         document.setDocumentFilename(filename);
         return document;
+    }
+
+    protected CallbackRequest buildInterimHearingCallbackRequest()  {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(TEST_JSON)) {
+            return mapper.readValue(resourceAsStream, CallbackRequest.class);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected List<InterimHearingData> convertToInterimHearingDataList(Object object) {
+        return mapper.convertValue(object, new TypeReference<>() {
+        });
     }
 }
