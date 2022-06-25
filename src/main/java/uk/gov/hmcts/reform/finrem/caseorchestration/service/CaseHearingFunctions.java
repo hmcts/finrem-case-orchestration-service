@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetai
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -334,8 +335,8 @@ public final class CaseHearingFunctions {
                 .phoneNumber((String) courtDetails.get(COURT_DETAILS_PHONE_KEY))
                 .email((String) courtDetails.get(COURT_DETAILS_EMAIL_KEY))
                 .build(), Map.class);
-        } catch (IOException | NullPointerException e) {
-            return null;
+        } catch (Exception e) {
+            return Collections.emptyMap();
         }
     }
 }
