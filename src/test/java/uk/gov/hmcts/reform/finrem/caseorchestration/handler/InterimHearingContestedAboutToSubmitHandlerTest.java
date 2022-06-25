@@ -89,14 +89,14 @@ public class InterimHearingContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void canNotHandleNonMatchEvent() {
+    public void canNotHandleWrongEvent() {
         assertThat(interimHearingContestedAboutToSubmitHandler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.CLOSE),
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.CLOSE),
             is(false));
     }
 
     @Test
-    public void canNotHandleNonMatchCallbackType() {
+    public void canNotHandleWrongCallbackType() {
         assertThat(interimHearingContestedAboutToSubmitHandler
                 .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.INTERIM_HEARING),
             is(false));
