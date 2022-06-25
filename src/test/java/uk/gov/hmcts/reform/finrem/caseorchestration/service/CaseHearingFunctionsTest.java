@@ -226,7 +226,7 @@ public class CaseHearingFunctionsTest {
         assertThat(stringObjectMap.get(COURT_DETAILS_EMAIL_KEY), is("family.croydon.countycourt@justice.gov.uk"));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void shouldReturnEmptyMap() {
         Map<String, Object> caseData = new HashMap<>();
         Map<String, Object> stringObjectMap = CaseHearingFunctions.buildInterimHearingFrcCourtDetails(caseData);
