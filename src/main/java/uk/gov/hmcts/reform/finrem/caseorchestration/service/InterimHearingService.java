@@ -26,7 +26,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static java.util.Objects.isNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
@@ -91,12 +90,10 @@ public class InterimHearingService {
     public void submitInterimHearing(CaseDetails caseDetails, String authorisationToken) {
 
         Map<String, Object> caseData = caseDetails.getData();
-
-
         List<InterimHearingData> interimHearingList = filterInterimHearingToProcess(caseData);
 
-        List<BulkPrintDocument> documents = prepareInterimHearingDocumentsToPrint(caseDetails, interimHearingList, authorisationToken);
-        printInterimDocumentPackAndSendToApplicantAndRespondent(caseDetails, authorisationToken, documents);
+        List<BulkPrintDocument> documents = prepareDocumentsForPrint(caseDetails, interimHearingList, authorisationToken);
+        sendToBulkPrint(caseDetails, authorisationToken, documents);
 
         //Need only for existing Interim Hearing
         if (caseData.get(INTERIM_HEARING_TYPE) != null) {
@@ -105,8 +102,8 @@ public class InterimHearingService {
         caseDetails.setData(caseData);
     }
 
-    private void printInterimDocumentPackAndSendToApplicantAndRespondent(CaseDetails caseDetails, String authorisationToken,
-                                                                  List<BulkPrintDocument> documents) {
+    private void sendToBulkPrint(CaseDetails caseDetails, String authorisationToken,
+                                 List<BulkPrintDocument> documents) {
         Map<String, Object> caseData = caseDetails.getData();
         if (isPaperApplication(caseData) || !isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
@@ -116,9 +113,9 @@ public class InterimHearingService {
         }
     }
 
-    private List<BulkPrintDocument> prepareInterimHearingDocumentsToPrint(CaseDetails caseDetails,
-                                                                          List<InterimHearingData> interimHearingList,
-                                                                          String authorisationToken) {
+    private List<BulkPrintDocument> prepareDocumentsForPrint(CaseDetails caseDetails,
+                                                             List<InterimHearingData> interimHearingList,
+                                                             String authorisationToken) {
         Map<String, Object> caseData = caseDetails.getData();
         List<CaseDocument> interimDocument = prepareInterimHearingRequiredNoticeDocument(caseDetails,
             interimHearingList, authorisationToken);
@@ -141,14 +138,13 @@ public class InterimHearingService {
     private void addToBulkPrintList(Map<String, Object> interimData,
                                       List<BulkPrintDocument> documents,String authorisationToken) {
         String isDocUploaded = nullToEmpty(interimData.get(INTERIM_HEARING_PROMPT_FOR_DOCUMENT));
-        if ("Yes".equalsIgnoreCase(isDocUploaded) && !isNull(interimData.get(INTERIM_HEARING_UPLOADED_DOCUMENT))) {
+        if ("Yes".equalsIgnoreCase(isDocUploaded)) {
             log.warn("Additional uploaded interim document found for printing for case");
             CaseDocument caseDocument = documentHelper.convertToCaseDocument(interimData.get(INTERIM_HEARING_UPLOADED_DOCUMENT));
             CaseDocument additionalUploadedDocuments = genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken);
             documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(additionalUploadedDocuments));
         }
     }
-
 
     private List<CaseDocument> prepareInterimHearingRequiredNoticeDocument(CaseDetails caseDetails,
                                                                      List<InterimHearingData> interimHearingList,

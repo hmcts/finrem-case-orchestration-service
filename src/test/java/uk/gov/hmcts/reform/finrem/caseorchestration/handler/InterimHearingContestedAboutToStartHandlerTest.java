@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,6 +36,8 @@ public class InterimHearingContestedAboutToStartHandlerTest {
     public static final String AUTH_TOKEN = "tokien:)";
 
     private static final String CONTESTED_INTERIM_HEARING_JSON = "/fixtures/contested/interim-hearing.json";
+    private static final String TEST_NEW_JSON = "/fixtures/contested/interim-hearing-with-no-existing-hearing.json";
+
 
     @Before
     public void setup() {
@@ -70,8 +73,8 @@ public class InterimHearingContestedAboutToStartHandlerTest {
     }
 
     @Test
-    public void handle() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
+    public void handleWhenExistingInterimHearingPresent() {
+        CallbackRequest callbackRequest = buildCallbackRequest(CONTESTED_INTERIM_HEARING_JSON);
         AboutToStartOrSubmitCallbackResponse handle = interimHearingContestedAboutToStartHandler.handle(callbackRequest, AUTH_TOKEN);
 
         List<InterimHearingData> interimHearingList = Optional.ofNullable(handle.getData().get(INTERIM_HEARING_COLLECTION))
@@ -85,8 +88,25 @@ public class InterimHearingContestedAboutToStartHandlerTest {
         assertEquals(interimHearingList.get(0).getId(), interimHearingCollectionItemDataList.get(0).getValue().getIhItemIds());
     }
 
-    private CallbackRequest buildCallbackRequest()  {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(CONTESTED_INTERIM_HEARING_JSON)) {
+    @Test
+    public void handleWhenThereIsNoExistingInterimHearingPresent() {
+        CallbackRequest callbackRequest = buildCallbackRequest(TEST_NEW_JSON);
+        AboutToStartOrSubmitCallbackResponse handle = interimHearingContestedAboutToStartHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        List<InterimHearingData> interimHearingList = Optional.ofNullable(handle.getData().get(INTERIM_HEARING_COLLECTION))
+            .map(this::convertToInterimHearingDataList).orElse(new ArrayList<>());
+        assertNotNull(interimHearingList);
+
+        List<InterimHearingCollectionItemData> interimHearingCollectionItemDataList = Optional.ofNullable(handle.getData()
+                .get(INTERIM_HEARING_TRACKING))
+            .map(this::convertToInterimHearingCollectionItemDataList).orElse(new ArrayList<>());
+
+        assertThat(interimHearingList, is(Collections.emptyList()));
+        assertThat(interimHearingCollectionItemDataList, is(Collections.emptyList()));
+    }
+
+    private CallbackRequest buildCallbackRequest(final String path)  {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(path)) {
             CaseDetails caseDetails = objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
             return CallbackRequest.builder().caseDetails(caseDetails).build();
         } catch (Exception e) {
