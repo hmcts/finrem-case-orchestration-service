@@ -61,9 +61,7 @@ public class NotificationRequestMapper {
 
     public NotificationRequest getNotificationRequestForApplicantSolicitor(CaseDetails caseDetails,
                                                                            Map<String, Object> interimHearingData) {
-        return caseDataService.isConsentedApplication(caseDetails)
-            ? buildNotificationRequest(caseDetails, getConsentedCaseDataKeysForApplicantSolicitor())
-            : buildNotificationRequest(caseDetails, getContestedCaseDataKeysForApplicantSolicitor(), interimHearingData);
+        return buildNotificationRequest(caseDetails, getContestedCaseDataKeysForApplicantSolicitor(), interimHearingData);
     }
 
     public NotificationRequest getNotificationRequestForApplicantSolicitor(CaseDetails caseDetails) {
