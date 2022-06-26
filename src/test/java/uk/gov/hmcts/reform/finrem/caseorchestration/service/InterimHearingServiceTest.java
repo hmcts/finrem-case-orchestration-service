@@ -20,6 +20,9 @@ import java.util.Optional;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
@@ -68,6 +71,11 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
     private DocumentConfiguration documentConfiguration;
     @MockBean
     private GenericDocumentService genericDocumentService;
+    @MockBean
+    private NotificationService notificationService;
+    @MockBean
+    private CaseDataService caseDataService;
+
     @Autowired
     private DocumentHelper documentHelper;
 
@@ -176,6 +184,45 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
         assertEquals("2010-10-10", interimHearingList.get(0).getValue().getInterimHearingDate());
         assertEquals("2020-10-10", interimHearingList.get(1).getValue().getInterimHearingDate());
         assertEquals("2030-10-10", interimHearingList.get(2).getValue().getInterimHearingDate());
+    }
+
+
+    @Test
+    public void willNotSendNotificationWhenPaperCase() {
+        CallbackRequest callbackRequest = buildCallbackRequest(TEST_NEW_JSON);
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        caseDetails.getData().put("paperApplication", "Yes");
+
+        when(caseDataService.isPaperApplication(any())).thenReturn(true);
+
+        interimHearingService.sendNotification(caseDetails);
+
+        verify(caseDataService).isPaperApplication(any());
+        verify(caseDataService, never()).isApplicantSolicitorAgreeToReceiveEmails(any());
+
+        verify(notificationService, never()).shouldEmailRespondentSolicitor(any());
+        verify(notificationService, never()).sendInterimHearingNotificationEmailToApplicantSolicitor(any(), anyMap());
+        verify(notificationService, never()).sendInterimHearingNotificationEmailToRespondentSolicitor(any(), anyMap());
+    }
+
+    @Test
+    public void willSendNotificationWhenNonPaperCase() {
+        CallbackRequest callbackRequest = buildCallbackRequest(TEST_NEW_JSON);
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        caseDetails.getData().put("paperApplication", "No");
+
+        when(caseDataService.isPaperApplication(any())).thenReturn(false);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+
+        interimHearingService.sendNotification(caseDetails);
+
+        verify(caseDataService).isPaperApplication(any());
+
+        verify(caseDataService, times(3)).isApplicantSolicitorAgreeToReceiveEmails(any());
+        verify(notificationService, times(3)).shouldEmailRespondentSolicitor(any());
+        verify(notificationService, times(3)).sendInterimHearingNotificationEmailToApplicantSolicitor(any(), anyMap());
+        verify(notificationService,times(3)).sendInterimHearingNotificationEmailToRespondentSolicitor(any(), anyMap());
     }
 
     private CallbackRequest buildCallbackRequest(String path)  {

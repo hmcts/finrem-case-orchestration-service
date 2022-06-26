@@ -9,21 +9,13 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InterimHearingService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-
-import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class InterimHearingContestedSubmittedHandler implements CallbackHandler {
 
-    private final CaseDataService caseDataService;
-    private final NotificationService notificationService;
     private final InterimHearingService interimHearingService;
 
     @Override
@@ -38,27 +30,10 @@ public class InterimHearingContestedSubmittedHandler implements CallbackHandler 
                                                        String userAuthorisation) {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
-        List<InterimHearingData> caseDataList = interimHearingService.filterInterimHearingToProcess(caseData);
-        List<Map<String, Object>> interimCaseData = interimHearingService.convertInterimHearingCollectionDataToMap(caseDataList);
 
-        if (!caseDataService.isPaperApplication(caseData)) {
-            interimCaseData.forEach(interimHearingData -> sendNotification(caseDetails, interimHearingData));
-        }
+        interimHearingService.sendNotification(caseDetails);
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(callbackRequest.getCaseDetails().getData()).build();
     }
-
-    private void sendNotification(CaseDetails caseDetails, Map<String, Object> interimHearingData) {
-        if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-            log.info("Sending email notification to Applicant Solicitor about interim hearing");
-            notificationService.sendInterimHearingNotificationEmailToApplicantSolicitor(caseDetails, interimHearingData);
-        }
-        if (notificationService.shouldEmailRespondentSolicitor(caseDetails.getData())) {
-            log.info("Sending email notification to Respondent Solicitor about interim hearing");
-            notificationService.sendInterimHearingNotificationEmailToRespondentSolicitor(caseDetails, interimHearingData);
-        }
-    }
-
 }

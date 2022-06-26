@@ -84,6 +84,8 @@ public class InterimHearingService {
     private final BulkPrintService bulkPrintService;
     private final DocumentConfiguration documentConfiguration;
     private final GenericDocumentService genericDocumentService;
+    private final CaseDataService caseDataService;
+    private final NotificationService notificationService;
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
 
@@ -292,4 +294,23 @@ public class InterimHearingService {
         caseData.remove(INTERIM_HEARING_UPLOADED_DOCUMENT);
     }
 
+    public void sendNotification(CaseDetails caseDetails) {
+        Map<String, Object> caseData =  caseDetails.getData();
+        if (!caseDataService.isPaperApplication(caseData)) {
+            List<InterimHearingData> caseDataList = filterInterimHearingToProcess(caseData);
+            List<Map<String, Object>> interimCaseData = convertInterimHearingCollectionDataToMap(caseDataList);
+            interimCaseData.forEach(interimHearingData -> notify(caseDetails, interimHearingData));
+        }
+    }
+
+    private void notify(CaseDetails caseDetails, Map<String, Object> interimHearingData) {
+        if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
+            log.info("Sending email notification to Applicant Solicitor about interim hearing");
+            notificationService.sendInterimHearingNotificationEmailToApplicantSolicitor(caseDetails, interimHearingData);
+        }
+        if (notificationService.shouldEmailRespondentSolicitor(caseDetails.getData())) {
+            log.info("Sending email notification to Respondent Solicitor about interim hearing");
+            notificationService.sendInterimHearingNotificationEmailToRespondentSolicitor(caseDetails, interimHearingData);
+        }
+    }
 }
