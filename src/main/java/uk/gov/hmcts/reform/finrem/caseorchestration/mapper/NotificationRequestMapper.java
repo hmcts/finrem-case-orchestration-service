@@ -139,23 +139,22 @@ public class NotificationRequestMapper {
     private NotificationRequest buildNotificationRequest(CaseDetails caseDetails,
                                                          SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper,
                                                          Map<String, Object> interimHearingData) {
+
         NotificationRequest notificationRequest = getNotificationCoreData(caseDetails, solicitorCaseDataKeysWrapper);
 
-
-        if (caseDataService.isContestedApplication(caseDetails)) {
-            String selectedCourt = CaseHearingFunctions.getSelectedCourtIH(interimHearingData);
-            String courtDetailsObj = (String) interimHearingData.get(selectedCourt);
-            Map<String, Object> courtDetailsMap = new HashMap<>();
-            try {
-                courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), new TypeReference<>() {});
-            } catch (JsonProcessingException je) {
-                log.info(je.getMessage());
-            }
-            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(courtDetailsObj);
-            notificationRequest.setSelectedCourt((String) courtDetails.get(COURT_DETAILS_NAME_KEY));
-
-            log.info("selectedCourt is {} for case ID: {}", selectedCourt, notificationRequest.getCaseReferenceNumber());
+        String selectedCourt = CaseHearingFunctions.getSelectedCourtIH(interimHearingData);
+        String courtDetailsObj = (String) interimHearingData.get(selectedCourt);
+        Map<String, Object> courtDetailsMap = new HashMap<>();
+        try {
+            courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), new TypeReference<>() {});
+        } catch (JsonProcessingException je) {
+            log.info(je.getMessage());
         }
+        Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(courtDetailsObj);
+        notificationRequest.setSelectedCourt((String) courtDetails.get(COURT_DETAILS_NAME_KEY));
+
+        log.info("selectedCourt is {} for case ID: {}", selectedCourt, notificationRequest.getCaseReferenceNumber());
+
         return notificationRequest;
     }
 
