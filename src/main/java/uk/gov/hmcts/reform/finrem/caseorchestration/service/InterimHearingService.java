@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -30,7 +29,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_ADDITIONAL_INFO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_BEDFORDSHIRE_COURT_LIST;
@@ -90,12 +88,12 @@ public class InterimHearingService {
     private final ObjectMapper objectMapper;
 
     public void submitInterimHearing(CaseDetails caseDetails, String authorisationToken) {
-
+        log.info("In submitInterimHearing for case id {}", caseDetails.getId());
         Map<String, Object> caseData = caseDetails.getData();
         List<InterimHearingData> interimHearingList = filterInterimHearingToProcess(caseData);
 
         List<BulkPrintDocument> documents = prepareDocumentsForPrint(caseDetails, interimHearingList, authorisationToken);
-        sendToBulkPrint(caseDetails, authorisationToken, documents);
+        sendToBulkPrint(caseDetails, caseData, authorisationToken, documents);
 
         //Need only for existing Interim Hearing
         if (caseData.get(INTERIM_HEARING_TYPE) != null) {
@@ -104,9 +102,8 @@ public class InterimHearingService {
         caseDetails.setData(caseData);
     }
 
-    private void sendToBulkPrint(CaseDetails caseDetails, String authorisationToken,
+    private void sendToBulkPrint(CaseDetails caseDetails, Map<String, Object> caseData, String authorisationToken,
                                  List<BulkPrintDocument> documents) {
-        Map<String, Object> caseData = caseDetails.getData();
         if (isPaperApplication(caseData) || !isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
         }
@@ -200,12 +197,11 @@ public class InterimHearingService {
     }
 
     private boolean isPaperApplication(Map<String, Object> caseData) {
-        return YES_VALUE.equalsIgnoreCase(Objects.toString(caseData.get(PAPER_APPLICATION)));
+        return YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(PAPER_APPLICATION)));
     }
 
     private boolean isRespondentRepresentedByASolicitor(Map<String, Object> caseData) {
-        return YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(CONSENTED_RESPONDENT_REPRESENTED)))
-            || YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(CONTESTED_RESPONDENT_REPRESENTED)));
+        return YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(CONTESTED_RESPONDENT_REPRESENTED)));
     }
 
     private boolean isApplicantSolicitorAgreeToReceiveEmails(CaseDetails caseDetails) {
@@ -295,6 +291,8 @@ public class InterimHearingService {
     }
 
     public void sendNotification(CaseDetails caseDetails) {
+        log.info("Sending email notification for case id {}", caseDetails.getId());
+
         Map<String, Object> caseData =  caseDetails.getData();
         if (!caseDataService.isPaperApplication(caseData)) {
             List<InterimHearingData> caseDataList = filterInterimHearingToProcess(caseData);
