@@ -11,10 +11,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION;
@@ -46,13 +47,19 @@ public class ManageCaseDocumentsService {
 
     private void removeDeletedFilesFromCaseData(Map<String, Object> caseData) {
 
-        Map<String, String> collectionNameOfDocument = findCollectionNameOfDocument(caseData);
+        Set<String> findRemainingApplicantAndRespondentDocumentIds =
+            mapper.convertValue(caseData.get(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION),
+                    new TypeReference<List<ContestedUploadedDocumentData>>() {
+                    }).stream().map(ContestedUploadedDocumentData::getId)
+                .collect(Collectors.toSet());
 
-        collectionNameOfDocument.forEach((key, value) -> caseData.put(value, mapper.convertValue(caseData.get(value),
-            new TypeReference<List<ContestedUploadedDocumentData>>() {
-            }).stream().filter(contestedUploadedDocumentData -> key.equals(
-            contestedUploadedDocumentData.getId()
-        )).collect(Collectors.toList())));
+        Arrays.stream(ContestedUploadCaseFilesCollectionType.values()).forEach(collection ->
+            Optional.ofNullable(caseData.get(collection.getCcdKey()))
+                .ifPresent(mapValue -> caseData.put(collection.getCcdKey(), mapper.convertValue(mapValue,
+                        new TypeReference<List<ContestedUploadedDocumentData>>() {
+                        })
+                    .stream().filter(contestedUploadedDocumentData -> findRemainingApplicantAndRespondentDocumentIds.contains(
+                        contestedUploadedDocumentData.getId())).collect(Collectors.toList()))));
     }
 
     private List<ContestedUploadedDocumentData> getAllContestedUploadDocuments(Map<String, Object> caseData) {
@@ -65,42 +72,6 @@ public class ManageCaseDocumentsService {
         }
 
         return allDocuments;
-    }
-
-    private Map<String, String> findCollectionNameOfDocument(Map<String, Object> caseData) {
-
-        Map<String, String> documentIdToCollection = new HashMap<>();
-        List<String> litigantDocumentsCollection = getAllDocumentsInCollection(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION)
-            .stream().map(ContestedUploadedDocumentData::getId).collect(Collectors.toList());
-
-        for (ContestedUploadCaseFilesCollectionType collectionType : ContestedUploadCaseFilesCollectionType.values()) {
-
-            String collection = collectionType.getCcdKey();
-
-            List<ContestedUploadedDocumentData> docsInCollection = getAllDocumentsInCollection(caseData, collection);
-
-            if (!docsInCollection.isEmpty()) {
-                for (ContestedUploadedDocumentData document : docsInCollection) {
-                    for (String litigantDocument : litigantDocumentsCollection) {
-                        if (litigantDocument.equals(document.getId())) {
-                            documentIdToCollection.put(litigantDocument, collection);
-                        }
-                    }
-                }
-            }
-        }
-
-        return documentIdToCollection;
-    }
-
-    private List<ContestedUploadedDocumentData> getAllDocumentsInCollection(Map<String, Object> caseData, String collection) {
-
-        List<ContestedUploadedDocumentData> listOfDocuments = new ArrayList<>();
-        Optional.ofNullable(caseData.get(collection))
-            .ifPresent(mapValue -> listOfDocuments.addAll(mapper.convertValue(mapValue, new TypeReference<>() {
-            })));
-
-        return listOfDocuments;
     }
 }
 
