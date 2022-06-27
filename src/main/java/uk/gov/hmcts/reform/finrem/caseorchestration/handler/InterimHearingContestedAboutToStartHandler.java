@@ -82,7 +82,7 @@ public class InterimHearingContestedAboutToStartHandler implements CallbackHandl
     @Override
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
                                                        String userAuthorisation) {
-        log.info("In Interim hearing callback");
+        log.info("In Interim hearing about to start callback");
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
@@ -98,8 +98,12 @@ public class InterimHearingContestedAboutToStartHandler implements CallbackHandl
 
         if (caseData.get(INTERIM_HEARING_TYPE) != null) {
             var collectionId = UUID.randomUUID().toString();
-            caseData.put(INTERIM_HEARING_TRACKING, setTrackingForBulkPrintAndNotification(collectionId));
+            caseData.put(INTERIM_HEARING_TRACKING, setTrackingForBulkPrintAndNotification(caseData, collectionId));
 
+            List<InterimHearingCollectionItemData> list  = Optional.ofNullable(caseData.get(INTERIM_HEARING_TRACKING))
+                .map(this::convertToTrackingDataList).orElse(new ArrayList<>());
+
+            log.info("INTERIM_HEARING_TRACKING IF {}", list);
             InterimHearingData.InterimHearingDataBuilder builder = InterimHearingData.builder();
             builder.id(collectionId);
             builder.value(loadInterimHearingData(caseData));
@@ -109,8 +113,10 @@ public class InterimHearingContestedAboutToStartHandler implements CallbackHandl
 
             loadBulkPrintDocuments(caseData);
         } else {
-            caseData.put(INTERIM_HEARING_TRACKING,
-                interimHearingList.stream().map(obj -> getTrackingObject(obj.getId())).collect(Collectors.toList()));
+            List<InterimHearingCollectionItemData> list = interimHearingList.stream()
+                .map(obj -> getTrackingObject(obj.getId())).collect(Collectors.toList());
+            log.info("INTERIM_HEARING_TRACKING ELSE {}", list);
+            caseData.put(INTERIM_HEARING_TRACKING, list);
         }
     }
 
@@ -122,8 +128,10 @@ public class InterimHearingContestedAboutToStartHandler implements CallbackHandl
         caseData.put(INTERIM_HEARING_ALL_DOCUMENT, bulkPrintDocumentsList);
     }
 
-    private List<InterimHearingCollectionItemData> setTrackingForBulkPrintAndNotification(String collectionId) {
-        List<InterimHearingCollectionItemData> list = new ArrayList<>();
+    private List<InterimHearingCollectionItemData> setTrackingForBulkPrintAndNotification(Map<String, Object> caseData,
+                                                                                          String collectionId) {
+        List<InterimHearingCollectionItemData> list  = Optional.ofNullable(caseData.get(INTERIM_HEARING_TRACKING))
+            .map(this::convertToTrackingDataList).orElse(new ArrayList<>());
         list.add(getTrackingObject(collectionId));
         return list;
     }
@@ -199,6 +207,11 @@ public class InterimHearingContestedAboutToStartHandler implements CallbackHandl
     }
 
     private List<InterimHearingBulkPrintDocumentsData> convertToBulkPrintDocumentDataList(Object object) {
+        return objectMapper.convertValue(object, new TypeReference<>() {
+        });
+    }
+
+    private List<InterimHearingCollectionItemData> convertToTrackingDataList(Object object) {
         return objectMapper.convertValue(object, new TypeReference<>() {
         });
     }
