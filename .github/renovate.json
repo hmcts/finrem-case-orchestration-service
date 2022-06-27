@@ -7,5 +7,6 @@
     "aliases": {
       "hmctspublic": "https://hmctspublic.azurecr.io/helm/v1/repo/"
     }
-  }
+  },
+  "schedule": ["before 6am on Monday"]
 }
