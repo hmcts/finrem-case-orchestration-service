@@ -82,21 +82,23 @@ public class ManageCaseDocumentsService {
 
     private void findAndRemoveMovedDocumentFromCollections(Map<String, Object> caseData, Map<String, String> documentIdsAndCollection) {
 
+        List<ContestedUploadedDocumentData> litigantDocumentsCollection = getAllDocumentsInCollection(caseData,
+            CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
         documentIdsAndCollection.forEach((documentId, collection) -> getAllDocumentsInCollection(caseData, collection)
             .forEach(contestedUploadedDocumentData -> {
                 if (collection.startsWith("app")) {
-                    caseData.put(collection, findIfDocumentExistInCollectionAfterMove(contestedUploadedDocumentData,
-                         getAllDocumentsInCollection(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION), "applicant"));
+                    caseData.put(collection, findIfDocumentExistInCollectionAfterMove(getAllDocumentsInCollection(caseData, collection), contestedUploadedDocumentData,
+                        litigantDocumentsCollection, "applicant"));
                 } else if (collection.startsWith("resp")) {
-                    caseData.put(collection, findIfDocumentExistInCollectionAfterMove(contestedUploadedDocumentData,
-                         getAllDocumentsInCollection(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION), "respondent"));
+                    caseData.put(collection, findIfDocumentExistInCollectionAfterMove(getAllDocumentsInCollection(caseData, collection), contestedUploadedDocumentData,
+                        litigantDocumentsCollection, "respondent"));
                 }
             }));
     }
 
-    private List<ContestedUploadedDocumentData> findIfDocumentExistInCollectionAfterMove(ContestedUploadedDocumentData documentToCheck,
-                                                                                         List<ContestedUploadedDocumentData>
-                                                                                             litigantDocumentCollection,
+    private List<ContestedUploadedDocumentData> findIfDocumentExistInCollectionAfterMove(List<ContestedUploadedDocumentData> collection,
+                                                                                         ContestedUploadedDocumentData documentToCheck,
+                                                                                         List<ContestedUploadedDocumentData> litigantDocumentCollection,
                                                                                          String party) {
 
         for (ContestedUploadedDocumentData document :
@@ -105,11 +107,11 @@ public class ManageCaseDocumentsService {
             if (documentToCheck.getId().equals(document.getId())
                 && !document.getUploadedCaseDocument().getCaseDocumentParty().equals(party)) {
 
-                litigantDocumentCollection.remove(documentToCheck);
+                collection.remove(documentToCheck);
             }
         }
 
-        return litigantDocumentCollection;
+        return collection;
     }
 
     private Map<String, String> findCollectionNameOfDocument(Map<String, Object> caseData) {
