@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUplo
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -40,7 +41,11 @@ public class ManageCaseDocumentsService {
 
         removeDeletedFilesFromCaseData(caseData);
 
+        Map<String, String> idToCollectionData = findCollectionNameOfDocument(caseData);
+
         contestedUploadDocumentsHelper.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+
+        findAndRemoveMovedDocumentFromCollections(caseData, idToCollectionData);
 
         return caseData;
     }
@@ -72,6 +77,84 @@ public class ManageCaseDocumentsService {
         }
 
         return allDocuments;
+    }
+
+    private void findAndRemoveMovedDocumentFromCollections(Map<String, Object> caseData, Map<String, String> documentIdsAndCollection) {
+
+        documentIdsAndCollection.forEach((documentId, collection) -> getAllDocumentsInCollection(caseData, collection)
+            .forEach(contestedUploadedDocumentData -> {
+                if (collection.startsWith("app")) {
+                    caseData.put(collection, findIfDocumentExistInCollectionAfterMove(caseData, contestedUploadedDocumentData,
+                        findOppositeCollection(collection), getAllDocumentsInCollection(caseData, collection), "applicant"));
+                } else if (collection.startsWith("resp")) {
+                    caseData.put(collection, findIfDocumentExistInCollectionAfterMove(caseData, contestedUploadedDocumentData,
+                        findOppositeCollection(collection), getAllDocumentsInCollection(caseData, collection), "respondent"));
+                }
+            }));
+    }
+
+    private List<ContestedUploadedDocumentData> findIfDocumentExistInCollectionAfterMove(Map<String, Object> caseData,
+                                                                                         ContestedUploadedDocumentData documentToCheck,
+                                                                                         String oppositeCollection,
+                                                                                         List<ContestedUploadedDocumentData> oldCollection,
+                                                                                         String party) {
+
+        for (ContestedUploadedDocumentData oppositeCollectionDoc :
+            getAllDocumentsInCollection(caseData, oppositeCollection)) {
+
+            if (documentToCheck.getId().equals(oppositeCollectionDoc.getId())
+                && !oppositeCollectionDoc.getUploadedCaseDocument().getCaseDocumentParty().equals(party)) {
+
+                oldCollection.remove(documentToCheck);
+            }
+        }
+
+        return oldCollection;
+    }
+
+    private String findOppositeCollection(String collection) {
+        if (collection.startsWith("app")) {
+            return "resp" + collection.substring(3);
+        } else if (collection.startsWith("resp")) {
+            return "app" + collection.substring(4);
+        }
+        return collection;
+    }
+
+    private Map<String, String> findCollectionNameOfDocument(Map<String, Object> caseData) {
+
+        Map<String, String> documentIdToCollection = new HashMap<>();
+        List<String> litigantDocumentsCollection = getAllDocumentsInCollection(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION)
+            .stream().map(ContestedUploadedDocumentData::getId).collect(Collectors.toList());
+
+        for (ContestedUploadCaseFilesCollectionType collectionType : ContestedUploadCaseFilesCollectionType.values()) {
+
+            String collection = collectionType.getCcdKey();
+
+            List<ContestedUploadedDocumentData> docsInCollection = getAllDocumentsInCollection(caseData, collection);
+
+            if (!docsInCollection.isEmpty()) {
+                for (ContestedUploadedDocumentData document : docsInCollection) {
+                    for (String litigantDocument : litigantDocumentsCollection) {
+                        if (litigantDocument.equals(document.getId())) {
+                            documentIdToCollection.put(litigantDocument, collection);
+                        }
+                    }
+                }
+            }
+        }
+
+        return documentIdToCollection;
+    }
+
+    private List<ContestedUploadedDocumentData> getAllDocumentsInCollection(Map<String, Object> caseData, String collection) {
+
+        List<ContestedUploadedDocumentData> listOfDocuments = new ArrayList<>();
+        Optional.ofNullable(caseData.get(collection))
+            .ifPresent(mapValue -> listOfDocuments.addAll(mapper.convertValue(mapValue, new TypeReference<>() {
+            })));
+
+        return listOfDocuments;
     }
 }
 
