@@ -147,10 +147,10 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
         data.setId("123");
         data.setUploadedCaseDocument(new ContestedUploadedDocument());
 
-        List<ContestedUploadedDocumentData> documentDetailsData = new ArrayList<>();
-        documentDetailsData.add(data);
+        List<ContestedUploadedDocumentData> litigantDocs = new ArrayList<>();
+        litigantDocs.add(createContestedUploadDocumentItem("Chronology", "respondent", "no", null));
 
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, documentDetailsData);
+        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, litigantDocs);
 
         caseDetails.getData().put(RESP_CHRONOLOGIES_STATEMENTS_COLLECTION, uploadDocumentList);
 
