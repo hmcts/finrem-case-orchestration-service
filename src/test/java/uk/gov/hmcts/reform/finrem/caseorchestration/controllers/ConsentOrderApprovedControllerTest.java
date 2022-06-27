@@ -158,7 +158,6 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenAnnexStampingDocument().thenReturn(caseDocument());
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
         when(notificationService.isApplicantSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
 
@@ -177,32 +176,6 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldUpdateStateToConsentOrderMadeAndBulkPrint_respJounryToggledOff() throws Exception {
-        doValidCaseDataSetUpNoPensionCollection();
-        whenServiceGeneratesDocument().thenReturn(caseDocument());
-        whenServiceGeneratesNotificationLetter().thenReturn(caseDocument());
-        whenAnnexStampingDocument().thenReturn(caseDocument());
-        whenStampingDocument().thenReturn(caseDocument());
-        whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
-        when(notificationService.isApplicantSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
-
-        ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE));
-
-        result.andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.state", is(CONSENT_ORDER_MADE.toString())));
-
-        verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), any());
-        verify(notificationService).sendConsentOrderAvailableCtscEmail(any());
-        verify(notificationService).sendConsentOrderAvailableEmailToApplicantSolicitor(any());
-        verify(notificationService, never()).sendConsentOrderAvailableEmailToRespondentSolicitor(any());
-    }
-
-    @Test
     public void shouldUpdateStateToConsentOrderMadeAndBulkPrint_noEmails() throws Exception {
         doValidCaseDataSetUpNoPensionCollection();
         whenServiceGeneratesDocument().thenReturn(caseDocument());
@@ -210,7 +183,6 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenAnnexStampingDocument().thenReturn(caseDocument());
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
         when(notificationService.isApplicantSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
 
