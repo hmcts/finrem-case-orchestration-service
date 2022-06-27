@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDirectionsCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
@@ -22,10 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENT_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_ADDRESS_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_NAME_KEY;
@@ -33,7 +29,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DIRECTION_DETAILS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element.element;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getFrcCourtDetailsAsOneLineAddressString;
@@ -52,6 +47,7 @@ public class ApprovedOrderNoticeOfHearingService {
     private final BulkPrintService bulkPrintService;
     private final DocumentConfiguration documentConfiguration;
     private final ObjectMapper objectMapper;
+    private final AdditionalHearingDocumentService additionalHearingDocumentService;
 
     public void submitNoticeOfHearing(CaseDetails caseDetails, String authorisationToken) {
         List<BulkPrintDocument> noticeOfHearingDocsToPrint =
@@ -70,7 +66,8 @@ public class ApprovedOrderNoticeOfHearingService {
         List<CaseDocument> hearingNoticeDocuments = Optional.ofNullable(documentHelper.getHearingNoticeDocuments(caseDetails.getData()))
             .orElse(new ArrayList<>());
         hearingNoticeDocuments.add(noticeOfHearingDocument);
-        caseDetails.getData().put(ADDITIONAL_HEARING_DOCUMENT_COLLECTION, convertToListOfAdditionalHearingDocuments(hearingNoticeDocuments));
+        hearingNoticeDocuments.forEach(document ->
+            additionalHearingDocumentService.addAdditionalHearingDocumentToCaseData(caseDetails, document));
         Optional.ofNullable(documentHelper.convertToCaseDocument(caseDetails.getData().get(LATEST_DRAFT_HEARING_ORDER)))
             .ifPresent(directionsDocuments::add);
 
@@ -163,13 +160,5 @@ public class ApprovedOrderNoticeOfHearingService {
         placeholdersMap.put("RespondentName", documentHelper.getRespondentFullNameContested(caseDetails));
 
         return placeholdersMap;
-    }
-
-    private List<Element<AdditionalHearingDocument>> convertToListOfAdditionalHearingDocuments(List<CaseDocument> documents) {
-        return documents.stream().map(document -> element(UUID.randomUUID(),
-                AdditionalHearingDocument.builder()
-                .document(document)
-                .build()))
-            .collect(Collectors.toList());
     }
 }

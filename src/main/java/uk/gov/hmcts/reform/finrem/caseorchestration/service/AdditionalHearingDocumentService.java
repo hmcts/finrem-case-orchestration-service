@@ -192,7 +192,7 @@ public class AdditionalHearingDocumentService {
         caseData.put("RespondentName", caseDataService.buildFullRespondentName(caseDetails));
     }
 
-    private void addAdditionalHearingDocumentToCaseData(CaseDetails caseDetails, CaseDocument document) {
+    protected void addAdditionalHearingDocumentToCaseData(CaseDetails caseDetails, CaseDocument document) {
         AdditionalHearingDocumentData generatedDocumentData = AdditionalHearingDocumentData.builder()
             .additionalHearingDocument(AdditionalHearingDocument.builder()
                 .document(document)

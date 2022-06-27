@@ -52,6 +52,8 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     private ObjectMapper objectMapper;
     @Autowired
     private DocumentConfiguration documentConfiguration;
+    @Autowired
+    private AdditionalHearingDocumentService additionalHearingDocumentService;
 
     @MockBean
     private BulkPrintService bulkPrintService;
