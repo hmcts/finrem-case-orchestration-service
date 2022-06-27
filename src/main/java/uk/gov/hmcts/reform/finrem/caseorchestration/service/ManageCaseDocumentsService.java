@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedUploadDocumentsHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
@@ -149,12 +150,11 @@ public class ManageCaseDocumentsService {
 
     private List<ContestedUploadedDocumentData> getAllDocumentsInCollection(Map<String, Object> caseData, String collection) {
 
-        List<ContestedUploadedDocumentData> listOfDocuments = new ArrayList<>();
-        Optional.ofNullable(caseData.get(collection))
-            .ifPresent(mapValue -> listOfDocuments.addAll(mapper.convertValue(mapValue, new TypeReference<>() {
-            })));
+        if (StringUtils.isEmpty(caseData.get(collection))) {
+            return new ArrayList<>();
+        }
 
-        return listOfDocuments;
+        return mapper.convertValue(caseData.get(collection), new TypeReference<>() {});
     }
 }
 
