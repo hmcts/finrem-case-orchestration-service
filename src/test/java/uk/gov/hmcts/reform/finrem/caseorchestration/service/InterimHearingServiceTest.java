@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocumentsData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
 
 import java.io.InputStream;
@@ -27,6 +29,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_ADDITIONAL_INFO;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_ALL_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_BEDFORDSHIRE_COURT_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_BIRMINGHAM_COURT_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_BRISTOL_COURT_LIST;
@@ -162,6 +165,12 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
         assertEquals("2010-10-10", interimHearingList.get(0).getValue().getInterimHearingDate());
         assertEquals("2020-10-10", interimHearingList.get(1).getValue().getInterimHearingDate());
         assertEquals("2030-10-10", interimHearingList.get(2).getValue().getInterimHearingDate());
+
+        List<InterimHearingBulkPrintDocumentsData> bulkPrintDocumentsList =
+            Optional.ofNullable(caseDetails.getData().get(INTERIM_HEARING_ALL_DOCUMENT))
+            .map(this::convertToBulkPrintDocumentDataList).orElse(Collections.emptyList());
+
+        assertEquals(3, bulkPrintDocumentsList.size());
     }
 
     @Test
@@ -233,5 +242,10 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private List<InterimHearingBulkPrintDocumentsData> convertToBulkPrintDocumentDataList(Object object) {
+        return objectMapper.convertValue(object, new TypeReference<>() {
+        });
     }
 }

@@ -122,23 +122,28 @@ public class InterimHearingService {
         Map<String, Object> caseData = caseDetails.getData();
         List<CaseDocument> interimDocument = prepareInterimHearingRequiredNoticeDocument(caseDetails,
             interimHearingList, authorisationToken);
+
+        List<InterimHearingBulkPrintDocumentsData> bulkPrintDocumentsList = Optional.ofNullable(caseData.get(INTERIM_HEARING_ALL_DOCUMENT))
+            .map(this::convertToBulkPrintDocumentDataList).orElse(new ArrayList<>());
+        interimDocument.forEach(doc -> bulkPrintDocumentsList.add(loadBulkPrintDocument(doc)));
+        caseData.put(INTERIM_HEARING_ALL_DOCUMENT, bulkPrintDocumentsList);
+
         List<BulkPrintDocument> documents = interimDocument.stream()
             .map(documentHelper::getCaseDocumentAsBulkPrintDocument).collect(Collectors.toList());
 
-        addUploadedDocumentsToBulkPrintList(caseData, interimHearingList, documents, authorisationToken);
+        addUploadedDocumentsToBulkPrintList(interimHearingList, documents, authorisationToken);
 
         return documents;
     }
 
-    private void addUploadedDocumentsToBulkPrintList(Map<String, Object> caseData,
-                                                     List<InterimHearingData> interimHearingList,
+    private void addUploadedDocumentsToBulkPrintList(List<InterimHearingData> interimHearingList,
                                                      List<BulkPrintDocument> documents,
                                                      String authorisationToken) {
         List<Map<String, Object>> interimCaseData = convertInterimHearingCollectionDataToMap(interimHearingList);
-        interimCaseData.forEach(interimData -> addToBulkPrintList(caseData, interimData, documents, authorisationToken));
+        interimCaseData.forEach(interimData -> addToBulkPrintList(interimData, documents, authorisationToken));
     }
 
-    private void addToBulkPrintList(Map<String, Object> caseData, Map<String, Object> interimData,
+    private void addToBulkPrintList(Map<String, Object> interimData,
                                       List<BulkPrintDocument> documents,String authorisationToken) {
         String isDocUploaded = nullToEmpty(interimData.get(INTERIM_HEARING_PROMPT_FOR_DOCUMENT));
         if ("Yes".equalsIgnoreCase(isDocUploaded)) {
@@ -146,23 +151,17 @@ public class InterimHearingService {
             CaseDocument caseDocument = documentHelper.convertToCaseDocument(interimData.get(INTERIM_HEARING_UPLOADED_DOCUMENT));
             CaseDocument additionalUploadedDocuments = genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken);
             documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(additionalUploadedDocuments));
-
-            List<InterimHearingBulkPrintDocumentsData> bulkPrintDocumentsList = Optional.ofNullable(caseData.get(INTERIM_HEARING_ALL_DOCUMENT))
-                .map(this::convertToBulkPrintDocumentDataList).orElse(new ArrayList<>());
-
-            bulkPrintDocumentsList.add(loadBulkPrintDocument(additionalUploadedDocuments));
-            caseData.put(INTERIM_HEARING_ALL_DOCUMENT, bulkPrintDocumentsList);
         }
     }
 
-    private InterimHearingBulkPrintDocumentsData loadBulkPrintDocument(CaseDocument additionalUploadedDocuments) {
+    private InterimHearingBulkPrintDocumentsData loadBulkPrintDocument(CaseDocument generatedDocument) {
 
         return InterimHearingBulkPrintDocumentsData.builder().id(UUID.randomUUID().toString())
             .value(InterimHearingBulkPrintDocument.builder()
                 .caseDocument(CaseDocument.builder()
-                    .documentUrl(additionalUploadedDocuments.getDocumentUrl())
-                    .documentFilename(additionalUploadedDocuments.getDocumentFilename())
-                    .documentBinaryUrl(additionalUploadedDocuments.getDocumentBinaryUrl())
+                    .documentUrl(generatedDocument.getDocumentUrl())
+                    .documentFilename(generatedDocument.getDocumentFilename())
+                    .documentBinaryUrl(generatedDocument.getDocumentBinaryUrl())
                 .build()).build())
             .build();
     }
