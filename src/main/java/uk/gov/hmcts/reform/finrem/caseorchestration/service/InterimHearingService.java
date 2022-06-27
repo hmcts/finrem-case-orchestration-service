@@ -121,20 +121,20 @@ public class InterimHearingService {
         List<BulkPrintDocument> documents = interimDocument.stream()
             .map(documentHelper::getCaseDocumentAsBulkPrintDocument).collect(Collectors.toList());
 
-        addUploadedDocumentsToBulkPrintList(interimHearingList, documents, authorisationToken);
+        addUploadedDocumentsToBulkPrintList(caseData, interimHearingList, documents, authorisationToken);
 
-        caseData.put(INTERIM_HEARING_ALL_DOCUMENT, interimDocument);
         return documents;
     }
 
-    private void addUploadedDocumentsToBulkPrintList(List<InterimHearingData> interimHearingList,
+    private void addUploadedDocumentsToBulkPrintList(Map<String, Object> caseData,
+                                                     List<InterimHearingData> interimHearingList,
                                                      List<BulkPrintDocument> documents,
                                                      String authorisationToken) {
         List<Map<String, Object>> interimCaseData = convertInterimHearingCollectionDataToMap(interimHearingList);
-        interimCaseData.forEach(interimData -> addToBulkPrintList(interimData, documents, authorisationToken));
+        interimCaseData.forEach(interimData -> addToBulkPrintList(caseData, interimData, documents, authorisationToken));
     }
 
-    private void addToBulkPrintList(Map<String, Object> interimData,
+    private void addToBulkPrintList(Map<String, Object> caseData, Map<String, Object> interimData,
                                       List<BulkPrintDocument> documents,String authorisationToken) {
         String isDocUploaded = nullToEmpty(interimData.get(INTERIM_HEARING_PROMPT_FOR_DOCUMENT));
         if ("Yes".equalsIgnoreCase(isDocUploaded)) {
@@ -142,6 +142,7 @@ public class InterimHearingService {
             CaseDocument caseDocument = documentHelper.convertToCaseDocument(interimData.get(INTERIM_HEARING_UPLOADED_DOCUMENT));
             CaseDocument additionalUploadedDocuments = genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken);
             documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(additionalUploadedDocuments));
+            caseData.put(INTERIM_HEARING_ALL_DOCUMENT, additionalUploadedDocuments);
         }
     }
 
