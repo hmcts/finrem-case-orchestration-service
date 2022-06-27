@@ -19,8 +19,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_CHRONOLOGIES_STATEMENTS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_FORMS_H_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_FORM_H_COLLECTION;
 
 public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
 
@@ -59,8 +61,9 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
     @Test
     public void givenCaseData_whenSetApplicantAndRespondentDocumentsCollection_thenRespondentDocumentsUploaded() {
 
-        uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "Respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "respondent", "no", null));
 
+        uploadDocumentList.get(0).setId("1");
         caseDetails.getData().put(RESP_CHRONOLOGIES_STATEMENTS_COLLECTION, uploadDocumentList);
 
         manageCaseDocumentsService.setApplicantAndRespondentDocumentsCollection(caseDetails);
@@ -77,22 +80,23 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenCaseDataManageLitigantDocuments_whenDocumentInWrongCollection_thenMoveItToRightCollection() {
+    public void givenCaseDataManageLitigantDocuments_whenDocumentInWrongCollection_thenMoveItToRightCollectionChronologiesCol() {
 
         List<ContestedUploadedDocumentData> chronologyDocs = new ArrayList<>();
 
-        chronologyDocs.add(createContestedUploadDocumentItem("Chronology", "respondent", "no", null));
         chronologyDocs.add(createContestedUploadDocumentItem("Chronology", "applicant", "no", null));
-        chronologyDocs.get(0).setId("5");
-        chronologyDocs.get(1).setId("6");
+        chronologyDocs.get(0).setId("4");
 
         List<ContestedUploadedDocumentData> litigantDocs = new ArrayList<>();
         litigantDocs.add(createContestedUploadDocumentItem("Chronology", "respondent", "no", null));
         litigantDocs.add(createContestedUploadDocumentItem("Chronology", "respondent", "no", null));
+        litigantDocs.add(createContestedUploadDocumentItem("Chronology", "respondent", "no", null));
+        litigantDocs.add(createContestedUploadDocumentItem("Chronology", "respondent", "no", null));
+
         litigantDocs.get(0).setId("1");
         litigantDocs.get(1).setId("2");
-
-
+        litigantDocs.get(2).setId("3");
+        litigantDocs.get(3).setId("4");
 
         caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, litigantDocs);
         caseDetails.getData().put(APP_CHRONOLOGIES_STATEMENTS_COLLECTION, chronologyDocs);
@@ -100,7 +104,35 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
         manageCaseDocumentsService.manageLitigantDocuments(caseDetails.getData());
 
         assertThat(getDocumentCollection(caseData, APP_CHRONOLOGIES_STATEMENTS_COLLECTION), hasSize(0));
-        assertThat(getDocumentCollection(caseData, RESP_CHRONOLOGIES_STATEMENTS_COLLECTION), hasSize(0));
+        assertThat(getDocumentCollection(caseData, RESP_CHRONOLOGIES_STATEMENTS_COLLECTION), hasSize(4));
+    }
+
+    @Test
+    public void givenCaseDataManageLitigantDocuments_whenDocumentInWrongCollection_thenMoveItToRightCollectionFormH() {
+
+        List<ContestedUploadedDocumentData> formH = new ArrayList<>();
+
+        formH.add(createContestedUploadDocumentItem("Form H", "applicant", "no", null));
+        formH.get(0).setId("4");
+
+        List<ContestedUploadedDocumentData> litigantDocs = new ArrayList<>();
+        litigantDocs.add(createContestedUploadDocumentItem("Form H", "respondent", "no", null));
+        litigantDocs.add(createContestedUploadDocumentItem("Form H", "respondent", "no", null));
+        litigantDocs.add(createContestedUploadDocumentItem("Form H", "respondent", "no", null));
+        litigantDocs.add(createContestedUploadDocumentItem("Form H", "respondent", "no", null));
+
+        litigantDocs.get(0).setId("1");
+        litigantDocs.get(1).setId("2");
+        litigantDocs.get(2).setId("3");
+        litigantDocs.get(3).setId("4");
+
+        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, litigantDocs);
+        caseDetails.getData().put(APP_FORMS_H_COLLECTION, formH);
+
+        manageCaseDocumentsService.manageLitigantDocuments(caseDetails.getData());
+
+        assertThat(getDocumentCollection(caseData, APP_FORMS_H_COLLECTION), hasSize(0));
+        assertThat(getDocumentCollection(caseData, RESP_FORM_H_COLLECTION), hasSize(4));
     }
 
     private CaseDetails populateCaseData() {
