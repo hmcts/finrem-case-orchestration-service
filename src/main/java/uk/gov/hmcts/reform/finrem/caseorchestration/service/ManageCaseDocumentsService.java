@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUplo
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -89,31 +90,37 @@ public class ManageCaseDocumentsService {
             .forEach(contestedUploadedDocumentData -> {
                 if (collection.startsWith("app")) {
                     caseData.put(collection, findIfDocumentExistInCollectionAfterMove(
-                        getAllDocumentsInCollection(caseData, collection), contestedUploadedDocumentData,
+                        caseData, getAllDocumentsInCollection(caseData, collection), contestedUploadedDocumentData,
                         litigantDocumentsCollection, "applicant"));
                 } else if (collection.startsWith("resp")) {
                     caseData.put(collection, findIfDocumentExistInCollectionAfterMove(
-                        getAllDocumentsInCollection(caseData, collection), contestedUploadedDocumentData,
+                        caseData, getAllDocumentsInCollection(caseData, collection), contestedUploadedDocumentData,
                         litigantDocumentsCollection, "respondent"));
                 }
             }));
     }
 
-    private List<ContestedUploadedDocumentData> findIfDocumentExistInCollectionAfterMove(List<ContestedUploadedDocumentData> collection,
+    private List<ContestedUploadedDocumentData> findIfDocumentExistInCollectionAfterMove(Map<String, Object> caseData,
+                                                                      List<ContestedUploadedDocumentData> collection,
                                                                       ContestedUploadedDocumentData documentToCheck,
                                                                       List<ContestedUploadedDocumentData> litigantDocumentCollection,
                                                                       String party) {
 
-        for (ContestedUploadedDocumentData document :
-            litigantDocumentCollection) {
+        for (Iterator<ContestedUploadedDocumentData> it = litigantDocumentCollection.iterator(); it.hasNext(); ) {
+
+            ContestedUploadedDocumentData document = it.next();
 
             if (documentToCheck.getId().equals(document.getId())
                 && !document.getUploadedCaseDocument().getCaseDocumentParty().equals(party)) {
 
                 collection.remove(documentToCheck);
+            } else if (documentToCheck.getId().equals(document.getId())
+                && document.getUploadedCaseDocument().getCaseDocumentParty().equals(party)) {
+                it.remove();
             }
         }
 
+        caseData.put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, litigantDocumentCollection);
         return collection;
     }
 
