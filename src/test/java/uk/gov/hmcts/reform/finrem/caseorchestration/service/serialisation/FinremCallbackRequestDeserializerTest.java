@@ -45,5 +45,7 @@ public class FinremCallbackRequestDeserializerTest {
         assertEquals(eventType, EventType.GIVE_ALLOCATION_DIRECTIONS);
         FinremCaseData caseData = callbackRequest.getCaseDetails().getCaseData();
         assertEquals(caseData.getContactDetailsWrapper().getApplicantRepresented(), YesOrNo.YES);
+        assertEquals(caseData.getRegionWrapper().getDefaultRegionWrapper()
+            .getNottinghamCourtList().getId(), "FR_s_NottinghamList_1");
     }
 }

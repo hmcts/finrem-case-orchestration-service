@@ -311,7 +311,7 @@ public final class CaseHearingFunctions {
                 .build(), Map.class);
     }
 
-    static String getCourtDetailsString() {
+    public static String getCourtDetailsString() {
         try (InputStream inputStream = CaseHearingFunctions.class.getResourceAsStream(COURT_DETAILS_JSON_PATH)) {
             return IOUtils.toString(inputStream, UTF_8);
         } catch (IOException e) {
