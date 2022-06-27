@@ -188,6 +188,7 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         List<Map<String, Object>> interimDataMap = interimHearingItems.stream()
             .map(obj -> new ObjectMapper().convertValue(obj, new TypeReference<Map<String, Object>>() {
             })).collect(Collectors.toList());
+
         interimDataMap.forEach(data -> verifyAppData(callbackRequest, data));
     }
 
@@ -202,8 +203,8 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         assertEquals(TEST_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
         assertEquals("contested", notificationRequest.getCaseType());
         assertThat("checking in loop", notificationRequest.getSelectedCourt(),
-            anyOf(is("Gloucester and Cheltenham County and Family Court"),
-                is("Croydon County Court And Family Court")));
+            anyOf(is("bristol"),
+                is("cfc")));
     }
 
     @Test
@@ -234,8 +235,8 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         assertEquals(TEST_RESP_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
         assertEquals("contested", notificationRequest.getCaseType());
         assertThat("checking in loop", notificationRequest.getSelectedCourt(),
-            anyOf(is("Gloucester and Cheltenham County and Family Court"),
-            is("Croydon County Court And Family Court")));
+            anyOf(is("bristol"),
+            is("cfc")));
     }
 
 

@@ -25,6 +25,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DORSET;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_REGION_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_LONDON_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_MIDLANDS_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_NORTHEAST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_NORTHWEST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_SOUTHEAST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_SOUTHWEST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_WALES_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENTFRC_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LANCASHIRE;
@@ -103,6 +111,111 @@ public class ContestedCourtHelper {
             default:
                 return EMPTY;
         }
+    }
+
+    public static String getSelectedInterimHearingFrc(Map<String, Object> interimHearingData) {
+        String region = (String) interimHearingData.get(INTERIM_HEARING_REGION_LIST);
+
+        if (MIDLANDS.equalsIgnoreCase(region)) {
+            return getMidlandInterimHearingFRC(interimHearingData);
+        }
+        if (LONDON.equalsIgnoreCase(region)) {
+            return getLondonInterimHearingFRC(interimHearingData);
+        }
+        if (NORTHWEST.equalsIgnoreCase(region)) {
+            return getNorthWestInterimHearingFRC(interimHearingData);
+        }
+        if (NORTHEAST.equalsIgnoreCase(region)) {
+            return getNorthEastInterimHearingFRC(interimHearingData);
+        }
+        if (SOUTHEAST.equalsIgnoreCase(region)) {
+            return getSouthEastInterimHearingFRC(interimHearingData);
+        }
+        if (SOUTHWEST.equalsIgnoreCase(region)) {
+            return getSouthWestInterimHearingFRC(interimHearingData);
+        }
+        if (WALES.equalsIgnoreCase(region)) {
+            return getWalesInterimHearingFRC(interimHearingData);
+        }
+        return EMPTY;
+    }
+
+    private static String getWalesInterimHearingFRC(Map<String, Object> interimHearingData) {
+        String walesList = (String) interimHearingData.get(INTERIM_WALES_FRC_LIST);
+        if (NEWPORT.equalsIgnoreCase(walesList)) {
+            return NEWPORT;
+        } else if (SWANSEA.equalsIgnoreCase(walesList)) {
+            return SWANSEA;
+        } else if (NORTHWALES.equalsIgnoreCase(walesList)) {
+            return NORTHWALES;
+        }
+        return EMPTY;
+    }
+
+    private static String getSouthWestInterimHearingFRC(Map<String, Object> interimHearingData) {
+        String southWestList = (String) interimHearingData.get(INTERIM_SOUTHWEST_FRC_LIST);
+        if (DEVON.equalsIgnoreCase(southWestList)) {
+            return DEVON;
+        } else if (DORSET.equalsIgnoreCase(southWestList)) {
+            return DORSET;
+        } else if (BRISTOLFRC.equalsIgnoreCase(southWestList)) {
+            return BRISTOLFRC;
+        }
+        return EMPTY;
+    }
+
+    private static String getSouthEastInterimHearingFRC(Map<String, Object> interimHearingData) {
+        String southEastList = (String) interimHearingData.get(INTERIM_SOUTHEAST_FRC_LIST);
+        if (KENT.equalsIgnoreCase(southEastList)) {
+            return KENT;
+        } else if (BEDFORDSHIRE.equalsIgnoreCase(southEastList)) {
+            return BEDFORDSHIRE;
+        } else if (THAMESVALLEY.equalsIgnoreCase(southEastList)) {
+            return THAMESVALLEY;
+        }
+        return EMPTY;
+    }
+
+    private static String getNorthEastInterimHearingFRC(Map<String, Object> interimHearingData) {
+        String northEastList = (String) interimHearingData.get(INTERIM_NORTHEAST_FRC_LIST);
+        if (CLEAVELAND.equalsIgnoreCase(northEastList)) {
+            return CLEAVELAND;
+        } else if (NWYORKSHIRE.equalsIgnoreCase(northEastList)) {
+            return NWYORKSHIRE;
+        } else if (HSYORKSHIRE.equalsIgnoreCase(northEastList)) {
+            return HSYORKSHIRE;
+        }
+        return EMPTY;
+    }
+
+    private static String getNorthWestInterimHearingFRC(Map<String, Object> interimHearingData) {
+        String northWestList = (String) interimHearingData.get(INTERIM_NORTHWEST_FRC_LIST);
+        if (LIVERPOOL.equalsIgnoreCase(northWestList)) {
+            return LIVERPOOL;
+        } else if (MANCHESTER.equalsIgnoreCase(northWestList)) {
+            return MANCHESTER;
+        } else if (LANCASHIRE.equalsIgnoreCase(northWestList)) {
+            return LANCASHIRE;
+        }
+        return EMPTY;
+    }
+
+    private static String getLondonInterimHearingFRC(Map<String, Object> interimHearingData) {
+        String londonList = (String) interimHearingData.get(INTERIM_LONDON_FRC_LIST);
+        if (CFC.equalsIgnoreCase(londonList)) {
+            return CFC;
+        }
+        return EMPTY;
+    }
+
+    private static String getMidlandInterimHearingFRC(Map<String, Object> interimHearingData) {
+        String midlandsList = (String) interimHearingData.get(INTERIM_MIDLANDS_FRC_LIST);
+        if (NOTTINGHAM.equalsIgnoreCase(midlandsList)) {
+            return NOTTINGHAM;
+        } else if (BIRMINGHAM.equalsIgnoreCase(midlandsList)) {
+            return BIRMINGHAM;
+        }
+        return EMPTY;
     }
 
     public static String getSelectedFrc(CaseDetails caseDetails) {
