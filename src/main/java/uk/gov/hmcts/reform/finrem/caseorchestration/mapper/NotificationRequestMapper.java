@@ -143,7 +143,9 @@ public class NotificationRequestMapper {
         NotificationRequest notificationRequest = getNotificationCoreData(caseDetails, solicitorCaseDataKeysWrapper);
 
         String selectedCourt = CaseHearingFunctions.getSelectedCourtIH(interimHearingData);
+        log.info("selectedCourt is {} for case ID: {}", selectedCourt, notificationRequest.getCaseReferenceNumber());
         String courtDetailsObj = (String) interimHearingData.get(selectedCourt);
+        log.info("courtDetailsObj is {} for case ID: {}", courtDetailsObj, notificationRequest.getCaseReferenceNumber());
         Map<String, Object> courtDetailsMap = new HashMap<>();
         try {
             courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), new TypeReference<>() {});
@@ -151,9 +153,10 @@ public class NotificationRequestMapper {
             log.info(je.getMessage());
         }
         Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(courtDetailsObj);
-        notificationRequest.setSelectedCourt((String) courtDetails.get(COURT_DETAILS_NAME_KEY));
+        String courtName = (String) courtDetails.get(COURT_DETAILS_NAME_KEY);
+        notificationRequest.setSelectedCourt(courtName);
 
-        log.info("selectedCourt is {} for case ID: {}", selectedCourt, notificationRequest.getCaseReferenceNumber());
+        log.info("courtName is {} for case ID: {}", courtName, notificationRequest.getCaseReferenceNumber());
 
         return notificationRequest;
     }
