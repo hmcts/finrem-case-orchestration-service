@@ -257,7 +257,7 @@ public class InterimHearingService {
 
         List<InterimHearingCollectionItemData> trackingList = Optional.ofNullable(caseData.get(INTERIM_HEARING_TRACKING))
             .map(this::convertToInterimHearingCollectionItemDataList).orElse(new ArrayList<>());
-
+        log.info("filterInterimHearingToProcess :: trackingList {}", trackingList.size());
         List<String> alreadyProcessedIds = trackingList.stream()
             .map(existingCollectionId -> existingCollectionId.getValue().getIhItemIds()).collect(Collectors.toList());
 
