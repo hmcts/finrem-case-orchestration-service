@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.InterimHearingServic
 @RequiredArgsConstructor
 public class InterimHearingContestedAboutToSubmitHandler implements CallbackHandler {
 
-    private InterimHearingService interimHearingService;
+    private final InterimHearingService interimHearingService;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -29,6 +29,7 @@ public class InterimHearingContestedAboutToSubmitHandler implements CallbackHand
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
                                                        String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        log.info("About to submit Interim hearing for case id {}", caseDetails.getId());
         interimHearingService.submitInterimHearing(caseDetails, userAuthorisation);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build();
     }
