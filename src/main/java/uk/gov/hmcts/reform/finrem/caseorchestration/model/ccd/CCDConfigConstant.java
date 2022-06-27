@@ -532,6 +532,8 @@ public class CCDConfigConstant {
     public static final String INTERIM_HEARING_PROMPT_FOR_DOCUMENT = "interimPromptForAnyDocument";
     public static final String INTERIM_HEARING_TRACKING = "iHCollectionItemIds";
 
+    public static final String INTERIM_HEARING_ALL_DOCUMENT = "interimHearingDocuments";
+
     public static final String INTERIM_HEARING_DOCUMENT = "interimHearingDirectionsDocument";
     public static final String INTERIM_HEARING_UPLOADED_DOCUMENT = "interimUploadAdditionalDocument";
 
