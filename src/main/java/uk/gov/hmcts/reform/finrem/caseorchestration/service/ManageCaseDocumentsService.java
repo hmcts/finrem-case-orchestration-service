@@ -85,30 +85,31 @@ public class ManageCaseDocumentsService {
         documentIdsAndCollection.forEach((documentId, collection) -> getAllDocumentsInCollection(caseData, collection)
             .forEach(contestedUploadedDocumentData -> {
                 if (collection.startsWith("app")) {
-                    caseData.put(collection, findIfDocumentExistInCollectionAfterMove(caseData, contestedUploadedDocumentData,
-                         getAllDocumentsInCollection(caseData, collection), "applicant"));
+                    caseData.put(collection, findIfDocumentExistInCollectionAfterMove(contestedUploadedDocumentData,
+                         getAllDocumentsInCollection(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION), "applicant"));
                 } else if (collection.startsWith("resp")) {
-                    caseData.put(collection, findIfDocumentExistInCollectionAfterMove(caseData, contestedUploadedDocumentData,
-                         getAllDocumentsInCollection(caseData, collection), "respondent"));
+                    caseData.put(collection, findIfDocumentExistInCollectionAfterMove(contestedUploadedDocumentData,
+                         getAllDocumentsInCollection(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION), "respondent"));
                 }
             }));
     }
 
-    private List<ContestedUploadedDocumentData> findIfDocumentExistInCollectionAfterMove(Map<String, Object> caseData, ContestedUploadedDocumentData documentToCheck,
-                                                                                         List<ContestedUploadedDocumentData> collectionToCheck,
+    private List<ContestedUploadedDocumentData> findIfDocumentExistInCollectionAfterMove(ContestedUploadedDocumentData documentToCheck,
+                                                                                         List<ContestedUploadedDocumentData>
+                                                                                             litigantDocumentCollection,
                                                                                          String party) {
 
         for (ContestedUploadedDocumentData document :
-            getAllDocumentsInCollection(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION)) {
+            litigantDocumentCollection) {
 
             if (documentToCheck.getId().equals(document.getId())
                 && !document.getUploadedCaseDocument().getCaseDocumentParty().equals(party)) {
 
-                collectionToCheck.remove(documentToCheck);
+                litigantDocumentCollection.remove(documentToCheck);
             }
         }
 
-        return collectionToCheck;
+        return litigantDocumentCollection;
     }
 
     private Map<String, String> findCollectionNameOfDocument(Map<String, Object> caseData) {
