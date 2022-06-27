@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocumentsData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollectionItemData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
 
@@ -25,6 +26,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_ALL_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_TRACKING;
 
@@ -81,6 +83,11 @@ public class InterimHearingContestedAboutToStartHandlerTest {
             .map(this::convertToInterimHearingDataList).orElse(new ArrayList<>());
         assertNotNull(interimHearingList);
 
+        List<InterimHearingBulkPrintDocumentsData> bulkPrintDocumentsList = Optional.ofNullable(handle.getData().get(INTERIM_HEARING_ALL_DOCUMENT))
+            .map(this::convertToBulkPrintDocumentDataList).orElse(new ArrayList<>());
+
+        assertEquals(1, bulkPrintDocumentsList.size());
+
         List<InterimHearingCollectionItemData> interimHearingCollectionItemDataList = Optional.ofNullable(handle.getData()
                 .get(INTERIM_HEARING_TRACKING))
             .map(this::convertToInterimHearingCollectionItemDataList).orElse(new ArrayList<>());
@@ -115,6 +122,11 @@ public class InterimHearingContestedAboutToStartHandlerTest {
     }
 
     private List<InterimHearingData> convertToInterimHearingDataList(Object object) {
+        return objectMapper.convertValue(object, new TypeReference<>() {
+        });
+    }
+
+    private List<InterimHearingBulkPrintDocumentsData> convertToBulkPrintDocumentDataList(Object object) {
         return objectMapper.convertValue(object, new TypeReference<>() {
         });
     }

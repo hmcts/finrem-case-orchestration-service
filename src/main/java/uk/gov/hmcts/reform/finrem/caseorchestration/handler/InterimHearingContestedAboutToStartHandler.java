@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocumentsData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollectionItemData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollectionItemIds;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
@@ -26,6 +28,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_ADDITIONAL_INFO;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_ALL_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_BEDFORDSHIRE_COURT_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_BIRMINGHAM_COURT_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_BRISTOL_COURT_LIST;
@@ -34,6 +37,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DEVON_COURT_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DORSET_COURT_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_HUMBER_COURT_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_KENT_SURREY_COURT_LIST;
@@ -102,10 +106,20 @@ public class InterimHearingContestedAboutToStartHandler implements CallbackHandl
             InterimHearingData interimHearingData = builder.build();
             interimHearingList.add(0,interimHearingData);
             caseData.put(INTERIM_HEARING_COLLECTION,interimHearingList);
+
+            loadBulkPrintDocuments(caseData);
         } else {
             caseData.put(INTERIM_HEARING_TRACKING,
                 interimHearingList.stream().map(obj -> getTrackingObject(obj.getId())).collect(Collectors.toList()));
         }
+    }
+
+    private void loadBulkPrintDocuments(Map<String, Object> caseData) {
+        List<InterimHearingBulkPrintDocumentsData> bulkPrintDocumentsList = Optional.ofNullable(caseData.get(INTERIM_HEARING_ALL_DOCUMENT))
+            .map(this::convertToBulkPrintDocumentDataList).orElse(new ArrayList<>());
+
+        bulkPrintDocumentsList.add(loadBulkPrintDocument(caseData));
+        caseData.put(INTERIM_HEARING_ALL_DOCUMENT, bulkPrintDocumentsList);
     }
 
     private List<InterimHearingCollectionItemData> setTrackingForBulkPrintAndNotification(String collectionId) {
@@ -167,7 +181,23 @@ public class InterimHearingContestedAboutToStartHandler implements CallbackHandl
             .build();
     }
 
+    private InterimHearingBulkPrintDocumentsData loadBulkPrintDocument(Map<String, Object> caseData) {
+        CaseDocument bulkPrintDocument  = convertToCaseDocument(caseData.get(INTERIM_HEARING_DOCUMENT));
+        return InterimHearingBulkPrintDocumentsData.builder().id(UUID.randomUUID().toString())
+            .value(InterimHearingBulkPrintDocument.builder()
+                .documentUrl(bulkPrintDocument.getDocumentUrl())
+                .documentFilename(bulkPrintDocument.getDocumentFilename())
+                .documentBinaryUrl(bulkPrintDocument.getDocumentBinaryUrl())
+                .build())
+            .build();
+    }
+
     private List<InterimHearingData> convertToInterimHearingDataList(Object object) {
+        return objectMapper.convertValue(object, new TypeReference<>() {
+        });
+    }
+
+    private List<InterimHearingBulkPrintDocumentsData> convertToBulkPrintDocumentDataList(Object object) {
         return objectMapper.convertValue(object, new TypeReference<>() {
         });
     }

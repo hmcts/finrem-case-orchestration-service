@@ -10,6 +10,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocumentsData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollectionItemData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItems;
@@ -23,6 +25,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
@@ -40,6 +43,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DEVON_COURT_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DORSET_COURT_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_HUMBER_COURT_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_KENT_SURREY_COURT_LIST;
@@ -142,8 +146,29 @@ public class InterimHearingService {
             CaseDocument caseDocument = documentHelper.convertToCaseDocument(interimData.get(INTERIM_HEARING_UPLOADED_DOCUMENT));
             CaseDocument additionalUploadedDocuments = genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken);
             documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(additionalUploadedDocuments));
-            caseData.put(INTERIM_HEARING_ALL_DOCUMENT, additionalUploadedDocuments);
+
+            List<InterimHearingBulkPrintDocumentsData> bulkPrintDocumentsList = Optional.ofNullable(caseData.get(INTERIM_HEARING_ALL_DOCUMENT))
+                .map(this::convertToBulkPrintDocumentDataList).orElse(new ArrayList<>());
+
+            bulkPrintDocumentsList.add(loadBulkPrintDocument(additionalUploadedDocuments));
+            caseData.put(INTERIM_HEARING_ALL_DOCUMENT, bulkPrintDocumentsList);
         }
+    }
+
+    private InterimHearingBulkPrintDocumentsData loadBulkPrintDocument(CaseDocument additionalUploadedDocuments) {
+
+        return InterimHearingBulkPrintDocumentsData.builder().id(UUID.randomUUID().toString())
+            .value(InterimHearingBulkPrintDocument.builder()
+                .documentUrl(additionalUploadedDocuments.getDocumentUrl())
+                .documentFilename(additionalUploadedDocuments.getDocumentFilename())
+                .documentBinaryUrl(additionalUploadedDocuments.getDocumentBinaryUrl())
+                .build())
+            .build();
+    }
+
+    private List<InterimHearingBulkPrintDocumentsData> convertToBulkPrintDocumentDataList(Object object) {
+        return objectMapper.convertValue(object, new TypeReference<>() {
+        });
     }
 
     private List<CaseDocument> prepareInterimHearingRequiredNoticeDocument(CaseDetails caseDetails,
@@ -222,6 +247,11 @@ public class InterimHearingService {
         });
     }
 
+    private List<InterimHearingBulkPrintDocumentsData> convertToInterimHearingDocumentDataList(Object object) {
+        return objectMapper.convertValue(object, new TypeReference<>() {
+        });
+    }
+
     public boolean isNotEmpty(String field, Map<String, Object> caseData) {
         return StringUtils.isNotEmpty(nullToEmpty(caseData.get(field)));
     }
@@ -289,6 +319,7 @@ public class InterimHearingService {
         caseData.remove(INTERIM_HEARING_ADDITIONAL_INFO);
         caseData.remove(INTERIM_HEARING_PROMPT_FOR_DOCUMENT);
         caseData.remove(INTERIM_HEARING_UPLOADED_DOCUMENT);
+        caseData.remove(INTERIM_HEARING_DOCUMENT);
     }
 
     public void sendNotification(CaseDetails caseDetails) {
