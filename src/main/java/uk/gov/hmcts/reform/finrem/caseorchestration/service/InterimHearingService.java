@@ -248,11 +248,6 @@ public class InterimHearingService {
         });
     }
 
-    private List<InterimHearingBulkPrintDocumentsData> convertToInterimHearingDocumentDataList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<>() {
-        });
-    }
-
     public boolean isNotEmpty(String field, Map<String, Object> caseData) {
         return StringUtils.isNotEmpty(nullToEmpty(caseData.get(field)));
     }
