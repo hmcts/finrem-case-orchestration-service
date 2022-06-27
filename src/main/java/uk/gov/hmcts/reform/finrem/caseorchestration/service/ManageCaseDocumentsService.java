@@ -84,22 +84,25 @@ public class ManageCaseDocumentsService {
 
         List<ContestedUploadedDocumentData> litigantDocumentsCollection = getAllDocumentsInCollection(caseData,
             CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
-        documentIdsAndCollection.forEach((documentId, collection) -> getAllDocumentsInCollection(caseData, collection)
+        documentIdsAndCollection.forEach((documentId, collection) ->
+            getAllDocumentsInCollection(caseData, collection)
             .forEach(contestedUploadedDocumentData -> {
                 if (collection.startsWith("app")) {
-                    caseData.put(collection, findIfDocumentExistInCollectionAfterMove(getAllDocumentsInCollection(caseData, collection), contestedUploadedDocumentData,
+                    caseData.put(collection, findIfDocumentExistInCollectionAfterMove(
+                        getAllDocumentsInCollection(caseData, collection), contestedUploadedDocumentData,
                         litigantDocumentsCollection, "applicant"));
                 } else if (collection.startsWith("resp")) {
-                    caseData.put(collection, findIfDocumentExistInCollectionAfterMove(getAllDocumentsInCollection(caseData, collection), contestedUploadedDocumentData,
+                    caseData.put(collection, findIfDocumentExistInCollectionAfterMove(
+                        getAllDocumentsInCollection(caseData, collection), contestedUploadedDocumentData,
                         litigantDocumentsCollection, "respondent"));
                 }
             }));
     }
 
     private List<ContestedUploadedDocumentData> findIfDocumentExistInCollectionAfterMove(List<ContestedUploadedDocumentData> collection,
-                                                                                         ContestedUploadedDocumentData documentToCheck,
-                                                                                         List<ContestedUploadedDocumentData> litigantDocumentCollection,
-                                                                                         String party) {
+                                                                      ContestedUploadedDocumentData documentToCheck,
+                                                                      List<ContestedUploadedDocumentData> litigantDocumentCollection,
+                                                                      String party) {
 
         for (ContestedUploadedDocumentData document :
             litigantDocumentCollection) {
