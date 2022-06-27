@@ -185,10 +185,11 @@ public class InterimHearingContestedAboutToStartHandler implements CallbackHandl
         CaseDocument bulkPrintDocument  = convertToCaseDocument(caseData.get(INTERIM_HEARING_DOCUMENT));
         return InterimHearingBulkPrintDocumentsData.builder().id(UUID.randomUUID().toString())
             .value(InterimHearingBulkPrintDocument.builder()
+                .caseDocument(CaseDocument.builder()
                 .documentUrl(bulkPrintDocument.getDocumentUrl())
                 .documentFilename(bulkPrintDocument.getDocumentFilename())
                 .documentBinaryUrl(bulkPrintDocument.getDocumentBinaryUrl())
-                .build())
+                .build()).build())
             .build();
     }
 

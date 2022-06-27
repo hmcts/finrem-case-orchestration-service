@@ -13,11 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class InterimHearingBulkPrintDocument {
-    @JsonProperty("document_url")
-    public String documentUrl;
-    @JsonProperty("document_filename")
-    public String documentFilename;
-    @JsonProperty("document_binary_url")
-    public String documentBinaryUrl;
+    @JsonProperty("bulkprintDocument")
+    CaseDocument caseDocument;
 }
 

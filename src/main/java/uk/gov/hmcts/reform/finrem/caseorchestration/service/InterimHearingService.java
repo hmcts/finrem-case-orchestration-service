@@ -159,10 +159,11 @@ public class InterimHearingService {
 
         return InterimHearingBulkPrintDocumentsData.builder().id(UUID.randomUUID().toString())
             .value(InterimHearingBulkPrintDocument.builder()
-                .documentUrl(additionalUploadedDocuments.getDocumentUrl())
-                .documentFilename(additionalUploadedDocuments.getDocumentFilename())
-                .documentBinaryUrl(additionalUploadedDocuments.getDocumentBinaryUrl())
-                .build())
+                .caseDocument(CaseDocument.builder()
+                    .documentUrl(additionalUploadedDocuments.getDocumentUrl())
+                    .documentFilename(additionalUploadedDocuments.getDocumentFilename())
+                    .documentBinaryUrl(additionalUploadedDocuments.getDocumentBinaryUrl())
+                .build()).build())
             .build();
     }
 
