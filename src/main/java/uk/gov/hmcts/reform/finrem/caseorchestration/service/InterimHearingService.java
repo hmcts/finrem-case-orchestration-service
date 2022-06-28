@@ -96,8 +96,10 @@ public class InterimHearingService {
         Map<String, Object> caseData = caseDetails.getData();
         List<InterimHearingData> interimHearingList = filterInterimHearingToProcess(caseData);
 
-        List<BulkPrintDocument> documents = prepareDocumentsForPrint(caseDetails, interimHearingList, authorisationToken);
-        sendToBulkPrint(caseDetails, caseData, authorisationToken, documents);
+        if (!interimHearingList.isEmpty()) {
+            List<BulkPrintDocument> documents = prepareDocumentsForPrint(caseDetails, interimHearingList, authorisationToken);
+            sendToBulkPrint(caseDetails, caseData, authorisationToken, documents);
+        }
 
         //Need only for existing Interim Hearing
         if (caseData.get(INTERIM_HEARING_TYPE) != null) {
@@ -268,7 +270,7 @@ public class InterimHearingService {
 
     private List<InterimHearingData> sortEarliestHearingFirst(Map<String, Object> caseData) {
         List<InterimHearingData> interimHearingList = Optional.ofNullable(caseData.get(INTERIM_HEARING_COLLECTION))
-            .map(this::convertToInterimHearingDataList).orElse(Collections.emptyList());
+            .map(this::convertToInterimHearingDataList).orElse(new ArrayList<>());
 
         return interimHearingList.stream()
             .sorted(Comparator.nullsLast(Comparator.comparing(e -> e.getValue().getInterimHearingDate())))
