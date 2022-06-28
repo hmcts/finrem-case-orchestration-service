@@ -331,6 +331,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
         verify(additionalHearingDocumentService).sendAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
     }
 
+    @Test
     public void generateHearingDocumentDirectionOrderMostRecentEnteredAtTheTop() throws Exception {
         requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
             .getResource("/fixtures/contested/validate-hearing-successfully.json")).toURI()));
@@ -344,7 +345,6 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.directionDetailsCollection[2].value.dateOfHearing", is("2023-10-01")));
 
         verify(additionalHearingDocumentService, times(1)).createAndStoreAdditionalHearingDocuments(any(), any());
-
     }
 }
 
