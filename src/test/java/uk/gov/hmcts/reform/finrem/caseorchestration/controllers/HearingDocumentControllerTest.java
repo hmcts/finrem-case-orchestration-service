@@ -326,7 +326,8 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
         verify(additionalHearingDocumentService).sendAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
     }
 
-    @Testpublic void generateHearingDocumentDirectionOrderMostRecentEnteredAtTheTop() throws Exception {
+    @Test
+    public void generateHearingDocumentDirectionOrderMostRecentEnteredAtTheTop() throws Exception {
         requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
             .getResource("/fixtures/contested/validate-hearing-successfully.json")).toURI()));
         mvc.perform(post(DIRECTION_ORDER_URL)
