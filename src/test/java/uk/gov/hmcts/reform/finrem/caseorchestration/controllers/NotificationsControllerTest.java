@@ -115,7 +115,8 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         notificationsController.sendConsentOrderMadeConfirmationEmail(buildCallbackRequest());
 
-        verify(notificationService).isRespondentSolicitorEmailCommunicationEnabled(any());
+        verify(notificationService, never()).sendConsentOrderMadeConfirmationEmailToApplicantSolicitor(any());
+        verify(notificationService, never()).sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(any());
     }
 
     @Test
@@ -125,7 +126,8 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         notificationsController.sendConsentOrderMadeConfirmationEmail(buildCallbackRequest());
 
-        verify(notificationService).isRespondentSolicitorEmailCommunicationEnabled(any());
+        verify(notificationService, never()).sendConsentOrderMadeConfirmationEmailToApplicantSolicitor(any());
+        verify(notificationService, never()).sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(any());
     }
 
     @Test
@@ -135,7 +137,8 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         notificationsController.sendConsentOrderMadeConfirmationEmail(buildCallbackRequest());
 
-        verify(notificationService).isRespondentSolicitorEmailCommunicationEnabled(any());
+        verify(notificationService, never()).sendConsentOrderMadeConfirmationEmailToApplicantSolicitor(any());
+        verify(notificationService, never()).sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(any());
     }
 
     @Test
@@ -155,7 +158,8 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         notificationsController.sendConsentOrderNotApprovedEmail(buildCallbackRequest());
 
-        verify(notificationService).isRespondentSolicitorEmailCommunicationEnabled(any());
+        verify(notificationService, never()).sendConsentOrderNotApprovedEmailToApplicantSolicitor(any());
+        verify(notificationService, never()).sendContestOrderNotApprovedEmailApplicant(any());
     }
 
     @Test
@@ -175,7 +179,8 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         notificationsController.sendConsentOrderAvailableEmail(buildCallbackRequest());
 
-        verify(notificationService).isRespondentSolicitorEmailCommunicationEnabled(any());
+        verify(notificationService, never()).sendConsentOrderAvailableEmailToApplicantSolicitor(any());
+        verify(notificationService, never()).sendConsentOrderAvailableEmailToRespondentSolicitor(any());
     }
 
     @Test
@@ -395,7 +400,8 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         notificationsController.sendConsentOrderNotApprovedEmail(createCallbackRequestWithFinalOrder());
 
-        verify(notificationService).isRespondentSolicitorEmailCommunicationEnabled(any());
+        verify(notificationService, never()).sendConsentOrderNotApprovedEmailToApplicantSolicitor(any());
+        verify(notificationService, never()).sendContestOrderNotApprovedEmailApplicant(any());
     }
 
     @Test
@@ -478,7 +484,9 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         notificationsController.sendGeneralOrderRaisedEmail(buildCallbackRequest());
 
-        verify(notificationService).isRespondentSolicitorEmailCommunicationEnabled(any());
+        verify(notificationService, never()).sendConsentedGeneralOrderEmailToRespondentSolicitor(any());
+        verify(notificationService, never()).sendContestedConsentGeneralOrderEmailRespondentSolicitor(any());
+        verify(notificationService, never()).sendContestedGeneralOrderEmailRespondent(any());
     }
 
     @Test
@@ -555,7 +563,8 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         notificationsController.sendContestedConsentOrderApprovedEmail(buildCallbackRequest());
 
-        verify(notificationService).isRespondentSolicitorEmailCommunicationEnabled(any());
+        verify(notificationService, never()).sendContestedConsentOrderApprovedEmailToApplicantSolicitor(any());
+        verify(notificationService, never()).sendContestedConsentOrderApprovedEmailToRespondentSolicitor(any());
     }
 
     @Test
