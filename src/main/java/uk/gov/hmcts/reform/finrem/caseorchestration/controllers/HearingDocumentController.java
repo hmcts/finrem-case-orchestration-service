@@ -89,7 +89,7 @@ public class HearingDocumentController extends BaseController {
 
         List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
 
-        if (isSolicitorEmailCommunicationEnabled(caseDetails)) {
+        if (notificationService.isSolicitorEmailCommunicationEnabled(caseDetails)) {
             CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
             if (caseDetailsBefore != null && hearingDocumentService.alreadyHadFirstHearing(caseDetailsBefore)) {
                 log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
@@ -137,7 +137,7 @@ public class HearingDocumentController extends BaseController {
         List<DirectionDetailsCollectionData> directionDetailsCollectionList = Optional.ofNullable(caseData.get(DIRECTION_DETAILS_COLLECTION_CT))
             .map(this::convertToDirectionDetailsDataList).orElse(Collections.emptyList());
 
-        if (! directionDetailsCollectionList.isEmpty()) {
+        if (!directionDetailsCollectionList.isEmpty()) {
             List<DirectionDetailsCollectionData> sortedDirectionDetailsCollectionList = directionDetailsCollectionList
                 .stream()
                 .filter(e -> (e.getDirectionDetailsCollection() != null &&  e.getDirectionDetailsCollection().getDateOfHearing() != null))
@@ -150,12 +150,5 @@ public class HearingDocumentController extends BaseController {
     private List<DirectionDetailsCollectionData> convertToDirectionDetailsDataList(Object object) {
         return objectMapper.convertValue(object, new TypeReference<>() {
         });
-    }
-
-    private boolean isSolicitorEmailCommunicationEnabled(CaseDetails caseDetails) {
-        return caseDataService.isContestedApplication(caseDetails)
-            && (!notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())
-            || !notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(caseDetails.getData())
-            || !checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails));
     }
 }
