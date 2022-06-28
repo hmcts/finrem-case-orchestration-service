@@ -119,7 +119,7 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
         litigantDocs.add(createContestedUploadDocumentItem("Chronology", "applicant", "no", null));
         litigantDocs.add(createContestedUploadDocumentItem("Chronology", "applicant", "no", null));
         litigantDocs.add(createContestedUploadDocumentItem("Chronology", "applicant", "no", null));
-        litigantDocs.add(createContestedUploadDocumentItem("Chronology", "applicant", "no", null));
+        litigantDocs.add(createContestedUploadDocumentItem("Form H", "applicant", "no", null));
 
         litigantDocs.get(0).setId("1");
         litigantDocs.get(1).setId("2");
@@ -132,7 +132,8 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
         manageCaseDocumentsService.manageLitigantDocuments(caseDetails.getData());
 
         assertThat(getDocumentCollection(caseData, RESP_CHRONOLOGIES_STATEMENTS_COLLECTION), hasSize(0));
-        assertThat(getDocumentCollection(caseData, APP_CHRONOLOGIES_STATEMENTS_COLLECTION), hasSize(4));
+        assertThat(getDocumentCollection(caseData, APP_CHRONOLOGIES_STATEMENTS_COLLECTION), hasSize(3));
+        assertThat(getDocumentCollection(caseData, APP_FORMS_H_COLLECTION), hasSize(1));
     }
 
 
@@ -148,7 +149,7 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
         litigantDocs.add(createContestedUploadDocumentItem("Form H", "respondent", "no", null));
         litigantDocs.add(createContestedUploadDocumentItem("Form H", "respondent", "no", null));
         litigantDocs.add(createContestedUploadDocumentItem("Form H", "respondent", "no", null));
-        litigantDocs.add(createContestedUploadDocumentItem("Form H", "respondent", "no", null));
+        litigantDocs.add(createContestedUploadDocumentItem("Chronology", "respondent", "no", null));
 
         litigantDocs.get(0).setId("1");
         litigantDocs.get(1).setId("2");
@@ -161,7 +162,8 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
         manageCaseDocumentsService.manageLitigantDocuments(caseDetails.getData());
 
         assertThat(getDocumentCollection(caseData, APP_FORMS_H_COLLECTION), hasSize(0));
-        assertThat(getDocumentCollection(caseData, RESP_FORM_H_COLLECTION), hasSize(4));
+        assertThat(getDocumentCollection(caseData, RESP_FORM_H_COLLECTION), hasSize(3));
+        assertThat(getDocumentCollection(caseData, RESP_CHRONOLOGIES_STATEMENTS_COLLECTION), hasSize(1));
     }
 
     @Test

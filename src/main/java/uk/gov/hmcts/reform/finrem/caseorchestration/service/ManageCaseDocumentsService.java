@@ -111,11 +111,15 @@ public class ManageCaseDocumentsService {
             ContestedUploadedDocumentData document = it.next();
 
             if (documentToCheck.getId().equals(document.getId())
-                && !document.getUploadedCaseDocument().getCaseDocumentParty().equals(party)) {
+                && (!document.getUploadedCaseDocument().getCaseDocumentParty().equals(party)
+                || !document.getUploadedCaseDocument().getCaseDocumentType()
+                .equals(documentToCheck.getUploadedCaseDocument().getCaseDocumentType()))) {
 
                 collection.remove(documentToCheck);
             } else if (documentToCheck.getId().equals(document.getId())
-                && document.getUploadedCaseDocument().getCaseDocumentParty().equals(party)) {
+                && document.getUploadedCaseDocument().getCaseDocumentParty().equals(party)
+                && document.getUploadedCaseDocument().getCaseDocumentType()
+                .equals(documentToCheck.getUploadedCaseDocument().getCaseDocumentType())) {
                 it.remove();
             }
         }
