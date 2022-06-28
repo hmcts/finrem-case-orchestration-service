@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_ADDRESS_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
@@ -28,7 +30,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_PHONE_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DIRECTION_DETAILS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NOTICE_DOCUMENT_PACK;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element.element;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getFrcCourtDetailsAsOneLineAddressString;
@@ -49,29 +53,27 @@ public class ApprovedOrderNoticeOfHearingService {
     private final ObjectMapper objectMapper;
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
 
-    public void submitNoticeOfHearing(CaseDetails caseDetails, String authorisationToken) {
-        List<BulkPrintDocument> noticeOfHearingDocsToPrint =
-            prepareHearingRequiredNoticeDocumentsForPrint(caseDetails, authorisationToken);
-        if (!noticeOfHearingDocsToPrint.isEmpty()) {
-            printDocumentPackAndSendToApplicantAndRespondent(caseDetails, authorisationToken, noticeOfHearingDocsToPrint);
-        }
-    }
-
-    private List<BulkPrintDocument> prepareHearingRequiredNoticeDocumentsForPrint(CaseDetails caseDetails,
-                                                                                  String authToken) {
-        List<CaseDocument> directionsDocuments = new ArrayList<>();
+    public void createAndStoreHearingNoticeDocumentPack(CaseDetails caseDetails,
+                                                        String authToken) {
+        List<CaseDocument> hearingNoticePack = new ArrayList<>();
 
         CaseDocument noticeOfHearingDocument = prepareHearingRequiredNoticeDocumentComplexType(caseDetails, authToken);
-        directionsDocuments.add(noticeOfHearingDocument);
-        List<CaseDocument> hearingNoticeDocuments = Optional.ofNullable(documentHelper.getHearingNoticeDocuments(caseDetails.getData()))
-            .orElse(new ArrayList<>());
-        hearingNoticeDocuments.add(noticeOfHearingDocument);
+        hearingNoticePack.add(noticeOfHearingDocument);
+        List<CaseDocument> hearingNoticeDocuments = addHearingNoticeToHearingDocumentCollection(noticeOfHearingDocument, caseDetails);
         hearingNoticeDocuments.forEach(document ->
             additionalHearingDocumentService.addAdditionalHearingDocumentToCaseData(caseDetails, document));
-        Optional.ofNullable(documentHelper.convertToCaseDocument(caseDetails.getData().get(LATEST_DRAFT_HEARING_ORDER)))
-            .ifPresent(directionsDocuments::add);
 
-        return documentHelper.getCaseDocumentsAsBulkPrintDocuments(directionsDocuments);
+        Optional.ofNullable(documentHelper.convertToCaseDocument(caseDetails.getData().get(LATEST_DRAFT_HEARING_ORDER)))
+            .ifPresent(hearingNoticePack::add);
+        caseDetails.getData().put(HEARING_NOTICE_DOCUMENT_PACK, convertHearingNoticeDocumentPackToCcdCollection(hearingNoticePack));
+    }
+
+    public void printHearingNoticePackAndSendToApplicantAndRespondent(CaseDetails caseDetails,
+                                                                      String authorisationToken) {
+        List<CaseDocument> hearingNoticePack = getHearingNoticeDocumentPackFromCaseData(caseDetails);
+        List<BulkPrintDocument> documentsToPrint = documentHelper.getCaseDocumentsAsBulkPrintDocuments(hearingNoticePack);
+        bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documentsToPrint);
+        bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documentsToPrint);
     }
 
     private CaseDocument prepareHearingRequiredNoticeDocumentComplexType(CaseDetails caseDetails, String authorisationToken) {
@@ -87,12 +89,6 @@ public class ApprovedOrderNoticeOfHearingService {
         return genericDocumentService.generateDocumentFromPlaceholdersMap(authorisationToken, mapOfLetterDetails,
             documentConfiguration.getAdditionalHearingTemplate(),
             documentConfiguration.getAdditionalHearingFileName());
-    }
-
-    private void printDocumentPackAndSendToApplicantAndRespondent(CaseDetails caseDetails, String authorisationToken,
-                                                                  List<BulkPrintDocument> documents) {
-        bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
-        bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documents);
     }
 
     private Map<String, Object> getCourtDetails(AdditionalHearingDirectionsCollection latestAdditionalHearingDirection) {
@@ -160,5 +156,30 @@ public class ApprovedOrderNoticeOfHearingService {
         placeholdersMap.put("RespondentName", documentHelper.getRespondentFullNameContested(caseDetails));
 
         return placeholdersMap;
+    }
+
+    private List<CaseDocument> addHearingNoticeToHearingDocumentCollection(CaseDocument noticeOfHearingDocument,
+                                                                           CaseDetails caseDetails) {
+        List<CaseDocument> hearingNoticeDocuments = Optional.ofNullable(documentHelper.getHearingNoticeDocuments(caseDetails.getData()))
+            .orElse(new ArrayList<>());
+        hearingNoticeDocuments.add(noticeOfHearingDocument);
+
+        return hearingNoticeDocuments;
+    }
+
+    private List<Element<CaseDocument>> convertHearingNoticeDocumentPackToCcdCollection(List<CaseDocument> hearingNoticePack) {
+        return hearingNoticePack.stream()
+            .map(document -> element(UUID.randomUUID(), document))
+            .collect(Collectors.toList());
+    }
+
+    private List<CaseDocument> getHearingNoticeDocumentPackFromCaseData(CaseDetails caseDetails) {
+        List<Element<CaseDocument>> hearingNoticePack = objectMapper.convertValue(
+            caseDetails.getData().get(HEARING_NOTICE_DOCUMENT_PACK),
+            new TypeReference<>() {});
+
+        return hearingNoticePack.stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
     }
 }

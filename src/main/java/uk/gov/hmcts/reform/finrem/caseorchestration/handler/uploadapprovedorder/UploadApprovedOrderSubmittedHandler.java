@@ -40,7 +40,7 @@ public class UploadApprovedOrderSubmittedHandler implements CallbackHandler {
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest, String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         if (isAnotherHearingToBeListed(caseDetails)) {
-            approvedOrderNoticeOfHearingService.submitNoticeOfHearing(caseDetails, userAuthorisation);
+            approvedOrderNoticeOfHearingService.printHearingNoticePackAndSendToApplicantAndRespondent(caseDetails, userAuthorisation);
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build();
     }

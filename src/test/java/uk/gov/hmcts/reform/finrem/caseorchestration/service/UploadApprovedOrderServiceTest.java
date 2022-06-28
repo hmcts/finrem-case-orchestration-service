@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDirectionsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
@@ -27,13 +28,18 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DIRECTION_DETAILS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NOTICE_DOCUMENT_PACK;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
 
 public class UploadApprovedOrderServiceTest extends BaseServiceTest {
@@ -57,6 +63,8 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
     private AdditionalHearingDocumentService additionalHearingDocumentService;
     @MockBean
     private GenericDocumentService genericDocumentService;
+    @MockBean
+    private ApprovedOrderNoticeOfHearingService approvedOrderNoticeOfHearingService;
     @Autowired
     private UploadApprovedOrderService uploadApprovedOrderService;
 
@@ -92,11 +100,13 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
         assertFalse(caseData.containsKey(CONTESTED_ORDER_APPROVED_JUDGE_TYPE));
         assertFalse(caseData.containsKey(CONTESTED_ORDER_APPROVED_JUDGE_NAME));
         assertFalse(caseData.containsKey(CONTESTED_ORDER_APPROVED_DATE));
+        assertFalse(caseData.containsKey(HEARING_NOTICE_DOCUMENT_PACK));
     }
 
     @Test
     public void givenNoExceptions_whenHandleUploadApprovedOrderAboutToSubmit_thenReturnValidatedResponse() throws JsonProcessingException {
         caseDetails.getData().put(HEARING_ORDER_COLLECTION, getDirectionOrderCollection());
+        setHearingDirectionDetailsCollection(YES_VALUE);
         uploadApprovedOrderService.handleUploadApprovedOrderAboutToSubmit(caseDetails, AUTH_TOKEN);
 
         verify(hearingOrderService, times(1))
@@ -108,6 +118,27 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
             .createAndStoreAdditionalHearingDocumentsFromApprovedOrder(AUTH_TOKEN, caseDetails);
         verify(hearingOrderService, times(1))
             .appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(caseDetails);
+        verify(approvedOrderNoticeOfHearingService, times(1))
+            .createAndStoreHearingNoticeDocumentPack(caseDetails, AUTH_TOKEN);
+    }
+
+    @Test
+    public void givenNoExceptions_whenHandleAboutToSubmitAndNoNextHearing_thenDoNotGenerateDocumentPack() {
+        caseDetails.getData().put(HEARING_ORDER_COLLECTION, getDirectionOrderCollection());
+        setHearingDirectionDetailsCollection(NO_VALUE);
+        uploadApprovedOrderService.handleUploadApprovedOrderAboutToSubmit(caseDetails, AUTH_TOKEN);
+
+        verify(hearingOrderService, times(1))
+            .updateCaseDataForLatestHearingOrderCollection(any(), any());
+        verify(genericDocumentService, times(1)).convertDocumentIfNotPdfAlready(any(), eq(AUTH_TOKEN));
+        verify(contestedOrderApprovedLetterService, times(1))
+            .generateAndStoreContestedOrderApprovedLetter(caseDetails, AUTH_TOKEN);
+        verify(additionalHearingDocumentService, times(1))
+            .createAndStoreAdditionalHearingDocumentsFromApprovedOrder(AUTH_TOKEN, caseDetails);
+        verify(hearingOrderService, times(1))
+            .appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(caseDetails);
+        verify(approvedOrderNoticeOfHearingService, never())
+            .createAndStoreHearingNoticeDocumentPack(caseDetails, AUTH_TOKEN);
     }
 
     @Test
@@ -135,5 +166,15 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
                 .documentFilename("directionOrder.pdf").documentBinaryUrl("aBinaryurl").build()).build();
 
         return List.of(Element.element(UUID.randomUUID(), directionOrder));
+    }
+
+    private void setHearingDirectionDetailsCollection(String value) {
+        caseDetails.getData().put(HEARING_DIRECTION_DETAILS_COLLECTION,
+            buildAdditionalHearingDetailsCollection(value));
+    }
+
+    private List<Element<AdditionalHearingDirectionsCollection>> buildAdditionalHearingDetailsCollection(String value) {
+        return List.of(Element.element(UUID.randomUUID(), AdditionalHearingDirectionsCollection.builder()
+            .isAnotherHearingYN(value).build()));
     }
 }
