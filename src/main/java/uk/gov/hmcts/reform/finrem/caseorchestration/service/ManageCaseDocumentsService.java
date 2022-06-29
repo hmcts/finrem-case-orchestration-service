@@ -49,6 +49,24 @@ public class ManageCaseDocumentsService {
 
         contestedUploadDocumentsHelper.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
 
+        List<ContestedUploadedDocumentData> remainingDocumentsInCollection =
+            getAllDocumentsInCollection(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        List<ContestedUploadedDocumentData> confidential = new ArrayList<>();
+
+        if (!remainingDocumentsInCollection.isEmpty()) {
+            for (Iterator<ContestedUploadedDocumentData> it = remainingDocumentsInCollection.iterator(); it.hasNext();) {
+                ContestedUploadedDocumentData document = it.next();
+                if (document.getUploadedCaseDocument().getCaseDocumentConfidential().equalsIgnoreCase("yes")) {
+                    confidential.add(document);
+                    it.remove();
+                }
+            }
+
+        }
+
+        caseData.put(ContestedUploadCaseFilesCollectionType.CONFIDENTIAL_DOCUMENTS_UPLOADED.getCcdKey(), confidential);
+        caseData.put(ContestedUploadCaseFilesCollectionType.CONTESTED_UPLOADED_DOCUMENTS.getCcdKey(), remainingDocumentsInCollection);
+
         return caseData;
     }
 
