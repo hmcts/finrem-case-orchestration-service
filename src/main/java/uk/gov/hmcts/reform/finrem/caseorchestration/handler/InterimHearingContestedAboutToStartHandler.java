@@ -15,10 +15,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingColl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollectionItemIds;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -82,8 +80,7 @@ public class InterimHearingContestedAboutToStartHandler implements CallbackHandl
 
     private List<InterimHearingCollectionItemData> setTrackingForBulkPrintAndNotification(Map<String, Object> caseData,
                                                                                           String collectionId) {
-        List<InterimHearingCollectionItemData> list  = Optional.ofNullable(caseData.get(INTERIM_HEARING_TRACKING))
-            .map(interimHearingHelper::convertToTrackingDataList).orElse(new ArrayList<>());
+        List<InterimHearingCollectionItemData> list  = interimHearingHelper.getInterimHearingTrackingList(caseData);
         list.add(getTrackingObject(collectionId));
         return list;
     }
