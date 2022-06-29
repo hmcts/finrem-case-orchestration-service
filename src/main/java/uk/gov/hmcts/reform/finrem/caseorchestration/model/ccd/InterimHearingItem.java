@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class InterimHearingItems {
+public class InterimHearingItem {
     @JsonProperty("interimHearingDate")
     public String interimHearingDate;
     @JsonProperty("interimHearingTime")

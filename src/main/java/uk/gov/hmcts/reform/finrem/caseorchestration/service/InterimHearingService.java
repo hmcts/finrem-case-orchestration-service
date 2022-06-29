@@ -9,21 +9,20 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.InterimHearingHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocumentsData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollectionItemData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItems;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -65,7 +64,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_THAMESVALLEY_COURT_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_TIME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_TIME_ESTIMATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_TRACKING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_UPLOADED_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_WALES_FRC_COURT_LIST;
@@ -89,6 +87,7 @@ public class InterimHearingService {
     private final NotificationService notificationService;
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
+    private final InterimHearingHelper interimHearingHelper;
 
     public void submitInterimHearing(CaseDetails caseDetails, String authorisationToken) {
         log.info("In submitInterimHearing for case id {}", caseDetails.getId());
@@ -124,8 +123,9 @@ public class InterimHearingService {
         List<CaseDocument> interimDocument = prepareInterimHearingRequiredNoticeDocument(caseDetails,
             interimHearingList, authorisationToken);
 
-        List<InterimHearingBulkPrintDocumentsData> bulkPrintDocumentsList = Optional.ofNullable(caseData.get(INTERIM_HEARING_ALL_DOCUMENT))
-            .map(this::convertToBulkPrintDocumentDataList).orElse(new ArrayList<>());
+        List<InterimHearingBulkPrintDocumentsData> bulkPrintDocumentsList =
+            interimHearingHelper.getInterimHearingBulkPrintDocumentList(caseData);
+
         interimDocument.forEach(doc -> bulkPrintDocumentsList.add(loadBulkPrintDocument(doc)));
         caseData.put(INTERIM_HEARING_ALL_DOCUMENT, bulkPrintDocumentsList);
 
@@ -167,11 +167,6 @@ public class InterimHearingService {
             .build();
     }
 
-    private List<InterimHearingBulkPrintDocumentsData> convertToBulkPrintDocumentDataList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<>() {
-        });
-    }
-
     private List<CaseDocument> prepareInterimHearingRequiredNoticeDocument(CaseDetails caseDetails,
                                                                      List<InterimHearingData> interimHearingList,
                                                                      String authorisationToken) {
@@ -187,7 +182,7 @@ public class InterimHearingService {
     }
 
     public List<Map<String, Object>> convertInterimHearingCollectionDataToMap(List<InterimHearingData> interimHearingList) {
-        List<InterimHearingItems> interimHearingItems
+        List<InterimHearingItem> interimHearingItems
             = interimHearingList.stream().map(InterimHearingData::getValue).collect(Collectors.toList());
         return interimHearingItems.stream()
             .map(obj -> objectMapper.convertValue(obj, new TypeReference<Map<String, Object>>() {
@@ -243,11 +238,6 @@ public class InterimHearingService {
             && !NO_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT)));
     }
 
-    private List<InterimHearingData> convertToInterimHearingDataList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<>() {
-        });
-    }
-
     public boolean isNotEmpty(String field, Map<String, Object> caseData) {
         return StringUtils.isNotEmpty(nullToEmpty(caseData.get(field)));
     }
@@ -256,8 +246,7 @@ public class InterimHearingService {
         List<InterimHearingData> sortedInterimHearingList = sortEarliestHearingFirst(caseData);
         caseData.put(INTERIM_HEARING_COLLECTION, sortedInterimHearingList);
 
-        List<InterimHearingCollectionItemData> trackingList = Optional.ofNullable(caseData.get(INTERIM_HEARING_TRACKING))
-            .map(this::convertToInterimHearingCollectionItemDataList).orElse(new ArrayList<>());
+        List<InterimHearingCollectionItemData> trackingList = interimHearingHelper.getInterimHearingTrackingList(caseData);
         log.info("filterInterimHearingToProcess :: trackingList {}", trackingList.size());
         List<String> alreadyProcessedIds = trackingList.stream()
             .map(existingCollectionId -> existingCollectionId.getValue().getIhItemIds()).collect(Collectors.toList());
@@ -268,17 +257,10 @@ public class InterimHearingService {
     }
 
     private List<InterimHearingData> sortEarliestHearingFirst(Map<String, Object> caseData) {
-        List<InterimHearingData> interimHearingList = Optional.ofNullable(caseData.get(INTERIM_HEARING_COLLECTION))
-            .map(this::convertToInterimHearingDataList).orElse(new ArrayList<>());
-
+        List<InterimHearingData> interimHearingList = interimHearingHelper.isThereAnExistingInterimHearing(caseData);
         return interimHearingList.stream()
             .sorted(Comparator.nullsLast(Comparator.comparing(e -> e.getValue().getInterimHearingDate())))
             .collect(Collectors.toList());
-    }
-
-    private List<InterimHearingCollectionItemData> convertToInterimHearingCollectionItemDataList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<>() {
-        });
     }
 
     private void removeNonCollectionInterimData(Map<String, Object> caseData) {

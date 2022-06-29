@@ -16,5 +16,5 @@ public class InterimHearingData {
     @JsonProperty("id")
     private String id;
     @JsonProperty("value")
-    private InterimHearingItems value;
+    private InterimHearingItem value;
 }

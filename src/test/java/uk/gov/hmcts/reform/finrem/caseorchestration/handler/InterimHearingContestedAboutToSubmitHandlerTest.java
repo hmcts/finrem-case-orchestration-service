@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -10,16 +10,15 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.InterimHearingHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InterimHearingService;
 
 import java.io.InputStream;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -33,7 +32,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_BRISTOL_COURT_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_CFC_COURT_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_CLEAVELAND_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DEVON_COURT_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DORSET_COURT_LIST;
@@ -70,9 +68,16 @@ public class InterimHearingContestedAboutToSubmitHandlerTest {
     @Mock
     private InterimHearingService interimHearingService;
 
+    private InterimHearingHelper interimHearingHelper;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
     private static final String AUTH_TOKEN = "tokien:)";
     private static final String TEST_JSON = "/fixtures/contested/interim-hearing-two-collection.json";
+
+    @Before
+    public void setup() {
+        interimHearingHelper = new InterimHearingHelper(objectMapper);
+    }
 
     @Test
     public void canHandle() {
@@ -108,15 +113,14 @@ public class InterimHearingContestedAboutToSubmitHandlerTest {
         AboutToStartOrSubmitCallbackResponse handle =
             interimHearingContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        Map<String, Object> data = handle.getData();
-        List<InterimHearingData> interimHearingList = Optional.ofNullable(data.get(INTERIM_HEARING_COLLECTION))
-            .map(this::convertToInterimHearingDataList).orElse(Collections.emptyList());
+        Map<String, Object> caseData = handle.getData();
+        List<InterimHearingData> interimHearingList = interimHearingHelper.isThereAnExistingInterimHearing(caseData);
 
         assertEquals("2000-10-10", interimHearingList.get(0).getValue().getInterimHearingDate());
         assertEquals("2040-10-10", interimHearingList.get(1).getValue().getInterimHearingDate());
 
         verify(interimHearingService).submitInterimHearing(any(), any());
-        verifyNonCollectionData(data);
+        verifyNonCollectionData(caseData);
     }
 
     private void verifyNonCollectionData(Map<String, Object> data) {
@@ -161,10 +165,5 @@ public class InterimHearingContestedAboutToSubmitHandlerTest {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private List<InterimHearingData> convertToInterimHearingDataList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<>() {
-        });
     }
 }

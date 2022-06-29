@@ -21,7 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItems;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
@@ -1160,7 +1160,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         List<InterimHearingData> interimHearingList = Optional.ofNullable(caseData.get(INTERIM_HEARING_COLLECTION))
             .map(this::convertToInterimHearingDataList).orElse(Collections.emptyList());
 
-        List<InterimHearingItems> interimHearingItems
+        List<InterimHearingItem> interimHearingItems
             = interimHearingList.stream().map(InterimHearingData::getValue).collect(Collectors.toList());
 
         List<Map<String, Object>> interimDataMap = interimHearingItems.stream()
@@ -1187,7 +1187,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         List<InterimHearingData> interimHearingList = Optional.ofNullable(caseData.get(INTERIM_HEARING_COLLECTION))
             .map(this::convertToInterimHearingDataList).orElse(Collections.emptyList());
 
-        List<InterimHearingItems> interimHearingItems
+        List<InterimHearingItem> interimHearingItems
             = interimHearingList.stream().map(InterimHearingData::getValue).collect(Collectors.toList());
 
         List<Map<String, Object>> interimDataMap = interimHearingItems.stream()

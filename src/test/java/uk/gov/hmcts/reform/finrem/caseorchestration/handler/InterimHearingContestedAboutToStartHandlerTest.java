@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,6 +9,8 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.InterimHearingHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.InterimHearingItemMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocumentsData;
@@ -17,24 +18,23 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingColl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_ALL_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_TRACKING;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InterimHearingContestedAboutToStartHandlerTest {
 
     private InterimHearingContestedAboutToStartHandler interimHearingContestedAboutToStartHandler;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private ObjectMapper objectMapper;
+    private InterimHearingHelper interimHearingHelper;
+
     public static final String AUTH_TOKEN = "tokien:)";
 
     private static final String CONTESTED_INTERIM_HEARING_JSON = "/fixtures/contested/interim-hearing.json";
@@ -45,7 +45,11 @@ public class InterimHearingContestedAboutToStartHandlerTest {
 
     @Before
     public void setup() {
-        interimHearingContestedAboutToStartHandler  = new InterimHearingContestedAboutToStartHandler(objectMapper);
+        objectMapper = new ObjectMapper();
+        interimHearingHelper = new InterimHearingHelper(objectMapper);
+        InterimHearingItemMapper interimHearingItemMapper = new InterimHearingItemMapper(interimHearingHelper);
+        interimHearingContestedAboutToStartHandler  =
+            new InterimHearingContestedAboutToStartHandler(interimHearingHelper, interimHearingItemMapper);
     }
 
     @Test
@@ -80,56 +84,48 @@ public class InterimHearingContestedAboutToStartHandlerTest {
     public void givenCase_WhenInterimHearingPresent_ThenMigrateToInterimHearingCollection() {
         CallbackRequest callbackRequest = buildCallbackRequest(CONTESTED_INTERIM_HEARING_JSON);
         AboutToStartOrSubmitCallbackResponse handle = interimHearingContestedAboutToStartHandler.handle(callbackRequest, AUTH_TOKEN);
+        Map<String, Object> caseData = handle.getData();
 
-        List<InterimHearingData> interimHearingList = Optional.ofNullable(handle.getData().get(INTERIM_HEARING_COLLECTION))
-            .map(this::convertToInterimHearingDataList).orElse(new ArrayList<>());
+        List<InterimHearingData> interimHearingList = interimHearingHelper.isThereAnExistingInterimHearing(caseData);
         assertNotNull(interimHearingList);
 
-        List<InterimHearingBulkPrintDocumentsData> bulkPrintDocumentsList = Optional.ofNullable(handle.getData().get(INTERIM_HEARING_ALL_DOCUMENT))
-            .map(this::convertToBulkPrintDocumentDataList).orElse(new ArrayList<>());
+        List<InterimHearingBulkPrintDocumentsData> bulkPrintDocumentsList =
+            interimHearingHelper.getInterimHearingBulkPrintDocumentList(caseData);
 
         assertEquals(1, bulkPrintDocumentsList.size());
 
-        List<InterimHearingCollectionItemData> interimHearingCollectionItemDataList = Optional.ofNullable(handle.getData()
-                .get(INTERIM_HEARING_TRACKING))
-            .map(this::convertToInterimHearingCollectionItemDataList).orElse(new ArrayList<>());
+        List<InterimHearingCollectionItemData> trackingList = interimHearingHelper.getInterimHearingTrackingList(caseData);
 
-        assertEquals(interimHearingList.get(0).getId(), interimHearingCollectionItemDataList.get(0).getValue().getIhItemIds());
+        assertEquals(interimHearingList.get(0).getId(), trackingList.get(0).getValue().getIhItemIds());
     }
 
     @Test
     public void givenCase_WhenMigrateToInterimHearingCollectionButNoUploadedDocAndNoBulkPrintDoc_ThenItShouldMigratedSuccessfully() {
         CallbackRequest callbackRequest = buildCallbackRequest(TEST_NEW_JSON_NO_UPLOADED_DOC);
         AboutToStartOrSubmitCallbackResponse handle = interimHearingContestedAboutToStartHandler.handle(callbackRequest, AUTH_TOKEN);
+        Map<String, Object> caseData = handle.getData();
 
-        List<InterimHearingData> interimHearingList = Optional.ofNullable(handle.getData().get(INTERIM_HEARING_COLLECTION))
-            .map(this::convertToInterimHearingDataList).orElse(new ArrayList<>());
+        final List<InterimHearingData> interimHearingList = interimHearingHelper.isThereAnExistingInterimHearing(caseData);
         assertNotNull(interimHearingList);
 
-        List<InterimHearingBulkPrintDocumentsData> bulkPrintDocumentsList = Optional.ofNullable(handle.getData().get(INTERIM_HEARING_ALL_DOCUMENT))
-            .map(this::convertToBulkPrintDocumentDataList).orElse(new ArrayList<>());
-
+        final List<InterimHearingBulkPrintDocumentsData> bulkPrintDocumentsList =
+            interimHearingHelper.getInterimHearingBulkPrintDocumentList(caseData);
         assertEquals(1, bulkPrintDocumentsList.size());
 
-        List<InterimHearingCollectionItemData> interimHearingCollectionItemDataList = Optional.ofNullable(handle.getData()
-                .get(INTERIM_HEARING_TRACKING))
-            .map(this::convertToInterimHearingCollectionItemDataList).orElse(new ArrayList<>());
-
-        assertEquals(interimHearingList.get(0).getId(), interimHearingCollectionItemDataList.get(0).getValue().getIhItemIds());
+        final List<InterimHearingCollectionItemData> trackingList = interimHearingHelper.getInterimHearingTrackingList(caseData);
+        assertEquals(interimHearingList.get(0).getId(), trackingList.get(0).getValue().getIhItemIds());
     }
 
     @Test
     public void givenCase_WhenInterimHearingPresent_ThenNothingToMigrateInInterimHearingCollection() {
         CallbackRequest callbackRequest = buildCallbackRequest(TEST_NEW_JSON);
         AboutToStartOrSubmitCallbackResponse handle = interimHearingContestedAboutToStartHandler.handle(callbackRequest, AUTH_TOKEN);
+        Map<String, Object> caseData = handle.getData();
 
-        List<InterimHearingData> interimHearingList = Optional.ofNullable(handle.getData().get(INTERIM_HEARING_COLLECTION))
-            .map(this::convertToInterimHearingDataList).orElse(new ArrayList<>());
+        List<InterimHearingData> interimHearingList = interimHearingHelper.isThereAnExistingInterimHearing(caseData);
         assertNotNull(interimHearingList);
 
-        List<InterimHearingCollectionItemData> trackingList = Optional.ofNullable(handle.getData()
-                .get(INTERIM_HEARING_TRACKING))
-            .map(this::convertToInterimHearingCollectionItemDataList).orElse(new ArrayList<>());
+        List<InterimHearingCollectionItemData> trackingList = interimHearingHelper.getInterimHearingTrackingList(caseData);
 
         assertThat(interimHearingList, is(Collections.emptyList()));
         assertThat(trackingList, is(Collections.emptyList()));
@@ -142,20 +138,5 @@ public class InterimHearingContestedAboutToStartHandlerTest {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private List<InterimHearingData> convertToInterimHearingDataList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<>() {
-        });
-    }
-
-    private List<InterimHearingBulkPrintDocumentsData> convertToBulkPrintDocumentDataList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<>() {
-        });
-    }
-
-    private List<InterimHearingCollectionItemData> convertToInterimHearingCollectionItemDataList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<>() {
-        });
     }
 }
