@@ -10,7 +10,7 @@ public enum EventType {
     SEND_ORDER("FR_sendOrder"),
     PREPARE_FOR_HEARING("FR_prepareForHearing"),
     CLOSE("FR_close"),
-    MANAGE_LITIGANT_DOCUMENT("FR_manageLitigantDocument"),
+    MANAGE_CASE_DOCUMENT("FR_manageCaseDocument"),
     NONE("");
 
     private final String ccdType;

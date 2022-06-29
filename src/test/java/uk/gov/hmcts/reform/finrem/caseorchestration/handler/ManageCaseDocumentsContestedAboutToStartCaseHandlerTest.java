@@ -36,14 +36,14 @@ public class ManageCaseDocumentsContestedAboutToStartCaseHandlerTest {
     @Test
     public void givenACcdCallbackContestedCase_WhenAnAboutToStartEventManageCaseDocuments_thenHandlerCanHandle() {
         assertThat(manageCaseDocumentsAboutToStartCaseHandler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.MANAGE_LITIGANT_DOCUMENT),
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.MANAGE_CASE_DOCUMENT),
             is(true));
     }
 
     @Test
     public void givenACcdCallbackConsentedCase_WhenAnAboutToStartEventManageCaseDocuments_thenHandlerCanNotHandle() {
         assertThat(manageCaseDocumentsAboutToStartCaseHandler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.MANAGE_LITIGANT_DOCUMENT),
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.MANAGE_CASE_DOCUMENT),
             is(false));
     }
 
