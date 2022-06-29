@@ -48,7 +48,7 @@ public class InterimHearingContestedSubmittedHandlerTest {
     }
 
     @Test
-    public void canNotHandle() {
+    public void canNotHandleWrongCaseType() {
         assertThat(interimHearingContestedSubmittedHandler
                 .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.INTERIM_HEARING),
             is(false));
@@ -69,7 +69,7 @@ public class InterimHearingContestedSubmittedHandlerTest {
     }
 
     @Test
-    public void handle() {
+    public void givenContestedCase_WhenPartiesNeedToNotify_ThenItShouldSendNotificaiton() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         AboutToStartOrSubmitCallbackResponse handle =
             interimHearingContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);

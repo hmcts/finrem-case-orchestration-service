@@ -98,12 +98,10 @@ public class InterimHearingContestedAboutToStartHandler implements CallbackHandl
 
         if (caseData.get(INTERIM_HEARING_TYPE) != null) {
             var collectionId = UUID.randomUUID().toString();
-            caseData.put(INTERIM_HEARING_TRACKING, setTrackingForBulkPrintAndNotification(caseData, collectionId));
+            List<InterimHearingCollectionItemData> trackingList = setTrackingForBulkPrintAndNotification(caseData, collectionId);
+            caseData.put(INTERIM_HEARING_TRACKING, trackingList);
 
-            List<InterimHearingCollectionItemData> list  = Optional.ofNullable(caseData.get(INTERIM_HEARING_TRACKING))
-                .map(this::convertToTrackingDataList).orElse(new ArrayList<>());
-
-            log.info("INTERIM_HEARING_TRACKING IF {}", list);
+            log.info("INTERIM_HEARING_TRACKING IF {}", trackingList);
             InterimHearingData.InterimHearingDataBuilder builder = InterimHearingData.builder();
             builder.id(collectionId);
             builder.value(loadInterimHearingData(caseData));

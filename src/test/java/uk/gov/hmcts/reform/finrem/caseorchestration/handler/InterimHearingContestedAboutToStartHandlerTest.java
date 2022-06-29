@@ -75,7 +75,7 @@ public class InterimHearingContestedAboutToStartHandlerTest {
     }
 
     @Test
-    public void handleWhenExistingInterimHearingPresent() {
+    public void givenCase_WhenInterimHearingPresent_ThenMigrateToInterimHearingCollection() {
         CallbackRequest callbackRequest = buildCallbackRequest(CONTESTED_INTERIM_HEARING_JSON);
         AboutToStartOrSubmitCallbackResponse handle = interimHearingContestedAboutToStartHandler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -96,7 +96,7 @@ public class InterimHearingContestedAboutToStartHandlerTest {
     }
 
     @Test
-    public void handleWhenThereIsNoExistingInterimHearingPresent() {
+    public void givenCase_WhenInterimHearingPresent_ThenNothingToMigrateInInterimHearingCollection() {
         CallbackRequest callbackRequest = buildCallbackRequest(TEST_NEW_JSON);
         AboutToStartOrSubmitCallbackResponse handle = interimHearingContestedAboutToStartHandler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -104,12 +104,12 @@ public class InterimHearingContestedAboutToStartHandlerTest {
             .map(this::convertToInterimHearingDataList).orElse(new ArrayList<>());
         assertNotNull(interimHearingList);
 
-        List<InterimHearingCollectionItemData> interimHearingCollectionItemDataList = Optional.ofNullable(handle.getData()
+        List<InterimHearingCollectionItemData> trackingList = Optional.ofNullable(handle.getData()
                 .get(INTERIM_HEARING_TRACKING))
             .map(this::convertToInterimHearingCollectionItemDataList).orElse(new ArrayList<>());
 
         assertThat(interimHearingList, is(Collections.emptyList()));
-        assertThat(interimHearingCollectionItemDataList, is(Collections.emptyList()));
+        assertThat(trackingList, is(Collections.emptyList()));
     }
 
     private CallbackRequest buildCallbackRequest(final String path)  {

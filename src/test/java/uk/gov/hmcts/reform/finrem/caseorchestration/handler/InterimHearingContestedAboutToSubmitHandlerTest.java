@@ -82,7 +82,7 @@ public class InterimHearingContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void canNotHandle() {
+    public void canNotHandleWrongCaseType() {
         assertThat(interimHearingContestedAboutToSubmitHandler
                 .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.INTERIM_HEARING),
             is(false));
@@ -103,7 +103,7 @@ public class InterimHearingContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void handle() {
+    public void givenContestedCase_WhenMultipleInterimHearing_ThenHearingsShouldBePresentInChronologicalOrder() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         AboutToStartOrSubmitCallbackResponse handle =
             interimHearingContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);

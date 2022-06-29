@@ -90,7 +90,7 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
 
 
     @Test
-    public void submitInterimHearingOneNewOneExisting() {
+    public void givenContestedPaperCase_WhenOneNewHearingAddedToExistingCase_ThenItShouldSendOnlyNewHEaringDetailsToBulkPrint() {
         CallbackRequest callbackRequest = buildCallbackRequest(TEST_JSON);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
@@ -108,6 +108,7 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
         assertEquals("2000-10-10", interimHearingList.get(0).getValue().getInterimHearingDate());
         assertEquals("2040-10-10", interimHearingList.get(1).getValue().getInterimHearingDate());
         verifyNonCollectionData(data);
+        assertEquals(2, interimHearingList.size());
     }
 
     private void verifyNonCollectionData(Map<String, Object> data) {
@@ -148,7 +149,7 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
     }
 
     @Test
-    public void submitInterimHearingThreeNewOne() {
+    public void givenContestedPaperCase_WhenMultipleHearingAdded_ThenItShouldSendAllToBulkPrint() {
         CallbackRequest callbackRequest = buildCallbackRequest(TEST_NEW_JSON);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
@@ -174,7 +175,7 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
     }
 
     @Test
-    public void submitInterimHearingThreeNewOneNonPaper() {
+    public void givenContestedMultipleHearing_WhenNoConsentToEmail_ThenItShouldSendAllToBulkPrint() {
         CallbackRequest callbackRequest = buildCallbackRequest(TEST_NEW_JSON);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         caseDetails.getData().put("paperApplication", "No");
@@ -199,7 +200,7 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
 
 
     @Test
-    public void willNotSendNotificationWhenPaperCase() {
+    public void givenContestedPaperCase_WhenPaperCase_ThenItShouldNotSendNotificaton() {
         CallbackRequest callbackRequest = buildCallbackRequest(TEST_NEW_JSON);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         caseDetails.getData().put("paperApplication", "Yes");
@@ -217,7 +218,7 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
     }
 
     @Test
-    public void willSendNotificationWhenNonPaperCase() {
+    public void givenContestedNotPaperCase_WhenPaperCase_ThenItShouldSendNotificaton() {
         CallbackRequest callbackRequest = buildCallbackRequest(TEST_NEW_JSON);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         caseDetails.getData().put("paperApplication", "No");
