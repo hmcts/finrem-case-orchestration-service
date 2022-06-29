@@ -39,6 +39,8 @@ public class InterimHearingContestedAboutToStartHandlerTest {
 
     private static final String CONTESTED_INTERIM_HEARING_JSON = "/fixtures/contested/interim-hearing.json";
     private static final String TEST_NEW_JSON = "/fixtures/contested/interim-hearing-with-no-existing-hearing.json";
+    private static final String TEST_NEW_JSON_NO_UPLOADED_DOC = "/fixtures/contested/interim-hearing-nouploaded-doc.json";
+
 
 
     @Before
@@ -77,6 +79,27 @@ public class InterimHearingContestedAboutToStartHandlerTest {
     @Test
     public void givenCase_WhenInterimHearingPresent_ThenMigrateToInterimHearingCollection() {
         CallbackRequest callbackRequest = buildCallbackRequest(CONTESTED_INTERIM_HEARING_JSON);
+        AboutToStartOrSubmitCallbackResponse handle = interimHearingContestedAboutToStartHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        List<InterimHearingData> interimHearingList = Optional.ofNullable(handle.getData().get(INTERIM_HEARING_COLLECTION))
+            .map(this::convertToInterimHearingDataList).orElse(new ArrayList<>());
+        assertNotNull(interimHearingList);
+
+        List<InterimHearingBulkPrintDocumentsData> bulkPrintDocumentsList = Optional.ofNullable(handle.getData().get(INTERIM_HEARING_ALL_DOCUMENT))
+            .map(this::convertToBulkPrintDocumentDataList).orElse(new ArrayList<>());
+
+        assertEquals(1, bulkPrintDocumentsList.size());
+
+        List<InterimHearingCollectionItemData> interimHearingCollectionItemDataList = Optional.ofNullable(handle.getData()
+                .get(INTERIM_HEARING_TRACKING))
+            .map(this::convertToInterimHearingCollectionItemDataList).orElse(new ArrayList<>());
+
+        assertEquals(interimHearingList.get(0).getId(), interimHearingCollectionItemDataList.get(0).getValue().getIhItemIds());
+    }
+
+    @Test
+    public void givenCase_WhenMigrateToInterimHearingCollectionButNoUploadedDocAndNoBulkPrintDoc_ThenItShouldMigratedSuccessfully() {
+        CallbackRequest callbackRequest = buildCallbackRequest(TEST_NEW_JSON_NO_UPLOADED_DOC);
         AboutToStartOrSubmitCallbackResponse handle = interimHearingContestedAboutToStartHandler.handle(callbackRequest, AUTH_TOKEN);
 
         List<InterimHearingData> interimHearingList = Optional.ofNullable(handle.getData().get(INTERIM_HEARING_COLLECTION))

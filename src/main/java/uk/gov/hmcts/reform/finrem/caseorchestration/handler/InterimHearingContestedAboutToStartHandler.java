@@ -179,24 +179,30 @@ public class InterimHearingContestedAboutToStartHandler implements CallbackHandl
     }
 
     private InterimUploadAdditionalDocument loadInterimUploadedDocument(Map<String, Object> caseData) {
-        CaseDocument interimUploadAdditionalDocument  = convertToCaseDocument(caseData.get(INTERIM_HEARING_UPLOADED_DOCUMENT));
-        return InterimUploadAdditionalDocument.builder()
-            .documentUrl(interimUploadAdditionalDocument.getDocumentUrl())
-            .documentFilename(interimUploadAdditionalDocument.getDocumentFilename())
-            .documentBinaryUrl(interimUploadAdditionalDocument.getDocumentBinaryUrl())
-            .build();
+        if (caseData.get(INTERIM_HEARING_UPLOADED_DOCUMENT) != null) {
+            CaseDocument interimUploadAdditionalDocument  = convertToCaseDocument(caseData.get(INTERIM_HEARING_UPLOADED_DOCUMENT));
+            return InterimUploadAdditionalDocument.builder()
+                .documentUrl(interimUploadAdditionalDocument.getDocumentUrl())
+                .documentFilename(interimUploadAdditionalDocument.getDocumentFilename())
+                .documentBinaryUrl(interimUploadAdditionalDocument.getDocumentBinaryUrl())
+                .build();
+        }
+        return null;
     }
 
     private InterimHearingBulkPrintDocumentsData loadBulkPrintDocument(Map<String, Object> caseData) {
-        CaseDocument bulkPrintDocument  = convertToCaseDocument(caseData.get(INTERIM_HEARING_DOCUMENT));
-        return InterimHearingBulkPrintDocumentsData.builder().id(UUID.randomUUID().toString())
-            .value(InterimHearingBulkPrintDocument.builder()
-                .caseDocument(CaseDocument.builder()
-                .documentUrl(bulkPrintDocument.getDocumentUrl())
-                .documentFilename(bulkPrintDocument.getDocumentFilename())
-                .documentBinaryUrl(bulkPrintDocument.getDocumentBinaryUrl())
-                .build()).build())
-            .build();
+        if (caseData.get(INTERIM_HEARING_DOCUMENT) != null) {
+            CaseDocument bulkPrintDocument = convertToCaseDocument(caseData.get(INTERIM_HEARING_DOCUMENT));
+            return InterimHearingBulkPrintDocumentsData.builder().id(UUID.randomUUID().toString())
+                .value(InterimHearingBulkPrintDocument.builder()
+                    .caseDocument(CaseDocument.builder()
+                        .documentUrl(bulkPrintDocument.getDocumentUrl())
+                        .documentFilename(bulkPrintDocument.getDocumentFilename())
+                        .documentBinaryUrl(bulkPrintDocument.getDocumentBinaryUrl())
+                        .build()).build())
+                .build();
+        }
+        return null;
     }
 
     private List<InterimHearingData> convertToInterimHearingDataList(Object object) {
