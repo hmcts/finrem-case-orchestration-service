@@ -9,6 +9,7 @@ public enum EventType {
 
     SEND_ORDER("FR_sendOrder"),
     PREPARE_FOR_HEARING("FR_prepareForHearing"),
+    UPLOAD_CASE_FILES("FR_uploadCaseFiles"),
     CLOSE("FR_close"),
     MANAGE_CASE_DOCUMENTS("FR_manageCaseDocuments"),
     NONE("");
