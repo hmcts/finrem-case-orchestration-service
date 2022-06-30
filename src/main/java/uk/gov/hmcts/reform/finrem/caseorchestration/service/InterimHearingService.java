@@ -20,7 +20,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocu
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -89,10 +91,11 @@ public class InterimHearingService {
     private final ObjectMapper objectMapper;
     private final InterimHearingHelper interimHearingHelper;
 
-    public void submitInterimHearing(CaseDetails caseDetails, String authorisationToken) {
+    public void submitInterimHearing(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authorisationToken) {
         log.info("In submitInterimHearing for case id {}", caseDetails.getId());
         Map<String, Object> caseData = caseDetails.getData();
-        List<InterimHearingData> interimHearingList = filterInterimHearingToProcess(caseData);
+        Map<String, Object> caseDataBefore = caseDetailsBefore.getData();
+        List<InterimHearingData> interimHearingList = filterInterimHearingToProcess(caseData, caseDataBefore);
 
         if (!interimHearingList.isEmpty()) {
             List<BulkPrintDocument> documents = prepareDocumentsForPrint(caseDetails, interimHearingList, authorisationToken);
@@ -242,18 +245,54 @@ public class InterimHearingService {
         return StringUtils.isNotEmpty(nullToEmpty(caseData.get(field)));
     }
 
-    public List<InterimHearingData> filterInterimHearingToProcess(Map<String, Object> caseData) {
+    public List<InterimHearingData> filterInterimHearingToProcess(Map<String, Object> caseData, Map<String, Object> caseDataBefore) {
         List<InterimHearingData> sortedInterimHearingList = sortEarliestHearingFirst(caseData);
         caseData.put(INTERIM_HEARING_COLLECTION, sortedInterimHearingList);
 
         List<InterimHearingCollectionItemData> trackingList = interimHearingHelper.getInterimHearingTrackingList(caseData);
+
+        List<String> dataToProcessList = compareCaseData(caseData, caseDataBefore);
+
+
         log.info("filterInterimHearingToProcess :: trackingList {}", trackingList.size());
         List<String> alreadyProcessedIds = trackingList.stream()
             .map(existingCollectionId -> existingCollectionId.getValue().getIhItemIds()).collect(Collectors.toList());
 
+        alreadyProcessedIds.removeAll(dataToProcessList);
+
         return sortedInterimHearingList.stream()
             .filter(collectionId -> !alreadyProcessedIds.contains(collectionId.getId()))
             .collect(Collectors.toList());
+    }
+
+    private List<String> compareCaseData(Map<String, Object> caseData, Map<String, Object> caseDataBefore) {
+        Map<String, String> currentMap = new HashMap<>();
+        Map<String, String> beforeMap = new HashMap<>();
+        List<String> modifiedCollectionList = new ArrayList<>();
+
+        List<InterimHearingData> currentInterimHearingList = interimHearingHelper.isThereAnExistingInterimHearing(caseData);
+        List<InterimHearingData> beforeInterimHearingList = interimHearingHelper.isThereAnExistingInterimHearing(caseDataBefore);
+
+        if (!currentInterimHearingList.isEmpty() && !beforeInterimHearingList.isEmpty()) {
+            currentInterimHearingList.forEach(data -> currentMap.put(data.getId(), String.join("#",
+                data.getValue().getInterimHearingDate(), data.getValue().getInterimHearingTime())));
+
+            beforeInterimHearingList.forEach(data -> beforeMap.put(data.getId(), String.join("#",
+                data.getValue().getInterimHearingDate(), data.getValue().getInterimHearingTime())));
+
+            currentMap.entrySet().forEach(currentData -> beforeMap.entrySet()
+                    .forEach(beforeData -> setList(currentData, beforeData, modifiedCollectionList)));
+        }
+        
+        log.info("Modified collection list::" + modifiedCollectionList);
+        return modifiedCollectionList;
+    }
+
+    private  void setList(Map.Entry<String, String> currentDataMap, Map.Entry<String, String> beforeDataMap,
+                          List<String> modifiedCollectionList) {
+        if (currentDataMap.getKey().equals(beforeDataMap.getKey()) && ! currentDataMap.getValue().equals(beforeDataMap.getValue())) {
+            modifiedCollectionList.add(currentDataMap.getKey());
+        }
     }
 
     private List<InterimHearingData> sortEarliestHearingFirst(Map<String, Object> caseData) {
@@ -300,12 +339,13 @@ public class InterimHearingService {
         caseData.remove(INTERIM_HEARING_DOCUMENT);
     }
 
-    public void sendNotification(CaseDetails caseDetails) {
+    public void sendNotification(CaseDetails caseDetails, CaseDetails caseDetailsBefore) {
         log.info("Sending email notification for case id {}", caseDetails.getId());
-
         Map<String, Object> caseData =  caseDetails.getData();
+        Map<String, Object> caseDataBefore =  caseDetailsBefore.getData();
+
         if (!caseDataService.isPaperApplication(caseData)) {
-            List<InterimHearingData> caseDataList = filterInterimHearingToProcess(caseData);
+            List<InterimHearingData> caseDataList = filterInterimHearingToProcess(caseData, caseDataBefore);
             List<Map<String, Object>> interimCaseData = convertInterimHearingCollectionDataToMap(caseDataList);
             interimCaseData.forEach(interimHearingData -> notify(caseDetails, interimHearingData));
         }

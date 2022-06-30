@@ -30,8 +30,9 @@ public class InterimHearingContestedSubmittedHandler implements CallbackHandler 
                                                        String userAuthorisation) {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
 
-        interimHearingService.sendNotification(caseDetails);
+        interimHearingService.sendNotification(caseDetails, caseDetailsBefore);
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(callbackRequest.getCaseDetails().getData()).build();

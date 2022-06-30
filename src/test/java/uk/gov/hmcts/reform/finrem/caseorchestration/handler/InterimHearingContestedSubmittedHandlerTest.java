@@ -76,7 +76,7 @@ public class InterimHearingContestedSubmittedHandlerTest {
 
         assertNotNull(handle.getData());
 
-        verify(interimHearingService).sendNotification(any());
+        verify(interimHearingService).sendNotification(any(), any());
     }
 
     private CallbackRequest buildCallbackRequest()  {

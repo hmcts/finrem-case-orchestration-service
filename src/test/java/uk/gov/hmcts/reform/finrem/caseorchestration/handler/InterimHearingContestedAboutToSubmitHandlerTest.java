@@ -119,7 +119,7 @@ public class InterimHearingContestedAboutToSubmitHandlerTest {
         assertEquals("2000-10-10", interimHearingList.get(0).getValue().getInterimHearingDate());
         assertEquals("2040-10-10", interimHearingList.get(1).getValue().getInterimHearingDate());
 
-        verify(interimHearingService).submitInterimHearing(any(), any());
+        verify(interimHearingService).submitInterimHearing(any(), any(), any());
         verifyNonCollectionData(caseData);
     }
 

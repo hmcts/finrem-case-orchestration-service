@@ -76,18 +76,49 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private static final String AUTH_TOKEN = "tokien:)";
-    private static final String TEST_JSON = "/fixtures/contested/interim-hearing-two-collection.json";
+    private static final String ONE_MIGRATED_AND_ONE_ADDED_HEARING_JSON =
+        "/fixtures/contested/interim-hearing-two-collection.json";
+    private static final String ONE_MIGRATED_MODIFIED_AND_ONE_ADDED_HEARING_JSON =
+        "/fixtures/contested/interim-hearing-two-collection-modified.json";
     private static final String TEST_NEW_JSON = "/fixtures/contested/interim-hearing-three-collection-no-track.json";
 
 
+
     @Test
-    public void givenContestedPaperCase_WhenOneNewHearingAddedToExistingCase_ThenItShouldSendOnlyNewHEaringDetailsToBulkPrint() {
-        CallbackRequest callbackRequest = buildCallbackRequest(TEST_JSON);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+    public void givenContestedPaperCaseWithTwoHearing_WhenExistingHearingModified_ThenItShouldSendBothToBulkPrint() {
+        CaseDetails caseDetails = buildCaseDetails(ONE_MIGRATED_AND_ONE_ADDED_HEARING_JSON);
+        CaseDetails caseDetailsBefore = buildCaseDetails(ONE_MIGRATED_MODIFIED_AND_ONE_ADDED_HEARING_JSON);
+
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
 
-        interimHearingService.submitInterimHearing(caseDetails, AUTH_TOKEN);
+        interimHearingService.submitInterimHearing(caseDetails,caseDetailsBefore, AUTH_TOKEN);
+
+        verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
+
+        Map<String, Object> caseData = caseDetails.getData();
+        List<InterimHearingData> interimHearingList = interimHearingHelper.isThereAnExistingInterimHearing(caseData);
+
+        assertEquals("2000-10-10", interimHearingList.get(0).getValue().getInterimHearingDate());
+        assertEquals("2040-10-10", interimHearingList.get(1).getValue().getInterimHearingDate());
+
+        verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
+
+        verifyNonCollectionData(caseData);
+        assertEquals(2, interimHearingList.size());
+    }
+
+    @Test
+    public void givenContestedPaperCase_WhenOneNewHearingAddedToExistingCase_ThenItShouldSendOnlyNewHEaringDetailsToBulkPrint() {
+        CaseDetails caseDetails = buildCaseDetails(ONE_MIGRATED_AND_ONE_ADDED_HEARING_JSON);
+        CaseDetails caseDetailsBefore = buildCaseDetails(ONE_MIGRATED_AND_ONE_ADDED_HEARING_JSON);
+
+        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
+
+        interimHearingService.submitInterimHearing(caseDetails,caseDetailsBefore, AUTH_TOKEN);
 
         verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
         verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
@@ -103,12 +134,13 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
 
     @Test
     public void givenContestedPaperCase_WhenMultipleHearingAdded_ThenItShouldSendAllToBulkPrint() {
-        CallbackRequest callbackRequest = buildCallbackRequest(TEST_NEW_JSON);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseDetails caseDetails = buildCaseDetails(TEST_NEW_JSON);
+        CaseDetails caseDetailsBefore = buildCaseDetails(TEST_NEW_JSON);
+
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
 
-        interimHearingService.submitInterimHearing(caseDetails, AUTH_TOKEN);
+        interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
         verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
         verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
@@ -127,8 +159,8 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
 
     @Test
     public void givenContestedMultipleHearing_WhenNoConsentToEmail_ThenItShouldSendAllToBulkPrint() {
-        CallbackRequest callbackRequest = buildCallbackRequest(TEST_NEW_JSON);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseDetails caseDetails = buildCaseDetails(TEST_NEW_JSON);
+
         caseDetails.getData().put("paperApplication", "No");
         caseDetails.getData().put("applicantSolicitorConsentForEmails", "No");
         caseDetails.getData().put("respondentRepresented", "No");
@@ -136,7 +168,8 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
 
-        interimHearingService.submitInterimHearing(caseDetails, AUTH_TOKEN);
+        CaseDetails caseDetailsBefore = buildCaseDetails(TEST_NEW_JSON);
+        interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
         verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
         verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
@@ -151,13 +184,14 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
 
     @Test
     public void givenContestedPaperCase_WhenPaperCase_ThenItShouldNotSendNotificaton() {
-        CallbackRequest callbackRequest = buildCallbackRequest(TEST_NEW_JSON);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseDetails caseDetails = buildCaseDetails(TEST_NEW_JSON);
+        CaseDetails caseDetailsBefore = buildCaseDetails(TEST_NEW_JSON);
+
         caseDetails.getData().put("paperApplication", "Yes");
 
         when(caseDataService.isPaperApplication(any())).thenReturn(true);
 
-        interimHearingService.sendNotification(caseDetails);
+        interimHearingService.sendNotification(caseDetails, caseDetailsBefore);
 
         verify(caseDataService).isPaperApplication(any());
         verify(caseDataService, never()).isApplicantSolicitorAgreeToReceiveEmails(any());
@@ -169,15 +203,15 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
 
     @Test
     public void givenContestedNotPaperCase_WhenPaperCase_ThenItShouldSendNotificaton() {
-        CallbackRequest callbackRequest = buildCallbackRequest(TEST_NEW_JSON);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseDetails caseDetails = buildCaseDetails(TEST_NEW_JSON);
         caseDetails.getData().put("paperApplication", "No");
 
         when(caseDataService.isPaperApplication(any())).thenReturn(false);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
 
-        interimHearingService.sendNotification(caseDetails);
+        CaseDetails caseDetailsBefore = buildCaseDetails(TEST_NEW_JSON);
+        interimHearingService.sendNotification(caseDetails, caseDetailsBefore);
 
         verify(caseDataService).isPaperApplication(any());
 
@@ -187,9 +221,17 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
         verify(notificationService,times(3)).sendInterimHearingNotificationEmailToRespondentSolicitor(any(), anyMap());
     }
 
-    private CallbackRequest buildCallbackRequest(String path)  {
+    private CaseDetails buildCaseDetails(String path)  {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(path)) {
-            return objectMapper.readValue(resourceAsStream, CallbackRequest.class);
+            return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private CaseDetails buildCaseDetailsBefore(String path)  {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(path)) {
+            return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetailsBefore();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

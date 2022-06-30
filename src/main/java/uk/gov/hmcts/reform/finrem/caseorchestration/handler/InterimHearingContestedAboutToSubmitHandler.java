@@ -29,8 +29,9 @@ public class InterimHearingContestedAboutToSubmitHandler implements CallbackHand
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
                                                        String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         log.info("About to submit Interim hearing for case id {}", caseDetails.getId());
-        interimHearingService.submitInterimHearing(caseDetails, userAuthorisation);
+        interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, userAuthorisation);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build();
     }
 }
