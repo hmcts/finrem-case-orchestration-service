@@ -273,12 +273,14 @@ public class InterimHearingService {
         List<InterimHearingData> currentInterimHearingList = interimHearingHelper.isThereAnExistingInterimHearing(caseData);
         List<InterimHearingData> beforeInterimHearingList = interimHearingHelper.isThereAnExistingInterimHearing(caseDataBefore);
 
-        if (!currentInterimHearingList.isEmpty() && !beforeInterimHearingList.isEmpty()) {
+        String beforeMigrationHearingDate = nullToEmpty(caseData.get(INTERIM_HEARING_DATE));
+        String beforeMigrationHearingTime = nullToEmpty(caseData.get(INTERIM_HEARING_TIME));
+
+        if (!currentInterimHearingList.isEmpty() && (!beforeInterimHearingList.isEmpty()
+            || !beforeMigrationHearingDate.isEmpty())) {
             currentInterimHearingList.forEach(data -> currentMap.put(data.getId(), String.join("#",
                 data.getValue().getInterimHearingDate(), data.getValue().getInterimHearingTime())));
 
-            String beforeMigrationHearingDate = nullToEmpty(caseData.get(INTERIM_HEARING_DATE));
-            String beforeMigrationHearingTime = nullToEmpty(caseData.get(INTERIM_HEARING_TIME));
             log.info("Non collection hearing date {} and time {}",beforeMigrationHearingDate, beforeMigrationHearingTime);
             if (beforeMigrationHearingDate.isEmpty() && beforeMigrationHearingTime.isEmpty()) {
                 beforeInterimHearingList.forEach(data -> beforeMap.put(data.getId(), String.join("#",
