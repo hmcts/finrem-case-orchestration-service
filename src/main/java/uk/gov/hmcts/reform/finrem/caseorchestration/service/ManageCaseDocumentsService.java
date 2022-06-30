@@ -7,9 +7,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedUploadDocumentsHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandler;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 
 @Slf4j
 @Service
@@ -29,7 +30,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class ManageCaseDocumentsService {
 
     private final ObjectMapper mapper;
-    private final ContestedUploadDocumentsHelper contestedUploadDocumentsHelper;
+    private final List<CaseDocumentHandler> caseDocumentHandlers;
 
     public Map<String, Object> setApplicantAndRespondentDocumentsCollection(CaseDetails caseDetails) {
 
@@ -39,7 +40,7 @@ public class ManageCaseDocumentsService {
         return caseDetails.getData();
     }
 
-    public Map<String, Object> manageLitigantDocuments(Map<String, Object> caseData) {
+    public Map<String, Object> manageCaseDocuments(Map<String, Object> caseData) {
 
         removeDeletedFilesFromCaseData(caseData);
 
@@ -47,25 +48,9 @@ public class ManageCaseDocumentsService {
 
         findAndRemoveMovedDocumentFromCollections(caseData, idToCollectionData);
 
-        contestedUploadDocumentsHelper.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
-
-        List<ContestedUploadedDocumentData> remainingDocumentsInCollection =
-            getAllDocumentsInCollection(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
-        List<ContestedUploadedDocumentData> confidential = new ArrayList<>();
-
-        if (!remainingDocumentsInCollection.isEmpty()) {
-            for (Iterator<ContestedUploadedDocumentData> it = remainingDocumentsInCollection.iterator(); it.hasNext();) {
-                ContestedUploadedDocumentData document = it.next();
-                if (document.getUploadedCaseDocument().getCaseDocumentConfidential().equalsIgnoreCase("yes")) {
-                    confidential.add(document);
-                    it.remove();
-                }
-            }
-
-        }
-
-        caseData.put(ContestedUploadCaseFilesCollectionType.CONFIDENTIAL_DOCUMENTS_UPLOADED.getCcdKey(), confidential);
-        caseData.put(ContestedUploadCaseFilesCollectionType.CONTESTED_UPLOADED_DOCUMENTS.getCcdKey(), remainingDocumentsInCollection);
+        List<ContestedUploadedDocumentData> caseDocuments = getAllDocumentsInCollection(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
+        caseDocumentHandlers.forEach(h -> h.handle(caseDocuments, caseData));
+        caseData.put(CONTESTED_UPLOADED_DOCUMENTS, caseDocuments);
 
         return caseData;
     }
@@ -93,7 +78,8 @@ public class ManageCaseDocumentsService {
 
         for (ContestedUploadCaseFilesCollectionType collectionType : ContestedUploadCaseFilesCollectionType.values()) {
             Optional.ofNullable(caseData.get(collectionType.getCcdKey()))
-                .ifPresent(mapValue -> allDocuments.addAll(mapper.convertValue(mapValue, new TypeReference<>() {})));
+                .ifPresent(mapValue -> allDocuments.addAll(mapper.convertValue(mapValue, new TypeReference<>() {
+                })));
         }
 
         return allDocuments;
@@ -101,7 +87,7 @@ public class ManageCaseDocumentsService {
 
     private void findAndRemoveMovedDocumentFromCollections(Map<String, Object> caseData, Map<String, String> documentIdsAndCollection) {
 
-        List<ContestedUploadedDocumentData> litigantDocumentsCollection = getAllDocumentsInCollection(caseData,
+        List<ContestedUploadedDocumentData> caseDocumentsCollection = getAllDocumentsInCollection(caseData,
             CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
         documentIdsAndCollection.forEach((documentId, collection) ->
             getAllDocumentsInCollection(caseData, collection)
@@ -109,11 +95,11 @@ public class ManageCaseDocumentsService {
                 if (collection.startsWith("app")) {
                     caseData.put(collection, findIfDocumentExistInCollectionAfterMove(
                         caseData, getAllDocumentsInCollection(caseData, collection), contestedUploadedDocumentData,
-                        litigantDocumentsCollection, "applicant"));
+                        caseDocumentsCollection, "applicant"));
                 } else if (collection.startsWith("resp")) {
                     caseData.put(collection, findIfDocumentExistInCollectionAfterMove(
                         caseData, getAllDocumentsInCollection(caseData, collection), contestedUploadedDocumentData,
-                        litigantDocumentsCollection, "respondent"));
+                        caseDocumentsCollection, "respondent"));
                 }
             }));
     }
@@ -121,35 +107,40 @@ public class ManageCaseDocumentsService {
     private List<ContestedUploadedDocumentData> findIfDocumentExistInCollectionAfterMove(Map<String, Object> caseData,
                                                                       List<ContestedUploadedDocumentData> collection,
                                                                       ContestedUploadedDocumentData documentToCheck,
-                                                                      List<ContestedUploadedDocumentData> litigantDocumentCollection,
+                                                                      List<ContestedUploadedDocumentData> caseDocumentCollection,
                                                                       String party) {
 
-        for (Iterator<ContestedUploadedDocumentData> it = litigantDocumentCollection.iterator(); it.hasNext(); ) {
+        for (Iterator<ContestedUploadedDocumentData> it = caseDocumentCollection.iterator(); it.hasNext(); ) {
 
             ContestedUploadedDocumentData document = it.next();
 
             if (documentToCheck.getId().equals(document.getId())
                 && (!document.getUploadedCaseDocument().getCaseDocumentParty().equals(party)
                 || !document.getUploadedCaseDocument().getCaseDocumentType()
-                .equals(documentToCheck.getUploadedCaseDocument().getCaseDocumentType()))) {
+                .equals(documentToCheck.getUploadedCaseDocument().getCaseDocumentType())
+                || !document.getUploadedCaseDocument().getHearingDetails()
+                .equals(documentToCheck.getUploadedCaseDocument().getHearingDetails()))) {
 
                 collection.remove(documentToCheck);
             } else if (documentToCheck.getId().equals(document.getId())
                 && document.getUploadedCaseDocument().getCaseDocumentParty().equals(party)
                 && document.getUploadedCaseDocument().getCaseDocumentType()
-                .equals(documentToCheck.getUploadedCaseDocument().getCaseDocumentType())) {
+                .equals(documentToCheck.getUploadedCaseDocument().getCaseDocumentType())
+                &&
+                document.getUploadedCaseDocument().getHearingDetails()
+                    .equals(documentToCheck.getUploadedCaseDocument().getHearingDetails())) {
                 it.remove();
             }
         }
 
-        caseData.put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, litigantDocumentCollection);
+        caseData.put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, caseDocumentCollection);
         return collection;
     }
 
     private Map<String, String> findCollectionNameOfDocument(Map<String, Object> caseData) {
 
         Map<String, String> documentIdToCollection = new HashMap<>();
-        List<String> litigantDocumentsCollection = getAllDocumentsInCollection(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION)
+        List<String> caseDocumentsCollection = getAllDocumentsInCollection(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION)
             .stream().map(ContestedUploadedDocumentData::getId).collect(Collectors.toList());
 
         for (ContestedUploadCaseFilesCollectionType collectionType : ContestedUploadCaseFilesCollectionType.values()) {
@@ -160,9 +151,9 @@ public class ManageCaseDocumentsService {
 
             if (!docsInCollection.isEmpty()) {
                 for (ContestedUploadedDocumentData document : docsInCollection) {
-                    for (String litigantDocument : litigantDocumentsCollection) {
-                        if (litigantDocument.equals(document.getId())) {
-                            documentIdToCollection.put(litigantDocument, collection);
+                    for (String caseDocument : caseDocumentsCollection) {
+                        if (caseDocument.equals(document.getId())) {
+                            documentIdToCollection.put(caseDocument, collection);
                         }
                     }
                 }
@@ -178,7 +169,8 @@ public class ManageCaseDocumentsService {
             return new ArrayList<>();
         }
 
-        return mapper.convertValue(caseData.get(collection), new TypeReference<>() {});
+        return mapper.convertValue(caseData.get(collection), new TypeReference<>() {
+        });
     }
 }
 

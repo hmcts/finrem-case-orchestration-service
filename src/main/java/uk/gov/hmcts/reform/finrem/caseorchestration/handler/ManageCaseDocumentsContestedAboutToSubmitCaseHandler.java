@@ -17,6 +17,8 @@ public class ManageCaseDocumentsContestedAboutToSubmitCaseHandler implements Cal
 
     private final ManageCaseDocumentsService manageCaseDocumentsService;
 
+
+
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
@@ -28,7 +30,7 @@ public class ManageCaseDocumentsContestedAboutToSubmitCaseHandler implements Cal
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest, String userAuthorisation) {
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(
-            manageCaseDocumentsService.manageLitigantDocuments(
+            manageCaseDocumentsService.manageCaseDocuments(
                 callbackRequest.getCaseDetails().getData())).build();
     }
 }
