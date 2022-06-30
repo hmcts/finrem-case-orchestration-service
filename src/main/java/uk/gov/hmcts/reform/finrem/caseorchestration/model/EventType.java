@@ -11,7 +11,7 @@ public enum EventType {
     PREPARE_FOR_HEARING("FR_prepareForHearing"),
     UPLOAD_CASE_FILES("FR_uploadCaseFiles"),
     CLOSE("FR_close"),
-    MANAGE_LITIGANT_DOCUMENT("FR_manageLitigantDocument"),
+    MANAGE_CASE_DOCUMENTS("FR_manageCaseDocuments"),
     NONE("");
 
     private final String ccdType;

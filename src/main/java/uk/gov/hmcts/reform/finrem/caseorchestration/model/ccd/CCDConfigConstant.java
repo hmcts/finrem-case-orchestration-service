@@ -408,7 +408,7 @@ public class CCDConfigConstant {
     public static final String UPLOAD_ORDER = "uploadOrder";
 
     // Manage litigant documents
-    public static final String CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION = "litigantDocumentsCollection";
+    public static final String CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION = "manageCaseDocumentCollection";
 
     //Contested Case Documents
     public static final String CONTESTED_UPLOADED_DOCUMENTS = "uploadCaseDocument";

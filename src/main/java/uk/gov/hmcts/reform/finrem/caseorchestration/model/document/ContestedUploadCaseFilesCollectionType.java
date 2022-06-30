@@ -35,6 +35,7 @@ public enum ContestedUploadCaseFilesCollectionType {
     RESP_EXPERT_EVIDENCE_COLLECTION("respExpertEvidenceCollection"),
     RESP_CORRESPONDENCE_COLLECTION("respCorrespondenceDocsColl"),
     RESP_OTHER_COLLECTION("respOtherCollection"),
+    CONTESTED_UPLOADED_DOCUMENTS("uploadCaseDocument"),
     CONFIDENTIAL_DOCUMENTS_UPLOADED("confidentialDocumentsUploaded");
 
     private final String ccdKey;

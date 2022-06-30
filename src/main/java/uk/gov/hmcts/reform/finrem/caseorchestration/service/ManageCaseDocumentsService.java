@@ -21,7 +21,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION;
 
 @Slf4j
 @Service
@@ -33,7 +33,7 @@ public class ManageCaseDocumentsService {
 
     public Map<String, Object> setApplicantAndRespondentDocumentsCollection(CaseDetails caseDetails) {
 
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION,
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION,
             getAllContestedUploadDocuments(caseDetails.getData()));
 
         return caseDetails.getData();
@@ -47,7 +47,25 @@ public class ManageCaseDocumentsService {
 
         findAndRemoveMovedDocumentFromCollections(caseData, idToCollectionData);
 
-        contestedUploadDocumentsHelper.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        contestedUploadDocumentsHelper.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
+
+        List<ContestedUploadedDocumentData> remainingDocumentsInCollection =
+            getAllDocumentsInCollection(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
+        List<ContestedUploadedDocumentData> confidential = new ArrayList<>();
+
+        if (!remainingDocumentsInCollection.isEmpty()) {
+            for (Iterator<ContestedUploadedDocumentData> it = remainingDocumentsInCollection.iterator(); it.hasNext();) {
+                ContestedUploadedDocumentData document = it.next();
+                if (document.getUploadedCaseDocument().getCaseDocumentConfidential().equalsIgnoreCase("yes")) {
+                    confidential.add(document);
+                    it.remove();
+                }
+            }
+
+        }
+
+        caseData.put(ContestedUploadCaseFilesCollectionType.CONFIDENTIAL_DOCUMENTS_UPLOADED.getCcdKey(), confidential);
+        caseData.put(ContestedUploadCaseFilesCollectionType.CONTESTED_UPLOADED_DOCUMENTS.getCcdKey(), remainingDocumentsInCollection);
 
         return caseData;
     }
@@ -55,7 +73,7 @@ public class ManageCaseDocumentsService {
     private void removeDeletedFilesFromCaseData(Map<String, Object> caseData) {
 
         Set<String> findRemainingApplicantAndRespondentDocumentIds =
-            mapper.convertValue(caseData.get(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION),
+            mapper.convertValue(caseData.get(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION),
                     new TypeReference<List<ContestedUploadedDocumentData>>() {
                     }).stream().map(ContestedUploadedDocumentData::getId)
                 .collect(Collectors.toSet());
@@ -84,7 +102,7 @@ public class ManageCaseDocumentsService {
     private void findAndRemoveMovedDocumentFromCollections(Map<String, Object> caseData, Map<String, String> documentIdsAndCollection) {
 
         List<ContestedUploadedDocumentData> litigantDocumentsCollection = getAllDocumentsInCollection(caseData,
-            CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+            CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
         documentIdsAndCollection.forEach((documentId, collection) ->
             getAllDocumentsInCollection(caseData, collection)
             .forEach(contestedUploadedDocumentData -> {
@@ -111,23 +129,27 @@ public class ManageCaseDocumentsService {
             ContestedUploadedDocumentData document = it.next();
 
             if (documentToCheck.getId().equals(document.getId())
-                && !document.getUploadedCaseDocument().getCaseDocumentParty().equals(party)) {
+                && (!document.getUploadedCaseDocument().getCaseDocumentParty().equals(party)
+                || !document.getUploadedCaseDocument().getCaseDocumentType()
+                .equals(documentToCheck.getUploadedCaseDocument().getCaseDocumentType()))) {
 
                 collection.remove(documentToCheck);
             } else if (documentToCheck.getId().equals(document.getId())
-                && document.getUploadedCaseDocument().getCaseDocumentParty().equals(party)) {
+                && document.getUploadedCaseDocument().getCaseDocumentParty().equals(party)
+                && document.getUploadedCaseDocument().getCaseDocumentType()
+                .equals(documentToCheck.getUploadedCaseDocument().getCaseDocumentType())) {
                 it.remove();
             }
         }
 
-        caseData.put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, litigantDocumentCollection);
+        caseData.put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, litigantDocumentCollection);
         return collection;
     }
 
     private Map<String, String> findCollectionNameOfDocument(Map<String, Object> caseData) {
 
         Map<String, String> documentIdToCollection = new HashMap<>();
-        List<String> litigantDocumentsCollection = getAllDocumentsInCollection(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION)
+        List<String> litigantDocumentsCollection = getAllDocumentsInCollection(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION)
             .stream().map(ContestedUploadedDocumentData::getId).collect(Collectors.toList());
 
         for (ContestedUploadCaseFilesCollectionType collectionType : ContestedUploadCaseFilesCollectionType.values()) {
