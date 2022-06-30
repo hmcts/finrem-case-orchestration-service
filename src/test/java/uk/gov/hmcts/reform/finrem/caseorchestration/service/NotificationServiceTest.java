@@ -19,6 +19,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -28,6 +30,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
@@ -36,6 +41,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_JUDGE_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
@@ -83,7 +89,11 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Autowired private RestTemplate restTemplate;
 
     @MockBean private FeatureToggleService featureToggleService;
+    @MockBean private RestTemplate mockRestTemplate;
     @MockBean private NotificationRequestMapper notificationRequestMapper;
+    @MockBean private CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
+    @MockBean private CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
+
     @SpyBean
     private NotificationServiceConfiguration notificationServiceConfiguration;
 
@@ -451,7 +461,8 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestOrderApprovedEmailApplicant(callbackRequest.getCaseDetails());
 
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper, timeout(100).times(1))
+            .getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
     }
 
     @Test
@@ -465,7 +476,8 @@ public class NotificationServiceTest extends BaseServiceTest {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
 
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper, timeout(100).times(1))
+            .getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
     }
 
     @Test
@@ -475,7 +487,8 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestOrderApprovedEmailRespondent(callbackRequest.getCaseDetails());
 
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper, timeout(100).times(1))
+            .getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
     }
 
     @Test
@@ -489,7 +502,7 @@ public class NotificationServiceTest extends BaseServiceTest {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
 
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper, timeout(100).times(1)).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
     }
 
     @Test
@@ -547,7 +560,8 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestOrderApprovedEmailApplicant(callbackRequest.getCaseDetails());
 
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper, timeout(100).times(1))
+            .getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
     }
 
     @Test
@@ -561,7 +575,8 @@ public class NotificationServiceTest extends BaseServiceTest {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
 
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper, timeout(100).times(1))
+            .getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
     }
 
     @Test
@@ -989,6 +1004,11 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void givenContestedCaseWhenSendNoticeOfChangeEmailThenSendNoticeOfChangeContestedEmail() {
+        NotificationRequest notificationRequest = new NotificationRequest();
+        notificationRequest.setName(TEST_SOLICITOR_NAME);
+        when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
+        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(true);
+
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_NOTICE_OF_CHANGE_CONTESTED))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
@@ -1001,6 +1021,11 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void givenConsentedCaseWhenSendNoticeOfChangeEmailThenSendNoticeOfChangeContestedEmail() {
+        NotificationRequest notificationRequest = new NotificationRequest();
+        notificationRequest.setName(TEST_SOLICITOR_NAME);
+        when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
+        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(true);
+
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_NOTICE_OF_CHANGE_CONSENTED))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
@@ -1012,7 +1037,29 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void givenContestedCaseAndNonDigitalSol_whenSendNocEmail_thenNotSendContestedEmail() {
+        NotificationRequest notificationRequest = new NotificationRequest();
+        notificationRequest.setName(TEST_SOLICITOR_NAME);
+        when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
+        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(false);
+
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_NOTICE_OF_CHANGE_CONTESTED))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+
+        notificationService.sendNoticeOfChangeEmail(getContestedCallbackRequest().getCaseDetails());
+
+        verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(getContestedCallbackRequest().getCaseDetails());
+        verify(notificationServiceConfiguration).getContestedNoticeOfChange();
+    }
+
+    @Test
     public void givenContestedCase_whenSendNoCCaseworkerEmail_thenSendContestedEmail() {
+        NotificationRequest notificationRequest = new NotificationRequest();
+        notificationRequest.setName(TEST_SOLICITOR_NAME);
+        when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
+        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(true);
+
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_NOC_CASEWORKER_CONTESTED))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
@@ -1027,6 +1074,11 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void givenConsentedCase_whenSendNoCCaseworkerEmail_thenSendConsentedEmail() {
+        NotificationRequest notificationRequest = new NotificationRequest();
+        notificationRequest.setName(TEST_SOLICITOR_NAME);
+        when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
+        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(true);
+
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_NOC_CASEWORKER_CONSENTED))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
@@ -1040,6 +1092,23 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void givenContestedCaseAndNonDigitalSol_whenSendNocEmail_thenNotSendContestedEmailCaseworker() {
+        NotificationRequest notificationRequest = new NotificationRequest();
+        notificationRequest.setName(TEST_SOLICITOR_NAME);
+        when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
+        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(false);
+
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_NOC_CASEWORKER_CONTESTED))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+
+        notificationService.sendNoticeOfChangeEmailCaseworker(getContestedCallbackRequest().getCaseDetails());
+
+        verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(getContestedCallbackRequest().getCaseDetails());
+        verify(notificationServiceConfiguration).getContestedNoCCaseworker();
+        verify(mockRestTemplate, never()).exchange(any(), eq(HttpMethod.POST), any(), eq(String.class));
+    }
+
     public void sendUpdateFrcInformationEmailToAppSolicitor() {
         callbackRequest = getContestedCallbackRequest();
 

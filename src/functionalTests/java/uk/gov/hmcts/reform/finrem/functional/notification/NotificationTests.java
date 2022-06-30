@@ -42,8 +42,8 @@ public class NotificationTests extends IntegrationTestBase {
     @Value("${case.orchestration.api}/notify/update-frc")
     private String updateFrcInfoUri;
 
-    private String consentedDir = "/json/consented/";
-    private String contestedDir = "/json/contested/";
+    private final String consentedDir = "/json/consented/";
+    private final String contestedDir = "/json/contested/";
 
     @Test
     public void verifyNotifyAssignToJudgeTestIsOkay() {
@@ -99,27 +99,6 @@ public class NotificationTests extends IntegrationTestBase {
 
         utils.validatePostSuccess(contestApplicationIssuedApiUri,
             "ccd-request-with-solicitor-contestApplicationIssued.json", contestedDir);
-    }
-
-    @Test
-    public void verifyNotifyContestOrderApprovedIsOkay() {
-
-        utils.validatePostSuccess(contestOrderApprovedApiUri,
-            "ccd-request-with-solicitor-contestOrderApproved.json", contestedDir);
-    }
-
-    @Test
-    public void verifyNotifyContestedNoticeOfChangeIsOkay() {
-
-        utils.validatePostSuccess(contestDraftOrderApiUri,
-            "notice-of-change-notification.json", contestedDir);
-    }
-
-    @Test
-    public void verifyNotifyConsentedNoticeOfChangeIsOkay() {
-
-        utils.validatePostSuccess(contestDraftOrderApiUri,
-            "notice-of-change-notification.json", contestedDir);
     }
 
     @Test

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.LitigantSolicitorRemovedNocDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.NocLetterDetailsGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.SolicitorRemovedLetterDetailsGenerator;
 
 @Slf4j
 @Component
@@ -14,7 +14,7 @@ public class SolicitorRemovedApplicantLetterHandler extends SolicitorChangedAppl
 
     @Autowired
     public SolicitorRemovedApplicantLetterHandler(
-        NocLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator,
+        SolicitorRemovedLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator,
         LitigantSolicitorRemovedNocDocumentService litigantSolicitorRemovedNocDocumentService,
         BulkPrintService bulkPrintService) {
         super(noticeOfChangeLetterDetailsGenerator, litigantSolicitorRemovedNocDocumentService, bulkPrintService, NoticeType.REMOVE);
