@@ -25,6 +25,7 @@
       "respondentFMName": "respondent0012",
       "divorceCaseNumber": "EZ17D80124",
       "fastTrackDecision": "Yes",
+      "currentUserCaseRole": "[RESPSOLICITOR]",
       "rSolicitorAddress": {
         "County": "Essex",
         "Country": "",
