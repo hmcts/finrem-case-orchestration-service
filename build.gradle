@@ -123,7 +123,7 @@ def versions = [
         serviceTokenGenerator: '3.1.1',
         springfoxSwagger     : '2.9.2',
         sonarPitest          : '0.5',
-        tomcat               : '9.0.63',
+        tomcat               : '9.0.64',
         wiremock             : '2.27.2',
         apacheLogging        : '2.17.1'
 ]
