@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -52,6 +54,10 @@ public class ApprovedOrderNoticeOfHearingService {
     private final DocumentConfiguration documentConfiguration;
     private final ObjectMapper objectMapper;
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
+    private final CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
+    private final CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
+    private final NotificationService notificationService;
+    private final CaseDataService caseDataService;
 
     public void createAndStoreHearingNoticeDocumentPack(CaseDetails caseDetails,
                                                         String authToken) {
@@ -72,8 +78,28 @@ public class ApprovedOrderNoticeOfHearingService {
                                                                       String authorisationToken) {
         List<CaseDocument> hearingNoticePack = getHearingNoticeDocumentPackFromCaseData(caseDetails);
         List<BulkPrintDocument> documentsToPrint = documentHelper.getCaseDocumentsAsBulkPrintDocuments(hearingNoticePack);
+
+        notifyApplicant(caseDetails, authorisationToken, documentsToPrint);
+        notifyRespondent(caseDetails, authorisationToken, documentsToPrint);
+    }
+
+    private void notifyApplicant(CaseDetails caseDetails, String authorisationToken, List<BulkPrintDocument> documentsToPrint) {
+        if (checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)
+            && caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
+
+            notificationService.sendPrepareForHearingEmailApplicant(caseDetails);
+            return;
+        }
         bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documentsToPrint);
-        bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documentsToPrint);
+    }
+
+    private void notifyRespondent(CaseDetails caseDetails, String authorisationToken, List<BulkPrintDocument> documentsToPrint) {
+        if (checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)
+            && caseDataService.isRespondentSolicitorAgreeToReceiveEmails(caseDetails)) {
+            notificationService.sendPrepareForHearingEmailRespondent(caseDetails);
+        } else {
+            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documentsToPrint);
+        }
     }
 
     private CaseDocument prepareHearingRequiredNoticeDocumentComplexType(CaseDetails caseDetails, String authorisationToken) {

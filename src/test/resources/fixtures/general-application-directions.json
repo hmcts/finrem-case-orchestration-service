@@ -8,7 +8,7 @@
     "id": 1234567890,
     "jurisdiction": "DIVORCE",
     "state": "applicationDrafted",
-    "case_type_id": "FinancialRemedyMVP2",
+    "case_type_id": "FinancialRemedyContested",
     "case_data": {
       "PBANumber": "PBA123456",
       "d81Question": "No",

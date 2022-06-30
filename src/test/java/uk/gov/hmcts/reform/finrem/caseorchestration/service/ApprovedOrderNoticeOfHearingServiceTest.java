@@ -12,10 +12,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 
 import java.util.List;
 import java.util.Map;
@@ -62,6 +65,16 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     private BulkPrintService bulkPrintService;
     @MockBean
     private GenericDocumentService genericDocumentService;
+    @MockBean
+    private CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
+    @MockBean
+    private CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
+    @MockBean
+    private CaseDataService caseDataService;
+    @MockBean
+    private NotificationService notificationService;
+    @MockBean
+    private DocumentHelper documentHelper;
 
     @Captor
     ArgumentCaptor<Map<String, Object>> placeholdersMapCaptor;
@@ -79,6 +92,10 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
 
     @Test
     public void givenHearingRequired_whenSubmitNoticeOfHearing_thenHearingNoticeIsPrinted() {
+        when(documentHelper.getApplicantFullName(caseDetails)).thenReturn("Poor Guy");
+        when(documentHelper.getRespondentFullNameContested(caseDetails)).thenReturn("test Korivi");
+
+
         caseDetails.getData().put(ANOTHER_HEARING_TO_BE_LISTED, YES_VALUE);
         approvedOrderNoticeOfHearingService.createAndStoreHearingNoticeDocumentPack(caseDetails, AUTH_TOKEN);
 
@@ -92,6 +109,8 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
 
     @Test
     public void givenDraftHearingOrderIsUploaded_whenSubmitNoticeOfHearing_thenOrderIsPrinted() {
+        when(documentHelper.getApplicantFullName(caseDetails)).thenReturn("Poor Guy");
+        when(documentHelper.getRespondentFullNameContested(caseDetails)).thenReturn("test Korivi");
 
         caseDetails.getData().put(ANOTHER_HEARING_TO_BE_LISTED, YES_VALUE);
         caseDetails.getData().put(LATEST_DRAFT_HEARING_ORDER, CaseDocument.builder().documentBinaryUrl(LATEST_DRAFT_ORDER_DOCUMENT_BIN_URL).build());
@@ -110,6 +129,18 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     @Test
     public void givenSubmittedCallbackReceived_whenSubmitNotice_thenSendNoticeOfHearingToAppAndResp() {
         caseDetails.getData().put(HEARING_NOTICE_DOCUMENT_PACK, buildHearingNoticePack());
+        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(false);
+        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(false);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)).thenReturn(true);
+        when(caseDataService.isRespondentSolicitorAgreeToReceiveEmails(caseDetails)).thenReturn(true);
+        when(documentHelper.getCaseDocumentsAsBulkPrintDocuments(any())).thenReturn(List.of(BulkPrintDocument
+                .builder()
+                .binaryFileUrl(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL)
+                .build(),
+            BulkPrintDocument
+                .builder()
+                .binaryFileUrl(LATEST_DRAFT_ORDER_DOCUMENT_BIN_URL)
+                .build()));
         approvedOrderNoticeOfHearingService.printHearingNoticePackAndSendToApplicantAndRespondent(caseDetails, AUTH_TOKEN);
 
         assertBulkPrintServiceInteraction();
@@ -125,6 +156,18 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
         );
     }
 
+    @Test
+    public void givenSubmittedCallbackReceived_whenSubmitNotice_thenSendNoticeOfHearingEmailToAppAndResp() {
+        caseDetails.getData().put(HEARING_NOTICE_DOCUMENT_PACK, buildHearingNoticePack());
+        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(true);
+        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)).thenReturn(true);
+        when(caseDataService.isRespondentSolicitorAgreeToReceiveEmails(caseDetails)).thenReturn(true);
+        approvedOrderNoticeOfHearingService.printHearingNoticePackAndSendToApplicantAndRespondent(caseDetails, AUTH_TOKEN);
+
+        assertNotificationServiceInteraction();
+    }
+
     private void assertDocumentServiceInteraction() {
         verify(genericDocumentService, times(1)).generateDocumentFromPlaceholdersMap(
             eq(AUTH_TOKEN),
@@ -137,6 +180,11 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
         verify(bulkPrintService, times(1)).printApplicantDocuments(any(), eq(AUTH_TOKEN), any());
         verify(bulkPrintService, times(1)).printRespondentDocuments(any(), eq(AUTH_TOKEN),
             printDocumentsRequestDocumentListCaptor.capture());
+    }
+
+    private void assertNotificationServiceInteraction() {
+        verify(notificationService, times(1)).sendPrepareForHearingEmailApplicant(caseDetails);
+        verify(notificationService, times(1)).sendPrepareForHearingEmailRespondent(caseDetails);
     }
 
     private void assertCaseDataHasHearingNoticesCollection() {
