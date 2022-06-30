@@ -6,7 +6,6 @@
     "state": "applicationDrafted",
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
-      "paperApplication": "Yes",
       "formC": {
         "document_url": "http://http://document-management-store:8080/documents/3e0218a7-0646-4b29-88af-2d8eab245f8d",
         "document_filename": "Form-C.pdf",
@@ -417,9 +416,6 @@
       "consentNatureOfApplicationChecklist": [
         "Maintenance Pending Suit"
       ],
-      "interimHearingDate": "2022-10-10",
-      "interimHearingTime": "15:00",
-      "interimHearingType": "Maintenance Pending Suit (MPS)",
       "iHCollectionItemIds": [
         {
           "id": "a3e5e7f4-5b9d-4123-afbb-5ab9e3112f6d",

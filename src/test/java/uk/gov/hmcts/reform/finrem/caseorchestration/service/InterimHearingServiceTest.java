@@ -76,6 +76,10 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private static final String AUTH_TOKEN = "tokien:)";
+    private static final String BEFORE_MIGRATION_TEST_JSON =
+        "/fixtures/contested/interim-hearing-one-collection.json";
+    private static final String MODIFIED_DURING_MIGRATION_TEST_JSON =
+        "/fixtures/contested/interim-hearing-one-modified-collection.json";
     private static final String ONE_MIGRATED_AND_ONE_ADDED_HEARING_JSON =
         "/fixtures/contested/interim-hearing-two-collection.json";
     private static final String ONE_MIGRATED_MODIFIED_AND_ONE_ADDED_HEARING_JSON =
@@ -83,6 +87,32 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
     private static final String TEST_NEW_JSON = "/fixtures/contested/interim-hearing-three-collection-no-track.json";
 
 
+
+    @Test
+    public void givenContestedPaperCaseWithBeforeMigrationToHearingCollection_WhenModifiedDuringMigration_ThenItShouldSendToBulkPrint() {
+        CaseDetails caseDetails = buildCaseDetails(BEFORE_MIGRATION_TEST_JSON);
+        CaseDetails caseDetailsBefore = buildCaseDetails(MODIFIED_DURING_MIGRATION_TEST_JSON);
+
+        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
+
+        interimHearingService.submitInterimHearing(caseDetails,caseDetailsBefore, AUTH_TOKEN);
+
+        verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
+
+        Map<String, Object> caseData = caseDetails.getData();
+        List<InterimHearingData> interimHearingList = interimHearingHelper.isThereAnExistingInterimHearing(caseData);
+
+        assertEquals("2000-10-10", interimHearingList.get(0).getValue().getInterimHearingDate());
+        assertEquals("15:00", interimHearingList.get(0).getValue().getInterimHearingTime());
+
+        verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
+
+        verifyNonCollectionData(caseData);
+        assertEquals(1, interimHearingList.size());
+    }
 
     @Test
     public void givenContestedPaperCaseWithTwoHearing_WhenExistingHearingModified_ThenItShouldSendBothToBulkPrint() {
