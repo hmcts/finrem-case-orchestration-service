@@ -47,6 +47,7 @@ public class CCDConfigConstant {
     public static final String CONSENTED_SOLICITOR_DX_NUMBER = "solicitorDXnumber";
     public static final String APPLICANT_SHARE_DOCUMENTS = "applicantShareDocs";
     public static final String APPLICANT_ORGANISATION_POLICY = "ApplicantOrganisationPolicy";
+    public static final String CONTESTED_SOLICITOR_PHONE = "applicantSolicitorPhone";
 
     //Respondent Solicitor Related
     public static final String CONSENTED_RESPONDENT_REPRESENTED = "appRespondentRep";
@@ -485,6 +486,9 @@ public class CCDConfigConstant {
 
     //NFD
     public static final String CIVIL_PARTNERSHIP = "civilPartnership";
+
+    //Get user based on role i.e applicant or respondent
+    public static final String CASE_ROLE = "currentUserCaseRole";
 
     //Interim FRC List Names
     public static final String INTERIM_HEARING_PREFIX = "interim_";
