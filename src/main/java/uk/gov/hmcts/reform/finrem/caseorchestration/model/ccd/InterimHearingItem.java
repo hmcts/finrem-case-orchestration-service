@@ -76,7 +76,7 @@ public class InterimHearingItem {
     @JsonProperty("interim_thamesvalleyCourtList")
     public String interimThamesvalleyCourtList;
     @JsonProperty("interimUploadAdditionalDocument")
-    public InterimUploadAdditionalDocument interimUploadAdditionalDocument;
+    public CaseDocument interimUploadAdditionalDocument;
     @JsonProperty("interimAdditionalInformationAboutHearing")
     public String interimAdditionalInformationAboutHearing;
 }

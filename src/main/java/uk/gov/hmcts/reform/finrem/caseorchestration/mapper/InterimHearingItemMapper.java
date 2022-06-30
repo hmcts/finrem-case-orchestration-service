@@ -8,7 +8,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocumentsData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimUploadAdditionalDocument;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -97,15 +96,9 @@ public class InterimHearingItemMapper {
             .build();
     }
 
-    private InterimUploadAdditionalDocument loadInterimUploadedDocument(Map<String, Object> caseData) {
+    private CaseDocument loadInterimUploadedDocument(Map<String, Object> caseData) {
         if (caseData.get(INTERIM_HEARING_UPLOADED_DOCUMENT) != null) {
-            CaseDocument interimUploadAdditionalDocument  =
-                interimHearingHelper.convertToCaseDocument(caseData.get(INTERIM_HEARING_UPLOADED_DOCUMENT));
-            return InterimUploadAdditionalDocument.builder()
-                .documentUrl(interimUploadAdditionalDocument.getDocumentUrl())
-                .documentFilename(interimUploadAdditionalDocument.getDocumentFilename())
-                .documentBinaryUrl(interimUploadAdditionalDocument.getDocumentBinaryUrl())
-                .build();
+            return interimHearingHelper.convertToCaseDocument(caseData.get(INTERIM_HEARING_UPLOADED_DOCUMENT));
         }
         return null;
     }
