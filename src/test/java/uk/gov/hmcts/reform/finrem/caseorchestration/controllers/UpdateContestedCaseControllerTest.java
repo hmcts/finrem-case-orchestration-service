@@ -40,6 +40,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     private static final String DATA_DIVORCE_UPLOAD_PETITION = "$.data.divorceUploadPetition";
     private static final String DATA_DIVORCE_UPLOAD_EVIDENCE_2 = "$.data.divorceUploadEvidence2";
     private static final String DATA_DIVORCE_DECREE_ABSOLUTE_DATE = "$.data.divorceDecreeAbsoluteDate";
+    private static final String CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE_SOLICITOR = "/case-orchestration/update-contested-case-solicitor";
 
     private static final String FEE_LOOKUP_JSON = "/fixtures/fee-lookup.json";
 
@@ -515,6 +516,46 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .andDo(print())
             .andExpect(jsonPath("$.data.promptForAnyDocument").exists())
             .andExpect(jsonPath("$.data.uploadAdditionalDocument").exists());
+    }
+
+    @Test
+    public void shouldDeleteRespondentSolicitorContactDetailsContested() throws Exception {
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/contested/remove-respondent-solicitor-details.json").toURI()));
+        mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE_SOLICITOR)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.rSolicitorFirm").doesNotExist())
+            .andExpect(jsonPath("$.data.rSolicitorName").doesNotExist())
+            .andExpect(jsonPath("$.data.rSolicitorReference").doesNotExist())
+            .andExpect(jsonPath("$.data.rSolicitorAddress").doesNotExist())
+            .andExpect(jsonPath("$.data.rSolicitorAddressLabel").doesNotExist())
+            .andExpect(jsonPath("$.data.rSolicitorEmail").doesNotExist())
+            .andExpect(jsonPath("$.data.rSolicitorPhone").doesNotExist())
+            .andExpect(jsonPath("$.data.RespSolNotificationsEmailConsent").doesNotExist());
+    }
+
+    @Test
+    public void shouldDeleteApplicantSolicitorContactDetailsContested() throws Exception {
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/applicant-solicitor-to-draft-order-with-email-consent.json").toURI()));
+        mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE_SOLICITOR)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.applicantSolicitorFirm").doesNotExist())
+            .andExpect(jsonPath("$.data.applicantSolicitorName").doesNotExist())
+            .andExpect(jsonPath("$.data.solicitorReference").doesNotExist())
+            .andExpect(jsonPath("$.data.applicantSolicitorAddress").doesNotExist())
+            .andExpect(jsonPath("$.data.applicantSolicitorAddressLabel").doesNotExist())
+            .andExpect(jsonPath("$.data.applicantSolicitorEmail").doesNotExist())
+            .andExpect(jsonPath("$.data.applicantSolicitorPhone").doesNotExist())
+            .andExpect(jsonPath("$.data.applicantSolicitorConsentForEmails").doesNotExist());
     }
 
     private void doRequestSetUp() throws IOException, URISyntaxException {
