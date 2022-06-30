@@ -19,7 +19,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class FinremCallbackRequestDeserializerTest {
 
-    private final String CALLBACK_REQUEST_JSON_FIXTURE = "fixtures/refusal-order-contested.json";
+    private static final String REFUSAL_ORDER_CALLBACK_REQUEST = "fixtures/refusal-order-contested.json";
+    private static final String CONTESTED_INTERIM_CALLBACK_REQUEST = "fixtures/contested-interim-hearing.json";
+    private static final String SOL_CONTEST_CALLBACK_REQUEST = "fixtures/deserialisation/ccd-request-with-solicitor-contestApplicationIssued.json";
 
     private FinremCallbackRequestDeserializer callbackRequestDeserializer;
 
@@ -28,16 +30,14 @@ public class FinremCallbackRequestDeserializerTest {
     private String callback;
 
     @Before
-    public void testSetUp() throws IOException {
-        String path = Objects.requireNonNull(getClass().getClassLoader().getResource(CALLBACK_REQUEST_JSON_FIXTURE)).getFile();
-        callback = FileUtils.readFileToString(new File(path), StandardCharsets.UTF_8.name());
+    public void testSetUp() {
         objectMapper = new ObjectMapper();
+        callbackRequestDeserializer = new FinremCallbackRequestDeserializer(objectMapper);
     }
 
     @Test
-    public void givenValidCallbackRequest_whenDeserializeFromString_thenSuccessfullyDeserialize() {
-        callbackRequestDeserializer = new FinremCallbackRequestDeserializer(objectMapper);
-
+    public void givenValidCallbackRequest_whenDeserializeFromString_thenSuccessfullyDeserialize() throws IOException {
+        setCallbackString(REFUSAL_ORDER_CALLBACK_REQUEST);
         CallbackRequest callbackRequest = callbackRequestDeserializer.deserialize(callback);
 
         assertNotNull(callbackRequest);
@@ -45,7 +45,28 @@ public class FinremCallbackRequestDeserializerTest {
         assertEquals(eventType, EventType.GIVE_ALLOCATION_DIRECTIONS);
         FinremCaseData caseData = callbackRequest.getCaseDetails().getCaseData();
         assertEquals(caseData.getContactDetailsWrapper().getApplicantRepresented(), YesOrNo.YES);
-        assertEquals(caseData.getRegionWrapper().getDefaultRegionWrapper()
-            .getNottinghamCourtList().getId(), "FR_s_NottinghamList_1");
+        assertEquals(caseData.getRegionWrapper().getDefaultCourtList().getNottinghamCourtList().getId(), "FR_s_NottinghamList_1");
+    }
+
+
+    @Test
+    public void givenGeneralOrderFixture_whenDeserializeFromString_thenSuccessfullyDeserialize() throws IOException {
+        setCallbackString(CONTESTED_INTERIM_CALLBACK_REQUEST);
+        CallbackRequest callbackRequest = callbackRequestDeserializer.deserialize(callback);
+
+        assertNotNull(callbackRequest);
+    }
+
+    @Test
+    public void givenCcdRequestAppIssued_whenDeserializeFromString_thenSuccessfullyDeserialize() throws IOException {
+        setCallbackString(SOL_CONTEST_CALLBACK_REQUEST);
+        CallbackRequest callbackRequest = callbackRequestDeserializer.deserialize(callback);
+
+        assertNotNull(callbackRequest);
+    }
+
+    private void setCallbackString(String fileName) throws IOException {
+        String path = Objects.requireNonNull(getClass().getClassLoader().getResource(fileName)).getFile();
+        callback = FileUtils.readFileToString(new File(path), StandardCharsets.UTF_8.name());
     }
 }
