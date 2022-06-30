@@ -36,7 +36,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_OTHER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_QUESTIONNAIRES_ANSWERS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_STATEMENTS_EXHIBITS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_CORRESPONDENCE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_EVIDENCE_COLLECTION;
@@ -85,9 +85,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
     public void applicantCorrespondenceDocumentsFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
         uploadDocumentList.add(createContestedUploadDocumentItem("Letter from Applicant", "applicant", "no", null));
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertThat(getDocumentCollection(caseData, APPLICANT_CORRESPONDENCE_COLLECTION), hasSize(1));
     }
@@ -100,9 +100,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
         uploadDocumentList.add(createContestedUploadDocumentItem("Form F", "applicant", "no", null));
         uploadDocumentList.add(createContestedUploadDocumentItem("Form G", "applicant", "no", null));
         uploadDocumentList.add(createContestedUploadDocumentItem("Form H", "applicant", "no", null));
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertThat(getDocumentCollection(caseData, APPLICANT_FR_FORM_COLLECTION), hasSize(5));
     }
@@ -124,9 +124,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
         uploadDocumentList.add(createContestedUploadDocumentItem("Care Plan", "applicant", "no", null));
         uploadDocumentList.add(createContestedUploadDocumentItem("Offers", "applicant", "no", null));
         uploadDocumentList.add(createContestedUploadDocumentItem("other", "applicant", "no", "Other Example"));
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertThat(getDocumentCollection(caseData, APPLICANT_EVIDENCE_COLLECTION), hasSize(14));
     }
@@ -135,9 +135,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
     public void applicantTrialBundleDocumentsFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
         uploadDocumentList.add(createContestedUploadDocumentItem("Trial Bundle", "applicant", "no", null));
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertThat(getDocumentCollection(caseData, APPLICANT_TRIAL_BUNDLE_COLLECTION), hasSize(1));
     }
@@ -146,9 +146,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
     public void applicantConfidentialDocumentsFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         uploadDocumentList.add(createContestedUploadDocumentItem("Other", "applicant", "yes", "Other Example"));
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertThat(getDocumentCollection(caseData, APPLICANT_CONFIDENTIAL_DOCS_COLLECTION), hasSize(1));
     }
@@ -157,9 +157,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
     public void respondentCorrespondenceDocumentsFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
         uploadDocumentList.add(createContestedUploadDocumentItem("Letter from Applicant", "respondent", "no", null));
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertThat(getDocumentCollection(caseData, RESPONDENT_CORRESPONDENCE_COLLECTION), hasSize(1));
     }
@@ -172,9 +172,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
         uploadDocumentList.add(createContestedUploadDocumentItem("Form F", "respondent", "no", null));
         uploadDocumentList.add(createContestedUploadDocumentItem("Form G", "respondent", "no", null));
         uploadDocumentList.add(createContestedUploadDocumentItem("Form H", "respondent", "no", null));
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertThat(getDocumentCollection(caseData, RESPONDENT_FR_FORM_COLLECTION), hasSize(5));
     }
@@ -196,9 +196,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
         uploadDocumentList.add(createContestedUploadDocumentItem("Care Plan", "respondent", "no", null));
         uploadDocumentList.add(createContestedUploadDocumentItem("Offers", "respondent", "no", null));
         uploadDocumentList.add(createContestedUploadDocumentItem("other", "respondent", "no", "Other Example"));
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertThat(getDocumentCollection(caseData, RESPONDENT_EVIDENCE_COLLECTION), hasSize(14));
     }
@@ -207,9 +207,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
     public void respondentTrialBundleDocumentsFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
         uploadDocumentList.add(createContestedUploadDocumentItem("Trial Bundle", "respondent", "no", null));
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertThat(getDocumentCollection(caseData, RESPONDENT_TRIAL_BUNDLE_COLLECTION), hasSize(1));
     }
@@ -218,9 +218,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
     public void respondentConfidentialDocumentsFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         uploadDocumentList.add(createContestedUploadDocumentItem("Other", "respondent", "yes", "Other Example"));
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertThat(getDocumentCollection(caseData, RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION), hasSize(1));
     }
@@ -230,9 +230,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         uploadDocumentList.add(createContestedUploadDocumentItem("Trial Bundle", "applicant", "no", null));
 
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertThat(getDocumentCollection(caseData, APP_HEARING_BUNDLES_COLLECTION), hasSize(1));
     }
@@ -242,9 +242,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         uploadDocumentList.add(createContestedUploadDocumentItem("Applicant - Form E", "applicant", "no", null));
 
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertThat(getDocumentCollection(caseData, APP_FORM_E_EXHIBITS_COLLECTION), hasSize(1));
     }
@@ -256,9 +256,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
         uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "applicant", "no", null));
         uploadDocumentList.add(createContestedUploadDocumentItem("Form G", "applicant", "no", null));
 
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertThat(getDocumentCollection(caseData, APP_CHRONOLOGIES_STATEMENTS_COLLECTION), hasSize(3));
     }
@@ -269,9 +269,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
         uploadDocumentList.add(createContestedUploadDocumentItem("Questionnaire", "applicant", "no", null));
         uploadDocumentList.add(createContestedUploadDocumentItem("Reply to Questionnaire", "applicant", "no", null));
 
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertThat(getDocumentCollection(caseData, APP_QUESTIONNAIRES_ANSWERS_COLLECTION), hasSize(2));
     }
@@ -282,9 +282,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
         uploadDocumentList.add(createContestedUploadDocumentItem("Statement/Affidavit", "applicant", "no", null));
         uploadDocumentList.add(createContestedUploadDocumentItem("Witness Statement/Affidavit", "applicant", "no", null));
 
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertThat(getDocumentCollection(caseData, APP_STATEMENTS_EXHIBITS_COLLECTION), hasSize(2));
     }
@@ -296,9 +296,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
         uploadDocumentList.add(createContestedUploadDocumentItem("Skeleton Argument", "applicant", "no", null));
         uploadDocumentList.add(createContestedUploadDocumentItem("Case Summary", "applicant", "no", null));
 
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertThat(getDocumentCollection(caseData, APP_CASE_SUMMARIES_COLLECTION), hasSize(3));
     }
@@ -308,9 +308,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         uploadDocumentList.add(createContestedUploadDocumentItem("Form H", "applicant", "no", null));
 
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertThat(getDocumentCollection(caseData, APP_FORMS_H_COLLECTION), hasSize(1));
     }
@@ -320,9 +320,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         uploadDocumentList.add(createContestedUploadDocumentItem("Valuation Report", "applicant", "no", null));
         uploadDocumentList.add(createContestedUploadDocumentItem("Expert Evidence", "applicant", "no", null));
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertThat(getDocumentCollection(caseData, APP_EXPERT_EVIDENCE_COLLECTION), hasSize(2));
     }
@@ -333,9 +333,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
         uploadDocumentList.add(createContestedUploadDocumentItem("Offers", "applicant", "no", null));
         uploadDocumentList.add(createContestedUploadDocumentItem("Letter from Applicant", "applicant", "no", null));
 
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertThat(getDocumentCollection(caseData, APP_CORRESPONDENCE_COLLECTION), hasSize(2));
     }
@@ -349,9 +349,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
         uploadDocumentList.add(createContestedUploadDocumentItem("Care Plan", "applicant", "no", null));
         uploadDocumentList.add(createContestedUploadDocumentItem("Pension Plan", "applicant", "no", null));
 
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertThat(getDocumentCollection(caseData, APP_OTHER_COLLECTION), hasSize(5));
     }
@@ -361,9 +361,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         uploadDocumentList.add(createContestedUploadDocumentItem("Trial Bundle", "respondent", "no", null));
 
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertThat(getDocumentCollection(caseData, RESP_HEARING_BUNDLES_COLLECTION), hasSize(1));
     }
@@ -373,9 +373,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         uploadDocumentList.add(createContestedUploadDocumentItem("Applicant - Form E", "respondent", "no", null));
 
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertThat(getDocumentCollection(caseData, RESP_FORM_E_EXHIBITS_COLLECTION), hasSize(1));
     }
@@ -387,9 +387,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
         uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "respondent", "no", null));
         uploadDocumentList.add(createContestedUploadDocumentItem("Form G", "respondent", "no", null));
 
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertThat(getDocumentCollection(caseData, RESP_CHRONOLOGIES_STATEMENTS_COLLECTION), hasSize(3));
     }
@@ -400,9 +400,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
         uploadDocumentList.add(createContestedUploadDocumentItem("Questionnaire", "respondent", "no", null));
         uploadDocumentList.add(createContestedUploadDocumentItem("Reply to Questionnaire", "respondent", "no", null));
 
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertThat(getDocumentCollection(caseData, RESP_QUESTIONNAIRES_ANSWERS_COLLECTION), hasSize(2));
     }
@@ -413,9 +413,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
         uploadDocumentList.add(createContestedUploadDocumentItem("Statement/Affidavit", "respondent", "no", null));
         uploadDocumentList.add(createContestedUploadDocumentItem("Witness Statement/Affidavit", "respondent", "no", null));
 
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertThat(getDocumentCollection(caseData, RESP_STATEMENTS_EXHIBITS_COLLECTION), hasSize(2));
     }
@@ -427,9 +427,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
         uploadDocumentList.add(createContestedUploadDocumentItem("Skeleton Argument", "respondent", "no", null));
         uploadDocumentList.add(createContestedUploadDocumentItem("Case Summary", "respondent", "no", null));
 
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertThat(getDocumentCollection(caseData, RESP_CASE_SUMMARIES_COLLECTION), hasSize(3));
     }
@@ -439,9 +439,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         uploadDocumentList.add(createContestedUploadDocumentItem("Form H", "respondent", "no", null));
 
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertThat(getDocumentCollection(caseData, RESP_FORM_H_COLLECTION), hasSize(1));
     }
@@ -451,9 +451,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         uploadDocumentList.add(createContestedUploadDocumentItem("Valuation Report", "respondent", "no", null));
         uploadDocumentList.add(createContestedUploadDocumentItem("Expert Evidence", "respondent", "no", null));
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertThat(getDocumentCollection(caseData, RESP_EXPERT_EVIDENCE_COLLECTION), hasSize(2));
     }
@@ -464,9 +464,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
         uploadDocumentList.add(createContestedUploadDocumentItem("Offers", "respondent", "no", null));
         uploadDocumentList.add(createContestedUploadDocumentItem("Letter from Applicant", "respondent", "no", null));
 
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertThat(getDocumentCollection(caseData, RESP_CORRESPONDENCE_COLLECTION), hasSize(2));
     }
@@ -480,9 +480,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
         uploadDocumentList.add(createContestedUploadDocumentItem("Care Plan", "respondent", "no", null));
         uploadDocumentList.add(createContestedUploadDocumentItem("Pension Plan", "respondent", "no", null));
 
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertThat(getDocumentCollection(caseData, RESP_OTHER_COLLECTION), hasSize(5));
     }
@@ -495,11 +495,11 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
 
         uploadDocumentList.add(createContestedUploadDocumentItem(null, "applicant", "yes", null));
         uploadDocumentList.add(createContestedUploadDocumentItem("Form B", null, "yes", null));
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
-        assertThat(getDocumentCollection(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION), hasSize(3));
+        assertThat(getDocumentCollection(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION), hasSize(3));
     }
 
     @Test
@@ -512,9 +512,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
         //Valid filter to Confidential Collection
         uploadDocumentList.add(createContestedUploadDocumentItem("other", "applicant", "yes", null));
         uploadDocumentList.add(createContestedUploadDocumentItem("other", "applicant", "yes", "Other Example"));
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertThat(getDocumentCollection(caseData, APP_OTHER_COLLECTION), hasSize(3));
         assertThat(getDocumentCollection(caseData, APPLICANT_CONFIDENTIAL_DOCS_COLLECTION), hasSize(2));
@@ -523,9 +523,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
     @Test
     public void documentsUploadedDoNotFilterToRespondentUnlessSelected() {
         uploadDocumentList.add(createContestedUploadDocumentItem("Letter from Applicant", "applicant", "no", null));
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertThat(getDocumentCollection(caseData, APP_CORRESPONDENCE_COLLECTION), hasSize(1));
 
@@ -547,9 +547,9 @@ public class ContestedUploadDocumentsHelperTest extends BaseServiceTest {
 
         uploadDocumentList.add(createContestedUploadDocumentItem("Other", "applicant", "yes", "Other Example"));
         uploadDocumentList.add(createContestedUploadDocumentItem("Other", "respondent", "yes", "Other Example"));
-        caseDetails.getData().put(CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
-        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_LITIGANT_DOCUMENTS_COLLECTION);
+        uploadCaseFilesService.setUploadedDocumentsToCollections(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         assertNull(getDocumentCollection(caseData, APPLICANT_CONFIDENTIAL_DOCS_COLLECTION));
         assertNull(getDocumentCollection(caseData, RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION));
