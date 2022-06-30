@@ -279,7 +279,7 @@ public class InterimHearingService {
 
             String beforeMigrationHearingDate = nullToEmpty(caseData.get(INTERIM_HEARING_DATE));
             String beforeMigrationHearingTime = nullToEmpty(caseData.get(INTERIM_HEARING_TIME));
-
+            log.info("Non collection hearing date {} and time {}",beforeMigrationHearingDate, beforeMigrationHearingTime);
             if (beforeMigrationHearingDate.isEmpty() && beforeMigrationHearingTime.isEmpty()) {
                 beforeInterimHearingList.forEach(data -> beforeMap.put(data.getId(), String.join("#",
                     data.getValue().getInterimHearingDate(), data.getValue().getInterimHearingTime())));
@@ -287,7 +287,7 @@ public class InterimHearingService {
                 currentInterimHearingList.forEach(data -> beforeMap.put(data.getId(), String.join("#",
                     beforeMigrationHearingDate, beforeMigrationHearingTime)));
             }
-
+            log.info("beforeMap::" + beforeMap.size());
             currentMap.entrySet().forEach(currentData -> beforeMap.entrySet()
                     .forEach(beforeData -> setList(currentData, beforeData, modifiedCollectionList)));
         }
