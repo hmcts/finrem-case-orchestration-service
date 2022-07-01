@@ -19,16 +19,11 @@ def versions = [
     commonsBeanUtils     : '1.9.4',
     commonsIo            : '2.7',
     commonsLang3         : '3.11',
-    gradlePitest         : '1.5.1',
-    jsonAssert           : '1.2.3',
     junit                : '4.13.1',
     lombok               : '1.18.22',
     mockito              : '3.4.4',
-    nimbus               : '5.1',
     pact_version         : '4.1.11',
     pdfbox               : '2.0.25',
-    pitest               : '1.5.2',
-    powerMock            : '1.7.3',
     reformLogging        : '5.1.5',
     serenity             : '3.2.5',
     serviceTokenGenerator: '3.1.1',
@@ -44,6 +39,12 @@ def versions = [
     openfeignForm        : '3.8.0',
     jaxbOsgi             : '2.3.3'
 ]
+
+project.ext {
+    pactVersion = getCheckedOutGitCommitHash()
+    springCloudBomVersion = "2021.0.3"
+    restAssuredBomVersion = "5.1.1"
+}
 
 group = 'uk.gov.hmcts.reform.finrem'
 version = '0.0.1'
@@ -280,11 +281,6 @@ task runAndPublishConsumerPactTests(type: Test){
 
 }
 
-project.ext {
-    pactVersion = getCheckedOutGitCommitHash()
-    springCloudVersion = "2021.0.3"
-}
-
 static def getCheckedOutGitCommitHash() {
     'git rev-parse --verify --short HEAD'.execute().text.trim()
 }
@@ -325,28 +321,8 @@ bootWithCCD {
 
 dependencyManagement {
     imports {
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-        mavenBom "io.rest-assured:rest-assured-bom:5.1.1"
-    }
-    dependencies {
-        dependency group: 'com.google.guava', name: 'guava', version: '30.1-jre'
-        dependency group: 'commons-beanutils', name: 'commons-beanutils', version: versions.commonsBeanUtils
-        dependency group: 'junit', name: 'junit', version: '4.13.1'
-        dependency group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.61'
-
-        dependencySet(group: 'org.apache.httpcomponents', version: '4.5.13') {
-            entry 'httpclient'
-            entry 'fluent-hc'
-        }
-
-        // prototype pollution vulnerability in handlebars
-        dependency group: 'com.github.jknack', name: 'handlebars', version: '4.2.0'
-
-        //CVE-2021-42550
-        dependencySet(group: 'ch.qos.logback', version: '1.2.10') {
-            entry 'logback-classic'
-            entry 'logback-core'
-        }
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudBomVersion}"
+        mavenBom "io.rest-assured:rest-assured-bom:${restAssuredBomVersion}"
     }
 }
 
@@ -427,7 +403,7 @@ dependencies {
     functionalImplementation group: 'com.github.hmcts', name: 'ccd-client', version: versions.ccdClient
     functionalImplementation group: 'com.github.hmcts', name:'service-auth-provider-java-client', version: versions.serviceTokenGenerator
 
-    functionalImplementation "com.github.hmcts:bsp-common-lib:${versions.bspCommonLib}"
+    functionalImplementation group: 'com.github.hmcts', name: 'bsp-common-lib', version: versions.bspCommonLib
 
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
