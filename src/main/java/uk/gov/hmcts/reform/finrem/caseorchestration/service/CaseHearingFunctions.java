@@ -304,11 +304,11 @@ public final class CaseHearingFunctions {
 
     public static Map<String, Object> buildConsentedFrcCourtDetails() {
         return new ObjectMapper().convertValue(FrcCourtDetails.builder()
-                .courtName(OrchestrationConstants.CTSC_COURT_NAME)
-                .courtAddress(OrchestrationConstants.CTSC_COURT_ADDRESS)
-                .phoneNumber(OrchestrationConstants.CTSC_PHONE_NUMBER)
-                .email((OrchestrationConstants.CTSC_EMAIL_ADDRESS))
-                .build(), Map.class);
+            .courtName(OrchestrationConstants.CTSC_COURT_NAME)
+            .courtAddress(OrchestrationConstants.CTSC_COURT_ADDRESS)
+            .phoneNumber(OrchestrationConstants.CTSC_PHONE_NUMBER)
+            .email((OrchestrationConstants.CTSC_EMAIL_ADDRESS))
+            .build(), Map.class);
     }
 
     static String getCourtDetailsString() {

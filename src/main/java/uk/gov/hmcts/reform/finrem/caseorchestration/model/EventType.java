@@ -15,13 +15,13 @@ public enum EventType {
 
     private final String ccdType;
 
-    public String getCcdType() {
-        return ccdType;
-    }
-
     public static EventType getEventType(String ccdType) {
         return Arrays.stream(EventType.values())
             .filter(eventTypeValue -> eventTypeValue.ccdType.equals(ccdType))
             .findFirst().orElseThrow(IllegalArgumentException::new);
+    }
+
+    public String getCcdType() {
+        return ccdType;
     }
 }

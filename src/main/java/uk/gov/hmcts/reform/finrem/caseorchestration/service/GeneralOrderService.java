@@ -50,10 +50,9 @@ public class GeneralOrderService {
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
     private final CaseDataService caseDataService;
-
-    private BiFunction<CaseDetails, String, CaseDocument> generateDocument = this::applyGenerateDocument;
     private Function<CaseDocument, GeneralOrderPreviewDocument> createGeneralOrderData = this::applyGeneralOrderData;
     private UnaryOperator<CaseDetails> addExtraFields = this::applyAddExtraFields;
+    private BiFunction<CaseDetails, String, CaseDocument> generateDocument = this::applyGenerateDocument;
 
     public Map<String, Object> createGeneralOrder(String authorisationToken, CaseDetails caseDetails) {
         log.info("Generating General Order for Case ID: {}", caseDetails.getId());

@@ -44,5 +44,5 @@ public interface PaymentClient {
         produces = MediaType.APPLICATION_JSON_VALUE
     )
     PaymentResponse pbaPaymentWithCaseType(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken,
-                               @RequestBody PaymentRequest paymentRequest);
+                                           @RequestBody PaymentRequest paymentRequest);
 }

@@ -31,9 +31,9 @@ public abstract class BaseUpdateFrcInfoDocumentService {
 
     @Autowired
     public BaseUpdateFrcInfoDocumentService(GenericDocumentService genericDocumentService,
-                                               DocumentConfiguration documentConfiguration,
-                                               CaseDataService caseDataService,
-                                               UpdateFrcInfoLetterDetailsGenerator updateFrcInfoLetterDetailsGenerator) {
+                                            DocumentConfiguration documentConfiguration,
+                                            CaseDataService caseDataService,
+                                            UpdateFrcInfoLetterDetailsGenerator updateFrcInfoLetterDetailsGenerator) {
         this.genericDocumentService = genericDocumentService;
         this.documentConfiguration = documentConfiguration;
         this.caseDataService = caseDataService;
@@ -43,7 +43,7 @@ public abstract class BaseUpdateFrcInfoDocumentService {
     public abstract Optional<CaseDocument> getUpdateFrcInfoLetter(CaseDetails caseDetails, String authToken);
 
     protected CaseDocument generateSolicitorUpdateFrcInfoLetter(CaseDetails caseDetails, String authToken,
-                                                      DocumentHelper.PaperNotificationRecipient recipient) {
+                                                                DocumentHelper.PaperNotificationRecipient recipient) {
         log.info("Generating Update FRC Info Letter for {} SOLICITOR for caseId {}", recipient, caseDetails.getId());
         String template = documentConfiguration.getUpdateFRCInformationSolicitorTemplate();
         String fileName = documentConfiguration.getUpdateFRCInformationSolicitorFilename();
@@ -52,8 +52,8 @@ public abstract class BaseUpdateFrcInfoDocumentService {
     }
 
     protected CaseDocument generateLitigantUpdateFrcInfoLetter(CaseDetails caseDetails,
-                                                     String authToken,
-                                                     DocumentHelper.PaperNotificationRecipient recipient) {
+                                                               String authToken,
+                                                               DocumentHelper.PaperNotificationRecipient recipient) {
         log.info("Generating Update FRC Info Letter for {} for caseId {}", recipient, caseDetails.getId());
         String template = documentConfiguration.getUpdateFRCInformationLitigantTemplate();
         String filename = documentConfiguration.getUpdateFRCInformationLitigantFilename();

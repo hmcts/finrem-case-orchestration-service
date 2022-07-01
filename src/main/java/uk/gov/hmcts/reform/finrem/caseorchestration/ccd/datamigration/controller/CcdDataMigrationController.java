@@ -1,8 +1,11 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.controller;
 
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,11 +36,12 @@ public class CcdDataMigrationController {
 
     @PostMapping(value = "/migrate", consumes = APPLICATION_JSON_VALUE)
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
-            response = CallbackResponse.class)})
+        @ApiResponse(responseCode = "200",
+            description = "Callback was processed successfully or in case of an error message is attached to the case",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = CallbackResponse.class))})})
     public CallbackResponse migrate(
         @RequestHeader(value = AUTHORIZATION_HEADER) final String authorisationToken,
-        @RequestBody @ApiParam("CaseData") final CallbackRequest ccdRequest) {
+        @RequestBody @Parameter(description = "CaseData") final CallbackRequest ccdRequest) {
 
         CaseDetails caseDetails = ccdRequest.getCaseDetails();
         log.info("FR case migration for removing respondent org policy. Request received for case {}", caseDetails.getId());
@@ -57,11 +61,12 @@ public class CcdDataMigrationController {
 
     @PostMapping(value = "/migrateFrc", consumes = APPLICATION_JSON_VALUE)
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
-            response = CallbackResponse.class)})
+        @ApiResponse(responseCode = "200",
+            description = "Callback was processed successfully or in case of an error message is attached to the case",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = CallbackResponse.class))})})
     public CallbackResponse migrateFrc(
         @RequestHeader(value = AUTHORIZATION_HEADER) final String authorisationToken,
-        @RequestBody @ApiParam("CaseData") final CallbackRequest ccdRequest) {
+        @RequestBody @Parameter(description = "CaseData") final CallbackRequest ccdRequest) {
 
         CaseDetails caseDetails = ccdRequest.getCaseDetails();
         log.info("FR case migration request received for case {}", caseDetails.getId());

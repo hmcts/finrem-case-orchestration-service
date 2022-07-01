@@ -92,7 +92,7 @@ public class AdditionalHearingDocumentService {
                 .get(DIRECTION_DETAILS_COLLECTION_CT));
 
         //check that the list contains one or more values for the court hearing information
-        if (! directionDetailsCollectionList.isEmpty()) {
+        if (!directionDetailsCollectionList.isEmpty()) {
             DirectionDetailsCollection latestDirectionDetailsCollectionItem =
                 directionDetailsCollectionList.get(directionDetailsCollectionList.size() - 1).getDirectionDetailsCollection();
 
@@ -189,7 +189,7 @@ public class AdditionalHearingDocumentService {
         AdditionalHearingDocumentData additionalHearingDocument = additionalHearingDocumentData.get(additionalHearingDocumentData.size() - 1);
 
         List<BulkPrintDocument> document = singletonList(documentHelper.getBulkPrintDocumentFromCaseDocument(
-                additionalHearingDocument.getAdditionalHearingDocument().getDocument()));
+            additionalHearingDocument.getAdditionalHearingDocument().getDocument()));
 
         bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, document);
         bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, document);

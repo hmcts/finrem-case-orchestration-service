@@ -30,6 +30,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequiredArgsConstructor
 public class AssignCaseAccessService {
 
+    private static final String CREATOR_ROLE = "[CREATOR]";
     private final AssignCaseAccessServiceConfiguration assignCaseAccessServiceConfiguration;
     private final AssignCaseAccessRequestMapper assignCaseAccessRequestMapper;
     private final IdamService idamService;
@@ -38,10 +39,7 @@ public class AssignCaseAccessService {
     private final AuthTokenGenerator authTokenGenerator;
     private final CaseDataApiV2 caseDataApi;
     private final SystemUserService systemUserService;
-
     private final FeatureToggleService featureToggleService;
-
-    private static final String CREATOR_ROLE = "[CREATOR]";
 
     public void assignCaseAccess(CaseDetails caseDetails, String authorisationToken) {
         String userId = idamService.getIdamUserId(authorisationToken);

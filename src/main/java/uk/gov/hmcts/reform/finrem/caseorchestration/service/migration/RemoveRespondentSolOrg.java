@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
-
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_RESPONDENT;
 
 @Slf4j

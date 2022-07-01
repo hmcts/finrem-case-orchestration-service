@@ -151,7 +151,8 @@ public class ConsentOrderApprovedDocumentService {
     }
 
     private CaseDocument getLatestConsentInContestedConsentOrder(Map<String, Object> caseData) {
-        return mapper.convertValue(caseData.get(CONSENT_ORDER), new TypeReference<>() {});
+        return mapper.convertValue(caseData.get(CONSENT_ORDER), new TypeReference<>() {
+        });
     }
 
     private List<PensionCollectionData> consentInContestedStampPensionDocuments(Map<String, Object> caseData, String authToken) {
@@ -164,11 +165,13 @@ public class ConsentOrderApprovedDocumentService {
             return new ArrayList<>();
         }
 
-        return mapper.convertValue(caseData.get(CONTESTED_CONSENT_PENSION_COLLECTION), new TypeReference<>() {});
+        return mapper.convertValue(caseData.get(CONTESTED_CONSENT_PENSION_COLLECTION), new TypeReference<>() {
+        });
     }
 
     List<CollectionElement<ApprovedOrder>> getConsentInContestedApprovedOrderCollection(Map<String, Object> caseData) {
-        return mapper.convertValue(caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION), new TypeReference<>() {});
+        return mapper.convertValue(caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION), new TypeReference<>() {
+        });
     }
 
     private CaseDetails prepareCaseDetailsCopyForDocumentGeneratorWithContestedFields(CaseDetails caseDetails) {
@@ -197,7 +200,7 @@ public class ConsentOrderApprovedDocumentService {
 
         if (!approvedOrderCollectionData.isEmpty()) {
             log.info("Extracting '{}' from case data for bulk print, case {}", approvedOrderCollectionFieldName, caseDetails.getId());
-            Map<String, Object> lastApprovedOrder = (Map<String, Object>)(approvedOrderCollectionData.get(approvedOrderCollectionData.size() - 1)
+            Map<String, Object> lastApprovedOrder = (Map<String, Object>) (approvedOrderCollectionData.get(approvedOrderCollectionData.size() - 1)
                 .get(VALUE));
             documentHelper.getDocumentLinkAsCaseDocument(lastApprovedOrder, ORDER_LETTER).ifPresent(documents::add);
             documentHelper.getDocumentLinkAsCaseDocument(lastApprovedOrder, CONSENT_ORDER).ifPresent(documents::add);

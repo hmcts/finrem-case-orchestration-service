@@ -59,6 +59,7 @@ public class TransferCourtService {
     }
 
     private List<TransferLocalCourtEmail> convertToTransferToCourtEmailList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<>() {});
+        return objectMapper.convertValue(object, new TypeReference<>() {
+        });
     }
 }

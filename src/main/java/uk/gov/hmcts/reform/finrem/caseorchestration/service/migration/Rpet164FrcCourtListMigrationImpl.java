@@ -90,13 +90,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 public class Rpet164FrcCourtListMigrationImpl implements MigrationHandler {
 
-    private CaseDataService caseDataService = new CaseDataService();
-
     public static final String EMPTY_STRING = "";
-
     // FRCs
     public static final String KENT = "kent";
-
     //NW OTHER COURT CODES
     public static final String WEST_CUMBRIA_OLD = "FR_NWList_1";
     public static final String PRESTON_OLD = "FR_NWList_2";
@@ -106,10 +102,8 @@ public class Rpet164FrcCourtListMigrationImpl implements MigrationHandler {
     public static final String BLACKPOOL_OLD = "FR_NWList_6";
     public static final String BLACKBURN_OLD = "FR_NWList_7";
     public static final String BARROW_OLD = "FR_NWList_8";
-
     //Temporary Court Code
     public static final String LONDON_TEMP = "FR_londonList_12";
-
     //SE OTHER COURT CODES
     public static final String BASILDON_OLD = "FR_SEList_1";
     public static final String BEDFORD_OLD = "FR_SEList_2";
@@ -132,10 +126,8 @@ public class Rpet164FrcCourtListMigrationImpl implements MigrationHandler {
     public static final String SOUTHEND_OLD = "FR_SEList_19";
     public static final String WATFORD_OLD = "FR_SEList_20";
     public static final String THANET_OLD = "FR_SEList_21";
-
     //Kent Surrey Court List
     public static final String BRIGHTON = "FR_kent_surreyList_7";
-
     //SW Other Court Codes
     public static final String ALDERSHOT_OLD = "FR_SWList_1";
     public static final String YEOVIL_OLD = "FR_SWList_2";
@@ -159,12 +151,12 @@ public class Rpet164FrcCourtListMigrationImpl implements MigrationHandler {
     public static final String BOURNEMOUTH_OLD = "FR_SWList_20";
     public static final String BATH_OLD = "FR_SWList_21";
     public static final String BARNSTAPLE_OLD = "FR_SWList_22";
-
     //Welsh Other Court Codes
     public static final String PRESTATYN_OLD = "FR_WList_1";
     public static final String WELSHPOOL_OLD = "FR_WList_2";
     public static final String WREXHAM_OLD = "FR_WList_3";
     public static final String MOLD_OLD = "FR_WList_4";
+    private CaseDataService caseDataService = new CaseDataService();
 
     @Override
     public Map<String, Object> migrate(CaseDetails caseDetails) {

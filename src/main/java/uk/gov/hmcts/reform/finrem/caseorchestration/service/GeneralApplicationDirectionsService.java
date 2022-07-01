@@ -138,7 +138,7 @@ public class GeneralApplicationDirectionsService {
     }
 
     private void printInterimDocumentPackAndSendToApplicantAndRespondent(CaseDetails caseDetails, String authorisationToken,
-                                                                  List<BulkPrintDocument> documents) {
+                                                                         List<BulkPrintDocument> documents) {
         Map<String, Object> caseData = caseDetails.getData();
         if (isPaperApplication(caseData) || !isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);

@@ -23,18 +23,16 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 @Component
 public class OptionIdToValueTranslator {
 
-    private FixedListOption fixedListOption;
-
     private final String optionsJsonFile;
     private final ObjectMapper objectMapper;
+    private FixedListOption fixedListOption;
+    Consumer<CaseDetails> translateOptionsValues = this::translateFixedListOptions;
 
     @Autowired
     public OptionIdToValueTranslator(@Value("${optionsValueFile}") String optionsJsonFile, ObjectMapper objectMapper) {
         this.optionsJsonFile = optionsJsonFile;
         this.objectMapper = objectMapper;
     }
-
-    Consumer<CaseDetails> translateOptionsValues = this::translateFixedListOptions;
 
     @PostConstruct
     void initOptionValueMap() {

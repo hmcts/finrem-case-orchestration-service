@@ -48,7 +48,7 @@ public class RemovedSolicitorService {
     }
 
     public ChangedRepresentative getRemovedSolicitorAsSolicitor(CaseDetails caseDetails,
-                                                      ChangeOrganisationRequest changeRequest) {
+                                                                ChangeOrganisationRequest changeRequest) {
         final boolean isApplicant = changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY);
 
         if (!isLitigantRepresented(caseDetails, isApplicant)) {
@@ -148,7 +148,7 @@ public class RemovedSolicitorService {
                                                 boolean isApplicant) {
         final OrganisationPolicy organisationPolicy = new ObjectMapper()
             .convertValue(caseDetails.getData().get(orgPolicy),
-            OrganisationPolicy.class);
+                OrganisationPolicy.class);
 
         if (!isSolicitorDigital(caseDetails, isApplicant)) {
             return null;

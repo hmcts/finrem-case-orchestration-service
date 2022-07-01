@@ -22,16 +22,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.tran
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ChildrenInfoMapper {
 
-    @AllArgsConstructor(access = AccessLevel.PRIVATE)
-    public static class Fields {
-        public static final String NAME_OF_CHILD = "NameOfChild";
-        public static final String GENDER = "GenderChild";
-        public static final String DOB = "DateOfBirthChild";
-        public static final String RELATION_TO_APPLICANT = "RelationshipToApplicantChild";
-        public static final String RELATION_TO_RESPONDENT = "RelationshipToRespondentChild";
-        public static final String COUNTRY = "CountryOfResidenceChild";
-    }
-
     public static void applyMappings(List<OcrDataField> ocrDataFields, Map<String, Object> modifiedMap) {
         ComplexTypeCollection<ChildInfo> children = new ComplexTypeCollection<>();
         for (int i = 1; isChildInfoPopulated(i, ocrDataFields); i++) {
@@ -68,5 +58,15 @@ public class ChildrenInfoMapper {
 
     private static String getValueOrEmptyString(int index, List<OcrDataField> ocrDataFields, String fieldPrefix) {
         return getValueFromOcrDataFields(fieldPrefix + index, ocrDataFields).orElse(StringUtils.EMPTY);
+    }
+
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    public static class Fields {
+        public static final String NAME_OF_CHILD = "NameOfChild";
+        public static final String GENDER = "GenderChild";
+        public static final String DOB = "DateOfBirthChild";
+        public static final String RELATION_TO_APPLICANT = "RelationshipToApplicantChild";
+        public static final String RELATION_TO_RESPONDENT = "RelationshipToRespondentChild";
+        public static final String COUNTRY = "CountryOfResidenceChild";
     }
 }

@@ -16,17 +16,17 @@ public enum PostStateOption {
 
     private final EventType eventToTrigger;
 
+    public static PostStateOption getSendOrderPostStateOption(String ccdType) {
+        return Arrays.stream(PostStateOption.values())
+            .filter(option -> option.ccdField.equals(ccdType))
+            .findFirst().orElse(PostStateOption.NONE);
+    }
+
     public String getCcdField() {
         return ccdField;
     }
 
     public EventType getEventToTrigger() {
         return eventToTrigger;
-    }
-
-    public static PostStateOption getSendOrderPostStateOption(String ccdType) {
-        return Arrays.stream(PostStateOption.values())
-            .filter(option -> option.ccdField.equals(ccdType))
-            .findFirst().orElse(PostStateOption.NONE);
     }
 }

@@ -42,10 +42,9 @@ public class RefusalOrderDocumentService {
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
     private final CaseDataService caseDataService;
-
-    private final Function<Pair<CaseDetails, String>, CaseDocument> generateDocument = this::applyGenerateRefusalOrder;
     private final Function<CaseDocument, ConsentOrderData> createConsentOrderData = this::applyCreateConsentOrderData;
     private final UnaryOperator<CaseDetails> addExtraFields = this::applyAddExtraFields;
+    private final Function<Pair<CaseDetails, String>, CaseDocument> generateDocument = this::applyGenerateRefusalOrder;
 
     public Map<String, Object> generateConsentOrderNotApproved(
         String authorisationToken, final CaseDetails caseDetails) {
@@ -113,7 +112,8 @@ public class RefusalOrderDocumentService {
     }
 
     private List<ConsentOrderData> convertToUploadOrderList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<>() {});
+        return objectMapper.convertValue(object, new TypeReference<>() {
+        });
     }
 
     private CaseDetails applyAddExtraFields(CaseDetails caseDetails) {

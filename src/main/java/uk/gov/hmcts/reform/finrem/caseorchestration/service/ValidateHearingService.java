@@ -24,6 +24,12 @@ public class ValidateHearingService {
     public static final String DATE_BETWEEN_12_AND_16_WEEKS = "Date of the hearing must be between 12 and 16 weeks.";
     public static final String REQUIRED_FIELD_EMPTY_ERROR = "Issue Date, fast track decision or hearingDate is empty";
 
+    //TODO: Refactor as it is always used inverted
+    private static boolean isDateInBetweenIncludingEndPoints(final LocalDate min, final LocalDate max,
+                                                             final LocalDate date) {
+        return !(date.isBefore(min) || date.isAfter(max));
+    }
+
     public List<String> validateHearingErrors(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
         String issueDate = Objects.toString(caseData.get(ISSUE_DATE), "");
@@ -53,10 +59,5 @@ public class ValidateHearingService {
             return ImmutableList.of(DATE_BETWEEN_12_AND_16_WEEKS);
         }
         return ImmutableList.of();
-    }
-
-    private static boolean isDateInBetweenIncludingEndPoints(final LocalDate min, final LocalDate max,
-                                                             final LocalDate date) {
-        return !(date.isBefore(min) || date.isAfter(max));
     }
 }
