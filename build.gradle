@@ -15,30 +15,30 @@ plugins {
 }
 
 def versions = [
-    bspCommonLib         : '0.0.50',
-    ccdClient            : '4.8.6',
-    commonsBeanUtils     : '1.9.4',
-    commonsIo            : '2.7',
-    commonsLang3         : '3.11',
-    junit                : '4.13.1',
-    lombok               : '1.18.22',
-    mockito              : '3.4.4',
-    pact_version         : '4.1.11',
-    pdfbox               : '2.0.25',
-    reformLogging        : '5.1.5',
-    serenity             : '3.2.5',
-    serviceTokenGenerator: '3.1.1',
-    springDoc            : '1.6.9',
-    sonarPitest          : '0.5',
-    wiremock             : '2.27.2',
-    apacheLogging        : '2.17.1',
-    idamClient           : '2.0.1',
-    jjwt                 : '0.9.1',
-    skyscreamer          : '1.5.0',
-    propVolumeStarter    : '0.0.4',
-    openfeign            : '11.6',
-    openfeignForm        : '3.8.0',
-    jaxbOsgi             : '2.3.3'
+        guava                : '31.1-jre',
+        bspCommonLib         : '0.0.51',
+        ccdClient            : '4.8.6',
+        commonsBeanUtils     : '1.9.4',
+        commonsIo            : '2.7',
+        commonsLang3         : '3.11',
+        junit                : '4.13.1',
+        lombok               : '1.18.22',
+        mockito              : '3.4.4',
+        pact_version         : '4.1.11',
+        pdfbox               : '2.0.25',
+        reformLogging        : '5.1.5',
+        serenity             : '3.2.5',
+        serviceTokenGenerator: '3.1.1',
+        springDoc            : '1.6.9',
+        wiremock             : '2.27.2',
+        apacheLogging        : '2.17.2',
+        idamClient           : '2.0.1',
+        jjwt                 : '0.9.1',
+        skyscreamer          : '1.5.0',
+        propVolumeStarter    : '0.0.4',
+        openfeign            : '11.6',
+        openfeignForm        : '3.8.0',
+        jaxbOsgi             : '2.3.3'
 ]
 
 project.ext {
@@ -245,7 +245,7 @@ task contractTest(type: Test) {
     systemProperty 'pact.rootDir', "pacts"
 }
 
-task runAndPublishConsumerPactTests(type: Test){
+task runAndPublishConsumerPactTests(type: Test) {
     dependsOn(contractTest)
     logger.lifecycle("Runs pact Tests")
     testClassesDirs = sourceSets.contract.output.classesDirs
@@ -258,7 +258,7 @@ static def getCheckedOutGitCommitHash() {
     'git rev-parse --verify --short HEAD'.execute().text.trim()
 }
 
-task fortifyScan(type: JavaExec)  {
+task fortifyScan(type: JavaExec) {
     mainClass.set("uk.gov.hmcts.fortifyclient.FortifyClientMainApp")
     classpath += sourceSets.test.runtimeClasspath
     jvmArgs = ['--add-opens=java.base/java.lang.reflect=ALL-UNNAMED']
@@ -300,12 +300,12 @@ dependencyManagement {
 }
 
 dependencies {
+    implementation group: 'com.google.guava', name: 'guava', version: versions.guava
     implementation group: 'com.sun.xml.bind', name: 'jaxb-osgi', version: versions.jaxbOsgi
     implementation group: 'com.jayway.jsonpath', name: 'json-path-assert', version: versions.jsonPathAssert
     implementation group: 'commons-io', name: 'commons-io', version: versions.commonsIo
     implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: versions.springDoc
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
-    implementation group: 'org.codehaus.sonar-plugins', name: 'sonar-pitest-plugin', version: versions.sonarPitest
     implementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     implementation group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
@@ -315,14 +315,14 @@ dependencies {
     implementation group: 'io.github.openfeign', name: 'feign-httpclient', version: versions.openfeign
     implementation group: 'io.github.openfeign.form', name: 'feign-form', version: versions.openfeignForm
 
-    implementation group: 'com.github.hmcts', name:'idam-java-client', version: versions.idamClient
+    implementation group: 'com.github.hmcts', name: 'idam-java-client', version: versions.idamClient
 
     implementation group: 'com.github.hmcts', name: 'ccd-client', version: versions.ccdClient
     implementation group: 'com.github.hmcts.java-logging', name: 'java-logging', version: versions.reformLogging
     implementation group: 'com.github.hmcts.java-logging', name: 'java-logging-appinsights', version: versions.reformLogging
     implementation group: 'com.github.hmcts.java-logging', name: 'java-logging-spring', version: versions.reformLogging
     implementation group: 'com.github.hmcts', name: 'properties-volume-spring-boot-starter', version: versions.propVolumeStarter
-    implementation group: 'com.github.hmcts', name:'service-auth-provider-java-client', version: versions.serviceTokenGenerator
+    implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: versions.serviceTokenGenerator
 
     implementation group: 'com.github.hmcts', name: 'bsp-common-lib', version: versions.bspCommonLib
 
@@ -338,7 +338,7 @@ dependencies {
     testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
 
-    testImplementation group: 'com.fasterxml.jackson.core', name:'jackson-databind'
+    testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind'
     testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations'
 
     testImplementation("org.junit.vintage:junit-vintage-engine") {
@@ -368,13 +368,13 @@ dependencies {
 
     functionalImplementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
 
-    functionalImplementation group: 'com.fasterxml.jackson.core', name:'jackson-databind'
+    functionalImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind'
     functionalImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations'
 
     functionalImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     functionalImplementation group: 'org.skyscreamer', name: 'jsonassert', version: versions.skyscreamer
     functionalImplementation group: 'com.github.hmcts', name: 'ccd-client', version: versions.ccdClient
-    functionalImplementation group: 'com.github.hmcts', name:'service-auth-provider-java-client', version: versions.serviceTokenGenerator
+    functionalImplementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: versions.serviceTokenGenerator
 
     functionalImplementation group: 'com.github.hmcts', name: 'bsp-common-lib', version: versions.bspCommonLib
 
