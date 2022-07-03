@@ -89,7 +89,7 @@ public class HearingDocumentController extends BaseController {
 
         List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
 
-        if (notificationService.isSolicitorEmailCommunicationEnabled(caseDetails)) {
+        if (isSolicitorEmailCommunicationEnabled(caseDetails)) {
             CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
             if (caseDetailsBefore != null && hearingDocumentService.alreadyHadFirstHearing(caseDetailsBefore)) {
                 log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
@@ -150,5 +150,12 @@ public class HearingDocumentController extends BaseController {
     private List<DirectionDetailsCollectionData> convertToDirectionDetailsDataList(Object object) {
         return objectMapper.convertValue(object, new TypeReference<>() {
         });
+    }
+
+    public boolean isSolicitorEmailCommunicationEnabled(CaseDetails caseDetails) {
+        return caseDataService.isContestedApplication(caseDetails)
+            && (!notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())
+            || !notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(caseDetails.getData())
+            || !checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails));
     }
 }
