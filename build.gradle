@@ -1,3 +1,9 @@
+buildscript {
+    dependencies {
+        classpath("net.serenity-bdd:serenity-gradle-plugin:3.2.5")
+    }
+}
+
 plugins {
     id 'application'
     id 'checkstyle'
