@@ -32,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -417,8 +418,10 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         when(notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
         additionalHearingDocumentService.bulkPrintAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
 
-        verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
-        verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService, timeout(100).times(1))
+            .printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService, timeout(100).times(1))
+            .printApplicantDocuments(any(), any(), any());
     }
 
     @Test
