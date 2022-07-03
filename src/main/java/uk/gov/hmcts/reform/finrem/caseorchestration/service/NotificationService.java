@@ -397,12 +397,7 @@ public class NotificationService {
         return caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails);
     }
 
-    public boolean isSolicitorEmailCommunicationEnabled(CaseDetails caseDetails) {
-        return caseDataService.isContestedApplication(caseDetails)
-            && (!isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())
-            || !isContestedApplicantSolicitorEmailCommunicationEnabled(caseDetails.getData())
-            || !checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails));
-    }
+
 
     private URI buildUri(String endPoint) {
         return fromHttpUrl(notificationServiceConfiguration.getUrl()
