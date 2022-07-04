@@ -4,7 +4,7 @@ plugins {
     id 'jacoco'
     id 'org.springframework.boot' version "2.7.1"
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-    id 'au.com.dius.pact' version '4.1.11'
+    id 'au.com.dius.pact' version '4.4.0-beta.2'
     id 'com.github.ben-manes.versions' version '0.42.0'
     id "info.solidsoft.pitest" version "1.5.1"
     id 'org.owasp.dependencycheck' version '6.5.3'
@@ -24,7 +24,7 @@ def versions = [
         junit                : '4.13.1',
         lombok               : '1.18.22',
         mockito              : '3.4.4',
-        pact_version         : '4.1.11',
+        pact_version         : '4.4.0-beta.2',
         pdfbox               : '2.0.25',
         reformLogging        : '5.1.5',
         serenity             : '3.2.5',
@@ -387,10 +387,8 @@ dependencies {
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     functionalAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
 
+    contractImplementation group: 'au.com.dius.pact', name: 'consumer', version: versions.pact_version
     contractImplementation group: 'au.com.dius.pact.consumer', name: 'junit', version: versions.pact_version
-    contractImplementation group: 'au.com.dius.pact.consumer', name: 'java8', version: versions.pact_version
-    contractRuntimeOnly group: 'au.com.dius.pact.consumer', name: 'junit', version: versions.pact_version
-    contractRuntimeOnly group: 'au.com.dius.pact.consumer', name: 'java8', version: versions.pact_version
 
     contractImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
 
