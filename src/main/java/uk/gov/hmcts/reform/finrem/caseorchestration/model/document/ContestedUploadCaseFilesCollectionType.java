@@ -36,7 +36,6 @@ public enum ContestedUploadCaseFilesCollectionType {
     RESP_CORRESPONDENCE_COLLECTION("respCorrespondenceDocsColl"),
     RESP_OTHER_COLLECTION("respOtherCollection"),
     CONTESTED_UPLOADED_DOCUMENTS("uploadCaseDocument"),
-    GENERAL_DOCUMENTS_COLLECTION("uploadGeneralDocuments"),
     CONTESTED_FDR_CASE_DOCUMENT_COLLECTION("fdrCaseDocumentCollection");
 
     private final String ccdKey;

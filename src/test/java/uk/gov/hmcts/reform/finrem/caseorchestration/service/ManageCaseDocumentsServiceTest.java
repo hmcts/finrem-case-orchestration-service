@@ -98,11 +98,6 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
         caseDocs.get(2).setId("3");
         caseDocs.get(3).setId("4");
 
-        caseDocs.get(3).getUploadedCaseDocument().setCaseDocuments(
-            CaseDocument.builder().documentFilename("File1")
-                .documentUrl("Url")
-                .documentBinaryUrl("binaryUrl").build());
-
         caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, caseDocs);
         caseDetails.getData().put(APP_CHRONOLOGIES_STATEMENTS_COLLECTION, chronologyDocs);
 
@@ -125,11 +120,6 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
         caseDocs.add(createContestedUploadDocumentItem("Chronology", "applicant", "no", null));
         caseDocs.add(createContestedUploadDocumentItem("Chronology", "applicant", "no", null));
         caseDocs.add(createContestedUploadDocumentItem("Form H", "applicant", "no", null));
-
-        caseDocs.get(3).getUploadedCaseDocument().setCaseDocuments(
-            CaseDocument.builder().documentFilename("File1")
-            .documentUrl("Url")
-            .documentBinaryUrl("binaryUrl").build());
 
         caseDocs.get(0).setId("1");
         caseDocs.get(1).setId("2");
@@ -165,11 +155,6 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
         caseDocs.get(1).setId("2");
         caseDocs.get(2).setId("3");
         caseDocs.get(3).setId("4");
-
-        caseDocs.get(3).getUploadedCaseDocument().setCaseDocuments(
-            CaseDocument.builder().documentFilename("File1")
-                .documentUrl("Url")
-                .documentBinaryUrl("binaryUrl").build());
 
         caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, caseDocs);
         caseDetails.getData().put(APP_FORMS_H_COLLECTION, formH);
