@@ -82,4 +82,11 @@
         <packageUrl regex="true">^pkg:maven/org\.apache\.logging\.log4j/log4j\-api@.*$</packageUrl>
         <cve>CVE-2022-33915</cve>
     </suppress>
+    <suppress>
+        <notes><![CDATA[
+    Junk CVE, only affects Amazon Corretto when hot patch is enabled
+    ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.logging\.log4j/log4j\-to\-slf4j@.*$</packageUrl>
+        <cve>CVE-2022-33915</cve>
+    </suppress>
 </suppressions>
