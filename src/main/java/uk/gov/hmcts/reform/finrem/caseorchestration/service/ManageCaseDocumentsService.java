@@ -34,6 +34,10 @@ public class ManageCaseDocumentsService {
 
     public Map<String, Object> setApplicantAndRespondentDocumentsCollection(CaseDetails caseDetails) {
 
+        Map<String, String> idToCollectionData = findCollectionNameOfDocument(caseDetails.getData());
+
+        findAndRemoveMovedDocumentFromCollections(caseDetails.getData(), idToCollectionData);
+
         caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION,
             getAllContestedUploadDocuments(caseDetails.getData()));
 
