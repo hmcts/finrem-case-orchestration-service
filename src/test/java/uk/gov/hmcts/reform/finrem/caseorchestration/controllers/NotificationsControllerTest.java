@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 
 
 import java.io.IOException;
@@ -52,6 +53,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @MockBean private CaseDataService caseDataService;
     @MockBean private TransferCourtService transferCourtService;
     @MockBean private FeatureToggleService featureToggleService;
+    @MockBean private CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
 
     @Test
     public void sendHwfSuccessfulConfirmationEmailIfDigitalCase() {
@@ -204,7 +206,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void givenSolAgreedToEmails_shouldSendPrepareForHearingEmail() {
+    public void givenApplicantSolicitorAgreedToEmails_shouldSendPrepareForHearingEmail() {
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
@@ -215,7 +217,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldNotSendPrepareForHearingEmailWhenNotAgreed() {
+    public void shouldNotSendPrepareForHearingEmailToApplicantSolicitorWhenNotAgreed() {
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
 
@@ -233,6 +235,27 @@ public class NotificationsControllerTest extends BaseControllerTest {
         notificationsController.sendPrepareForHearingOrderSentEmail(buildCallbackRequest());
 
         verify(notificationService).sendPrepareForHearingOrderSentEmailApplicant(any());
+    }
+
+    @Test
+    public void shouldSendPrepareForHearingOrderSentEmailWhenRespondentAgreed() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
+        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(true);
+        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
+
+        verify(notificationService).sendPrepareForHearingEmailRespondent(any());
+    }
+
+    @Test
+    public void shouldNotSendPrepareForHearingOrderSentEmailWhenRespondentAgreedButNotRegistered() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
+        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(false);
+        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
+
+        verify(notificationService, never()).sendPrepareForHearingEmailApplicant(any());
+        verify(notificationService, never()).sendPrepareForHearingEmailRespondent(any());
     }
 
     @Test

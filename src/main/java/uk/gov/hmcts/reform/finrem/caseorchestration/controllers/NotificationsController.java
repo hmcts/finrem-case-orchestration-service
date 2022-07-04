@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 
 import java.io.IOException;
 import java.util.Map;
@@ -47,6 +48,7 @@ public class NotificationsController extends BaseController {
     private final TransferCourtService transferCourtService;
     private final FeatureToggleService featureToggleService;
     private final NocLetterNotificationService nocLetterNotificationService;
+    private final CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
 
     @PostMapping(value = "/hwf-successful", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Notify Applicant/Applicant Solicitor of HWF Successful by email or letter.")
@@ -332,7 +334,8 @@ public class NotificationsController extends BaseController {
             notificationService.sendPrepareForHearingEmailApplicant(caseDetails);
         }
 
-        if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
+        if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())
+            && checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)) {
             log.info("Sending email notification to Respondent Solicitor for 'Prepare for Hearing'");
             notificationService.sendPrepareForHearingEmailRespondent(caseDetails);
         }
