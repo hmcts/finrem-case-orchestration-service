@@ -92,14 +92,10 @@ public class ManageCaseDocumentsService {
         documentIdsAndCollection.forEach((documentId, collection) ->
             getAllDocumentsInCollection(caseData, collection)
             .forEach(contestedUploadedDocumentData -> {
-                if (collection.startsWith("app")) {
+                if (collection.startsWith("app") || collection.startsWith("resp") || collection.startsWith("fdr")) {
                     caseData.put(collection, findIfDocumentExistInCollectionAfterMove(
                         caseData, getAllDocumentsInCollection(caseData, collection), contestedUploadedDocumentData,
-                        caseDocumentsCollection, "applicant"));
-                } else if (collection.startsWith("resp")) {
-                    caseData.put(collection, findIfDocumentExistInCollectionAfterMove(
-                        caseData, getAllDocumentsInCollection(caseData, collection), contestedUploadedDocumentData,
-                        caseDocumentsCollection, "respondent"));
+                        caseDocumentsCollection));
                 }
             }));
     }
@@ -107,8 +103,7 @@ public class ManageCaseDocumentsService {
     private List<ContestedUploadedDocumentData> findIfDocumentExistInCollectionAfterMove(Map<String, Object> caseData,
                                                                       List<ContestedUploadedDocumentData> collection,
                                                                       ContestedUploadedDocumentData documentToCheck,
-                                                                      List<ContestedUploadedDocumentData> caseDocumentCollection,
-                                                                      String party) {
+                                                                      List<ContestedUploadedDocumentData> caseDocumentCollection) {
 
         for (Iterator<ContestedUploadedDocumentData> it = caseDocumentCollection.iterator(); it.hasNext(); ) {
 

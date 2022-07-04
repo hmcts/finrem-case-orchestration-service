@@ -21,6 +21,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_CHRONOLOGIES_STATEMENTS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_FORMS_H_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FDR_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_FORM_H_COLLECTION;
 
@@ -136,7 +137,6 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
         assertThat(getDocumentCollection(caseData, APP_FORMS_H_COLLECTION), hasSize(1));
     }
 
-
     @Test
     public void givenCaseDataManageCaseDocuments_whenDocumentInWrongCollection_thenMoveItToAppChronologiesCollection() {
 
@@ -194,6 +194,33 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
         assertThat(getDocumentCollection(caseData, RESP_FORM_H_COLLECTION), hasSize(3));
     }
 
+    @Test
+    public void givenCaseDataManageCaseDocuments_whenDocumentIsNotFdrDocument_thenMoveItToRightCollectionFromFdr() {
+
+        List<ContestedUploadedDocumentData> formHFdrDocs = new ArrayList<>();
+
+        formHFdrDocs.add(createContestedUploadDocumentItem("Form H", null, "no", null));
+        formHFdrDocs.get(0).setId("4");
+
+        List<ContestedUploadedDocumentData> caseDocs = new ArrayList<>();
+        caseDocs.add(createContestedUploadDocumentItem("Chronology", "applicant", "no", null));
+        caseDocs.add(createContestedUploadDocumentItem("Chronology", "applicant", "no", null));
+        caseDocs.add(createContestedUploadDocumentItem("Chronology", "applicant", "no", null));
+        caseDocs.add(createContestedUploadDocumentItem("Form H", "applicant", "no", null));
+
+        caseDocs.get(0).setId("1");
+        caseDocs.get(1).setId("2");
+        caseDocs.get(2).setId("3");
+        caseDocs.get(3).setId("4");
+
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, caseDocs);
+        caseDetails.getData().put(FDR_DOCS_COLLECTION, formHFdrDocs);
+
+        manageCaseDocumentsService.manageCaseDocuments(caseDetails.getData());
+
+        assertThat(getDocumentCollection(caseData, APP_CHRONOLOGIES_STATEMENTS_COLLECTION), hasSize(3));
+        assertThat(getDocumentCollection(caseData, FDR_DOCS_COLLECTION), hasSize(0));
+    }
     private CaseDetails populateCaseData() {
 
         uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "Respondent", "no", null));
