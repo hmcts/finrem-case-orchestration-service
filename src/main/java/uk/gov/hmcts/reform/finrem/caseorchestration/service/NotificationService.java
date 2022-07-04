@@ -397,6 +397,11 @@ public class NotificationService {
         return caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails);
     }
 
+    public boolean isSolicitorEmailCommunicationProhibited(CaseDetails caseDetails) {
+        return (!isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())
+            || !isContestedApplicantSolicitorEmailCommunicationEnabled(caseDetails.getData())
+            || !checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails));
+    }
 
 
     private URI buildUri(String endPoint) {
