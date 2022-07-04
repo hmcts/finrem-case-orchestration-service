@@ -1,0 +1,21 @@
+{
+  "token": "",
+  "event_id": "FR_approveApplication",
+  "case_details": {
+    "case_data": {
+      "divorceCaseNumber": "DD12D12345",
+      "divorceStageReached": "Decree Nisi",
+      "assignedToJudge": "Judge Judy",
+      "assignedToJudgeReason": "Draft consent order",
+      "refusalOrderJudgeType": "Her Honour Judge",
+      "refusalOrderJudgeName": "Judgey",
+      "solicitorAgreeToReceiveEmails": "Yes",
+      "solicitorDXnumber": "string",
+      "solicitorEmail": "email@hmcts.net",
+      "solicitorFirm": "FirmA",
+      "solicitorName": "SolName1",
+      "solicitorPhone": "1234567891",
+      "solicitorReference": "LL01"
+    }
+  }
+}

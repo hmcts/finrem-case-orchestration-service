@@ -98,13 +98,21 @@
           "value": {
             "name": "kid name",
             "dateOfBirth": "2008-01-01",
-            "gender": "Male",
+            "gender": "Female",
             "relationshipToRespondent": "step-daughter",
             "relationshipToApplicant": "daughter",
             "countryOfResidence": "UK"
           }
         }
       ],
+      "latestDraftDirectionOrder": {
+        "purposeOfDocument": "Resubmitted Draft Order",
+        "uploadDraftDocument": {
+          "document_url": "http://doc1",
+          "document_filename": "doc1",
+          "document_binary_url": "http://doc1.binary"
+        }
+      },
       "formA": {
         "document_url": "http://doc1",
         "document_filename": "doc1",
@@ -207,7 +215,7 @@
               "document_filename": "doc1",
               "document_binary_url": "http://doc1.binary"
             },
-            "DocumentDateAdded": "2022-18-06",
+            "DocumentDateAdded": "2022-06-18",
             "DocumentComment": "none",
             "DocumentFileName": "statement.pdf"
           }
@@ -258,6 +266,7 @@
             "timeEstimate": "standardTime",
             "additionalTime": "additional time",
             "listingInstructor": "listing Instructor",
+            "dateOfHearing": "2022-06-20",
             "localCourt": {
               "region": "london",
               "londonList": "cfc",
@@ -323,7 +332,7 @@
                     "document_filename": "doc1",
                     "document_binary_url": "http://doc1.binary"
                   },
-                  "bundleUploadDate": "2022-06-20:21"
+                  "bundleUploadDate": "2022-06-20T15:00:00.000"
                 }
               }
             ],
@@ -360,37 +369,37 @@
       "authorisationFirm": "test",
       "authorisationName": "test",
       "consentOrder": {
-        "document_binary_url": "http://file1.binary",
-        "document_filename": "string",
-        "document_url": "string"
+        "document_url": "http://doc1",
+        "document_filename": "doc1",
+        "document_binary_url": "http://doc1.binary"
       },
       "consentOrderText": {
-        "document_url": "http://file1",
-        "document_filename": "file1",
-        "document_binary_url": "http://file1.binary"
+        "document_url": "http://doc1",
+        "document_filename": "doc1",
+        "document_binary_url": "http://doc1.binary"
       },
       "d81Applicant": {
-        "document_url": "http://file1",
-        "document_filename": "file1",
-        "document_binary_url": "http://file1.binary"
+        "document_url": "http://doc1",
+        "document_filename": "doc1",
+        "document_binary_url": "http://doc1.binary"
       },
       "d81Joint": {
-        "document_url": "http://file1",
-        "document_filename": "file1",
-        "document_binary_url": "http://file1.binary"
+        "document_url": "http://doc1",
+        "document_filename": "doc1",
+        "document_binary_url": "http://doc1.binary"
       },
       "d81Question": "No",
       "d81Respondent": {
-        "document_url": "http://file1",
-        "document_filename": "file1",
-        "document_binary_url": "http://file1.binary"
+        "document_url": "http://doc1",
+        "document_filename": "doc1",
+        "document_binary_url": "http://doc1.binary"
       },
-      "region": "southeast",
-      "southEastList": "kentfrc",
+      "regionList": "southeast",
+      "southEastFRCList": "kent",
       "kentSurreyCourtList": "FR_kent_surrey_hc_list_1",
       "allocatedCourtList": {
         "region": "southeast",
-        "southEastList": "kentfrc",
+        "southEastList": "kent",
         "kentSurreyCourtList": "FR_kent_surrey_hc_list_1"
       },
       "divorceCaseNumber": "DD12D12345",
@@ -398,16 +407,16 @@
       "divorceDecreeNisiDate": "2019-02-21",
       "divorceStageReached": "Decree Nisi",
       "divorceUploadEvidence1": {
-        "document_url": "http://file1",
-        "document_filename": "file1",
-        "document_binary_url": "http://file1.binary"
+        "document_url": "http://doc1",
+        "document_filename": "doc1",
+        "document_binary_url": "http://doc1.binary"
       },
       "divorceUploadEvidence2": {
-        "document_url": "http://file2",
-        "document_filename": "file2",
-        "document_binary_url": "http://file2.binary"
+        "document_url": "http://doc1",
+        "document_filename": "doc1",
+        "document_binary_url": "http://doc1.binary"
       },
-      "dueDate": "2019-03-21T09:53:03.013Z",
+      "dueDate": "2019-03-21",
       "generalOrderCollection": [
         {
           "id": "1",
@@ -418,14 +427,14 @@
               "document_filename": "doc1",
               "document_binary_url": "http://doc1.binary"
             },
-            "generalOrder_judgeList": "district judge",
+            "generalOrder_judgeList": "District Judge",
             "generalOrder_judgeName": "judge1",
             "generalOrder_dateOfOrder": "2010-01-02",
             "generalOrder_comments": "comment1"
           }
         }
       ],
-      "helpWithFeesQuestion": "NO",
+      "helpWithFeesQuestion": "No",
       "issueDate": "2019-02-21",
       "miniFormA": {
         "document_url": "http://doc1",
@@ -456,9 +465,9 @@
       "orderDirectionJudge": "District Judge",
       "orderDirectionJudgeName": "test",
       "orderDirectionOpt1": {
-        "document_url": "http://file1",
-        "document_filename": "file1",
-        "document_binary_url": "http://file1.binary"
+        "document_url": "http://doc1",
+        "document_filename": "doc1",
+        "document_binary_url": "http://doc1.binary"
       },
       "orderDirectionOpt2": "test",
       "orderForChildrenQuestion1": "Yes",
@@ -477,16 +486,8 @@
             },
             "orderRefusalJudge": "District Judge",
             "orderRefusalOther": "test1",
-            "otherHearingDetails": "test2",
             "orderRefusalJudgeName": "test3",
-            "orderRefusalNotEnough": [
-              "reason1"
-            ],
-            "estimateLengthOfHearing": "10",
-            "orderRefusalAddComments": "comment1",
-            "orderRefusalNotEnoughOther": "test",
-            "whenShouldHearingTakePlace": "today",
-            "whereShouldHearingTakePlace": "EZ801"
+            "orderRefusalAddComments": "comment1"
           }
         }
       ],
@@ -510,9 +511,9 @@
           "value": {
             "typeOfDocument": "Notice of acting",
             "uploadedDocument": {
-              "document_url": "http://file1",
-              "document_filename": "file1",
-              "document_binary_url": "http://file1.binary"
+              "document_url": "http://doc1",
+              "document_filename": "doc1",
+              "document_binary_url": "http://doc1.binary"
             }
           }
         }
@@ -522,9 +523,9 @@
           "value": {
             "typeOfDocument": "Copy of paper form A",
             "uploadedDocument": {
-              "document_url": "http://file1",
-              "document_filename": "file1",
-              "document_binary_url": "http://file1.binary"
+              "document_url": "http://doc1",
+              "document_filename": "doc1",
+              "document_binary_url": "http://doc1.binary"
             }
           }
         }
@@ -535,9 +536,9 @@
           "value": {
             "typeOfDocument": "Form P1",
             "uploadedDocument": {
-              "document_url": "http://file1",
-              "document_filename": "file1",
-              "document_binary_url": "http://file1.binary"
+              "document_url": "http://doc1",
+              "document_filename": "doc1",
+              "document_binary_url": "http://doc1.binary"
             }
           }
         }
@@ -623,6 +624,10 @@
       "consentNatureOfApplicationChecklist": [
         "Pension Compensation Sharing Order"
       ],
+      "consentNatureOfApplicationAddress": "Address",
+      "consentNatureOfApplicationMortgage": "Mortgage",
+      "consentOrderForChildrenQuestion1": "Yes",
+      "consentNatureOfApplication5": "Yes",
       "natureOfApplicationChecklist": [
         "Pension Compensation Sharing Order"
       ],
@@ -631,6 +636,23 @@
         "disability expenses",
         "training"
       ],
+      "consentNatureOfApplication7": "String",
+      "consentD81Question": "Yes",
+      "consentD81Joint": {
+        "document_url": "http://doc1",
+        "document_filename": "doc1",
+        "document_binary_url": "http://doc1.binary"
+      },
+      "consentD81Applicant": {
+        "document_url": "http://doc1",
+        "document_filename": "doc1",
+        "document_binary_url": "http://doc1.binary"
+      },
+      "consentD81Respondent": {
+        "document_url": "http://doc1",
+        "document_filename": "doc1",
+        "document_binary_url": "http://doc1.binary"
+      },
       "consentOtherCollection": [
         {
           "value": {
@@ -643,8 +665,21 @@
           }
         }
       ],
+      "consentOrderFrcName": "Bromley",
+      "consentOrderFrcAddress": {
+        "addressLine1": "Address"
+      },
+      "divorceDecreeNisiDate": "2022-02-02",
+      "divorceDecreeAbsoluteDate": "2022-02-02",
+      "consentOrderFrcEmail": "email",
+      "consentOrderFrcPhone": "123456789",
+      "consentSubjectToDecreeAbsoluteValue": "Yes",
+      "consentServePensionProvider": "Yes",
       "consentServePensionProviderResponsibility": "applicantSolicitor",
+      "consentServePensionProviderOther": "Other",
       "servePensionProviderResponsibility": "theCourt",
+      "consentSelectJudge": "Judge",
+      "consentJudgeName": "Name",
       "consentedNotApprovedOrders": [
         {
           "value": {
@@ -673,6 +708,13 @@
           }
         }
       ],
+      "consentDateOfOrder": "2022-02-02",
+      "consentAdditionalComments": "additional",
+      "consentMiniFormA": {
+        "document_url": "http://doc1",
+        "document_filename": "doc1",
+        "document_binary_url": "http://doc1.binary"
+      },
       "contestedConsentedApprovedOrders": [
         {
           "value": {
@@ -747,30 +789,32 @@
       "generalOrders": [
         {
           "value": {
-            "generalOrderText": "Some text",
-            "additionalDocument": {
+            "generalOrder_order": "order1",
+            "generalOrder_documentUpload": {
               "document_url": "http://doc1",
               "document_filename": "doc1",
               "document_binary_url": "http://doc1.binary"
             },
-            "judge": "judgey",
-            "additionalComments": "None",
-            "generalOrderAddressTo": "Someone"
+            "generalOrder_judgeList": "District Judge",
+            "generalOrder_judgeName": "judge1",
+            "generalOrder_dateOfOrder": "2010-01-02",
+            "generalOrder_comments": "comment1"
           }
         }
       ],
       "generalOrdersConsent": [
         {
           "value": {
-            "generalOrderText": "Some text",
-            "additionalDocument": {
+            "generalOrder_order": "order1",
+            "generalOrder_documentUpload": {
               "document_url": "http://doc1",
               "document_filename": "doc1",
               "document_binary_url": "http://doc1.binary"
             },
-            "judge": "judgey",
-            "additionalComments": "None",
-            "generalOrderAddressTo": "Someone"
+            "generalOrder_judgeList": "District Judge",
+            "generalOrder_judgeName": "judge1",
+            "generalOrder_dateOfOrder": "2010-01-02",
+            "generalOrder_comments": "comment1"
           }
         }
       ],
