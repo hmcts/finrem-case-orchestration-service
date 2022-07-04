@@ -118,13 +118,13 @@ public class ManageCaseDocumentsService {
             ContestedUploadedDocument uploadedDocument = document.getUploadedCaseDocument();
             ContestedUploadedDocument check = documentToCheck.getUploadedCaseDocument();
 
-            if (documentToCheck.getId().equals(document.getId())
-                && (!uploadedDocument.getCaseDocuments().equals(check.getCaseDocuments())
-                || !uploadedDocument.getCaseDocumentParty().equals(party)
+            if ((documentToCheck.getId().equals(document.getId())
+                && !uploadedDocument.getCaseDocuments().equals(check.getCaseDocuments())
+                && (!uploadedDocument.getCaseDocumentParty().equals(party)
                 || !uploadedDocument.getCaseDocumentType()
                 .equals(check.getCaseDocumentType())
                 || !uploadedDocument.getHearingDetails()
-                .equals(check.getHearingDetails()))) {
+                .equals(check.getHearingDetails())))) {
 
                 collection.remove(documentToCheck);
 
