@@ -221,6 +221,7 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
         assertThat(getDocumentCollection(caseData, APP_CHRONOLOGIES_STATEMENTS_COLLECTION), hasSize(3));
         assertThat(getDocumentCollection(caseData, FDR_DOCS_COLLECTION), hasSize(0));
     }
+
     private CaseDetails populateCaseData() {
 
         uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "Respondent", "no", null));
