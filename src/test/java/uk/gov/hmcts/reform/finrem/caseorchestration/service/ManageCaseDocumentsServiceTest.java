@@ -233,6 +233,7 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
                 .caseDocumentParty(party)
                 .caseDocumentConfidential(isConfidential)
                 .caseDocumentOther(other)
+                .caseDocumentFdr("no")
                 .hearingDetails("hearingDetails")
                 .build())
             .build();

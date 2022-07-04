@@ -119,7 +119,8 @@ public class ManageCaseDocumentsService {
                 || !document.getUploadedCaseDocument().getCaseDocumentType()
                 .equals(documentToCheck.getUploadedCaseDocument().getCaseDocumentType())
                 || !document.getUploadedCaseDocument().getHearingDetails()
-                .equals(documentToCheck.getUploadedCaseDocument().getHearingDetails()))) {
+                .equals(documentToCheck.getUploadedCaseDocument().getHearingDetails()))
+                || !document.getUploadedCaseDocument().getCaseDocumentFdr().equalsIgnoreCase("yes")) {
 
                 collection.remove(documentToCheck);
             } else if (document.getId().equals(documentToCheck.getId())
@@ -127,7 +128,8 @@ public class ManageCaseDocumentsService {
                 && document.getUploadedCaseDocument().getCaseDocumentType()
                 .equals(documentToCheck.getUploadedCaseDocument().getCaseDocumentType())
                 && document.getUploadedCaseDocument().getHearingDetails()
-                    .equals(documentToCheck.getUploadedCaseDocument().getHearingDetails())) {
+                .equals(documentToCheck.getUploadedCaseDocument().getHearingDetails())
+                && document.getUploadedCaseDocument().getCaseDocumentFdr().equalsIgnoreCase("yes")) {
                 it.remove();
             }
         }
