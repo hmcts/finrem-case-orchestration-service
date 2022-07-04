@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandler;
@@ -114,21 +115,25 @@ public class ManageCaseDocumentsService {
 
             ContestedUploadedDocumentData document = it.next();
 
+            ContestedUploadedDocument uploadedDocument = document.getUploadedCaseDocument();
+            ContestedUploadedDocument check = documentToCheck.getUploadedCaseDocument();
+
             if (documentToCheck.getId().equals(document.getId())
-                && (!document.getUploadedCaseDocument().getCaseDocumentParty().equals(party)
-                || !document.getUploadedCaseDocument().getCaseDocumentType()
-                .equals(documentToCheck.getUploadedCaseDocument().getCaseDocumentType())
-                || !document.getUploadedCaseDocument().getHearingDetails()
-                .equals(documentToCheck.getUploadedCaseDocument().getHearingDetails()))) {
+                && (!uploadedDocument.getCaseDocuments().equals(check.getCaseDocuments())
+                || !uploadedDocument.getCaseDocumentParty().equals(party)
+                || !uploadedDocument.getCaseDocumentType()
+                .equals(check.getCaseDocumentType())
+                || !uploadedDocument.getHearingDetails()
+                .equals(check.getHearingDetails()))) {
 
                 collection.remove(documentToCheck);
+
             } else if (documentToCheck.getId().equals(document.getId())
-                && document.getUploadedCaseDocument().getCaseDocumentParty().equals(party)
-                && document.getUploadedCaseDocument().getCaseDocumentType()
-                .equals(documentToCheck.getUploadedCaseDocument().getCaseDocumentType())
-                &&
-                document.getUploadedCaseDocument().getHearingDetails()
-                    .equals(documentToCheck.getUploadedCaseDocument().getHearingDetails())) {
+                && uploadedDocument.getCaseDocumentParty().equals(party)
+                && uploadedDocument.getCaseDocumentType().equals(check.getCaseDocumentType())
+                && uploadedDocument.getHearingDetails().equals(check.getHearingDetails())
+                && uploadedDocument.getCaseDocuments().equals(
+                check.getCaseDocuments())) {
                 it.remove();
             }
         }
