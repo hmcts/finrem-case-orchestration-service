@@ -115,21 +115,11 @@ public class ManageCaseDocumentsService {
             ContestedUploadedDocumentData document = it.next();
 
             if (document.getId().equals(documentToCheck.getId())
-                && (!document.getUploadedCaseDocument().getCaseDocumentParty().equals(party)
-                || !document.getUploadedCaseDocument().getCaseDocumentType()
-                .equals(documentToCheck.getUploadedCaseDocument().getCaseDocumentType())
-                || !document.getUploadedCaseDocument().getHearingDetails()
-                .equals(documentToCheck.getUploadedCaseDocument().getHearingDetails()))
-                || !"yes".equalsIgnoreCase(document.getUploadedCaseDocument().getCaseDocumentFdr())) {
+                && !document.getUploadedCaseDocument().equals(documentToCheck.getUploadedCaseDocument())) {
 
                 collection.remove(documentToCheck);
             } else if (document.getId().equals(documentToCheck.getId())
-                && document.getUploadedCaseDocument().getCaseDocumentParty().equals(party)
-                && document.getUploadedCaseDocument().getCaseDocumentType()
-                .equals(documentToCheck.getUploadedCaseDocument().getCaseDocumentType())
-                && document.getUploadedCaseDocument().getHearingDetails()
-                .equals(documentToCheck.getUploadedCaseDocument().getHearingDetails())
-                && "yes".equalsIgnoreCase(document.getUploadedCaseDocument().getCaseDocumentFdr())) {
+                && document.getUploadedCaseDocument().equals(documentToCheck.getUploadedCaseDocument())) {
                 it.remove();
             }
         }
