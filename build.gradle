@@ -314,13 +314,6 @@ dependencyManagement {
 
 dependencies {
 
-    implementation ('au.com.dius.pact:provider:' + versions.pact) {
-        exclude group: 'com.vladsch.flexmark', module:'flexmark-util'
-        exclude group: 'com.vladsch.flexmark', module:'flexmark-ext-tables'
-        exclude group: 'com.vladsch.flexmark', module:'flexmark'
-    }
-    testRuntimeOnly "com.vladsch.flexmark:flexmark-all:0.34.30"
-
     implementation group: 'com.google.guava', name: 'guava', version: versions.guava
     implementation group: 'com.sun.xml.bind', name: 'jaxb-osgi', version: versions.jaxbOsgi
     implementation group: 'com.jayway.jsonpath', name: 'json-path-assert', version: versions.jsonPathAssert
@@ -340,9 +333,6 @@ dependencies {
     implementation group: 'com.github.hmcts', name: 'bsp-common-lib', version: versions.bspCommonLib
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: versions.apacheLogging
     implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: versions.apacheLogging
-    implementation ('au.com.dius.pact:provider:' + versions.pact) {
-        exclude group: 'com.vladsch.flexmark', module:'flexmark-util'
-    }
 
     developmentOnly group: 'org.springframework.boot', name: 'spring-boot-devtools'
 
@@ -393,9 +383,5 @@ dependencies {
     contractImplementation group: 'au.com.dius.pact', name: 'consumer', version: versions.pact
     contractImplementation group: 'au.com.dius.pact.consumer', name: 'junit', version: versions.pact
     contractImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
-    contractImplementation ('au.com.dius.pact:provider:' + versions.pact) {
-        exclude group: 'com.vladsch.flexmark', module:'flexmark-util'
-        exclude group: 'com.vladsch.flexmark', module:'flexmark'
-    }
 }
 
