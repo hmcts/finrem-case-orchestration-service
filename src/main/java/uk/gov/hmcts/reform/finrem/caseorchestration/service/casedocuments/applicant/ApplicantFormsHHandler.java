@@ -1,17 +1,28 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.FormsHHandler;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.UploadCaseDocumentCollection;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_FORMS_H_COLLECTION;
+import java.util.List;
 
 @Component
 public class ApplicantFormsHHandler extends FormsHHandler {
 
     @Autowired
-    public ApplicantFormsHHandler(ObjectMapper mapper) {
-        super(APP_FORMS_H_COLLECTION, APPLICANT, mapper);
+    public ApplicantFormsHHandler() {
+        super(APPLICANT);
+    }
+
+    @Override
+    protected List<UploadCaseDocumentCollection> getDocumentCollection(FinremCaseData caseData) {
+        return caseData.getUploadCaseDocumentWrapper().getAppFormsHCollection();
+    }
+
+    @Override
+    protected void setDocumentCollection(FinremCaseData caseData, List<UploadCaseDocumentCollection> docs) {
+        caseData.getUploadCaseDocumentWrapper().setAppFormsHCollection(docs);
     }
 }

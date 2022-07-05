@@ -7,6 +7,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.service.UpdateFrcInfoApplicantDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.service.UpdateFrcInfoRespondentDocumentService;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import java.util.Map;
 import java.util.Optional;
@@ -29,13 +32,12 @@ public class PaperNotificationService {
     private final UpdateFrcInfoApplicantDocumentService updateFrcInfoApplicantDocumentService;
     private final UpdateFrcInfoRespondentDocumentService updateFrcInfoRespondentDocumentService;
     private final BulkPrintService bulkPrintService;
-    private final CaseDataService caseDataService;
 
-    public void printHwfSuccessfulNotification(CaseDetails caseDetails, String authToken) {
+    public void printHwfSuccessfulNotification(FinremCaseDetails caseDetails, String authToken) {
         log.info("Sending Consented HWF Successful notification letter for bulk print");
 
-        Map<String, Object> caseData = caseDetails.getData();
-        if (caseDataService.isPaperApplication(caseData)) {
+        FinremCaseData caseData = caseDetails.getCaseData();
+        if (caseData.isPaperCase()) {
             log.info("Case is paper application");
 
             // Generate PDF notification letter
@@ -56,13 +58,13 @@ public class PaperNotificationService {
         }
     }
 
-    public void printAssignToJudgeNotification(CaseDetails caseDetails, String authToken) {
+    public void printAssignToJudgeNotification(FinremCaseDetails caseDetails, String authToken) {
         log.info("Sending AssignedToJudge notification letter for bulk print for Case ID: {}", caseDetails.getId());
 
-        Map<String, Object> caseData = caseDetails.getData();
-        if (caseDataService.isPaperApplication(caseData)) {
+        FinremCaseData caseData = caseDetails.getCaseData();
+        if (caseData.isPaperCase()) {
             // Generate PDF notification letter
-            CaseDocument assignedToJudgeNotificationLetter = assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(
+            Document assignedToJudgeNotificationLetter = assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(
                 caseDetails, authToken, APPLICANT);
 
             // Send notification letter to Bulk Print
@@ -79,12 +81,12 @@ public class PaperNotificationService {
         }
     }
 
-    public void printConsentInContestedAssignToJudgeConfirmationNotification(CaseDetails caseDetails, String authToken) {
+    public void printConsentInContestedAssignToJudgeConfirmationNotification(FinremCaseDetails caseDetails, String authToken) {
         if (shouldPrintForApplicant(caseDetails)) {
             log.info("Sending applicant Consent in Contested AssignedToJudge notification letter for bulk print for Case ID: {}",
                 caseDetails.getId());
 
-            CaseDocument applicantAssignedToJudgeNotificationLetter =
+            Document applicantAssignedToJudgeNotificationLetter =
                 assignedToJudgeDocumentService.generateConsentInContestedAssignedToJudgeNotificationLetter(caseDetails, authToken, APPLICANT);
             bulkPrintService.sendDocumentForPrint(applicantAssignedToJudgeNotificationLetter, caseDetails);
         }
@@ -94,20 +96,20 @@ public class PaperNotificationService {
             log.info("Sending respondent Consent in Contested AssignedToJudge notification letter for bulk print for Case ID: {}",
                 caseDetails.getId());
 
-            CaseDocument respondentAssignedToJudgeNotificationLetter =
+            Document respondentAssignedToJudgeNotificationLetter =
                 assignedToJudgeDocumentService.generateConsentInContestedAssignedToJudgeNotificationLetter(caseDetails, authToken, RESPONDENT);
             bulkPrintService.sendDocumentForPrint(respondentAssignedToJudgeNotificationLetter, caseDetails);
         }
     }
 
-    public void printManualPaymentNotification(CaseDetails caseDetails, String authToken) {
-        if (caseDataService.isContestedPaperApplication(caseDetails)) {
-            CaseDocument applicantManualPaymentLetter = manualPaymentDocumentService.generateManualPaymentLetter(caseDetails, authToken, APPLICANT);
+    public void printManualPaymentNotification(FinremCaseDetails caseDetails, String authToken) {
+        if (caseDetails.getCaseData().isContestedPaperApplication()) {
+            Document applicantManualPaymentLetter = manualPaymentDocumentService.generateManualPaymentLetter(caseDetails, authToken, APPLICANT);
             bulkPrintService.sendDocumentForPrint(applicantManualPaymentLetter, caseDetails);
         }
 
-        if (caseDataService.isContestedApplication(caseDetails) && shouldPrintNotificationForRespondentSolicitor(caseDetails)) {
-            CaseDocument respondentManualPaymentLetter = manualPaymentDocumentService.generateManualPaymentLetter(caseDetails, authToken, RESPONDENT);
+        if (caseDetails.getCaseData().isContestedApplication() && shouldPrintNotificationForRespondentSolicitor(caseDetails)) {
+            Document respondentManualPaymentLetter = manualPaymentDocumentService.generateManualPaymentLetter(caseDetails, authToken, RESPONDENT);
             bulkPrintService.sendDocumentForPrint(respondentManualPaymentLetter, caseDetails);
         }
     }
@@ -129,19 +131,19 @@ public class PaperNotificationService {
         respondentLetter.ifPresent(letter -> bulkPrintService.sendDocumentForPrint(letter, caseDetails));
     }
 
-    public boolean shouldPrintForApplicant(CaseDetails caseDetails) {
-        return !caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())
-            || !caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)
-            || caseDataService.isPaperApplication(caseDetails.getData());
+    public boolean shouldPrintForApplicant(FinremCaseDetails caseDetails) {
+        return !caseDetails.getCaseData().isApplicantRepresentedByASolicitor()
+            || !caseDetails.getCaseData().isApplicantSolicitorAgreeToReceiveEmails()
+            || caseDetails.getCaseData().isPaperCase();
     }
 
-    public boolean shouldPrintForRespondent(CaseDetails caseDetails) {
-        return !caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())
-            || !YES_VALUE.equalsIgnoreCase(nullToEmpty(caseDetails.getData().get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT)));
+    public boolean shouldPrintForRespondent(FinremCaseDetails caseDetails) {
+        return !caseDetails.getCaseData().isRespondentRepresentedByASolicitor()
+        || !caseDetails.getCaseData().isRespondentSolicitorAgreeToReceiveEmails();
     }
 
-    private boolean shouldPrintNotificationForRespondentSolicitor(CaseDetails caseDetails) {
-        return caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())
-            && !YES_VALUE.equalsIgnoreCase(nullToEmpty(caseDetails.getData().get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT)));
+    private boolean shouldPrintNotificationForRespondentSolicitor(FinremCaseDetails caseDetails) {
+        return caseDetails.getCaseData().isRespondentRepresentedByASolicitor()
+            && !caseDetails.getCaseData().isRespondentSolicitorAgreeToReceiveEmails();
     }
 }

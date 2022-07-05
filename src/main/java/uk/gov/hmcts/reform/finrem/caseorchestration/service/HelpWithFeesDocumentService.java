@@ -6,7 +6,12 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.LetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -16,18 +21,20 @@ public class HelpWithFeesDocumentService {
     private final GenericDocumentService genericDocumentService;
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
+    private final LetterDetailsMapper letterDetailsMapper;
 
-    public CaseDocument generateHwfSuccessfulNotificationLetter(CaseDetails caseDetails, String authToken,
+    public CaseDocument generateHwfSuccessfulNotificationLetter(FinremCaseDetails caseDetails, String authToken,
                                                                 DocumentHelper.PaperNotificationRecipient recipient) {
         log.info("Generating Help With Fees Successful Notification Letter {} from {} for bulk print for {}",
             documentConfiguration.getHelpWithFeesSuccessfulNotificationFileName(),
             documentConfiguration.getHelpWithFeesSuccessfulNotificationTemplate(),
             recipient);
 
-        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterTemplateData(caseDetails, recipient);
+        Map<String, Object> placeHoldersMap = letterDetailsMapper.getLetterDetailsAsMap(caseDetails,
+            recipient, caseDetails.getCaseData().getRegionWrapper().getDefaultCourtList());
 
-        CaseDocument generatedHwfSuccessfulNotificationLetter = genericDocumentService.generateDocument(authToken,
-            caseDetailsForBulkPrint,
+        CaseDocument generatedHwfSuccessfulNotificationLetter = genericDocumentService.generateDocumentFromPlaceholdersMap(authToken,
+            placeHoldersMap,
             documentConfiguration.getHelpWithFeesSuccessfulNotificationTemplate(),
             documentConfiguration.getHelpWithFeesSuccessfulNotificationFileName());
 

@@ -3,10 +3,13 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.LetterDetailsMapper;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -16,18 +19,21 @@ public class AssignedToJudgeDocumentService {
     private final GenericDocumentService genericDocumentService;
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
+    private final LetterDetailsMapper letterDetailsMapper;
 
-    public CaseDocument generateAssignedToJudgeNotificationLetter(CaseDetails caseDetails, String authToken,
-                                                                  DocumentHelper.PaperNotificationRecipient recipient) {
+    public Document generateAssignedToJudgeNotificationLetter(FinremCaseDetails caseDetails, String authToken,
+                                                              DocumentHelper.PaperNotificationRecipient recipient) {
         log.info("Generating Assigned To Judge Notification Letter {} from {} for bulk print for {}",
             documentConfiguration.getAssignedToJudgeNotificationTemplate(),
             documentConfiguration.getAssignedToJudgeNotificationFileName(),
             recipient);
 
-        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterTemplateData(caseDetails, recipient);
+        Map<String, Object> placeHoldersMap = letterDetailsMapper.getLetterDetailsAsMap(caseDetails, recipient,
+            caseDetails.getCaseData().getRegionWrapper().getDefaultCourtList());
 
-        CaseDocument generatedAssignedToJudgeNotificationLetter = genericDocumentService.generateDocument(authToken,
-            caseDetailsForBulkPrint,
+        Document generatedAssignedToJudgeNotificationLetter = genericDocumentService.generateDocumentFromPlaceholdersMap(
+            authToken,
+            placeHoldersMap,
             documentConfiguration.getAssignedToJudgeNotificationTemplate(),
             documentConfiguration.getAssignedToJudgeNotificationFileName());
 
@@ -36,19 +42,22 @@ public class AssignedToJudgeDocumentService {
         return generatedAssignedToJudgeNotificationLetter;
     }
 
-    public CaseDocument generateConsentInContestedAssignedToJudgeNotificationLetter(CaseDetails caseDetails, String authToken,
+    public Document generateConsentInContestedAssignedToJudgeNotificationLetter(FinremCaseDetails caseDetails, String authToken,
                                                                                     DocumentHelper.PaperNotificationRecipient recipient) {
-        return generateConsentInContestedAssignedToJudgeNotificationLetter(
-            documentHelper.prepareLetterTemplateData(caseDetails, recipient), authToken);
+        Map<String, Object> placeholdersMap = letterDetailsMapper.getLetterDetailsAsMap(caseDetails, recipient,
+            caseDetails.getCaseData().getRegionWrapper().getDefaultCourtList());
+        return generateConsentInContestedAssignedToJudgeNotificationLetter(placeholdersMap, authToken);
     }
 
-    private CaseDocument generateConsentInContestedAssignedToJudgeNotificationLetter(CaseDetails caseDetails, String authToken) {
+    private Document generateConsentInContestedAssignedToJudgeNotificationLetter(Map<String, Object> placeholdersMap,
+                                                                                     String authToken) {
         log.info("Generating Consent in Contested Assigned To Judge Notification Letter {} from {} for bulk print",
             documentConfiguration.getConsentInContestedAssignedToJudgeNotificationTemplate(),
             documentConfiguration.getConsentInContestedAssignedToJudgeNotificationFileName());
 
-        CaseDocument generatedAssignedToJudgeNotificationLetter = genericDocumentService.generateDocument(authToken,
-            caseDetails,
+        Document generatedAssignedToJudgeNotificationLetter = genericDocumentService.generateDocumentFromPlaceholdersMap(
+            authToken,
+            placeholdersMap,
             documentConfiguration.getConsentInContestedAssignedToJudgeNotificationTemplate(),
             documentConfiguration.getConsentInContestedAssignedToJudgeNotificationFileName());
 

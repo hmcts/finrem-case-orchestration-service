@@ -90,4 +90,14 @@ public class SendOrderContestedSubmittedHandler implements CallbackHandler {
             }
         }
     }
+
+    @Override
+    public boolean canHandle(uk.gov.hmcts.reform.finrem.ccd.callback.CallbackType callbackType, uk.gov.hmcts.reform.finrem.ccd.domain.CaseType caseType, uk.gov.hmcts.reform.finrem.ccd.domain.EventType eventType) {
+        return false;
+    }
+
+    @Override
+    public uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse handle(uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest, String userAuthorisation) {
+        return null;
+    }
 }

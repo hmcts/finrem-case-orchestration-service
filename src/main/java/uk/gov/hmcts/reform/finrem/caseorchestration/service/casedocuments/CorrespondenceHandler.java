@@ -1,16 +1,36 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CaseDocumentType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.UploadCaseDocumentCollection;
+
+import java.util.List;
 
 public class CorrespondenceHandler extends PartyDocumentHandler {
 
-    public CorrespondenceHandler(String collectionName, String party, ObjectMapper mapper) {
-        super(collectionName, party, mapper);
+    public CorrespondenceHandler(String party) {
+        super(party);
     }
 
     @Override
     protected boolean isDocumentTypeValid(String caseDocumentType) {
         return caseDocumentType.equals("Offers")
             || caseDocumentType.equals("Letter from Applicant");
+    }
+
+    @Override
+    protected boolean isDocumentTypeValid(CaseDocumentType caseDocumentType) {
+        return caseDocumentType.equals(CaseDocumentType.OFFERS)
+            || caseDocumentType.equals(CaseDocumentType.LETTER_FROM_APPLICANT);
+    }
+
+    @Override
+    protected List<UploadCaseDocumentCollection> getDocumentCollection(FinremCaseData caseData) {
+        return null;
+    }
+
+    @Override
+    protected void setDocumentCollection(FinremCaseData caseData, List<UploadCaseDocumentCollection> docs) {
+
     }
 }

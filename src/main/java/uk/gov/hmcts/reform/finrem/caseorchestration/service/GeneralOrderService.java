@@ -17,6 +17,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContes
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContestedData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderPreviewDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,17 +54,16 @@ public class GeneralOrderService {
     private final ObjectMapper objectMapper;
     private final CaseDataService caseDataService;
 
-    private BiFunction<CaseDetails, String, CaseDocument> generateDocument = this::applyGenerateDocument;
-    private Function<CaseDocument, GeneralOrderPreviewDocument> createGeneralOrderData = this::applyGeneralOrderData;
-    private UnaryOperator<CaseDetails> addExtraFields = this::applyAddExtraFields;
+    private final BiFunction<FinremCaseDetails, String, Document> generateDocument = this::applyGenerateDocument;
+    private Function<Document, GeneralOrderPreviewDocument> createGeneralOrderData = this::applyGeneralOrderData;
+    private final UnaryOperator<FinremCaseDetails> addExtraFields = this::applyAddExtraFields;
 
-    public Map<String, Object> createGeneralOrder(String authorisationToken, CaseDetails caseDetails) {
+    public Map<String, Object> createGeneralOrder(String authorisationToken, FinremCaseDetails caseDetails) {
         log.info("Generating General Order for Case ID: {}", caseDetails.getId());
 
         return generateDocument
-            .andThen(createGeneralOrderData)
             .andThen(data -> previewGeneralOrderData(data, caseDetails))
-            .apply(documentHelper.deepCopy(caseDetails, CaseDetails.class), authorisationToken);
+            .apply(documentHelper.deepCopy(caseDetails, FinremCaseDetails.class), authorisationToken);
     }
 
     public BulkPrintDocument getLatestGeneralOrderAsBulkPrintDocument(Map<String, Object> caseData) {
@@ -71,18 +73,26 @@ public class GeneralOrderService {
             : null;
     }
 
-    private CaseDocument applyGenerateDocument(CaseDetails caseDetails, String authorisationToken) {
+    public BulkPrintDocument getLatestGeneralOrderAsBulkPrintDocument(FinremCaseData caseData) {
+        Document latestGeneralOrder = caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument();
+        return latestGeneralOrder != null
+            ? BulkPrintDocument.builder().binaryFileUrl(latestGeneralOrder.getBinaryUrl()).build()
+            : null;
+    }
+
+    private Document applyGenerateDocument(FinremCaseDetails caseDetails, String authorisationToken) {
         return genericDocumentService.generateDocument(authorisationToken, addExtraFields.apply(caseDetails),
             documentConfiguration.getGeneralOrderTemplate(),
             documentConfiguration.getGeneralOrderFileName());
     }
 
-    private GeneralOrderPreviewDocument applyGeneralOrderData(CaseDocument caseDocument) {
+    private GeneralOrderPreviewDocument applyGeneralOrderData(Document caseDocument) {
         return new GeneralOrderPreviewDocument(caseDocument);
     }
 
-    private CaseDetails applyAddExtraFields(CaseDetails caseDetails) {
+    private FinremCaseDetails applyAddExtraFields(FinremCaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
+        FinremCaseData caseData = caseDetails.getCaseData();
 
         caseData.put("DivorceCaseNumber", caseDetails.getData().get(DIVORCE_CASE_NUMBER));
         caseData.put("ApplicantName", documentHelper.getApplicantFullName(caseDetails));
@@ -111,9 +121,9 @@ public class GeneralOrderService {
         return caseDetails;
     }
 
-    private Map<String, Object> previewGeneralOrderData(GeneralOrderPreviewDocument generalOrderData, CaseDetails caseDetails) {
-        caseDetails.getData().put(GENERAL_ORDER_PREVIEW_DOCUMENT, generalOrderData.getGeneralOrder());
-        return caseDetails.getData();
+    private FinremCaseData previewGeneralOrderData(Document generalOrderData, FinremCaseDetails caseDetails) {
+        caseDetails.getCaseData().getGeneralOrderWrapper().setGeneralOrderPreviewDocument(generalOrderData);
+        return caseDetails.getCaseData();
     }
 
     public Map<String, Object> populateGeneralOrderCollection(CaseDetails caseDetails) {

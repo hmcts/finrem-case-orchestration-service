@@ -23,7 +23,7 @@ public class ApplicantCaseSummariesHandlerTest extends CaseDocumentHandlerTest {
     private final List<ContestedUploadedDocumentData> uploadDocumentList = new ArrayList<>();
     private final ObjectMapper mapper = new ObjectMapper();
 
-    ApplicantCaseSummariesHandler applicantCaseSummariesHandler = new ApplicantCaseSummariesHandler(mapper);
+    ApplicantCaseSummariesHandler applicantCaseSummariesHandler = new ApplicantCaseSummariesHandler();
 
     @Before
     public void setUp() {

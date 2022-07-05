@@ -22,6 +22,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.ccd.domain.AdditionalHearingDocumentCollection;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -61,7 +64,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_A_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
@@ -83,7 +85,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFu
 @Slf4j
 public class DocumentHelper {
 
-    public enum PaperNotificationRecipient { APPLICANT, RESPONDENT, SOLICITOR }
+    public enum PaperNotificationRecipient { APPLICANT, RESPONDENT, SOLICITOR, APP_SOLICITOR, RESP_SOLICITOR }
 
     public static final String DOCUMENT_URL = "document_url";
     public static final String DOCUMENT_FILENAME = "document_filename";
@@ -139,14 +141,10 @@ public class DocumentHelper {
             .collect(Collectors.toList());
     }
 
-    public boolean hasAnotherHearing(Map<String, Object> caseData) {
-        List<DirectionDetailsCollectionData> directionDetailsCollectionList =
-            convertToDirectionDetailsCollectionData(caseData
-                .get(DIRECTION_DETAILS_COLLECTION_CT));
-
+    public boolean hasAnotherHearing(FinremCaseData caseData) {
         // use a utility to handle directionDetailsCollectionList being null as well as empty
-        return !CollectionUtils.isEmpty(directionDetailsCollectionList) && YES_VALUE.equalsIgnoreCase(
-            nullToEmpty(directionDetailsCollectionList.get(0).getDirectionDetailsCollection().getIsAnotherHearingYN()));
+        return !CollectionUtils.isEmpty(caseData.getDirectionDetailsCollection()) && YES_VALUE.equalsIgnoreCase(
+            nullToEmpty(caseData.getDirectionDetailsCollection().get(0).getValue().getIsAnotherHearingYN()));
     }
 
     public CaseDocument getLatestGeneralOrder(Map<String, Object> caseData) {
@@ -217,6 +215,19 @@ public class DocumentHelper {
         if (additionalHearingDocumentData.isPresent()) {
             return additionalHearingDocumentData
                 .map(additionalHearingDocumentDataCopy -> additionalHearingDocumentData.get().getAdditionalHearingDocument().getDocument());
+        }
+        return Optional.empty();
+    }
+
+    public Optional<Document> getLatestAdditionalHearingDocument(FinremCaseData caseData) {
+        Optional<AdditionalHearingDocumentCollection> additionalHearingDocumentData =
+            ofNullable(caseData.getAdditionalHearingDocuments())
+                .orElse(emptyList())
+                .stream()
+                .reduce((first, second) -> second);
+        if (additionalHearingDocumentData.isPresent()) {
+            return additionalHearingDocumentData
+                .map(additionalHearingDocumentDataCopy -> additionalHearingDocumentData.get().getValue().getAdditionalHearingDocument());
         }
         return Optional.empty();
     }
@@ -336,6 +347,22 @@ public class DocumentHelper {
         return documentLink != null
             ? Optional.of(BulkPrintDocument.builder().binaryFileUrl(documentLink.get(DOCUMENT_BINARY_URL)).build())
             : Optional.empty();
+    }
+
+    public Optional<BulkPrintDocument> getDocumentAsBulkPrintDocument(Document document) {
+        return document != null
+            ? Optional.of(BulkPrintDocument.builder().binaryFileUrl(document.getBinaryUrl()).build())
+            : Optional.empty();
+    }
+
+    public List<BulkPrintDocument> getDocumentsAsBulkPrintDocuments(List<Document> documents) {
+        return documents
+            .stream()
+            .filter(Objects::nonNull)
+            .map(document -> BulkPrintDocument.builder()
+                .binaryFileUrl(document.getBinaryUrl())
+                .build())
+            .collect(Collectors.toList());
     }
 
     public List<BulkPrintDocument> getCollectionOfDocumentLinksAsBulkPrintDocuments(Map<String, Object> data, String collectionName) {
