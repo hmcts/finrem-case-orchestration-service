@@ -316,8 +316,10 @@ dependencies {
 
     implementation ('au.com.dius.pact:provider:' + versions.pact) {
         exclude group: 'com.vladsch.flexmark', module:'flexmark-util'
+        exclude group: 'com.vladsch.flexmark', module:'flexmark-ext-tables'
         exclude group: 'com.vladsch.flexmark', module:'flexmark'
     }
+    testRuntimeOnly "com.vladsch.flexmark:flexmark-all:0.34.30"
 
     implementation group: 'com.google.guava', name: 'guava', version: versions.guava
     implementation group: 'com.sun.xml.bind', name: 'jaxb-osgi', version: versions.jaxbOsgi
