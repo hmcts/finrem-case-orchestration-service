@@ -309,8 +309,10 @@ dependencies {
     implementation group: 'com.google.guava', name: 'guava', version: versions.guava
 
     implementation ('au.com.dius.pact:provider:4.4.0-beta.2') {
-        exclude group: 'com.vladsch.flexmark', module:'flexmark-util'
         exclude group: 'com.vladsch.flexmark', module:'flexmark'
+        exclude group: 'com.vladsch.flexmark', module:'flexmark-util'
+        exclude group: 'com.vladsch.flexmark', module:'flexmark-all'
+
     }
 
 
@@ -401,6 +403,7 @@ dependencies {
     contractImplementation ('au.com.dius.pact:provider:' + versions.pact) {
         exclude group: 'com.vladsch.flexmark', module:'flexmark-util'
         exclude group: 'com.vladsch.flexmark', module:'flexmark'
+        exclude group: 'com.vladsch.flexmark', module:'flexmark-all'
     }
 
     contractImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
