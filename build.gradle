@@ -301,17 +301,11 @@ dependencyManagement {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudBomVersion}"
         mavenBom "io.rest-assured:rest-assured-bom:${restAssuredBomVersion}"
     }
-
 }
 
 dependencies {
 
     implementation group: 'com.google.guava', name: 'guava', version: versions.guava
-
-    implementation ('au.com.dius.pact:provider:4.4.0-beta.2') {
-        exclude group: 'com.vladsch.flexmark', module:'flexmark-util'
-    }
-
     implementation group: 'com.sun.xml.bind', name: 'jaxb-osgi', version: versions.jaxbOsgi
     implementation group: 'com.jayway.jsonpath', name: 'json-path-assert', version: versions.jsonPathAssert
     implementation group: 'commons-io', name: 'commons-io', version: versions.commonsIo
@@ -333,6 +327,9 @@ dependencies {
     implementation group: 'com.github.hmcts', name: 'bsp-common-lib', version: versions.bspCommonLib
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: versions.apacheLogging
     implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: versions.apacheLogging
+    implementation ('au.com.dius.pact:provider:' + versions.pact) {
+        exclude group: 'com.vladsch.flexmark', module:'flexmark-util'
+    }
 
     developmentOnly group: 'org.springframework.boot', name: 'spring-boot-devtools'
 
@@ -352,7 +349,6 @@ dependencies {
     testSmokeImplementation group: 'io.rest-assured', name: 'rest-assured'
     testSmokeImplementation sourceSets.main.runtimeClasspath
     testSmokeImplementation sourceSets.test.runtimeClasspath
-
 
     functionalImplementation group: 'io.jsonwebtoken', name: 'jjwt', version: versions.jjwt
     functionalImplementation group: 'io.rest-assured', name: 'rest-assured'
