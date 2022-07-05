@@ -162,7 +162,7 @@ jacocoTestReport {
 }
 
 dependencyCheck {
-    suppressionFile = 'config/owasp/supressions.xml'
+    suppressionFile = 'config/owasp/suppressions.xml'
 }
 
 jacocoTestCoverageVerification {
