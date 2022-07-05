@@ -314,6 +314,11 @@ dependencyManagement {
 
 dependencies {
 
+    implementation ('au.com.dius.pact:provider:' + versions.pact) {
+        exclude group: 'com.vladsch.flexmark', module:'flexmark-util'
+        exclude group: 'com.vladsch.flexmark', module:'flexmark'
+    }
+
     implementation group: 'com.google.guava', name: 'guava', version: versions.guava
     implementation group: 'com.sun.xml.bind', name: 'jaxb-osgi', version: versions.jaxbOsgi
     implementation group: 'com.jayway.jsonpath', name: 'json-path-assert', version: versions.jsonPathAssert
