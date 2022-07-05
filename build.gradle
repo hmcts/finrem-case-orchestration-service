@@ -313,6 +313,7 @@ dependencies {
         exclude group: 'com.vladsch.flexmark', module:'flexmark'
     }
 
+
     implementation group: 'com.sun.xml.bind', name: 'jaxb-osgi', version: versions.jaxbOsgi
     implementation group: 'com.jayway.jsonpath', name: 'json-path-assert', version: versions.jsonPathAssert
     implementation group: 'commons-io', name: 'commons-io', version: versions.commonsIo
