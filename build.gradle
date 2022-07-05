@@ -317,7 +317,6 @@ dependencyManagement {
 dependencies {
 
     implementation group: 'com.google.guava', name: 'guava', version: versions.guava
-
     implementation group: 'com.sun.xml.bind', name: 'jaxb-osgi', version: versions.jaxbOsgi
     implementation group: 'com.jayway.jsonpath', name: 'json-path-assert', version: versions.jsonPathAssert
     implementation group: 'commons-io', name: 'commons-io', version: versions.commonsIo
@@ -348,20 +347,24 @@ dependencies {
     runtimeOnly group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
     runtimeOnly group: 'org.springframework.boot', name: 'spring-boot-starter-web'
 
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
+
     testImplementation group: 'com.github.tomakehurst', name: 'wiremock', version: versions.wiremock
     testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
-    testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind'
-    testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations'
     testImplementation('com.github.hmcts:fortify-client:1.2.0:all')
     testImplementation("org.junit.vintage:junit-vintage-engine") {
         exclude group: "org.hamcrest", module: "hamcrest-core"
     }
 
-    testSmokeImplementation group: 'io.rest-assured', name: 'rest-assured'
+    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
+
     testSmokeImplementation sourceSets.main.runtimeClasspath
     testSmokeImplementation sourceSets.test.runtimeClasspath
+    testSmokeImplementation group: 'io.rest-assured', name: 'rest-assured'
 
+    functionalTestImplementation sourceSets.main.runtimeClasspath
+    functionalTestImplementation sourceSets.test.runtimeClasspath
     functionalImplementation group: 'io.jsonwebtoken', name: 'jjwt', version: versions.jjwt
     functionalImplementation group: 'io.rest-assured', name: 'rest-assured'
     functionalImplementation group: 'junit', name: 'junit', version: versions.junit
@@ -375,28 +378,22 @@ dependencies {
     functionalImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
     functionalImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
     functionalImplementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
-    functionalImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind'
-    functionalImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations'
     functionalImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     functionalImplementation group: 'org.skyscreamer', name: 'jsonassert', version: versions.skyscreamer
     functionalImplementation group: 'com.github.hmcts', name: 'ccd-client', version: versions.ccdClient
     functionalImplementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: versions.serviceTokenGenerator
     functionalImplementation group: 'com.github.hmcts', name: 'bsp-common-lib', version: versions.bspCommonLib
 
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
-    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     functionalAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
 
+    contractImplementation sourceSets.main.runtimeClasspath
+    contractImplementation sourceSets.test.runtimeClasspath
     contractImplementation group: 'au.com.dius.pact', name: 'consumer', version: versions.pact
     contractImplementation group: 'au.com.dius.pact.consumer', name: 'junit', version: versions.pact
+    contractImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
     contractImplementation ('au.com.dius.pact:provider:' + versions.pact) {
         exclude group: 'com.vladsch.flexmark', module:'flexmark-util'
         exclude group: 'com.vladsch.flexmark', module:'flexmark'
     }
-
-    contractImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
-
-    contractImplementation sourceSets.main.runtimeClasspath
-    contractImplementation sourceSets.test.runtimeClasspath
 }
 
