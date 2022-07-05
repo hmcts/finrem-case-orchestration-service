@@ -7,5 +7,5 @@ maintainers:
   - name: HMCTS Financial Remedy Team
 dependencies:
   - name: java
-    version: 3.7.6
+    version: 4.0.0
     repository: 'https://hmctspublic.azurecr.io/helm/v1/repo/'
