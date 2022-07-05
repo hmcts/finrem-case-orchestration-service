@@ -139,6 +139,11 @@ test {
     failFast = true
 }
 
+configurations.all {
+    resolutionStrategy.force 'com.vladsch.flexmark:flexmark:0.34.30'
+    resolutionStrategy.force 'com.vladsch.flexmark:flexmark-util:0.34.30'
+}
+
 // before committing a change, make sure task still works
 dependencyUpdates {
     def isNonStable = { String version ->
