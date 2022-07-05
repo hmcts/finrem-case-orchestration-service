@@ -385,6 +385,11 @@ dependencies {
 
     contractImplementation group: 'au.com.dius.pact', name: 'consumer', version: versions.pact
     contractImplementation group: 'au.com.dius.pact.consumer', name: 'junit', version: versions.pact
+    contractImplementation ('au.com.dius.pact:provider:' + versions.pact) {
+        exclude group: 'com.vladsch.flexmark', module:'flexmark-util'
+        exclude group: 'com.vladsch.flexmark', module:'flexmark'
+    }
+
     contractImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
 
     contractImplementation sourceSets.main.runtimeClasspath
