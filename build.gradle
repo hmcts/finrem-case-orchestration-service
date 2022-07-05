@@ -313,7 +313,6 @@ dependencies {
         exclude group: 'com.vladsch.flexmark', module:'flexmark'
     }
 
-
     implementation group: 'com.sun.xml.bind', name: 'jaxb-osgi', version: versions.jaxbOsgi
     implementation group: 'com.jayway.jsonpath', name: 'json-path-assert', version: versions.jsonPathAssert
     implementation group: 'commons-io', name: 'commons-io', version: versions.commonsIo
@@ -400,6 +399,7 @@ dependencies {
     contractImplementation group: 'au.com.dius.pact.consumer', name: 'junit', version: versions.pact
     contractImplementation ('au.com.dius.pact:provider:' + versions.pact) {
         exclude group: 'com.vladsch.flexmark', module:'flexmark-util'
+        exclude group: 'com.vladsch.flexmark', module:'flexmark'
     }
 
     contractImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
