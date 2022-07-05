@@ -445,6 +445,8 @@ public class CCDConfigConstant {
     public static final String RESP_CORRESPONDENCE_COLLECTION = "respCorrespondenceDocsColl";
     public static final String RESP_OTHER_COLLECTION = "respOtherCollection";
 
+    // Manage case documents
+    public static final String CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION = "manageCaseDocumentCollection";
 
     public static final String AMENDED_CONSENT_ORDER = "AmendedConsentOrder";
 
