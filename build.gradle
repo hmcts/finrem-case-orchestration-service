@@ -115,8 +115,8 @@ configurations {
     functionalImplementation.extendsFrom testImplementation
     functionalRuntimeOnly.extendsFrom testRuntimeOnly
     cftlibRuntimeClasspath.extendsFrom runtimeClasspath
-    smokeRuntimeOnly.extendsFrom functionalRuntimeOnly
-    smokeImplementation.extendsFrom functionalImplementation
+    smokeRuntimeOnly.extendsFrom testRuntimeOnly
+    smokeImplementation.extendsFrom testImplementation
 }
 
 processTestResources {
@@ -385,5 +385,7 @@ dependencies {
     contractImplementation group: 'au.com.dius.pact', name: 'consumer', version: versions.pact
     contractImplementation group: 'au.com.dius.pact.consumer', name: 'junit', version: versions.pact
     contractImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
+
+    smokeImplementation group: 'com.vladsch.flexmark', name: 'flexmark-util', version: '0.34.30'
 }
 
