@@ -24,7 +24,7 @@ def versions = [
         junit                : '4.13.1',
         lombok               : '1.18.22',
         mockito              : '3.4.4',
-        pact_version         : '4.4.0-beta.2',
+        pact                 : '4.4.0-beta.2',
         pdfbox               : '2.0.25',
         reformLogging        : '5.1.9',
         serenity             : '3.2.5',
@@ -223,7 +223,7 @@ pact {
         pactDirectory = 'pacts'
         pactBrokerUrl = System.getenv("PACT_BROKER_FULL_URL") ?: 'http://localhost:80'
         tags = [System.getenv("PACT_BRANCH_NAME") ?: 'Dev']
-        version = versions.pact_version
+        version = versions.pact
     }
 }
 
@@ -308,10 +308,6 @@ dependencies {
 
     implementation group: 'com.google.guava', name: 'guava', version: versions.guava
 
-    implementation ('au.com.dius.pact:provider:4.4.0-beta.2') {
-        exclude group: 'com.vladsch.flexmark', module:'flexmark-util'
-    }
-
     implementation group: 'com.sun.xml.bind', name: 'jaxb-osgi', version: versions.jaxbOsgi
     implementation group: 'com.jayway.jsonpath', name: 'json-path-assert', version: versions.jsonPathAssert
     implementation group: 'commons-io', name: 'commons-io', version: versions.commonsIo
@@ -394,8 +390,11 @@ dependencies {
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     functionalAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
 
-    contractImplementation group: 'au.com.dius.pact', name: 'consumer', version: versions.pact_version
-    contractImplementation group: 'au.com.dius.pact.consumer', name: 'junit', version: versions.pact_version
+    contractImplementation group: 'au.com.dius.pact', name: 'consumer', version: versions.pact
+    contractImplementation group: 'au.com.dius.pact.consumer', name: 'junit', version: versions.pact
+    contractImplementation ('au.com.dius.pact:provider:' + versions.pact) {
+        exclude group: 'com.vladsch.flexmark', module:'flexmark-util'
+    }
 
     contractImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
 
