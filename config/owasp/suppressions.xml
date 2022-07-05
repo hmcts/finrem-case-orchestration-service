@@ -14,44 +14,36 @@
         <cve>CVE-2022-34305</cve>
     </suppress>
 
-    <suppress until="2022-11-01">
+    <suppress until="2022-10-10">
         <notes><![CDATA[Junk CVE, only affects Amazon Corretto when hot patch is enabled]]></notes>
         <packageUrl regex="true">^pkg:maven/org\.apache\.logging\.log4j/log4j\-api@.*$</packageUrl>
         <cve>CVE-2022-33915</cve>
     </suppress>
 
-    <suppress until="2022-11-01">
+    <suppress until="2022-11-11">
         <notes><![CDATA[file name: spring-security-crypto-5.7.2.jar]]></notes>
         <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring\-security\-crypto@.*$</packageUrl>
         <vulnerabilityName>CVE-2020-5408</vulnerabilityName>
     </suppress>
 
-    <suppress>
-        <notes><![CDATA[
-   file name: tika-core-1.27.jar
-   ]]></notes>
+    <suppress until="2022-09-09">
+        <notes><![CDATA[transitive dependency in au.com.dius.pact file name: tika-core-1.27.jar]]></notes>
         <packageUrl regex="true">^pkg:maven/org\.apache\.tika/tika\-core@.*$</packageUrl>
         <cve>CVE-2022-25169</cve>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[
-   file name: tika-core-1.27.jar
-   ]]></notes>
-        <packageUrl regex="true">^pkg:maven/org\.apache\.tika/tika\-core@.*$</packageUrl>
         <cve>CVE-2022-30126</cve>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[
-   file name: tika-core-1.27.jar
-   ]]></notes>
-        <packageUrl regex="true">^pkg:maven/org\.apache\.tika/tika\-core@.*$</packageUrl>
         <cve>CVE-2022-30973</cve>
     </suppress>
-    <suppress>
-        <notes><![CDATA[
-   file name: xercesImpl-2.12.1.jar
-   ]]></notes>
+
+    <suppress until="2022-09-09">
+        <notes><![CDATA[transitive dependency in au.com.dius.pact file name: xercesImpl-2.12.1.jar]]></notes>
         <packageUrl regex="true">^pkg:maven/xerces/xercesImpl@.*$</packageUrl>
         <cve>CVE-2022-23437</cve>
+        <cve>CVE-2017-10355</cve>
+    </suppress>
+
+    <suppress until="2022-09-09">
+        <notes><![CDATA[transitive dependency in au.com.dius.pact file name: xercesImpl-2.12.1.jar]]></notes>
+        <packageUrl regex="true">^pkg:maven/com.ibm.icu/icu4j@.*$</packageUrl>
+        <cve>CVE-2018-18928</cve>
     </suppress>
 </suppressions>
