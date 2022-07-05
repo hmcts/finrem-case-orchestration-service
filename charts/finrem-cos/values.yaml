@@ -23,7 +23,7 @@ java:
   keyVaults:
     finrem:
       secrets:
-        - AppInsightsInstrumentationKey
+        - app-insights-connection-string
         - finrem-case-orchestration-service-s2s-key
         - idam-secret
         - finrem-system-update-username
