@@ -294,17 +294,6 @@ bootWithCCD {
     environment("FEATURE_USE_USER_TOKEN", "true")
 }
 
-configurations.all {
-    resolutionStrategy {
-        eachDependency { DependencyResolveDetails details ->
-            if (details.requested.group in ['com.vladsch.flexmark']) {
-                details.useVersion '0.34.30'
-                details.because('Serenity requires this version for reporting. Conflicts with Pact')
-            }
-        }
-    }
-}
-
 dependencyManagement {
     imports {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudBomVersion}"
@@ -377,7 +366,6 @@ dependencies {
     functionalImplementation group: 'com.github.hmcts', name: 'ccd-client', version: versions.ccdClient
     functionalImplementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: versions.serviceTokenGenerator
     functionalImplementation group: 'com.github.hmcts', name: 'bsp-common-lib', version: versions.bspCommonLib
-    functionalImplementation group: 'com.vladsch.flexmark', name: 'flexmark-util', version: '0.34.30'
 
     functionalAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
 
