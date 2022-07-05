@@ -23,9 +23,15 @@ java:
   keyVaults:
     finrem:
       secrets:
-        - app-insights-connection-string
-        - finrem-case-orchestration-service-s2s-key
-        - idam-secret
-        - finrem-system-update-username
-        - finrem-system-update-password
-        - finrem-idam-client-secret
+        - name: app-insights-connection-string
+          alias: app-insights-connection-string
+        - name: finrem-case-orchestration-service-s2s-key
+          alias: finrem-case-orchestration-service-s2s-key
+        - name: idam-secret
+          alias: idam-secret
+        - name: finrem-system-update-username
+          alias: finrem-system-update-username
+        - name: finrem-system-update-password
+          alias: finrem-system-update-password
+        - name: finrem-idam-client-secret
+          alias: finrem-idam-client-secret

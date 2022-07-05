@@ -313,7 +313,6 @@ dependencies {
         exclude group: 'com.vladsch.flexmark', module:'flexmark'
     }
 
-
     implementation group: 'com.sun.xml.bind', name: 'jaxb-osgi', version: versions.jaxbOsgi
     implementation group: 'com.jayway.jsonpath', name: 'json-path-assert', version: versions.jsonPathAssert
     implementation group: 'commons-io', name: 'commons-io', version: versions.commonsIo
@@ -327,18 +326,12 @@ dependencies {
     implementation group: 'io.github.openfeign', name: 'feign-jackson', version: versions.openfeign
     implementation group: 'io.github.openfeign', name: 'feign-httpclient', version: versions.openfeign
     implementation group: 'io.github.openfeign.form', name: 'feign-form', version: versions.openfeignForm
-
     implementation group: 'com.github.hmcts', name: 'idam-java-client', version: versions.idamClient
-
     implementation group: 'com.github.hmcts', name: 'ccd-client', version: versions.ccdClient
-
     implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: versions.reformLogging
-
     implementation group: 'com.github.hmcts', name: 'properties-volume-spring-boot-starter', version: versions.propVolumeStarter
     implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: versions.serviceTokenGenerator
-
     implementation group: 'com.github.hmcts', name: 'bsp-common-lib', version: versions.bspCommonLib
-
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: versions.apacheLogging
     implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: versions.apacheLogging
 
@@ -350,10 +343,9 @@ dependencies {
     testImplementation group: 'com.github.tomakehurst', name: 'wiremock', version: versions.wiremock
     testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
-
     testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind'
     testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations'
-
+    testImplementation('com.github.hmcts:fortify-client:1.2.0:all')
     testImplementation("org.junit.vintage:junit-vintage-engine") {
         exclude group: "org.hamcrest", module: "hamcrest-core"
     }
@@ -362,35 +354,30 @@ dependencies {
     testSmokeImplementation sourceSets.main.runtimeClasspath
     testSmokeImplementation sourceSets.test.runtimeClasspath
 
-    testImplementation('com.github.hmcts:fortify-client:1.2.0:all')
 
     functionalImplementation group: 'io.jsonwebtoken', name: 'jjwt', version: versions.jjwt
     functionalImplementation group: 'io.rest-assured', name: 'rest-assured'
     functionalImplementation group: 'junit', name: 'junit', version: versions.junit
-
     functionalImplementation group: 'net.serenity-bdd', name: 'serenity-core', version: versions.serenity
     functionalImplementation group: 'net.serenity-bdd', name: 'serenity-junit', version: versions.serenity
     functionalImplementation group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: versions.serenity
     functionalImplementation group: 'net.serenity-bdd', name: 'serenity-spring', version: versions.serenity
     functionalImplementation group: 'com.vladsch.flexmark', name: 'flexmark-util', version: '0.34.30'
-
     functionalImplementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
     functionalImplementation group: 'org.mockito', name: 'mockito-core', version: versions.mockito
-
     functionalImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
     functionalImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
-
     functionalImplementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
-
     functionalImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind'
     functionalImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations'
-
     functionalImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     functionalImplementation group: 'org.skyscreamer', name: 'jsonassert', version: versions.skyscreamer
     functionalImplementation group: 'com.github.hmcts', name: 'ccd-client', version: versions.ccdClient
     functionalImplementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: versions.serviceTokenGenerator
-
     functionalImplementation group: 'com.github.hmcts', name: 'bsp-common-lib', version: versions.bspCommonLib
+    functionalImplementation ('au.com.dius.pact:provider:' + versions.pact) {
+        exclude group: 'com.vladsch.flexmark', module:'flexmark-util'
+    }
 
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
@@ -398,10 +385,6 @@ dependencies {
 
     contractImplementation group: 'au.com.dius.pact', name: 'consumer', version: versions.pact
     contractImplementation group: 'au.com.dius.pact.consumer', name: 'junit', version: versions.pact
-    contractImplementation ('au.com.dius.pact:provider:' + versions.pact) {
-        exclude group: 'com.vladsch.flexmark', module:'flexmark-util'
-    }
-
     contractImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
 
     contractImplementation sourceSets.main.runtimeClasspath
