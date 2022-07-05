@@ -301,9 +301,8 @@ configurations.all {
         eachDependency { DependencyResolveDetails details ->
             if (details.requested.group in ['com.vladsch.flexmark']) {
                 details.useVersion '0.34.30'
+                details.because('Serenity requires this version for reporting. Conflicts with Pact')
             }
-
-
         }
     }
 }
