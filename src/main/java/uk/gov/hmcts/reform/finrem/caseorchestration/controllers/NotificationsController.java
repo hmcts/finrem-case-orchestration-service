@@ -619,7 +619,7 @@ public class NotificationsController extends BaseController {
     @PostMapping(value = "/update-frc", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Send FRC change update notifications")
     @ApiResponses(value = {
-        @ApiResponse(code = 204, message = "Update FRC information notificatons sent successfully",
+        @ApiResponse(code = 204, message = "Update FRC information notification sent successfully",
             response = AboutToStartOrSubmitCallbackResponse.class)})
     ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendUpdateFrcNotifications(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
