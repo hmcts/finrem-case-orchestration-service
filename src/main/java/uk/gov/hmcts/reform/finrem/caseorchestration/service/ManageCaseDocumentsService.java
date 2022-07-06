@@ -95,13 +95,9 @@ public class ManageCaseDocumentsService {
             CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
         documentIdsAndCollection.forEach((documentId, collection) ->
             getAllDocumentsInCollection(caseData, collection)
-                .forEach(contestedUploadedDocumentData -> {
-                    if (collection.startsWith("app") || collection.startsWith("resp") || collection.startsWith("fdr")) {
-                        caseData.put(collection, findIfDocumentExistInCollectionAfterMove(
-                            caseData, getAllDocumentsInCollection(caseData, collection), contestedUploadedDocumentData,
-                            caseDocumentsCollection));
-                    }
-                }));
+                .forEach(contestedUploadedDocumentData -> caseData.put(collection, findIfDocumentExistInCollectionAfterMove(
+                    caseData, getAllDocumentsInCollection(caseData, collection), contestedUploadedDocumentData,
+                    caseDocumentsCollection))));
     }
 
     private List<ContestedUploadedDocumentData> findIfDocumentExistInCollectionAfterMove(Map<String, Object> caseData,
