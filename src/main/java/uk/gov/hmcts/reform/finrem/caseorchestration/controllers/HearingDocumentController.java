@@ -90,7 +90,8 @@ public class HearingDocumentController extends BaseController {
         List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
 
         if (caseDataService.isContestedApplication(caseDetails)
-            && notificationService.isSolicitorEmailCommunicationProhibited(caseDetails)) {
+            && (!notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)
+            || !notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails))) {
             CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
             if (caseDetailsBefore != null && hearingDocumentService.alreadyHadFirstHearing(caseDetailsBefore)) {
                 log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
