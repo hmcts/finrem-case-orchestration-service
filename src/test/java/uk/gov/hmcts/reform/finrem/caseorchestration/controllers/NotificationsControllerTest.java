@@ -103,6 +103,24 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
+    public void shouldSendAssignToJudgeConfirmationEmailIfRespondentSolicitorIsAcceptingEmail() {
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
+
+        notificationsController.sendAssignToJudgeConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
+
+        verify(notificationService).sendAssignToJudgeConfirmationEmailToApplicantSolicitor(any());
+    }
+
+    @Test
+    public void shouldNotSendAssignToJudgeConfirmationEmailIfRespondentSolicitorIsAcceptingEmail() {
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
+
+        notificationsController.sendAssignToJudgeConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
+
+        verify(notificationService).sendAssignToJudgeConfirmationEmailToApplicantSolicitor(any());
+    }
+
+    @Test
     public void whenIsConsentedAndSolicitorAgreedToEmail_sendConsentOrderMadeConfirmationEmail() {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
