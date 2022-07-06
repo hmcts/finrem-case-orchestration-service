@@ -115,8 +115,6 @@ configurations {
     functionalImplementation.extendsFrom testImplementation
     functionalRuntimeOnly.extendsFrom testRuntimeOnly
     cftlibRuntimeClasspath.extendsFrom runtimeClasspath
-    smokeRuntimeOnly.extendsFrom testRuntimeOnly
-    smokeImplementation.extendsFrom testImplementation
 }
 
 processTestResources {
