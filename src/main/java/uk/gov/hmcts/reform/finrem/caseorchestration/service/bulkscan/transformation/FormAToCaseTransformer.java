@@ -69,7 +69,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.help
 @RequiredArgsConstructor
 @Component
 public class FormAToCaseTransformer extends BulkScanFormTransformer {
-
     private final CaseDataService caseDataService = new CaseDataService();
 
     private static final Map<String, String> ocrToCCDMapping;
