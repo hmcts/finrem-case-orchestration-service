@@ -17,8 +17,6 @@ public class ManageCaseDocumentsContestedAboutToSubmitCaseHandler implements Cal
 
     private final ManageCaseDocumentsService manageCaseDocumentsService;
 
-
-
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)

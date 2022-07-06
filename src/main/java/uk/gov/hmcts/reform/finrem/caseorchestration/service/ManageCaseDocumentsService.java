@@ -30,7 +30,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class ManageCaseDocumentsService {
 
     private final ObjectMapper mapper;
-    private final List<CaseDocumentHandler> caseDocumentHandlers;
+    private final List<CaseDocumentHandler<ContestedUploadedDocumentData>> caseDocumentHandlers;
 
     public Map<String, Object> setApplicantAndRespondentDocumentsCollection(CaseDetails caseDetails) {
 
