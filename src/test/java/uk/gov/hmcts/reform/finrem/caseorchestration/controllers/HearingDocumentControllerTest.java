@@ -265,7 +265,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @Test
     public void givenNoPreviousHearing_shouldPrintHearingDocumentsForRespondentSolicitor() throws Exception {
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
-        when(notificationService.isSolicitorEmailCommunicationProhibited(any())).thenReturn(true);
+        when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(true);
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(false);
 
         requestContent = objectMapper.readTree(new File(getClass()
@@ -282,7 +282,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @Test
     public void givenNoPreviousHearing_shouldPrintHearingDocumentsForApplicantSolicitor() throws Exception {
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
-        when(notificationService.isSolicitorEmailCommunicationProhibited(any())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(true);
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(false);
 
         requestContent = objectMapper.readTree(new File(getClass()
@@ -299,7 +299,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @Test
     public void givenHadPreviousHearing_thenPrintAdditionalHearingDocumentsForRespondentSolicitor() throws Exception {
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
-        when(notificationService.isSolicitorEmailCommunicationProhibited(any())).thenReturn(true);
+        when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(true);
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
 
         requestContent = objectMapper.readTree(new File(getClass()
@@ -316,7 +316,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @Test
     public void givenHadPreviousHearing_thenPrintAdditionalHearingDocumentsForApplicantSolicitor() throws Exception {
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
-        when(notificationService.isSolicitorEmailCommunicationProhibited(any())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(true);
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
 
         requestContent = objectMapper.readTree(new File(getClass()
