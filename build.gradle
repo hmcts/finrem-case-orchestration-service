@@ -148,8 +148,7 @@ dependencyUpdates {
 }
 
 jacocoTestReport {
-    //TODO: add integration, eg executionData(test, integration)
-    executionData(test)
+    executionData(test, integration)
     reports {
         xml.required = true
         csv.required = false
