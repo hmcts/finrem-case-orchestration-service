@@ -409,10 +409,14 @@ public class NotificationService {
         return caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails);
     }
 
-    public boolean isSolicitorEmailCommunicationProhibited(CaseDetails caseDetails) {
-        return (!isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())
-            || !isContestedApplicantSolicitorEmailCommunicationEnabled(caseDetails.getData())
-            || !checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails));
+    public boolean isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(CaseDetails caseDetails) {
+        return caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)
+            && checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails);
+    }
+
+    public boolean isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(CaseDetails caseDetails) {
+        return isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())
+            && checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails);
     }
 
 
