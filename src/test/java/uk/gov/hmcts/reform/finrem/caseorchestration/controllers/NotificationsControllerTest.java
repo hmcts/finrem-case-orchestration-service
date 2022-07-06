@@ -682,6 +682,17 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
+    public void whenConsentOrderApprovedAndSolicitorEmailsNotEnabled_thenDoNotEmailSolicitors() {
+        when(notificationService.isApplicantSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
+
+        notificationsController.sendConsentOrderNotApprovedSentEmail(buildCallbackRequest());
+
+        verify(notificationService, never()).sendConsentOrderNotApprovedSentEmailToApplicantSolicitor(any());
+        verify(notificationService, never()).sendConsentOrderNotApprovedSentEmailToRespondentSolicitor(any());
+    }
+
+    @Test
     public void sendTransferToLocalCourtEmailConsented() {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
 
