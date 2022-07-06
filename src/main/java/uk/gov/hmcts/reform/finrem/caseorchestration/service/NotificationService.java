@@ -448,9 +448,10 @@ public class NotificationService {
         sendEmailIfSolicitorIsDigital(caseDetails, notificationRequest, uri);
     }
 
-    private void sendEmailIfSolicitorIsDigital(CaseDetails caseDetails,
-                                               NotificationRequest notificationRequest,
-                                               URI uri) {
+    private void sendEmailIfSolicitorIsDigital(
+        CaseDetails caseDetails,
+        NotificationRequest notificationRequest,
+        URI uri) {
 
         if (isApplicantNoticeOfChangeRequest(notificationRequest, caseDetails)) {
             if (checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)) {
@@ -462,7 +463,6 @@ public class NotificationService {
         if (checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)) {
             sendNotificationEmail(notificationRequest, uri);
         }
-
     }
 
     private URI getNoticeOfChangeUri(CaseDetails caseDetails) {
