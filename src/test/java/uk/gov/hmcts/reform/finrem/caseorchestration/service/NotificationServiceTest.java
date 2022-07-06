@@ -48,6 +48,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
 
 public class NotificationServiceTest extends BaseServiceTest {
 
@@ -885,6 +886,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         caseData.put(PAPER_APPLICATION, NO_VALUE);
         caseData.put(CONTESTED_RESPONDENT_REPRESENTED, YES_VALUE);
         caseData.put(RESP_SOLICITOR_EMAIL, TEST_USER_EMAIL);
+        caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, YES_VALUE);
 
         assertTrue(notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData));
     }
@@ -924,6 +926,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         caseData.put(PAPER_APPLICATION, NO_VALUE);
         caseData.put(APPLICANT_REPRESENTED, YES_VALUE);
         caseData.put(CONTESTED_SOLICITOR_EMAIL, TEST_USER_EMAIL);
+        caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, YES_VALUE);
 
         assertTrue(notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(caseData));
     }
