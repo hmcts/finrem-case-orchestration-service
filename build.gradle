@@ -356,6 +356,7 @@ dependencies {
     testSmokeImplementation sourceSets.main.runtimeClasspath
     testSmokeImplementation sourceSets.test.runtimeClasspath
     testSmokeImplementation group: 'io.rest-assured', name: 'rest-assured'
+    testSmokeImplementation group: 'com.vladsch.flexmark', name: 'flexmark-util', version: '0.34.30'
 
     functionalImplementation sourceSets.main.runtimeClasspath
     functionalImplementation sourceSets.test.runtimeClasspath
@@ -386,6 +387,6 @@ dependencies {
     contractImplementation group: 'au.com.dius.pact.consumer', name: 'junit', version: versions.pact
     contractImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
 
-    smokeImplementation group: 'com.vladsch.flexmark', name: 'flexmark-util', version: '0.34.30'
+
 }
 
