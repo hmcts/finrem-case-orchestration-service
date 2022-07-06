@@ -231,14 +231,12 @@ task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verificatio
     description = "Runs smoke Tests"
     testClassesDirs = sourceSets.testSmoke.output.classesDirs
     classpath = sourceSets.testSmoke.runtimeClasspath
-    finalizedBy aggregate
 }
 
 task functional(type: Test) {
     description = "Runs functional Tests"
     setTestClassesDirs(sourceSets.functional.output.classesDirs)
     setClasspath(sourceSets.functional.runtimeClasspath)
-    finalizedBy aggregate
 }
 
 task contractTest(type: Test) {
@@ -316,9 +314,6 @@ dependencyManagement {
 
 dependencies {
 
-    implementation ('au.com.dius.pact:provider:' + versions.pact) {
-        exclude group: 'com.vladsch.flexmark'
-    }
     implementation group: 'com.google.guava', name: 'guava', version: versions.guava
     implementation group: 'com.sun.xml.bind', name: 'jaxb-osgi', version: versions.jaxbOsgi
     implementation group: 'com.jayway.jsonpath', name: 'json-path-assert', version: versions.jsonPathAssert
