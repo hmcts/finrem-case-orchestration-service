@@ -331,14 +331,11 @@ public class NotificationsController extends BaseController {
         validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)
-            && checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)) {
+        if (notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
             log.info("Sending email notification to Applicant Solicitor for 'Prepare for Hearing'");
             notificationService.sendPrepareForHearingEmailApplicant(caseDetails);
         }
-
-        if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())
-            && checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)) {
+        if (notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
             log.info("Sending email notification to Respondent Solicitor for 'Prepare for Hearing'");
             notificationService.sendPrepareForHearingEmailRespondent(caseDetails);
         }

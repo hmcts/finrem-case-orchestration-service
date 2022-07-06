@@ -98,10 +98,10 @@ public class HearingDocumentService {
         String caseId = caseDetails.getId() == null ? "noId" : caseDetails.getId().toString();
         List<BulkPrintDocument> caseDocuments = getHearingCaseDocuments(caseDetails.getData(), caseId);
 
-        if (!notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
+        if (!notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
             bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, caseDocuments);
         }
-        if (!notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
+        if (!notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
             bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, caseDocuments);
         }
     }
