@@ -65,18 +65,28 @@
         <packageUrl regex="true">^pkg:maven/org\.springframework/spring\-core@.*$</packageUrl>
         <cve>CVE-2022-22971</cve>
     </suppress>
-    <suppress until="2022-08-01">
-        <notes><![CDATA[
-   file name: tomcat-embed-core-9.0.63.jar
-   ]]></notes>
+    <suppress>
+        <notes><![CDATA[it's an example webapp that the CVE is against, very bad CVE data]]></notes>
         <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat\-embed\-core@.*$</packageUrl>
         <cve>CVE-2022-34305</cve>
     </suppress>
-    <suppress until="2022-08-01">
-        <notes><![CDATA[
-   file name: tomcat-embed-websocket-9.0.63.jar
-   ]]></notes>
+    <suppress>
+        <notes><![CDATA[it's an example webapp that the CVE is against, very bad CVE data]]></notes>
         <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat\-embed\-websocket@.*$</packageUrl>
         <cve>CVE-2022-34305</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+    Junk CVE, only affects Amazon Corretto when hot patch is enabled
+    ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.logging\.log4j/log4j\-api@.*$</packageUrl>
+        <cve>CVE-2022-33915</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+    Junk CVE, only affects Amazon Corretto when hot patch is enabled
+    ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.logging\.log4j/log4j\-to\-slf4j@.*$</packageUrl>
+        <cve>CVE-2022-33915</cve>
     </suppress>
 </suppressions>
