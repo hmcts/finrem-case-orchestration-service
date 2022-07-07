@@ -15,11 +15,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CallbackDispatchService;
 
 import javax.validation.constraints.NotNull;
+
+import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.ResponseEntity.ok;
@@ -93,9 +96,16 @@ public class CcdCallbackController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) {
 
-        log.info("Mid Event Financial Remedy case callback `{}` received for Case ID `{}`",
-            callbackRequest.getEventId(),
-            callbackRequest.getCaseDetails().getId());
+        Optional<CaseDetails> caseDetails = Optional.ofNullable(callbackRequest.getCaseDetails());
+
+        if (caseDetails.isPresent()) {
+            log.info("Mid Event Financial Remedy case callback `{}` received for Case ID `{}`",
+                callbackRequest.getEventId(),
+                caseDetails.get().getId());
+        } else {
+            log.info("Mid Event Financial Remedy case callback `{}`",
+                callbackRequest.getEventId());
+        }
 
         validateCaseData(callbackRequest);
 
