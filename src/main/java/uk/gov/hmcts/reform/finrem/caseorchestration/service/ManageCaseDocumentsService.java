@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandler;
@@ -172,9 +173,12 @@ public class ManageCaseDocumentsService {
         List<ContestedUploadedDocumentData> manageCaseDocuments =
             getAllDocumentsInCollection(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
-        manageCaseDocuments.stream().filter(document -> document.getUploadedCaseDocument().getDocumentUploadDate() != null)
-            .forEach((doc -> doc.getUploadedCaseDocument().setDocumentUploadDate(LocalDate.now())));
-
+        manageCaseDocuments.forEach((doc -> {
+            ContestedUploadedDocument contestedUploadedDocument = doc.getUploadedCaseDocument();
+            contestedUploadedDocument.setDocumentUploadDate(contestedUploadedDocument.getDocumentUploadDate()
+                == null ? LocalDate.now() : contestedUploadedDocument.getDocumentUploadDate());
+            doc.setUploadedCaseDocument(contestedUploadedDocument);
+        }));
         Comparator<ContestedUploadedDocumentData> mostRecentDocuments =
             Comparator.comparing(t -> t.getUploadedCaseDocument().getDocumentUploadDate(),
                 Comparator.nullsLast(Comparator.naturalOrder()));
