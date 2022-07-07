@@ -55,9 +55,9 @@ public class ManageCaseDocumentsService {
 
         findAndRemoveMovedDocumentFromCollections(caseData, idToCollectionData);
 
-        List<ContestedUploadedDocumentData> caseDocuments = getAllDocumentsInCollection(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
-
         setDocumentUploadDate(caseData);
+
+        List<ContestedUploadedDocumentData> caseDocuments = getAllDocumentsInCollection(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         caseDocumentHandlers.forEach(h -> h.handle(caseDocuments, caseData));
         caseData.put(CONTESTED_UPLOADED_DOCUMENTS, caseDocuments);
