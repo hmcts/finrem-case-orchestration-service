@@ -170,15 +170,18 @@ public class ManageCaseDocumentsService {
     }
 
     private void setDocumentUploadDate(Map<String, Object> caseData) {
+
         List<ContestedUploadedDocumentData> manageCaseDocuments =
             getAllDocumentsInCollection(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
+        for (Iterator<ContestedUploadedDocumentData> it = manageCaseDocuments.iterator(); it.hasNext(); ) {
+            ContestedUploadedDocumentData document = it.next();
 
-        manageCaseDocuments.forEach((doc -> {
-            ContestedUploadedDocument contestedUploadedDocument = doc.getUploadedCaseDocument();
+            ContestedUploadedDocument contestedUploadedDocument = document.getUploadedCaseDocument();
             contestedUploadedDocument.setDocumentUploadDate(contestedUploadedDocument.getDocumentUploadDate()
                 == null ? LocalDate.now() : contestedUploadedDocument.getDocumentUploadDate());
-            doc.setUploadedCaseDocument(contestedUploadedDocument);
-        }));
+            document.setUploadedCaseDocument(contestedUploadedDocument);
+        }
+
         Comparator<ContestedUploadedDocumentData> mostRecentDocuments =
             Comparator.comparing(t -> t.getUploadedCaseDocument().getDocumentUploadDate(),
                 Comparator.nullsLast(Comparator.naturalOrder()));
@@ -187,6 +190,7 @@ public class ManageCaseDocumentsService {
 
         caseData.put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, manageCaseDocuments);
     }
+
 }
 
 
