@@ -10,6 +10,7 @@ public enum EventType {
     SEND_ORDER("FR_sendOrder"),
     PREPARE_FOR_HEARING("FR_prepareForHearing"),
     UPLOAD_CASE_FILES("FR_uploadCaseFiles"),
+    SOLICITOR_CREATE("FR_solicitorCreate"),
     CLOSE("FR_close"),
     NONE("");
 
