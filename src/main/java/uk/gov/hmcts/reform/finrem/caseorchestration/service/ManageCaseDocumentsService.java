@@ -11,8 +11,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandler;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -53,6 +55,9 @@ public class ManageCaseDocumentsService {
         findAndRemoveMovedDocumentFromCollections(caseData, idToCollectionData);
 
         List<ContestedUploadedDocumentData> caseDocuments = getAllDocumentsInCollection(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
+
+        setDocumentUploadDate(caseData);
+
         caseDocumentHandlers.forEach(h -> h.handle(caseDocuments, caseData));
         caseData.put(CONTESTED_UPLOADED_DOCUMENTS, caseDocuments);
 
@@ -161,6 +166,22 @@ public class ManageCaseDocumentsService {
 
         return mapper.convertValue(caseData.get(collection), new TypeReference<>() {
         });
+    }
+
+    private void setDocumentUploadDate(Map<String, Object> caseData) {
+        List<ContestedUploadedDocumentData> manageCaseDocuments =
+            getAllDocumentsInCollection(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
+
+        manageCaseDocuments.stream().filter(document -> document.getUploadedCaseDocument().getDocumentUploadDate() != null)
+            .forEach((doc -> doc.getUploadedCaseDocument().setDocumentUploadDate(LocalDate.now())));
+
+        Comparator<ContestedUploadedDocumentData> mostRecentDocuments =
+            Comparator.comparing(t -> t.getUploadedCaseDocument().getDocumentUploadDate(),
+                Comparator.nullsLast(Comparator.naturalOrder()));
+
+        manageCaseDocuments.sort(mostRecentDocuments.reversed());
+
+        caseData.put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, manageCaseDocuments);
     }
 }
 
