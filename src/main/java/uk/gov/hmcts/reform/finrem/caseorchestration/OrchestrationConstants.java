@@ -51,4 +51,12 @@ public class OrchestrationConstants {
     public static final String CTSC_EMAIL_ADDRESS = "contactFinancialRemedy@justice.gov.uk";
     public static final String CTSC_PHONE_NUMBER = "0300 303 0642";
     public static final String CTSC_OPENING_HOURS = "from 8am to 6pm, Monday to Friday";
+
+    // VARIATION ORDER RELATED
+    public static final String CV_ORDER_CAMELCASE_LABEL_FIELD = "consentVariationOrderLabelC";
+    public static final String VARIATION_ORDER_CAMELCASE_LABEL_VALUE = "Consent/Variation order";
+    public static final String CONSENT_ORDER_CAMELCASE_LABEL_VALUE = "Consent order";
+    public static final String CV_LOWERCASE_LABEL_FIELD = "consentVariationOrderLabelL";
+    public static final String VARIATION_ORDER_LOWERCASE_LABEL_VALUE = "consent/variation order";
+    public static final String CONSENT_ORDER_LOWERCASE_LABEL_VALUE = "consent order";
 }

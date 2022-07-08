@@ -12,11 +12,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CONSENT_ORDER_CAMELCASE_LABEL_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CONSENT_ORDER_LOWERCASE_LABEL_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CV_LOWERCASE_LABEL_FIELD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CV_ORDER_CAMELCASE_LABEL_FIELD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.VARIATION_ORDER_CAMELCASE_LABEL_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.VARIATION_ORDER_LOWERCASE_LABEL_VALUE;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SolicitorCreateConsentedMidHandlerTest {
@@ -54,12 +61,33 @@ public class SolicitorCreateConsentedMidHandlerTest {
     }
 
     @Test
-    public void give_casedata_when_asked_customlebel_then_return_custom_label() {
+    public void giveConsentedCase_when_natureOfApplicationIsVariation_then_return_variation_order_labels() {
         CallbackRequest callbackRequest = buildCallbackRequest();
+        List<String> orderList  = List.of("Variation Order", "Property Adjustment Order");
+        callbackRequest.getCaseDetails().getData().put("natureOfApplication2", orderList);
 
-        AboutToStartOrSubmitCallbackResponse response = solicitorCreateConsentedMidHandler.handle(callbackRequest, AUTH_TOKEN);
-        final String customLabel = (String) response.getData().get("customLabel");
-        assertEquals("consent/variation order", customLabel);
+        AboutToStartOrSubmitCallbackResponse response =
+            solicitorCreateConsentedMidHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        final String camelCaseLabel = (String) response.getData().get(CV_ORDER_CAMELCASE_LABEL_FIELD);
+        assertEquals(VARIATION_ORDER_CAMELCASE_LABEL_VALUE, camelCaseLabel);
+        final String lowerCaseLabel = (String) response.getData().get(CV_LOWERCASE_LABEL_FIELD);
+        assertEquals(VARIATION_ORDER_LOWERCASE_LABEL_VALUE, lowerCaseLabel);
+    }
+
+    @Test
+    public void giveConsentedCase_when_natureOfApplicationIsNotVariation_then_return_consent_order_labels() {
+        CallbackRequest callbackRequest = buildCallbackRequest();
+        List<String> orderList  = List.of("Property Adjustment Order");
+        callbackRequest.getCaseDetails().getData().put("natureOfApplication2", orderList);
+
+        AboutToStartOrSubmitCallbackResponse response =
+            solicitorCreateConsentedMidHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        final String camelCaseLabel = (String) response.getData().get(CV_ORDER_CAMELCASE_LABEL_FIELD);
+        assertEquals(CONSENT_ORDER_CAMELCASE_LABEL_VALUE, camelCaseLabel);
+        final String lowerCaseLabel = (String) response.getData().get(CV_LOWERCASE_LABEL_FIELD);
+        assertEquals(CONSENT_ORDER_LOWERCASE_LABEL_VALUE, lowerCaseLabel);
     }
 
     private CallbackRequest buildCallbackRequest() {
