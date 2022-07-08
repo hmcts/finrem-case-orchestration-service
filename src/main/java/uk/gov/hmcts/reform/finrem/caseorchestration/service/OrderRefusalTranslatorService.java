@@ -24,6 +24,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @Service
 @RequiredArgsConstructor
+//Todo: Flagged for removal
+@Deprecated
 public final class OrderRefusalTranslatorService {
 
     private static final String ORDER_REFUSAL_COLLECTION_NEW = "orderRefusalCollectionNew";

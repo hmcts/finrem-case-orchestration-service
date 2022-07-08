@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler
 
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
@@ -11,6 +10,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.genera
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler.AbstractLetterHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.RepresentationUpdate;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
@@ -39,10 +40,10 @@ public class RepresentativeLetterHandler extends AbstractLetterHandler {
 
     @Override
     protected boolean shouldALetterBeSent(RepresentationUpdate representationUpdate,
-                                          CaseDetails caseDetailsToUse,
-                                          CaseDetails otherCaseDetails) {
+                                          FinremCaseDetails caseDetailsToUse,
+                                          FinremCaseDetails otherCaseDetails) {
         log.info("Now check if solicitor notification letter is required");
-        boolean isConsentedApplication = caseDataService.isConsentedApplication(caseDetailsToUse);
+        boolean isConsentedApplication = caseDetailsToUse.getCaseData().isConsentedApplication();
         log.info("Check that the solicitor email address is populated for is consented {}", isConsentedApplication);
         return (isApplicantChangeOfRepresentativeWithoutSolicitorEmail(representationUpdate, caseDetailsToUse,
             isConsentedApplication, otherCaseDetails)
@@ -51,9 +52,9 @@ public class RepresentativeLetterHandler extends AbstractLetterHandler {
     }
 
     private boolean isApplicantChangeOfRepresentativeWithoutSolicitorEmail(RepresentationUpdate representationUpdate,
-                                                                           CaseDetails caseDetailsToUse,
+                                                                           FinremCaseDetails caseDetailsToUse,
                                                                            boolean isConsentedApplication,
-                                                                           CaseDetails otherCaseDetails) {
+                                                                           FinremCaseDetails otherCaseDetails) {
         return (representationUpdate.getParty().equalsIgnoreCase(COR_APPLICANT))
             && (isConsentedAndSolicitorNonDigitalOrWithoutEmail(representationUpdate,
                 caseDetailsToUse, otherCaseDetails, isConsentedApplication)
@@ -62,32 +63,32 @@ public class RepresentativeLetterHandler extends AbstractLetterHandler {
     }
 
     private boolean isRespondentChangeOfRepresentativeWithoutSolcitorEmail(RepresentationUpdate representationUpdate,
-                                                                           CaseDetails caseDetailsToUse,
-                                                                           CaseDetails otherCaseDetails) {
+                                                                           FinremCaseDetails caseDetailsToUse,
+                                                                           FinremCaseDetails otherCaseDetails) {
         return representationUpdate.getParty().equals(COR_RESPONDENT)
-            && (!isCaseFieldPopulated(caseDetailsToUse, RESP_SOLICITOR_EMAIL)
+            && (!isCaseFieldPopulated(caseDetailsToUse.getCaseData().getContactDetailsWrapper().getRespondentSolicitorEmail())
             || !isSolicitorDigital(representationUpdate, otherCaseDetails));
     }
 
     private boolean isConsentedAndSolicitorNonDigitalOrWithoutEmail(RepresentationUpdate representationUpdate,
-                                                                    CaseDetails caseDetailsToUse,
-                                                                    CaseDetails otherCaseDetails,
+                                                                    FinremCaseDetails caseDetailsToUse,
+                                                                    FinremCaseDetails otherCaseDetails,
                                                                     boolean isConsentedApplication) {
         return isConsentedApplication
-            && (!isCaseFieldPopulated(caseDetailsToUse, SOLICITOR_EMAIL)
+            && (!isCaseFieldPopulated(caseDetailsToUse.getCaseData().getApplicantSolicitorEmail())
             || !isSolicitorDigital(representationUpdate, otherCaseDetails));
     }
 
     private boolean isContestedAndSolicitorNonDigitalOrWithoutEmail(RepresentationUpdate representationUpdate,
-                                                                    CaseDetails caseDetailsToUse,
-                                                                    CaseDetails otherCaseDetails,
+                                                                    FinremCaseDetails caseDetailsToUse,
+                                                                    FinremCaseDetails otherCaseDetails,
                                                                     boolean isConsentedApplication) {
         return !isConsentedApplication
-            && (!isCaseFieldPopulated(caseDetailsToUse, CONTESTED_SOLICITOR_EMAIL)
+            && (!isCaseFieldPopulated(caseDetailsToUse.getCaseData().getApplicantSolicitorEmail())
             || !isSolicitorDigital(representationUpdate, otherCaseDetails));
     }
 
-    private boolean isSolicitorDigital(RepresentationUpdate representationUpdate, CaseDetails otherCaseDetails) {
+    private boolean isSolicitorDigital(RepresentationUpdate representationUpdate, FinremCaseDetails otherCaseDetails) {
         return representationUpdate.getParty().equalsIgnoreCase(COR_APPLICANT)
             ? checkApplicantSolicitorIsDigitalService.isSolicitorDigital(otherCaseDetails)
             : checkRespondentSolicitorIsDigitalService.isSolicitorDigital(otherCaseDetails);

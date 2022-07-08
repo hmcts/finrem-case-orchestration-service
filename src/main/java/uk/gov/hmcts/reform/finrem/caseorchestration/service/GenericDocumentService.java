@@ -59,6 +59,16 @@ public class GenericDocumentService {
         return toCaseDocument(documentClient.convertDocumentToPdf(authorisationToken, toDocument(document)));
     }
 
+    public Document convertDocumentIfNotPdfAlready(Document document, String authorisationToken) {
+        return !Files.getFileExtension(document.getFilename()).equalsIgnoreCase("pdf")
+            ? convertDocumentToPdf(document, authorisationToken) : document;
+    }
+
+    public Document convertDocumentToPdf(Document document, String authorisationToken) {
+        return documentClient.convertDocumentToPdf(authorisationToken, document);
+    }
+
+
     public CaseDocument stampDocument(CaseDocument document, String authorisationToken) {
         Document stampedDocument = documentClient.stampDocument(toDocument(document), authorisationToken);
         return toCaseDocument(stampedDocument);

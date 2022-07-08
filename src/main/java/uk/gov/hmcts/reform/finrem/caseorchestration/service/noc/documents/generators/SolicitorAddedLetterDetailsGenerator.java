@@ -2,12 +2,12 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.gener
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.address.AddresseeGeneratorService;
+import uk.gov.hmcts.reform.finrem.ccd.domain.ChangedRepresentative;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.RepresentationUpdate;
 
 @Component
 public class SolicitorAddedLetterDetailsGenerator extends AbstractLetterDetailsGenerator {
@@ -15,8 +15,8 @@ public class SolicitorAddedLetterDetailsGenerator extends AbstractLetterDetailsG
     @Autowired
     public SolicitorAddedLetterDetailsGenerator(
         AddresseeGeneratorService addresseeGeneratorService,
-        DocumentHelper documentHelper, CaseDataService caseDataService) {
-        super(addresseeGeneratorService, documentHelper, caseDataService);
+        CourtDetailsMapper courtDetailsMapper) {
+        super(addresseeGeneratorService, courtDetailsMapper);
     }
 
     @Override
@@ -30,19 +30,21 @@ public class SolicitorAddedLetterDetailsGenerator extends AbstractLetterDetailsG
     }
 
     @Override
-    String getSolicitorReference(CaseDetails caseDetails, CaseDetails caseDetailsBefore, RepresentationUpdate representationUpdate) {
+    String getSolicitorReference(FinremCaseDetails caseDetails,
+                                 FinremCaseDetails caseDetailsBefore,
+                                 RepresentationUpdate representationUpdate) {
         return getSolicitorReference(caseDetails, representationUpdate);
     }
 
     @Override
-    String getSolicitorFirmName(RepresentationUpdate representationUpdate, CaseDetails caseDetails,
-                                CaseDetails caseDetailsBefore) {
+    String getSolicitorFirmName(RepresentationUpdate representationUpdate, FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore) {
         return getSolicitorFirmName(caseDetails, representationUpdate);
-
     }
 
     @Override
-    CaseDetails getCaseDetailsToUse(CaseDetails caseDetails, CaseDetails caseDetailsBefore, DocumentHelper.PaperNotificationRecipient recipient) {
+    FinremCaseDetails getCaseDetailsToUse(FinremCaseDetails caseDetails,
+                                    FinremCaseDetails caseDetailsBefore,
+                                    DocumentHelper.PaperNotificationRecipient recipient) {
         return recipient == DocumentHelper.PaperNotificationRecipient.SOLICITOR
             ? caseDetails
             : caseDetailsBefore;

@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.LetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
@@ -23,7 +24,7 @@ public class HelpWithFeesDocumentService {
     private final DocumentHelper documentHelper;
     private final LetterDetailsMapper letterDetailsMapper;
 
-    public CaseDocument generateHwfSuccessfulNotificationLetter(FinremCaseDetails caseDetails, String authToken,
+    public Document generateHwfSuccessfulNotificationLetter(FinremCaseDetails caseDetails, String authToken,
                                                                 DocumentHelper.PaperNotificationRecipient recipient) {
         log.info("Generating Help With Fees Successful Notification Letter {} from {} for bulk print for {}",
             documentConfiguration.getHelpWithFeesSuccessfulNotificationFileName(),
@@ -33,7 +34,7 @@ public class HelpWithFeesDocumentService {
         Map<String, Object> placeHoldersMap = letterDetailsMapper.getLetterDetailsAsMap(caseDetails,
             recipient, caseDetails.getCaseData().getRegionWrapper().getDefaultCourtList());
 
-        CaseDocument generatedHwfSuccessfulNotificationLetter = genericDocumentService.generateDocumentFromPlaceholdersMap(authToken,
+        Document generatedHwfSuccessfulNotificationLetter = genericDocumentService.generateDocumentFromPlaceholdersMap(authToken,
             placeHoldersMap,
             documentConfiguration.getHelpWithFeesSuccessfulNotificationTemplate(),
             documentConfiguration.getHelpWithFeesSuccessfulNotificationFileName());

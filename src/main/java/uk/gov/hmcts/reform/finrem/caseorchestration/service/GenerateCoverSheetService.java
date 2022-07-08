@@ -2,11 +2,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.BulkPrintCoverLetterDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.bulkprint.BulkPrintCoverLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 

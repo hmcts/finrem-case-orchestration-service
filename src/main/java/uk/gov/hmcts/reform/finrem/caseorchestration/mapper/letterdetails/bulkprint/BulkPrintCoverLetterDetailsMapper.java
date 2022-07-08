@@ -1,13 +1,16 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails;
+package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.bulkprint;
 
 import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.LetterDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.LetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.CourtListWrapper;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_POSTCODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_PO_BOX;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_TOWN;
+
 
 public class BulkPrintCoverLetterDetailsMapper extends LetterDetailsMapper {
 

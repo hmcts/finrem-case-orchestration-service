@@ -2,10 +2,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandler;
+import uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackType;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType.getCaseType;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.getEventType;
 
 @RequiredArgsConstructor
 @Service
@@ -36,8 +34,8 @@ public class CallbackDispatchService {
 
         for (CallbackHandler callbackHandler : callbackHandlers) {
             if (callbackHandler.canHandle(callbackType,
-                getCaseType(callbackRequest.getCaseDetails().getCaseTypeId()),
-                getEventType(callbackRequest.getEventId()))) {
+                callbackRequest.getCaseDetails().getCaseType(),
+                callbackRequest.getEventType())) {
 
                 AboutToStartOrSubmitCallbackResponse handlerCallbackResponse =
                     callbackHandler.handle(callbackRequest, userAuthorisation);

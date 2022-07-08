@@ -4,21 +4,19 @@ import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.address.AddresseeGeneratorService;
+import uk.gov.hmcts.reform.finrem.ccd.domain.ChangedRepresentative;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.RepresentationUpdate;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Objects;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_FIRM;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_FIRM;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
@@ -31,21 +29,20 @@ public abstract class AbstractLetterDetailsGenerator {
     public static final String LETTER_DATE_FORMAT = "yyyy-MM-dd";
     public static final String COR_APPLICANT = "applicant";
     private final AddresseeGeneratorService addresseeGeneratorService;
-    private final DocumentHelper documentHelper;
-    private final CaseDataService caseDataService;
+    private final CourtDetailsMapper courtDetailsMapper;
 
-    public NoticeOfChangeLetterDetails generate(CaseDetails caseDetails, CaseDetails caseDetailsBefore,
+    public NoticeOfChangeLetterDetails generate(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore,
                                                 RepresentationUpdate representationUpdate,
                                                 DocumentHelper.PaperNotificationRecipient recipient) {
 
         return NoticeOfChangeLetterDetails.builder()
             .letterDate(DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()))
-            .divorceCaseNumber(Objects.toString(caseDetails.getData().get(DIVORCE_CASE_NUMBER)))
-            .caseNumber(caseDetails.getId().toString())
+            .divorceCaseNumber(caseDetails.getCaseData().getDivorceCaseNumber())
+            .caseNumber(String.valueOf(caseDetails.getId()))
             .reference(getSolicitorReference(caseDetails, caseDetailsBefore, representationUpdate))
-            .applicantName(documentHelper.getApplicantFullName(caseDetails))
+            .applicantName(caseDetails.getCaseData().getFullApplicantName())
             .solicitorFirmName(getSolicitorFirmName(representationUpdate, caseDetails, caseDetailsBefore))
-            .respondentName(getRespondentName(caseDetails))
+            .respondentName(caseDetails.getCaseData().getRespondentFullName())
             .courtDetails(getCourtDetails(caseDetails))
             .addressee(getAddressee(caseDetails, caseDetailsBefore, recipient, representationUpdate))
             .noticeOfChangeText(getNoticeOfChangeText())
@@ -56,31 +53,32 @@ public abstract class AbstractLetterDetailsGenerator {
 
     abstract String getNoticeOfChangeText();
 
-    abstract String getSolicitorReference(CaseDetails caseDetails, CaseDetails caseDetailsBefore, RepresentationUpdate representationUpdate);
+    abstract String getSolicitorReference(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore, RepresentationUpdate representationUpdate);
 
-    protected String getSolicitorReference(CaseDetails caseDetails, RepresentationUpdate representationUpdate) {
-        return isApplicant(representationUpdate) ? Objects.toString(caseDetails.getData().get(SOLICITOR_REFERENCE)) :
-            Objects.toString(caseDetails.getData().get(RESP_SOLICITOR_REFERENCE));
+    protected String getSolicitorReference(FinremCaseDetails caseDetails, RepresentationUpdate representationUpdate) {
+        return isApplicant(representationUpdate)
+            ? caseDetails.getCaseData().getContactDetailsWrapper().getSolicitorReference()
+            : caseDetails.getCaseData().getContactDetailsWrapper().getRespondentSolicitorReference();
     }
 
 
     abstract String getSolicitorFirmName(RepresentationUpdate representationUpdate,
-                                         CaseDetails caseDetails,
-                                         CaseDetails caseDetailsBefore);
+                                         FinremCaseDetails caseDetails,
+                                         FinremCaseDetails caseDetailsBefore);
 
-    protected String getSolicitorFirmName(CaseDetails caseDetails, RepresentationUpdate representationUpdate) {
+    protected String getSolicitorFirmName(FinremCaseDetails caseDetails, RepresentationUpdate representationUpdate) {
         return isApplicant(representationUpdate)
-            ? nullToEmpty(caseDetails.getData().get(getAppSolicitorFirmKey(caseDetails)))
-            : nullToEmpty(caseDetails.getData().get(RESP_SOLICITOR_FIRM));
+            ? nullToEmpty(caseDetails.getCaseData().getApplicantSolicitorFirm())
+            : nullToEmpty(caseDetails.getCaseData().getContactDetailsWrapper().getRespondentSolicitorFirm());
     }
 
-    abstract CaseDetails getCaseDetailsToUse(CaseDetails caseDetails,
-                                             CaseDetails caseDetailsBefore,
+    abstract FinremCaseDetails getCaseDetailsToUse(FinremCaseDetails caseDetails,
+                                             FinremCaseDetails caseDetailsBefore,
                                              DocumentHelper.PaperNotificationRecipient recipient);
 
 
-    private Addressee getAddressee(CaseDetails caseDetails,
-                                   CaseDetails caseDetailsBefore,
+    private Addressee getAddressee(FinremCaseDetails caseDetails,
+                                   FinremCaseDetails caseDetailsBefore,
                                    DocumentHelper.PaperNotificationRecipient recipient,
                                    RepresentationUpdate representationUpdate) {
         return addresseeGeneratorService.generateAddressee(
@@ -93,21 +91,10 @@ public abstract class AbstractLetterDetailsGenerator {
         return representationUpdate.getParty().equalsIgnoreCase(COR_APPLICANT);
     }
 
-    private String getRespondentName(CaseDetails caseDetails) {
-        boolean isConsentedApplication = caseDataService.isConsentedApplication(caseDetails);
-        return isConsentedApplication ? documentHelper.getRespondentFullNameConsented(caseDetails) :
-            documentHelper.getRespondentFullNameContested(caseDetails);
-    }
-
-    private Map getCourtDetails(CaseDetails caseDetails) {
-        boolean isConsentedApplication = caseDataService.isConsentedApplication(caseDetails);
-        return isConsentedApplication ? buildConsentedFrcCourtDetails() : buildFrcCourtDetails(caseDetails.getData());
-    }
-
-    private String getAppSolicitorFirmKey(CaseDetails caseDetails) {
-        return caseDataService.isConsentedApplication(caseDetails)
-            ? CONSENTED_SOLICITOR_FIRM
-            : CONTESTED_SOLICITOR_FIRM;
+    private Map getCourtDetails(FinremCaseDetails caseDetails) {
+        return caseDetails.getCaseData().isConsentedApplication()
+            ? buildConsentedFrcCourtDetails()
+            : (Map) courtDetailsMapper.getCourtDetails(caseDetails.getCaseData().getRegionWrapper().getDefaultCourtList());
     }
 
 }

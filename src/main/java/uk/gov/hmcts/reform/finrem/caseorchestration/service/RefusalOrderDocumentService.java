@@ -1,34 +1,28 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.rejectedorder.RejectedOrderDetailsMapper;
+import uk.gov.hmcts.reform.finrem.ccd.domain.ConsentOrder;
+import uk.gov.hmcts.reform.finrem.ccd.domain.ConsentOrderCollection;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.OrderRefusalCollection;
+import uk.gov.hmcts.reform.finrem.ccd.domain.UploadOrder;
+import uk.gov.hmcts.reform.finrem.ccd.domain.UploadOrderCollection;
+import uk.gov.hmcts.reform.finrem.ccd.domain.UploadOrderDocumentType;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Function;
-import java.util.function.UnaryOperator;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_PREVIEW_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildConsentedFrcCourtDetails;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
+import static java.util.Objects.nonNull;
 
 @Service
 @RequiredArgsConstructor
@@ -37,101 +31,92 @@ public class RefusalOrderDocumentService {
     private static final String DOCUMENT_COMMENT = "System Generated";
 
     private final GenericDocumentService genericDocumentService;
-    private final OrderRefusalTranslatorService orderRefusalTranslatorService;
     private final DocumentConfiguration documentConfiguration;
-    private final DocumentHelper documentHelper;
-    private final ObjectMapper objectMapper;
-    private final CaseDataService caseDataService;
+    private final RejectedOrderDetailsMapper rejectedOrderDetailsMapper;
 
-    private final Function<Pair<CaseDetails, String>, CaseDocument> generateDocument = this::applyGenerateRefusalOrder;
-    private final Function<CaseDocument, ConsentOrderData> createConsentOrderData = this::applyCreateConsentOrderData;
-    private final UnaryOperator<CaseDetails> addExtraFields = this::applyAddExtraFields;
+    private final Function<Pair<FinremCaseDetails, String>, Document> generateDocument = this::applyGenerateRefusalOrder;
+    private final Function<Document, UploadOrderCollection> createConsentOrderData = this::applyCreateConsentOrderCollection;
 
-    public Map<String, Object> generateConsentOrderNotApproved(
-        String authorisationToken, final CaseDetails caseDetails) {
-        orderRefusalTranslatorService.translateOrderRefusalCollection
-            .andThen(generateDocument)
-            .andThen(createConsentOrderData)
-            .andThen(consentOrderData -> populateConsentOrderData(consentOrderData, caseDetails))
-            .apply(Pair.of(documentHelper.deepCopy(caseDetails, CaseDetails.class), authorisationToken));
-        return orderRefusalTranslatorService.copyToOrderRefusalCollection(caseDetails);
+    public FinremCaseData generateConsentOrderNotApproved(String authorisationToken, final FinremCaseDetails caseDetails) {
+
+        Document refusalOrder = generateDocument.apply(Pair.of(caseDetails, authorisationToken));
+        UploadOrderCollection consentOrderData = createConsentOrderData.apply(refusalOrder);
+        FinremCaseData caseData = populateConsentOrderData(consentOrderData, caseDetails);
+
+
+        return copyToOrderRefusalCollection(caseData);
     }
 
-    public Map<String, Object> previewConsentOrderNotApproved(String authorisationToken, CaseDetails caseDetails) {
-        return orderRefusalTranslatorService.translateOrderRefusalCollection
-            .andThen(generateDocument)
-            .andThen(caseDocument -> populateConsentOrderNotApproved(caseDocument, caseDetails))
-            .apply(Pair.of(documentHelper.deepCopy(caseDetails, CaseDetails.class), authorisationToken));
+    public FinremCaseData previewConsentOrderNotApproved(String authorisationToken, FinremCaseDetails caseDetails) {
+
+        Document refusalOrder = generateDocument.apply(Pair.of(caseDetails, authorisationToken));
+        return populateConsentOrderNotApproved(refusalOrder, caseDetails);
     }
 
-    private Map<String, Object> populateConsentOrderNotApproved(CaseDocument caseDocument, CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
-        caseData.put(ORDER_REFUSAL_PREVIEW_COLLECTION, caseDocument);
+    private FinremCaseData populateConsentOrderNotApproved(Document caseDocument, FinremCaseDetails caseDetails) {
+        FinremCaseData caseData = caseDetails.getCaseData();
+        caseData.setOrderRefusalPreviewDocument(caseDocument);
         return caseData;
     }
 
-    private Map<String, Object> populateConsentOrderData(ConsentOrderData consentOrderData, CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
+    private FinremCaseData populateConsentOrderData(UploadOrderCollection consentOrderData, FinremCaseDetails caseDetails) {
+        FinremCaseData caseData = caseDetails.getCaseData();
 
-        List<ConsentOrderData> uploadOrder = Optional.ofNullable(caseData.get(UPLOAD_ORDER))
-            .map(this::convertToUploadOrderList)
-            .orElse(new ArrayList<>());
-        uploadOrder.add(consentOrderData);
-        caseData.put(UPLOAD_ORDER, uploadOrder);
+        Optional.ofNullable(caseData.getUploadOrder()).ifPresentOrElse(
+            collection -> collection.add(consentOrderData),
+            () -> caseData.setUploadOrder(List.of(consentOrderData)));
 
-        if (caseDataService.isConsentedInContestedCase(caseDetails)) {
-            ContestedConsentOrder consentOrder = new ContestedConsentOrder(consentOrderData.getConsentOrder().getDocumentLink());
-            ContestedConsentOrderData contestedConsentOrderData = new ContestedConsentOrderData(UUID.randomUUID().toString(), consentOrder);
-            List<ContestedConsentOrderData> consentOrders = Optional.ofNullable(caseData.get(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION))
-                .map(documentHelper::convertToContestedConsentOrderData)
-                .orElse(new ArrayList<>(1));
-            consentOrders.add(contestedConsentOrderData);
-            caseData.put(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION, consentOrders);
+
+        if (caseData.isConsentedInContestedCase()) {
+            ConsentOrderCollection consentOrder = getConsentOrder(consentOrderData);
+
+            Optional.ofNullable(caseData.getConsentOrderWrapper().getConsentedNotApprovedOrders()).ifPresentOrElse(
+                collection -> collection.add(consentOrder),
+                () -> caseData.getConsentOrderWrapper().setConsentedNotApprovedOrders(List.of(consentOrder)));
         }
 
         return caseData;
     }
 
-    private CaseDocument applyGenerateRefusalOrder(Pair<CaseDetails, String> data) {
-        return genericDocumentService.generateDocument(data.getRight(), addExtraFields.apply(data.getLeft()),
+    private ConsentOrderCollection getConsentOrder(UploadOrderCollection consentOrderData) {
+        return ConsentOrderCollection.builder()
+            .value(ConsentOrder.builder()
+                .consentOrder(consentOrderData.getValue().getDocumentLink())
+                .build()).build();
+    }
+
+    private Document applyGenerateRefusalOrder(Pair<FinremCaseDetails, String> data) {
+        Map<String, Object> refusalOrderDetailsMap = rejectedOrderDetailsMapper.getDocumentTemplateDetailsAsMap(data.getLeft(),
+                data.getLeft().getCaseData().getRegionWrapper().getDefaultCourtList());
+
+        return genericDocumentService.generateDocumentFromPlaceholdersMap(data.getRight(), refusalOrderDetailsMap,
             documentConfiguration.getRejectedOrderTemplate(),
             documentConfiguration.getRejectedOrderFileName());
     }
 
-    private ConsentOrderData applyCreateConsentOrderData(CaseDocument caseDocument) {
-        ConsentOrder consentOrder = new ConsentOrder();
-        consentOrder.setDocumentType(documentConfiguration.getRejectedOrderDocType());
-        consentOrder.setDocumentDateAdded(LocalDate.now());
-        consentOrder.setDocumentLink(caseDocument);
-        consentOrder.setDocumentComment(DOCUMENT_COMMENT);
 
-        ConsentOrderData consentOrderData = new ConsentOrderData();
-        consentOrderData.setId(UUID.randomUUID().toString());
-        consentOrderData.setConsentOrder(consentOrder);
-
-        return consentOrderData;
+    private UploadOrderCollection applyCreateConsentOrderCollection(Document document) {
+        return UploadOrderCollection.builder()
+            .value(UploadOrder.builder()
+                .documentType(UploadOrderDocumentType.GENERAL_ORDER)
+                .documentComment(DOCUMENT_COMMENT)
+                .documentLink(document)
+                .documentDateAdded(LocalDate.now())
+                .build())
+            .build();
     }
 
-    private List<ConsentOrderData> convertToUploadOrderList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<>() {});
-    }
+    private FinremCaseData copyToOrderRefusalCollection(FinremCaseData caseData) {
+        if (nonNull(caseData.getOrderRefusalCollectionNew())) {
+            List<OrderRefusalCollection> orderRefusalNew = caseData.getOrderRefusalCollectionNew();
 
-    private CaseDetails applyAddExtraFields(CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
+            Optional.ofNullable(caseData.getOrderRefusalCollection()).ifPresentOrElse(
+                collection -> collection.addAll(orderRefusalNew),
+                () -> caseData.setOrderRefusalCollection(orderRefusalNew));
 
-        caseData.put("ApplicantName", documentHelper.getApplicantFullName(caseDetails));
-        caseData.put("RefusalOrderHeader", "Sitting in the Family Court");
-        if (caseDataService.isConsentedApplication(caseDetails)) {
-            caseData.put("RespondentName", documentHelper.getRespondentFullNameConsented(caseDetails));
-            caseData.put("CourtName", "SITTING in private");
-            caseData.put("courtDetails", buildConsentedFrcCourtDetails());
-
-        } else {
-            caseData.put("RespondentName", documentHelper.getRespondentFullNameContested(caseDetails));
-            caseData.put("CourtName", "SITTING AT the Family Court at the "
-                + ContestedCourtHelper.getSelectedCourt(caseDetails));
-            caseData.put("courtDetails", buildFrcCourtDetails(caseData));
+            caseData.setOrderRefusalCollectionNew(new ArrayList<>());
         }
-        return caseDetails;
+
+        return caseData;
     }
 }

@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import java.util.Map;
 
@@ -21,6 +23,7 @@ public class CheckApplicantSolicitorIsDigitalService extends CheckSolicitorIsDig
         super(caseDataService);
     }
 
+    @Deprecated
     @Override
     public boolean isSolicitorDigital(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
@@ -33,6 +36,20 @@ public class CheckApplicantSolicitorIsDigitalService extends CheckSolicitorIsDig
         }
 
         return !isOrganisationEmpty(applicantPolicy) && isApplicantRepresented;
+    }
+
+    @Override
+    public boolean isSolicitorDigital(FinremCaseDetails caseDetails) {
+        FinremCaseData caseData = caseDetails.getCaseData();
+        uk.gov.hmcts.reform.finrem.ccd.domain.OrganisationPolicy applicantPolicy = caseData.getApplicantOrganisationPolicy();
+
+        if (applicantPolicy == null) {
+            throw new IllegalStateException(String.format("Applicant Organisation Policy is null for caseId %s",
+                caseDetails.getId()));
+        }
+
+        return !isOrganisationEmpty(applicantPolicy) &&
+            caseData.getContactDetailsWrapper().getApplicantRepresented().isYes();
     }
 
     private OrganisationPolicy getApplicantOrganisationPolicy(Map<String, Object> caseData) {

@@ -2,8 +2,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.CourtListWrapper;
 
@@ -13,13 +15,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiPredicate;
-import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
 
 @RequiredArgsConstructor
 @Slf4j
+@Component
 public class CourtDetailsMapper {
 
     private final ObjectMapper objectMapper;
@@ -29,7 +32,7 @@ public class CourtDetailsMapper {
             field.setAccessible(true);
             return field.get(courtListWrapper) != null && !field.get(courtListWrapper).toString().trim().isEmpty();
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            log.error("Illegal Access occurred; message : {}, cause: {}", e.getMessage(), e.getCause());
             return false;
         }
     };
@@ -56,12 +59,13 @@ public class CourtDetailsMapper {
     private List<Field> filterEmptyFields(List<Field> allFields, CourtListWrapper courtListWrapper) {
         return allFields.stream()
             .filter(field -> fieldIsNotNullOrEmpty.test(field, courtListWrapper))
-            .collect(Collectors.toList());
+            .collect(toList());
     }
 
     private FrcCourtDetails convertToFrcCourtDetails(List<Field> initialisedCourtField,
                                                      CourtListWrapper courtListWrapper) throws Exception {
-        Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
+        Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(),
+            TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, Object.class));
 
         return objectMapper.convertValue(courtDetailsMap.get(
             nullToEmpty(initialisedCourtField.get(0).get(courtListWrapper))),

@@ -41,7 +41,7 @@ public class PaperNotificationService {
             log.info("Case is paper application");
 
             // Generate PDF notification letter
-            CaseDocument hwfSuccessfulNotificationLetter = helpWithFeesDocumentService.generateHwfSuccessfulNotificationLetter(
+            Document hwfSuccessfulNotificationLetter = helpWithFeesDocumentService.generateHwfSuccessfulNotificationLetter(
                 caseDetails, authToken, APPLICANT);
 
             // Send notification letter to Bulk Print

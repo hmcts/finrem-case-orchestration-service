@@ -7,7 +7,8 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
+import uk.gov.hmcts.reform.finrem.ccd.domain.ChangedRepresentative;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import java.util.Map;
 
@@ -22,7 +23,7 @@ public class AddresseeGeneratorService {
     private final RespondentAddresseeGenerator respondentAddresseeGenerator;
     private final SolicitorAddresseeGenerator solicitorAddresseeGenerator;
 
-    public Addressee generateAddressee(CaseDetails caseDetails, ChangedRepresentative changedRepresentative,
+    public Addressee generateAddressee(FinremCaseDetails caseDetails, ChangedRepresentative changedRepresentative,
                                        DocumentHelper.PaperNotificationRecipient recipient, String party) {
         log.info("In the buildAddressee method for case {} and recipient type {}", caseDetails.getId(), recipient);
         return this.addresseeGeneratorMap().get(recipient).generate(caseDetails, changedRepresentative, party);

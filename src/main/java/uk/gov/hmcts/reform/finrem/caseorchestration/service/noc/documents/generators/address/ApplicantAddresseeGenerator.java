@@ -4,29 +4,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
-
-import java.util.Map;
-
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper;
+import uk.gov.hmcts.reform.finrem.ccd.domain.ChangedRepresentative;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class ApplicantAddresseeGenerator implements AddresseeGenerator {
 
-    private final CaseDataService caseDataService;
-    private final DocumentHelper documentHelper;
-
-    public Addressee generate(CaseDetails caseDetails, ChangedRepresentative changedRepresentative, String party) {
+    public Addressee generate(FinremCaseDetails caseDetails, ChangedRepresentative changedRepresentative, String party) {
         log.info("In the generate addressee method for Applicant");
-        return Addressee.builder()
-            .name(caseDataService.buildFullName(caseDetails.getData(), APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME))
-            .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) caseDetails.getData().get(APPLICANT_ADDRESS))).build();
+        return AddresseeGeneratorHelper.generateAddressee(caseDetails,
+            DocumentHelper.PaperNotificationRecipient.APPLICANT);
     }
 }

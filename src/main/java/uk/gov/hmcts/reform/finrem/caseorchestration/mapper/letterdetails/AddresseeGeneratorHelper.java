@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
-public class AddresseeGenerator {
+public class AddresseeGeneratorHelper {
 
     public static Addressee generateAddressee(FinremCaseDetails caseDetails,
                                               DocumentHelper.PaperNotificationRecipient recipient) {
@@ -67,7 +67,7 @@ public class AddresseeGenerator {
             : caseData.getContactDetailsWrapper().getRespondentSolicitorAddress();
     }
 
-    private static String formatAddressForLetterPrinting(Address address) {
+    public static String formatAddressForLetterPrinting(Address address) {
         return formatAddressForLetterPrinting(new ObjectMapper().convertValue(address, Map.class));
     }
 

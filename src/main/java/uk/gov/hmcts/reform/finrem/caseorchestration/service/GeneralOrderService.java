@@ -4,18 +4,16 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.generalorder.GeneralOrderDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsentedData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContestedData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderPreviewDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
@@ -28,20 +26,13 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.UnaryOperator;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_ADDRESS_TO;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_BODY_TEXT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_COLLECTION_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_COLLECTION_CONSENTED_IN_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_COLLECTION_CONTESTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_DATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_JUDGE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_JUDGE_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_RECITALS;
 
 @Service
 @RequiredArgsConstructor
@@ -53,16 +44,16 @@ public class GeneralOrderService {
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
     private final CaseDataService caseDataService;
+    private final GeneralOrderDetailsMapper generalOrderDetailsMapper;
 
     private final BiFunction<FinremCaseDetails, String, Document> generateDocument = this::applyGenerateDocument;
-    private Function<Document, GeneralOrderPreviewDocument> createGeneralOrderData = this::applyGeneralOrderData;
-    private final UnaryOperator<FinremCaseDetails> addExtraFields = this::applyAddExtraFields;
+    private final Function<FinremCaseDetails, Map<String, Object>> addExtraFields = this::applyAddExtraFields;
 
-    public Map<String, Object> createGeneralOrder(String authorisationToken, FinremCaseDetails caseDetails) {
+    public FinremCaseData createGeneralOrder(String authorisationToken, FinremCaseDetails caseDetails) {
         log.info("Generating General Order for Case ID: {}", caseDetails.getId());
 
         return generateDocument
-            .andThen(data -> previewGeneralOrderData(data, caseDetails))
+            .andThen(data -> setGeneralOrderPreviewDocument(data, caseDetails))
             .apply(documentHelper.deepCopy(caseDetails, FinremCaseDetails.class), authorisationToken);
     }
 
@@ -81,47 +72,19 @@ public class GeneralOrderService {
     }
 
     private Document applyGenerateDocument(FinremCaseDetails caseDetails, String authorisationToken) {
-        return genericDocumentService.generateDocument(authorisationToken, addExtraFields.apply(caseDetails),
+        return genericDocumentService.generateDocumentFromPlaceholdersMap(authorisationToken,
+            addExtraFields.apply(caseDetails),
             documentConfiguration.getGeneralOrderTemplate(),
             documentConfiguration.getGeneralOrderFileName());
     }
 
-    private GeneralOrderPreviewDocument applyGeneralOrderData(Document caseDocument) {
-        return new GeneralOrderPreviewDocument(caseDocument);
+    private Map<String, Object> applyAddExtraFields(FinremCaseDetails caseDetails) {
+        return generalOrderDetailsMapper.getGeneralOrderDetailsAsMap(
+            caseDetails,
+            caseDetails.getCaseData().getRegionWrapper().getDefaultCourtList());
     }
 
-    private FinremCaseDetails applyAddExtraFields(FinremCaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
-        FinremCaseData caseData = caseDetails.getCaseData();
-
-        caseData.put("DivorceCaseNumber", caseDetails.getData().get(DIVORCE_CASE_NUMBER));
-        caseData.put("ApplicantName", documentHelper.getApplicantFullName(caseDetails));
-
-        if (caseDataService.isConsentedApplication(caseDetails)) {
-            caseData.put("RespondentName", documentHelper.getRespondentFullNameConsented(caseDetails));
-            caseData.put("GeneralOrderCourt", "SITTING in private");
-            caseData.put("GeneralOrderHeaderOne", "Sitting in the Family Court");
-        } else {
-            caseData.put("RespondentName", documentHelper.getRespondentFullNameContested(caseDetails));
-            caseData.put("GeneralOrderCourtSitting", "SITTING AT the Family Court at the ");
-            caseData.put("GeneralOrderCourt", ContestedCourtHelper.getSelectedCourt(caseDetails));
-            caseData.put("GeneralOrderHeaderOne", "In the Family Court");
-            caseData.put("GeneralOrderHeaderTwo", "sitting in the");
-        }
-
-        caseData.put("GeneralOrderJudgeDetails",
-            StringUtils.joinWith(" ",
-                caseDetails.getData().get(GENERAL_ORDER_JUDGE_TYPE),
-                caseDetails.getData().get(GENERAL_ORDER_JUDGE_NAME)));
-
-        caseData.put("GeneralOrderRecitals", caseDetails.getData().get(GENERAL_ORDER_RECITALS));
-        caseData.put("GeneralOrderDate", caseDetails.getData().get(GENERAL_ORDER_DATE));
-        caseData.put("GeneralOrderBodyText", caseDetails.getData().get(GENERAL_ORDER_BODY_TEXT));
-
-        return caseDetails;
-    }
-
-    private FinremCaseData previewGeneralOrderData(Document generalOrderData, FinremCaseDetails caseDetails) {
+    private FinremCaseData setGeneralOrderPreviewDocument(Document generalOrderData, FinremCaseDetails caseDetails) {
         caseDetails.getCaseData().getGeneralOrderWrapper().setGeneralOrderPreviewDocument(generalOrderData);
         return caseDetails.getCaseData();
     }
@@ -186,12 +149,12 @@ public class GeneralOrderService {
     }
 
     private List<GeneralOrderConsentedData> convertToGeneralOrderConsentedList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<List<GeneralOrderConsentedData>>() {
+        return objectMapper.convertValue(object, new TypeReference<>() {
         });
     }
 
     private List<GeneralOrderContestedData> convertToGeneralOrderContestedList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<List<GeneralOrderContestedData>>() {
+        return objectMapper.convertValue(object, new TypeReference<>() {
         });
     }
 

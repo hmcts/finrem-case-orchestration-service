@@ -55,6 +55,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Service
 @Slf4j
 @RequiredArgsConstructor
+//Todo: If method from this class is required, please check and if needed add to the FinremCaseData object in finrem-common
+@Deprecated
 public class CaseDataService {
 
     public final Function<List<Map>, Map> getLastMapValue = listMap -> listMap.stream().reduce((first, second) -> second).get();
@@ -147,7 +149,6 @@ public class CaseDataService {
         return YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(CONSENTED_RESPONDENT_REPRESENTED)))
             || YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(CONTESTED_RESPONDENT_REPRESENTED)));
     }
-
 
     public boolean isPaperApplication(Map<String, Object> caseData) {
         return YES_VALUE.equalsIgnoreCase(Objects.toString(caseData.get(PAPER_APPLICATION)));

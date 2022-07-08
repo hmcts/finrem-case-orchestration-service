@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -8,25 +7,20 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.generalapplicationinterim.GeneralApplicationLetterDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.generalapplicationorder.GeneralApplicationOrderDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
-import java.io.IOException;
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_ADDITIONAL_INFORMATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_BEDFORDSHIRE_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_BIRMINGHAM_COURT;
@@ -35,7 +29,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_CLEVELAND_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_COURT_ORDER_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_DEVON_COURT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_DORSET_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_HEARING_REGION;
@@ -64,21 +57,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_THAMESVALLEY_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_WALES_FRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_WALES_OTHER_COURT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DRAFT_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_PRE_STATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_UPLOADED_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildInterimFrcCourtDetails;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getFrcCourtDetailsAsOneLineAddressString;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getSelectedCourtGA;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getSelectedCourtIH;
 
 @Service
 @RequiredArgsConstructor
@@ -89,7 +68,8 @@ public class GeneralApplicationDirectionsService {
     private final DocumentConfiguration documentConfiguration;
     private final GenericDocumentService genericDocumentService;
     private final DocumentHelper documentHelper;
-    private final ObjectMapper objectMapper;
+    private final GeneralApplicationLetterDetailsMapper generalApplicationLetterDetailsMapper;
+    private final GeneralApplicationOrderDetailsMapper generalApplicationOrderDetailsMapper;
 
     public void startGeneralApplicationDirections(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
@@ -129,174 +109,117 @@ public class GeneralApplicationDirectionsService {
             GENERAL_APPLICATION_DIRECTIONS_JUDGE_NAME,
             GENERAL_APPLICATION_DIRECTIONS_RECITALS,
             GENERAL_APPLICATION_DIRECTIONS_TEXT_FROM_JUDGE
-        ).forEach(generalApplicationDirectionCcdField -> caseData.remove(generalApplicationDirectionCcdField));
+        ).forEach(caseData::remove);
     }
 
-    public void submitInterimHearing(CaseDetails caseDetails, String authorisationToken) {
+    public void submitInterimHearing(FinremCaseDetails caseDetails, String authorisationToken) {
         List<BulkPrintDocument> documents = prepareInterimHearingDocumentsToPrint(caseDetails, authorisationToken);
         printInterimDocumentPackAndSendToApplicantAndRespondent(caseDetails, authorisationToken, documents);
     }
 
-    private void printInterimDocumentPackAndSendToApplicantAndRespondent(CaseDetails caseDetails, String authorisationToken,
-                                                                  List<BulkPrintDocument> documents) {
-        Map<String, Object> caseData = caseDetails.getData();
-        if (isPaperApplication(caseData) || !isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
+    private void printInterimDocumentPackAndSendToApplicantAndRespondent(FinremCaseDetails caseDetails, String authorisationToken,
+                                                                         List<BulkPrintDocument> documents) {
+        FinremCaseData caseData = caseDetails.getCaseData();
+        if (caseData.isPaperCase() || !caseData.isApplicantSolicitorAgreeToReceiveEmails()) {
             bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
         }
-        if (isPaperApplication(caseData) || !isRespondentSolicitorAgreeToReceiveEmails(caseData)) {
+        if (caseData.isPaperCase() || !isRespondentSolicitorAgreeToReceiveEmails(caseData)) {
             bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documents);
         }
     }
 
-    private List<BulkPrintDocument> prepareInterimHearingDocumentsToPrint(CaseDetails caseDetails, String authorisationToken) {
-        Map<String, Object> caseData = caseDetails.getData();
+    private List<BulkPrintDocument> prepareInterimHearingDocumentsToPrint(FinremCaseDetails caseDetails, String authorisationToken) {
+        FinremCaseData caseData = caseDetails.getCaseData();
         List<BulkPrintDocument> documents = new ArrayList<>();
-        CaseDocument interimDocument = prepareInterimHearingRequiredNoticeDocument(caseDetails, authorisationToken);
-        documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(interimDocument));
+        Document interimDocument = prepareInterimHearingRequiredNoticeDocument(caseDetails, authorisationToken);
+        documents.add(documentHelper.getDocumentAsBulkPrintDocument(interimDocument).orElse(null));
 
-        if (!isNull(caseData.get(INTERIM_HEARING_UPLOADED_DOCUMENT))) {
+        if (!isNull(caseData.getInterimWrapper().getInterimUploadAdditionalDocument())) {
             log.warn("Additional uploaded interim document found for printing for case");
-            CaseDocument caseDocument = documentHelper.convertToCaseDocument(caseData.get(INTERIM_HEARING_UPLOADED_DOCUMENT));
-            CaseDocument additionalUploadedDocuments = genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken);
-            documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(additionalUploadedDocuments));
-            caseData.put(INTERIM_HEARING_UPLOADED_DOCUMENT, additionalUploadedDocuments);
+            Document caseDocument = caseData.getInterimWrapper().getInterimUploadAdditionalDocument();
+            Document additionalUploadedDocuments = genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken);
+            documents.add(documentHelper.getDocumentAsBulkPrintDocument(additionalUploadedDocuments).orElse(null));
+            caseData.getInterimWrapper().setInterimUploadAdditionalDocument(additionalUploadedDocuments);
         }
 
-        caseData.put(INTERIM_HEARING_DOCUMENT, interimDocument);
+        caseData.getInterimWrapper().setInterimHearingDirectionsDocument(interimDocument);
         return documents;
     }
 
-    private CaseDocument prepareInterimHearingRequiredNoticeDocument(CaseDetails caseDetails, String authorisationToken) {
-        CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
-        Map<String, Object> caseData = caseDetailsCopy.getData();
+    private Document prepareInterimHearingRequiredNoticeDocument(FinremCaseDetails caseDetails, String authorisationToken) {
+        Map<String, Object> interimLetterDetailsMap = generalApplicationLetterDetailsMapper
+            .getDocumentTemplateDetailsAsMap(caseDetails, caseDetails.getCaseData().getRegionWrapper().getInterimCourtList());
 
-        caseData.put("ccdCaseNumber", caseDetails.getId());
-        caseData.put("courtDetails", buildInterimFrcCourtDetails(caseData));
-        caseData.put("applicantName", documentHelper.getApplicantFullName(caseDetailsCopy));
-        caseData.put("respondentName", documentHelper.getRespondentFullNameContested(caseDetailsCopy));
-        addInterimHearingVenueDetails(caseDetailsCopy);
-        caseData.put("letterDate", String.valueOf(LocalDate.now()));
-
-        return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
+        return genericDocumentService.generateDocumentFromPlaceholdersMap(authorisationToken, interimLetterDetailsMap,
             documentConfiguration.getGeneralApplicationInterimHearingNoticeTemplate(),
             documentConfiguration.getGeneralApplicationInterimHearingNoticeFileName());
     }
 
-    private void addInterimHearingVenueDetails(CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
-        try {
-            Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
-            log.info("Interim hearing courtDetailsMap :{}", courtDetailsMap);
-            String selectedCourtIH = getSelectedCourtIH(caseData);
-            log.info("Interim hearing selectedCourtIH :{}", selectedCourtIH);
-            String courtDetailsObj = (String) caseData.get(selectedCourtIH);
-            log.info("Interim hearing courtDetailsObj :{}", courtDetailsObj);
-            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(courtDetailsObj);
-            caseData.put("hearingVenue", getFrcCourtDetailsAsOneLineAddressString(courtDetails));
-        } catch (IOException exception) {
-            throw new IllegalStateException(exception);
-        }
-    }
-
-    public void submitGeneralApplicationDirections(CaseDetails caseDetails, String authorisationToken) {
+    public void submitGeneralApplicationDirections(FinremCaseDetails caseDetails, String authorisationToken) {
         List<BulkPrintDocument> documents = prepareDocumentsToPrint(caseDetails, authorisationToken);
         printDocumentPackAndSendToApplicantAndRespondent(caseDetails, authorisationToken, documents);
         resetStateToGeneralApplicationPrestate(caseDetails);
     }
 
-    private List<BulkPrintDocument> prepareDocumentsToPrint(CaseDetails caseDetails, String authorisationToken) {
-        Map<String, Object> caseData = caseDetails.getData();
+    private List<BulkPrintDocument> prepareDocumentsToPrint(FinremCaseDetails caseDetails, String authorisationToken) {
+        FinremCaseData caseData = caseDetails.getCaseData();
         List<BulkPrintDocument> documents = new ArrayList<>();
-        CaseDocument directionsDocument = caseData.get(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED).equals(YES_VALUE)
-            ? prepareHearingRequiredNoticeDocument(caseDetails, authorisationToken)
-            : prepareGeneralApplicationDirectionsOrderDocument(caseDetails, authorisationToken);
-        documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(directionsDocument));
-        caseData.put(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT, directionsDocument);
+        Document directionsDocument =
+            caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsHearingRequired().isYes()
+                ? prepareHearingRequiredNoticeDocument(caseDetails, authorisationToken)
+                : prepareGeneralApplicationDirectionsOrderDocument(caseDetails, authorisationToken);
 
-        Stream.of(GENERAL_APPLICATION_DOCUMENT_LATEST, GENERAL_APPLICATION_DRAFT_ORDER).forEach(documentFieldName -> {
-            if (caseData.get(documentFieldName) != null) {
-                documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(
-                    documentHelper.convertToCaseDocument(caseData.get(documentFieldName))));
-            }
-        });
+        documents.add(documentHelper.getDocumentAsBulkPrintDocument(directionsDocument).orElse(null));
+        caseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsDocument(directionsDocument);
+
+        Stream.of(caseData.getGeneralApplicationWrapper().getGeneralApplicationLatestDocument(),
+            caseData.getGeneralApplicationWrapper().getGeneralApplicationDraftOrder()).forEach(
+                document -> documents.add(documentHelper.getDocumentAsBulkPrintDocument(document).orElse(null)));
 
         return documents;
     }
 
-    private void printDocumentPackAndSendToApplicantAndRespondent(CaseDetails caseDetails, String authorisationToken,
+    private void printDocumentPackAndSendToApplicantAndRespondent(FinremCaseDetails caseDetails, String authorisationToken,
                                                                   List<BulkPrintDocument> documents) {
         bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
         bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documents);
     }
 
-    private void resetStateToGeneralApplicationPrestate(CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
-        String generalApplicationPreState = (String) caseData.get(GENERAL_APPLICATION_PRE_STATE);
+    private void resetStateToGeneralApplicationPrestate(FinremCaseDetails caseDetails) {
+        FinremCaseData caseData = caseDetails.getCaseData();
+        String generalApplicationPreState = caseData.getGeneralApplicationWrapper().getGeneralApplicationPreState();
         if (generalApplicationPreState != null) {
-            caseData.put(STATE, generalApplicationPreState);
+            caseData.setState(generalApplicationPreState);
         }
     }
 
-    private CaseDocument prepareGeneralApplicationDirectionsOrderDocument(CaseDetails caseDetails, String authorisationToken) {
-        CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
-        Map<String, Object> caseData = caseDetailsCopy.getData();
+    private Document prepareGeneralApplicationDirectionsOrderDocument(FinremCaseDetails caseDetails,
+                                                                          String authorisationToken) {
+        Map<String, Object> orderDetailsMap = generalApplicationOrderDetailsMapper
+            .getDocumentTemplateDetailsAsMap(caseDetails, caseDetails.getCaseData().getRegionWrapper()
+                .getDefaultCourtList());
 
-        caseData.put("courtDetails", buildFrcCourtDetails(caseData));
-        caseData.put("applicantName", documentHelper.getApplicantFullName(caseDetailsCopy));
-        caseData.put("respondentName", documentHelper.getRespondentFullNameContested(caseDetailsCopy));
-        caseData.put("letterDate", String.valueOf(LocalDate.now()));
-
-        return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
+        return genericDocumentService.generateDocumentFromPlaceholdersMap(authorisationToken,
+            orderDetailsMap,
             documentConfiguration.getGeneralApplicationOrderTemplate(),
             documentConfiguration.getGeneralApplicationOrderFileName());
     }
 
-    private CaseDocument prepareHearingRequiredNoticeDocument(CaseDetails caseDetails, String authorisationToken) {
-        CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
-        Map<String, Object> caseData = caseDetailsCopy.getData();
+    private Document prepareHearingRequiredNoticeDocument(FinremCaseDetails caseDetails, String authorisationToken) {
+        Map<String, Object> letterDetailsMap = generalApplicationLetterDetailsMapper.getDocumentTemplateDetailsAsMap(
+            caseDetails, caseDetails.getCaseData().getRegionWrapper().getGeneralApplicationCourtList());
 
-        caseData.put("ccdCaseNumber", caseDetails.getId());
-        caseData.put("courtDetails", buildFrcCourtDetails(caseData));
-        caseData.put("applicantName", documentHelper.getApplicantFullName(caseDetailsCopy));
-        caseData.put("respondentName", documentHelper.getRespondentFullNameContested(caseDetailsCopy));
-        addHearingVenueDetails(caseDetailsCopy);
-        caseData.put("letterDate", String.valueOf(LocalDate.now()));
-
-        return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
+        return genericDocumentService.generateDocumentFromPlaceholdersMap(authorisationToken, letterDetailsMap,
             documentConfiguration.getGeneralApplicationHearingNoticeTemplate(),
             documentConfiguration.getGeneralApplicationHearingNoticeFileName());
     }
 
-    private void addHearingVenueDetails(CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
-        try {
-            Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
-            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(caseData.get(getSelectedCourtGA(caseData)));
-            caseData.put("hearingVenue", getFrcCourtDetailsAsOneLineAddressString(courtDetails));
-        } catch (IOException exception) {
-            throw new IllegalStateException(exception);
-        }
-    }
-
-    private boolean isPaperApplication(Map<String, Object> caseData) {
-        return YES_VALUE.equalsIgnoreCase(Objects.toString(caseData.get(PAPER_APPLICATION)));
-    }
-
-    private boolean isRespondentRepresentedByASolicitor(Map<String, Object> caseData) {
-        return YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(CONSENTED_RESPONDENT_REPRESENTED)))
-            || YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(CONTESTED_RESPONDENT_REPRESENTED)));
-    }
-
-    private boolean isApplicantSolicitorAgreeToReceiveEmails(CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
-        return YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED)));
-    }
-
-    private boolean isRespondentSolicitorAgreeToReceiveEmails(Map<String, Object> caseData) {
-        return !isPaperApplication(caseData)
-            && isRespondentRepresentedByASolicitor(caseData)
-            && isNotEmpty(RESP_SOLICITOR_EMAIL, caseData)
-            && !NO_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT)));
+    private boolean isRespondentSolicitorAgreeToReceiveEmails(FinremCaseData caseData) {
+        return !caseData.isPaperCase()
+            && caseData.isRespondentRepresentedByASolicitor()
+            && StringUtils.isNotBlank(caseData.getContactDetailsWrapper().getRespondentSolicitorEmail())
+            && caseData.getRespSolNotificationsEmailConsent() != null
+            && caseData.getRespSolNotificationsEmailConsent().isYes();
     }
 
     public boolean isNotEmpty(String field, Map<String, Object> caseData) {
