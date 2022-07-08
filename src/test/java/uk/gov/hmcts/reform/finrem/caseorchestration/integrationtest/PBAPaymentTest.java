@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.PropertySource;
@@ -57,8 +58,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus
 public class PBAPaymentTest extends BaseTest {
     private static final String PBA_PAYMENT_URL = "/case-orchestration/pba-payment";
     private static final String ASSIGN_APPLICANT_SOLICITOR_URL = "/case-orchestration/assign-applicant-solicitor";
-    private static final String FEE_LOOKUP_URL = "/payments/fee-lookup\\?application-type=consented";
-    private static final String PBA_URL = "/payments/pba-payment";
+    private static final String PBA_URL = "/credit-account-payments";
     private static final String FEE_RESPONSE = "{\n"
         + "  \"code\": \"FEE0600\",\n"
         + "  \"description\": \"Application (without notice)\",\n"
@@ -87,6 +87,11 @@ public class PBAPaymentTest extends BaseTest {
         + "\"organisationIdentifier\":\"RG-123456789\""
         + "}";
 
+
+    private static final String FEE_REGISTER_CONSENTED_URL =
+        "/fees-register/fees/lookup\\?service=other&jurisdiction1=family&jurisdiction2=family-court&channel=default&event=general%20application" +
+            "&keyword=GeneralAppWithoutNotice";
+
     @Autowired
     private MockMvc webClient;
 
@@ -95,11 +100,18 @@ public class PBAPaymentTest extends BaseTest {
 
     private CallbackRequest request;
 
-    @ClassRule public static WireMockClassRule feeLookUpService = new WireMockClassRule(9001);
-    @ClassRule public static WireMockClassRule idamService = new WireMockClassRule(4501);
-    @ClassRule public static WireMockClassRule acaService = new WireMockClassRule(4454);
-    @ClassRule public static WireMockClassRule dataStoreService = new WireMockClassRule(4452);
-    @ClassRule public static WireMockClassRule prdService = new WireMockClassRule(8090);
+    @ClassRule
+    public static WireMockClassRule feeLookUpService = new WireMockClassRule(8182);
+    @ClassRule
+    public static WireMockClassRule pbaPaymentsService = new WireMockClassRule(8181);
+    @ClassRule
+    public static WireMockClassRule idamService = new WireMockClassRule(4501);
+    @ClassRule
+    public static WireMockClassRule acaService = new WireMockClassRule(4454);
+    @ClassRule
+    public static WireMockClassRule dataStoreService = new WireMockClassRule(4452);
+    @ClassRule
+    public static WireMockClassRule prdService = new WireMockClassRule(8090);
 
     private String idamUrl = "/details";
     private String acaUrl = "/case-assignments?use_user_token=true";
@@ -120,9 +132,9 @@ public class PBAPaymentTest extends BaseTest {
         stubFeeLookUp();
         stubPayment(PAYMENT_RESPONSE);
         webClient.perform(MockMvcRequestBuilders.post(PBA_PAYMENT_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(objectMapper.writeValueAsString(request)))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.PBAPaymentReference", is("REF0001")))
@@ -140,9 +152,9 @@ public class PBAPaymentTest extends BaseTest {
         setUpHwfPayment();
         stubFeeLookUp();
         webClient.perform(MockMvcRequestBuilders.post(PBA_PAYMENT_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(objectMapper.writeValueAsString(request)))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.state", is(AWAITING_HWF_DECISION.toString())))
@@ -162,9 +174,9 @@ public class PBAPaymentTest extends BaseTest {
         stubPayment(PAYMENT_FAILURE_RESPONSE);
 
         webClient.perform(MockMvcRequestBuilders.post(PBA_PAYMENT_URL)
-            .content(objectMapper.writeValueAsString(request))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(objectMapper.writeValueAsString(request))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors", hasSize(1)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
@@ -176,9 +188,9 @@ public class PBAPaymentTest extends BaseTest {
         stubForAca(HttpStatus.NOT_FOUND);
 
         webClient.perform(MockMvcRequestBuilders.post(ASSIGN_APPLICANT_SOLICITOR_URL)
-            .content(objectMapper.writeValueAsString(request))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(objectMapper.writeValueAsString(request))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors", hasSize(1)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
@@ -190,9 +202,9 @@ public class PBAPaymentTest extends BaseTest {
         stubForAca(HttpStatus.OK);
 
         webClient.perform(MockMvcRequestBuilders.post(ASSIGN_APPLICANT_SOLICITOR_URL)
-            .content(objectMapper.writeValueAsString(request))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(objectMapper.writeValueAsString(request))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.authorisation3", is(notNullValue())))
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
@@ -204,14 +216,14 @@ public class PBAPaymentTest extends BaseTest {
         setUpPbaPayment("/fixtures/empty-casedata.json");
 
         webClient.perform(MockMvcRequestBuilders.post(PBA_PAYMENT_URL)
-            .content(objectMapper.writeValueAsString(request))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(objectMapper.writeValueAsString(request))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest());
     }
 
     private void stubPayment(String paymentResponse) {
-        feeLookUpService.stubFor(post(PBA_URL)
+        pbaPaymentsService.stubFor(post(PBA_URL)
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -219,7 +231,7 @@ public class PBAPaymentTest extends BaseTest {
     }
 
     private void stubFeeLookUp() {
-        feeLookUpService.stubFor(get(urlMatching(FEE_LOOKUP_URL))
+        feeLookUpService.stubFor(get(urlMatching(FEE_REGISTER_CONSENTED_URL))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)

@@ -1,0 +1,20 @@
+{
+  "organisationEntityResponse": {
+    "organisationIdentifier": "LY7RZOE",
+    "name": "TestOrg1",
+    "status": "ACTIVE",
+    "sraId": "1111",
+    "sraRegulated": true,
+    "companyNumber": "1110111",
+    "companyUrl": "http://testorg2.co.uk",
+    "superUser": {
+      "firstName": "Henry",
+      "lastName": "Harper",
+      "email": "henry_fr_harper@yahoo.com"
+    },
+    "paymentAccount": [
+      "NUM1",
+      "NUM2"
+    ]
+  }
+}

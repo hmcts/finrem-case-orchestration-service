@@ -48,7 +48,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType
 @Slf4j
 @Category(IntegrationTest.class)
 public class FeeLookUpTest extends BaseTest {
-    private static final String FEE_LOOKUP_URL = "/case-orchestration/fee-lookup";
+
+    private static final String FEE_REGISTER_CONSENTED_URL =
+        "/fees-register/fees/lookup\\?service=other&jurisdiction1=family&jurisdiction2=family-court&channel=default&event=general%20application" +
+            "&keyword=GeneralAppWithoutNotice";
+    private static final String FEE_REGISTER_CONTESTED_URL =
+        "/fees-register/fees/lookup\\?service=other&jurisdiction1=family&jurisdiction2=family-court&channel=default&event=miscellaneous" +
+            "&keyword=FinancialOrderOnNotice";
+
+    private static final String COS_URL = "/case-orchestration/fee-lookup";
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -56,7 +65,7 @@ public class FeeLookUpTest extends BaseTest {
     private MockMvc webClient;
 
     @ClassRule
-    public static WireMockClassRule feeLookUpService = new WireMockClassRule(9001);
+    public static WireMockClassRule feeLookUpService = new WireMockClassRule(8182);
 
     private CallbackRequest request;
 
@@ -71,27 +80,28 @@ public class FeeLookUpTest extends BaseTest {
     @Test
     public void consentedFeeLookup() throws Exception {
         stubFeeLookUp(CONSENTED);
-        webClient.perform(MockMvcRequestBuilders.post(FEE_LOOKUP_URL)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(objectMapper.writeValueAsString(request(CONSENTED))))
+        webClient.perform(MockMvcRequestBuilders.post(COS_URL)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(request(CONSENTED))))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(content()
                 .json(expectedBody(CONSENTED)));
-        verify(getRequestedFor(urlMatching("/payments/fee-lookup\\?application-type=consented")));
+        verify(getRequestedFor(urlMatching(FEE_REGISTER_CONSENTED_URL)));
     }
 
     @Test
     public void contestedFeeLookup() throws Exception {
         stubFeeLookUp(CONTESTED);
-        webClient.perform(MockMvcRequestBuilders.post(FEE_LOOKUP_URL)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(objectMapper.writeValueAsString(request(CONTESTED))))
+        webClient.perform(MockMvcRequestBuilders.post(COS_URL)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(request(CONTESTED))))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(content()
                 .json(expectedBody(CONTESTED)));
-        verify(getRequestedFor(urlMatching("/payments/fee-lookup\\?application-type=contested")));
+        verify(getRequestedFor(
+            urlMatching(FEE_REGISTER_CONTESTED_URL)));
     }
 
     private String expectedBody(ApplicationType applicationType) {
@@ -111,7 +121,7 @@ public class FeeLookUpTest extends BaseTest {
     }
 
     private void stubFeeLookUp(ApplicationType applicationType) {
-        stubFor(get(urlMatching("/payments/fee-lookup\\?application-type=" + applicationType.toString()))
+        stubFor(get(urlMatching(applicationType == ApplicationType.CONSENTED ? FEE_REGISTER_CONSENTED_URL : FEE_REGISTER_CONTESTED_URL))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)

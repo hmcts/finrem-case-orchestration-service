@@ -26,13 +26,13 @@ public class FeeServiceTest extends BaseServiceTest {
     private FeeService feeService;
 
     @ClassRule
-    public static WireMockClassRule paymentService = new WireMockClassRule(9001);
+    public static WireMockClassRule feeClient = new WireMockClassRule(8182);
 
-    private static final String FEE_LOOKUP_API = "/payments/fee-lookup";
+    private static final String FEE_LOOKUP_API = "/fees-register/fees/lookup";
 
     @Test
     public void retrieveConsentedApplicationFee() {
-        paymentService.stubFor(get(urlPathEqualTo(FEE_LOOKUP_API))
+        feeClient.stubFor(get(urlPathEqualTo(FEE_LOOKUP_API))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
@@ -48,7 +48,7 @@ public class FeeServiceTest extends BaseServiceTest {
 
     @Test
     public void retrieveContestedApplicationFee() {
-        paymentService.stubFor(get(urlPathEqualTo(FEE_LOOKUP_API))
+        feeClient.stubFor(get(urlPathEqualTo(FEE_LOOKUP_API))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
