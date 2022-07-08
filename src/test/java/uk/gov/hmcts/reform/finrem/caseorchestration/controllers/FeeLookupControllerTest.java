@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.client.FeeClient;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,8 +34,10 @@ public class FeeLookupControllerTest extends BaseControllerTest {
 
     private static final String FEE_LOOKUP_URL = "/case-orchestration/fee-lookup";
 
-    @MockBean private FeeService feeService;
-    @MockBean private CaseDataService caseDataService;
+    @MockBean
+    private FeeService feeService;
+    @MockBean
+    private CaseDataService caseDataService;
 
     private void doFeeLookupSetUp(ApplicationType applicationType) throws IOException, URISyntaxException {
         String fileName = applicationType == CONSENTED
@@ -54,9 +55,9 @@ public class FeeLookupControllerTest extends BaseControllerTest {
         when(caseDataService.isConsentedApplication(any())).thenReturn(false);
 
         mvc.perform(post(FEE_LOOKUP_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest())
             .andExpect(content().string(startsWith(GlobalExceptionHandler.SERVER_ERROR_MSG)));
     }
@@ -67,9 +68,9 @@ public class FeeLookupControllerTest extends BaseControllerTest {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
 
         mvc.perform(post(FEE_LOOKUP_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeCode", is("FEE0640")))
             .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeAmount", is("1000")))
@@ -84,11 +85,11 @@ public class FeeLookupControllerTest extends BaseControllerTest {
     public void shouldDoContestedFeeLookup() throws Exception {
         doFeeLookupSetUp(CONTESTED);
         when(caseDataService.isConsentedApplication(any())).thenReturn(false);
-        
+
         mvc.perform(post(FEE_LOOKUP_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeCode", is("FEE0640")))
             .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeAmount", is("25500")))

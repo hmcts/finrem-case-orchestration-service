@@ -19,7 +19,6 @@ import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.validation.PBAValidationResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAValidationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.client.PBAValidationClient;
 
 import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonBody;

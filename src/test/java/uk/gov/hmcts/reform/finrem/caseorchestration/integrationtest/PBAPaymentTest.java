@@ -9,7 +9,6 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.PropertySource;
@@ -89,8 +88,8 @@ public class PBAPaymentTest extends BaseTest {
 
 
     private static final String FEE_REGISTER_CONSENTED_URL =
-        "/fees-register/fees/lookup\\?service=other&jurisdiction1=family&jurisdiction2=family-court&channel=default&event=general%20application" +
-            "&keyword=GeneralAppWithoutNotice";
+        "/fees-register/fees/lookup\\?service=other&jurisdiction1=family&jurisdiction2=family-court&channel=default&event=general%20application"
+            + "&keyword=GeneralAppWithoutNotice";
 
     @Autowired
     private MockMvc webClient;

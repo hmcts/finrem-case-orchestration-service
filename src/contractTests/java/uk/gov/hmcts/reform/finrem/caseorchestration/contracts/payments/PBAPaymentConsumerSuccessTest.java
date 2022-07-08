@@ -112,24 +112,20 @@ public class PBAPaymentConsumerSuccessTest extends BaseTest {
     }
 
     static PaymentRequestWithSiteID getPaymentRequest(BigDecimal amount) {
-        PaymentRequestWithSiteID expectedRequest = new PaymentRequestWithSiteID();
-        expectedRequest.setService("FINREM");
-        expectedRequest.setCurrency("GBP");
-        expectedRequest.setAmount(amount);
-        expectedRequest.setCcdCaseNumber("test.case.id");
-        expectedRequest.setSiteId("AA09");
-        expectedRequest.setAccountNumber("test.account");
-        expectedRequest.setOrganisationName("test.organisation");
-        expectedRequest.setCustomerReference("test.customer.reference");
-        expectedRequest.setDescription("Financial Remedy Payment");
-
-        FeeRequest feeRequest = new FeeRequest();
-        feeRequest.setCode("test");
-        feeRequest.setVersion("v1");
-        feeRequest.setCalculatedAmount(amount);
-        feeRequest.setVolume(1);
-
-        expectedRequest.setFeesList(Collections.singletonList(feeRequest));
-        return expectedRequest;
+        return PaymentRequestWithSiteID.builder()
+            .service("FINREM")
+            .currency("GBP")
+            .amount(amount)
+            .ccdCaseNumber("test.case.id")
+            .siteId("AA09")
+            .accountNumber("test.account")
+            .organisationName("test.organisation")
+            .customerReference("test.customer.reference")
+            .description("Financial Remedy Payment")
+            .feesList(Collections.singletonList(FeeRequest.builder().code("test")
+                .calculatedAmount(amount)
+                .version("v1")
+                .volume(1).build()))
+            .build();
     }
 }

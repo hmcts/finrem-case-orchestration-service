@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdDataStoreService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.client.FeeClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 
@@ -56,15 +55,23 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     private static final String PBA_PAYMENT_URL = "/case-orchestration/pba-payment";
     private static final String ASSIGN_APPLICANT_SOLICITOR_URL = "/case-orchestration/assign-applicant-solicitor";
 
-    @MockBean private FeeService feeService;
-    @MockBean private PBAPaymentService pbaPaymentService;
-    @MockBean private CaseDataService caseDataService;
-    @MockBean private AssignCaseAccessService assignCaseAccessService;
-    @MockBean private CcdDataStoreService ccdDataStoreService;
-    @MockBean private FeatureToggleService featureToggleService;
-    @MockBean private PrdOrganisationService prdOrganisationService;
+    @MockBean
+    private FeeService feeService;
+    @MockBean
+    private PBAPaymentService pbaPaymentService;
+    @MockBean
+    private CaseDataService caseDataService;
+    @MockBean
+    private AssignCaseAccessService assignCaseAccessService;
+    @MockBean
+    private CcdDataStoreService ccdDataStoreService;
+    @MockBean
+    private FeatureToggleService featureToggleService;
+    @MockBean
+    private PrdOrganisationService prdOrganisationService;
 
-    @Autowired private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     public static final String ADDRESS_LINE_1 = "addressLine1";
     public static final String ADDRESS_LINE_2 = "addressLine2";
@@ -109,9 +116,9 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     public void shouldReturnBadRequestWhenCaseDataIsMissingInRequest() throws Exception {
         doEmptyCaseDataSetUp();
         mvc.perform(post(PBA_PAYMENT_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest())
             .andExpect(content().string(startsWith(SERVER_ERROR_MSG)));
         verifyNoInteractions(ccdDataStoreService);
@@ -146,9 +153,9 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
 
         mvc.perform(post(PBA_PAYMENT_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.state", is(AWAITING_HWF_DECISION.toString())))
             .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeCode", is("FEE0640")))
@@ -167,9 +174,9 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
 
         mvc.perform(post(PBA_PAYMENT_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors", hasSize(1)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
@@ -184,9 +191,9 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
 
         mvc.perform(post(PBA_PAYMENT_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeCode", is("FEE0640")))
             .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeAmount", is("1000")))
@@ -205,9 +212,9 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
 
         mvc.perform(post(PBA_PAYMENT_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
@@ -220,9 +227,9 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         when(featureToggleService.isAssignCaseAccessEnabled()).thenReturn(true);
 
         mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.authorisation3", is(notNullValue())))
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
@@ -238,9 +245,9 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         when(featureToggleService.isAssignCaseAccessEnabled()).thenReturn(false);
 
         mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
@@ -257,9 +264,9 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .build());
 
         mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors", hasSize(2)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
@@ -273,9 +280,9 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
 
         mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors", hasSize(2)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
@@ -290,9 +297,9 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         doThrow(feignError()).when(assignCaseAccessService).assignCaseAccess(any(), eq(AUTH_TOKEN));
 
         mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors", hasSize(1)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
