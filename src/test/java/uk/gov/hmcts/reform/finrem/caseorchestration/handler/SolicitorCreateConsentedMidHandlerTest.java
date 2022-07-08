@@ -61,7 +61,7 @@ public class SolicitorCreateConsentedMidHandlerTest {
     }
 
     @Test
-    public void giveConsentedCase_when_natureOfApplicationIsVariation_then_return_variation_order_labels() {
+    public void giveConsentedCase_when_natureOfApplicationIsVariation_thenReturnVariationOrderLabels() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         List<String> orderList  = List.of("Variation Order", "Property Adjustment Order");
         callbackRequest.getCaseDetails().getData().put("natureOfApplication2", orderList);
@@ -76,7 +76,7 @@ public class SolicitorCreateConsentedMidHandlerTest {
     }
 
     @Test
-    public void giveConsentedCase_when_natureOfApplicationIsNotVariation_then_return_consent_order_labels() {
+    public void giveConsentedCase_when_natureOfApplicationIsNotVariation_thenReturnConsentOrderLabels() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         List<String> orderList  = List.of("Property Adjustment Order");
         callbackRequest.getCaseDetails().getData().put("natureOfApplication2", orderList);
