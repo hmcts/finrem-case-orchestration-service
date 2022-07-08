@@ -57,8 +57,6 @@ public class ManageCaseDocumentsService {
 
         List<ContestedUploadedDocumentData> caseDocuments = getAllDocumentsInCollection(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
-        setDocumentUploadDate(caseData);
-
         caseDocumentHandlers.forEach(h -> h.handle(caseDocuments, caseData));
 
         caseData.put(CONTESTED_UPLOADED_DOCUMENTS, caseDocuments);
