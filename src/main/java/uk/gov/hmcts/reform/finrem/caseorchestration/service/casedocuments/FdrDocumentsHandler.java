@@ -37,6 +37,8 @@ public class FdrDocumentsHandler extends CaseDocumentHandler<ContestedUploadedDo
             })
             .collect(Collectors.toList());
 
+        CaseDocumentHandler.setDocumentUploadDate(fdrFiltered);
+
         List<ContestedUploadedDocumentData> fdrDocsCollection = getDocumentCollection(caseData, FDR_DOCS_COLLECTION);
         fdrDocsCollection.addAll(fdrFiltered);
         log.info("Adding items: {}, to FDR Documents Collection", fdrFiltered);

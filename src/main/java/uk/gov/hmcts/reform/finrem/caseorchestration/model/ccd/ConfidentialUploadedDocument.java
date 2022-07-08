@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
@@ -29,4 +31,6 @@ public class ConfidentialUploadedDocument {
     @JsonProperty("DocumentComment")
     private String documentComment;
 
+    @JsonProperty("documentUploadDate")
+    private LocalDate documentUploadDate;
 }

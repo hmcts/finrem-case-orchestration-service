@@ -40,6 +40,8 @@ public class ConfidentialDocumentsHandler extends CaseDocumentHandler<Confidenti
         log.info("Adding items: {}, to Confidential Documents Collection", confidentialFiltered);
         uploadedDocuments.removeAll(confidentialFiltered);
 
+        CaseDocumentHandler.setDocumentUploadDate(confidentialFiltered);
+
         List<ConfidentialUploadedDocumentData> confidentialDocsCollection = getDocumentCollection(caseData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
         if (!confidentialFiltered.isEmpty()) {
             List<ConfidentialUploadedDocumentData> confidentialDocs = confidentialFiltered.stream().map(
@@ -62,6 +64,7 @@ public class ConfidentialDocumentsHandler extends CaseDocumentHandler<Confidenti
                 .documentComment(uploadedCaseDocument.getHearingDetails())
                 .documentLink(uploadedCaseDocument.getCaseDocuments())
                 .documentType(uploadedCaseDocument.getCaseDocumentType())
+                .documentUploadDate(uploadedCaseDocument.getDocumentUploadDate())
                 .build()).build();
     }
 }

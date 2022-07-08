@@ -57,9 +57,8 @@ public class ManageCaseDocumentsService {
 
         List<ContestedUploadedDocumentData> caseDocuments = getAllDocumentsInCollection(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
-        setDocumentUploadDate(caseData);
-
         caseDocumentHandlers.forEach(h -> h.handle(caseDocuments, caseData));
+
         caseData.put(CONTESTED_UPLOADED_DOCUMENTS, caseDocuments);
 
         return caseData;
@@ -168,29 +167,6 @@ public class ManageCaseDocumentsService {
         return mapper.convertValue(caseData.get(collection), new TypeReference<>() {
         });
     }
-
-    private void setDocumentUploadDate(Map<String, Object> caseData) {
-
-        List<ContestedUploadedDocumentData> manageCaseDocuments =
-            getAllDocumentsInCollection(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
-        for (Iterator<ContestedUploadedDocumentData> it = manageCaseDocuments.iterator(); it.hasNext(); ) {
-            ContestedUploadedDocumentData document = it.next();
-
-            ContestedUploadedDocument contestedUploadedDocument = document.getUploadedCaseDocument();
-            contestedUploadedDocument.setDocumentUploadDate(contestedUploadedDocument.getDocumentUploadDate()
-                == null ? LocalDate.now() : contestedUploadedDocument.getDocumentUploadDate());
-            document.setUploadedCaseDocument(contestedUploadedDocument);
-        }
-
-        Comparator<ContestedUploadedDocumentData> mostRecentDocuments =
-            Comparator.comparing(t -> t.getUploadedCaseDocument().getDocumentUploadDate(),
-                Comparator.nullsLast(Comparator.naturalOrder()));
-
-        manageCaseDocuments.sort(mostRecentDocuments.reversed());
-
-        caseData.put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, manageCaseDocuments);
-    }
-
 }
 
 

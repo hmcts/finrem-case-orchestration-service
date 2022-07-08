@@ -39,6 +39,8 @@ public abstract class PartyDocumentHandler extends CaseDocumentHandler<Contested
                 && isDocumentTypeValid(d.getUploadedCaseDocument().getCaseDocumentType()))
             .collect(Collectors.toList());
 
+       CaseDocumentHandler.setDocumentUploadDate(documentsFiltered);
+
         List<ContestedUploadedDocumentData> documentCollection = getDocumentCollection(caseData, collectionName);
         documentCollection.addAll(documentsFiltered);
         log.info("Adding items: {}, to {} Collection", documentsFiltered, collectionName);
