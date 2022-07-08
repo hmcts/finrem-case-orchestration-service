@@ -54,9 +54,14 @@ public class OrchestrationConstants {
 
     // VARIATION ORDER RELATED
     public static final String CV_ORDER_CAMELCASE_LABEL_FIELD = "consentVariationOrderLabelC";
-    public static final String VARIATION_ORDER_CAMELCASE_LABEL_VALUE = "Consent/Variation Order";
+    public static final String VARIATION_ORDER_CAMELCASE_LABEL_VALUE = "Consent / Variation Order";
     public static final String CONSENT_ORDER_CAMELCASE_LABEL_VALUE = "Consent Order";
     public static final String CV_LOWERCASE_LABEL_FIELD = "consentVariationOrderLabelL";
-    public static final String VARIATION_ORDER_LOWERCASE_LABEL_VALUE = "consent/variation order";
+    public static final String VARIATION_ORDER_LOWERCASE_LABEL_VALUE = "consent / variation order";
     public static final String CONSENT_ORDER_LOWERCASE_LABEL_VALUE = "consent order";
+    public static final String CV_OTHER_DOC_LABEL_FIELD = "otherDocLabel";
+    public static final String CV_OTHER_DOC_LABEL_VALUE =
+        "If you are applying for variation order, please upload the order you are varying";
+    public static final String CONSENT_OTHER_DOC_LABEL_VALUE =
+        "Upload other order documentation related to your application";
 }

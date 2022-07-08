@@ -20,8 +20,11 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CONSENT_ORDER_CAMELCASE_LABEL_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CONSENT_ORDER_LOWERCASE_LABEL_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CONSENT_OTHER_DOC_LABEL_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CV_LOWERCASE_LABEL_FIELD;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CV_ORDER_CAMELCASE_LABEL_FIELD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CV_OTHER_DOC_LABEL_FIELD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CV_OTHER_DOC_LABEL_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.VARIATION_ORDER_CAMELCASE_LABEL_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.VARIATION_ORDER_LOWERCASE_LABEL_VALUE;
 
@@ -73,6 +76,8 @@ public class SolicitorCreateConsentedMidHandlerTest {
         assertEquals(VARIATION_ORDER_CAMELCASE_LABEL_VALUE, camelCaseLabel);
         final String lowerCaseLabel = (String) response.getData().get(CV_LOWERCASE_LABEL_FIELD);
         assertEquals(VARIATION_ORDER_LOWERCASE_LABEL_VALUE, lowerCaseLabel);
+        final String docLabel = (String) response.getData().get(CV_OTHER_DOC_LABEL_FIELD);
+        assertEquals(CV_OTHER_DOC_LABEL_VALUE, docLabel);
     }
 
     @Test
@@ -88,6 +93,8 @@ public class SolicitorCreateConsentedMidHandlerTest {
         assertEquals(CONSENT_ORDER_CAMELCASE_LABEL_VALUE, camelCaseLabel);
         final String lowerCaseLabel = (String) response.getData().get(CV_LOWERCASE_LABEL_FIELD);
         assertEquals(CONSENT_ORDER_LOWERCASE_LABEL_VALUE, lowerCaseLabel);
+        final String docLabel = (String) response.getData().get(CV_OTHER_DOC_LABEL_FIELD);
+        assertEquals(CONSENT_OTHER_DOC_LABEL_VALUE, docLabel);
     }
 
     private CallbackRequest buildCallbackRequest() {
