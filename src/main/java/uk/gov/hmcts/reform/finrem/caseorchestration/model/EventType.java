@@ -11,6 +11,7 @@ public enum EventType {
     PREPARE_FOR_HEARING("FR_prepareForHearing"),
     UPLOAD_CASE_FILES("FR_uploadCaseFiles"),
     SOLICITOR_CREATE("FR_solicitorCreate"),
+    AMEND_APP_DETAILS("FR_amendApplicationDetails"),
     CLOSE("FR_close"),
     NONE("");
 
