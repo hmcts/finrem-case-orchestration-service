@@ -7,15 +7,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandler;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -60,6 +57,8 @@ public class ManageCaseDocumentsService {
         caseDocumentHandlers.forEach(h -> h.handle(caseDocuments, caseData));
 
         caseData.put(CONTESTED_UPLOADED_DOCUMENTS, caseDocuments);
+
+        caseData.put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, caseDocuments);
 
         return caseData;
     }

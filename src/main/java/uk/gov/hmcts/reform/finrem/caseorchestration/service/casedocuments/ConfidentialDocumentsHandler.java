@@ -1,15 +1,18 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -49,6 +52,15 @@ public class ConfidentialDocumentsHandler extends CaseDocumentHandler<Confidenti
             confidentialDocsCollection.addAll(confidentialDocs);
             caseData.put(CONFIDENTIAL_DOCS_UPLOADED_COLLECTION, confidentialDocsCollection);
         }
+    }
+
+    @Override
+    protected List<ConfidentialUploadedDocumentData> getDocumentCollection(Map<String, Object> caseData, String collection) {
+        if (StringUtils.isEmpty(caseData.get(collection))) {
+            return new ArrayList<>();
+        }
+        return objectMapper.convertValue(caseData.get(collection), new TypeReference<>() {
+        });
     }
 
     private ConfidentialUploadedDocumentData buildConfidentialDocument(ContestedUploadedDocumentData doc) {

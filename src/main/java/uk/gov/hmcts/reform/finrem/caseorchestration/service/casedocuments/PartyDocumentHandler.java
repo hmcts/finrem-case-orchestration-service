@@ -1,10 +1,13 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -14,7 +17,6 @@ public abstract class PartyDocumentHandler extends CaseDocumentHandler<Contested
 
     private final String collectionName;
     private final String party;
-    private final ObjectMapper mapper;
 
     protected static final String APPLICANT = "applicant";
     protected static final String RESPONDENT = "respondent";
@@ -23,7 +25,6 @@ public abstract class PartyDocumentHandler extends CaseDocumentHandler<Contested
         super(mapper);
         this.collectionName = collectionName;
         this.party = party;
-        this.mapper = mapper;
     }
 
     public void handle(List<ContestedUploadedDocumentData> uploadedDocuments,
@@ -39,7 +40,7 @@ public abstract class PartyDocumentHandler extends CaseDocumentHandler<Contested
                 && isDocumentTypeValid(d.getUploadedCaseDocument().getCaseDocumentType()))
             .collect(Collectors.toList());
 
-       CaseDocumentHandler.setDocumentUploadDate(documentsFiltered);
+        CaseDocumentHandler.setDocumentUploadDate(documentsFiltered);
 
         List<ContestedUploadedDocumentData> documentCollection = getDocumentCollection(caseData, collectionName);
         documentCollection.addAll(documentsFiltered);
@@ -47,9 +48,19 @@ public abstract class PartyDocumentHandler extends CaseDocumentHandler<Contested
         uploadedDocuments.removeAll(documentsFiltered);
 
         if (!documentCollection.isEmpty()) {
-            caseData.put(collectionName, documentCollection);
+            caseData.put(collectionName, sortDocumentsByDateDesc(documentCollection));
         }
     }
 
+    @Override
+    protected List<ContestedUploadedDocumentData> getDocumentCollection(Map<String, Object> caseData, String collection) {
+        if (StringUtils.isEmpty(caseData.get(collection))) {
+            return new ArrayList<>();
+        }
+        return objectMapper.convertValue(caseData.get(collection), new TypeReference<>() {
+        });
+    }
+
     protected abstract boolean isDocumentTypeValid(String caseDocumentType);
+
 }

@@ -8,7 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -39,5 +39,5 @@ public class ContestedUploadedDocument {
     private String hearingDetails;
 
     @JsonProperty("documentUploadDate")
-    private LocalDate documentUploadDate;
+    private LocalDateTime documentUploadDate;
 }
