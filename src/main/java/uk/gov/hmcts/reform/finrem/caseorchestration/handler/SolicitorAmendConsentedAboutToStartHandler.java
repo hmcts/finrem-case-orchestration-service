@@ -13,6 +13,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CV_LOWERCASE_LABEL_FIELD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CV_ORDER_CAMELCASE_LABEL_FIELD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CV_OTHER_DOC_LABEL_FIELD;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
 
@@ -38,6 +41,12 @@ public class SolicitorAmendConsentedAboutToStartHandler implements CallbackHandl
         Map<String, Object> caseData = caseDetails.getData();
         caseData.putIfAbsent(CIVIL_PARTNERSHIP, NO_VALUE);
         consentedApplicationHelper.setConsentVariationOrderLabelField(caseData);
+
+        String camelCaseLabel = (String) caseData.get(CV_ORDER_CAMELCASE_LABEL_FIELD);
+        String lowerCaseLabel = (String) caseData.get(CV_LOWERCASE_LABEL_FIELD);
+        String otherLabel = (String) caseData.get(CV_OTHER_DOC_LABEL_FIELD);
+
+        log.info("Camel Case Label {}, lower case label {} and other label{}", camelCaseLabel, lowerCaseLabel, otherLabel);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
     }
