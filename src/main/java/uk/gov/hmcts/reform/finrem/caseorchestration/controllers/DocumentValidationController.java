@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse.AboutToStartOrSubmitCallbackResponseBuilder;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentValidationService;
 
@@ -39,6 +40,8 @@ public class DocumentValidationController extends BaseController {
 
     @Autowired
     private DocumentValidationService service;
+    @Autowired
+    private ConsentedApplicationHelper helper;
 
     @PostMapping(path = "/field/{field}/file-upload-check", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(summary = "Checks the file type and returns error.")
@@ -57,6 +60,7 @@ public class DocumentValidationController extends BaseController {
         log.info("Received request for checkUploadedFileType for Case ID: {}", caseId);
 
         validateCaseData(callbackRequest);
+        helper.setConsentVariationOrderLabelField(callbackRequest.getCaseDetails().getData());
         return ResponseEntity.ok(response(callbackRequest, field, authorisationToken));
     }
 
