@@ -8,6 +8,12 @@ import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.NottinghamCourt;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Region;
+import uk.gov.hmcts.reform.finrem.ccd.domain.RegionMidlandsFrc;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -56,7 +62,7 @@ public abstract class BaseServiceTest extends BaseTest {
     protected CallbackRequest getConsentedCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(SOLICITOR_EMAIL, TEST_SOLICITOR_EMAIL);
-        caseData.put(CONSENTED_SOLICITOR_NAME, TEST_SOLICITOR_NAME);
+        caseData.put(CONSENTED_SOLICITOR_NAME, CONSENTED_SOLICITOR_NAME);
         caseData.put(SOLICITOR_REFERENCE, TEST_SOLICITOR_REFERENCE);
         caseData.put(RESP_SOLICITOR_EMAIL, TEST_RESP_SOLICITOR_EMAIL);
         caseData.put(RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_NAME);
@@ -67,6 +73,25 @@ public abstract class BaseServiceTest extends BaseTest {
                 .caseTypeId(CASE_TYPE_ID_CONSENTED)
                 .id(12345L)
                 .data(caseData)
+                .build())
+            .build();
+    }
+
+    protected uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest getConsentedNewCallbackRequest() {
+        FinremCaseData caseData = new FinremCaseData();
+        caseData.getContactDetailsWrapper().setSolicitorEmail(TEST_SOLICITOR_EMAIL);
+        caseData.getContactDetailsWrapper().setSolicitorName(CONSENTED_SOLICITOR_NAME);
+        caseData.getContactDetailsWrapper().setSolicitorReference(TEST_SOLICITOR_REFERENCE);
+        caseData.getContactDetailsWrapper().setRespondentSolicitorEmail(TEST_RESP_SOLICITOR_EMAIL);
+        caseData.getContactDetailsWrapper().setRespondentSolicitorName(TEST_RESP_SOLICITOR_NAME);
+        caseData.getContactDetailsWrapper().setRespondentSolicitorReference(TEST_RESP_SOLICITOR_REFERENCE);
+        caseData.setDivorceCaseNumber(TEST_DIVORCE_CASE_NUMBER);
+
+        return uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest.builder()
+            .caseDetails(FinremCaseDetails.builder()
+                .caseType(CaseType.CONSENTED)
+                .id(12345L)
+                .caseData(caseData)
                 .build())
             .build();
     }
@@ -102,6 +127,17 @@ public abstract class BaseServiceTest extends BaseTest {
             .build();
     }
 
+    protected uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest getContestedNewCallbackRequest() {
+        FinremCaseData caseData = getFinremCaseData();
+        return uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest.builder()
+            .caseDetails(FinremCaseDetails.builder()
+                .caseType(CaseType.CONTESTED)
+                .id(12345L)
+                .caseData(caseData)
+                .build())
+            .build();
+    }
+
     protected CallbackRequest getContestedCallbackRequestWithCaseDataValues(Map<String, Object> caseDataValuesToAdd) {
         Map<String, Object> caseData = getCaseData();
         caseData.putAll(caseDataValuesToAdd);
@@ -129,6 +165,24 @@ public abstract class BaseServiceTest extends BaseTest {
         caseData.put(MIDLANDS_FRC_LIST, NOTTINGHAM);
         caseData.put(NOTTINGHAM_COURTLIST, "FR_s_NottinghamList_1");
         caseData.put(BULK_PRINT_LETTER_ID_RES, NOTTINGHAM);
+        return caseData;
+    }
+
+    private FinremCaseData getFinremCaseData() {
+        FinremCaseData caseData = new FinremCaseData();
+        caseData.getContactDetailsWrapper().setApplicantSolicitorEmail(TEST_SOLICITOR_EMAIL);
+        caseData.getContactDetailsWrapper().setApplicantSolicitorName(TEST_SOLICITOR_NAME);
+        caseData.getContactDetailsWrapper().setRespondentSolicitorEmail(TEST_RESP_SOLICITOR_EMAIL);
+        caseData.getContactDetailsWrapper().setRespondentSolicitorName(TEST_RESP_SOLICITOR_NAME);
+        caseData.getContactDetailsWrapper().setRespondentSolicitorReference(TEST_RESP_SOLICITOR_REFERENCE);
+        caseData.getContactDetailsWrapper().setSolicitorReference(TEST_SOLICITOR_REFERENCE);
+        caseData.setDivorceCaseNumber(TEST_DIVORCE_CASE_NUMBER);
+        caseData.getGeneralApplicationWrapper().setGeneralApplicationReferToJudgeEmail(TEST_JUDGE_EMAIL);
+        caseData.getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.MIDLANDS);
+        caseData.getRegionWrapper().getDefaultRegionWrapper().setMidlandsFrcList(RegionMidlandsFrc.NOTTINGHAM);
+        caseData.getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
+            .setNottinghamCourtList(NottinghamCourt.NOTTINGHAM_COUNTY_COURT_AND_FAMILY_COURT);
+        caseData.setBulkPrintLetterIdRes(NOTTINGHAM);
         return caseData;
     }
 

@@ -1,26 +1,23 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandlerTest;
+import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_FORM_H_COLLECTION;
 
 public class RespondentFormsHHandlerTest extends CaseDocumentHandlerTest {
 
-    RespondentFormsHHandler respondentFormsHHandler = new RespondentFormsHHandler(new ObjectMapper());
+    RespondentFormsHHandler respondentFormsHHandler = new RespondentFormsHHandler();
 
     @Test
     public void respFormsHFiltered() {
-        uploadDocumentList.add(createContestedUploadDocumentItem("Form H", "respondent", "no", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form H", "respondent", YesOrNo.NO, YesOrNo.NO, null));
 
-        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setUploadCaseDocument(uploadDocumentList);
 
         respondentFormsHHandler.handle(uploadDocumentList, caseData);
-
-        assertThat(getDocumentCollection(caseData, RESP_FORM_H_COLLECTION), hasSize(1));
+        assertThat(caseData.getUploadCaseDocumentWrapper().getRespFormsHCollection(), hasSize(1));
     }
 }

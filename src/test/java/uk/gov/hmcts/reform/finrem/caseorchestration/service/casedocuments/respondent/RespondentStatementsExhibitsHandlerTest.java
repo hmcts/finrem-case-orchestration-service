@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respo
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandlerTest;
+import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -11,17 +12,15 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class RespondentStatementsExhibitsHandlerTest extends CaseDocumentHandlerTest {
 
-    RespondentStatementsExhibitsHandler respondentStatementsExhibitsHandler = new RespondentStatementsExhibitsHandler(new ObjectMapper());
+    RespondentStatementsExhibitsHandler respondentStatementsExhibitsHandler = new RespondentStatementsExhibitsHandler();
 
     @Test
     public void respStatementsExhibitsFiltered() {
-        uploadDocumentList.add(createContestedUploadDocumentItem("Statement/Affidavit", "respondent", "no", "no", null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Witness Statement/Affidavit", "respondent", "no", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Statement/Affidavit", "respondent", YesOrNo.NO, YesOrNo.NO, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Witness Statement/Affidavit", "respondent", YesOrNo.NO, YesOrNo.NO, null));
 
-        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
-
+        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setUploadCaseDocument(uploadDocumentList);
         respondentStatementsExhibitsHandler.handle(uploadDocumentList, caseData);
-
-        assertThat(getDocumentCollection(caseData, RESP_STATEMENTS_EXHIBITS_COLLECTION), hasSize(2));
+        assertThat(caseData.getUploadCaseDocumentWrapper().getRespStatementsExhibitsCollection(), hasSize(2));
     }
 }

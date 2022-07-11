@@ -1,53 +1,51 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocumentData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CaseDocumentType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.UploadConfidentialDocument;
+import uk.gov.hmcts.reform.finrem.ccd.domain.UploadConfidentialDocumentCollection;
+import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONFIDENTIAL_DOCS_UPLOADED_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 
 public class ConfidentialDocumentsHandlerTest extends CaseDocumentHandlerTest {
 
-    ConfidentialDocumentsHandler confidentialDocumentsHandler = new ConfidentialDocumentsHandler(new ObjectMapper());
+    ConfidentialDocumentsHandler confidentialDocumentsHandler = new ConfidentialDocumentsHandler();
 
     @Test
     public void respondentConfidentialDocumentsFiltered() {
-        uploadDocumentList.add(createContestedUploadDocumentItem("Other", "respondent", "yes", "no", "Other Example"));
-        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+        uploadDocumentList.add(createContestedUploadDocumentItem("Other", "respondent", YesOrNo.YES, YesOrNo.NO, "Other Example"));
+        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setUploadCaseDocument(uploadDocumentList);
 
         confidentialDocumentsHandler.handle(uploadDocumentList, caseData);
-
-        assertThat(getDocumentCollection(caseData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION), hasSize(1));
+        assertThat(caseData.getConfidentialDocumentsUploaded(), hasSize(1));
     }
 
     @Test
     public void shouldNotAddConfidentialDocumentsFiltered() {
 
-        List<ConfidentialUploadedDocumentData> confidentialUploadedDocumentData = new ArrayList<>();
+        List<UploadConfidentialDocumentCollection> confidentialUploadedDocumentData = new ArrayList<>();
         confidentialUploadedDocumentData.add(createConfidentialUploadedDocumentDataItem());
-        caseDetails.getData().put(CONFIDENTIAL_DOCS_UPLOADED_COLLECTION, confidentialUploadedDocumentData);
-        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+        caseDetails.getCaseData().setConfidentialDocumentsUploaded(confidentialUploadedDocumentData);
+        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setUploadCaseDocument(uploadDocumentList);
 
         confidentialDocumentsHandler.handle(uploadDocumentList, caseData);
-
-        assertThat(getDocumentCollection(caseData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION), hasSize(1));
+        assertThat(caseData.getConfidentialDocumentsUploaded(), hasSize(1));
     }
 
-    protected ConfidentialUploadedDocumentData createConfidentialUploadedDocumentDataItem() {
-        return ConfidentialUploadedDocumentData.builder().confidentialUploadedDocument(
-            (ConfidentialUploadedDocument
+    protected UploadConfidentialDocumentCollection createConfidentialUploadedDocumentDataItem() {
+        return UploadConfidentialDocumentCollection.builder().value(
+            UploadConfidentialDocument
                 .builder()
-                .documentType("Other")
-                .documentLink(CaseDocument.builder().documentUrl("url").documentFilename("filename").build())
+                .documentType(CaseDocumentType.OTHER)
+                .documentLink(Document.builder().url("url").filename("filename").build())
                 .documentComment("Comment")
-                .build())).build();
+                .build())
+            .build();
     }
 }

@@ -5,18 +5,15 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
+import uk.gov.hmcts.reform.finrem.ccd.domain.ChangedRepresentative;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Organisation;
+import uk.gov.hmcts.reform.finrem.ccd.domain.RepresentationUpdate;
+import uk.gov.hmcts.reform.finrem.ccd.domain.RepresentationUpdateHistoryCollection;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -28,9 +25,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RE
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REPRESENTATION_UPDATE_HISTORY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element.element;
 
 public class NotificationRequestMapperTest extends BaseServiceTest {
 
@@ -112,9 +107,9 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
 
     @Test
     public void givenApplicantSolicitorNoticeOfChangeOnContestedWhenGetNotificationRequestCalledThenReturnNotificationRequestToAddedSolicitor() {
-        CallbackRequest callbackRequest = getContestedCallbackRequest();
-        callbackRequest.getCaseDetails().getData().put(REPRESENTATION_UPDATE_HISTORY,
-            getChangeOfRepresentationListJson("Applicant", TEST_SOLICITOR_NAME, TEST_SOLICITOR_EMAIL));
+        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest = getContestedNewCallbackRequest();
+        callbackRequest.getCaseDetails().getCaseData()
+            .setRepresentationUpdateHistory(getChangeOfRepresentationListJson("Applicant", TEST_SOLICITOR_NAME, TEST_SOLICITOR_EMAIL));
 
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForNoticeOfChange(
             callbackRequest.getCaseDetails());
@@ -126,9 +121,9 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
 
     @Test
     public void givenRespondentSolicitorNoticeOfChangeOnContestedWhenGetNotificationRequestCalledThenReturnNotificationRequestToAddedSolicitor() {
-        CallbackRequest callbackRequest = getContestedCallbackRequest();
-        callbackRequest.getCaseDetails().getData().put(REPRESENTATION_UPDATE_HISTORY,
-            getChangeOfRepresentationListJson("Respondent", TEST_RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_EMAIL));
+        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest = getContestedNewCallbackRequest();
+        callbackRequest.getCaseDetails().getCaseData().setRepresentationUpdateHistory(getChangeOfRepresentationListJson(
+            "Respondent", TEST_RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_EMAIL));
 
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForNoticeOfChange(
             callbackRequest.getCaseDetails());
@@ -140,9 +135,9 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
 
     @Test
     public void givenApplicantSolicitorNoticeOfChangeOnConsentedWhenGetNotificationRequestCalledThenReturnNotificationRequestToAddedSolicitor() {
-        CallbackRequest callbackRequest = getConsentedCallbackRequest();
-        callbackRequest.getCaseDetails().getData().put(REPRESENTATION_UPDATE_HISTORY,
-            getChangeOfRepresentationListJson("Applicant", TEST_SOLICITOR_NAME, TEST_SOLICITOR_EMAIL));
+        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest = getConsentedNewCallbackRequest();
+        callbackRequest.getCaseDetails().getCaseData().setRepresentationUpdateHistory(getChangeOfRepresentationListJson(
+            "Applicant", TEST_SOLICITOR_NAME, TEST_SOLICITOR_EMAIL));
 
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForNoticeOfChange(
             callbackRequest.getCaseDetails());
@@ -154,9 +149,9 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
 
     @Test
     public void givenRespondentSolicitorNoticeOfChangeOnConsentedWhenGetNotificationRequestCalledThenReturnNotificationRequestToAddedSolicitor() {
-        CallbackRequest callbackRequest = getConsentedCallbackRequest();
-        callbackRequest.getCaseDetails().getData().put(REPRESENTATION_UPDATE_HISTORY,
-            getChangeOfRepresentationListJson("Respondent", TEST_RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_EMAIL));
+        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest = getConsentedNewCallbackRequest();
+        callbackRequest.getCaseDetails().getCaseData().setRepresentationUpdateHistory(getChangeOfRepresentationListJson(
+            "Respondent", TEST_RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_EMAIL));
 
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForNoticeOfChange(
             callbackRequest.getCaseDetails());
@@ -167,44 +162,45 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
     }
 
     @SneakyThrows
-    private List<Element<RepresentationUpdate>> getChangeOfRepresentationListJson(String party,
-                                                                                  String latestSolicitorName,
-                                                                                  String latestSolicitorEmail) {
-        return Stream.of(
-            element(UUID.randomUUID(), RepresentationUpdate.builder()
-                .party(party)
-                .clientName("TestClient Name")
-                .via("Notice of Change")
-                .by("TestSolicitor2 Name")
-                .date(LocalDateTime.now().minusDays(5))
-                .added(ChangedRepresentative.builder()
-                    .email("testSolicitor2@test.com")
-                    .name("TestSolicitor2 Name")
-                    .organisation(Organisation.builder().build())
+    private List<RepresentationUpdateHistoryCollection> getChangeOfRepresentationListJson(String party,
+                                                                                          String latestSolicitorName,
+                                                                                          String latestSolicitorEmail) {
+        return List.of(
+            RepresentationUpdateHistoryCollection.builder()
+                .value(RepresentationUpdate.builder()
+                    .party(party)
+                    .name("TestClient Name")
+                    .via("Notice of Change")
+                    .by("TestSolicitor2 Name")
+                    .date(LocalDateTime.now().minusDays(5))
+                    .added(ChangedRepresentative.builder()
+                        .email("testSolicitor2@test.com")
+                        .name("TestSolicitor2 Name")
+                        .organisation(Organisation.builder().build())
+                        .build())
+                    .removed(ChangedRepresentative.builder()
+                        .email("testSolicitor1@test.com")
+                        .name("TestSolicitor1 Name")
+                        .organisation(Organisation.builder().build())
+                        .build())
+                    .build()).build(),
+            RepresentationUpdateHistoryCollection.builder()
+                .value(RepresentationUpdate.builder()
+                    .party(party)
+                    .via("Notice of Change")
+                    .by(latestSolicitorName)
+                    .date(LocalDateTime.now())
+                    .added(ChangedRepresentative.builder()
+                        .email(latestSolicitorEmail)
+                        .name(latestSolicitorName)
+                        .organisation(Organisation.builder().build())
+                        .build())
+                    .removed(ChangedRepresentative.builder()
+                        .email("testSolicitor2@test.com")
+                        .name("TestSolicitor2 Name")
+                        .organisation(Organisation.builder().build())
+                        .build())
                     .build())
-                .removed(ChangedRepresentative.builder()
-                    .email("testSolicitor1@test.com")
-                    .name("TestSolicitor1 Name")
-                    .organisation(Organisation.builder().build())
-                    .build())
-                .build()),
-            element(UUID.randomUUID(), RepresentationUpdate.builder()
-                .party(party)
-                .clientName("TestClient Name")
-                .via("Notice of Change")
-                .by(latestSolicitorName)
-                .date(LocalDateTime.now())
-                .added(ChangedRepresentative.builder()
-                    .email(latestSolicitorEmail)
-                    .name(latestSolicitorName)
-                    .organisation(Organisation.builder().build())
-                    .build())
-                .removed(ChangedRepresentative.builder()
-                    .email("testSolicitor2@test.com")
-                    .name("TestSolicitor2 Name")
-                    .organisation(Organisation.builder().build())
-                    .build())
-                .build())
-        ).collect(Collectors.toList());
+                .build());
     }
 }

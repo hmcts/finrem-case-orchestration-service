@@ -7,7 +7,10 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.ccd.domain.CaseDocumentType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.ccd.domain.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
@@ -21,16 +24,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 
 public abstract class CaseDocumentHandlerTest {
 
-    protected CaseDetails caseDetails;
-    protected Map<String, Object> caseData;
-    protected final List<ContestedUploadedDocumentData> uploadDocumentList = new ArrayList<>();
+    protected FinremCaseDetails caseDetails;
+    protected FinremCaseData caseData;
+    protected final List<UploadCaseDocumentCollection> uploadDocumentList = new ArrayList<>();
     protected final ObjectMapper mapper = new ObjectMapper();
 
 
     @Before
     public void setUp() {
-        caseDetails = buildCaseDetails();
-        caseData = caseDetails.getData();
+        caseDetails = buildFinremCaseDetails();
+        caseData = caseDetails.getCaseData();
     }
 
     protected UploadCaseDocumentCollection createContestedUploadDocumentItem(String type, String party,
@@ -50,9 +53,9 @@ public abstract class CaseDocumentHandlerTest {
             .build();
     }
 
-    protected CaseDetails buildCaseDetails() {
-        Map<String, Object> caseData = new HashMap<>();
-        return CaseDetails.builder().id(Long.valueOf(123)).caseTypeId(CASE_TYPE_ID_CONTESTED).data(caseData).build();
+    protected FinremCaseDetails buildFinremCaseDetails() {
+        FinremCaseData caseData = new FinremCaseData();
+        return FinremCaseDetails.builder().id(123L).caseType(CaseType.CONTESTED).caseData(caseData).build();
     }
 
     protected List<ContestedUploadedDocumentData> getDocumentCollection(Map<String, Object> data, String field) {

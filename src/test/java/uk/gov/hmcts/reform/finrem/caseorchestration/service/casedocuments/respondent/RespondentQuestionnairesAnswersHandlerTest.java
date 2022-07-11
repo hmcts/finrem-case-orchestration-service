@@ -1,28 +1,25 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandlerTest;
+import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_QUESTIONNAIRES_ANSWERS_COLLECTION;
 
 public class RespondentQuestionnairesAnswersHandlerTest extends CaseDocumentHandlerTest {
 
-    RespondentQuestionnairesAnswersHandler respondentQuestionnairesAnswersHandler = new RespondentQuestionnairesAnswersHandler(new ObjectMapper());
+    RespondentQuestionnairesAnswersHandler respondentQuestionnairesAnswersHandler = new RespondentQuestionnairesAnswersHandler();
 
 
     @Test
     public void respQuestionnairesAnswersFiltered() {
-        uploadDocumentList.add(createContestedUploadDocumentItem("Questionnaire", "respondent", "no", "no", null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Reply to Questionnaire", "respondent", "no", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Questionnaire", "respondent", YesOrNo.NO, YesOrNo.NO, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Reply to Questionnaire", "respondent", YesOrNo.NO, YesOrNo.NO, null));
 
-        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setUploadCaseDocument(uploadDocumentList);
 
         respondentQuestionnairesAnswersHandler.handle(uploadDocumentList, caseData);
-
-        assertThat(getDocumentCollection(caseData, RESP_QUESTIONNAIRES_ANSWERS_COLLECTION), hasSize(2));
+        assertThat(caseData.getUploadCaseDocumentWrapper().getRespQaCollection(), hasSize(2));
     }
 }

@@ -1,28 +1,26 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandlerTest;
+import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_CHRONOLOGIES_STATEMENTS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 
 public class ApplicantChronologiesStatementHandlerTest extends CaseDocumentHandlerTest {
 
-    ApplicantChronologiesStatementHandler applicantChronologiesStatementHandler = new ApplicantChronologiesStatementHandler(new ObjectMapper());
+    ApplicantChronologiesStatementHandler applicantChronologiesStatementHandler = new ApplicantChronologiesStatementHandler();
 
     @Test
     public void appChronologiesStatementsFiltered() {
-        uploadDocumentList.add(createContestedUploadDocumentItem("Statement of Issues", "applicant", "no", "no", null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "applicant", "no", "no", null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Form G", "applicant", "no", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Statement of Issues", "applicant", YesOrNo.NO, YesOrNo.NO, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "applicant", YesOrNo.NO, YesOrNo.NO, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form G", "applicant", YesOrNo.NO, YesOrNo.NO, null));
 
-        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setUploadCaseDocument(uploadDocumentList);
 
         applicantChronologiesStatementHandler.handle(uploadDocumentList, caseData);
 
-        assertThat(getDocumentCollection(caseData, APP_CHRONOLOGIES_STATEMENTS_COLLECTION), hasSize(3));
+        assertThat(caseData.getUploadCaseDocumentWrapper().getAppChronologiesCollection(), hasSize(3));
     }
 }

@@ -1,31 +1,28 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandlerTest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_OTHER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo.NO;
 
 public class RespondentOtherDocumentsHandlerTest extends CaseDocumentHandlerTest {
 
-    RespondentOtherDocumentsHandler respondentOtherDocumentsHandler = new RespondentOtherDocumentsHandler(new ObjectMapper());
+    RespondentOtherDocumentsHandler respondentOtherDocumentsHandler = new RespondentOtherDocumentsHandler();
 
     @Test
     public void respOtherDocsFiltered() {
-        uploadDocumentList.add(createContestedUploadDocumentItem("other", "respondent", "no", "no", "Other Example"));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Form B", "respondent", "no", "no", null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Form F", "respondent", "no", "no", null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Care Plan", "respondent", "no", "no", null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Pension Plan", "respondent", "no", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("other", "respondent", NO, NO, "Other Example"));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form B", "respondent", NO, NO, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form F", "respondent", NO, NO, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Care Plan", "respondent", NO, NO, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Pension Plan", "respondent", NO, NO, null));
 
-        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setUploadCaseDocument(uploadDocumentList);
 
         respondentOtherDocumentsHandler.handle(uploadDocumentList, caseData);
-
-        assertThat(getDocumentCollection(caseData, RESP_OTHER_COLLECTION), hasSize(5));
+        assertThat(caseData.getUploadCaseDocumentWrapper().getRespOtherCollection(), hasSize(5));
     }
 
 }

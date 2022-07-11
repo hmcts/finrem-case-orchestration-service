@@ -1,27 +1,24 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandlerTest;
+import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_FORM_E_EXHIBITS_COLLECTION;
 
 public class RespondentFormEExhibitsHandlerTest extends CaseDocumentHandlerTest {
 
-    RespondentFormEExhibitsHandler respondentFormEExhibitsHandler = new RespondentFormEExhibitsHandler(new ObjectMapper());
+    RespondentFormEExhibitsHandler respondentFormEExhibitsHandler = new RespondentFormEExhibitsHandler();
 
 
     @Test
     public void respFormEExhibitsFiltered() {
-        uploadDocumentList.add(createContestedUploadDocumentItem("Applicant - Form E", "respondent", "no", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Applicant - Form E", "respondent", YesOrNo.NO, YesOrNo.NO, null));
 
-        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setUploadCaseDocument(uploadDocumentList);
 
         respondentFormEExhibitsHandler.handle(uploadDocumentList, caseData);
-
-        assertThat(getDocumentCollection(caseData, RESP_FORM_E_EXHIBITS_COLLECTION), hasSize(1));
+        assertThat(caseData.getUploadCaseDocumentWrapper().getRespFormEExhibitsCollection(), hasSize(1));
     }
 }
