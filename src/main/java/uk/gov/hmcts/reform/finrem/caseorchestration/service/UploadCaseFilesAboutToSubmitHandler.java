@@ -58,11 +58,9 @@ public class UploadCaseFilesAboutToSubmitHandler {
     public static final String TRIAL_BUNDLE_SELECTED_ERROR =
         "To upload a hearing bundle please use the Manage hearing "
             + "bundles event which can be found on the drop-down list on the home page";
-
+    public static final String TRIAL_BUNDLE_TYPE = "Trial Bundle";
     private static final String APPLICANT = "applicant";
     private static final String RESPONDENT = "respondent";
-    public static final String TRIAL_BUNDLE_TYPE = "Trial Bundle";
-
     private final ObjectMapper mapper;
     private final FeatureToggleService featureToggleService;
 

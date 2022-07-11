@@ -46,8 +46,6 @@ public class GenerateCoverSheetService {
     private final DocumentHelper documentHelper;
     private final CaseDataService caseDataService;
 
-    private enum AddressFoundInCaseData { SOLICITOR, PARTY, NONE }
-
     public CaseDocument generateApplicantCoverSheet(final CaseDetails caseDetails, final String authorisationToken) {
         log.info("Generating Applicant cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
             documentConfiguration.getBulkPrintTemplate());
@@ -136,5 +134,9 @@ public class GenerateCoverSheetService {
 
     private String partyName(Object partyFirstMiddleName, Object partyLastName) {
         return StringUtils.joinWith(" ", partyFirstMiddleName, partyLastName).trim();
+    }
+
+    private enum AddressFoundInCaseData {
+        SOLICITOR, PARTY, NONE
     }
 }

@@ -1,9 +1,11 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -38,15 +40,15 @@ public class GeneralLetterController extends BaseController {
     private final GeneralLetterService generalLetterService;
 
     @PostMapping(path = "/general-letter-start", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Clears previous entered field values. Serves as a callback from CCD")
+    @Operation(summary = "Clears previous entered field values. Serves as a callback from CCD")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
-            response = AboutToStartOrSubmitCallbackResponse.class),
-        @ApiResponse(code = 400, message = "Bad Request"),
-        @ApiResponse(code = 500, message = "Internal Server Error")})
+        @ApiResponse(responseCode = "200", description = "Callback was processed successfully or in case of an error message is attached to the case",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> initialiseGeneralLetterProperties(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+        @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callback) {
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to clear general letter fields for Case ID: {}", caseDetails.getId());
@@ -65,15 +67,15 @@ public class GeneralLetterController extends BaseController {
     }
 
     @PostMapping(path = "/documents/preview-general-letter", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Preview general letter")
+    @Operation(summary = "Preview general letter")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
-            response = AboutToStartOrSubmitCallbackResponse.class),
-        @ApiResponse(code = 400, message = "Bad Request"),
-        @ApiResponse(code = 500, message = "Internal Server Error")})
+        @ApiResponse(responseCode = "200", description = "Callback was processed successfully or in case of an error message is attached to the case",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> previewGeneralLetter(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+        @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callback) {
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to preview general letter for Case ID: {}", caseDetails.getId());
@@ -90,15 +92,15 @@ public class GeneralLetterController extends BaseController {
     }
 
     @PostMapping(path = "/documents/general-letter", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Creates general letter for case worker. Serves as a callback from CCD")
+    @Operation(summary = "Creates general letter for case worker. Serves as a callback from CCD")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
-            response = AboutToStartOrSubmitCallbackResponse.class),
-        @ApiResponse(code = 400, message = "Bad Request"),
-        @ApiResponse(code = 500, message = "Internal Server Error")})
+        @ApiResponse(responseCode = "200", description = "Callback was processed successfully or in case of an error message is attached to the case",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> createGeneralLetter(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+        @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callback) {
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request for generating general letter with Case ID: {}", caseDetails.getId());
