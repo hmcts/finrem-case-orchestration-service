@@ -26,8 +26,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CV_ORDER_CAMELCASE_LABEL_FIELD;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CV_OTHER_DOC_LABEL_FIELD;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CV_OTHER_DOC_LABEL_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.VARIATION_ORDER_CAMELCASE_LABEL_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.VARIATION_ORDER_LOWERCASE_LABEL_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SolicitorAmendConsentedAboutToStartHandlerTest {
@@ -84,6 +86,8 @@ public class SolicitorAmendConsentedAboutToStartHandlerTest {
         assertEquals(VARIATION_ORDER_LOWERCASE_LABEL_VALUE, lowerCaseLabel);
         final String docLabel = (String) response.getData().get(CV_OTHER_DOC_LABEL_FIELD);
         assertEquals(CV_OTHER_DOC_LABEL_VALUE, docLabel);
+        final String civil = (String) response.getData().get(CIVIL_PARTNERSHIP);
+        assertEquals(NO_VALUE, civil);
     }
 
     @Test
@@ -101,6 +105,8 @@ public class SolicitorAmendConsentedAboutToStartHandlerTest {
         assertEquals(CONSENT_ORDER_LOWERCASE_LABEL_VALUE, lowerCaseLabel);
         final String docLabel = (String) response.getData().get(CV_OTHER_DOC_LABEL_FIELD);
         assertEquals(CONSENT_OTHER_DOC_LABEL_VALUE, docLabel);
+        final String civil = (String) response.getData().get(CIVIL_PARTNERSHIP);
+        assertEquals(NO_VALUE, civil);
     }
 
     private CallbackRequest buildCallbackRequest() {

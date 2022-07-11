@@ -13,6 +13,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -33,7 +36,7 @@ public class SolicitorAmendConsentedAboutToStartHandler implements CallbackHandl
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
-
+        caseData.putIfAbsent(CIVIL_PARTNERSHIP, NO_VALUE);
         consentedApplicationHelper.setConsentVariationOrderLabelField(caseData);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
