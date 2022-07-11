@@ -1,13 +1,14 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 
@@ -31,9 +32,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @RunWith(MockitoJUnitRunner.class)
 public class SolicitorAmendConsentedAboutToStartHandlerTest {
 
-    @InjectMocks
     private SolicitorAmendConsentedAboutToStartHandler handle;
+
     public static final String AUTH_TOKEN = "4d73f8d4-2a8d-48e2-af91-11cbaa642345";
+
+    @Before
+    public void setup() {
+        handle = new SolicitorAmendConsentedAboutToStartHandler(new ConsentedApplicationHelper());
+    }
 
     @Test
     public void given_case_whenEvent_type_is_amendapp_thenCanHandle() {
