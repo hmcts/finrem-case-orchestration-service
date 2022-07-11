@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_OPENING_HOURS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
@@ -38,13 +39,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class NotificationRequestMapper {
 
     protected static final String EMPTY_STRING = "";
+    private static final String RESPONDENT = "Respondent";
+    private static final String CONSENTED = "consented";
+    private static final String CONTESTED = "contested";
     private final CaseDataService caseDataService;
     private final ObjectMapper objectMapper;
     private final CourtDetailsMapper courtDetailsMapper;
 
-    private static final String RESPONDENT = "Respondent";
-    private static final String CONSENTED = "consented";
-    private static final String CONTESTED = "contested";
 
     @Deprecated
     public NotificationRequest getNotificationRequestForRespondentSolicitor(CaseDetails caseDetails) {
@@ -147,6 +148,7 @@ public class NotificationRequestMapper {
         notificationRequest.setNotificationEmail(Objects.toString(mapOfCaseData.get(solicitorCaseDataKeysWrapper.getSolicitorEmailKey())));
         notificationRequest.setGeneralEmailBody(Objects.toString(mapOfCaseData.get(GENERAL_EMAIL_BODY)));
         notificationRequest.setCaseType(getCaseType(caseDetails));
+        notificationRequest.setPhoneOpeningHours(CTSC_OPENING_HOURS);
 
         if (caseDataService.isContestedApplication(caseDetails)) {
             String selectedCourt = ContestedCourtHelper.getSelectedFrc(caseDetails);

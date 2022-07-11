@@ -1,10 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.google.common.collect.ImmutableList;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -57,13 +59,13 @@ public class ConsentOrderApprovedController extends BaseController {
     private final FinremCallbackRequestDeserializer callbackRequestDeserializer;
 
     @PostMapping(path = "/documents/consent-order-approved", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "'Consent Order Approved' callback handler. Generates relevant Consent Order Approved documents")
+    @Operation(summary = "'Consent Order Approved' callback handler. Generates relevant Consent Order Approved documents")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
-            response = AboutToStartOrSubmitCallbackResponse.class),
-        @ApiResponse(code = 400, message = "Bad Request"),
-        @ApiResponse(code = 500, message = "Internal Server Error")
-    })
+        @ApiResponse(responseCode = "200",
+            description = "Callback was processed successfully or in case of an error message is attached to the case",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> consentOrderApproved(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @NotNull @RequestBody @ApiParam("CaseData") String source) {
@@ -90,14 +92,14 @@ public class ConsentOrderApprovedController extends BaseController {
     }
 
     @PostMapping(path = "/consent-in-contested/consent-order-approved", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "'Consent Order Approved' callback handler for consent in contested. Stamps Consent Order Approved documents"
-        + "and adds them to a collection")
+    @Operation(summary = "'Consent Order Approved' callback handler for consent in contested. Stamps Consent Order Approved documents\"\n"
+        + "        + \"and adds them to a collection")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
-            response = AboutToStartOrSubmitCallbackResponse.class),
-        @ApiResponse(code = 400, message = "Bad Request"),
-        @ApiResponse(code = 500, message = "Internal Server Error")
-    })
+        @ApiResponse(responseCode = "200",
+            description = "Callback was processed successfully or in case of an error message is attached to the case",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> consentInContestedConsentOrderApproved(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @NotNull @RequestBody @ApiParam("CaseData") String source) {
@@ -120,15 +122,15 @@ public class ConsentOrderApprovedController extends BaseController {
     }
 
     @PostMapping(path = "/consent-in-contested/send-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "'Consent Order Approved' and 'Consent Order Not Approved' callback handler for consent in contested. "
-        + "Checks state and if not/approved generates docs else puts latest general order into uploadOrder fields. "
-        + "Then sends the data to bulk print")
+    @Operation(summary = "'Consent Order Approved' and 'Consent Order Not Approved' callback handler for consent in contested. \"\n"
+        + "        + \"Checks state and if not/approved generates docs else puts latest general order into uploadOrder fields. \"\n"
+        + "        + \"Then sends the data to bulk print")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
-            response = AboutToStartOrSubmitCallbackResponse.class),
-        @ApiResponse(code = 400, message = "Bad Request"),
-        @ApiResponse(code = 500, message = "Internal Server Error")
-    })
+        @ApiResponse(responseCode = "200",
+            description = "Callback was processed successfully or in case of an error message is attached to the case",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> consentInContestedSendOrder(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @NotNull @RequestBody @ApiParam("CaseData") String source) {
@@ -143,7 +145,7 @@ public class ConsentOrderApprovedController extends BaseController {
             .build());
     }
 
-    private void generateAndPrepareDocuments(String authToken, FinremCaseDetails caseDetails) {
+    private void generateAndPrepareDocuments(String authToken, CaseDetails caseDetails) {
         log.info("Generating and preparing documents for latest consent order, case {}", caseDetails.getId());
 
         FinremCaseData caseData = caseDetails.getCaseData();

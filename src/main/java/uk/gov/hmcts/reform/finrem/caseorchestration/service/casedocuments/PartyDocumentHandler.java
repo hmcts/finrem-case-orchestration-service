@@ -12,10 +12,10 @@ import java.util.stream.Collectors;
 @Slf4j
 public abstract class PartyDocumentHandler extends CaseDocumentHandler<UploadCaseDocumentCollection> {
 
-    private final String party;
-
     protected static final String APPLICANT = "applicant";
     protected static final String RESPONDENT = "respondent";
+
+    private final String party;
 
     public PartyDocumentHandler(String party) {
         this.party = party;

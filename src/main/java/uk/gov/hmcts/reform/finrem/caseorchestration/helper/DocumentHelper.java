@@ -93,9 +93,21 @@ public class DocumentHelper {
     public static final String ADDRESSEE = "addressee";
     public static final String CTSC_CONTACT_DETAILS = "ctscContactDetails";
     public static final String CASE_NUMBER = "caseNumber";
-
     private final ObjectMapper objectMapper;
     private final CaseDataService caseDataService;
+
+    public static CtscContactDetails buildCtscContactDetails() {
+        return CtscContactDetails.builder()
+            .serviceCentre(CTSC_SERVICE_CENTRE)
+            .careOf(CTSC_CARE_OF)
+            .poBox(CTSC_PO_BOX)
+            .town(CTSC_TOWN)
+            .postcode(CTSC_POSTCODE)
+            .emailAddress(CTSC_EMAIL_ADDRESS)
+            .phoneNumber(CTSC_PHONE_NUMBER)
+            .openingHours(CTSC_OPENING_HOURS)
+            .build();
+    }
 
     public CaseDocument getLatestAmendedConsentOrder(Map<String, Object> caseData) {
         Optional<AmendedConsentOrderData> reduce = ofNullable(caseData.get(AMENDED_CONSENT_ORDER_COLLECTION))
@@ -295,19 +307,6 @@ public class DocumentHelper {
         }
 
         return caseDetailsCopy;
-    }
-
-    public static CtscContactDetails buildCtscContactDetails() {
-        return CtscContactDetails.builder()
-            .serviceCentre(CTSC_SERVICE_CENTRE)
-            .careOf(CTSC_CARE_OF)
-            .poBox(CTSC_PO_BOX)
-            .town(CTSC_TOWN)
-            .postcode(CTSC_POSTCODE)
-            .emailAddress(CTSC_EMAIL_ADDRESS)
-            .phoneNumber(CTSC_PHONE_NUMBER)
-            .openingHours(CTSC_OPENING_HOURS)
-            .build();
     }
 
     public <T> T deepCopy(T object, Class<T> objectClass) {

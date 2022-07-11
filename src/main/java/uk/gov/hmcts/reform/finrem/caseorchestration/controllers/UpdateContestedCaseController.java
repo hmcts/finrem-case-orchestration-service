@@ -1,9 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import lombok.RequiredArgsConstructor;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -39,12 +40,12 @@ public class UpdateContestedCaseController extends BaseController {
     private final FinremCallbackRequestDeserializer finremCallbackRequestDeserializer;
 
     @PostMapping(path = "/update-contested-case", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Handles update Contested Case details and cleans up the data fields based on the options chosen for Contested Cases")
+    @Operation(summary = "Handles update Contested Case details and cleans up the data fields based on the options chosen for Contested Cases")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
-            response = AboutToStartOrSubmitCallbackResponse.class),
-        @ApiResponse(code = 400, message = "Bad Request"),
-        @ApiResponse(code = 500, message = "Internal Server Error")})
+        @ApiResponse(responseCode = "200", description = "Callback was processed successfully or in case of an error message is attached to the case",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> updateContestedCase(
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
         @RequestBody String source) {
@@ -75,6 +76,28 @@ public class UpdateContestedCaseController extends BaseController {
     private void cleanupAdditionalDocuments(FinremCaseData caseData) {
         if (caseData.getPromptForAnyDocument().isNoOrNull()) {
             caseData.setUploadAdditionalDocument(null);
+    @PostMapping(path = "/update-contested-case-solicitor", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Handles update case details and cleans up the data fields based on the options chosen for Consented Cases")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback was processed successfully or in case of an error message is attached to the case",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> updateContestedCaseSolicitor(
+        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
+        @RequestBody CallbackRequest ccdRequest) {
+
+        CaseDetails caseDetails = ccdRequest.getCaseDetails();
+        log.info("Received request to update contested case solicitor contact details with Case ID: {}", caseDetails.getId());
+
+        validateCaseData(ccdRequest);
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(removeSolicitorAddress(caseDetails, true)).build());
+    }
+
+    private void cleanupAdditionalDocuments(Map<String, Object> caseData) {
+        if (equalsTo((String) caseData.get("promptForAnyDocument"), NO_VALUE)) {
+            caseData.put("uploadAdditionalDocument", null);
         }
     }
 

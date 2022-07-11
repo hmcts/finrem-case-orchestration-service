@@ -22,14 +22,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class CourtDetailsMigration implements MigrationHandler {
 
-    private CaseDataService caseDataService = new CaseDataService();
-
     public static final String REGION_SL = "regionListSL";
     public static final String ALLOCATED_COURT_LIST = "allocatedCourtList";
     public static final String ALLOCATED_COURT_LIST_GA = "allocatedCourtListGA";
     public static final String REGION_AC = "region";
     public static final String EMPTY_STRING = "";
-
     // FRC lists SL
     public static final String WALES_FRC_LIST_SL = "walesFRCListSL";
     public static final String SOUTHEAST_FRC_LIST_SL = "southEastFRCListSL";
@@ -37,7 +34,6 @@ public class CourtDetailsMigration implements MigrationHandler {
     public static final String NORTHWEST_FRC_LIST_SL = "northWestFRCListSL";
     public static final String LONDON_FRC_LIST_SL = "londonFRCListSL";
     public static final String MIDLANDS_FRC_LIST_SL = "allocatedCourtListSL";
-
     // FRC lists AC
     public static final String WALES_FRC_LIST_AC = "walesList";
     public static final String SOUTHEAST_FRC_LIST_AC = "southEastList";
@@ -45,7 +41,6 @@ public class CourtDetailsMigration implements MigrationHandler {
     public static final String NORTHWEST_FRC_LIST_AC = "northWestList";
     public static final String LONDON_FRC_LIST_AC = "londonList";
     public static final String MIDLANDS_FRC_LIST_AC = "midlandsList";
-
     // FRCs
     public static final String KENT = "kentfrc";
     public static final String LIVERPOOL = "liverpool";
@@ -58,7 +53,6 @@ public class CourtDetailsMigration implements MigrationHandler {
     public static final String HSYORKSHIRE = "hsyorkshire";
     public static final String NOTTINGHAM = "nottingham";
     public static final String BIRMINGHAM = "birmingham";
-
     // Court lists
     public static final String LIVERPOOL_COURT_LIST = "liverpoolCourtList";
     public static final String MANCHESTER_COURT_LIST = "manchesterCourtList";
@@ -71,7 +65,6 @@ public class CourtDetailsMigration implements MigrationHandler {
     public static final String BIRMINGHAM_COURT_LIST = "birminghamCourtList";
     public static final String HUMBER_COURT_LIST = "humberCourtList";
     public static final String KENT_SURREY_COURT_LIST = "kentSurreyCourtList";
-
     // Court lists SL
     public static final String LIVERPOOL_COURT_LIST_SL = "liverpoolCourtListSL";
     public static final String MANCHESTER_COURT_LIST_SL = "manchesterCourtListSL";
@@ -84,7 +77,6 @@ public class CourtDetailsMigration implements MigrationHandler {
     public static final String BIRMINGHAM_COURT_LIST_SL = "birminghamCourtListSL";
     public static final String HUMBER_COURT_LIST_SL = "humberCourtListSL";
     public static final String KENT_SURREY_COURT_LIST_SL = "kentSurreyCourtListSL";
-
     // Court lists SL
     public static final String LIVERPOOL_COURT_LIST_AC = "liverpoolCourtList";
     public static final String MANCHESTER_COURT_LIST_AC = "manchesterCourtList";
@@ -97,6 +89,7 @@ public class CourtDetailsMigration implements MigrationHandler {
     public static final String BIRMINGHAM_COURT_LIST_AC = "birminghamCourtList";
     public static final String HUMBER_COURT_LIST_AC = "humberCourtList";
     public static final String KENT_SURREY_COURT_LIST_AC = "kentSurreyCourtList";
+    private CaseDataService caseDataService = new CaseDataService();
 
     public Map<String, Object> migrate(CaseDetails caseDetails) {
         if (migrationRequired(caseDetails)) {

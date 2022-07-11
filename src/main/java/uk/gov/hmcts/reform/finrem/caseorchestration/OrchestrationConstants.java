@@ -50,5 +50,5 @@ public class OrchestrationConstants {
     public static final String CTSC_POSTCODE = "CM20 9QZ";
     public static final String CTSC_EMAIL_ADDRESS = "contactFinancialRemedy@justice.gov.uk";
     public static final String CTSC_PHONE_NUMBER = "0300 303 0642";
-    public static final String CTSC_OPENING_HOURS = "from 8.30am to 5pm";
+    public static final String CTSC_OPENING_HOURS = "from 8am to 6pm, Monday to Friday";
 }

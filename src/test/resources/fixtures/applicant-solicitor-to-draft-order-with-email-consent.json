@@ -37,6 +37,7 @@
       "solicitorPhone": "1234",
       "applicantFMName": "Poor",
       "authorisation2b": "test",
+      "currentUserCaseRole": "[APPSOLICITOR]",
       "otherCollection": [
         {
           "id": "1",

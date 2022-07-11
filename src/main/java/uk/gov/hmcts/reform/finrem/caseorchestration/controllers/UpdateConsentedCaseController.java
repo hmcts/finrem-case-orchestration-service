@@ -1,8 +1,11 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -27,33 +30,21 @@ import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.NoCSolicitorDetailsHelper.removeApplicantSolicitorAddress;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.NoCSolicitorDetailsHelper.removeRespondentSolicitorAddress;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.NoCSolicitorDetailsHelper.removeSolicitorAddress;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_DX_NUMBER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_FIRM;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INCLUDES_REPRESENTATION_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_PHONE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_DX_NUMBER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_FIRM;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_PHONE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_PHONE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
 @RestController
@@ -67,19 +58,22 @@ public class UpdateConsentedCaseController extends BaseController {
     private static final String DIVORCE_UPLOAD_EVIDENCE_1 = "divorceUploadEvidence1";
     private static final String DIVORCE_DECREE_NISI_DATE = "divorceDecreeNisiDate";
 
-    @Autowired private ConsentOrderService consentOrderService;
+    @Autowired
+    private ConsentOrderService consentOrderService;
 
-    @Autowired private UpdateRepresentationWorkflowService nocWorkflowService;
+    @Autowired
+    private UpdateRepresentationWorkflowService nocWorkflowService;
 
-    @Autowired private FeatureToggleService featureToggleService;
+    @Autowired
+    private FeatureToggleService featureToggleService;
 
     @PostMapping(path = "/update-case", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Handles update case details and cleans up the data fields based on the options chosen for Consented Cases")
+    @Operation(summary = "Handles update case details and cleans up the data fields based on the options chosen for Consented Cases")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
-            response = AboutToStartOrSubmitCallbackResponse.class),
-        @ApiResponse(code = 400, message = "Bad Request"),
-        @ApiResponse(code = 500, message = "Internal Server Error")})
+        @ApiResponse(responseCode = "200", description = "Callback was processed successfully or in case of an error message is attached to the case",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> updateCase(
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
         @RequestBody CallbackRequest ccdRequest) {
@@ -102,12 +96,12 @@ public class UpdateConsentedCaseController extends BaseController {
     }
 
     @PostMapping(path = "/update-contact-details", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Handles update case details and cleans up the data fields based on the options chosen for Consented Cases")
+    @Operation(summary = "Handles update case details and cleans up the data fields based on the options chosen for Consented Cases")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
-            response = AboutToStartOrSubmitCallbackResponse.class),
-        @ApiResponse(code = 400, message = "Bad Request"),
-        @ApiResponse(code = 500, message = "Internal Server Error")})
+        @ApiResponse(responseCode = "200", description = "Callback was processed successfully or in case of an error message is attached to the case",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> updateDetails(
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
         @RequestBody CallbackRequest ccdRequest) {
@@ -135,6 +129,25 @@ public class UpdateConsentedCaseController extends BaseController {
 
         persistOrgPolicies(caseData, ccdRequest.getCaseDetailsBefore());
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+    }
+
+    @PostMapping(path = "/update-case-solicitor", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Handles update case details and cleans up the data fields based on the options chosen for Consented Cases")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback was processed successfully or in case of an error message is attached to the case",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> updateCaseSolicitor(
+        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
+        @RequestBody CallbackRequest ccdRequest) {
+
+        CaseDetails caseDetails = ccdRequest.getCaseDetails();
+        log.info("Received request to update consented case solicitor contact details with Case ID: {}", caseDetails.getId());
+
+        validateCaseData(ccdRequest);
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(removeSolicitorAddress(caseDetails, false)).build());
     }
 
     private void updateLatestConsentOrder(CallbackRequest callbackRequest) {
@@ -200,16 +213,6 @@ public class UpdateConsentedCaseController extends BaseController {
         caseData.put("orderForChildrenQuestion1", null);
     }
 
-    private void removeRespondentSolicitorAddress(Map<String, Object> caseData) {
-        caseData.put(RESP_SOLICITOR_NAME, null);
-        caseData.put(RESP_SOLICITOR_FIRM, null);
-        caseData.put(RESP_SOLICITOR_REFERENCE, null);
-        caseData.put(RESP_SOLICITOR_ADDRESS, null);
-        caseData.put(RESP_SOLICITOR_PHONE, null);
-        caseData.put(RESP_SOLICITOR_EMAIL, null);
-        caseData.put(RESP_SOLICITOR_DX_NUMBER, null);
-    }
-
     private void removePropertyAdjustmentDetails(Map<String, Object> caseData) {
         caseData.put("natureOfApplication3a", null);
         caseData.put("natureOfApplication3b", null);
@@ -218,22 +221,12 @@ public class UpdateConsentedCaseController extends BaseController {
 
     private void updateApplicantOrSolicitorContactDetails(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get(APPLICANT_REPRESENTED), "No")) {
-            removeApplicantSolicitorAddress(caseData);
+            removeApplicantSolicitorAddress(caseData, false);
         } else {
             removeApplicantAddress(caseData);
         }
     }
 
-    private void removeApplicantSolicitorAddress(Map<String, Object> caseData) {
-        caseData.put(CONSENTED_SOLICITOR_NAME, null);
-        caseData.put(CONSENTED_SOLICITOR_FIRM, null);
-        caseData.put(SOLICITOR_REFERENCE, null);
-        caseData.put(CONSENTED_SOLICITOR_ADDRESS, null);
-        caseData.put(SOLICITOR_PHONE, null);
-        caseData.put(SOLICITOR_EMAIL, null);
-        caseData.put(CONSENTED_SOLICITOR_DX_NUMBER, null);
-        caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED, null);
-    }
 
     private void removeApplicantAddress(Map<String, Object> caseData) {
         caseData.put(APPLICANT_ADDRESS, null);

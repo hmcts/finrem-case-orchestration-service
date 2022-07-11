@@ -24,9 +24,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 @Slf4j
 public class UpdateFrcInfoLetterDetailsGenerator {
 
+    public static final String LETTER_DATE_FORMAT = "yyyy-MM-dd";
     private final CourtDetailsMapper courtDetailsMapper;
     private final ObjectMapper objectMapper;
-    public static final String LETTER_DATE_FORMAT = "yyyy-MM-dd";
 
     public UpdateFrcInfoLetterDetails generate(FinremCaseDetails caseDetails,
                                                DocumentHelper.PaperNotificationRecipient recipient) {

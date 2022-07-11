@@ -87,7 +87,6 @@ public class ConsentOrderApprovedDocumentService {
         return stampedPensionData;
     }
 
-
     public List<BulkPrintDocument> prepareApplicantLetterPack(FinremCaseDetails caseDetails, String authorisationToken) {
         log.info("Sending Approved Consent Order to applicant / solicitor for Bulk Print, case {}", caseDetails.getId());
         FinremCaseData caseData = caseDetails.getCaseData();
