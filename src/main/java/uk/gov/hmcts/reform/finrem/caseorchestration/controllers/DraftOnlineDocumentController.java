@@ -12,21 +12,19 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
+import uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
 import javax.validation.constraints.NotNull;
 
-import java.util.Map;
-
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -36,6 +34,7 @@ public class DraftOnlineDocumentController {
 
     private final OnlineFormDocumentService service;
     private final IdamService idamService;
+    private final FinremCallbackRequestDeserializer finremCallbackRequestDeserializer;
 
     @PostMapping(path = "/documents/draft-contested-mini-form-a", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles draft Contested Mini Form A generation. Serves as a callback from CCD")
@@ -46,17 +45,19 @@ public class DraftOnlineDocumentController {
         @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateContestedMiniFormA(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+        @NotNull @RequestBody @ApiParam("CaseData") String source) {
+
+        CallbackRequest callback = finremCallbackRequestDeserializer.deserialize(source);
 
         log.info("Received request to generate draft Contested Mini Form A for Case ID : {}",
             callback.getCaseDetails().getId());
 
-        Map<String, Object> caseData = callback.getCaseDetails().getData();
-        CaseDocument document = service.generateDraftContestedMiniFormA(authorisationToken, callback.getCaseDetails());
-        caseData.put(MINI_FORM_A, document);
+        FinremCaseData caseData = callback.getCaseDetails().getCaseData();
+        Document miniFormA = service.generateDraftContestedMiniFormA(authorisationToken, callback.getCaseDetails());
+        caseData.setMiniFormA(miniFormA);
         if (!idamService.isUserRoleAdmin(authorisationToken)) {
             log.info("other users.");
-            caseData.put(APPLICANT_REPRESENTED, YES_VALUE);
+            caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());

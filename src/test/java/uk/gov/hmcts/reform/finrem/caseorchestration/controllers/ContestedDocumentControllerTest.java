@@ -8,10 +8,10 @@ import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,8 +31,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
 
 @WebMvcTest(ContestedDocumentController.class)
 public class ContestedDocumentControllerTest extends BaseControllerTest {
@@ -65,13 +65,13 @@ public class ContestedDocumentControllerTest extends BaseControllerTest {
         return "/case-orchestration/documents/generate-contested-mini-form-a";
     }
 
-    public OngoingStubbing<CaseDocument> whenServiceGeneratesDocument() {
-        return when(documentService.generateContestedMiniFormA(eq(AUTH_TOKEN), isA(CaseDetails.class)));
+    public OngoingStubbing<Document> whenServiceGeneratesDocument() {
+        return when(documentService.generateContestedMiniFormA(eq(AUTH_TOKEN), isA(FinremCaseDetails.class)));
     }
 
     @Test
     public void generateMiniFormA() throws Exception {
-        whenServiceGeneratesDocument().thenReturn(caseDocument());
+        whenServiceGeneratesDocument().thenReturn(newDocument());
 
         mvc.perform(post(endpoint())
             .content(requestContent.toString())

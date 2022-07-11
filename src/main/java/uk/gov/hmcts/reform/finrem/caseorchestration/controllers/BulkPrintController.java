@@ -12,10 +12,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
+import uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import javax.validation.constraints.NotNull;
 
@@ -29,6 +30,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 public class BulkPrintController extends BaseController {
 
     private final ConsentOrderPrintService consentOrderPrintService;
+    private final FinremCallbackRequestDeserializer finremCallbackRequestDeserializer;
 
     @PostMapping(path = "/bulk-print", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles bulk print")
@@ -42,14 +44,16 @@ public class BulkPrintController extends BaseController {
         })
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> bulkPrint(
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authorisationToken,
-        @NotNull @RequestBody @ApiParam("Callback") CallbackRequest callback) {
+        @NotNull @RequestBody @ApiParam("Callback") String source) {
 
-        CaseDetails caseDetails = callback.getCaseDetails();
+        CallbackRequest callbackRequest = finremCallbackRequestDeserializer.deserialize(source);
+
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request for Bulk Print for Case ID {}", caseDetails.getId());
-        validateCaseData(callback);
+        validateCaseData(callbackRequest);
 
         consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, authorisationToken);
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getCaseData()).build());
     }
 }

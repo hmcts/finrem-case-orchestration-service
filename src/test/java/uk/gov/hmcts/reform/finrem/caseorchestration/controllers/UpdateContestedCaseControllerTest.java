@@ -7,8 +7,8 @@ import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +28,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
 
 @WebMvcTest(UpdateContestedCaseController.class)
 public class UpdateContestedCaseControllerTest extends BaseControllerTest {
@@ -62,8 +62,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldDeleteNDecreeAbsoluteWhenSolicitorChooseToDecreeNisiForContested() throws Exception {
-        when(onlineFormDocumentService.generateDraftContestedMiniFormA(eq(AUTH_TOKEN), isA(CaseDetails.class)))
-            .thenReturn(caseDocument());
+        when(onlineFormDocumentService.generateDraftContestedMiniFormA(eq(AUTH_TOKEN), isA(FinremCaseDetails.class)))
+            .thenReturn(newDocument());
 
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/amend-divorce-details-decree-nisi.json").toURI()));

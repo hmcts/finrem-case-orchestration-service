@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.ConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.PensionTypeCollection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,19 +73,20 @@ public class ConsentOrderApprovedDocumentService {
         return generatedApprovedConsentOrderNotificationLetter;
     }
 
-    public List<PensionCollectionData> stampPensionDocuments(List<PensionCollectionData> pensionList, String authToken) {
+    public List<PensionTypeCollection> stampPensionDocuments(List<PensionTypeCollection> pensionList, String authToken) {
         return pensionList.stream()
-            .filter(pensionCollectionData -> pensionCollectionData.getTypedCaseDocument().getPensionDocument() != null)
+            .filter(pensionCollectionData -> pensionCollectionData.getValue().getUploadedDocument() != null)
             .map(pensionCollectionData -> stampPensionDocuments(pensionCollectionData, authToken)).collect(toList());
     }
 
-    private PensionCollectionData stampPensionDocuments(PensionCollectionData pensionDocument, String authToken) {
-        CaseDocument document = pensionDocument.getTypedCaseDocument().getPensionDocument();
-        CaseDocument stampedDocument = genericDocumentService.stampDocument(document, authToken);
-        PensionCollectionData stampedPensionData = documentHelper.deepCopy(pensionDocument, PensionCollectionData.class);
-        stampedPensionData.getTypedCaseDocument().setPensionDocument(stampedDocument);
+    private PensionTypeCollection stampPensionDocuments(PensionTypeCollection pensionDocument, String authToken) {
+        Document document = pensionDocument.getValue().getUploadedDocument();
+        Document stampedDocument = genericDocumentService.stampDocument(document, authToken);
+        PensionTypeCollection stampedPensionData = documentHelper.deepCopy(pensionDocument, PensionTypeCollection.class);
+        stampedPensionData.getValue().setUploadedDocument(stampedDocument);
         return stampedPensionData;
     }
+
 
     public List<BulkPrintDocument> prepareApplicantLetterPack(FinremCaseDetails caseDetails, String authorisationToken) {
         log.info("Sending Approved Consent Order to applicant / solicitor for Bulk Print, case {}", caseDetails.getId());
@@ -102,9 +104,9 @@ public class ConsentOrderApprovedDocumentService {
         return bulkPrintDocuments;
     }
 
-    public void stampAndPopulateContestedConsentApprovedOrderCollection(Map<String, Object> caseData, String authToken) {
-        CaseDocument stampedAndAnnexedDoc = stampAndAnnexContestedConsentOrder(caseData, authToken);
-        List<PensionCollectionData> pensionDocs = consentInContestedStampPensionDocuments(caseData, authToken);
+    public void stampAndPopulateContestedConsentApprovedOrderCollection(FinremCaseData caseData, String authToken) {
+        Document stampedAndAnnexedDoc = stampAndAnnexContestedConsentOrder(caseData, authToken);
+        List<PensionTypeCollection> pensionDocs = caseData.getConsentPensionCollection();
         populateContestedConsentOrderCaseDetails(caseData, stampedAndAnnexedDoc, pensionDocs);
     }
 
@@ -119,46 +121,29 @@ public class ConsentOrderApprovedDocumentService {
         }
     }
 
-    private CaseDocument stampAndAnnexContestedConsentOrder(Map<String, Object> caseData, String authToken) {
-        CaseDocument latestConsentOrder = getLatestConsentInContestedConsentOrder(caseData);
-        CaseDocument stampedDoc = genericDocumentService.stampDocument(latestConsentOrder, authToken);
-        CaseDocument stampedAndAnnexedDoc = genericDocumentService.annexStampDocument(stampedDoc, authToken);
+    private Document stampAndAnnexContestedConsentOrder(FinremCaseData caseData, String authToken) {
+        Document latestConsentOrder = caseData.getConsentOrder();
+        Document stampedDoc = genericDocumentService.stampDocument(latestConsentOrder, authToken);
+        Document stampedAndAnnexedDoc = genericDocumentService.annexStampDocument(stampedDoc, authToken);
         log.info("Stamped Document and Annex doc = {}", stampedAndAnnexedDoc);
         return stampedAndAnnexedDoc;
     }
 
-    private void populateContestedConsentOrderCaseDetails(Map<String, Object> caseData, CaseDocument stampedDoc,
-                                                          List<PensionCollectionData> pensionDocs) {
-        caseData.put(CONSENT_ORDER, stampedDoc);
-        caseData.put(CONTESTED_CONSENT_PENSION_COLLECTION, pensionDocs);
+    private void populateContestedConsentOrderCaseDetails(FinremCaseData caseData, Document stampedDoc,
+                                                          List<PensionTypeCollection> pensionDocs) {
+        caseData.setConsentOrder(stampedDoc);
+        caseData.setConsentPensionCollection(pensionDocs);
 
-        List<CollectionElement<ApprovedOrder>> approvedOrders = Optional.ofNullable(getConsentInContestedApprovedOrderCollection(caseData))
-            .orElse(new ArrayList<>());
+        List<ConsentOrderCollection> approvedOrders = caseData.getContestedConsentedApprovedOrders();
 
-        ApprovedOrder approvedOrder = ApprovedOrder.builder()
-            .consentOrder(stampedDoc)
-            .pensionDocuments(pensionDocs)
-            .build();
+        ConsentOrderCollection approvedOrder = ConsentOrderCollection.builder()
+            .value(ConsentOrder.builder()
+                .consentOrder(stampedDoc)
+                .pensionDocuments(pensionDocs)
+                .build()).build();
 
-        approvedOrders.add(CollectionElement.<ApprovedOrder>builder().value(approvedOrder).build());
-        caseData.put(CONTESTED_CONSENT_ORDER_COLLECTION, approvedOrders);
-    }
-
-    private CaseDocument getLatestConsentInContestedConsentOrder(Map<String, Object> caseData) {
-        return mapper.convertValue(caseData.get(CONSENT_ORDER), new TypeReference<>() {});
-    }
-
-    private List<PensionCollectionData> consentInContestedStampPensionDocuments(Map<String, Object> caseData, String authToken) {
-        List<PensionCollectionData> pensionDocs = getContestedConsentPensionDocuments(caseData);
-        return stampPensionDocuments(pensionDocs, authToken);
-    }
-
-    private List<PensionCollectionData> getContestedConsentPensionDocuments(Map<String, Object> caseData) {
-        if (StringUtils.isEmpty(caseData.get(CONTESTED_CONSENT_PENSION_COLLECTION))) {
-            return new ArrayList<>();
-        }
-
-        return mapper.convertValue(caseData.get(CONTESTED_CONSENT_PENSION_COLLECTION), new TypeReference<>() {});
+        approvedOrders.add(approvedOrder);
+        caseData.setContestedConsentedApprovedOrders(approvedOrders);
     }
 
     List<CollectionElement<ApprovedOrder>> getConsentInContestedApprovedOrderCollection(Map<String, Object> caseData) {

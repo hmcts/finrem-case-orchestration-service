@@ -12,21 +12,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralLetterService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
+import uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import javax.validation.constraints.NotNull;
 
-import java.util.Map;
-
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_ADDRESS_TO;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_BODY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_PREVIEW;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -36,6 +33,7 @@ public class GeneralLetterController extends BaseController {
 
     private final IdamService idamService;
     private final GeneralLetterService generalLetterService;
+    private final FinremCallbackRequestDeserializer finremCallbackRequestDeserializer;
 
     @PostMapping(path = "/general-letter-start", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Clears previous entered field values. Serves as a callback from CCD")
@@ -46,20 +44,23 @@ public class GeneralLetterController extends BaseController {
         @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> initialiseGeneralLetterProperties(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+        @NotNull @RequestBody @ApiParam("CaseData") String source) {
 
-        CaseDetails caseDetails = callback.getCaseDetails();
+        CallbackRequest callback = finremCallbackRequestDeserializer.deserialize(source);
+
+        FinremCaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to clear general letter fields for Case ID: {}", caseDetails.getId());
 
         validateCaseData(callback);
 
-        Map<String, Object> caseData = caseDetails.getData();
-        caseData.put(GENERAL_LETTER_ADDRESS_TO, null);
-        caseData.put("generalLetterRecipient", null);
-        caseData.put("generalLetterRecipientAddress", null);
-        caseData.put("generalLetterCreatedBy", idamService.getIdamFullName(authorisationToken));
-        caseData.put(GENERAL_LETTER_BODY, null);
-        caseData.remove(GENERAL_LETTER_PREVIEW);
+        FinremCaseData caseData = caseDetails.getCaseData();
+
+        caseData.getGeneralLetterWrapper().setGeneralLetterAddressTo(null);
+        caseData.getGeneralLetterWrapper().setGeneralLetterRecipient(null);
+        caseData.getGeneralLetterWrapper().setGeneralLetterRecipientAddress(null);
+        caseData.getGeneralLetterWrapper().setGeneralLetterCreatedBy(idamService.getIdamFullName(authorisationToken));
+        caseData.getGeneralLetterWrapper().setGeneralLetterBody(null);
+        caseData.getGeneralLetterWrapper().setGeneralLetterPreview(null);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
@@ -73,15 +74,17 @@ public class GeneralLetterController extends BaseController {
         @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> previewGeneralLetter(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+        @NotNull @RequestBody @ApiParam("CaseData") String source) {
 
-        CaseDetails caseDetails = callback.getCaseDetails();
+        CallbackRequest callback = finremCallbackRequestDeserializer.deserialize(source);
+
+        FinremCaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to preview general letter for Case ID: {}", caseDetails.getId());
         validateCaseData(callback);
 
         if (generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails).isEmpty()) {
             generalLetterService.previewGeneralLetter(authorisationToken, caseDetails);
-            return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+            return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getCaseData()).build());
         } else {
             return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
                 .errors(generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails))
@@ -98,15 +101,17 @@ public class GeneralLetterController extends BaseController {
         @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> createGeneralLetter(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+        @NotNull @RequestBody @ApiParam("CaseData") String source) {
 
-        CaseDetails caseDetails = callback.getCaseDetails();
+        CallbackRequest callback = finremCallbackRequestDeserializer.deserialize(source);
+
+        FinremCaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request for generating general letter with Case ID: {}", caseDetails.getId());
         validateCaseData(callback);
 
         if (generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails).isEmpty()) {
             generalLetterService.createGeneralLetter(authorisationToken, caseDetails);
-            return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+            return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getCaseData()).build());
         } else {
             return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
                 .errors(generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails))

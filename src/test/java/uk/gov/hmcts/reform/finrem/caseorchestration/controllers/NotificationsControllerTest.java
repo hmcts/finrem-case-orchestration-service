@@ -23,16 +23,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
-
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -61,56 +64,56 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @MockBean private FeatureToggleService featureToggleService;
 
     @Test
-    public void sendHwfSuccessfulConfirmationEmailIfDigitalCase() {
+    public void sendHwfSuccessfulConfirmationEmailIfDigitalCase() throws JsonProcessingException {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
         when(caseDataService.isPaperApplication(any())).thenReturn(false);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
 
-        notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
+        notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequestString());
 
         verify(notificationService).sendConsentedHWFSuccessfulConfirmationEmail(any());
         verifyNoInteractions(helpWithFeesDocumentService);
     }
 
     @Test
-    public void shouldNotSendHwfSuccessfulConfirmationEmail() {
+    public void shouldNotSendHwfSuccessfulConfirmationEmail() throws JsonProcessingException {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
         when(caseDataService.isPaperApplication(any())).thenReturn(false);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
 
-        notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
+        notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequestString());
 
         verifyNoInteractions(notificationService);
     }
 
     @Test
-    public void sendHwfSuccessfulNotificationLetterIfIsConsentedAndIsPaperApplication() {
+    public void sendHwfSuccessfulNotificationLetterIfIsConsentedAndIsPaperApplication() throws JsonProcessingException {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
         when(caseDataService.isPaperApplication(any())).thenReturn(true);
 
-        notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
+        notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequestString());
 
-        verify(paperNotificationService).printHwfSuccessfulNotification(any(CaseDetails.class), eq(AUTH_TOKEN));
+        verify(paperNotificationService).printHwfSuccessfulNotification(any(FinremCaseDetails.class), eq(AUTH_TOKEN));
         verifyNoInteractions(notificationService);
     }
 
     @Test
-    public void sendAssignToJudgeConfirmationEmailIfDigitalCase() {
+    public void sendAssignToJudgeConfirmationEmailIfDigitalCase() throws JsonProcessingException {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
         when(caseDataService.isPaperApplication(any())).thenReturn(false);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
 
-        notificationsController.sendAssignToJudgeConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
+        notificationsController.sendAssignToJudgeConfirmationNotification(AUTH_TOKEN, buildCallbackRequestString());
 
         verify(notificationService).sendAssignToJudgeConfirmationEmailToApplicantSolicitor(any());
     }
 
     @Test
-    public void shouldNotSendAssignToJudgeConfirmationEmail() {
+    public void shouldNotSendAssignToJudgeConfirmationEmail() throws JsonProcessingException {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
         when(caseDataService.isPaperApplication(any())).thenReturn(true);
 
-        notificationsController.sendAssignToJudgeConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
+        notificationsController.sendAssignToJudgeConfirmationNotification(AUTH_TOKEN, buildCallbackRequestString());
 
         verifyNoInteractions(notificationService);
     }
@@ -176,54 +179,54 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void sendConsentOrderAvailableEmail() {
+    public void sendConsentOrderAvailableEmail() throws JsonProcessingException {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
 
-        notificationsController.sendConsentOrderAvailableEmail(buildCallbackRequest());
+        notificationsController.sendConsentOrderAvailableEmail(buildCallbackRequestString());
 
         verify(notificationService).sendConsentOrderAvailableEmailToApplicantSolicitor(any());
     }
 
     @Test
-    public void shouldNotSendConsentOrderAvailableEmail() {
+    public void shouldNotSendConsentOrderAvailableEmail() throws JsonProcessingException {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
 
-        notificationsController.sendConsentOrderAvailableEmail(buildCallbackRequest());
+        notificationsController.sendConsentOrderAvailableEmail(buildCallbackRequestString());
 
         verifyNoInteractions(notificationService);
     }
 
     @Test
-    public void sendConsentedHwfSuccessfulConfirmationEmail() {
+    public void sendConsentedHwfSuccessfulConfirmationEmail() throws JsonProcessingException {
         when(caseDataService.isConsentedApplication(any())).thenReturn(false);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
 
-        notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
+        notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequestString());
 
         verify(notificationService).sendContestedHwfSuccessfulConfirmationEmail(any());
     }
 
     @Test
-    public void shouldNotSendContestedHwfSuccessfulEmail() {
+    public void shouldNotSendContestedHwfSuccessfulEmail() throws JsonProcessingException {
         when(caseDataService.isConsentedApplication(any())).thenReturn(false);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
 
-        notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
+        notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequestString());
 
         verifyNoInteractions(notificationService);
     }
 
     @Test
-    public void givenSolAgreedToEmails_and_noPreviousHearing_shouldSendPrepareForHearingEmail_and_PrintHearingDocuments() {
+    public void givenSolAgreedToEmails_and_noPreviousHearing_shouldSendPrepareForHearingEmail_and_PrintHearingDocuments() throws JsonProcessingException {
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
         when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
-        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(FinremCaseData.class))).thenReturn(true);
+        when(hearingDocumentService.alreadyHadFirstHearing(isA(FinremCaseDetails.class))).thenReturn(false);
 
-        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
+        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequestString());
 
         verify(notificationService).sendPrepareForHearingEmailApplicant(any());
         verify(notificationService).sendPrepareForHearingEmailRespondent(any());
@@ -231,22 +234,22 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldNotSendPrepareForHearingEmailWhenNotAgreed() {
+    public void shouldNotSendPrepareForHearingEmailWhenNotAgreed() throws JsonProcessingException {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(FinremCaseData.class))).thenReturn(false);
 
-        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
+        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequestString());
 
         verify(notificationService, never()).sendPrepareForHearingEmailApplicant(any());
         verify(notificationService, never()).sendPrepareForHearingEmailRespondent(any());
     }
 
     @Test
-    public void givenHadPreviousHearing_whenNotifyHearingInvoked_thenPrintAdditionalHearingDocuments() {
+    public void givenHadPreviousHearing_whenNotifyHearingInvoked_thenPrintAdditionalHearingDocuments() throws JsonProcessingException {
         when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
-        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
+        when(hearingDocumentService.alreadyHadFirstHearing(isA(FinremCaseDetails.class))).thenReturn(true);
 
-        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
+        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequestString());
 
         verify(additionalHearingDocumentService).sendAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
     }
@@ -273,7 +276,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void sendPrepareForHearingOrderSentEmail_shouldSendRespondentEmail() {
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(true);
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
 
         notificationsController.sendPrepareForHearingOrderSentEmail(buildCallbackRequest());
@@ -283,7 +286,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void sendPrepareForHearingOrderSentEmail_shouldNotSendRespondentEmail() {
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(false);
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
 
         notificationsController.sendPrepareForHearingOrderSentEmail(buildCallbackRequest());
@@ -293,7 +296,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void sendPrepareForHearingOrderSentEmail_toggledOff() {
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(true);
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
 
         notificationsController.sendPrepareForHearingOrderSentEmail(buildCallbackRequest());
@@ -324,7 +327,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @Test
     public void shouldSendContestedApplicationIssuedEmailWhenAgreed_andNotifyRespondentSolicitorWhenShould() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(true);
 
         notificationsController.sendContestedApplicationIssuedEmail(buildCallbackRequest());
 
@@ -334,7 +337,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @Test
     public void shouldSendContestedApplicationIssuedEmailWhenAgreed_andNotSendRespondentNotificationWhenToggledOff() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(true);
 
         notificationsController.sendContestedApplicationIssuedEmail(buildCallbackRequest());
 
@@ -344,7 +347,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @Test
     public void shouldNotSendContestedApplicationIssuedEmailWhenNotAgreed_andDontNotifyRespondentSolicitorWhenShouldNot() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(false);
 
         notificationsController.sendContestedApplicationIssuedEmail(buildCallbackRequest());
 
@@ -384,7 +387,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldSendSolicitorToDraftOrderEmailRespondent() {
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(true);
         when(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(any())).thenReturn(true);
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
 
@@ -395,7 +398,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldSendSolicitorToDraftOrderEmailRespondent_shouldNotSendEmail() {
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(false);
         when(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(any())).thenReturn(true);
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
 
@@ -406,7 +409,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldSendSolicitorToDraftOrderEmailRespondent_respSolicitorNotResponsible() {
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(true);
         when(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(any())).thenReturn(false);
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
 
@@ -417,7 +420,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldSendSolicitorToDraftOrderEmailRespondent_toggledOff() {
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(true);
         when(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(any())).thenReturn(true);
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
 
@@ -478,7 +481,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @Test
     public void sendContestedConsentOrderApprovedEmailToRespondentSolicitor() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(true);
 
         notificationsController.sendContestedConsentOrderApprovedEmail(buildCallbackRequest());
 
@@ -488,7 +491,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @Test
     public void givenContestedCase_whenShouldSendRespondentNotification_thenShouldTriggerRespondentEmail() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(true);
 
         CallbackRequest callbackRequest = buildCallbackRequest();
         callbackRequest.getCaseDetails().setCaseTypeId(CASE_TYPE_ID_CONTESTED);
@@ -502,7 +505,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     public void givenConsentedCase_whenShouldSendRespondentNotification_thenShouldNotTriggerContestedRespondentEmail() {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(true);
 
         notificationsController.sendConsentOrderNotApprovedEmail(buildCallbackRequest());
 
@@ -513,7 +516,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     public void givenConsentedCase_whenSendConsentOrderNotApproved_thenShouldTriggerConsentedRespondentEmail() {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(true);
 
         CallbackRequest callbackRequest = buildCallbackRequest();
         callbackRequest.getCaseDetails().setCaseTypeId(CASE_TYPE_ID_CONSENTED);
@@ -535,7 +538,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @Test
     public void shouldNotSendContestedConsentOrderApprovedEmailToRespondentSolicitorWhenRespSolShouldNotReceiveEmail() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(false);
 
         notificationsController.sendContestedConsentOrderApprovedEmail(buildCallbackRequest());
 
@@ -546,7 +549,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @Test
     public void shouldNotSendContestedConsentOrderApprovedEmailToRespondentSolicitorWhenRespSolNotificationsToggledOff() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(true);
 
         notificationsController.sendContestedConsentOrderApprovedEmail(buildCallbackRequest());
 
@@ -582,7 +585,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(caseDataService.isConsentedInContestedCase(any())).thenReturn(false);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(true);
 
         notificationsController.sendGeneralOrderRaisedEmail(buildCallbackRequest());
 
@@ -593,7 +596,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @Test
     public void whenShouldNotSendContestedGeneralOrderEmailToRespondent_ThenTheEmailIsNotIssued() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(false);
 
         notificationsController.sendGeneralOrderRaisedEmail(buildCallbackRequest());
 
@@ -602,13 +605,13 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void whenToggleEnabledAndShouldSendEmailToRespSolicitor_thenSendsEmail() {
-        final ArgumentCaptor<CaseDetails> requestCaptor = ArgumentCaptor.forClass(CaseDetails.class);
+    public void whenToggleEnabledAndShouldSendEmailToRespSolicitor_thenSendsEmail() throws JsonProcessingException {
+        final ArgumentCaptor<FinremCaseDetails> requestCaptor = ArgumentCaptor.forClass(FinremCaseDetails.class);
 
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(FinremCaseData.class))).thenReturn(true);
 
-        notificationsController.sendAssignToJudgeConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
+        notificationsController.sendAssignToJudgeConfirmationNotification(AUTH_TOKEN, buildCallbackRequestString());
 
         verify(notificationService).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(any());
 
@@ -617,31 +620,31 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void whenToggleEnabledAndShouldNotSendEmailToRespSolicitor_thenDoesNotSendEmail() {
+    public void whenToggleEnabledAndShouldNotSendEmailToRespSolicitor_thenDoesNotSendEmail() throws JsonProcessingException {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(FinremCaseData.class))).thenReturn(false);
 
-        notificationsController.sendAssignToJudgeConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
-
-        verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(any());
-    }
-
-    @Test
-    public void whenToggleDisabledAndShouldSendEmailToRespSolicitor_thenDoesNotSendEmail() {
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
-
-        notificationsController.sendAssignToJudgeConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
+        notificationsController.sendAssignToJudgeConfirmationNotification(AUTH_TOKEN, buildCallbackRequestString());
 
         verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(any());
     }
 
     @Test
-    public void whenToggleDisabledAndShouldNotSendEmailToRespSolicitor_thenDoesNotSendEmail() {
+    public void whenToggleDisabledAndShouldSendEmailToRespSolicitor_thenDoesNotSendEmail() throws JsonProcessingException {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(FinremCaseData.class))).thenReturn(true);
 
-        notificationsController.sendAssignToJudgeConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
+        notificationsController.sendAssignToJudgeConfirmationNotification(AUTH_TOKEN, buildCallbackRequestString());
+
+        verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(any());
+    }
+
+    @Test
+    public void whenToggleDisabledAndShouldNotSendEmailToRespSolicitor_thenDoesNotSendEmail() throws JsonProcessingException {
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(FinremCaseData.class))).thenReturn(false);
+
+        notificationsController.sendAssignToJudgeConfirmationNotification(AUTH_TOKEN, buildCallbackRequestString());
 
         verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(any());
     }
@@ -651,7 +654,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(caseDataService.isConsentedApplication(any())).thenReturn(false);
         when(caseDataService.isConsentedInContestedCase(any())).thenReturn(true);
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(true);
 
         notificationsController.sendGeneralOrderRaisedEmail(buildCallbackRequest());
 
@@ -665,7 +668,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(true);
 
         notificationsController.sendGeneralOrderRaisedEmail(buildCallbackRequest());
 
@@ -697,7 +700,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(caseDataService.isPaperApplication(any())).thenReturn(false);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(true);
 
         notificationsController.sendContestedConsentOrderNotApprovedEmail(buildCallbackRequest());
 
@@ -708,7 +711,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @Test
     public void shouldNotSendContestedConsentOrderNotApprovedEmail() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(false);
 
         notificationsController.sendContestedConsentOrderNotApprovedEmail(buildCallbackRequest());
 
@@ -727,41 +730,42 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void givenConsentedCase_whenToggleEnabledAndShouldSendEmailToRespSolicitor_thenSendsEmail() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        callbackRequest.getCaseDetails().setCaseTypeId(CASE_TYPE_ID_CONSENTED);
+    public void givenConsentedCase_whenToggleEnabledAndShouldSendEmailToRespSolicitor_thenSendsEmail()
+        throws JsonProcessingException {
+        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest = buildNewCallbackRequestConsented();
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
-        notificationsController.sendConsentOrderAvailableEmail(callbackRequest);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(FinremCaseData.class))).thenReturn(true);
+        notificationsController.sendConsentOrderAvailableEmail(objectMapper.writeValueAsString(callbackRequest));
         verify(notificationService).sendConsentOrderAvailableEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
     }
 
     @Test
-    public void givenConsentedCase_whenToggleEnabledAndShouldNotSendEmailToRespSolicitor_thenDoesNotSendEmail() {
+    public void givenConsentedCase_whenToggleEnabledAndShouldNotSendEmailToRespSolicitor_thenDoesNotSendEmail()
+        throws JsonProcessingException {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(FinremCaseData.class))).thenReturn(false);
 
-        notificationsController.sendConsentOrderAvailableEmail(buildCallbackRequest());
-
-        verify(notificationService, never()).sendConsentOrderAvailableEmailToRespondentSolicitor(any());
-    }
-
-    @Test
-    public void givenConsentedCase_whenToggleDisabledAndShouldSendEmailToRespSolicitor_thenDoesNotSendEmail() {
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
-
-        notificationsController.sendConsentOrderAvailableEmail(buildCallbackRequest());
+        notificationsController.sendConsentOrderAvailableEmail(buildCallbackRequestString());
 
         verify(notificationService, never()).sendConsentOrderAvailableEmailToRespondentSolicitor(any());
     }
 
     @Test
-    public void givenConsentedCase_whenToggleDisabledAndShouldNotSendEmailToRespSolicitor_thenDoesNotSendEmail() {
+    public void givenConsentedCase_whenToggleDisabledAndShouldSendEmailToRespSolicitor_thenDoesNotSendEmail() throws JsonProcessingException {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(FinremCaseData.class))).thenReturn(true);
 
-        notificationsController.sendConsentOrderAvailableEmail(buildCallbackRequest());
+        notificationsController.sendConsentOrderAvailableEmail(buildCallbackRequestString());
+
+        verify(notificationService, never()).sendConsentOrderAvailableEmailToRespondentSolicitor(any());
+    }
+
+    @Test
+    public void givenConsentedCase_whenToggleDisabledAndShouldNotSendEmailToRespSolicitor_thenDoesNotSendEmail() throws JsonProcessingException {
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(FinremCaseData.class))).thenReturn(false);
+
+        notificationsController.sendConsentOrderAvailableEmail(buildCallbackRequestString());
 
         verify(notificationService, never()).sendConsentOrderAvailableEmailToRespondentSolicitor(any());
     }
@@ -770,7 +774,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     public void sendConsentOrderMadeEmailToRespSolicitor() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(true);
         notificationsController.sendConsentOrderMadeConfirmationEmail(callbackRequest);
         verify(notificationService).sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
     }
@@ -780,7 +784,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         CallbackRequest callbackRequest = buildCallbackRequest();
         callbackRequest.getCaseDetails().setCaseTypeId(CASE_TYPE_ID_CONSENTED);
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(false);
         notificationsController.sendConsentOrderMadeConfirmationEmail(callbackRequest);
         verify(notificationService, never()).sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
     }
@@ -790,7 +794,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         CallbackRequest callbackRequest = buildCallbackRequest();
         callbackRequest.getCaseDetails().setCaseTypeId(CASE_TYPE_ID_CONSENTED);
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(true);
         notificationsController.sendConsentOrderMadeConfirmationEmail(callbackRequest);
         verify(notificationService, never()).sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
     }
@@ -800,7 +804,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         CallbackRequest callbackRequest = buildCallbackRequest();
         callbackRequest.getCaseDetails().setCaseTypeId(CASE_TYPE_ID_CONSENTED);
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(false);
         notificationsController.sendConsentOrderMadeConfirmationEmail(callbackRequest);
         verify(notificationService, never()).sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
     }
@@ -809,7 +813,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     public void whenConsentOrderNotApprovedSentEmail_thenNotificationEmailsSentToSolicitors() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(notificationService.shouldEmailApplicantSolicitor(any())).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(true);
 
         notificationsController.sendConsentOrderNotApprovedSentEmail(buildCallbackRequest());
 
@@ -821,7 +825,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     public void given_RespondentJourneyIsToggledOff_whenConsentOrderNotApprovedSentEmail_thenNoEmailsSentToSolicitors() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
         when(notificationService.shouldEmailApplicantSolicitor(any())).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(true);
 
         notificationsController.sendConsentOrderNotApprovedSentEmail(buildCallbackRequest());
 
@@ -844,7 +848,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(caseDataService.isPaperApplication(any())).thenReturn(false);
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(true);
 
         notificationsController.sendInterimHearingNotification(buildCallbackInterimRequest());
 
@@ -857,7 +861,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(caseDataService.isPaperApplication(any())).thenReturn(false);
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(false);
 
         notificationsController.sendInterimHearingNotification(buildCallbackInterimRequest());
 
@@ -870,7 +874,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(caseDataService.isPaperApplication(any())).thenReturn(false);
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(false);
 
         notificationsController.sendInterimHearingNotification(buildCallbackInterimRequest());
 
@@ -883,7 +887,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(caseDataService.isPaperApplication(any())).thenReturn(false);
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(true);
 
         notificationsController.sendInterimHearingNotification(buildCallbackInterimRequest());
 
@@ -917,7 +921,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     public void givenUpdateFrc_whenSendEmail_thenNotificationServiceCalledThreeTimes() throws JsonProcessingException {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class))).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(true);
 
         notificationsController.sendUpdateFrcNotifications(AUTH_TOKEN, buildCallbackRequest());
         verify(notificationService, times(1)).sendUpdateFrcInformationEmailToAppSolicitor(any());
@@ -930,7 +934,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     public void givenUpdateFrc_whenAppSolNotAgreeToReceiveEmails_thenNotificationServiceCalledTwice() throws JsonProcessingException {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class))).thenReturn(false);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(true);
 
         notificationsController.sendUpdateFrcNotifications(AUTH_TOKEN, buildCallbackRequest());
         verify(notificationService, never()).sendUpdateFrcInformationEmailToAppSolicitor(any());
@@ -943,7 +947,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     public void givenUpdateFrc_whenRespSolNotAgreeToReceiveEmails_thenNotificationServiceCalledTwice() throws JsonProcessingException {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class))).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(false);
 
         notificationsController.sendUpdateFrcNotifications(AUTH_TOKEN, buildCallbackRequest());
         verify(notificationService, times(1)).sendUpdateFrcInformationEmailToAppSolicitor(any());

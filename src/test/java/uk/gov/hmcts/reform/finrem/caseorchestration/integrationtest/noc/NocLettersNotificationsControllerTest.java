@@ -10,8 +10,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseControllerTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.NotificationsController;
@@ -20,6 +18,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import java.util.Map;
 
@@ -30,7 +31,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finremCaseDetailsFromResource;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(NotificationsController.class)
@@ -52,26 +53,26 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
     @Captor
     ArgumentCaptor<Map> placeholdersMapArgumentCaptor;
 
-    private CaseDetails caseDetails;
-    private CaseDetails caseDetailsBefore;
+    private FinremCaseDetails caseDetails;
+    private FinremCaseDetails caseDetailsBefore;
 
 
     @Test
     public void shouldCallNotificationsServiceCorrectly() {
 
-        CaseDocument litigantSolicitorAddedCaseDocument = CaseDocument.builder().documentFilename("docFileNameAdded").build();
+        Document litigantSolicitorAddedCaseDocument = Document.builder().filename("docFileNameAdded").build();
         when(genericDocumentServiceMock.generateDocumentFromPlaceholdersMap(anyString(), anyMap(),
             eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorAddedTemplate()),
             eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorAddedFileName()))).thenReturn(
             litigantSolicitorAddedCaseDocument);
 
-        CaseDocument litigantSolicitorRemovedCaseDocument = CaseDocument.builder().documentFilename("docFileNameRemoved").build();
+        Document litigantSolicitorRemovedCaseDocument = Document.builder().filename("docFileNameRemoved").build();
         when(genericDocumentServiceMock.generateDocumentFromPlaceholdersMap(anyString(), anyMap(),
             eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorRevokedTemplate()),
             eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorRevokedFileName()))).thenReturn(
             litigantSolicitorRemovedCaseDocument);
 
-        notificationsController.sendNoticeOfChangeNotifications("authToken", buildCallbackRequest());
+        notificationsController.sendNoticeOfChangeNotifications("authToken", buildLatestCallbackRequest());
 
         verify(notificationService).sendNoticeOfChangeEmail(caseDetails);
         verify(genericDocumentServiceMock).generateDocumentFromPlaceholdersMap(eq("authToken"), placeholdersMapArgumentCaptor.capture(),
@@ -113,22 +114,21 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
         verify(bulkPrintService).sendDocumentForPrint(litigantSolicitorAddedCaseDocument, caseDetails);
     }
 
-    @Override
-    protected CallbackRequest buildCallbackRequest() {
-        caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke.json",
+    protected CallbackRequest buildLatestCallbackRequest() {
+        caseDetails = finremCaseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke.json",
             new ObjectMapper());
         caseDetailsBefore =
-            caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke-before.json",
+            finremCaseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke-before.json",
                 new ObjectMapper());
         return CallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
     }
 
     protected CallbackRequest buildNonDigitalCallbackRequest() {
-        caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/"
+        caseDetails = finremCaseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/"
                 + "noc-letter-notifications-add-and-revoke-non-digital.json",
             new ObjectMapper());
         caseDetailsBefore =
-            caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications"
+            finremCaseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications"
                     + "-add-and-revoke-non-digital-before.json",
                 new ObjectMapper());
         return CallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();

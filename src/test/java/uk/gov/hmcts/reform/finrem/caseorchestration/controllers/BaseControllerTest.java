@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
@@ -9,10 +10,17 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.Classification;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.EventType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.State;
 
 import java.io.File;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -77,10 +85,32 @@ public abstract class BaseControllerTest extends BaseTest {
         return CallbackRequest.builder().eventId("SomeEventId").caseDetails(caseDetails).build();
     }
 
+    protected uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest buildNewCallbackRequest() {
+        FinremCaseData caseData = new FinremCaseData();
+        FinremCaseDetails caseDetails = new FinremCaseDetails(123, "x", State.APPLICATION_ISSUED,
+            LocalDateTime.now(), 2, "200", LocalDateTime.now(),
+            Classification.PUBLIC, caseData, CaseType.CONTESTED, 1);
+
+        return new uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest(EventType.PREPARE_FOR_HEARING, caseDetails, caseDetails);
+    }
+
+    protected uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest buildNewCallbackRequestConsented() {
+        FinremCaseData caseData = new FinremCaseData();
+        FinremCaseDetails caseDetails = new FinremCaseDetails(123, "x", State.APPLICATION_ISSUED,
+            LocalDateTime.now(), 2, "200", LocalDateTime.now(),
+            Classification.PUBLIC, caseData, CaseType.CONSENTED, 1);
+
+        return new uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest(EventType.PREPARE_FOR_HEARING, caseDetails, caseDetails);
+    }
+
+    protected String buildCallbackRequestString() throws JsonProcessingException {
+        return objectMapper.writeValueAsString(buildCallbackRequest());
+    }
+
     protected CallbackRequest buildNoCCaseworkerCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(INCLUDES_REPRESENTATIVE_UPDATE, YES_VALUE);
-        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(123)).data(caseData).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
         return CallbackRequest.builder().eventId(UPDATE_CONTACT_DETAILS_EVENT)
             .caseDetails(caseDetails)
             .caseDetailsBefore(caseDetails)

@@ -3,12 +3,11 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.generators.UpdateFrcInfoLetterDetailsGenerator;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import java.util.Optional;
 
@@ -21,13 +20,12 @@ public class UpdateFrcInfoRespondentDocumentService extends BaseUpdateFrcInfoDoc
     @Autowired
     public UpdateFrcInfoRespondentDocumentService(GenericDocumentService genericDocumentService,
                                                   DocumentConfiguration documentConfiguration,
-                                                  CaseDataService caseDataService,
                                                   UpdateFrcInfoLetterDetailsGenerator updateFrcInfoLetterDetailsGenerator) {
-        super(genericDocumentService, documentConfiguration, caseDataService, updateFrcInfoLetterDetailsGenerator);
+        super(genericDocumentService, documentConfiguration, updateFrcInfoLetterDetailsGenerator);
     }
 
     @Override
-    public Optional<CaseDocument> getUpdateFrcInfoLetter(CaseDetails caseDetails, String authToken) {
+    public Optional<Document> getUpdateFrcInfoLetter(FinremCaseDetails caseDetails, String authToken) {
         if (shouldPrintForRespondentSolicitor(caseDetails)) {
             return Optional.of(generateSolicitorUpdateFrcInfoLetter(caseDetails, authToken, RESPONDENT));
         } else if (shouldPrintForRespondent(caseDetails)) {
@@ -37,12 +35,12 @@ public class UpdateFrcInfoRespondentDocumentService extends BaseUpdateFrcInfoDoc
         return Optional.empty();
     }
 
-    private boolean shouldPrintForRespondentSolicitor(CaseDetails caseDetails) {
-        return caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())
-            && !caseDataService.isRespondentSolicitorAgreeToReceiveEmails(caseDetails);
+    private boolean shouldPrintForRespondentSolicitor(FinremCaseDetails caseDetails) {
+        return caseDetails.getCaseData().isRespondentRepresentedByASolicitor()
+            && !caseDetails.getCaseData().isRespondentSolicitorAgreeToReceiveEmails();
     }
 
-    private boolean shouldPrintForRespondent(CaseDetails caseDetails) {
-        return !caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData());
+    private boolean shouldPrintForRespondent(FinremCaseDetails caseDetails) {
+        return !caseDetails.getCaseData().isRespondentRepresentedByASolicitor();
     }
 }

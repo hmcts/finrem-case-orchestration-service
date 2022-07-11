@@ -54,7 +54,7 @@ public class ContestedDraftOrderNotApprovedServiceTest extends BaseServiceTest {
 
     @Test
     public void generateRefusalOrderWithOneReason() throws Exception {
-        Map<String, Object> documentMap = refusalOrderService.createRefusalOrder(AUTH_TOKEN, contestedCaseDetails(false));
+        Map<String, Object> documentMap = refusalOrderService.createAndSetRefusalOrderPreviewDocument(AUTH_TOKEN, contestedCaseDetails(false));
 
         CaseDocument result = (CaseDocument) documentMap.get(CONTESTED_APPLICATION_NOT_APPROVED_PREVIEW_DOCUMENT);
         doCaseDocumentAssert(result);
@@ -64,7 +64,7 @@ public class ContestedDraftOrderNotApprovedServiceTest extends BaseServiceTest {
 
     @Test
     public void generateRefusalOrderWithMultipleReasons() throws Exception {
-        Map<String, Object> documentMap = refusalOrderService.createRefusalOrder(AUTH_TOKEN, contestedCaseDetails(true));
+        Map<String, Object> documentMap = refusalOrderService.createAndSetRefusalOrderPreviewDocument(AUTH_TOKEN, contestedCaseDetails(true));
 
         CaseDocument result = (CaseDocument) documentMap.get(CONTESTED_APPLICATION_NOT_APPROVED_PREVIEW_DOCUMENT);
         doCaseDocumentAssert(result);

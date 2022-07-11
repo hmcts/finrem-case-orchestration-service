@@ -5,40 +5,38 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.PostStateOption;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.DirectionOrder;
+import uk.gov.hmcts.reform.finrem.ccd.domain.DirectionOrderCollection;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.EventType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.SendOrderEventPostStateOption;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SEND_ORDER_POST_STATE_OPTION_FIELD;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SendOrderContestedSubmittedHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
-    public static final String PREPARE_FOR_HEARING_STATE = "prepareForHearing";
-    public static final String CLOSE_STATE = "close";
+
     @Mock
     private CaseDataService caseDataService;
     @Mock
@@ -69,9 +67,8 @@ public class SendOrderContestedSubmittedHandlerTest {
     @Test
     public void givenPrepareForHearingPostStateOption_WhenHandle_ThenRunPrepareForHearingEvent() {
         CallbackRequest callbackRequest = buildCallbackRequest();
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        caseDetails.getData().put(SEND_ORDER_POST_STATE_OPTION_FIELD,
-            PostStateOption.PREPARE_FOR_HEARING.getCcdField());
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        caseDetails.getCaseData().setSendOrderPostStateOption(SendOrderEventPostStateOption.PREPARE_FOR_HEARING);
 
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -81,9 +78,8 @@ public class SendOrderContestedSubmittedHandlerTest {
     @Test
     public void givenClosePostStateOption_WhenHandle_ThenRunPrepareForHearingEvent() {
         CallbackRequest callbackRequest = buildCallbackRequest();
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        caseDetails.getData().put(SEND_ORDER_POST_STATE_OPTION_FIELD,
-            PostStateOption.CLOSE.getCcdField());
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        caseDetails.getCaseData().setSendOrderPostStateOption(SendOrderEventPostStateOption.CLOSE);
 
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -93,8 +89,7 @@ public class SendOrderContestedSubmittedHandlerTest {
     @Test
     public void givenOrderSentPostStateOption_WhenHandle_ThenDoNotRunUpdateCaseAndStateIsOrderSent() {
         CallbackRequest callbackRequest = buildCallbackRequest();
-        callbackRequest.getCaseDetails().getData().put(SEND_ORDER_POST_STATE_OPTION_FIELD,
-            PostStateOption.ORDER_SENT.getCcdField());
+        callbackRequest.getCaseDetails().getCaseData().setSendOrderPostStateOption(SendOrderEventPostStateOption.ORDER_SENT);
 
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -104,7 +99,7 @@ public class SendOrderContestedSubmittedHandlerTest {
     @Test
     public void givenNoPostStateOption_WhenHandle_ThenDoNotRunUpdateCaseAndStateIsOrderSent() {
         CallbackRequest callbackRequest = buildCallbackRequest();
-        callbackRequest.getCaseDetails().getData().put(SEND_ORDER_POST_STATE_OPTION_FIELD, null);
+        callbackRequest.getCaseDetails().getCaseData().setSendOrderPostStateOption(null);
 
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -131,7 +126,7 @@ public class SendOrderContestedSubmittedHandlerTest {
     @Test
     public void givenRespAgreedToReceiveEmails_WhenHandle_ThenSendContestOrderApprovedEmailToRespondent() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(FinremCaseData.class))).thenReturn(true);
 
         sendOrderContestedSubmittedHandler.handle(createCallbackRequestWithFinalOrder(), AUTH_TOKEN);
 
@@ -150,7 +145,7 @@ public class SendOrderContestedSubmittedHandlerTest {
     @Test
     public void givenRespNotAgreedToReceiveEmails_WhenHandle_ThenDoNotSendContestOrderApprovedEmailToRespondent() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(FinremCaseData.class))).thenReturn(false);
 
         sendOrderContestedSubmittedHandler.handle(createCallbackRequestWithFinalOrder(), AUTH_TOKEN);
 
@@ -158,23 +153,22 @@ public class SendOrderContestedSubmittedHandlerTest {
     }
 
     private CallbackRequest buildCallbackRequest() {
-        Map<String, Object> caseData = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
-        return CallbackRequest.builder().eventId("SomeEventId").caseDetails(caseDetails).build();
+        FinremCaseData caseData = new FinremCaseData();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123L).caseData(caseData).build();
+        return CallbackRequest.builder().eventType(EventType.PREPARE_FOR_HEARING).caseDetails(caseDetails).build();
     }
 
     private CallbackRequest createCallbackRequestWithFinalOrder() {
         CallbackRequest callbackRequest = buildCallbackRequest();
 
-        ArrayList<HearingOrderCollectionData> finalOrderCollection = new ArrayList<>();
-        finalOrderCollection.add(HearingOrderCollectionData.builder()
-            .hearingOrderDocuments(HearingOrderDocument
-                .builder()
-                .uploadDraftDocument(new CaseDocument())
+        List<DirectionOrderCollection> finalOrderCollection = new ArrayList<>();
+        finalOrderCollection.add(DirectionOrderCollection.builder()
+            .value(DirectionOrder.builder()
+                .uploadDraftDocument(new Document())
                 .build())
             .build());
 
-        callbackRequest.getCaseDetails().getData().put(FINAL_ORDER_COLLECTION, finalOrderCollection);
+        callbackRequest.getCaseDetails().getCaseData().setFinalOrderCollection(finalOrderCollection);
 
         return callbackRequest;
     }

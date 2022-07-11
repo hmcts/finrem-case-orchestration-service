@@ -6,21 +6,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.LocalDate;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.UnaryOperator;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BEDFORDSHIRE;
@@ -29,7 +22,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BIRMINGHAM_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BRISTOLFRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BRISTOL_COURTLIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ALLOCATED_TO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CFC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CFC_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND;
@@ -42,7 +34,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DEVON_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DORSET;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DORSET_COURTLIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_HEARING_REGION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_LONDON_FRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_MIDLANDS_FRC;
@@ -52,7 +43,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_SOUTHEAST_FRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_SOUTHWEST_FRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_WALES_FRC;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_PREFIX;
@@ -114,36 +104,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public final class CaseHearingFunctions {
 
     public static final String COURT_DETAILS_JSON_PATH = "/json/court-details.json";
-
-    static UnaryOperator<CaseDetails> addFastTrackFields = caseDetails -> {
-        Map<String, Object> data = caseDetails.getData();
-        data.put("formCCreatedDate", new Date());
-        data.put("eventDatePlus21Days", LocalDate.now().plusDays(21));
-
-        return caseDetails;
-    };
-
-    static UnaryOperator<CaseDetails> addNonFastTrackFields = caseDetails -> {
-        Map<String, Object> data = caseDetails.getData();
-
-        String hearingDate = Objects.toString(data.get(HEARING_DATE));
-        LocalDate hearingLocalDate = LocalDate.parse(hearingDate);
-
-        data.put("formCCreatedDate", new Date());
-        data.put("hearingDateLess35Days", hearingLocalDate.minusDays(35));
-        data.put("hearingDateLess14Days", hearingLocalDate.minusDays(14));
-
-        return caseDetails;
-    };
-
-    static Function<Map<String, Object>, Boolean> isFastTrackApplication = caseData -> {
-        String fastTrackDecision = Objects.toString(caseData.get(FAST_TRACK_DECISION));
-        String caseAllocatedTo = (String) caseData.get(CASE_ALLOCATED_TO);
-
-        return Optional.ofNullable(caseAllocatedTo)
-            .map(s -> s.equalsIgnoreCase("yes"))
-            .orElseGet(() -> fastTrackDecision.equalsIgnoreCase("yes"));
-    };
 
     static String getSelectedCourtGA(Map<String, Object> mapOfCaseData) {
         return GENERAL_APPLICATION_DIRECTIONS_PREFIX + getSelectedCourt(mapOfCaseData, GENERAL_APPLICATION_DIRECTIONS_HEARING_REGION,

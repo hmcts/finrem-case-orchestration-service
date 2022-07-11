@@ -1,17 +1,19 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.RepresentationUpdate;
+import uk.gov.hmcts.reform.finrem.ccd.domain.RepresentationUpdateHistoryCollection;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -24,7 +26,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_BODY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REPRESENTATION_UPDATE_HISTORY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_REFERENCE;
@@ -39,23 +40,33 @@ public class NotificationRequestMapper {
     protected static final String EMPTY_STRING = "";
     private final CaseDataService caseDataService;
     private final ObjectMapper objectMapper;
+    private final CourtDetailsMapper courtDetailsMapper;
 
     private static final String RESPONDENT = "Respondent";
     private static final String CONSENTED = "consented";
     private static final String CONTESTED = "contested";
 
-
+    @Deprecated
     public NotificationRequest getNotificationRequestForRespondentSolicitor(CaseDetails caseDetails) {
         return buildNotificationRequest(caseDetails, getCaseDataKeysForRespondentSolicitor());
     }
 
+    public NotificationRequest getNotificationRequestForRespondentSolicitor(FinremCaseDetails caseDetails) {
+        return buildNotificationRequest(caseDetails, getRespondentSolicitorCaseData(caseDetails.getCaseData()));
+    }
+
+    @Deprecated
     public NotificationRequest getNotificationRequestForApplicantSolicitor(CaseDetails caseDetails) {
         return caseDataService.isConsentedApplication(caseDetails)
             ? buildNotificationRequest(caseDetails, getConsentedCaseDataKeysForApplicantSolicitor())
             : buildNotificationRequest(caseDetails, getContestedCaseDataKeysForApplicantSolicitor());
     }
 
-    public NotificationRequest getNotificationRequestForNoticeOfChange(CaseDetails caseDetails) {
+    public NotificationRequest getNotificationRequestForApplicantSolicitor(FinremCaseDetails caseDetails) {
+        return buildNotificationRequest(caseDetails, getApplicantSolicitorCaseData(caseDetails.getCaseData()));
+    }
+
+    public NotificationRequest getNotificationRequestForNoticeOfChange(FinremCaseDetails caseDetails) {
         return isRespondentSolicitorChangedOnLatestRepresentationUpdate(caseDetails)
             ? getNotificationRequestForRespondentSolicitor(caseDetails)
             : getNotificationRequestForApplicantSolicitor(caseDetails);
@@ -66,6 +77,22 @@ public class NotificationRequestMapper {
             .solicitorEmailKey(CONTESTED_SOLICITOR_EMAIL)
             .solicitorNameKey(CONTESTED_SOLICITOR_NAME)
             .solicitorReferenceKey(SOLICITOR_REFERENCE)
+            .build();
+    }
+
+    private SolicitorCaseDataKeysWrapper getApplicantSolicitorCaseData(FinremCaseData caseData) {
+        return SolicitorCaseDataKeysWrapper.builder()
+            .solicitorEmailKey(caseData.getApplicantSolicitorEmail())
+            .solicitorNameKey(caseData.getApplicantSolicitorName())
+            .solicitorReferenceKey(caseData.getContactDetailsWrapper().getSolicitorReference())
+            .build();
+    }
+
+    private SolicitorCaseDataKeysWrapper getRespondentSolicitorCaseData(FinremCaseData caseData) {
+        return SolicitorCaseDataKeysWrapper.builder()
+            .solicitorEmailKey(caseData.getContactDetailsWrapper().getRespondentSolicitorEmail())
+            .solicitorNameKey(caseData.getRespondentSolicitorName())
+            .solicitorReferenceKey(caseData.getContactDetailsWrapper().getRespondentSolicitorReference())
             .build();
     }
 
@@ -85,14 +112,13 @@ public class NotificationRequestMapper {
             .build();
     }
 
-    private boolean isRespondentSolicitorChangedOnLatestRepresentationUpdate(CaseDetails caseDetails) {
-        return getLastRepresentationUpdate(caseDetails).getParty().equals(RESPONDENT);
+    private boolean isRespondentSolicitorChangedOnLatestRepresentationUpdate(FinremCaseDetails caseDetails) {
+        return getLastRepresentationUpdate(caseDetails).getParty().equalsIgnoreCase(RESPONDENT);
     }
 
-    private RepresentationUpdate getLastRepresentationUpdate(CaseDetails caseDetails) {
-
-        List<Element<RepresentationUpdate>> representationUpdates = objectMapper
-            .convertValue(caseDetails.getData().get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {});
+    private RepresentationUpdate getLastRepresentationUpdate(FinremCaseDetails caseDetails) {
+        List<RepresentationUpdateHistoryCollection> representationUpdates =
+            caseDetails.getCaseData().getRepresentationUpdateHistory();
 
         return Collections.max(representationUpdates, Comparator.comparing(c -> c.getValue().getDate())).getValue();
     }
@@ -107,6 +133,7 @@ public class NotificationRequestMapper {
         return caseType;
     }
 
+    @Deprecated
     private NotificationRequest buildNotificationRequest(CaseDetails caseDetails,
                                                          SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
         NotificationRequest notificationRequest = new NotificationRequest();
@@ -126,6 +153,28 @@ public class NotificationRequestMapper {
             notificationRequest.setSelectedCourt(selectedCourt);
 
             log.info("selectedCourt is {} for case ID: {}", selectedCourt, notificationRequest.getCaseReferenceNumber());
+        }
+
+        return notificationRequest;
+    }
+
+    private NotificationRequest buildNotificationRequest(FinremCaseDetails caseDetails,
+                                                         SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
+        NotificationRequest notificationRequest = new NotificationRequest();
+        FinremCaseData caseData = caseDetails.getCaseData();
+        notificationRequest.setCaseReferenceNumber(String.valueOf(caseDetails.getId()));
+        notificationRequest.setSolicitorReferenceNumber(solicitorCaseDataKeysWrapper.getSolicitorReferenceKey());
+        notificationRequest.setDivorceCaseNumber(caseData.getDivorceCaseNumber());
+        notificationRequest.setName(solicitorCaseDataKeysWrapper.getSolicitorNameKey());
+        notificationRequest.setNotificationEmail(solicitorCaseDataKeysWrapper.getSolicitorEmailKey());
+        notificationRequest.setCaseType(caseDetails.getCaseType().getCcdType());
+
+        if (caseData.isContestedApplication()) {
+            FrcCourtDetails courtDetails = courtDetailsMapper.getCourtDetails(caseData.getRegionWrapper().getDefaultCourtList());
+            notificationRequest.setSelectedCourt(courtDetails.getCourtName());
+
+            log.info("selectedCourt is {} for case ID: {}", courtDetails.getCourtName(),
+                notificationRequest.getCaseReferenceNumber());
         }
 
         return notificationRequest;

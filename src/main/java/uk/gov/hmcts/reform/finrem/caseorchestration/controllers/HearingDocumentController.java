@@ -1,8 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -15,19 +13,20 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
+import uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.ccd.domain.DirectionDetailCollection;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import javax.validation.constraints.NotNull;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -38,7 +37,8 @@ import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
 
 @RestController
 @RequiredArgsConstructor
@@ -49,8 +49,7 @@ public class HearingDocumentController extends BaseController {
     private final HearingDocumentService hearingDocumentService;
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
     private final ValidateHearingService validateHearingService;
-    private final CaseDataService caseDataService;
-    private final ObjectMapper objectMapper;
+    private final FinremCallbackRequestDeserializer finremCallbackRequestDeserializer;
 
     @PostMapping(path = "/documents/hearing", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles Form C and G generation. Serves as a callback from CCD")
@@ -61,30 +60,42 @@ public class HearingDocumentController extends BaseController {
         @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateHearingDocument(
             @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-            @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) throws IOException {
+            @NotNull @RequestBody @ApiParam("CaseData") String source) {
 
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CallbackRequest callbackRequest = finremCallbackRequestDeserializer.deserialize(source);
+
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request for validating a hearing for Case ID: {}", caseDetails.getId());
 
         validateCaseData(callbackRequest);
 
         List<String> errors = validateHearingService.validateHearingErrors(caseDetails);
         if (!errors.isEmpty()) {
-            return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
-                .errors(errors)
-                .build());
+            return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().errors(errors).build());
         }
 
+        generateHearingDocuments(authorisationToken, caseDetails);
+        List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDetails.getCaseData())
+            .warnings(warnings).build());
+    }
+
+    private void generateHearingDocuments(String authorisationToken, FinremCaseDetails caseDetails) {
         if (hearingDocumentService.alreadyHadFirstHearing(caseDetails)) {
-            if (caseDataService.isContestedPaperApplication(caseDetails)) {
+            if (caseDetails.getCaseData().isContestedPaperApplication()) {
                 additionalHearingDocumentService.createAdditionalHearingDocuments(authorisationToken, caseDetails);
             }
         } else {
-            caseDetails.getData().putAll(hearingDocumentService.generateHearingDocuments(authorisationToken, caseDetails));
+            Map<String, Object> forms = hearingDocumentService.generateHearingDocuments(authorisationToken, caseDetails);
+            if (forms.containsKey(FORM_C)) {
+                caseDetails.getCaseData().setFormC((Document) forms.get(FORM_C));
+            }
+            if (forms.containsKey(FORM_G)) {
+                caseDetails.getCaseData().setFormG((Document) forms.get(FORM_G));
+            }
         }
-
-        List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).warnings(warnings).build());
     }
 
     @PostMapping(path = "/contested-upload-direction-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
@@ -96,10 +107,13 @@ public class HearingDocumentController extends BaseController {
         @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateHearingDocumentDirectionOrder(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
-        CaseDetails caseDetails = callback.getCaseDetails();
+        @NotNull @RequestBody @ApiParam("CaseData") String source) {
+
+        CallbackRequest callback = finremCallbackRequestDeserializer.deserialize(source);
+
+        FinremCaseDetails caseDetails = callback.getCaseDetails();
         validateCaseData(callback);
-        Map<String, Object> caseData = caseDetails.getData();
+        FinremCaseData caseData = caseDetails.getCaseData();
         List<String> errors = new ArrayList<>();
 
         log.info("Storing Additional Hearing Document for Case ID: {}", caseDetails.getId());
@@ -118,22 +132,18 @@ public class HearingDocumentController extends BaseController {
             .build());
     }
 
-    private void sortDirectionDetailsCollection(Map<String, Object> caseData) {
-        List<DirectionDetailsCollectionData> directionDetailsCollectionList = Optional.ofNullable(caseData.get(DIRECTION_DETAILS_COLLECTION_CT))
-            .map(this::convertToDirectionDetailsDataList).orElse(Collections.emptyList());
+    private void sortDirectionDetailsCollection(FinremCaseData caseData) {
+        List<DirectionDetailCollection> directionDetailsCollectionList =
+            Optional.ofNullable(caseData.getDirectionDetailsCollection()).orElse(Collections.emptyList());
 
         if (! directionDetailsCollectionList.isEmpty()) {
-            List<DirectionDetailsCollectionData> sortedDirectionDetailsCollectionList = directionDetailsCollectionList
+            List<DirectionDetailCollection> sortedDirectionDetailsCollectionList = directionDetailsCollectionList
                 .stream()
-                .filter(e -> (e.getDirectionDetailsCollection() != null &&  e.getDirectionDetailsCollection().getDateOfHearing() != null))
-                .sorted(Comparator.comparing(e -> e.getDirectionDetailsCollection().getDateOfHearing()))
+                .filter(e -> (e.getValue() != null &&  e.getValue().getDateOfHearing() != null))
+                .sorted(Comparator.comparing(e -> e.getValue().getDateOfHearing()))
                 .collect(Collectors.toList());
-            caseData.put(DIRECTION_DETAILS_COLLECTION_CT, sortedDirectionDetailsCollectionList);
-        }
-    }
 
-    private List<DirectionDetailsCollectionData> convertToDirectionDetailsDataList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<>() {
-        });
+            caseData.setDirectionDetailsCollection(sortedDirectionDetailsCollectionList);
+        }
     }
 }

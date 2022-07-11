@@ -14,14 +14,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.RefusalOrderDocumentService;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.UUID;
 import java.util.regex.Pattern;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -41,9 +40,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.REJECTED_ORDER_TYPE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDataWithPreviewOrder;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDataWithUploadOrder;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finremCaseDataWithPreviewOrder;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finremCaseDataWithUploadOrder;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(RejectedOrderDocumentController.class)
@@ -77,8 +76,8 @@ public class RejectedOrderDocumentControllerTest {
 
     @Test
     public void generateConsentOrderNotApprovedSuccess() throws Exception {
-        when(documentService.generateConsentOrderNotApproved(eq(AUTH_TOKEN), isA(CaseDetails.class)))
-                .thenReturn(caseDataWithUploadOrder(UUID.randomUUID().toString()));
+        when(documentService.generateConsentOrderNotApproved(eq(AUTH_TOKEN), isA(FinremCaseDetails.class)))
+                .thenReturn(finremCaseDataWithUploadOrder());
 
         mvc.perform(post(API_URL)
                 .content(requestContent.toString())
@@ -106,7 +105,7 @@ public class RejectedOrderDocumentControllerTest {
 
     @Test
     public void generateConsentOrderNotApproved500() throws Exception {
-        when(documentService.generateConsentOrderNotApproved(eq(AUTH_TOKEN), isA(CaseDetails.class)))
+        when(documentService.generateConsentOrderNotApproved(eq(AUTH_TOKEN), isA(FinremCaseDetails.class)))
                 .thenThrow(feignError());
 
         mvc.perform(post(API_URL)
@@ -118,8 +117,8 @@ public class RejectedOrderDocumentControllerTest {
 
     @Test
     public void previewConsentOrderNotApprovedSuccess() throws Exception {
-        when(documentService.previewConsentOrderNotApproved(eq(AUTH_TOKEN), isA(CaseDetails.class)))
-                .thenReturn(caseDataWithPreviewOrder());
+        when(documentService.previewConsentOrderNotApproved(eq(AUTH_TOKEN), isA(FinremCaseDetails.class)))
+                .thenReturn(finremCaseDataWithPreviewOrder());
 
         mvc.perform(post(PREVIEW_API_URL)
                 .content(requestContent.toString())
@@ -146,7 +145,7 @@ public class RejectedOrderDocumentControllerTest {
 
     @Test
     public void previewConsentOrderNotApproved500() throws Exception {
-        when(documentService.previewConsentOrderNotApproved(eq(AUTH_TOKEN), isA(CaseDetails.class)))
+        when(documentService.previewConsentOrderNotApproved(eq(AUTH_TOKEN), isA(FinremCaseDetails.class)))
                 .thenThrow(feignError());
 
         mvc.perform(post(PREVIEW_API_URL)

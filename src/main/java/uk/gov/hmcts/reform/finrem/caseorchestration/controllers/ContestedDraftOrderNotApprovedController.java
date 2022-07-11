@@ -12,28 +12,25 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedDraftOrderNotApprovedService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
+import uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import javax.validation.constraints.NotNull;
 
-import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Collections.singletonList;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_DATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_TYPE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_PREVIEW_DOCUMENT;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -46,6 +43,7 @@ public class ContestedDraftOrderNotApprovedController extends BaseController {
     private final PaperNotificationService paperNotificationService;
     private final DocumentHelper documentHelper;
     private final IdamService idamService;
+    private final FinremCallbackRequestDeserializer callbackRequestDeserializer;
 
     @PostMapping(path = "/contested-application-not-approved-start", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Clears previous entered field values. Serves as a callback from CCD")
@@ -56,19 +54,19 @@ public class ContestedDraftOrderNotApprovedController extends BaseController {
         @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> initialiseApplicationNotApprovedProperties(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+        @NotNull @RequestBody @ApiParam("CaseData") String source) {
 
-        CaseDetails caseDetails = callback.getCaseDetails();
+        CallbackRequest callback = callbackRequestDeserializer.deserialize(source);
+        FinremCaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to clear contested application not approved fields for Case ID: {}", caseDetails.getId());
 
         validateCaseData(callback);
 
-        Map<String, Object> caseData = caseDetails.getData();
-        caseData.put(CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_TYPE, null);
-        caseData.put(CONTESTED_APPLICATION_NOT_APPROVED_DATE, null);
-        caseData.put(CONTESTED_APPLICATION_NOT_APPROVED_PREVIEW_DOCUMENT, null);
-
-        caseData.put(CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_NAME, idamService.getIdamFullName(authorisationToken));
+        FinremCaseData caseData = caseDetails.getCaseData();
+        caseData.setRefusalOrderJudgeType(null);
+        caseData.setRefusalOrderDate(null);
+        caseData.setRefusalOrderPreviewDocument(null);
+        caseData.setRefusalOrderJudgeName(idamService.getIdamFullName(authorisationToken));
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
@@ -82,16 +80,17 @@ public class ContestedDraftOrderNotApprovedController extends BaseController {
         @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> previewApplicationNotApprovedDocument(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+        @NotNull @RequestBody @ApiParam("CaseData") String source) {
 
-        CaseDetails caseDetails = callback.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
+        CallbackRequest callback = callbackRequestDeserializer.deserialize(source);
+
+        FinremCaseDetails caseDetails = callback.getCaseDetails();
+        FinremCaseData caseData = caseDetails.getCaseData();
 
         log.info("Received request to preview application not approved document for Case ID: {}", caseDetails.getId());
         validateCaseData(callback);
 
-        Map<String, Object> refusalOrder = contestedNotApprovedService.createRefusalOrder(authorisationToken, caseDetails);
-        caseData.putAll(refusalOrder);
+        contestedNotApprovedService.createAndSetRefusalOrderPreviewDocument(authorisationToken, caseDetails);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
@@ -104,13 +103,14 @@ public class ContestedDraftOrderNotApprovedController extends BaseController {
         @ApiResponse(code = 400, message = "Bad Request"),
         @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> createGeneralLetter(
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+        @NotNull @RequestBody @ApiParam("CaseData") String source) {
+        CallbackRequest callback = callbackRequestDeserializer.deserialize(source);
 
-        CaseDetails caseDetails = callback.getCaseDetails();
+        FinremCaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request for storing general order with Case ID: {}", caseDetails.getId());
         validateCaseData(callback);
 
-        Map<String, Object> caseData = contestedNotApprovedService.populateRefusalOrderCollection(caseDetails);
+        FinremCaseData caseData = contestedNotApprovedService.populateRefusalOrderCollection(caseDetails);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
@@ -124,27 +124,29 @@ public class ContestedDraftOrderNotApprovedController extends BaseController {
         @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendRefusalReason(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+        @NotNull @RequestBody @ApiParam("CaseData") String source) {
 
-        CaseDetails caseDetails = callback.getCaseDetails();
+        CallbackRequest callback = callbackRequestDeserializer.deserialize(source);
+
+        FinremCaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request for send refusal reason for case with Case ID: {}", caseDetails.getId());
 
         validateCaseData(callback);
 
-        Optional<CaseDocument> refusalReason = contestedNotApprovedService.getLatestRefusalReason(caseDetails);
+        Optional<Document> refusalReason = contestedNotApprovedService.getLatestRefusalReason(caseDetails);
 
         if (refusalReason.isPresent()) {
             if (paperNotificationService.shouldPrintForApplicant(caseDetails)) {
                 bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken,
-                    singletonList(documentHelper.getBulkPrintDocumentFromCaseDocument(refusalReason.get())));
+                    singletonList(documentHelper.getDocumentAsBulkPrintDocument(refusalReason.get()).orElse(null)));
             }
 
             if (paperNotificationService.shouldPrintForRespondent(caseDetails)) {
                 bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken,
-                    singletonList(documentHelper.getBulkPrintDocumentFromCaseDocument(refusalReason.get())));
+                    singletonList(documentHelper.getDocumentAsBulkPrintDocument(refusalReason.get()).orElse(null)));
             }
         }
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getCaseData()).build());
     }
 }

@@ -12,11 +12,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
+import uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import javax.validation.constraints.NotNull;
 
@@ -33,6 +34,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 public class GeneralApplicationDirectionsController extends BaseController {
 
     private final GeneralApplicationDirectionsService generalApplicationDirectionsService;
+    private final FinremCallbackRequestDeserializer finremCallbackRequestDeserializer;
 
     @PostMapping(path = "/submit-general-application-directions", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Submit general application directions")
@@ -43,9 +45,11 @@ public class GeneralApplicationDirectionsController extends BaseController {
         @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> submitGeneralApplication(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+        @NotNull @RequestBody @ApiParam("CaseData") String source) {
 
-        CaseDetails caseDetails = callback.getCaseDetails();
+        CallbackRequest callback = finremCallbackRequestDeserializer.deserialize(source);
+
+        FinremCaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to submit general application directions for Case ID: {}", caseDetails.getId());
         validateCaseData(callback);
 
@@ -58,7 +62,7 @@ public class GeneralApplicationDirectionsController extends BaseController {
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
             .builder()
-            .data(caseDetails.getData())
+            .data(caseDetails.getCaseData())
             .errors(errors)
             .build());
     }
@@ -72,9 +76,11 @@ public class GeneralApplicationDirectionsController extends BaseController {
         @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> startGeneralApplication(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+        @NotNull @RequestBody @ApiParam("CaseData") String source) {
 
-        CaseDetails caseDetails = callback.getCaseDetails();
+        CallbackRequest callback = finremCallbackRequestDeserializer.deserialize(source);
+
+        FinremCaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to start general application directions for Case ID: {}", caseDetails.getId());
         validateCaseData(callback);
 
@@ -82,7 +88,7 @@ public class GeneralApplicationDirectionsController extends BaseController {
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
             .builder()
-            .data(caseDetails.getData())
+            .data(caseDetails.getCaseData())
             .build());
     }
 
@@ -95,9 +101,11 @@ public class GeneralApplicationDirectionsController extends BaseController {
         @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> submitInterimHearing(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+        @NotNull @RequestBody @ApiParam("CaseData") String source) {
 
-        CaseDetails caseDetails = callback.getCaseDetails();
+        CallbackRequest callback = finremCallbackRequestDeserializer.deserialize(source);
+
+        FinremCaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to submit for interim hearing for Case ID: {}", caseDetails.getId());
         validateCaseData(callback);
 
@@ -110,7 +118,7 @@ public class GeneralApplicationDirectionsController extends BaseController {
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
             .builder()
-            .data(caseDetails.getData())
+            .data(caseDetails.getCaseData())
             .errors(errors)
             .build());
     }

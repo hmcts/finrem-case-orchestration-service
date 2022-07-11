@@ -7,12 +7,12 @@ import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DefaultsConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,8 +33,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.MiniFormAController.ASSIGNED_TO_JUDGE_REASON_DEFAULT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.MiniFormAController.REFER_TO_JUDGE_TEXT_DEFAULT;
 
 @WebMvcTest(MiniFormAController.class)
 public class MiniFormAControllerTest extends BaseControllerTest {
@@ -52,12 +54,12 @@ public class MiniFormAControllerTest extends BaseControllerTest {
         return "/case-orchestration/documents/generate-mini-form-a";
     }
 
-    protected OngoingStubbing<CaseDocument> whenServiceGeneratesDocument() {
-        return when(documentService.generateMiniFormA(eq(AUTH_TOKEN), isA(CaseDetails.class)));
+    protected OngoingStubbing<Document> whenServiceGeneratesDocument() {
+        return when(documentService.generateMiniFormA(eq(AUTH_TOKEN), isA(FinremCaseDetails.class)));
     }
 
-    protected OngoingStubbing<CaseDocument> whenServiceGeneratesConsentedInContestedMiniFormA() {
-        return when(documentService.generateConsentedInContestedMiniFormA(isA(CaseDetails.class), eq(AUTH_TOKEN)));
+    protected OngoingStubbing<Document> whenServiceGeneratesConsentedInContestedMiniFormA() {
+        return when(documentService.generateConsentedInContestedMiniFormA(isA(FinremCaseDetails.class), eq(AUTH_TOKEN)));
     }
 
     private void doRequestSetUpConsented() throws IOException, URISyntaxException {
@@ -73,7 +75,7 @@ public class MiniFormAControllerTest extends BaseControllerTest {
     @Test
     public void generateMiniFormA() throws Exception {
         doRequestSetUpConsented();
-        whenServiceGeneratesDocument().thenReturn(caseDocument());
+        whenServiceGeneratesDocument().thenReturn(newDocument());
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
 
         mvc.perform(post(endpoint())
@@ -85,8 +87,8 @@ public class MiniFormAControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.miniFormA.document_filename", is(FILE_NAME)))
             .andExpect(jsonPath("$.data.miniFormA.document_binary_url", is(BINARY_URL)))
             .andExpect(jsonPath("$.data.assignedToJudge", is(defaultsConfiguration.getAssignedToJudgeDefault())))
-            .andExpect(jsonPath("$.data.assignedToJudgeReason", is(MiniFormAController.assignedToJudgeReasonDefault)))
-            .andExpect(jsonPath("$.data.referToJudgeText", is(MiniFormAController.referToJudgeTextDefault)))
+            .andExpect(jsonPath("$.data.assignedToJudgeReason", is(ASSIGNED_TO_JUDGE_REASON_DEFAULT.getValue())))
+            .andExpect(jsonPath("$.data.referToJudgeText", is(REFER_TO_JUDGE_TEXT_DEFAULT)))
             .andExpect(jsonPath("$.data.referToJudgeDate", is(LocalDate.now().toString())))
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
@@ -117,7 +119,7 @@ public class MiniFormAControllerTest extends BaseControllerTest {
     @Test
     public void generateMiniFormAWhenConsentedInContested() throws Exception {
         doRequestSetUpContested();
-        whenServiceGeneratesConsentedInContestedMiniFormA().thenReturn(caseDocument());
+        whenServiceGeneratesConsentedInContestedMiniFormA().thenReturn(newDocument());
         when(caseDataService.isConsentedInContestedCase(any())).thenReturn(true);
 
         mvc.perform(post(endpoint())
@@ -133,7 +135,7 @@ public class MiniFormAControllerTest extends BaseControllerTest {
     @Test
     public void generateMiniFormAWhenConsentedInContestedExpectContestedFieldToBePopulated() throws Exception {
         doRequestSetUpContested();
-        whenServiceGeneratesConsentedInContestedMiniFormA().thenReturn(caseDocument());
+        whenServiceGeneratesConsentedInContestedMiniFormA().thenReturn(newDocument());
         when(caseDataService.isConsentedInContestedCase(any())).thenReturn(false);
 
         mvc.perform(post(endpoint())

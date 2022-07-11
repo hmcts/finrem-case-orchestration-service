@@ -22,6 +22,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocu
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.PensionDocumentType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.PensionType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.PensionTypeCollection;
+import uk.gov.hmcts.reform.finrem.ccd.domain.UploadOrder;
+import uk.gov.hmcts.reform.finrem.ccd.domain.UploadOrderCollection;
+import uk.gov.hmcts.reform.finrem.ccd.domain.UploadOrderDocumentType;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -108,9 +117,21 @@ public class TestSetUpUtils {
         return caseData;
     }
 
+    public static FinremCaseData finremCaseDataWithUploadOrder() {
+        FinremCaseData caseData = new FinremCaseData();
+        caseData.setUploadOrder(List.of(uploadOrderData()));
+        return caseData;
+    }
+
     public static Map<String, Object> caseDataWithPreviewOrder() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(ORDER_REFUSAL_PREVIEW_COLLECTION, caseDocument());
+        return caseData;
+    }
+
+    public static FinremCaseData finremCaseDataWithPreviewOrder() {
+        FinremCaseData caseData = new FinremCaseData();
+        caseData.setOrderRefusalPreviewDocument(newDocument());
         return caseData;
     }
 
@@ -120,9 +141,9 @@ public class TestSetUpUtils {
         return caseData;
     }
 
-    public static Map<String, Object> caseDataWithRefusalOrder() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(CONTESTED_APPLICATION_NOT_APPROVED_PREVIEW_DOCUMENT, caseDocument());
+    public static FinremCaseData finremCaseDataWithRefusalOrder() {
+        FinremCaseData caseData = new FinremCaseData();
+        caseData.setRefusalOrderPreviewDocument(newDocument());
         return caseData;
     }
 
@@ -137,6 +158,16 @@ public class TestSetUpUtils {
         consentOrderData.setConsentOrder(consentOrder);
 
         return consentOrderData;
+    }
+
+    private static UploadOrderCollection uploadOrderData() {
+        return UploadOrderCollection.builder()
+            .value(UploadOrder.builder()
+                .documentType(UploadOrderDocumentType.GENERAL_ORDER)
+                .documentLink(newDocument())
+                .documentDateAdded(LocalDate.now())
+                .build())
+            .build();
     }
 
     public static Document document() {
@@ -174,12 +205,29 @@ public class TestSetUpUtils {
         return document;
     }
 
+    public static PensionType pensionType() {
+        return PensionType.builder()
+            .uploadedDocument(uk.gov.hmcts.reform.finrem.ccd.domain.Document.builder()
+                .url(DOC_URL)
+                .filename(FILE_NAME)
+                .binaryUrl(BINARY_URL)
+                .build())
+            .typeOfDocument(PensionDocumentType.FORM_PPF1)
+            .build();
+    }
+
     public static PensionCollectionData pensionDocumentData() {
         PensionCollectionData document = new PensionCollectionData();
         document.setTypedCaseDocument(pensionDocument());
         document.setId(PENSION_ID);
 
         return document;
+    }
+
+    public static PensionTypeCollection pensionTypeCollection() {
+        return PensionTypeCollection.builder()
+            .value(pensionType())
+            .build();
     }
 
     public static void assertCaseDocument(CaseDocument caseDocument) {
@@ -245,6 +293,11 @@ public class TestSetUpUtils {
         } catch (Exception exception) {
             throw new IllegalStateException(exception.getMessage(), exception);
         }
+    }
+
+    public static FinremCaseDetails finremCaseDetailsFromResource(String resourcePath, ObjectMapper mapper) {
+        FinremCallbackRequestDeserializer deserializer = new FinremCallbackRequestDeserializer(mapper);
+        return deserializer.deserialize(resourcePath).getCaseDetails();
     }
 
     public static CaseDetails caseDetailsBeforeFromResource(String resourcePath, ObjectMapper mapper) {
@@ -314,5 +367,15 @@ public class TestSetUpUtils {
             }
         });
         return caseData;
+    }
+
+    public static uk.gov.hmcts.reform.finrem.ccd.domain.Document newDocument() {
+        uk.gov.hmcts.reform.finrem.ccd.domain.Document caseDocument =
+            new uk.gov.hmcts.reform.finrem.ccd.domain.Document();
+        caseDocument.setUrl(DOC_URL);
+        caseDocument.setFilename(FILE_NAME);
+        caseDocument.setBinaryUrl(BINARY_URL);
+
+        return caseDocument;
     }
 }

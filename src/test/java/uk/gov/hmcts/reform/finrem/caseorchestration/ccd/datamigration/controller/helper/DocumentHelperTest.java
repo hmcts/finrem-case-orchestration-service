@@ -8,9 +8,11 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.ccd.domain.DirectionDetail;
+import uk.gov.hmcts.reform.finrem.ccd.domain.DirectionDetailCollection;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
 import java.io.InputStream;
 import java.util.HashMap;
@@ -19,7 +21,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -33,14 +34,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_PO_BOX;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_SERVICE_CENTRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_TOWN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CTSC_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
 
 public class DocumentHelperTest {
 
@@ -91,39 +89,43 @@ public class DocumentHelperTest {
 
     @Test
     public void hasAnotherHearing_shouldReturnTrue() {
-        Map<String, Object> caseData = new HashMap<>();
-        DirectionDetailsCollection directionDetailsCollection = DirectionDetailsCollection.builder().isAnotherHearingYN(YES_VALUE).build();
-        DirectionDetailsCollectionData directionDetailsCollectionData
-            = DirectionDetailsCollectionData.builder().directionDetailsCollection(directionDetailsCollection).build();
-        List<DirectionDetailsCollectionData> directionDetailsCollectionList = singletonList(directionDetailsCollectionData);
-        caseData.put(DIRECTION_DETAILS_COLLECTION_CT, directionDetailsCollectionList);
+        FinremCaseData caseData = new FinremCaseData();
+        DirectionDetailCollection directionDetailsCollection = DirectionDetailCollection.builder()
+            .value(DirectionDetail.builder()
+                .isAnotherHearingYN(YesOrNo.YES)
+                .build())
+            .build();
+
+        caseData.setDirectionDetailsCollection(List.of(directionDetailsCollection));
 
         assertTrue(documentHelper.hasAnotherHearing(caseData));
     }
 
     @Test
     public void hasAnotherHearing_noDirectionDetails() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(DIRECTION_DETAILS_COLLECTION_CT, emptyList());
+        FinremCaseData caseData = new FinremCaseData();
+        caseData.setDirectionDetailsCollection(emptyList());
 
         assertFalse(documentHelper.hasAnotherHearing(caseData));
     }
 
     @Test
     public void hasAnotherHearing_missingDirectionDetails() {
-        Map<String, Object> caseData = new HashMap<>();
+        FinremCaseData caseData = new FinremCaseData();
 
         assertFalse(documentHelper.hasAnotherHearing(caseData));
     }
 
     @Test
     public void hasAnotherHearing_noNextHearing() {
-        Map<String, Object> caseData = new HashMap<>();
-        DirectionDetailsCollection directionDetailsCollection = DirectionDetailsCollection.builder().isAnotherHearingYN(NO_VALUE).build();
-        DirectionDetailsCollectionData directionDetailsCollectionData
-            = DirectionDetailsCollectionData.builder().directionDetailsCollection(directionDetailsCollection).build();
-        List<DirectionDetailsCollectionData> directionDetailsCollectionList = singletonList(directionDetailsCollectionData);
-        caseData.put(DIRECTION_DETAILS_COLLECTION_CT, directionDetailsCollectionList);
+        FinremCaseData caseData = new FinremCaseData();
+        DirectionDetailCollection directionDetailCollection = DirectionDetailCollection.builder()
+            .value(DirectionDetail.builder()
+                .isAnotherHearingYN(YesOrNo.NO)
+                .build())
+            .build();
+
+        caseData.setDirectionDetailsCollection(List.of(directionDetailCollection));
 
         assertFalse(documentHelper.hasAnotherHearing(caseData));
     }

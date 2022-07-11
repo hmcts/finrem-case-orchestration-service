@@ -13,12 +13,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.RefusalOrderDocumentService;
-
-import java.util.Map;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
+import uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -30,6 +30,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 public class RejectedOrderDocumentController {
 
     private final RefusalOrderDocumentService refusalOrderDocumentService;
+    private final FinremCallbackRequestDeserializer finremCallbackRequestDeserializer;
 
     @PostMapping(path = "/documents/consent-order-not-approved", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles Consent Order Not Approved Order Generation. Serves as a callback from CCD")
@@ -42,20 +43,21 @@ public class RejectedOrderDocumentController {
     })
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateConsentOrderNotApproved(
             @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-            @RequestBody @ApiParam("CaseData") CallbackRequest request) {
+            @RequestBody @ApiParam("CaseData") String source) {
 
-        CaseDetails caseDetails = request.getCaseDetails();
+        CallbackRequest request = finremCallbackRequestDeserializer.deserialize(source);
+
+        FinremCaseDetails caseDetails = request.getCaseDetails();
         log.info("Received request to generate 'Consent Order Not Approved' for Case ID: {}", caseDetails.getId());
 
-        Map<String, Object> caseData = refusalOrderDocumentService.generateConsentOrderNotApproved(authorisationToken, caseDetails);
+        FinremCaseData caseData = refusalOrderDocumentService.generateConsentOrderNotApproved(authorisationToken, caseDetails);
 
         return ResponseEntity.ok(
             AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseData)
                 .errors(ImmutableList.of())
                 .warnings(ImmutableList.of())
-                .build()
-        );
+                .build());
     }
 
     @PostMapping(path = "/documents/preview-consent-order-not-approved", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
@@ -69,10 +71,12 @@ public class RejectedOrderDocumentController {
         })
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> previewConsentOrderNotApproved(
             @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-            @RequestBody @ApiParam("CaseData") CallbackRequest request) {
+            @RequestBody @ApiParam("CaseData") String source) {
+
+        CallbackRequest request = finremCallbackRequestDeserializer.deserialize(source);
 
         log.info("Received request to preview generated 'Consent Order Not Approved' for Case ID: {}", request.getCaseDetails().getId());
-        Map<String, Object> caseData = refusalOrderDocumentService.previewConsentOrderNotApproved(authorisationToken, request.getCaseDetails());
+        FinremCaseData caseData = refusalOrderDocumentService.previewConsentOrderNotApproved(authorisationToken, request.getCaseDetails());
 
         return ResponseEntity.ok(
             AboutToStartOrSubmitCallbackResponse.builder()

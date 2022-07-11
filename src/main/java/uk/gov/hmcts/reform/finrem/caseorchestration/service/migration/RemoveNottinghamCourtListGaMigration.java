@@ -4,6 +4,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.Map;
 
+//Todo Seems unused, marked for removal
+@Deprecated
 public class RemoveNottinghamCourtListGaMigration {
 
     public static final String NOTTINGHAM_COURT_LIST_GA = "nottinghamCourtListGA";

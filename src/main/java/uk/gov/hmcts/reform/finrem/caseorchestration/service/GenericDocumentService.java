@@ -45,9 +45,14 @@ public class GenericDocumentService {
         documentClient.deleteDocument(documentUrl, authorisationToken);
     }
 
+    @Deprecated
     public CaseDocument annexStampDocument(CaseDocument document, String authorisationToken) {
         Document stampedDocument = documentClient.annexStampDocument(toDocument(document), authorisationToken);
         return toCaseDocument(stampedDocument);
+    }
+
+    public Document annexStampDocument(Document document, String authorisationToken) {
+        return documentClient.annexStampDocument(document, authorisationToken);
     }
 
     public CaseDocument convertDocumentIfNotPdfAlready(CaseDocument document, String authorisationToken) {

@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -14,16 +12,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.SendOrderContestedAboutToSubmitHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingBundle;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingBundleItems;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingUploadBundle;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingUploadBundleData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
+import uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.HearingBundleDocument;
+import uk.gov.hmcts.reform.finrem.ccd.domain.HearingBundleDocumentCollection;
+import uk.gov.hmcts.reform.finrem.ccd.domain.HearingUploadBundle;
+import uk.gov.hmcts.reform.finrem.ccd.domain.HearingUploadBundleCollection;
 
 import javax.validation.constraints.NotNull;
 
@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -40,8 +39,6 @@ import java.util.stream.Collectors;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_UPLOAD_BUNDLE_COLLECTION;
 
 @Slf4j
 @RestController
@@ -49,8 +46,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequestMapping(value = "/case-orchestration")
 public class ContestedOrderController extends BaseController {
 
-    private final ObjectMapper objectMapper;
     private final SendOrderContestedAboutToSubmitHandler sendOrderContestedAboutToSubmitHandler;
+    private final FinremCallbackRequestDeserializer finremCallbackRequestDeserializer;
 
     @PostMapping(path = "/contested/send-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles Consent order approved generation. Serves as a callback from CCD")
@@ -64,11 +61,13 @@ public class ContestedOrderController extends BaseController {
     @Deprecated
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> stampFinalOrder(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+        @NotNull @RequestBody @ApiParam("CaseData") String source) {
+
+        CallbackRequest callback = finremCallbackRequestDeserializer.deserialize(source);
 
         validateCaseData(callback);
 
-        CaseDetails caseDetails = callback.getCaseDetails();
+        FinremCaseDetails caseDetails = callback.getCaseDetails();
         log.info("Starting to send contested order for case {}", caseDetails.getId());
 
         sendOrderContestedAboutToSubmitHandler.handle(callback, authToken);
@@ -86,9 +85,11 @@ public class ContestedOrderController extends BaseController {
         @ApiResponse(code = 400, message = "Bad Request"),
         @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> checkHearingDate(
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+        @NotNull @RequestBody @ApiParam("CaseData") String source) {
 
-        CaseDetails caseDetails = callback.getCaseDetails();
+        CallbackRequest callback = finremCallbackRequestDeserializer.deserialize(source);
+
+        FinremCaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to check for manage bundle hearing date for Case ID: {}", caseDetails.getId());
         validateCaseData(callback);
 
@@ -101,7 +102,7 @@ public class ContestedOrderController extends BaseController {
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
             .builder()
-            .data(caseDetails.getData())
+            .data(caseDetails.getCaseData())
             .errors(errors)
             .build());
     }
@@ -114,26 +115,27 @@ public class ContestedOrderController extends BaseController {
         @ApiResponse(code = 400, message = "Bad Request"),
         @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sortHearingBundles(
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+        @NotNull @RequestBody @ApiParam("CaseData") String source) {
 
-        CaseDetails caseDetails = callback.getCaseDetails();
+        CallbackRequest callback = finremCallbackRequestDeserializer.deserialize(source);
+
+        FinremCaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request for doc newest first at top of the list for Case ID: {}", caseDetails.getId());
         validateCaseData(callback);
-        Map<String, Object> caseData = caseDetails.getData();
+        FinremCaseData caseData = caseDetails.getCaseData();
         List<String> errors = new ArrayList<>();
-        List<HearingUploadBundleData> hearingBundleDataList = Optional.ofNullable(caseData.get(HEARING_UPLOAD_BUNDLE_COLLECTION))
-            .map(this::convertToHearingBundleDataList).orElse(Collections.emptyList());
+        List<HearingUploadBundleCollection> hearingBundleDataList =
+            Optional.ofNullable(caseData.getHearingUploadBundle()).orElse(Collections.emptyList());
 
         if (!hearingBundleDataList.isEmpty()) {
-            List<HearingUploadBundleData> updateUploadDateList = hearingBundleDataList.stream()
-                .map(hd -> HearingUploadBundleData.builder()
-                    .id(hd.getId())
+            List<HearingUploadBundleCollection> updateUploadDateList = hearingBundleDataList.stream()
+                .map(hd -> HearingUploadBundleCollection.builder()
                     .value(getHearingBundle(errors, hd))
                     .build())
                 .sorted(Comparator.nullsLast((e1, e2) -> e2.getValue().getHearingBundleDate()
                     .compareTo(e1.getValue().getHearingBundleDate())))
                 .collect(Collectors.toList());
-            caseData.put(HEARING_UPLOAD_BUNDLE_COLLECTION, updateUploadDateList);
+            caseData.setHearingUploadBundle(updateUploadDateList);
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
             .builder()
@@ -142,41 +144,40 @@ public class ContestedOrderController extends BaseController {
             .build());
     }
 
-    private HearingBundle getHearingBundle(List<String> errors, HearingUploadBundleData hd) {
-        return HearingBundle.builder()
+    private HearingUploadBundle getHearingBundle(List<String> errors, HearingUploadBundleCollection hd) {
+        return HearingUploadBundle.builder()
             .hearingBundleDate(hd.getValue().getHearingBundleDate())
             .hearingBundleFdr(hd.getValue().getHearingBundleFdr())
             .hearingBundleDocuments(hd.getValue().getHearingBundleDocuments().stream()
                 .map(getHearingUploadBundleFunction(errors))
-                .sorted(Comparator.nullsLast((e1, e2) -> e2.getValue().getBundleUploadDate()
-                    .compareTo(e1.getValue().getBundleUploadDate()))).collect(Collectors.toList()))
+                .sorted(Comparator.nullsLast(getHearingBundleDocumentCollectionComparator())).collect(Collectors.toList()))
             .hearingBundleDescription(hd.getValue().getHearingBundleDescription())
             .build();
     }
 
-    private Function<HearingUploadBundle, HearingUploadBundle> getHearingUploadBundleFunction(List<String> errors) {
-        return hdi -> HearingUploadBundle.builder().id(hdi.getId())
-            .value(HearingBundleItems.builder().bundleDocuments(getBundleDocuments(hdi, errors))
+    private Comparator<HearingBundleDocumentCollection> getHearingBundleDocumentCollectionComparator() {
+        return (e1, e2) -> e2.getValue().getBundleUploadDate()
+            .compareTo(e1.getValue().getBundleUploadDate());
+    }
+
+    private Function<HearingBundleDocumentCollection, HearingBundleDocumentCollection> getHearingUploadBundleFunction(List<String> errors) {
+        return hdi -> HearingBundleDocumentCollection.builder()
+            .value(HearingBundleDocument.builder().bundleDocuments(getBundleDocuments(hdi, errors))
                 .bundleUploadDate(hdi.getValue().getBundleUploadDate() == null
                     ? LocalDateTime.now() : hdi.getValue().getBundleUploadDate())
                 .build()).build();
     }
 
-    private CaseDocument getBundleDocuments(HearingUploadBundle hdi, List<String> errors) {
-        if (!hdi.getValue().getBundleDocuments().getDocumentFilename().toUpperCase().endsWith(".PDF")) {
+    private Document getBundleDocuments(HearingBundleDocumentCollection hdi, List<String> errors) {
+        if (!hdi.getValue().getBundleDocuments().getFilename().toUpperCase().endsWith(".PDF")) {
             errors.add(String.format("Uploaded bundle %s is not in expected format. Please upload bundle in pdf format.",
-                hdi.getValue().getBundleDocuments().getDocumentFilename()));
+                hdi.getValue().getBundleDocuments().getFilename()));
         }
         return hdi.getValue().getBundleDocuments();
     }
 
-    private List<HearingUploadBundleData> convertToHearingBundleDataList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<>() {
-        });
-    }
-
     private void validateHearingDate(CallbackRequest callbackRequest) {
-        if (callbackRequest.getCaseDetails().getData().get(HEARING_DATE) == null) {
+        if (callbackRequest.getCaseDetails().getCaseData().getHearingDate() == null) {
             log.info("Hearing date for Case ID: {} not found", callbackRequest.getCaseDetails().getId());
             throw new InvalidCaseDataException(BAD_REQUEST.value(), "Missing hearing date.");
         }

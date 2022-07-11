@@ -61,7 +61,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
 
     @Test
     public void generateGeneralOrderConsented() throws Exception {
-        Map<String, Object> documentMap = generalOrderService.createGeneralOrder(AUTH_TOKEN, consentedCaseDetails());
+        Map<String, Object> documentMap = generalOrderService.createAndSetGeneralOrder(AUTH_TOKEN, consentedCaseDetails());
 
         CaseDocument result = (CaseDocument) documentMap.get(GENERAL_ORDER_PREVIEW_DOCUMENT);
         doCaseDocumentAssert(result);
@@ -71,7 +71,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
 
     @Test
     public void generateGeneralOrderContested() throws Exception {
-        Map<String, Object> documentMap = generalOrderService.createGeneralOrder(AUTH_TOKEN, contestedCaseDetails());
+        Map<String, Object> documentMap = generalOrderService.createAndSetGeneralOrder(AUTH_TOKEN, contestedCaseDetails());
 
         CaseDocument result = (CaseDocument) documentMap.get(GENERAL_ORDER_PREVIEW_DOCUMENT);
         doCaseDocumentAssert(result);
@@ -112,7 +112,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
 
     @Test
     public void generateGeneralOrderConsentedInContested() throws Exception {
-        Map<String, Object> documentMap = generalOrderService.createGeneralOrder(AUTH_TOKEN, consentedInContestedCaseDetails());
+        Map<String, Object> documentMap = generalOrderService.createAndSetGeneralOrder(AUTH_TOKEN, consentedInContestedCaseDetails());
 
         CaseDocument result = (CaseDocument) documentMap.get(GENERAL_ORDER_PREVIEW_DOCUMENT);
         doCaseDocumentAssert(result);

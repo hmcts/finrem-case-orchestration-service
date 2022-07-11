@@ -8,17 +8,17 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.HttpServerErrorException;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedDraftOrderNotApprovedService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.is;
@@ -26,7 +26,9 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -34,12 +36,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDataWithRefusalOrder;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finremCaseDataWithRefusalOrder;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_TYPE;
@@ -114,21 +113,15 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
     @Test
     public void previewRefusalOrderSuccess() throws Exception {
         doValidCaseDataSetUp();
-        whenServiceGeneratesDocument().thenReturn(caseDataWithRefusalOrder());
 
         mvc.perform(post(PREVIEW_REFUSAL_ORDER_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(
-                jsonPath("$.data.refusalOrderPreviewDocument.document_url", is(DOC_URL)))
-            .andExpect(
-                jsonPath("$.data.refusalOrderPreviewDocument.document_filename",
-                    is(FILE_NAME)))
-            .andExpect(
-                jsonPath("$.data.refusalOrderPreviewDocument.document_binary_url",
-                    is(BINARY_URL)));
+            .andExpect(status().isOk());
+        verify(contestedDraftOrderNotApprovedService,
+            times(1)).createAndSetRefusalOrderPreviewDocument(eq(AUTH_TOKEN),
+            isA(FinremCaseDetails.class));
     }
 
     @Test
@@ -145,7 +138,8 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
     @Test
     public void previewRefusalOrder500Error() throws Exception {
         doValidCaseDataSetUp();
-        whenServiceGeneratesDocument().thenThrow(feignError());
+        doThrow(feignError()).when(contestedDraftOrderNotApprovedService)
+            .createAndSetRefusalOrderPreviewDocument(eq(AUTH_TOKEN), isA(FinremCaseDetails.class));
 
         mvc.perform(post(PREVIEW_REFUSAL_ORDER_URL)
             .content(requestContent.toString())
@@ -154,21 +148,17 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
             .andExpect(status().isInternalServerError());
     }
 
-    private OngoingStubbing<Map<String, Object>> whenServiceGeneratesDocument() {
-        return when(contestedDraftOrderNotApprovedService.createRefusalOrder(eq(AUTH_TOKEN), isA(CaseDetails.class)));
-    }
-
     @Test
     public void submitRefusalOrderSuccess() throws Exception {
         doValidCaseDataSetUp();
-        whenServicePopulatesCollection().thenReturn(caseDataWithRefusalOrder());
+        whenServicePopulatesCollection().thenReturn(finremCaseDataWithRefusalOrder());
 
         mvc.perform(post(SUBMIT_REFUSAL_ORDER_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
-        verify(contestedDraftOrderNotApprovedService).populateRefusalOrderCollection(any(CaseDetails.class));
+        verify(contestedDraftOrderNotApprovedService).populateRefusalOrderCollection(any(FinremCaseDetails.class));
     }
 
     @Test
@@ -185,7 +175,7 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
     @Test
     public void submitSendRefusalReasonWithRefusalAndShouldPrintForApplicantTrue() throws Exception {
         doValidRefusalOrder();
-        when(contestedDraftOrderNotApprovedService.getLatestRefusalReason(any())).thenReturn(Optional.of(caseDocument()));
+        when(contestedDraftOrderNotApprovedService.getLatestRefusalReason(any())).thenReturn(Optional.of(newDocument()));
         when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
         when(paperNotificationService.shouldPrintForRespondent(any())).thenReturn(true);
         mvc.perform(post(SUBMIT_REFUSAL_REASON_URL)
@@ -201,7 +191,7 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
     @Test
     public void submitSendRefusalReasonWithRefusalAndShouldNotPrintForParties() throws Exception {
         doValidRefusalOrder();
-        when(contestedDraftOrderNotApprovedService.getLatestRefusalReason(any())).thenReturn(Optional.of(caseDocument()));
+        when(contestedDraftOrderNotApprovedService.getLatestRefusalReason(any())).thenReturn(Optional.of(newDocument()));
         when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(false);
         when(paperNotificationService.shouldPrintForRespondent(any())).thenReturn(false);
         mvc.perform(post(SUBMIT_REFUSAL_REASON_URL)
@@ -227,7 +217,7 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
         verify(bulkPrintService, never()).printRespondentDocuments(any(), any(), any());
     }
 
-    private OngoingStubbing<Map<String, Object>> whenServicePopulatesCollection() {
-        return when(contestedDraftOrderNotApprovedService.populateRefusalOrderCollection(isA(CaseDetails.class)));
+    private OngoingStubbing<FinremCaseData> whenServicePopulatesCollection() {
+        return when(contestedDraftOrderNotApprovedService.populateRefusalOrderCollection(isA(FinremCaseDetails.class)));
     }
 }

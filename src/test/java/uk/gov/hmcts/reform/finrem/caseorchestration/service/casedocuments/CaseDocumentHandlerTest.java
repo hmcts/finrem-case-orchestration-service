@@ -4,9 +4,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CaseDocumentParty;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CaseDocumentType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.UploadCaseDocument;
+import uk.gov.hmcts.reform.finrem.ccd.domain.UploadCaseDocumentCollection;
+import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,14 +33,15 @@ public abstract class CaseDocumentHandlerTest {
         caseData = caseDetails.getData();
     }
 
-    protected ContestedUploadedDocumentData createContestedUploadDocumentItem(String type, String party,
-                                                                              String isConfidential, String isFdr, String other) {
-        return ContestedUploadedDocumentData.builder()
-            .uploadedCaseDocument(ContestedUploadedDocument
+    protected UploadCaseDocumentCollection createContestedUploadDocumentItem(String type, String party,
+                                                                             YesOrNo isConfidential, YesOrNo isFdr,
+                                                                             String other) {
+        return UploadCaseDocumentCollection.builder()
+            .value(UploadCaseDocument
                 .builder()
-                .caseDocuments(new CaseDocument())
-                .caseDocumentType(type)
-                .caseDocumentParty(party)
+                .caseDocuments(new Document())
+                .caseDocumentType(CaseDocumentType.getCaseDocumentType(type))
+                .caseDocumentParty(CaseDocumentParty.forValue(party))
                 .caseDocumentConfidential(isConfidential)
                 .caseDocumentOther(other)
                 .caseDocumentFdr(isFdr)

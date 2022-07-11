@@ -3,31 +3,25 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.PostStateOption;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.EventType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.SendOrderEventPostStateOption;
 
-import java.util.Map;
 import java.util.Objects;
-
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.PostStateOption.getSendOrderPostStateOption;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SEND_ORDER_POST_STATE_OPTION_FIELD;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class SendOrderContestedSubmittedHandler implements CallbackHandler {
 
-    private final CaseDataService caseDataService;
     private final FeatureToggleService featureToggleService;
     private final NotificationService notificationService;
     private final CcdService ccdService;
@@ -49,18 +43,17 @@ public class SendOrderContestedSubmittedHandler implements CallbackHandler {
 
         return AboutToStartOrSubmitCallbackResponse
             .builder()
-            .data(callbackRequest.getCaseDetails().getData())
+            .data(callbackRequest.getCaseDetails().getCaseData())
             .build();
     }
 
     private void updateCaseWithPostStateOption(CallbackRequest callbackRequest, String userAuthorisation) {
 
-        PostStateOption postStateOption =
-            getSendOrderPostStateOption(
-                (String) callbackRequest.getCaseDetails().getData().get(SEND_ORDER_POST_STATE_OPTION_FIELD));
+        SendOrderEventPostStateOption postStateOption =
+            callbackRequest.getCaseDetails().getCaseData().getSendOrderPostStateOption();
 
         if (isOptionThatRequireUpdate(postStateOption)) {
-            callbackRequest.getCaseDetails().getData().put(SEND_ORDER_POST_STATE_OPTION_FIELD, null);
+            callbackRequest.getCaseDetails().getCaseData().setSendOrderPostStateOption(null);
             ccdService.executeCcdEventOnCase(
                 userAuthorisation,
                 callbackRequest.getCaseDetails(),
@@ -68,17 +61,17 @@ public class SendOrderContestedSubmittedHandler implements CallbackHandler {
         }
     }
 
-    private boolean isOptionThatRequireUpdate(PostStateOption postStateOption) {
-        return PostStateOption.PREPARE_FOR_HEARING.equals(postStateOption)
-            || PostStateOption.CLOSE.equals(postStateOption);
+    private boolean isOptionThatRequireUpdate(SendOrderEventPostStateOption postStateOption) {
+        return SendOrderEventPostStateOption.PREPARE_FOR_HEARING.equals(postStateOption)
+            || SendOrderEventPostStateOption.CLOSE.equals(postStateOption);
     }
 
     private void sendNotifications(CallbackRequest callbackRequest) {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
-        if (!caseDataService.isPaperApplication(caseData) && Objects.nonNull(caseData.get(FINAL_ORDER_COLLECTION))) {
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData caseData = caseDetails.getCaseData();
+        if (!caseData.isPaperCase() && Objects.nonNull(caseData.getFinalOrderCollection())) {
             log.info("Received request to send email for 'Contest Order Approved' for Case ID: {}", callbackRequest.getCaseDetails().getId());
-            if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
+            if (caseData.isApplicantSolicitorAgreeToReceiveEmails()) {
                 log.info("Sending 'Contest Order Approved' email notification to Applicant Solicitor");
                 notificationService.sendContestOrderApprovedEmailApplicant(caseDetails);
             }
@@ -89,15 +82,5 @@ public class SendOrderContestedSubmittedHandler implements CallbackHandler {
                 notificationService.sendContestOrderApprovedEmailRespondent(caseDetails);
             }
         }
-    }
-
-    @Override
-    public boolean canHandle(uk.gov.hmcts.reform.finrem.ccd.callback.CallbackType callbackType, uk.gov.hmcts.reform.finrem.ccd.domain.CaseType caseType, uk.gov.hmcts.reform.finrem.ccd.domain.EventType eventType) {
-        return false;
-    }
-
-    @Override
-    public uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse handle(uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest, String userAuthorisation) {
-        return null;
     }
 }

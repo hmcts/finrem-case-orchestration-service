@@ -4,8 +4,8 @@ import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -36,7 +36,7 @@ public class GeneralApplicationDirectionsControllerTest extends BaseControllerTe
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(generalApplicationDirectionsService, times(1)).startGeneralApplicationDirections(isA(CaseDetails.class));
+        verify(generalApplicationDirectionsService, times(1)).startGeneralApplicationDirections(isA(FinremCaseDetails.class));
     }
 
     @Test
@@ -47,7 +47,8 @@ public class GeneralApplicationDirectionsControllerTest extends BaseControllerTe
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(generalApplicationDirectionsService, times(1)).submitGeneralApplicationDirections(isA(CaseDetails.class), eq(AUTH_TOKEN));
+        verify(generalApplicationDirectionsService, times(1))
+            .submitGeneralApplicationDirections(isA(FinremCaseDetails.class), eq(AUTH_TOKEN));
     }
 
     @Test
@@ -64,7 +65,8 @@ public class GeneralApplicationDirectionsControllerTest extends BaseControllerTe
     @Test
     public void startGeneralApplication500Error() throws Exception {
         doValidCaseDataSetUp();
-        doThrow(feignError()).when(generalApplicationDirectionsService).startGeneralApplicationDirections(isA(CaseDetails.class));
+        doThrow(feignError()).when(generalApplicationDirectionsService)
+            .startGeneralApplicationDirections(isA(FinremCaseDetails.class));
 
         mvc.perform(post(START_GENERAL_APPLICATION_URL)
             .content(requestContent.toString())
@@ -87,7 +89,8 @@ public class GeneralApplicationDirectionsControllerTest extends BaseControllerTe
     @Test
     public void submitGeneralApplication500Error() throws Exception {
         doValidCaseDataSetUp();
-        doThrow(feignError()).when(generalApplicationDirectionsService).submitGeneralApplicationDirections(isA(CaseDetails.class), eq(AUTH_TOKEN));
+        doThrow(feignError()).when(generalApplicationDirectionsService)
+            .submitGeneralApplicationDirections(isA(FinremCaseDetails.class), eq(AUTH_TOKEN));
 
         mvc.perform(post(SUBMIT_GENERAL_APPLICATION_URL)
             .content(requestContent.toString())
@@ -104,6 +107,7 @@ public class GeneralApplicationDirectionsControllerTest extends BaseControllerTe
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(generalApplicationDirectionsService, times(1)).submitInterimHearing(isA(CaseDetails.class), eq(AUTH_TOKEN));
+        verify(generalApplicationDirectionsService, times(1))
+            .submitInterimHearing(isA(FinremCaseDetails.class), eq(AUTH_TOKEN));
     }
 }

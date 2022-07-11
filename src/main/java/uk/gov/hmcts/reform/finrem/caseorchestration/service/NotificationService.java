@@ -15,6 +15,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMa
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import java.io.IOException;
 import java.net.URI;
@@ -25,8 +27,6 @@ import java.util.concurrent.CompletableFuture;
 
 import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_RECIPIENT;
@@ -53,16 +53,16 @@ public class NotificationService {
 
     private static final String DEFAULT_EMAIL = "fr_applicant_solicitor1@mailinator.com";
 
-    public void sendConsentedHWFSuccessfulConfirmationEmail(CaseDetails caseDetails) {
+    public void sendConsentedHWFSuccessfulConfirmationEmail(FinremCaseDetails caseDetails) {
         URI uri = buildUri(notificationServiceConfiguration.getHwfSuccessful());
         sendNotificationEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails), uri);
     }
 
-    public void sendAssignToJudgeConfirmationEmailToApplicantSolicitor(CaseDetails caseDetails) {
+    public void sendAssignToJudgeConfirmationEmailToApplicantSolicitor(FinremCaseDetails caseDetails) {
         sendAssignToJudgeConfirmationEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
 
-    public void sendAssignToJudgeConfirmationEmailToRespondentSolicitor(CaseDetails caseDetails) {
+    public void sendAssignToJudgeConfirmationEmailToRespondentSolicitor(FinremCaseDetails caseDetails) {
         sendAssignToJudgeConfirmationEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
 
@@ -97,11 +97,11 @@ public class NotificationService {
         sendNotificationEmail(notificationRequest, uri);
     }
 
-    public void sendConsentOrderAvailableEmailToApplicantSolicitor(CaseDetails caseDetails) {
+    public void sendConsentOrderAvailableEmailToApplicantSolicitor(FinremCaseDetails caseDetails) {
         sendConsentOrderAvailableEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
 
-    public void sendConsentOrderAvailableEmailToRespondentSolicitor(CaseDetails caseDetails) {
+    public void sendConsentOrderAvailableEmailToRespondentSolicitor(FinremCaseDetails caseDetails) {
         sendConsentOrderAvailableEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
 
@@ -110,14 +110,15 @@ public class NotificationService {
         sendNotificationEmail(notificationRequest, uri);
     }
 
-    public void sendConsentOrderAvailableCtscEmail(CaseDetails caseDetails) {
+    public void sendConsentOrderAvailableCtscEmail(FinremCaseDetails caseDetails) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentOrderAvailableCtsc());
-        NotificationRequest ctscNotificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
+        NotificationRequest ctscNotificationRequest =
+            notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
         ctscNotificationRequest.setNotificationEmail(notificationServiceConfiguration.getCtscEmail());
         sendNotificationEmail(ctscNotificationRequest, uri);
     }
 
-    public void sendContestedHwfSuccessfulConfirmationEmail(CaseDetails caseDetails) {
+    public void sendContestedHwfSuccessfulConfirmationEmail(FinremCaseDetails caseDetails) {
         URI uri = buildUri(notificationServiceConfiguration.getContestedHwfSuccessful());
         sendNotificationEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails), uri);
     }
@@ -135,13 +136,14 @@ public class NotificationService {
         sendNotificationEmail(notificationRequest, uri);
     }
 
-    public void sendContestOrderApprovedEmailApplicant(CaseDetails caseDetails) {
+    public void sendContestOrderApprovedEmailApplicant(FinremCaseDetails caseDetails) {
         CompletableFuture.runAsync(() ->
             sendContestOrderApprovedEmail(
                 notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails)));
     }
 
-    public void sendContestOrderApprovedEmailRespondent(CaseDetails caseDetails) {
+
+    public void sendContestOrderApprovedEmailRespondent(FinremCaseDetails caseDetails) {
         CompletableFuture.runAsync(() ->
             sendContestOrderApprovedEmail(
                 notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails)));
@@ -152,11 +154,11 @@ public class NotificationService {
         sendNotificationEmail(notificationRequest, uri);
     }
 
-    public void sendPrepareForHearingEmailApplicant(CaseDetails caseDetails) {
+    public void sendPrepareForHearingEmailApplicant(FinremCaseDetails caseDetails) {
         sendPrepareForHearingEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
 
-    public void sendPrepareForHearingEmailRespondent(CaseDetails caseDetails) {
+    public void sendPrepareForHearingEmailRespondent(FinremCaseDetails caseDetails) {
         sendPrepareForHearingEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
 
@@ -377,11 +379,19 @@ public class NotificationService {
         }
     }
 
+    @Deprecated
     public boolean shouldEmailRespondentSolicitor(Map<String, Object> caseData) {
         return !caseDataService.isPaperApplication(caseData)
             && caseDataService.isRespondentRepresentedByASolicitor(caseData)
             && caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData)
             && !NO_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT)));
+    }
+
+    public boolean shouldEmailRespondentSolicitor(FinremCaseData caseData) {
+        return !caseData.isPaperCase()
+            && caseData.isRespondentRepresentedByASolicitor()
+            && !caseData.getContactDetailsWrapper().getRespondentSolicitorEmail().isEmpty()
+            && caseData.isRespondentSolicitorAgreeToReceiveEmails();
     }
 
     public boolean shouldEmailApplicantSolicitor(CaseDetails caseDetails) {
@@ -402,21 +412,21 @@ public class NotificationService {
         return headers;
     }
 
-    public void sendNoticeOfChangeEmail(CaseDetails caseDetails) {
+    public void sendNoticeOfChangeEmail(FinremCaseDetails caseDetails) {
         URI uri = getNoticeOfChangeUri(caseDetails);
         NotificationRequest notificationRequest = notificationRequestMapper
             .getNotificationRequestForNoticeOfChange(caseDetails);
         sendEmailIfSolicitorIsDigital(caseDetails, notificationRequest, uri);
     }
 
-    public void sendNoticeOfChangeEmailCaseworker(CaseDetails caseDetails) {
+    public void sendNoticeOfChangeEmailCaseworker(FinremCaseDetails caseDetails) {
         URI uri = getNoticeOfChangeUriCaseworker(caseDetails);
         NotificationRequest notificationRequest = notificationRequestMapper
             .getNotificationRequestForNoticeOfChange(caseDetails);
         sendEmailIfSolicitorIsDigital(caseDetails, notificationRequest, uri);
     }
 
-    private void sendEmailIfSolicitorIsDigital(CaseDetails caseDetails,
+    private void sendEmailIfSolicitorIsDigital(FinremCaseDetails caseDetails,
                                                NotificationRequest notificationRequest,
                                                URI uri) {
 
@@ -433,29 +443,23 @@ public class NotificationService {
 
     }
 
-    private URI getNoticeOfChangeUri(CaseDetails caseDetails) {
-        return buildUri(caseDataService.isConsentedApplication(caseDetails)
+    private URI getNoticeOfChangeUri(FinremCaseDetails caseDetails) {
+        return buildUri(caseDetails.getCaseData().isConsentedApplication()
             ? notificationServiceConfiguration.getConsentedNoticeOfChange()
             : notificationServiceConfiguration.getContestedNoticeOfChange());
     }
 
-    private URI getNoticeOfChangeUriCaseworker(CaseDetails caseDetails) {
-        return buildUri(caseDataService.isConsentedApplication(caseDetails)
+    private URI getNoticeOfChangeUriCaseworker(FinremCaseDetails caseDetails) {
+        return buildUri(caseDetails.getCaseData().isConsentedApplication()
             ? notificationServiceConfiguration.getConsentedNoCCaseworker()
             : notificationServiceConfiguration.getContestedNoCCaseworker());
 
     }
 
     private boolean isApplicantNoticeOfChangeRequest(NotificationRequest notificationRequest,
-                                                     CaseDetails caseDetails) {
+                                                     FinremCaseDetails caseDetails) {
         return notificationRequest.getName().equalsIgnoreCase(
-            nullToEmpty(caseDetails.getData().get(getSolicitorNameKey(caseDetails))));
-    }
-
-    private String getSolicitorNameKey(CaseDetails caseDetails) {
-        return caseDataService.isConsentedApplication(caseDetails)
-            ? CONSENTED_SOLICITOR_NAME
-            : CONTESTED_SOLICITOR_NAME;
+            nullToEmpty(caseDetails.getCaseData().getApplicantSolicitorName()));
     }
 
     private String getRecipientEmail(CaseDetails caseDetails) throws JsonProcessingException {

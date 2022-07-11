@@ -8,13 +8,13 @@ import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,8 +42,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
 
 @WebMvcTest(HearingDocumentController.class)
 public class HearingDocumentControllerTest extends BaseControllerTest {
@@ -67,8 +67,8 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
             fail(e.getMessage());
         }
 
-        when(validateHearingService.validateHearingErrors(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
-        when(validateHearingService.validateHearingWarnings(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
+        when(validateHearingService.validateHearingErrors(isA(FinremCaseDetails.class))).thenReturn(ImmutableList.of());
+        when(validateHearingService.validateHearingWarnings(isA(FinremCaseDetails.class))).thenReturn(ImmutableList.of());
     }
 
     private void doRequestSetUp() throws IOException, URISyntaxException {
@@ -87,8 +87,8 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void generateHearingDocumentFormC() throws Exception {
-        when(hearingDocumentService.generateHearingDocuments(eq(AUTH_TOKEN), isA(CaseDetails.class)))
-            .thenReturn(ImmutableMap.of("formC", caseDocument()));
+        when(hearingDocumentService.generateHearingDocuments(eq(AUTH_TOKEN), isA(FinremCaseDetails.class)))
+            .thenReturn(ImmutableMap.of("formC", newDocument()));
 
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
             .content(requestContent.toString())
@@ -107,8 +107,8 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
             .getResource("/fixtures/contested/validate-hearing-with-fastTrackDecision-paperApplication.json")).toURI()));
 
-        when(hearingDocumentService.generateHearingDocuments(eq(AUTH_TOKEN), isA(CaseDetails.class)))
-            .thenReturn(ImmutableMap.of("formC", caseDocument()));
+        when(hearingDocumentService.generateHearingDocuments(eq(AUTH_TOKEN), isA(FinremCaseDetails.class)))
+            .thenReturn(ImmutableMap.of("formC", newDocument()));
 
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
             .content(requestContent.toString())
@@ -122,7 +122,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void generateMiniFormAHttpError500() throws Exception {
-        when(hearingDocumentService.generateHearingDocuments(eq(AUTH_TOKEN), isA(CaseDetails.class)))
+        when(hearingDocumentService.generateHearingDocuments(eq(AUTH_TOKEN), isA(FinremCaseDetails.class)))
                 .thenThrow(feignError());
 
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
@@ -136,7 +136,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     public void generateAdditionalHearingDocumentSuccess() throws Exception {
         doValidCaseDataSetUpForAdditionalHearing();
 
-        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
+        when(hearingDocumentService.alreadyHadFirstHearing(isA(FinremCaseDetails.class))).thenReturn(true);
         when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
 
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
@@ -185,7 +185,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldThrowErrorWhenIssueDateAndHearingDateAreEmpty() throws Exception {
-        when(validateHearingService.validateHearingErrors(isA(CaseDetails.class)))
+        when(validateHearingService.validateHearingErrors(isA(FinremCaseDetails.class)))
             .thenReturn(ImmutableList.of(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY));
 
         requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
@@ -202,8 +202,8 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldThrowWarningsWhenNotFastTrackDecision() throws Exception {
-        when(validateHearingService.validateHearingErrors(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
-        when(validateHearingService.validateHearingWarnings(isA(CaseDetails.class)))
+        when(validateHearingService.validateHearingErrors(isA(FinremCaseDetails.class))).thenReturn(ImmutableList.of());
+        when(validateHearingService.validateHearingWarnings(isA(FinremCaseDetails.class)))
             .thenReturn(ImmutableList.of("Date of the hearing must be between 12 and 14 weeks."));
 
         requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
@@ -220,8 +220,8 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldThrowWarningsWhenFastTrackDecision() throws Exception {
-        when(validateHearingService.validateHearingErrors(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
-        when(validateHearingService.validateHearingWarnings(isA(CaseDetails.class)))
+        when(validateHearingService.validateHearingErrors(isA(FinremCaseDetails.class))).thenReturn(ImmutableList.of());
+        when(validateHearingService.validateHearingWarnings(isA(FinremCaseDetails.class)))
             .thenReturn(ImmutableList.of("Date of the Fast Track hearing must be between 6 and 10 weeks."));
 
         requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
@@ -238,8 +238,8 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldSuccessfullyValidate() throws Exception {
-        when(validateHearingService.validateHearingErrors(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
-        when(validateHearingService.validateHearingWarnings(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
+        when(validateHearingService.validateHearingErrors(isA(FinremCaseDetails.class))).thenReturn(ImmutableList.of());
+        when(validateHearingService.validateHearingWarnings(isA(FinremCaseDetails.class))).thenReturn(ImmutableList.of());
 
         requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
             .getResource("/fixtures/contested/validate-hearing-successfully.json")).toURI()));

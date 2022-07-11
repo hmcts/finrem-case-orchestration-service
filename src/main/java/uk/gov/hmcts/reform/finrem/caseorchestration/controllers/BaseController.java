@@ -13,10 +13,19 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public abstract class BaseController {
 
+    @Deprecated
     public void validateCaseData(CallbackRequest callbackRequest) {
         if (callbackRequest == null
             || callbackRequest.getCaseDetails() == null
             || callbackRequest.getCaseDetails().getData() == null) {
+            throw new InvalidCaseDataException(BAD_REQUEST.value(), "Missing data from callbackRequest.");
+        }
+    }
+
+    public void validateCaseData(uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest) {
+        if (callbackRequest == null
+            || callbackRequest.getCaseDetails() == null
+            || callbackRequest.getCaseDetails().getCaseData() == null) {
             throw new InvalidCaseDataException(BAD_REQUEST.value(), "Missing data from callbackRequest.");
         }
     }

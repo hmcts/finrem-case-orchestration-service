@@ -25,6 +25,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import java.io.IOException;
 import java.util.Map;
@@ -32,9 +35,6 @@ import java.util.Optional;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INCLUDES_REPRESENTATIVE_UPDATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOC_PARTY;
 
 @RestController
 @Slf4j
@@ -51,54 +51,63 @@ public class NotificationsController extends BaseController {
     private final TransferCourtService transferCourtService;
     private final FeatureToggleService featureToggleService;
     private final NocLetterNotificationService nocLetterNotificationService;
+    private final FinremCallbackRequestDeserializer finremCallbackRequestDeserializer;
 
     @PostMapping(value = "/hwf-successful", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Notify Applicant/Applicant Solicitor of HWF Successful by email or letter.")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "HWFSuccessful notification sent successfully",
-            response = AboutToStartOrSubmitCallbackResponse.class)})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendHwfSuccessfulConfirmationNotification(
-        @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
-        @RequestBody CallbackRequest callbackRequest) {
+            response = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class)})
+    public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse>
+    sendHwfSuccessfulConfirmationNotification(@RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
+                                              @RequestBody String source) {
+
+        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest =
+            finremCallbackRequestDeserializer.deserialize(source);
 
         log.info("Received request to send email for HWF Successful for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData caseData = caseDetails.getCaseData();
 
-        if (caseDataService.isConsentedApplication(callbackRequest.getCaseDetails())) {
+        if (caseData.isConsentedApplication()) {
             paperNotificationService.printHwfSuccessfulNotification(caseDetails, authToken);
 
-            if (!caseDataService.isPaperApplication(caseData) && caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
+            if (!caseData.isPaperCase() && caseData.isApplicantSolicitorAgreeToReceiveEmails()) {
                 log.info("Sending Consented HWF Successful email notification to Solicitor");
                 notificationService.sendConsentedHWFSuccessfulConfirmationEmail(caseDetails);
             }
-        } else if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
+        } else if (caseData.isApplicantSolicitorAgreeToReceiveEmails()) {
             log.info("Sending Contested HWF Successful email notification to Solicitor");
             notificationService.sendContestedHwfSuccessfulConfirmationEmail(caseDetails);
         }
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        return ResponseEntity.ok(uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseData)
+            .build());
     }
 
     @PostMapping(value = "/assign-to-judge", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Notify solicitor when Judge assigned to case via email or letter")
     @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Case assigned to Judge notification sent successfully",
-            response = AboutToStartOrSubmitCallbackResponse.class)})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendAssignToJudgeConfirmationNotification(
-        @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
-        @RequestBody CallbackRequest callbackRequest) {
+            response = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class)})
+    public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse>
+    sendAssignToJudgeConfirmationNotification(@RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
+                                              @RequestBody String source) {
+
+        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest =
+            finremCallbackRequestDeserializer.deserialize(source);
 
         log.info("Received request to notify solicitor for Judge successfully assigned to case for Case ID: {}",
             callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData caseData = caseDetails.getCaseData();
 
         paperNotificationService.printAssignToJudgeNotification(caseDetails, authToken);
 
-        if (!caseDataService.isPaperApplication(caseData) && caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
+        if (!caseData.isPaperCase() && caseData.isApplicantSolicitorAgreeToReceiveEmails()) {
             log.info("Sending email notification to Applicant Solicitor for Judge successfully assigned to case");
             notificationService.sendAssignToJudgeConfirmationEmailToApplicantSolicitor(caseDetails);
         }
@@ -109,26 +118,33 @@ public class NotificationsController extends BaseController {
             notificationService.sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
         }
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        return ResponseEntity.ok(uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseData)
+            .build());
     }
 
     @PostMapping(value = "/assign-to-judge-consent-in-contested", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Notify applicant and respondent when Judge assigned to case via letter")
     @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Case assigned to Judge notification sent successfully",
-            response = AboutToStartOrSubmitCallbackResponse.class)})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendConsentInContestedAssignToJudgeConfirmationPaperNotification(
-        @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
-        @RequestBody CallbackRequest callbackRequest) {
+            response = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class)})
+    public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse>
+    sendConsentInContestedAssignToJudgeConfirmationPaperNotification(@RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
+                                                                     @RequestBody String source) {
+
+        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest =
+            finremCallbackRequestDeserializer.deserialize(source);
 
         log.info("Received request to notify applicant and respondent for Judge successfully assigned to case for Case ID: {}",
             callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         paperNotificationService.printConsentInContestedAssignToJudgeConfirmationNotification(caseDetails, authToken);
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+        return ResponseEntity.ok(uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDetails.getCaseData())
+            .build());
     }
 
     @PostMapping(value = "/consent-order-made", consumes = APPLICATION_JSON_VALUE)
@@ -295,16 +311,19 @@ public class NotificationsController extends BaseController {
     @ApiOperation(value = "send e-mail for Consent order available.")
     @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Consent order available e-mail sent successfully",
-            response = AboutToStartOrSubmitCallbackResponse.class)})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendConsentOrderAvailableEmail(
-        @RequestBody CallbackRequest callbackRequest) {
+            response = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class)})
+    public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendConsentOrderAvailableEmail(
+        @RequestBody String source) {
+
+        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest =
+            finremCallbackRequestDeserializer.deserialize(source);
 
         log.info("Received request to send email for 'Consent Order Available' for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData caseData = caseDetails.getCaseData();
 
-        if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
+        if (caseData.isApplicantSolicitorAgreeToReceiveEmails()) {
             log.info("Sending email notification to Applicant Solicitor for 'Consent Order Available'");
             notificationService.sendConsentOrderAvailableEmailToApplicantSolicitor(caseDetails);
         }
@@ -315,33 +334,39 @@ public class NotificationsController extends BaseController {
             notificationService.sendConsentOrderAvailableEmailToRespondentSolicitor(caseDetails);
         }
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        return ResponseEntity.ok(uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseData)
+            .build());
     }
 
     @PostMapping(value = "/prepare-for-hearing", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for 'Prepare for Hearing'.")
     @ApiResponses(value = {
         @ApiResponse(code = 204, message = "'Prepare for Hearing' e-mail sent successfully",
-            response = AboutToStartOrSubmitCallbackResponse.class)})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendPrepareForHearingEmail(
+            response = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class)})
+    public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendPrepareForHearingEmail(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @RequestBody CallbackRequest callbackRequest) {
+        @RequestBody String source) {
+
+        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest =
+            finremCallbackRequestDeserializer.deserialize(source);
 
         log.info("Received request to send email for 'Prepare for Hearing' for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
+        if (caseDetails.getCaseData().isApplicantSolicitorAgreeToReceiveEmails()) {
             log.info("Sending email notification to Applicant Solicitor for 'Prepare for Hearing'");
             notificationService.sendPrepareForHearingEmailApplicant(caseDetails);
         }
 
-        if (featureToggleService.isRespondentJourneyEnabled() && notificationService.shouldEmailRespondentSolicitor(caseDetails.getData())) {
+        if (featureToggleService.isRespondentJourneyEnabled()
+            && notificationService.shouldEmailRespondentSolicitor(caseDetails.getCaseData())) {
             log.info("Sending email notification to Respondent Solicitor for 'Prepare for Hearing'");
             notificationService.sendPrepareForHearingEmailRespondent(caseDetails);
         }
 
-        if (caseDataService.isContestedPaperApplication(caseDetails)) {
+        if (caseDetails.getCaseData().isContestedPaperApplication()) {
             if (hearingDocumentService.alreadyHadFirstHearing(callbackRequest.getCaseDetailsBefore())) {
                 log.info("Sending Additional Hearing Document to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
                 additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, caseDetails);
@@ -351,7 +376,9 @@ public class NotificationsController extends BaseController {
             }
         }
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+        return ResponseEntity.ok(uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDetails.getCaseData())
+            .build());
     }
 
     @PostMapping(value = "/prepare-for-hearing-order-sent", consumes = APPLICATION_JSON_VALUE)
@@ -463,17 +490,22 @@ public class NotificationsController extends BaseController {
     @ApiOperation(value = "send a manual payment letter")
     @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Manual Payment letter sent successfully",
-            response = AboutToStartOrSubmitCallbackResponse.class)})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendManualPaymentPaperNotification(
+            response = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class)})
+    public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendManualPaymentPaperNotification(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
-        @RequestBody CallbackRequest callbackRequest) {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        @RequestBody String source) {
+
+        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest =
+            finremCallbackRequestDeserializer.deserialize(source);
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request to send Manual Payment Letter for Case ID: {}", caseDetails.getId());
         validateCaseData(callbackRequest);
 
         paperNotificationService.printManualPaymentNotification(caseDetails, authToken);
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+        return ResponseEntity.ok(uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDetails.getCaseData())
+            .build());
     }
 
     @PostMapping(value = "/general-application-refer-to-judge", consumes = APPLICATION_JSON_VALUE)
@@ -589,45 +621,53 @@ public class NotificationsController extends BaseController {
     @ApiOperation(value = "Send a notice of change to the Solicitor email and a letter to the organization.")
     @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Notice of change e-mail and letter sent successfully",
-            response = AboutToStartOrSubmitCallbackResponse.class)})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendNoticeOfChangeNotifications(
+            response = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class)})
+    public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse>
+    sendNoticeOfChangeNotifications(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @RequestBody CallbackRequest callbackRequest) {
+        @RequestBody String source) {
+        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest =
+            finremCallbackRequestDeserializer.deserialize(source);
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         log.info("Received request to send Notice of Change email and letter for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
-
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         notificationService.sendNoticeOfChangeEmail(caseDetails);
         log.info("Call the noc letter service");
         nocLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, callbackRequest.getCaseDetailsBefore(), authorisationToken);
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+        return ResponseEntity.ok(uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDetails.getCaseData())
+            .build());
     }
 
     @PostMapping(value = "/notice-of-change/caseworker", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Send a notice of change to the Solicitor email and a letter to the organization.")
     @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Notice of change e-mail and letter sent successfully",
-            response = AboutToStartOrSubmitCallbackResponse.class)})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendNoticeOfChangeNotificationsCaseworker(
+            response = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class)})
+    public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendNoticeOfChangeNotificationsCaseworker(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @RequestBody CallbackRequest callbackRequest) {
+        @RequestBody String source) {
+
+        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest =
+            finremCallbackRequestDeserializer.deserialize(source);
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         validateCaseData(callbackRequest);
 
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
         if (!requiresNotifications(callbackRequest)) {
-            return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+            return ResponseEntity.ok(uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse
+                .builder().data(caseDetails.getCaseData()).build());
         }
         log.info("Received request to send Notice of Change email and letter for Case ID: {}", callbackRequest.getCaseDetails().getId());
         notificationService.sendNoticeOfChangeEmailCaseworker(caseDetails);
         log.info("Call the noc letter service");
         nocLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, callbackRequest.getCaseDetailsBefore(), authorisationToken);
-        caseDetails.getData().put(INCLUDES_REPRESENTATIVE_UPDATE, null);
-        caseDetails.getData().put(NOC_PARTY, null);
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+        return ResponseEntity.ok(uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDetails.getCaseData())
+            .build());
     }
 
     @PostMapping(value = "/update-frc", consumes = APPLICATION_JSON_VALUE)
@@ -661,11 +701,11 @@ public class NotificationsController extends BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    private boolean requiresNotifications(CallbackRequest callbackRequest) {
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+    private boolean requiresNotifications(uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest) {
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getCaseData();
 
         return featureToggleService.isCaseworkerNoCEnabled()
-            && Optional.ofNullable(caseData.get(INCLUDES_REPRESENTATIVE_UPDATE))
-            .map(updateField -> updateField.equals(YES_VALUE)).orElse(false);
+            && Optional.ofNullable(caseData.getContactDetailsWrapper().getUpdateIncludesRepresentativeChange())
+            .map(updateField -> updateField.isYes()).orElse(false);
     }
 }

@@ -6,15 +6,15 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.PensionTypeCollection;
 
 import java.util.List;
 
@@ -38,9 +38,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.PENSION_TYPE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.pensionDocumentData;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.pensionTypeCollection;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.DOCUMENT_BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.CONSENT_ORDER_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
@@ -93,11 +93,11 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     @Test
     public void latestConsentOrderIsMissing() throws Exception {
         doMissingLatestConsentOrder();
-        whenServiceGeneratesDocument().thenReturn(caseDocument());
-        whenServiceGeneratesNotificationLetter().thenReturn(caseDocument());
-        whenAnnexStampingDocument().thenReturn(caseDocument());
-        whenStampingDocument().thenReturn(caseDocument());
-        whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
+        whenServiceGeneratesDocument().thenReturn(newDocument());
+        whenServiceGeneratesNotificationLetter().thenReturn(newDocument());
+        whenAnnexStampingDocument().thenReturn(newDocument());
+        whenStampingDocument().thenReturn(newDocument());
+        whenStampingPensionDocuments().thenReturn(singletonList(pensionTypeCollection()));
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
@@ -111,12 +111,11 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     @Test
     public void consentOrderApprovedSuccess() throws Exception {
         doValidCaseDataSetUp();
-        whenServiceGeneratesDocument().thenReturn(caseDocument());
-        whenServiceGeneratesNotificationLetter().thenReturn(caseDocument());
-        whenAnnexStampingDocument().thenReturn(caseDocument());
-        whenStampingDocument().thenReturn(caseDocument());
-        whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
-        when(documentHelper.getPensionDocumentsData(any())).thenReturn(singletonList(caseDocument()));
+        whenServiceGeneratesDocument().thenReturn(newDocument());
+        whenServiceGeneratesNotificationLetter().thenReturn(newDocument());
+        whenAnnexStampingDocument().thenReturn(newDocument());
+        whenStampingDocument().thenReturn(newDocument());
+        whenStampingPensionDocuments().thenReturn(singletonList(pensionTypeCollection()));
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
@@ -132,12 +131,11 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     @Test
     public void consentOrderApprovedSuccessForPaperApplication() throws Exception {
         doValidCaseDataSetUpForPaperApplication();
-        whenServiceGeneratesDocument().thenReturn(caseDocument());
-        whenServiceGeneratesNotificationLetter().thenReturn(caseDocument());
-        whenAnnexStampingDocument().thenReturn(caseDocument());
-        whenStampingDocument().thenReturn(caseDocument());
-        whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
-        when(documentHelper.getPensionDocumentsData(any())).thenReturn(singletonList(caseDocument()));
+        whenServiceGeneratesDocument().thenReturn(newDocument());
+        whenServiceGeneratesNotificationLetter().thenReturn(newDocument());
+        whenAnnexStampingDocument().thenReturn(newDocument());
+        whenStampingDocument().thenReturn(newDocument());
+        whenStampingPensionDocuments().thenReturn(singletonList(pensionTypeCollection()));
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
@@ -153,14 +151,12 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     @Test
     public void shouldUpdateStateToConsentOrderMadeAndBulkPrint() throws Exception {
         doValidCaseDataSetUpNoPensionCollection();
-        whenServiceGeneratesDocument().thenReturn(caseDocument());
-        whenServiceGeneratesNotificationLetter().thenReturn(caseDocument());
-        whenAnnexStampingDocument().thenReturn(caseDocument());
-        whenStampingDocument().thenReturn(caseDocument());
-        whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
+        whenServiceGeneratesDocument().thenReturn(newDocument());
+        whenServiceGeneratesNotificationLetter().thenReturn(newDocument());
+        whenAnnexStampingDocument().thenReturn(newDocument());
+        whenStampingDocument().thenReturn(newDocument());
+        whenStampingPensionDocuments().thenReturn(singletonList(pensionTypeCollection()));
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
-        when(notificationService.shouldEmailApplicantSolicitor(any())).thenReturn(true);
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
@@ -179,14 +175,12 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     @Test
     public void shouldUpdateStateToConsentOrderMadeAndBulkPrint_respJounryToggledOff() throws Exception {
         doValidCaseDataSetUpNoPensionCollection();
-        whenServiceGeneratesDocument().thenReturn(caseDocument());
-        whenServiceGeneratesNotificationLetter().thenReturn(caseDocument());
-        whenAnnexStampingDocument().thenReturn(caseDocument());
-        whenStampingDocument().thenReturn(caseDocument());
-        whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
+        whenServiceGeneratesDocument().thenReturn(newDocument());
+        whenServiceGeneratesNotificationLetter().thenReturn(newDocument());
+        whenAnnexStampingDocument().thenReturn(newDocument());
+        whenStampingDocument().thenReturn(newDocument());
+        whenStampingPensionDocuments().thenReturn(singletonList(pensionTypeCollection()));
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
-        when(notificationService.shouldEmailApplicantSolicitor(any())).thenReturn(true);
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
@@ -205,14 +199,12 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     @Test
     public void shouldUpdateStateToConsentOrderMadeAndBulkPrint_noEmails() throws Exception {
         doValidCaseDataSetUpNoPensionCollection();
-        whenServiceGeneratesDocument().thenReturn(caseDocument());
-        whenServiceGeneratesNotificationLetter().thenReturn(caseDocument());
-        whenAnnexStampingDocument().thenReturn(caseDocument());
-        whenStampingDocument().thenReturn(caseDocument());
-        whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
+        whenServiceGeneratesDocument().thenReturn(newDocument());
+        whenServiceGeneratesNotificationLetter().thenReturn(newDocument());
+        whenAnnexStampingDocument().thenReturn(newDocument());
+        whenStampingDocument().thenReturn(newDocument());
+        whenStampingPensionDocuments().thenReturn(singletonList(pensionTypeCollection()));
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
-        when(notificationService.shouldEmailApplicantSolicitor(any())).thenReturn(false);
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
@@ -232,12 +224,11 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     public void shouldNotTriggerConsentOrderApprovedNotificationLetterIfIsNotPaperApplication() throws Exception {
         doValidCaseDataSetUp();
 
-        whenServiceGeneratesDocument().thenReturn(caseDocument());
-        whenServiceGeneratesNotificationLetter().thenReturn(caseDocument());
-        whenAnnexStampingDocument().thenReturn(caseDocument());
-        whenStampingDocument().thenReturn(caseDocument());
-        whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
-        when(documentHelper.getPensionDocumentsData(any())).thenReturn(singletonList(caseDocument()));
+        whenServiceGeneratesDocument().thenReturn(newDocument());
+        whenServiceGeneratesNotificationLetter().thenReturn(newDocument());
+        whenAnnexStampingDocument().thenReturn(newDocument());
+        whenStampingDocument().thenReturn(newDocument());
+        whenStampingPensionDocuments().thenReturn(singletonList(pensionTypeCollection()));
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
@@ -296,7 +287,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     public void consentInContestedSendOrderShouldPrintDocsWhenApproved() throws Exception {
         doValidConsentOrderApprovedSetup();
         when(consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(any(), eq(AUTH_TOKEN)))
-            .thenReturn(caseDocument());
+            .thenReturn(newDocument());
 
         ResultActions result = mvc.perform(post(contestedConsentSendOrderEndpoint())
             .content(requestContent.toString())
@@ -307,23 +298,23 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), eq(AUTH_TOKEN));
     }
 
-    private OngoingStubbing<CaseDocument> whenServiceGeneratesDocument() {
-        return when(consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(isA(CaseDetails.class), eq(AUTH_TOKEN)));
+    private OngoingStubbing<Document> whenServiceGeneratesDocument() {
+        return when(consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(isA(FinremCaseDetails.class), eq(AUTH_TOKEN)));
     }
 
-    private OngoingStubbing<CaseDocument> whenServiceGeneratesNotificationLetter() {
-        return when(consentOrderApprovedDocumentService.generateApprovedConsentOrderCoverLetter(isA(CaseDetails.class), eq(AUTH_TOKEN)));
+    private OngoingStubbing<Document> whenServiceGeneratesNotificationLetter() {
+        return when(consentOrderApprovedDocumentService.generateApprovedConsentOrderCoverLetter(isA(FinremCaseDetails.class), eq(AUTH_TOKEN)));
     }
 
-    private OngoingStubbing<CaseDocument> whenAnnexStampingDocument() {
-        return when(genericDocumentService.annexStampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN)));
+    private OngoingStubbing<Document> whenAnnexStampingDocument() {
+        return when(genericDocumentService.annexStampDocument(isA(Document.class), eq(AUTH_TOKEN)));
     }
 
-    private OngoingStubbing<CaseDocument> whenStampingDocument() {
-        return when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN)));
+    private OngoingStubbing<Document> whenStampingDocument() {
+        return when(genericDocumentService.stampDocument(isA(Document.class), eq(AUTH_TOKEN)));
     }
 
-    private OngoingStubbing<List<PensionCollectionData>> whenStampingPensionDocuments() {
+    private OngoingStubbing<List<PensionTypeCollection>> whenStampingPensionDocuments() {
         return when(consentOrderApprovedDocumentService.stampPensionDocuments(any(), eq(AUTH_TOKEN)));
     }
 

@@ -4,14 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.frcupateinfo.UpdateFrcInfoLetterDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.generators.UpdateFrcInfoLetterDetailsGenerator;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +23,6 @@ public abstract class BaseUpdateFrcInfoDocumentService {
     private static final String CASE_DETAILS = "caseDetails";
     private static final String CASE_DATA = "case_data";
 
-    protected final CaseDataService caseDataService;
     private final GenericDocumentService genericDocumentService;
     private final DocumentConfiguration documentConfiguration;
     private final UpdateFrcInfoLetterDetailsGenerator updateFrcInfoLetterDetailsGenerator;
@@ -32,17 +30,15 @@ public abstract class BaseUpdateFrcInfoDocumentService {
     @Autowired
     public BaseUpdateFrcInfoDocumentService(GenericDocumentService genericDocumentService,
                                                DocumentConfiguration documentConfiguration,
-                                               CaseDataService caseDataService,
                                                UpdateFrcInfoLetterDetailsGenerator updateFrcInfoLetterDetailsGenerator) {
         this.genericDocumentService = genericDocumentService;
         this.documentConfiguration = documentConfiguration;
-        this.caseDataService = caseDataService;
         this.updateFrcInfoLetterDetailsGenerator = updateFrcInfoLetterDetailsGenerator;
     }
 
-    public abstract Optional<CaseDocument> getUpdateFrcInfoLetter(CaseDetails caseDetails, String authToken);
+    public abstract Optional<Document> getUpdateFrcInfoLetter(FinremCaseDetails caseDetails, String authToken);
 
-    protected CaseDocument generateSolicitorUpdateFrcInfoLetter(CaseDetails caseDetails, String authToken,
+    protected Document generateSolicitorUpdateFrcInfoLetter(FinremCaseDetails caseDetails, String authToken,
                                                       DocumentHelper.PaperNotificationRecipient recipient) {
         log.info("Generating Update FRC Info Letter for {} SOLICITOR for caseId {}", recipient, caseDetails.getId());
         String template = documentConfiguration.getUpdateFRCInformationSolicitorTemplate();
@@ -51,7 +47,7 @@ public abstract class BaseUpdateFrcInfoDocumentService {
         return generateUpdateFrcInfoLetter(caseDetails, authToken, recipient, template, fileName);
     }
 
-    protected CaseDocument generateLitigantUpdateFrcInfoLetter(CaseDetails caseDetails,
+    protected Document generateLitigantUpdateFrcInfoLetter(FinremCaseDetails caseDetails,
                                                      String authToken,
                                                      DocumentHelper.PaperNotificationRecipient recipient) {
         log.info("Generating Update FRC Info Letter for {} for caseId {}", recipient, caseDetails.getId());
@@ -61,9 +57,9 @@ public abstract class BaseUpdateFrcInfoDocumentService {
         return generateUpdateFrcInfoLetter(caseDetails, authToken, recipient, template, filename);
     }
 
-    private CaseDocument generateUpdateFrcInfoLetter(CaseDetails caseDetails, String authToken,
-                                                     DocumentHelper.PaperNotificationRecipient recipient,
-                                                     String template, String filename) {
+    private Document generateUpdateFrcInfoLetter(FinremCaseDetails caseDetails, String authToken,
+                                                 DocumentHelper.PaperNotificationRecipient recipient,
+                                                 String template, String filename) {
         UpdateFrcInfoLetterDetails letterDetails = updateFrcInfoLetterDetailsGenerator.generate(caseDetails, recipient);
         Map letterDetailsMap = convertUpdateFrcInfoLetterDetailsToMap(letterDetails);
         return genericDocumentService.generateDocumentFromPlaceholdersMap(authToken, letterDetailsMap, template, filename);

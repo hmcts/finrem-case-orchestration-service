@@ -4,47 +4,44 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DefaultsConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
+import uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.ccd.domain.AssignToJudgeReason;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import javax.validation.constraints.NotNull;
 
 import java.time.LocalDate;
-import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A_CONSENTED_IN_CONTESTED;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
+@RequiredArgsConstructor
 public class MiniFormAController extends BaseController {
 
-    @Autowired private OnlineFormDocumentService service;
-    @Autowired private DefaultsConfiguration defaultsConfiguration;
-    @Autowired private CaseDataService caseDataService;
+    private final OnlineFormDocumentService service;
+    private final DefaultsConfiguration defaultsConfiguration;
+    private final FinremCallbackRequestDeserializer finremCallbackRequestDeserializer;
 
-    public static final String assignedToJudgeReason = "assignedToJudgeReason";
-    public static final String assignedToJudgeReasonDefault = "Draft consent order";
-    public static final String assignedToJudge = "assignedToJudge";
-    public static final String referToJudgeDate = "referToJudgeDate";
-    public static final String referToJudgeText = "referToJudgeText";
-    public static final String referToJudgeTextDefault = "consent for approval";
+
+    public static final AssignToJudgeReason ASSIGNED_TO_JUDGE_REASON_DEFAULT = AssignToJudgeReason.DRAFT_CONSENT_ORDER;
+    public static final String REFER_TO_JUDGE_TEXT_DEFAULT = "consent for approval";
 
     @PostMapping(path = "/documents/generate-mini-form-a", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles Consented Mini Form A generation. Serves as a callback from CCD")
@@ -55,33 +52,35 @@ public class MiniFormAController extends BaseController {
         @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateMiniFormA(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+        @NotNull @RequestBody @ApiParam("CaseData") String source) {
+
+        CallbackRequest callback = finremCallbackRequestDeserializer.deserialize(source);
 
         log.info("Received request to generate Consented Mini Form A for Case ID : {}", callback.getCaseDetails().getId());
 
-        CaseDetails caseDetails = callback.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
+        FinremCaseDetails caseDetails = callback.getCaseDetails();
+        FinremCaseData caseData = caseDetails.getCaseData();
 
-        if (!caseDataService.isConsentedInContestedCase(caseDetails)) {
-            CaseDocument document = service.generateMiniFormA(authorisationToken, callback.getCaseDetails());
-            caseData.put(MINI_FORM_A, document);
+        if (!caseData.isConsentedInContestedCase()) {
+            Document miniFormA = service.generateMiniFormA(authorisationToken, caseDetails);
+            caseData.setMiniFormA(miniFormA);
 
             log.info("Defaulting AssignedToJudge fields for Case ID: {}", callback.getCaseDetails().getId());
-            populateAssignToJudgeFields(caseData, caseDetails);
+            populateAssignToJudgeFields(caseData);
         } else {
-            CaseDocument document = service.generateConsentedInContestedMiniFormA(callback.getCaseDetails(), authorisationToken);
-            caseData.put(MINI_FORM_A_CONSENTED_IN_CONTESTED, document);
+            Document consentMiniFormA = service.generateConsentedInContestedMiniFormA(callback.getCaseDetails(), authorisationToken);
+            caseData.getConsentOrderWrapper().setConsentMiniFormA(consentMiniFormA);
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    private void populateAssignToJudgeFields(Map<String, Object> caseData, CaseDetails caseDetails) {
-        caseData.put(assignedToJudge, defaultsConfiguration.getAssignedToJudgeDefault());
-        if (caseDataService.isConsentedApplication(caseDetails)) {
-            caseData.put(assignedToJudgeReason, assignedToJudgeReasonDefault);
-            caseData.put(referToJudgeDate, LocalDate.now());
-            caseData.put(referToJudgeText, referToJudgeTextDefault);
+    private void populateAssignToJudgeFields(FinremCaseData caseData) {
+        caseData.setAssignedToJudge(defaultsConfiguration.getAssignedToJudgeDefault());
+        if (caseData.isConsentedApplication()) {
+            caseData.setAssignedToJudgeReason(ASSIGNED_TO_JUDGE_REASON_DEFAULT);
+            caseData.getReferToJudgeWrapper().setReferToJudgeDate(LocalDate.now());
+            caseData.getReferToJudgeWrapper().setReferToJudgeText(REFER_TO_JUDGE_TEXT_DEFAULT);
         }
     }
 }

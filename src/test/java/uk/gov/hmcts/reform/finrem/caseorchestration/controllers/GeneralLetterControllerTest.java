@@ -6,9 +6,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.HttpServerErrorException;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralLetterService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
@@ -66,7 +66,7 @@ public class GeneralLetterControllerTest extends BaseControllerTest {
     @Test
     public void generateGeneralLetter500Error() throws Exception {
         doValidCaseDataSetUp();
-        doThrow(feignError()).when(generalLetterService).createGeneralLetter(eq(AUTH_TOKEN), isA(CaseDetails.class));
+        doThrow(feignError()).when(generalLetterService).createGeneralLetter(eq(AUTH_TOKEN), isA(FinremCaseDetails.class));
 
         mvc.perform(post(GENERAL_LETTER_URL)
             .content(requestContent.toString())

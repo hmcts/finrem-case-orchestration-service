@@ -5,10 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.wrapper.IdamToken;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import java.util.Collections;
 
@@ -20,11 +21,11 @@ public class CcdService {
     private final CoreCaseDataApi coreCaseDataApi;
     private final SystemUserService systemUserService;
 
-    public void executeCcdEventOnCase(String authorisation, CaseDetails caseDetails,
+    public void executeCcdEventOnCase(String authorisation, FinremCaseDetails caseDetails,
                                       String eventType) {
 
         Long caseId = caseDetails.getId();
-        String caseTypeId = caseDetails.getCaseTypeId();
+        CaseType caseTypeId = caseDetails.getCaseType();
 
         log.info("Executing eventType {} on caseId {}", eventType, caseId);
 
@@ -35,7 +36,7 @@ public class CcdService {
                 idamToken.getServiceAuthorization(),
                 idamToken.getUserId(),
                 "DIVORCE",
-                caseTypeId,
+                caseTypeId.getCcdType(),
                 caseId.toString(),
                 eventType);
 
@@ -44,10 +45,10 @@ public class CcdService {
             idamToken.getServiceAuthorization(),
             idamToken.getUserId(),
             "DIVORCE",
-            caseTypeId,
+            caseTypeId.getCcdType(),
             caseId.toString(),
             true,
-            getCaseDataContent(caseDetails.getData(), startEventResponse));
+            getCaseDataContent(caseDetails.getCaseData(), startEventResponse));
 
     }
 
