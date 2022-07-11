@@ -16,7 +16,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 
 @Service
 @Slf4j
-public class UpdateFrcInfoApplicantDocumentService extends  BaseUpdateFrcInfoDocumentService {
+public class UpdateFrcInfoApplicantDocumentService extends BaseUpdateFrcInfoDocumentService {
 
     @Autowired
     public UpdateFrcInfoApplicantDocumentService(GenericDocumentService genericDocumentService,
