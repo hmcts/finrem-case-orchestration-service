@@ -19,14 +19,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import java.io.IOException;
 
-import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonBody;
+import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonBody;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 
 
 @SpringBootTest({"idam.url: http://localhost:8888"})
 @TestPropertySource(locations = "classpath:application.properties")
-@PactFolder("pacts")
 public class SidamConsumerTest extends BaseTest {
 
     @Autowired

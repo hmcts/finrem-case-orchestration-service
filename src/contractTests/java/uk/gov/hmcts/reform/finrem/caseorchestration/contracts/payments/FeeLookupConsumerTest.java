@@ -6,7 +6,6 @@ import au.com.dius.pact.consumer.junit.PactProviderRule;
 import au.com.dius.pact.consumer.junit.PactVerification;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
-import au.com.dius.pact.core.model.annotations.PactFolder;
 import org.apache.http.HttpStatus;
 import org.json.JSONException;
 import org.junit.Rule;
@@ -27,7 +26,6 @@ import static org.junit.Assert.assertEquals;
 
 @SpringBootTest({"fees.url: http://localhost:8889"})
 @TestPropertySource(locations = "classpath:application.properties")
-@PactFolder("pacts")
 public class FeeLookupConsumerTest extends BaseTest {
 
     @Autowired

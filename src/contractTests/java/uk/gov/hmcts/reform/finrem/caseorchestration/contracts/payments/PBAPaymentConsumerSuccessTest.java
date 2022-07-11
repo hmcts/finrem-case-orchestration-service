@@ -6,11 +6,8 @@ import au.com.dius.pact.consumer.junit.PactProviderRule;
 import au.com.dius.pact.consumer.junit.PactVerification;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
-import au.com.dius.pact.core.model.annotations.PactFolder;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.http.client.fluent.Executor;
 import org.json.JSONException;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -30,11 +27,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonBody;
+import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonBody;
 
 @SpringBootTest({"payment.url: http://localhost:8886"})
 @TestPropertySource(locations = "classpath:application.properties")
-@PactFolder("pacts")
 public class PBAPaymentConsumerSuccessTest extends BaseTest {
 
     public static final String AUTH_TOKEN = "Bearer someAuthorizationToken";
@@ -47,11 +43,6 @@ public class PBAPaymentConsumerSuccessTest extends BaseTest {
 
     @Rule
     public PactProviderRule mockProvider = new PactProviderRule("payment_creditAccountPayment", "localhost", 8886, this);
-
-    @After
-    public void teardown() {
-        Executor.closeIdleConnections();
-    }
 
     @Pact(provider = "payment_creditAccountPayment", consumer = "fr_caseOrchestratorService")
     public RequestResponsePact generatePactFragmentSuccess(PactDslWithProvider builder) throws JSONException, IOException {

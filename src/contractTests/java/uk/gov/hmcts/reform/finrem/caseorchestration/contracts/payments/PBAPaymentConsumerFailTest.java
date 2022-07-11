@@ -6,10 +6,7 @@ import au.com.dius.pact.consumer.junit.PactProviderRule;
 import au.com.dius.pact.consumer.junit.PactVerification;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
-import au.com.dius.pact.core.model.annotations.PactFolder;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.http.client.fluent.Executor;
-import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +29,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.contracts.payments.PB
 
 @SpringBootTest({"payment.url: http://localhost:8887"})
 @TestPropertySource(locations = "classpath:application.properties")
-@PactFolder("pacts")
 public class PBAPaymentConsumerFailTest extends BaseTest {
 
     public static final String AUTH_TOKEN = "Bearer someAuthorizationToken";
@@ -47,10 +43,6 @@ public class PBAPaymentConsumerFailTest extends BaseTest {
     @Rule
     public PactProviderRule mockProvider = new PactProviderRule("payment_creditAccountPayment", "localhost", 8887, this);
 
-    @After
-    public void teardown() {
-        Executor.closeIdleConnections();
-    }
 
     @Pact(provider = "payment_creditAccountPayment", consumer = "fr_caseOrchestratorService")
     public RequestResponsePact generatePactFragmentFail(PactDslWithProvider builder) throws IOException {

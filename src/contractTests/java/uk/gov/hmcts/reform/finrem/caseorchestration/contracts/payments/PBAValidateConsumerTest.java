@@ -6,7 +6,6 @@ import au.com.dius.pact.consumer.junit.PactProviderRule;
 import au.com.dius.pact.consumer.junit.PactVerification;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
-import au.com.dius.pact.core.model.annotations.PactFolder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONException;
 import org.junit.Rule;
@@ -21,7 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.validation.PBAVali
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.client.PBAValidationClient;
 
-import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonBody;
+import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonBody;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
@@ -29,7 +28,6 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest({"pba.validation.url: http://localhost:8891"})
 @TestPropertySource(locations = "classpath:application.properties")
-@PactFolder("pacts")
 public class PBAValidateConsumerTest extends BaseTest {
 
     public static final String SOME_AUTHORIZATION_TOKEN = "Bearer UserAuthToken";
