@@ -38,13 +38,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class NotificationRequestMapper {
 
     protected static final String EMPTY_STRING = "";
-    private final CaseDataService caseDataService;
-    private final ObjectMapper objectMapper;
-
     private static final String RESPONDENT = "Respondent";
     private static final String CONSENTED = "consented";
     private static final String CONTESTED = "contested";
-
+    private final CaseDataService caseDataService;
+    private final ObjectMapper objectMapper;
 
     public NotificationRequest getNotificationRequestForRespondentSolicitor(CaseDetails caseDetails) {
         return buildNotificationRequest(caseDetails, getCaseDataKeysForRespondentSolicitor());
@@ -93,7 +91,8 @@ public class NotificationRequestMapper {
     private RepresentationUpdate getLastRepresentationUpdate(CaseDetails caseDetails) {
 
         List<Element<RepresentationUpdate>> representationUpdates = objectMapper
-            .convertValue(caseDetails.getData().get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {});
+            .convertValue(caseDetails.getData().get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {
+            });
 
         return Collections.max(representationUpdates, Comparator.comparing(c -> c.getValue().getDate())).getValue();
     }
