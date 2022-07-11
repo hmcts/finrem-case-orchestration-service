@@ -13,6 +13,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CV_LOWERCASE_LABEL_FIELD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CV_ORDER_CAMELCASE_LABEL_FIELD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CV_OTHER_DOC_LABEL_FIELD;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -37,6 +41,11 @@ public class SolicitorCreateConsentedMidHandler implements CallbackHandler {
 
         contsentedApplicatonHelper.setConsentVariationOrderLabelField(caseData);
 
+        String camelCaseLabel = (String) caseData.get(CV_ORDER_CAMELCASE_LABEL_FIELD);
+        String lowerCaseLabel = (String) caseData.get(CV_LOWERCASE_LABEL_FIELD);
+        String otherCaseLabel = (String) caseData.get(CV_OTHER_DOC_LABEL_FIELD);
+
+        log.info("Camelcase label '{}', lowercase label '{}' and other label '{}'", camelCaseLabel, lowerCaseLabel, otherCaseLabel);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
     }
 }
