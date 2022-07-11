@@ -50,11 +50,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType
 public class FeeLookUpTest extends BaseTest {
 
     private static final String FEE_REGISTER_CONSENTED_URL =
-        "/fees-register/fees/lookup\\?service=other&jurisdiction1=family&jurisdiction2=family-court&channel=default&event=general%20application"
-            + "&keyword=GeneralAppWithoutNotice";
+        "/fees-register/fees/lookup\\?service=other&jurisdiction1=family&jurisdiction2=family-court&channel=default&event=general%20application" +
+            "&keyword=GeneralAppWithoutNotice";
     private static final String FEE_REGISTER_CONTESTED_URL =
-        "/fees-register/fees/lookup\\?service=other&jurisdiction1=family&jurisdiction2=family-court&channel=default&event=miscellaneous"
-            + "&keyword=FinancialOrderOnNotice";
+        "/fees-register/fees/lookup\\?service=other&jurisdiction1=family&jurisdiction2=family-court&channel=default&event=miscellaneous" +
+            "&keyword=FinancialOrderOnNotice";
 
     private static final String COS_URL = "/case-orchestration/fee-lookup";
 

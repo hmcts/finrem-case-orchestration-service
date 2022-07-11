@@ -1,15 +1,15 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.health;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+@Slf4j
 @Component
-public class FeesServiceHealthCheck extends AbstractServiceHealthCheck {
+public class PBAServiceHealthCheck extends AbstractServiceHealthCheck {
 
-    @Autowired
-    public FeesServiceHealthCheck(@Value("${fees.health.url}") String uri, RestTemplate restTemplate) {
+    public PBAServiceHealthCheck(@Value("${pba.validation.health.url}") String uri, RestTemplate restTemplate) {
         super(uri, restTemplate);
     }
 }
