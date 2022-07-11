@@ -14,19 +14,6 @@ import static uk.gov.hmcts.reform.bsp.common.mapper.AddressMapper.applyMappings;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ContactDetailsMapper {
 
-    @AllArgsConstructor(access = AccessLevel.PRIVATE)
-    public static class CcdFields {
-        public static final String APPLICANT = CCDConfigConstant.APPLICANT_ADDRESS;
-        public static final String APPLICANT_SOLICITOR = CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
-        public static final String APPLICANT_PHONE = CCDConfigConstant.APPLICANT_PHONE;
-        public static final String APPLICANT_EMAIL = CCDConfigConstant.APPLICANT_EMAIL;
-        public static final String APPLICANT_SOLICITOR_EMAIL = CCDConfigConstant.SOLICITOR_EMAIL;
-        public static final String APPLICANT_SOLICITOR_PHONE = CCDConfigConstant.SOLICITOR_PHONE;
-
-        public static final String RESPONDENT = CCDConfigConstant.RESPONDENT_ADDRESS;
-        public static final String RESPONDENT_SOLICITOR = CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
-    }
-
     /**
      * We only store contact details to citizens or theirs solicitors (if they are represented). Never both.
      */
@@ -65,5 +52,18 @@ public class ContactDetailsMapper {
             transformedCaseData.put(CcdFields.RESPONDENT_SOLICITOR, transformedCaseData.get(CcdFields.RESPONDENT));
             transformedCaseData.remove(CcdFields.RESPONDENT);
         }
+    }
+
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    public static class CcdFields {
+        public static final String APPLICANT = CCDConfigConstant.APPLICANT_ADDRESS;
+        public static final String APPLICANT_SOLICITOR = CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
+        public static final String APPLICANT_PHONE = CCDConfigConstant.APPLICANT_PHONE;
+        public static final String APPLICANT_EMAIL = CCDConfigConstant.APPLICANT_EMAIL;
+        public static final String APPLICANT_SOLICITOR_EMAIL = CCDConfigConstant.SOLICITOR_EMAIL;
+        public static final String APPLICANT_SOLICITOR_PHONE = CCDConfigConstant.SOLICITOR_PHONE;
+
+        public static final String RESPONDENT = CCDConfigConstant.RESPONDENT_ADDRESS;
+        public static final String RESPONDENT_SOLICITOR = CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
     }
 }

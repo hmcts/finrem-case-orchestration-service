@@ -14,8 +14,8 @@
       },
       "control_number": "123452",
       "file_name": "d81-1-scan.pdf",
-      "scanned_date": "2018-12-27T10:46:03.123",
-      "delivery_date": "2018-12-27T10:46:03.123"
+      "scanned_date": "2018-12-27T10:46:03.123Z",
+      "delivery_date": "2018-12-27T10:46:03.123Z"
     },
     {
       "type": "Form",
@@ -27,8 +27,8 @@
       },
       "control_number": "123456",
       "file_name": "formA-scan.pdf",
-      "scanned_date": "2018-12-27T10:46:03.123",
-      "delivery_date": "2018-12-27T10:46:03.123"
+      "scanned_date": "2018-12-27T10:46:03.123Z",
+      "delivery_date": "2018-12-27T10:46:03.123Z"
     },
     {
       "type": "Other",
@@ -40,8 +40,8 @@
       },
       "control_number": "123453",
       "file_name": "d81-2-scan.pdf",
-      "scanned_date": "2018-12-27T10:46:03.123",
-      "delivery_date": "2018-12-27T10:46:03.123"
+      "scanned_date": "2018-12-27T10:46:03.123Z",
+      "delivery_date": "2018-12-27T10:46:03.123Z"
     },
     {
       "type": "Other",
@@ -53,8 +53,8 @@
       },
       "control_number": "123453",
       "file_name": "p1.pdf",
-      "scanned_date": "2018-12-27T10:46:03.123",
-      "delivery_date": "2018-12-27T10:46:03.123"
+      "scanned_date": "2018-12-27T10:46:03.123Z",
+      "delivery_date": "2018-12-27T10:46:03.123Z"
     },
     {
       "type": "Other",
@@ -66,8 +66,8 @@
       },
       "control_number": "123453",
       "file_name": "PPF1.pdf",
-      "scanned_date": "2018-12-27T10:46:03.123",
-      "delivery_date": "2018-12-27T10:46:03.123"
+      "scanned_date": "2018-12-27T10:46:03.123Z",
+      "delivery_date": "2018-12-27T10:46:03.123Z"
     },
     {
       "type": "Other",
@@ -79,8 +79,8 @@
       },
       "control_number": "123453",
       "file_name": "P2.pdf",
-      "scanned_date": "2018-12-27T10:46:03.123",
-      "delivery_date": "2018-12-27T10:46:03.123"
+      "scanned_date": "2018-12-27T10:46:03.123Z",
+      "delivery_date": "2018-12-27T10:46:03.123Z"
     },
     {
       "type": "Other",
@@ -92,8 +92,8 @@
       },
       "control_number": "123453",
       "file_name": "PPF2.pdf",
-      "scanned_date": "2018-12-27T10:46:03.123",
-      "delivery_date": "2018-12-27T10:46:03.123"
+      "scanned_date": "2018-12-27T10:46:03.123Z",
+      "delivery_date": "2018-12-27T10:46:03.123Z"
     },
     {
       "type": "Other",
@@ -105,8 +105,8 @@
       },
       "control_number": "123453",
       "file_name": "PPF.pdf",
-      "scanned_date": "2018-12-27T10:46:03.123",
-      "delivery_date": "2018-12-27T10:46:03.123"
+      "scanned_date": "2018-12-27T10:46:03.123Z",
+      "delivery_date": "2018-12-27T10:46:03.123Z"
     },
     {
       "type": "Other",
@@ -118,8 +118,8 @@
       },
       "control_number": "123453",
       "file_name": "FormE.pdf",
-      "scanned_date": "2018-12-27T10:46:03.123",
-      "delivery_date": "2018-12-27T10:46:03.123"
+      "scanned_date": "2018-12-27T10:46:03.123Z",
+      "delivery_date": "2018-12-27T10:46:03.123Z"
     },
     {
       "type": "Other",
@@ -131,8 +131,8 @@
       },
       "control_number": "123453",
       "file_name": "CoverLetter.pdf",
-      "scanned_date": "2018-12-27T10:46:03.123",
-      "delivery_date": "2018-12-27T10:46:03.123"
+      "scanned_date": "2018-12-27T10:46:03.123Z",
+      "delivery_date": "2018-12-27T10:46:03.123Z"
     },
     {
       "type": "Other",
@@ -144,8 +144,8 @@
       },
       "control_number": "123453",
       "file_name": "DraftConsentOrder.pdf",
-      "scanned_date": "2018-12-27T10:46:03.123",
-      "delivery_date": "2018-12-27T10:46:03.123"
+      "scanned_date": "2018-12-27T10:46:03.123Z",
+      "delivery_date": "2018-12-27T10:46:03.123Z"
     },
     {
       "type": "Other",
@@ -157,8 +157,8 @@
       },
       "control_number": "123453",
       "file_name": "DecreeNisi.pdf",
-      "scanned_date": "2018-12-27T10:46:03.123",
-      "delivery_date": "2018-12-27T10:46:03.123"
+      "scanned_date": "2018-12-27T10:46:03.123Z",
+      "delivery_date": "2018-12-27T10:46:03.123Z"
     },
     {
       "type": "Other",
@@ -170,8 +170,8 @@
       },
       "control_number": "123453",
       "file_name": "DecreeAbsolute.pdf",
-      "scanned_date": "2018-12-27T10:46:03.123",
-      "delivery_date": "2018-12-27T10:46:03.123"
+      "scanned_date": "2018-12-27T10:46:03.123Z",
+      "delivery_date": "2018-12-27T10:46:03.123Z"
     },
     {
       "type": "Other",
@@ -183,8 +183,8 @@
       },
       "control_number": "123453",
       "file_name": "OtherSupportDocuments.pdf",
-      "scanned_date": "2018-12-27T10:46:03.123",
-      "delivery_date": "2018-12-27T10:46:03.123"
+      "scanned_date": "2018-12-27T10:46:03.123Z",
+      "delivery_date": "2018-12-27T10:46:03.123Z"
     }
   ],
   "ocr_data_fields": [

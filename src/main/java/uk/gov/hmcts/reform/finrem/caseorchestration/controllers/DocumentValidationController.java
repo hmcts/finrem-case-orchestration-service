@@ -1,9 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -38,15 +41,16 @@ public class DocumentValidationController extends BaseController {
     private DocumentValidationService service;
 
     @PostMapping(path = "/field/{field}/file-upload-check", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Checks the file type and returns error.")
+    @Operation(summary = "Checks the file type and returns error.")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback was processed successfully.", response = AboutToStartOrSubmitCallbackResponse.class),
-        @ApiResponse(code = 400, message = "Bad Request"),
-        @ApiResponse(code = 500, message = "Internal Server Error")
-    })
+        @ApiResponse(responseCode = "200", description = "Callback was processed successfully.",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")})
+
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> checkUploadedFileType(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest,
+        @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callbackRequest,
         @PathVariable("field") String field) {
 
         Optional<Long> caseId = Optional.ofNullable(callbackRequest.getCaseDetails().getId());
