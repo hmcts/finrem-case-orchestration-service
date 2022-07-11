@@ -24,7 +24,8 @@ public class SolicitorCreateConsentedMidHandler implements CallbackHandler {
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.MID_EVENT.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && EventType.SOLICITOR_CREATE.equals(eventType);
+            && (EventType.SOLICITOR_CREATE.equals(eventType)
+            || EventType.AMEND_APP_DETAILS.equals(eventType));
     }
 
     @Override

@@ -41,6 +41,13 @@ public class SolicitorCreateConsentedMidHandlerTest {
     }
 
     @Test
+    public void given_case_whenEvent_type_is_amendApp_thenCanHandle() {
+        assertThat(solicitorCreateConsentedMidHandler
+                .canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.AMEND_APP_DETAILS),
+            is(true));
+    }
+
+    @Test
     public void given_case_when_wrong_callback_then_case_can_not_handle() {
         assertThat(solicitorCreateConsentedMidHandler
                 .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.SOLICITOR_CREATE),
