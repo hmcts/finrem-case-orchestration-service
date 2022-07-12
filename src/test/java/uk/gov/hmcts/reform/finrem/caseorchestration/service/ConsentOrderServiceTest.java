@@ -20,7 +20,7 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
     private ConsentOrderService consentOrderService;
 
     private CallbackRequest callbackRequest;
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private void setUpCaseDetails(String fileName) throws Exception {
         try (InputStream resourceAsStream =

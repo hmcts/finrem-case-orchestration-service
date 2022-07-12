@@ -1,8 +1,9 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
-import org.apache.logging.log4j.util.TriConsumer;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
@@ -13,11 +14,8 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.CourtListWrapper;
 
-import java.lang.reflect.Field;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_CARE_OF;
@@ -42,21 +40,11 @@ public class LetterDetailsMapper {
     private FrcCourtDetails courtDetails;
     private Addressee addressee;
 
-    static final String CASE_DETAILS = "caseDetails";
-    static final String CASE_DATA = "case_data";
+    private static final String CASE_DETAILS = "caseDetails";
+    private static final String CASE_DATA = "case_data";
 
-
-    private CourtDetailsMapper courtDetailsMapper;
-
-    private final TriConsumer<Field, LetterDetails, Map<String, Object>> addMapEntry =
-        (field, letterDetails, letterDetailsMap) -> {
-        try {
-            field.setAccessible(true);
-            letterDetailsMap.put(field.getName(), field.get(letterDetails));
-        } catch (IllegalAccessException e) {
-            throw new IllegalStateException("Unable to access letterDetails field");
-        }
-    };
+    private final ObjectMapper objectMapper;
+    private final CourtDetailsMapper courtDetailsMapper;
 
     public LetterDetails buildLetterDetails(FinremCaseDetails caseDetails,
                                                  DocumentHelper.PaperNotificationRecipient recipient,
@@ -77,17 +65,15 @@ public class LetterDetailsMapper {
     public Map<String, Object> getLetterDetailsAsMap(FinremCaseDetails caseDetails,
                                      DocumentHelper.PaperNotificationRecipient recipient,
                                      CourtListWrapper courtList) {
-        LetterDetails letterDetails = buildLetterDetails(caseDetails, recipient, courtList);
-        List<Field> letterDetailsFields = Arrays.asList(BasicLetterDetails.class.getDeclaredFields());
-        Map<String, Object> letterDetailsMap = new HashMap<>();
-        letterDetailsFields.forEach(field -> addMapEntry.accept(field, letterDetails, letterDetailsMap));
+        Map<String, Object> documentTemplateDetails =
+            objectMapper.convertValue(buildLetterDetails(caseDetails, recipient, courtList),
+                TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, Object.class));
 
-        Map<String, Object> caseDetailsMap = new HashMap<>();
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put(CASE_DATA, letterDetailsMap);
-        caseDataMap.put("id", caseDetails.getId());
-        caseDetailsMap.put(CASE_DETAILS, caseDataMap);
-        return caseDetailsMap;
+        Map<String, Object> caseDetailsMap = Map.of(
+            CASE_DATA, documentTemplateDetails,
+            "id", caseDetails.getId());
+
+        return Map.of(CASE_DETAILS, caseDetailsMap);
     }
 
     private String getReference(FinremCaseData caseData, DocumentHelper.PaperNotificationRecipient recipient) {

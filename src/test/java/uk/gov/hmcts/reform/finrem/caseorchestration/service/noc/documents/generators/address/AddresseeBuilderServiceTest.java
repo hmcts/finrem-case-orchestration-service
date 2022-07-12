@@ -5,9 +5,9 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
+import uk.gov.hmcts.reform.finrem.ccd.domain.ChangedRepresentative;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import static org.mockito.Mockito.verify;
 
@@ -25,7 +25,7 @@ public class AddresseeBuilderServiceTest {
     @Mock
     SolicitorAddresseeGenerator solicitorAddresseeGenerator;
 
-    CaseDetails caseDetails = CaseDetails.builder().build();
+    FinremCaseDetails caseDetails = FinremCaseDetails.builder().build();
     ChangedRepresentative changedRepresentative = ChangedRepresentative.builder().build();
 
     @Test

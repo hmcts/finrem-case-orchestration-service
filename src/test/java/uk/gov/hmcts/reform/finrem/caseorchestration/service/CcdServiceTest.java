@@ -6,13 +6,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.wrapper.IdamToken;
-
-import java.util.HashMap;
-import java.util.Map;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -43,9 +41,9 @@ public class CcdServiceTest {
         verify(coreCaseDataApi).submitEventForCaseWorker(any(), any(), any(), any(), any(), any(), anyBoolean(), any());
     }
 
-    private CaseDetails buildCaseDetails() {
-        Map<String, Object> caseData = new HashMap<>();
-        return CaseDetails.builder().id(123L).data(caseData).build();
+    private FinremCaseDetails buildCaseDetails() {
+        FinremCaseData caseData = new FinremCaseData();
+        return FinremCaseDetails.builder().id(123L).caseData(caseData).build();
     }
 
 }

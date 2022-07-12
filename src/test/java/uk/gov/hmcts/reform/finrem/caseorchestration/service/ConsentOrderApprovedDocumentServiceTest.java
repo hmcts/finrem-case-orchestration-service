@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,21 +8,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Address;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.ConsentOrder;
+import uk.gov.hmcts.reform.finrem.ccd.domain.ConsentOrderCollection;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.PensionTypeCollection;
+import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -36,26 +35,15 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetails;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedFinremCaseDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finremCaseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.matchDocumentGenerationRequestTemplateAndFilename;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.pensionDocumentData;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.pensionTypeCollection;
 
 @ActiveProfiles("test-mock-feign-clients")
 public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
@@ -86,22 +74,22 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     @Value("${document.approvedConsentOrderNotificationFileName}")
     private String documentApprovedConsentOrderNotificationFileName;
 
-    private CaseDetails caseDetails;
+    private FinremCaseDetails caseDetails;
 
     @Before
     public void setUp() {
-        caseDetails = defaultConsentedCaseDetails();
+        caseDetails = defaultConsentedFinremCaseDetails();
 
-        Document defaultCoversheet = document();
+        Document defaultCoversheet = newDocument();
         defaultCoversheet.setBinaryUrl(DEFAULT_COVERSHEET_URL);
 
         when(documentClientMock.generatePdf(matchDocumentGenerationRequestTemplateAndFilename(documentBulkPrintTemplate,
             documentBulkPrintFileName), anyString())).thenReturn(defaultCoversheet);
 
         when(documentClientMock.generatePdf(matchDocumentGenerationRequestTemplateAndFilename(documentApprovedConsentOrderTemplate,
-            documentApprovedConsentOrderFileName), anyString())).thenReturn(document());
+            documentApprovedConsentOrderFileName), anyString())).thenReturn(newDocument());
 
-        Document consentOrderApprovedCoverLetter = document();
+        Document consentOrderApprovedCoverLetter = newDocument();
         consentOrderApprovedCoverLetter.setBinaryUrl(CONSENT_ORDER_APPROVED_COVER_LETTER_URL);
 
         when(documentClientMock.generatePdf(matchDocumentGenerationRequestTemplateAndFilename(documentApprovedConsentOrderNotificationTemplate,
@@ -110,7 +98,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateApprovedConsentOrderLetterForConsented() {
-        CaseDocument caseDocument = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, AUTH_TOKEN);
+        Document caseDocument = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, AUTH_TOKEN);
 
         assertCaseDocument(caseDocument);
         verify(documentClientMock, atLeastOnce()).generatePdf(
@@ -120,10 +108,10 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateAndPopulateApprovedConsentOrderLetterForConsentInContested() {
-        CaseDetails caseDetails = caseDetailsFromResource("/fixtures/contested/consent-in-contested-application-approved.json", mapper);
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource("/fixtures/contested/consent-in-contested-application-approved.json", mapper);
         consentOrderApprovedDocumentService.generateAndPopulateConsentOrderLetter(caseDetails, AUTH_TOKEN);
-        List<CollectionElement<ApprovedOrder>> approvedOrders = consentOrderApprovedDocumentService.getConsentInContestedApprovedOrderCollection(
-            caseDetails.getData());
+        List<ConsentOrderCollection> approvedOrders = caseDetails.getCaseData().getContestedConsentedApprovedOrders();
+
         assertCaseDocument(approvedOrders.get(approvedOrders.size() - 1).getValue().getOrderLetter());
         verify(documentClientMock, atLeastOnce()).generatePdf(
             matchDocumentGenerationRequestTemplateAndFilename(documentApprovedConsentOrderTemplate, documentApprovedConsentOrderFileName),
@@ -132,8 +120,8 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateApprovedConsentOrderLetterForContested() {
-        CaseDetails contestedDetails = caseDetailsFromResource("/fixtures/contested/consent-in-contested-application-approved.json", mapper);
-        CaseDocument caseDocument = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(contestedDetails, AUTH_TOKEN);
+        FinremCaseDetails contestedDetails = finremCaseDetailsFromResource("/fixtures/contested/consent-in-contested-application-approved.json", mapper);
+        Document caseDocument = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(contestedDetails, AUTH_TOKEN);
 
         assertCaseDocument(caseDocument);
         verify(documentClientMock, atLeastOnce()).generatePdf(
@@ -144,9 +132,9 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     @Test
     public void shouldGenerateApprovedConsentOrderCoverLetterForApplicant() {
-        caseDetails.getData().put(APPLICANT_REPRESENTED, NO_VALUE);
+        caseDetails.getCaseData().getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
 
-        CaseDocument generatedApprovedConsentOrderNotificationLetter =
+        Document generatedApprovedConsentOrderNotificationLetter =
             consentOrderApprovedDocumentService.generateApprovedConsentOrderCoverLetter(caseDetails, AUTH_TOKEN);
 
         assertCaseDocument(generatedApprovedConsentOrderNotificationLetter, CONSENT_ORDER_APPROVED_COVER_LETTER_URL);
@@ -154,22 +142,24 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateApprovedConsentOrderCoverLetterForApplicantSolicitor() {
-        Map<String, Object> solicitorAddress = new HashMap<>();
-        solicitorAddress.put("AddressLine1", "123 Applicant Solicitor Street");
-        solicitorAddress.put("AddressLine2", "Second Address Line");
-        solicitorAddress.put("AddressLine3", "Third Address Line");
-        solicitorAddress.put("County", "London");
-        solicitorAddress.put("Country", "England");
-        solicitorAddress.put("PostTown", "London");
-        solicitorAddress.put("PostCode", "SE1");
+        Address solicitorAddress = Address.builder()
+            .addressLine1("123 Applicant Solicitor Street")
+            .addressLine2("Second Address Line")
+            .addressLine3("Third Address Line")
+            .county("London")
+            .country("England")
+            .postTown("London")
+            .postCode("SE1")
+            .build();
 
-        Map<String, Object> caseData = caseDetails.getData();
-        caseData.replace(APPLICANT_REPRESENTED, YES_VALUE);
-        caseData.put(CONSENTED_SOLICITOR_NAME, TEST_SOLICITOR_NAME);
-        caseData.put(SOLICITOR_REFERENCE, TEST_SOLICITOR_REFERENCE);
-        caseData.put(CONSENTED_SOLICITOR_ADDRESS, solicitorAddress);
+        FinremCaseData caseData = caseDetails.getCaseData();
+        caseData.setCcdCaseType(CaseType.CONSENTED);
+        caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
+        caseData.getContactDetailsWrapper().setSolicitorName(TEST_SOLICITOR_NAME);
+        caseData.getContactDetailsWrapper().setSolicitorReference(TEST_SOLICITOR_REFERENCE);
+        caseData.getContactDetailsWrapper().setSolicitorAddress(solicitorAddress);
 
-        CaseDocument generatedApprovedConsentOrderNotificationLetter =
+        Document generatedApprovedConsentOrderNotificationLetter =
             consentOrderApprovedDocumentService.generateApprovedConsentOrderCoverLetter(caseDetails, AUTH_TOKEN);
 
         assertCaseDocument(generatedApprovedConsentOrderNotificationLetter, CONSENT_ORDER_APPROVED_COVER_LETTER_URL);
@@ -178,34 +168,34 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     @Test
     public void shouldStampPensionDocuments() {
         Mockito.reset(documentClientMock);
-        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(document());
+        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(newDocument());
 
-        List<PensionCollectionData> pensionDocuments = asList(pensionDocumentData(), pensionDocumentData());
-        List<PensionCollectionData> stampPensionDocuments = consentOrderApprovedDocumentService.stampPensionDocuments(pensionDocuments, AUTH_TOKEN);
+        List<PensionTypeCollection> pensionDocuments = asList(pensionTypeCollection(), pensionTypeCollection());
+        List<PensionTypeCollection> stampPensionDocuments = consentOrderApprovedDocumentService.stampPensionDocuments(pensionDocuments, AUTH_TOKEN);
 
-        stampPensionDocuments.forEach(data -> assertCaseDocument(data.getTypedCaseDocument().getPensionDocument()));
+        stampPensionDocuments.forEach(data -> assertCaseDocument(data.getValue().getUploadedDocument()));
         verify(documentClientMock, times(2)).stampDocument(any(), anyString());
     }
 
     @Test
     public void givenNullDocumentInPensionDocuments_whenStampingDocuments_thenTheNullValueIsIgnored() {
         Mockito.reset(documentClientMock);
-        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(document());
+        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(newDocument());
 
-        PensionCollectionData pensionCollectionDataWithNullDocument = pensionDocumentData();
-        pensionCollectionDataWithNullDocument.getTypedCaseDocument().setPensionDocument(null);
-        List<PensionCollectionData> pensionDocuments = asList(pensionDocumentData(), pensionCollectionDataWithNullDocument);
+        PensionTypeCollection pensionCollectionDataWithNullDocument = pensionTypeCollection();
+        pensionCollectionDataWithNullDocument.getValue().setUploadedDocument(null);
+        List<PensionTypeCollection> pensionDocuments = asList(pensionTypeCollection(), pensionCollectionDataWithNullDocument);
 
-        List<PensionCollectionData> stampPensionDocuments = consentOrderApprovedDocumentService.stampPensionDocuments(pensionDocuments, AUTH_TOKEN);
+        List<PensionTypeCollection> stampPensionDocuments = consentOrderApprovedDocumentService.stampPensionDocuments(pensionDocuments, AUTH_TOKEN);
 
         assertThat(stampPensionDocuments, hasSize(1));
-        stampPensionDocuments.forEach(data -> assertCaseDocument(data.getTypedCaseDocument().getPensionDocument()));
+        stampPensionDocuments.forEach(data -> assertCaseDocument(data.getValue().getUploadedDocument()));
         verify(documentClientMock, times(1)).stampDocument(any(), anyString());
     }
 
     @Test
     public void whenPreparingApplicantLetterPack() throws Exception {
-        CaseDetails caseDetailsTemp = documentHelper.deepCopy(caseDetails, CaseDetails.class);
+        FinremCaseDetails caseDetailsTemp = documentHelper.deepCopy(caseDetails, FinremCaseDetails.class);
         addConsentOrderApprovedDataToCaseDetails(caseDetailsTemp);
 
         List<BulkPrintDocument> documents = consentOrderApprovedDocumentService.prepareApplicantLetterPack(caseDetailsTemp, AUTH_TOKEN);
@@ -219,8 +209,8 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void whenPreparingApplicantLetterPack_paperApplication() throws Exception {
-        CaseDetails caseDetailsTemp = documentHelper.deepCopy(caseDetails, CaseDetails.class);
-        caseDetailsTemp.getData().put(PAPER_APPLICATION, YES_VALUE);
+        FinremCaseDetails caseDetailsTemp = documentHelper.deepCopy(caseDetails, FinremCaseDetails.class);
+        caseDetailsTemp.getCaseData().setPaperApplication(YesOrNo.YES);
         addConsentOrderApprovedDataToCaseDetails(caseDetailsTemp);
 
         List<BulkPrintDocument> documents = consentOrderApprovedDocumentService.prepareApplicantLetterPack(caseDetailsTemp, AUTH_TOKEN);
@@ -235,46 +225,50 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void stampsAndPopulatesCaseDataForContestedConsentOrder() {
-        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(document());
-        when(documentClientMock.annexStampDocument(any(), anyString())).thenReturn(document());
+        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(newDocument());
+        when(documentClientMock.annexStampDocument(any(), anyString())).thenReturn(newDocument());
 
-        CaseDetails caseDetails = defaultConsentedCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
-        caseData.put(CONSENT_ORDER, caseDocument());
-
-        consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData, AUTH_TOKEN);
-        assertThat(getDocumentList(caseData, CONTESTED_CONSENT_ORDER_COLLECTION), hasSize(1));
+        FinremCaseDetails caseDetails = defaultConsentedFinremCaseDetails();
+        FinremCaseData caseData = caseDetails.getCaseData();
+        caseData.setConsentOrder(newDocument());
 
         consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData, AUTH_TOKEN);
-        assertThat(getDocumentList(caseData, CONTESTED_CONSENT_ORDER_COLLECTION), hasSize(2));
+        assertThat(caseData.getContestedConsentedApprovedOrders(), hasSize(1));
+
+        consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData, AUTH_TOKEN);
+        assertThat(caseData.getContestedConsentedApprovedOrders(), hasSize(2));
     }
 
     @Test
     public void shouldConvertCollectionDocument() {
-        List<CaseDocument> documents = consentOrderApprovedDocumentService.approvedOrderCollection(caseDetails());
+        List<Document> documents = consentOrderApprovedDocumentService.approvedOrderCollection(caseDetails());
 
         assertThat(documents, hasSize(3));
     }
 
-    private List<CaseDocument> getDocumentList(Map<String, Object> data, String field) {
-        return mapper.convertValue(data.get(field), new TypeReference<>() {});
-    }
+    private void addConsentOrderApprovedDataToCaseDetails(FinremCaseDetails caseDetails) throws Exception {
+        PensionTypeCollection pensionData = pensionTypeCollection();
+        pensionData.getValue().getUploadedDocument().setBinaryUrl(PENSION_DOCUMENT_URL);
 
-    private void addConsentOrderApprovedDataToCaseDetails(CaseDetails caseDetails) throws Exception {
-        PensionCollectionData pensionData = pensionDocumentData();
-        pensionData.getTypedCaseDocument().getPensionDocument().setDocumentBinaryUrl(PENSION_DOCUMENT_URL);
-
-        ApprovedOrder approvedOrder = ApprovedOrder.builder()
-            .consentOrder(caseDocument(CONSENT_ORDER_URL, CONSENT_ORDER_URL, CONSENT_ORDER_URL))
-            .pensionDocuments(singletonList(pensionData))
-            .orderLetter(caseDocument(ORDER_LETTER_URL, ORDER_LETTER_URL, ORDER_LETTER_URL))
+        Document consentOrderDoc = Document.builder()
+            .url(CONSENT_ORDER_URL)
+            .binaryUrl(CONSENT_ORDER_URL)
+            .filename(CONSENT_ORDER_URL)
             .build();
 
-        caseDetails.getData().put(APPROVED_ORDER_COLLECTION, singletonList(CollectionElement.<ApprovedOrder>builder().value(approvedOrder).build()));
-        caseDetails.setData(mapper.readValue(mapper.writeValueAsString(caseDetails.getData()), HashMap.class));
+        ConsentOrderCollection approvedOrder = ConsentOrderCollection
+            .builder()
+            .value(ConsentOrder.builder()
+                .consentOrder(consentOrderDoc)
+                .pensionDocuments(singletonList(pensionData))
+                .orderLetter(consentOrderDoc)
+                .build())
+            .build();
+
+        caseDetails.getCaseData().setApprovedOrderCollection(singletonList(approvedOrder));
     }
 
-    private CaseDetails caseDetails() {
-        return TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print.json", mapper);
+    private FinremCaseDetails caseDetails() {
+        return finremCaseDetailsFromResource("/fixtures/bulkprint/bulk-print.json", mapper);
     }
 }

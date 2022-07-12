@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 
 import java.util.Map;
 
@@ -31,8 +31,8 @@ public class LitigantSolicitorAddedNocDocumentServiceTest extends NocDocumentSer
         when(documentConfiguration.getNocLetterNotificationLitigantSolicitorAddedFileName()).thenReturn(DOC_FILENAME);
         when(
             genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), notiicationLettersDetailsMapCaptor.capture(), eq(DOC_TEMPLATE),
-                eq(DOC_FILENAME))).thenReturn(new CaseDocument());
-        CaseDocument caseDocument =
+                eq(DOC_FILENAME))).thenReturn(new Document());
+        Document caseDocument =
             litigantSolicitorAddedNocLetterGenerator.generateNoticeOfChangeLetter(AUTH_TOKEN, noticeOfChangeLetterDetails);
 
         Map placeholdersMap = notiicationLettersDetailsMapCaptor.getValue();

@@ -6,14 +6,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler.litigant.respondent.SolicitorAddedRespondentLetterHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler.litigant.respondent.SolicitorRemovedRespondentLetterHandler;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import java.util.Arrays;
 
 import static org.mockito.Mockito.verify;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finremCaseDetailsFromResource;
 
 @RunWith(MockitoJUnitRunner.class)
 public class NocLetterNotificationServiceTest {
@@ -26,8 +26,8 @@ public class NocLetterNotificationServiceTest {
     @Mock
     private SolicitorAddedRespondentLetterHandler solicitorAddedRespondentLetterHandler;
 
-    private CaseDetails caseDetails;
-    private CaseDetails caseDetailsBefore;
+    private FinremCaseDetails caseDetails;
+    private FinremCaseDetails caseDetailsBefore;
 
 
     @Before
@@ -39,10 +39,10 @@ public class NocLetterNotificationServiceTest {
     @Test
     public void shouldCallLetterHandlersCorrectly() {
 
-        caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke.json",
+        caseDetails = finremCaseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke.json",
             new ObjectMapper());
         caseDetailsBefore =
-            caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke-before.json",
+            finremCaseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke-before.json",
                 new ObjectMapper());
 
         noticeOfChangeLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, caseDetailsBefore, AUTH_TOKEN);

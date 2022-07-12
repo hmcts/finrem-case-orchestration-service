@@ -28,6 +28,7 @@ public class BulkPrintService {
     private final DocumentHelper documentHelper;
     private final GenerateCoverSheetService coverSheetService;
 
+    @Deprecated
     public UUID sendDocumentForPrint(final CaseDocument document, CaseDetails caseDetails) {
         List<BulkPrintDocument> bulkPrintDocument = Collections.singletonList(
             BulkPrintDocument.builder().binaryFileUrl(document.getDocumentBinaryUrl()).build());

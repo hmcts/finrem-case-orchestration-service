@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import feign.FeignException;
 import feign.Request;
@@ -14,8 +13,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataExcepti
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchFieldExistsException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
@@ -23,11 +20,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Address;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.NottinghamCourt;
 import uk.gov.hmcts.reform.finrem.ccd.domain.PensionDocumentType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.PensionType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.PensionTypeCollection;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Region;
+import uk.gov.hmcts.reform.finrem.ccd.domain.RegionMidlandsFrc;
 import uk.gov.hmcts.reform.finrem.ccd.domain.UploadOrder;
 import uk.gov.hmcts.reform.finrem.ccd.domain.UploadOrderCollection;
 import uk.gov.hmcts.reform.finrem.ccd.domain.UploadOrderDocumentType;
@@ -53,19 +55,15 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_PREVIEW_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM_COURTLIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_PREVIEW_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 
 public class TestSetUpUtils {
 
@@ -111,21 +109,9 @@ public class TestSetUpUtils {
         return feeResponse;
     }
 
-    public static Map<String, Object> caseDataWithUploadOrder(String uploadOrderId) {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(UPLOAD_ORDER, ImmutableList.of(consentOrderData(uploadOrderId)));
-        return caseData;
-    }
-
     public static FinremCaseData finremCaseDataWithUploadOrder() {
         FinremCaseData caseData = new FinremCaseData();
         caseData.setUploadOrder(List.of(uploadOrderData()));
-        return caseData;
-    }
-
-    public static Map<String, Object> caseDataWithPreviewOrder() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(ORDER_REFUSAL_PREVIEW_COLLECTION, caseDocument());
         return caseData;
     }
 
@@ -135,29 +121,10 @@ public class TestSetUpUtils {
         return caseData;
     }
 
-    public static Map<String, Object> caseDataWithGeneralOrder() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(GENERAL_ORDER_PREVIEW_DOCUMENT, caseDocument());
-        return caseData;
-    }
-
     public static FinremCaseData finremCaseDataWithRefusalOrder() {
         FinremCaseData caseData = new FinremCaseData();
         caseData.setRefusalOrderPreviewDocument(newDocument());
         return caseData;
-    }
-
-    private static ConsentOrderData consentOrderData(String id) {
-        ConsentOrder consentOrder = new ConsentOrder();
-        consentOrder.setDocumentType(REJECTED_ORDER_TYPE);
-        consentOrder.setDocumentLink(caseDocument());
-        consentOrder.setDocumentDateAdded(LocalDate.now());
-
-        ConsentOrderData consentOrderData = new ConsentOrderData();
-        consentOrderData.setId(id);
-        consentOrderData.setConsentOrder(consentOrder);
-
-        return consentOrderData;
     }
 
     private static UploadOrderCollection uploadOrderData() {
@@ -240,6 +207,17 @@ public class TestSetUpUtils {
         assertThat(caseDocument.getDocumentBinaryUrl(), is(binaryUrl));
     }
 
+    public static void assertCaseDocument(uk.gov.hmcts.reform.finrem.ccd.domain.Document caseDocument) {
+        assertCaseDocument(caseDocument, BINARY_URL);
+    }
+
+    public static void assertCaseDocument(uk.gov.hmcts.reform.finrem.ccd.domain.Document caseDocument, String binaryUrl) {
+        assertThat(caseDocument.getFilename(), is(FILE_NAME));
+        assertThat(caseDocument.getUrl(), is(DOC_URL));
+        assertThat(caseDocument.getBinaryUrl(), is(binaryUrl));
+    }
+
+    @Deprecated
     public static CaseDetails defaultConsentedCaseDetails() {
         Map<String, Object> caseData = new HashMap<>();
         populateApplicantNameAndAddress(caseData);
@@ -249,6 +227,19 @@ public class TestSetUpUtils {
             .caseTypeId(CASE_TYPE_ID_CONSENTED)
             .id(123456789L)
             .data(caseData)
+            .build();
+    }
+
+    public static FinremCaseDetails defaultConsentedFinremCaseDetails() {
+        FinremCaseData caseData = new FinremCaseData();
+        caseData.setCcdCaseType(CaseType.CONSENTED);
+        populateApplicantNameAndAddress(caseData);
+        populateRespondentNameAndAddressConsented(caseData);
+
+        return FinremCaseDetails.builder()
+            .caseType(CaseType.CONSENTED)
+            .id(123456789L)
+            .caseData(caseData)
             .build();
     }
 
@@ -262,6 +253,20 @@ public class TestSetUpUtils {
             .caseTypeId(CASE_TYPE_ID_CONTESTED)
             .id(987654321L)
             .data(caseData)
+            .build();
+    }
+
+    public static FinremCaseDetails defaultContestedFinremCaseDetails() {
+        FinremCaseData caseData = new FinremCaseData();
+        caseData.setCcdCaseType(CaseType.CONTESTED);
+        populateApplicantNameAndAddress(caseData);
+        populateRespondentNameAndAddressContested(caseData);
+        populateCourtDetails(caseData);
+
+        return FinremCaseDetails.builder()
+            .caseType(CaseType.CONTESTED)
+            .id(987654321L)
+            .caseData(caseData)
             .build();
     }
 
@@ -281,10 +286,32 @@ public class TestSetUpUtils {
         caseData.put(APPLICANT_REPRESENTED, null);
     }
 
+    private static void populateApplicantNameAndAddress(FinremCaseData caseData) {
+        Address applicantAddress = Address.builder()
+            .addressLine1("50 Applicant Street")
+            .addressLine2("Second Address Line")
+            .addressLine3("Third Address Line")
+            .county("London")
+            .country("England")
+            .postTown("London")
+            .postCode("SW1")
+            .build();
+        caseData.getContactDetailsWrapper().setApplicantFmName("James");
+        caseData.getContactDetailsWrapper().setApplicantLname("Joyce");
+        caseData.getContactDetailsWrapper().setApplicantAddress(applicantAddress);
+        caseData.getContactDetailsWrapper().setApplicantRepresented(null);
+    }
+
     private static void populateCourtDetails(Map<String, Object> caseData) {
         caseData.put(REGION, MIDLANDS);
         caseData.put(MIDLANDS_FRC_LIST, NOTTINGHAM);
         caseData.put(NOTTINGHAM_COURTLIST, "FR_s_NottinghamList_7");
+    }
+
+    private static void populateCourtDetails(FinremCaseData caseData) {
+        caseData.getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.MIDLANDS);
+        caseData.getRegionWrapper().getDefaultRegionWrapper().setMidlandsFrcList(RegionMidlandsFrc.NOTTINGHAM);
+        caseData.getRegionWrapper().getDefaultCourtList().setNottinghamCourtList(NottinghamCourt.MANSFIELD_MAGISTRATES_AND_COUNTY_COURT);
     }
 
     public static CaseDetails caseDetailsFromResource(String resourcePath, ObjectMapper mapper) {
@@ -298,14 +325,6 @@ public class TestSetUpUtils {
     public static FinremCaseDetails finremCaseDetailsFromResource(String resourcePath, ObjectMapper mapper) {
         FinremCallbackRequestDeserializer deserializer = new FinremCallbackRequestDeserializer(mapper);
         return deserializer.deserialize(resourcePath).getCaseDetails();
-    }
-
-    public static CaseDetails caseDetailsBeforeFromResource(String resourcePath, ObjectMapper mapper) {
-        try (InputStream resourceAsStream = TestSetUpUtils.class.getResourceAsStream(resourcePath)) {
-            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetailsBefore();
-        } catch (Exception exception) {
-            throw new IllegalStateException(exception.getMessage(), exception);
-        }
     }
 
     private static void populateRespondentNameAndAddressConsented(Map<String, Object> caseData) {
@@ -324,6 +343,23 @@ public class TestSetUpUtils {
         caseData.put(CONSENTED_RESPONDENT_REPRESENTED, null);
     }
 
+    private static void populateRespondentNameAndAddressConsented(FinremCaseData caseData) {
+        Address respondentAddress = Address.builder()
+            .addressLine1("50 Respondent Street")
+            .addressLine2("Consented")
+            .addressLine3("Third Address Line")
+            .county("London")
+            .country("England")
+            .postTown("London")
+            .postCode("SW1")
+            .build();
+
+        caseData.getContactDetailsWrapper().setAppRespondentFmName("Jane");
+        caseData.getContactDetailsWrapper().setAppRespondentLName("Doe");
+        caseData.getContactDetailsWrapper().setRespondentAddress(respondentAddress);
+        caseData.getContactDetailsWrapper().setConsentedRespondentRepresented(null);
+    }
+
     private static void populateRespondentNameAndAddressContested(Map<String, Object> caseData) {
         Map<String, Object> respondentAddress = new HashMap<>();
         respondentAddress.put("AddressLine1", "50 Respondent Street");
@@ -338,6 +374,23 @@ public class TestSetUpUtils {
         caseData.put(CONTESTED_RESPONDENT_LAST_NAME, "Doe");
         caseData.put(RESPONDENT_ADDRESS, respondentAddress);
         caseData.put(CONTESTED_RESPONDENT_REPRESENTED, null);
+    }
+
+    private static void populateRespondentNameAndAddressContested(FinremCaseData caseData) {
+        Address respondentAddress = Address.builder()
+            .addressLine1("50 Respondent Street")
+            .addressLine2("Contested")
+            .addressLine3("Third Address Line")
+            .county("London")
+            .country("England")
+            .postTown("London")
+            .postCode("SW1")
+            .build();
+
+        caseData.getContactDetailsWrapper().setRespondentFmName("Jane");
+        caseData.getContactDetailsWrapper().setRespondentLname("Doe");
+        caseData.getContactDetailsWrapper().setRespondentAddress(respondentAddress);
+        caseData.getContactDetailsWrapper().setContestedRespondentRepresented(null);
     }
 
     public static DocumentGenerationRequest matchDocumentGenerationRequestTemplateAndFilename(String template, String filename) {

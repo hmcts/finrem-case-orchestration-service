@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -23,7 +24,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultContestedCaseDetails;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
 
 @ActiveProfiles("test-mock-feign-clients")
 public class GenericDocumentServiceTest extends BaseServiceTest {
@@ -36,7 +37,7 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldStampDocument() {
-        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(document());
+        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(newDocument());
 
         CaseDocument stampDocument = genericDocumentService.stampDocument(caseDocument(), AUTH_TOKEN);
 
@@ -46,7 +47,7 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldAnnexStampDocument() {
-        when(documentClientMock.annexStampDocument(any(), anyString())).thenReturn(document());
+        when(documentClientMock.annexStampDocument(any(), anyString())).thenReturn(newDocument());
 
         CaseDocument stampDocument = genericDocumentService.annexStampDocument(caseDocument(), AUTH_TOKEN);
 
@@ -59,9 +60,9 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
         final String templateName = "template name";
         final String fileName = "file name";
 
-        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
+        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(newDocument());
 
-        CaseDocument document = genericDocumentService.generateDocument(AUTH_TOKEN, defaultContestedCaseDetails(), templateName, fileName);
+        Document document = genericDocumentService.generateDocument(AUTH_TOKEN, defaultContestedCaseDetails(), templateName, fileName);
 
         assertCaseDocument(document);
         verify(documentClientMock, times(1)).generatePdf(documentGenerationRequestCaptor.capture(), eq(AUTH_TOKEN));

@@ -5,13 +5,14 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.frcupateinfo.UpdateFrcInfoLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.generators.UpdateFrcInfoLetterDetailsGenerator;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -25,8 +26,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildConsentedFrcCourtDetails;
 
 public class BaseUpdateFrcInfoDocumentServiceTest {
@@ -56,8 +55,8 @@ public class BaseUpdateFrcInfoDocumentServiceTest {
     private static final String CASE_DETAILS = "caseDetails";
     private static final String CASE_DATA = "case_data";
 
-    private Map caseData = null;
-    protected CaseDetails caseDetails = null;
+    private FinremCaseData caseData = null;
+    protected FinremCaseDetails caseDetails = null;
 
     protected UpdateFrcInfoLetterDetails updateFrcInfoLetterDetails;
 
@@ -68,16 +67,17 @@ public class BaseUpdateFrcInfoDocumentServiceTest {
 
     @Before
     public void setUp() {
-        caseData = Map.of(DIVORCE_CASE_NUMBER, "divCaseReference", SOLICITOR_REFERENCE,
-            "solicitorReference");
-        caseDetails = CaseDetails.builder().id(1234L).data(caseData).build();
+        caseData = new FinremCaseData();
+        caseData.setDivorceCaseNumber("divCaseReference");
+        caseData.getContactDetailsWrapper().setSolicitorReference("solicitorReference");
+        caseDetails = FinremCaseDetails.builder().id(1234L).caseData(caseData).build();
 
         letterDate = DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now());
         updateFrcInfoLetterDetails = UpdateFrcInfoLetterDetails.builder()
             .letterDate(letterDate)
-            .divorceCaseNumber(Objects.toString(caseDetails.getData().get(DIVORCE_CASE_NUMBER)))
-            .caseNumber(caseDetails.getId().toString())
-            .reference(Objects.toString(caseDetails.getData().get(SOLICITOR_REFERENCE)))
+            .divorceCaseNumber(Objects.toString(caseData.getDivorceCaseNumber()))
+            .caseNumber(String.valueOf(caseDetails.getId()))
+            .reference(caseData.getContactDetailsWrapper().getSolicitorReference())
             .applicantName(APPLICANT_NAME)
             .respondentName(RESPONDENT_NAME)
             .courtDetails(buildConsentedFrcCourtDetails())
@@ -85,7 +85,7 @@ public class BaseUpdateFrcInfoDocumentServiceTest {
             .build();
     }
 
-    protected void assertAndVerifyDocumentIsGenerated(CaseDocument caseDocument) {
+    protected void assertAndVerifyDocumentIsGenerated(Document caseDocument) {
         assertNotNull(caseDocument);
         verify(genericDocumentService, times(1))
             .generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),

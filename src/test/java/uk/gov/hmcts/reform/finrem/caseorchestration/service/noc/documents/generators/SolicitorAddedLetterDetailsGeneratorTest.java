@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -31,7 +32,8 @@ public class SolicitorAddedLetterDetailsGeneratorTest extends AbstractLetterDeta
     @Test
     public void shouldGenerateNoticeOfChangeLetterDetailsForApplicantWhenSolicitorAdded() {
 
-        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.FALSE);
+        caseDetails.getCaseData().setCcdCaseType(CaseType.CONTESTED);
+        caseDetailsBefore.getCaseData().setCcdCaseType(CaseType.CONTESTED);
         when(addresseeGeneratorService.generateAddressee(caseDetailsBefore, changedRepresentativeAdded,
             DocumentHelper.PaperNotificationRecipient.APPLICANT, "applicant"))
             .thenReturn(Addressee.builder().formattedAddress(
@@ -50,7 +52,8 @@ public class SolicitorAddedLetterDetailsGeneratorTest extends AbstractLetterDeta
     @Test
     public void shouldGenerateNoticeOfChangeLetterDetailsForSolicitorWhenAdded() {
 
-        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(Boolean.FALSE);
+        caseDetails.getCaseData().setCcdCaseType(CaseType.CONTESTED);
+        caseDetailsBefore.getCaseData().setCcdCaseType(CaseType.CONTESTED);
         when(addresseeGeneratorService.generateAddressee(caseDetails, changedRepresentativeAdded,
             DocumentHelper.PaperNotificationRecipient.SOLICITOR, "applicant"))
             .thenReturn(Addressee.builder().formattedAddress(

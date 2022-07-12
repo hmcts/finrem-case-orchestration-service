@@ -13,11 +13,14 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Address;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -27,25 +30,15 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetails;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultContestedCaseDetails;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedFinremCaseDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultContestedFinremCaseDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 
 @ActiveProfiles("test-mock-feign-clients")
 public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
@@ -53,7 +46,7 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
     @Autowired private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
     @Autowired private DocumentClient documentClientMock;
 
-    private CaseDetails caseDetails;
+    private FinremCaseDetails caseDetails;
 
     @Captor
     private ArgumentCaptor<DocumentGenerationRequest> documentGenerationRequestCaptor;
@@ -69,11 +62,11 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     @Test
     public void shouldGenerateAssignedToJudgeLetterForApplicant() {
-        caseDetails = defaultConsentedCaseDetails();
+        caseDetails = defaultConsentedFinremCaseDetails();
 
-        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
+        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(newDocument());
 
-        CaseDocument generateAssignedToJudgeNotificationLetter
+        Document generateAssignedToJudgeNotificationLetter
             = assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN, APPLICANT);
 
         assertCaseDocument(generateAssignedToJudgeNotificationLetter);
@@ -83,26 +76,27 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     @Test
     public void shouldGenerateAssignedToJudgeLetterForApplicantSolicitor() {
-        caseDetails = defaultConsentedCaseDetails();
+        caseDetails = defaultConsentedFinremCaseDetails();
 
-        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
+        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(newDocument());
 
-        Map<String, Object> solicitorAddress = new HashMap<>();
-        solicitorAddress.put("AddressLine1", "123 Applicant Solicitor Street");
-        solicitorAddress.put("AddressLine2", "Second Address Line");
-        solicitorAddress.put("AddressLine3", "Third Address Line");
-        solicitorAddress.put("County", "London");
-        solicitorAddress.put("Country", "England");
-        solicitorAddress.put("PostTown", "London");
-        solicitorAddress.put("PostCode", "SE1");
+        Address solicitorAddress = Address.builder()
+            .addressLine1("123 Applicant Solicitor Street")
+            .addressLine2("Second Address Line")
+            .addressLine3("Third Address Line")
+            .county("London")
+            .country("England")
+            .postTown("London")
+            .postCode("SE1")
+            .build();
 
-        Map<String, Object> caseData = caseDetails.getData();
-        caseData.replace(APPLICANT_REPRESENTED, YES_VALUE);
-        caseData.put(CONSENTED_SOLICITOR_NAME, TEST_SOLICITOR_NAME);
-        caseData.put(SOLICITOR_REFERENCE, TEST_SOLICITOR_REFERENCE);
-        caseData.put(CONSENTED_SOLICITOR_ADDRESS, solicitorAddress);
+        FinremCaseData caseData = caseDetails.getCaseData();
+        caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
+        caseData.getContactDetailsWrapper().setSolicitorName(TEST_SOLICITOR_NAME);
+        caseData.getContactDetailsWrapper().setSolicitorReference(TEST_SOLICITOR_REFERENCE);
+        caseData.getContactDetailsWrapper().setSolicitorAddress(solicitorAddress);
 
-        CaseDocument generatedAssignedToJudgeNotificationLetter
+        Document generatedAssignedToJudgeNotificationLetter
             = assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN, APPLICANT);
 
         assertCaseDocument(generatedAssignedToJudgeNotificationLetter);
@@ -111,11 +105,11 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     @Test
     public void shouldGenerateApplicantConsentInContestedAssignedToJudgeNotificationLetter() {
-        caseDetails = defaultContestedCaseDetails();
+        caseDetails = defaultContestedFinremCaseDetails();
 
-        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
+        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(newDocument());
 
-        CaseDocument generateAssignedToJudgeNotificationLetter
+        Document generateAssignedToJudgeNotificationLetter
             = assignedToJudgeDocumentService.generateConsentInContestedAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN, APPLICANT);
 
         assertCaseDocument(generateAssignedToJudgeNotificationLetter);
@@ -142,26 +136,27 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     @Test
     public void shouldGenerateApplicantConsentInContestedAssignedToJudgeNotificationLetterForApplicantSolicitor() {
-        caseDetails = defaultContestedCaseDetails();
+        caseDetails = defaultContestedFinremCaseDetails();
 
-        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
+        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(newDocument());
 
-        Map<String, Object> solicitorAddress = new HashMap<>();
-        solicitorAddress.put("AddressLine1", "123 Applicant Solicitor Street");
-        solicitorAddress.put("AddressLine2", "Second Address Line");
-        solicitorAddress.put("AddressLine3", "Third Address Line");
-        solicitorAddress.put("County", "London");
-        solicitorAddress.put("Country", "England");
-        solicitorAddress.put("PostTown", "London");
-        solicitorAddress.put("PostCode", "SE1");
+        Address solicitorAddress = Address.builder()
+            .addressLine1("123 Applicant Solicitor Street")
+            .addressLine2("Second Address Line")
+            .addressLine3("Third Address Line")
+            .county("London")
+            .country("England")
+            .postTown("London")
+            .postCode("SE1")
+            .build();
 
-        Map<String, Object> caseData = caseDetails.getData();
-        caseData.replace(APPLICANT_REPRESENTED, YES_VALUE);
-        caseData.put(CONTESTED_SOLICITOR_NAME, TEST_SOLICITOR_NAME);
-        caseData.put(SOLICITOR_REFERENCE, TEST_SOLICITOR_REFERENCE);
-        caseData.put(CONTESTED_SOLICITOR_ADDRESS, solicitorAddress);
+        FinremCaseData caseData = caseDetails.getCaseData();
+        caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
+        caseData.getContactDetailsWrapper().setApplicantSolicitorName(TEST_SOLICITOR_NAME);
+        caseData.getContactDetailsWrapper().setSolicitorReference(TEST_SOLICITOR_REFERENCE);
+        caseData.getContactDetailsWrapper().setApplicantSolicitorAddress(solicitorAddress);
 
-        CaseDocument generatedAssignedToJudgeNotificationLetter
+        Document generatedAssignedToJudgeNotificationLetter
             = assignedToJudgeDocumentService.generateConsentInContestedAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN, APPLICANT);
 
         assertCaseDocument(generatedAssignedToJudgeNotificationLetter);
@@ -188,11 +183,11 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     @Test
     public void shouldGenerateRespondentConsentInContestedAssignedToJudgeNotificationLetter() {
-        caseDetails = defaultContestedCaseDetails();
+        caseDetails = defaultContestedFinremCaseDetails();
 
-        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
+        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(newDocument());
 
-        CaseDocument generateAssignedToJudgeNotificationLetter
+        Document generateAssignedToJudgeNotificationLetter
             = assignedToJudgeDocumentService.generateConsentInContestedAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN, RESPONDENT);
 
         assertCaseDocument(generateAssignedToJudgeNotificationLetter);
@@ -219,26 +214,27 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     @Test
     public void shouldGenerateRespondentConsentInContestedAssignedToJudgeNotificationLetterForApplicantSolicitor() {
-        caseDetails = defaultContestedCaseDetails();
+        caseDetails = defaultContestedFinremCaseDetails();
 
-        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
+        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(newDocument());
 
-        Map<String, Object> solicitorAddress = new HashMap<>();
-        solicitorAddress.put("AddressLine1", "123 Respondent Solicitor Street");
-        solicitorAddress.put("AddressLine2", "Second Address Line");
-        solicitorAddress.put("AddressLine3", "Third Address Line");
-        solicitorAddress.put("County", "London");
-        solicitorAddress.put("Country", "England");
-        solicitorAddress.put("PostTown", "London");
-        solicitorAddress.put("PostCode", "SE1");
+        Address solicitorAddress = Address.builder()
+            .addressLine1("123 Respondent Solicitor Street")
+            .addressLine2("Second Address Line")
+            .addressLine3("Third Address Line")
+            .county("London")
+            .country("England")
+            .postTown("London")
+            .postCode("SE1")
+            .build();
 
-        Map<String, Object> caseData = caseDetails.getData();
-        caseData.replace(CONTESTED_RESPONDENT_REPRESENTED, YES_VALUE);
-        caseData.put(RESP_SOLICITOR_NAME, TEST_SOLICITOR_NAME);
-        caseData.put(SOLICITOR_REFERENCE, TEST_SOLICITOR_REFERENCE);
-        caseData.put(RESP_SOLICITOR_ADDRESS, solicitorAddress);
+        FinremCaseData caseData = caseDetails.getCaseData();
+        caseData.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
+        caseData.getContactDetailsWrapper().setRespondentSolicitorName(TEST_SOLICITOR_NAME);
+        caseData.getContactDetailsWrapper().setRespondentSolicitorReference(TEST_SOLICITOR_REFERENCE);
+        caseData.getContactDetailsWrapper().setRespondentSolicitorAddress(solicitorAddress);
 
-        CaseDocument generatedAssignedToJudgeNotificationLetter
+        Document generatedAssignedToJudgeNotificationLetter
             = assignedToJudgeDocumentService.generateConsentInContestedAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN, RESPONDENT);
 
         assertCaseDocument(generatedAssignedToJudgeNotificationLetter);

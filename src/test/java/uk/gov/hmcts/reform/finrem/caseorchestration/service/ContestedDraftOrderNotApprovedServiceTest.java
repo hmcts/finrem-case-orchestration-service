@@ -7,14 +7,17 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedRefusalOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
-import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +35,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_PREVIEW_DOCUMENT;
@@ -42,19 +45,22 @@ public class ContestedDraftOrderNotApprovedServiceTest extends BaseServiceTest {
     @Autowired private ContestedDraftOrderNotApprovedService refusalOrderService;
     @Autowired private ObjectMapper objectMapper;
     @Autowired private DocumentConfiguration documentConfiguration;
+    @Autowired private FinremCallbackRequestDeserializer deserializer;
 
     @MockBean private GenericDocumentService genericDocumentService;
 
-    @Captor private ArgumentCaptor<CaseDetails> caseDetailsArgumentCaptor;
+    @Captor private ArgumentCaptor<FinremCaseDetails> caseDetailsArgumentCaptor;
+    @Captor private ArgumentCaptor<Map<String, Object>> placeholdersMapArgumentCaptor;
 
     @Before
     public void setUp() {
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(newDocument());
     }
 
     @Test
     public void generateRefusalOrderWithOneReason() throws Exception {
-        Map<String, Object> documentMap = refusalOrderService.createAndSetRefusalOrderPreviewDocument(AUTH_TOKEN, contestedCaseDetails(false));
+        refusalOrderService.createAndSetRefusalOrderPreviewDocument(AUTH_TOKEN, contestedCaseDetails(false));
+
 
         CaseDocument result = (CaseDocument) documentMap.get(CONTESTED_APPLICATION_NOT_APPROVED_PREVIEW_DOCUMENT);
         doCaseDocumentAssert(result);
@@ -105,9 +111,9 @@ public class ContestedDraftOrderNotApprovedServiceTest extends BaseServiceTest {
 
     @Test
     public void getLatestRefusalReasonShouldReturnLatestReason() throws Exception {
-        Optional<CaseDocument> doc = refusalOrderService.getLatestRefusalReason(contestedCaseDetails(true));
+        Optional<Document> doc = refusalOrderService.getLatestRefusalReason(contestedCaseDetails(true));
         assertThat(doc.isPresent(), is(true));
-        assertThat(doc.get().getDocumentFilename(), is("app_docs.pdf"));
+        assertThat(doc.get().getFilename(), is("app_docs.pdf"));
     }
 
     @Test
@@ -116,15 +122,13 @@ public class ContestedDraftOrderNotApprovedServiceTest extends BaseServiceTest {
         assertThat(doc.isPresent(), is(false));
     }
 
-    private CaseDetails contestedCaseDetails(boolean multipleReasons) throws Exception {
+    private FinremCaseDetails contestedCaseDetails(boolean multipleReasons) throws Exception {
         if (multipleReasons) {
-            try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/refusal-order-contested.json")) {
-                return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-            }
+            return deserializer.deserialize(new String(Files.readAllBytes(Paths.get("/fixtures/refusal-order-contested.json"))))
+                .getCaseDetails();
         } else {
-            try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/refusal-order-singular-contested.json")) {
-                return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-            }
+            return deserializer.deserialize(new String(Files.readAllBytes(Paths.get("/fixtures/refusal-order-singular-contested.json"))))
+                .getCaseDetails();
         }
     }
 
@@ -149,11 +153,12 @@ public class ContestedDraftOrderNotApprovedServiceTest extends BaseServiceTest {
     }
 
     void verifyAdditionalFieldsWithSingularReason() {
-        verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
+        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
+            placeholdersMapArgumentCaptor.capture(),
             eq(documentConfiguration.getContestedDraftOrderNotApprovedTemplate()),
             eq(documentConfiguration.getContestedDraftOrderNotApprovedFileName()));
 
-        Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
+        Map<String, Object> data = placeholdersMapArgumentCaptor.getValue();
         assertThat(data.get("ApplicantName"), is("Contested Applicant Name"));
         assertThat(data.get("RespondentName"), is("Contested Respondent Name"));
         assertThat(data.get("Court"), is("Nottingham County Court and Family Court"));

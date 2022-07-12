@@ -6,13 +6,14 @@ import org.mockito.Mock;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.address.AddresseeGeneratorService;
+import uk.gov.hmcts.reform.finrem.ccd.domain.ChangedRepresentative;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Organisation;
+import uk.gov.hmcts.reform.finrem.ccd.domain.RepresentationUpdate;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,6 +25,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finremCaseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_ADDRESS_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_NAME_KEY;
@@ -52,17 +54,17 @@ public class AbstractLetterDetailsGeneratorTest {
     @Mock
     protected CaseDataService caseDataService;
 
-    protected CaseDetails caseDetails;
-    protected CaseDetails caseDetailsBefore;
+    protected FinremCaseDetails caseDetails;
+    protected FinremCaseDetails caseDetailsBefore;
     protected RepresentationUpdate representationUpdate;
     protected ChangedRepresentative changedRepresentativeRemoved;
     protected ChangedRepresentative changedRepresentativeAdded;
 
     @Before
     public void setUpTest() {
-        caseDetails = caseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke.json",
+        caseDetails = finremCaseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke.json",
             new ObjectMapper());
-        caseDetailsBefore = caseDetailsFromResource(
+        caseDetailsBefore = finremCaseDetailsFromResource(
             "/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke-before.json",
             new ObjectMapper());
         when(documentHelper.getApplicantFullName(any(CaseDetails.class))).thenReturn(APPLICANT_FULL_NAME);
@@ -73,10 +75,9 @@ public class AbstractLetterDetailsGeneratorTest {
 
     protected void assertLetterDetails(NoticeOfChangeLetterDetails noticeOfChangeLetterDetails,
                                        NoticeType noticeType, boolean isConsented) {
-        assertThat(noticeOfChangeLetterDetails.getCaseNumber(), is(caseDetails.getId().toString()));
-        assertThat(noticeOfChangeLetterDetails.getReference(), is(caseDetails.getData().get(SOLICITOR_REFERENCE).toString()));
-        assertThat(noticeOfChangeLetterDetails.getReference(), is(caseDetails.getData().get(SOLICITOR_REFERENCE).toString()));
-        assertThat(noticeOfChangeLetterDetails.getDivorceCaseNumber(), is(caseDetails.getData().get(DIVORCE_CASE_NUMBER).toString()));
+        assertThat(noticeOfChangeLetterDetails.getCaseNumber(), is(String.valueOf(caseDetails.getId())));
+        assertThat(noticeOfChangeLetterDetails.getReference(), is(caseDetails.getCaseData().getContactDetailsWrapper().getSolicitorReference()));
+        assertThat(noticeOfChangeLetterDetails.getDivorceCaseNumber(), is(caseDetails.getCaseData().getDivorceCaseNumber()));
         assertThat(noticeOfChangeLetterDetails.getLetterDate(), is(DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now())));
         assertThat(noticeOfChangeLetterDetails.getApplicantName(), is(APPLICANT_FULL_NAME));
         assertThat(noticeOfChangeLetterDetails.getRespondentName(),
@@ -127,7 +128,7 @@ public class AbstractLetterDetailsGeneratorTest {
                 .build()).build();
         return RepresentationUpdate.builder()
             .party("applicant")
-            .clientName("John Smith")
+            .name("John Smith")
             .by("Sir Solicitor")
             .via("Notice of Change")
             .date(LocalDateTime.now())

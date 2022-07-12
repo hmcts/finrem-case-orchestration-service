@@ -1,26 +1,27 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsented;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsentedData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
+import uk.gov.hmcts.reform.finrem.ccd.domain.ConsentOrder;
+import uk.gov.hmcts.reform.finrem.ccd.domain.ConsentOrderCollection;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.GeneralOrder;
+import uk.gov.hmcts.reform.finrem.ccd.domain.GeneralOrderCollection;
+import uk.gov.hmcts.reform.finrem.ccd.domain.UploadOrder;
+import uk.gov.hmcts.reform.finrem.ccd.domain.UploadOrderCollection;
+import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -29,21 +30,10 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetails;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultContestedCaseDetails;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.DOCUMENT_BINARY_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.DOCUMENT_FILENAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.DOCUMENT_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_COLLECTION_CONSENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedFinremCaseDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultContestedFinremCaseDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
 
 @ActiveProfiles("test-mock-feign-clients")
 public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest {
@@ -54,34 +44,38 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
     @Autowired private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
     @Autowired private DocumentClient documentClientMock;
 
-    private CaseDetails caseDetails;
+    private FinremCaseDetails caseDetails;
 
     @Before
     public void setupDocumentGenerationMocks() {
-        Document generatedDocument = document();
+        Document generatedDocument = newDocument();
         generatedDocument.setBinaryUrl(COVER_LETTER_URL);
 
         when(documentClientMock.generatePdf(any(DocumentGenerationRequest.class), eq(AUTH_TOKEN))).thenReturn(generatedDocument);
     }
 
     public void setupContestedCase() {
-        caseDetails = defaultContestedCaseDetails();
+        caseDetails = defaultContestedFinremCaseDetails();
 
-        Map<String, Object> caseData = caseDetails.getData();
-        caseData.put(GENERAL_ORDER_LATEST_DOCUMENT, caseDocument());
-        caseData.put(PAPER_APPLICATION, YES_VALUE);
-        caseData.put(UPLOAD_ORDER, Collections.singletonList(
-            ImmutableMap.of("value", ImmutableMap.of(
-                "DocumentLink", ImmutableMap.of(
-                    DOCUMENT_URL, "mockUrl",
-                    DOCUMENT_FILENAME, "mockFilename",
-                    DOCUMENT_BINARY_URL, GENERAL_ORDER_URL)))));
-
-        List<GeneralOrderConsentedData> generalOrders = new ArrayList<>();
-        GeneralOrderConsented generalOrder = new GeneralOrderConsented();
-        generalOrder.setGeneralOrder(caseDocument());
-        generalOrders.add(new GeneralOrderConsentedData("123", generalOrder));
-        caseData.put(GENERAL_ORDER_COLLECTION_CONSENTED, generalOrders);
+        FinremCaseData caseData = caseDetails.getCaseData();
+        caseData.getGeneralOrderWrapper().setGeneralOrderLatestDocument(newDocument());
+        caseData.setPaperApplication(YesOrNo.YES);
+        caseData.setUploadOrder(Collections.singletonList(
+            UploadOrderCollection.builder()
+                .value(UploadOrder.builder()
+                    .documentLink(Document.builder()
+                        .filename("mockFilename")
+                        .binaryUrl(GENERAL_ORDER_URL)
+                        .url("mockUrl")
+                        .build())
+                    .build())
+                .build()
+        ));
+        caseData.getGeneralOrderWrapper().setGeneralOrderCollection(List.of(GeneralOrderCollection.builder()
+            .value(GeneralOrder.builder()
+                .generalOrderDocumentUpload(newDocument())
+                .build())
+            .build()));
     }
 
     @Test
@@ -95,13 +89,13 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
         assertThat(generatedDocuments.get(0).getBinaryFileUrl(), is(COVER_LETTER_URL));
         assertThat(generatedDocuments.get(1).getBinaryFileUrl(), is(TestSetUpUtils.BINARY_URL));
 
-        assertThat(caseDetails.getData().get(BULK_PRINT_COVER_SHEET_APP), is(nullValue()));
+        assertThat(caseDetails.getCaseData().getBulkPrintCoverSheetApp(), is(nullValue()));
     }
 
     @Test
     public void whenNoNotApprovedConsentOrderIsFound_thenApplicantPackPrintsWithoutIt() {
         setupContestedCase();
-        caseDetails.getData().put(UPLOAD_ORDER, null);
+        caseDetails.getCaseData().setUploadOrder(null);
 
         List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
             caseDetails, AUTH_TOKEN);
@@ -110,43 +104,45 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
         assertThat(generatedDocuments.get(0).getBinaryFileUrl(), is(COVER_LETTER_URL));
         assertThat(generatedDocuments.get(1).getBinaryFileUrl(), is(TestSetUpUtils.BINARY_URL));
 
-        assertThat(caseDetails.getData().get(BULK_PRINT_COVER_SHEET_APP), is(nullValue()));
+        assertThat(caseDetails.getCaseData().getBulkPrintCoverSheetApp(), is(nullValue()));
     }
 
     @Test
     public void getApplicantLetterPackWithNoConsentOrderAndNoGeneralOrdersReturnsEmptyList_withConsentDocGenOn() {
-        caseDetails = defaultConsentedCaseDetails();
-        caseDetails.getData().put(UPLOAD_ORDER, null);
+        caseDetails = defaultConsentedFinremCaseDetails();
+        caseDetails.getCaseData().setUploadOrder(null);
 
         List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
             caseDetails, AUTH_TOKEN);
 
         assertThat(generatedDocuments, hasSize(0));
 
-        assertThat(caseDetails.getData().get(BULK_PRINT_COVER_SHEET_APP), is(nullValue()));
+        assertThat(caseDetails.getCaseData().getBulkPrintCoverSheetApp(), is(nullValue()));
     }
 
     @Test
     public void givenConsentedInContestedCase_whenConsentOrderWasNotApproved_expectedDocumentsArePrinted() {
-        caseDetails = defaultContestedCaseDetails();
+        caseDetails = defaultContestedFinremCaseDetails();
         addConsentedInContestedConsentOrderNotApproved();
 
         List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
             caseDetails, AUTH_TOKEN);
 
         assertThat(generatedDocuments, hasSize(2));
-        assertThat(caseDetails.getData().get(BULK_PRINT_COVER_SHEET_APP), is(nullValue()));
+        assertThat(caseDetails.getCaseData().getBulkPrintCoverSheetApp(), is(nullValue()));
     }
 
     private void addConsentedInContestedConsentOrderNotApproved() {
-        Map<String, Object> caseData = caseDetails.getData();
+        FinremCaseData caseData = caseDetails.getCaseData();
 
-        caseData.put(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION, Arrays.asList(ImmutableMap.of(
-            "id", UUID.randomUUID().toString(),
-            "value", ImmutableMap.of(
-                "consentOrder", ImmutableMap.of(
-                    "document_binary_url", "test_url_"
-                )))));
-
+        caseData.getConsentOrderWrapper().setConsentedNotApprovedOrders(List.of(
+            ConsentOrderCollection.builder()
+                .value(ConsentOrder.builder()
+                    .consentOrder(Document.builder()
+                        .binaryUrl("test_url_")
+                        .build())
+                    .build())
+                .build()
+        ));
     }
 }

@@ -1,7 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.bulkprint;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.LetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.LetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
@@ -11,8 +14,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_PO_BOX;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_TOWN;
 
-
+@Component
 public class BulkPrintCoverLetterDetailsMapper extends LetterDetailsMapper {
+
+    public BulkPrintCoverLetterDetailsMapper(ObjectMapper objectMapper, CourtDetailsMapper courtDetailsMapper) {
+        super(objectMapper, courtDetailsMapper);
+    }
 
     @Override
     public LetterDetails buildLetterDetails(FinremCaseDetails caseDetails,

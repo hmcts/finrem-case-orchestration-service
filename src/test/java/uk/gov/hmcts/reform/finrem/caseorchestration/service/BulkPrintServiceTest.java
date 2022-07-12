@@ -10,15 +10,19 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
 import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,12 +30,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.bulkPrintDocumentList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CONFIDENTIAL_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP_CONFIDENTIAL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_RES;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_RES_CONFIDENTIAL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_CONFIDENTIAL_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finremCaseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService.FINANCIAL_REMEDY_PACK_LETTER_TYPE;
 
 public class BulkPrintServiceTest extends BaseServiceTest {
@@ -44,7 +43,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     @MockBean private GenericDocumentService genericDocumentService;
     @MockBean private PaperNotificationService paperNotificationService;
 
-    private final CaseDocument caseDocument = TestSetUpUtils.caseDocument();
+    private final Document caseDocument = TestSetUpUtils.newDocument();
     private UUID letterId;
     private ArgumentCaptor<BulkPrintRequest> bulkPrintRequestArgumentCaptor;
 
@@ -58,7 +57,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     @Test
     public void shouldSendDocumentForBulkPrint() {
         UUID bulkPrintLetterId = bulkPrintService.sendDocumentForPrint(
-            new CaseDocument(), caseDetails());
+            new Document(), caseDetails());
 
         assertThat(bulkPrintLetterId, is(letterId));
     }
@@ -75,7 +74,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     public void shouldPrintApplicantDocuments() {
         final String consentedBulkPrintConsentOrderNotApprovedJson
             = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
-        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
         List<BulkPrintDocument> bulkPrintDocuments = bulkPrintDocumentList();
 
         when(coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
@@ -90,15 +89,15 @@ public class BulkPrintServiceTest extends BaseServiceTest {
 
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().containsAll(bulkPrintDocuments), is(true));
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getLetterType(), is(FINANCIAL_REMEDY_PACK_LETTER_TYPE));
-        assertThat(bulkPrintRequestArgumentCaptor.getValue().getCaseId(), is(caseDetails.getId().toString()));
-        assertThat(caseDetails.getData().containsKey(BULK_PRINT_COVER_SHEET_APP), is(true));
+        assertThat(bulkPrintRequestArgumentCaptor.getValue().getCaseId(), is(String.valueOf(caseDetails.getId())));
+        assertThat(caseDetails.getCaseData().getBulkPrintCoverSheetApp(), is(notNullValue()));
     }
 
     @Test
     public void shouldPrintRespondentDocuments() {
         final String consentedBulkPrintConsentOrderNotApprovedJson
             = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
-        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
         List<BulkPrintDocument> bulkPrintDocuments = bulkPrintDocumentList();
 
         when(coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
@@ -113,8 +112,8 @@ public class BulkPrintServiceTest extends BaseServiceTest {
 
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().containsAll(bulkPrintDocuments), is(true));
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getLetterType(), is(FINANCIAL_REMEDY_PACK_LETTER_TYPE));
-        assertThat(bulkPrintRequestArgumentCaptor.getValue().getCaseId(), is(caseDetails.getId().toString()));
-        assertThat(caseDetails.getData().containsKey(BULK_PRINT_COVER_SHEET_RES), is(true));
+        assertThat(bulkPrintRequestArgumentCaptor.getValue().getCaseId(), is(String.valueOf(caseDetails.getId())));
+        assertThat(caseDetails.getCaseData().getBulkPrintCoverSheetRes(), is(notNullValue()));
     }
 
     @Test
@@ -127,7 +126,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     public void shouldNotPrintForApplicantIfRepresentedAgreedToEmailAndNotPaperCase() {
         final String json
             = "/fixtures/refusal-order-contested.json";
-        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(json, mapper);
 
         assertThat(paperNotificationService.shouldPrintForApplicant(caseDetails), is(false));
     }
@@ -136,8 +135,8 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     public void shouldSaveApplicantDocumentsToConfidentialCollectionWhenAddressIsConfidential() {
         final String consentedBulkPrintConsentOrderNotApprovedJson
             = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
-        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
-        caseDetails.getData().put(APPLICANT_CONFIDENTIAL_ADDRESS, "Yes");
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
+        caseDetails.getCaseData().getContactDetailsWrapper().setApplicantAddressConfidential(YesOrNo.YES);
         List<BulkPrintDocument> bulkPrintDocuments = bulkPrintDocumentList();
 
         when(coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
@@ -146,16 +145,16 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         UUID uuid = bulkPrintService.printApplicantDocuments(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
 
         assertThat(uuid, is(letterId));
-        assertThat(caseDetails.getData().containsKey(BULK_PRINT_COVER_SHEET_APP_CONFIDENTIAL), is(true));
-        assertThat(caseDetails.getData().containsKey(BULK_PRINT_COVER_SHEET_APP), is(false));
+        assertThat(caseDetails.getCaseData().getBulkPrintCoverSheetAppConfidential(), is(notNullValue()));
+        assertThat(caseDetails.getCaseData().getBulkPrintCoverSheetApp(), is(nullValue()));
     }
 
     @Test
     public void shouldSaveRespondentDocumentsToConfidentialCollectionWhenAddressIsConfidential() {
         final String consentedBulkPrintConsentOrderNotApprovedJson
             = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
-        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
-        caseDetails.getData().put(RESPONDENT_CONFIDENTIAL_ADDRESS, "Yes");
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
+        caseDetails.getCaseData().getContactDetailsWrapper().setRespondentAddressConfidential(YesOrNo.YES);
         List<BulkPrintDocument> bulkPrintDocuments = bulkPrintDocumentList();
 
         when(coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
@@ -164,11 +163,11 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         UUID uuid = bulkPrintService.printRespondentDocuments(caseDetails, AUTH_TOKEN, bulkPrintDocuments);
 
         assertThat(uuid, is(letterId));
-        assertThat(caseDetails.getData().containsKey(BULK_PRINT_COVER_SHEET_RES_CONFIDENTIAL), is(true));
-        assertThat(caseDetails.getData().containsKey(BULK_PRINT_COVER_SHEET_RES), is(false));
+        assertThat(caseDetails.getCaseData().getBulkPrintCoverSheetResConfidential(), is(notNullValue()));
+        assertThat(caseDetails.getCaseData().getBulkPrintCoverSheetRes(), is(nullValue()));
     }
 
-    private CaseDetails caseDetails() {
-        return TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print.json", mapper);
+    private FinremCaseDetails caseDetails() {
+        return finremCaseDetailsFromResource("/fixtures/bulkprint/bulk-print.json", mapper);
     }
 }

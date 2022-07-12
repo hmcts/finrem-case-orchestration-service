@@ -3,14 +3,14 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.EventType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -37,7 +37,7 @@ public class CallbackDispatchServiceTest extends BaseServiceTest {
     private CallbackHandler handler2;
 
     @Mock
-    private CaseDetails caseDetails;
+    private FinremCaseDetails caseDetails;
 
     @Mock
     private CallbackRequest callbackRequest;
@@ -62,8 +62,8 @@ public class CallbackDispatchServiceTest extends BaseServiceTest {
     public void givenMultipleHandlers_WhenDispatchToHandlers_ThenAllErrorsCollected() {
 
         when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
-        when(caseDetails.getCaseTypeId()).thenReturn(CaseType.CONTESTED.getCcdType());
-        when(callbackRequest.getEventId()).thenReturn(EventType.SEND_ORDER.getCcdType());
+        when(caseDetails.getCaseType()).thenReturn(CaseType.CONTESTED);
+        when(callbackRequest.getEventType()).thenReturn(EventType.SEND_ORDER);
 
         when(response1.getErrors()).thenReturn(List.of("error1"));
         when(response2.getErrors()).thenReturn(List.of("error2", "error3"));
@@ -88,8 +88,8 @@ public class CallbackDispatchServiceTest extends BaseServiceTest {
     public void givenOneHandlerCanHandle_WhenDispatchToHandlers_ThenOnlyAbleHandlerAreCalled() {
 
         when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
-        when(caseDetails.getCaseTypeId()).thenReturn(CaseType.CONTESTED.getCcdType());
-        when(callbackRequest.getEventId()).thenReturn(EventType.SEND_ORDER.getCcdType());
+        when(caseDetails.getCaseType()).thenReturn(CaseType.CONTESTED);
+        when(callbackRequest.getEventType()).thenReturn(EventType.SEND_ORDER);
 
         when(handler1.canHandle(any(CallbackType.class), any(CaseType.class), any(EventType.class))).thenReturn(true);
         when(handler1.handle(any(CallbackRequest.class), anyString())).thenReturn(response1);

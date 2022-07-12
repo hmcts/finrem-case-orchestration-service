@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -77,7 +78,7 @@ public class NocDocumentServiceBaseTest {
 
     }
 
-    protected void assertAndVerifyDocumentsAreGenerated(CaseDocument caseDocument) {
+    protected void assertAndVerifyDocumentsAreGenerated(Document caseDocument) {
         assertNotNull(caseDocument);
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), notiicationLettersDetailsMapCaptor.capture(),
             eq(DOC_TEMPLATE), eq(DOC_FILENAME));
