@@ -26,5 +26,5 @@ public abstract class CaseDocumentHandler<T> {
     }
 
     public abstract void handle(List<ContestedUploadedDocumentData> uploadedDocuments,
-                         Map<String, Object> caseData);
+                                Map<String, Object> caseData);
 }
