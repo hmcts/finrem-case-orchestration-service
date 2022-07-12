@@ -287,7 +287,6 @@ public class CCDConfigConstant {
     public static final String APPROVED_ORDER_COLLECTION = "approvedOrderCollection";
     public static final String FINAL_ORDER_COLLECTION = "finalOrderCollection";
     public static final String HEARING_ORDER_COLLECTION = "uploadHearingOrder";
-    public static final String HEARING_NOTICES_COLLECTION = "hearingNoticesDocumentCollection";
     public static final String RESPOND_TO_ORDER_DOCUMENTS = "respondToOrderDocuments";
     public static final String CONSENT_ORDER = "consentOrder";
     public static final String CONSENT_ORDER_FRC_NAME = "consentOrderFRCName";
@@ -478,8 +477,6 @@ public class CCDConfigConstant {
     public static final String HEARING_ORDER_OTHER_COLLECTION = "hearingOrderOtherDocuments";
     public static final String LATEST_DRAFT_DIRECTION_ORDER = "latestDraftDirectionOrder";
     public static final String JUDGES_AMENDED_DIRECTION_ORDER_COLLECTION = "judgesAmendedOrderCollection";
-    public static final String LATEST_DIRECTION_ORDER_IS_FINAL = "finalOrderYN";
-    public static final String ANOTHER_HEARING_TO_BE_LISTED = "anotherHearingYN";
 
     //transfer to local courts
     public static final String TRANSFER_COURTS_COLLECTION = "transferLocalCourtEmailCollection";
@@ -549,13 +546,10 @@ public class CCDConfigConstant {
     public static final String CHANGE_ORGANISATION_REQUEST = "changeOrganisationRequestField";
     public static final String INCLUDES_REPRESENTATION_CHANGE = "updateIncludesRepresentativeChange";
     public static final String REPRESENTATION_UPDATE_HISTORY = "RepresentationUpdateHistory";
+    public static final String CHANGE_REQUEST_FIELD = "changeOrganisationRequestField";
     public static final String INCLUDES_REPRESENTATIVE_UPDATE = "updateIncludesRepresentativeChange";
     public static final String UPDATE_CONTACT_DETAILS_EVENT = "FR_updateContactDetails";
 
     public static final String HEARING_UPLOAD_BUNDLE_COLLECTION = "hearingUploadBundle";
     public static final String SEND_ORDER_POST_STATE_OPTION_FIELD = "sendOrderPostStateOption";
-
-    //Upload Approved Order
-    public static final String HEARING_DIRECTION_DETAILS_COLLECTION = "hearingDirectionDetailsCollection";
-    public static final String HEARING_NOTICE_DOCUMENT_PACK = "hearingNoticeDocumentPack";
 }
