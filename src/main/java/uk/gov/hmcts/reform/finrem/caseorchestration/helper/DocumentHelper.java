@@ -65,7 +65,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_A_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NOTICES_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
@@ -92,10 +91,6 @@ public class DocumentHelper {
     public static final String CASE_NUMBER = "caseNumber";
     private final ObjectMapper objectMapper;
     private final CaseDataService caseDataService;
-
-    public enum PaperNotificationRecipient {
-        APPLICANT, RESPONDENT, SOLICITOR
-    }
 
     public static CtscContactDetails buildCtscContactDetails() {
         return CtscContactDetails.builder()
@@ -410,9 +405,7 @@ public class DocumentHelper {
         return BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl()).build();
     }
 
-    public List<CaseDocument> getHearingNoticeDocuments(Map<String, Object> caseData) {
-        return objectMapper.convertValue(caseData.get(HEARING_NOTICES_COLLECTION),
-            new TypeReference<>() {
-            });
+    public enum PaperNotificationRecipient {
+        APPLICANT, RESPONDENT, SOLICITOR
     }
 }

@@ -12,7 +12,6 @@ public enum EventType {
     UPLOAD_CASE_FILES("FR_uploadCaseFiles"),
     INTERIM_HEARING("FR_listForInterimHearing"),
     CLOSE("FR_close"),
-    UPLOAD_APPROVED_ORDER("FR_uploadApprovedOrder"),
     NONE("");
 
     private final String ccdType;
