@@ -1,0 +1,253 @@
+{
+  "event_id": "some_event_id",
+  "case_details": {
+    "id": "123",
+    "jurisdiction": "DIVORCE",
+    "state": "applicationDrafted",
+    "case_type_id": "FinancialRemedyContested",
+    "case_data": {
+      "formC": {
+        "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/84c8188c-0765-46bc-a082-f59c818615e7",
+        "document_filename": "Form-C.pdf",
+        "document_binary_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/84c8188c-0765-46bc-a082-f59c818615e7/binary"
+      },
+      "formG": {
+        "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/86fc9b34-4052-40de-b6b2-a4e40b499702",
+        "document_filename": "Form-G.pdf",
+        "document_binary_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/86fc9b34-4052-40de-b6b2-a4e40b499702/binary"
+      },
+      "isAdmin": "Yes",
+      "issueDate": "2020-11-18",
+      "miniFormA": {
+        "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/95bc00fc-dd3e-4442-b7a1-f4d4a082cb91",
+        "document_filename": "OnlineForm.pdf",
+        "document_binary_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/95bc00fc-dd3e-4442-b7a1-f4d4a082cb91/binary"
+      },
+      "regionList": "wales",
+      "hearingDate": "2020-12-30",
+      "hearingTime": "10:00am",
+      "hearingType": "First Directions Appointment (FDA)",
+      "cfcCourtList": null,
+      "consentOrder": {
+        "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/aa429ad1-fbe7-4e31-87bb-f2e1f3cb5d89",
+        "document_filename": "InterimHearingNotice-1649341720076259.pdf",
+        "document_binary_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/aa429ad1-fbe7-4e31-87bb-f2e1f3cb5d89/binary"
+      },
+      "timeEstimate": "45 minutes",
+      "walesFRCList": "swansea",
+      "londonFRCList": null,
+      "applicantLName": "sdas",
+      "dateOfMarriage": "2020-02-01",
+      "devonCourtList": null,
+      "rSolicitorFirm": "xzcxz",
+      "rSolicitorName": "xcxz",
+      "soleTraderName": "ipo",
+      "applicantFMName": "sadas",
+      "consentD81Joint": {
+        "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/490711ae-db33-4b63-8c69-fa2cc8482979",
+        "document_filename": "dummy1.pdf",
+        "document_binary_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/490711ae-db33-4b63-8c69-fa2cc8482979/binary"
+      },
+      "dateOfSepration": null,
+      "dorsetCourtList": null,
+      "evidenceHandled": "No",
+      "humberCourtList": null,
+      "midlandsFRCList": null,
+      "rSolicitorEmail": "vivred@mailinator.com",
+      "rSolicitorPhone": null,
+      "respondentLName": "asa",
+      "bristolCourtList": null,
+      "civilPartnership": "No",
+      "consentMiniFormA": {
+        "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/86d2ba7a-1132-4474-a3e7-3c4378d95448",
+        "document_filename": "OnlineForm.pdf",
+        "document_binary_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/86d2ba7a-1132-4474-a3e7-3c4378d95448/binary"
+      },
+      "copyOfPaperFormA": [
+        {
+          "id": "f89c1c34-1694-4212-98e6-fe71482e92ad",
+          "value": {
+            "typeOfDocument": "Copy of paper form A",
+            "uploadedDocument": {
+              "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/d2b80f72-9d32-49c1-89f7-a8cd6e8d2027",
+              "document_filename": "1605693369752232-GeneralOrder.pdf",
+              "document_binary_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/d2b80f72-9d32-49c1-89f7-a8cd6e8d2027/binary"
+            }
+          }
+        }
+      ],
+      "newportCourtList": null,
+      "northEastFRCList": null,
+      "northWestFRCList": null,
+      "paperApplication": "Yes",
+      "respondentFMName": "xcx",
+      "scannedDocuments": [
+        {
+          "id": "1f1101b6-6d14-4a59-b1d0-ee7e456852f5",
+          "value": {
+            "url": {
+              "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/0bb9a2ee-147b-446e-84fd-15d6e3732f4c",
+              "document_filename": "CV doc.doc",
+              "document_binary_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/0bb9a2ee-147b-446e-84fd-15d6e3732f4c/binary"
+            },
+            "type": "coversheet",
+            "subtype": null,
+            "fileName": null,
+            "scannedDate": null,
+            "deliveryDate": null,
+            "controlNumber": null,
+            "exceptionRecordReference": null
+          }
+        }
+      ],
+      "southEastFRCList": null,
+      "southWestFRCList": null,
+      "swanseaCourtList": "FR_swansea_hc_list_6",
+      "divorceCaseNumber": "LV18D81234",
+      "fastTrackDecision": "No",
+      "rSolicitorAddress": {
+        "County": null,
+        "Country": "United Kingdom",
+        "PostCode": "NE1 2BA",
+        "PostTown": "Newcastle Upon Tyne",
+        "AddressLine1": "1 Lime Square",
+        "AddressLine2": "City Road",
+        "AddressLine3": null
+      },
+      "consentD81Question": "Yes",
+      "interimHearingDate": "2022-10-10",
+      "interimHearingTime": "12:00",
+      "interimHearingType": "Maintenance Pending Suit (MPS)",
+      "interim_regionList": "southwest",
+      "liverpoolCourtList": null,
+      "rSolicitorDXnumber": null,
+      "solicitorReference": "pba1234567",
+      "birminghamCourtList": null,
+      "caseNotesCollection": [
+        {
+          "id": "d4bed27e-ebe8-4961-8491-107869acec59",
+          "value": {
+            "caseNote": "BD",
+            "caseNoteDate": "2022-01-01",
+            "caseNoteAuthor": "BD"
+          }
+        }
+      ],
+      "cleavelandCourtList": null,
+      "consentD81Applicant": null,
+      "consentOrderFRCName": "Port Talbot Justice Centre",
+      "divorceStageReached": "Petition Issued",
+      "interimTimeEstimate": "2 hour",
+      "kentSurreyCourtList": null,
+      "lancashireCourtList": null,
+      "manchesterCourtList": null,
+      "northWalesCourtList": null,
+      "nottinghamCourtList": null,
+      "rSolicitorReference": "xzczx",
+      "applicantRepresented": "Yes",
+      "consentD81Respondent": null,
+      "consentOrderFRCEmail": "FRCswansea@justice.gov.uk",
+      "consentOrderFRCPhone": "01792 485 800",
+      "interim_cfcCourtList": null,
+      "interim_walesFRCList": null,
+      "nwyorkshireCourtList": null,
+      "promptForAnyDocument": "No",
+      "applicantAttendedMIAM": "Yes",
+      "bedfordshireCourtList": null,
+      "divorceUploadPetition": {
+        "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/03e8a546-d3c9-46f1-adf9-69835d352f19",
+        "document_filename": "1605693369752232-Pension sharing annex.pdf",
+        "document_binary_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/03e8a546-d3c9-46f1-adf9-69835d352f19/binary"
+      },
+      "interim_londonFRCList": null,
+      "isApplicantsHomeCourt": "No",
+      "respondentRepresented": "Yes",
+      "thamesvalleyCourtList": null,
+      "applicantSolicitorFirm": "fdgdf",
+      "applicantSolicitorName": "dfg",
+      "bulkPrintCoverSheetApp": {
+        "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/afd2912b-7a02-462a-bec7-75a331a7c860",
+        "document_filename": "BulkPrintCoverSheet.pdf",
+        "document_binary_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/afd2912b-7a02-462a-bec7-75a331a7c860/binary"
+      },
+      "bulkPrintCoverSheetRes": {
+        "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/1685a4d2-0bd2-4f8a-b978-32c506757e5c",
+        "document_filename": "BulkPrintCoverSheet.pdf",
+        "document_binary_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/1685a4d2-0bd2-4f8a-b978-32c506757e5c/binary"
+      },
+      "consentOrderFRCAddress": "Harbourside Road, Port Talbot, SA13 1SB",
+      "consentOtherCollection": [],
+      "interim_devonCourtList": null,
+      "applicantSolicitorEmail": "test@mailinator.com",
+      "applicantSolicitorPhone": "01234556778",
+      "interim_dorsetCourtList": null,
+      "interim_humberCourtList": null,
+      "interim_midlandsFRCList": null,
+      "interim_bristolCourtList": "FR_bristolList_2",
+      "interim_newportCourtList": null,
+      "interim_northEastFRCList": null,
+      "interim_northWestFRCList": null,
+      "interim_southEastFRCList": null,
+      "interim_southWestFRCList": "bristol",
+      "interim_swanseaCourtList": null,
+      "nameOfCourtDivorceCentre": "sdfghjkl",
+      "applicantSolicitorAddress": {
+        "County": null,
+        "Country": "United Kingdom",
+        "PostCode": "DA15UY",
+        "PostTown": "Ilford",
+        "AddressLine1": "1 Lavender Place",
+        "AddressLine2": null,
+        "AddressLine3": null
+      },
+      "divorcePetitionIssuedDate": null,
+      "familyMediatorServiceName": "famrwerwe",
+      "specialAssistanceRequired": "dsfsd",
+      "applicantSolicitorDXnumber": null,
+      "interim_liverpoolCourtList": null,
+      "mediatorRegistrationNumber": "23242334234",
+      "ApplicantOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": null,
+          "OrganisationName": null
+        },
+        "OrgPolicyReference": "asdasd",
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
+      },
+      "interimPromptForAnyDocument": "Yes",
+      "interim_birminghamCourtList": null,
+      "interim_cleavelandCourtList": null,
+      "interim_kentSurreyCourtList": null,
+      "interim_lancashireCourtList": null,
+      "interim_manchesterCourtList": null,
+      "interim_northWalesCourtList": null,
+      "interim_nottinghamCourtList": null,
+      "RespondentOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": null,
+          "OrganisationName": null
+        },
+        "OrgPolicyReference": "ss",
+        "OrgPolicyCaseAssignedRole": "[RESPSOLICITOR]"
+      },
+      "interim_nwyorkshireCourtList": null,
+      "natureOfApplicationChecklist": [
+        "Lump Sum Order"
+      ],
+      "specificArrangementsRequired": "sadas",
+      "interim_bedfordshireCourtList": null,
+      "interim_thamesvalleyCourtList": null,
+      "interimUploadAdditionalDocument": null,
+      "interimHearingDirectionsDocument": null,
+      "additionalInformationAboutHearing": "HER",
+      "consentNatureOfApplicationAddress": null,
+      "applicantSolicitorConsentForEmails": "No",
+      "consentNatureOfApplicationMortgage": null,
+      "consentNatureOfApplicationChecklist": [
+        "Lump Sum Order"
+      ],
+      "interimAdditionalInformationAboutHearing": "This is test hearing",
+      "interimHearings": []
+    }
+  }
+}
