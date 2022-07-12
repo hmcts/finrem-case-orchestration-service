@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.microsoft.applicationinsights.core.dependencies.io.grpc.netty.shaded.io.netty.util.internal.StringUtil.EMPTY_STRING;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -346,7 +347,7 @@ public class  CaseDataServiceTest extends BaseServiceTest {
 
     @Test
     public void isNotEmptyShouldReturnFalseWhenFieldIsEmpty() {
-        assertThat(caseDataService.isNotEmpty(APPLICANT_REPRESENTED, createCaseDataApplRepresented("")), is(false));
+        assertThat(caseDataService.isNotEmpty(APPLICANT_REPRESENTED, createCaseDataApplRepresented(EMPTY_STRING)), is(false));
     }
 
     @Test(expected = NullPointerException.class)

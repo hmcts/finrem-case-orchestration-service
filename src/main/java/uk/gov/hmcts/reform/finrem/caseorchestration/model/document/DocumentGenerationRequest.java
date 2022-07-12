@@ -1,7 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.document;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,16 +12,16 @@ import java.util.Map;
 
 @Data
 @Builder
-@Schema(description = "Request body model for Document Generation Request")
+@ApiModel(description = "Request body model for Document Generation Request")
 public class DocumentGenerationRequest {
-    @Schema(description = "Name of the template", required = true)
+    @ApiModelProperty(value = "Name of the template", required = true)
     @JsonProperty(value = "template", required = true)
     @NotBlank
     private final String template;
-    @Schema(description = "Name of the file")
+    @ApiModelProperty(value = "Name of the file")
     @JsonProperty(value = "fileName", required = true)
     private final String fileName;
     @JsonProperty(value = "values", required = true)
-    @Schema(description = "Placeholder key / value pairs", required = true)
+    @ApiModelProperty(value = "Placeholder key / value pairs", required = true)
     private final Map<String, Object> values;
 }
