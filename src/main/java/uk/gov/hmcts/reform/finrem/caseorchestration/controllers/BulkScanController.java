@@ -1,8 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,15 +51,13 @@ public class BulkScanController {
     private AuthService authService;
 
     @PostMapping(path = BulkScanEndpoints.VALIDATE, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation("Validates OCR form data based on form type")
-    @ApiResponses({
-        @ApiResponse(
-            code = 200, response = OcrValidationResponse.class, message = "Validation executed successfully"
-        ),
-        @ApiResponse(code = 401, message = "Provided S2S token is missing or invalid"),
-        @ApiResponse(code = 403, message = "S2S token is not authorized to use the service"),
-        @ApiResponse(code = 404, message = "Form type not found")
-    })
+    @Operation(summary = "Validates OCR form data based on form type")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Validation executed successfully",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = OcrValidationResponse.class))}),
+        @ApiResponse(responseCode = "401", description = "Provided S2S token is missing or invalid"),
+        @ApiResponse(responseCode = "403", description = "S2S token is not authorized to use the service"),
+        @ApiResponse(responseCode = "404", description = "Form type not found")})
     public ResponseEntity<OcrValidationResponse> validateOcrData(
         @RequestHeader(name = SERVICE_AUTHORISATION_HEADER) String s2sAuthToken,
         @PathVariable(name = "form-type") String formType,
@@ -85,16 +85,15 @@ public class BulkScanController {
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    @ApiOperation(value = "Transform exception record into CCD case data")
-    @ApiResponses({
-        @ApiResponse(code = 200, response = SuccessfulTransformationResponse.class,
-            message = "Transformation of exception record into case data has been successful"
-        ),
-        @ApiResponse(code = 400, message = "Request failed due to malformed syntax (and only for that reason)"),
-        @ApiResponse(code = 401, message = "Provided S2S token is missing or invalid"),
-        @ApiResponse(code = 403, message = "Calling service is not authorised to use the endpoint"),
-        @ApiResponse(code = 422, message = "Exception record is well-formed, but contains invalid data.")
-    })
+    @Operation(summary = "Transform exception record into CCD case data")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200",
+            description = "Transformation of exception record into case data has been successful",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = SuccessfulTransformationResponse.class))}),
+        @ApiResponse(responseCode = "400", description = "Request failed due to malformed syntax (and only for that reason)"),
+        @ApiResponse(responseCode = "401", description = "Provided S2S token is missing or invalid"),
+        @ApiResponse(responseCode = "403", description = "Calling service is not authorised to use the endpoint"),
+        @ApiResponse(responseCode = "422", description = "Exception record is well-formed, but contains invalid data.")})
     public ResponseEntity<SuccessfulTransformationResponse> transformExceptionRecordIntoCase(
         @RequestHeader(name = SERVICE_AUTHORISATION_HEADER) String s2sAuthToken,
         @Valid @RequestBody ExceptionRecord exceptionRecord
@@ -130,16 +129,15 @@ public class BulkScanController {
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE
     )
-    @ApiOperation(value = "OUT OF SCOPE: API to update Financial Remedy case data by bulk scan")
-    @ApiResponses({
-        @ApiResponse(code = 200, response = SuccessfulUpdateResponse.class,
-            message = "Update of case data has been successful"
-        ),
-        @ApiResponse(code = 400, message = "Request failed due to malformed syntax (and only for that reason). "
-            + "This response results in a general error presented to the caseworker in CCD"),
-        @ApiResponse(code = 401, message = "Provided S2S token is missing or invalid"),
-        @ApiResponse(code = 403, message = "Calling service is not authorised to use the endpoint"),
-        @ApiResponse(code = 422, message = "Exception record is well-formed, but contains invalid data.")
+    @Operation(summary = "OUT OF SCOPE: API to update Financial Remedy case data by bulk scan")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Update of case data has been successful",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = SuccessfulUpdateResponse.class))}),
+        @ApiResponse(responseCode = "400", description = "Request failed due to malformed syntax (and only for that reason). \"\n"
+            + "            + \"This response results in a general error presented to the caseworker in CCD"),
+        @ApiResponse(responseCode = "401", description = "Provided S2S token is missing or invalid"),
+        @ApiResponse(responseCode = "403", description = "Calling service is not authorised to use the endpoint"),
+        @ApiResponse(responseCode = "422", description = "Exception record is well-formed, but contains invalid data.")
     })
     public ResponseEntity<SuccessfulUpdateResponse> updateCase(
         @RequestHeader(name = SERVICE_AUTHORISATION_HEADER) String s2sAuthToken,

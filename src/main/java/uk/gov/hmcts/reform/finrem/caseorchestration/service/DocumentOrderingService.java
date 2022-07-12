@@ -44,7 +44,7 @@ public class DocumentOrderingService {
             throw new IllegalStateException();
         }
 
-        return  auditResponse.get(0).getModifiedOn().after(
+        return auditResponse.get(0).getModifiedOn().after(
             auditResponse.get(1).getModifiedOn());
     }
 
@@ -64,6 +64,7 @@ public class DocumentOrderingService {
         String approvedOrderCollectionFieldName = caseDataService.isConsentedInContestedCase(caseDetails)
             ? CONTESTED_CONSENT_ORDER_COLLECTION : APPROVED_ORDER_COLLECTION;
 
-        return objectMapper.convertValue(caseDetails.getData().get(approvedOrderCollectionFieldName), new TypeReference<>() {});
+        return objectMapper.convertValue(caseDetails.getData().get(approvedOrderCollectionFieldName), new TypeReference<>() {
+        });
     }
 }
