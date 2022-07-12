@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +42,7 @@ public abstract class CaseDocumentHandlerTest {
                 .caseDocumentOther(other)
                 .caseDocumentFdr(isFdr)
                 .hearingDetails(null)
+                .documentUploadDate(LocalDateTime.now())
                 .build())
             .build();
     }
