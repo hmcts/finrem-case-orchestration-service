@@ -14,6 +14,11 @@ public enum ApplicationType {
         this.id = id;
     }
 
+    @Override
+    public String toString() {
+        return id;
+    }
+
     public static ApplicationType from(String value) {
         for (ApplicationType applicationType : values()) {
             if (applicationType.id.equalsIgnoreCase(value)) {
@@ -22,10 +27,5 @@ public enum ApplicationType {
         }
         throw new IllegalArgumentException(
             "Unknown enum type " + value + ", allowed values are " + Arrays.toString(values()));
-    }
-
-    @Override
-    public String toString() {
-        return id;
     }
 }

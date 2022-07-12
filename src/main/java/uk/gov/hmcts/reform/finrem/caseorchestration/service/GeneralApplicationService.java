@@ -76,8 +76,7 @@ public class GeneralApplicationService {
     }
 
     private List<GeneralApplicationData> convertToGeneralApplicationDataList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<List<GeneralApplicationData>>() {
-        });
+        return objectMapper.convertValue(object, new TypeReference<List<GeneralApplicationData>>() {});
     }
 
     public void updateCaseDataStart(Map<String, Object> caseData, String authorisationToken) {
