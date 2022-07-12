@@ -1,0 +1,472 @@
+{
+  "event_id": "some_event_id",
+  "case_details": {
+    "id": "123",
+    "jurisdiction": "DIVORCE",
+    "state": "applicationDrafted",
+    "case_type_id": "FinancialRemedyContested",
+    "case_data": {
+      "paperApplication": "Yes",
+      "formC": {
+        "document_url": "http://document-management-store:8080/documents/3e0218a7-0646-4b29-88af-2d8eab245f8d",
+        "document_filename": "Form-C.pdf",
+        "document_binary_url": "http://document-management-store:8080/documents/3e0218a7-0646-4b29-88af-2d8eab245f8d/binary"
+      },
+      "isAdmin": "No",
+      "HWFNumber": "123456",
+      "issueDate": "2021-02-26",
+      "miniFormA": {
+        "document_url": "http://document-management-store:8080/documents/4db4f0f4-f1c9-43ce-b776-414174f6865d",
+        "document_filename": "OnlineForm.pdf",
+        "document_binary_url": "http://document-management-store:8080/documents/4db4f0f4-f1c9-43ce-b776-414174f6865d/binary"
+      },
+      "regionList": "southwest",
+      "amountToPay": "25500",
+      "hearingDate": "2021-05-26",
+      "hearingTime": "10",
+      "hearingType": "First Directions Appointment (FDA)",
+      "consentOrder": {
+        "document_url": "http://document-management-store:8080/documents/9f234fcc-4683-4747-bf25-7a551ece7657",
+        "document_filename": "dummy1-1649341720076259.pdf",
+        "document_binary_url": "http://document-management-store:8080/documents/9f234fcc-4683-4747-bf25-7a551ece7657/binary"
+      },
+      "orderSummary": {
+        "Fees": [
+          {
+            "id": "ac82d9f0-535b-483a-bcf4-5e3848f38ef2",
+            "value": {
+              "FeeCode": "FEE0229",
+              "FeeAmount": "25500",
+              "FeeVersion": "1",
+              "FeeDescription": "Application for a financial order"
+            }
+          }
+        ],
+        "PaymentTotal": "25500",
+        "PaymentReference": "null"
+      },
+      "timeEstimate": "1 hour",
+      "solicitorFirm": "App Sols",
+      "applicantLName": "test",
+      "authorisation3": "2021-02-26",
+      "dateOfMarriage": "2020-02-01",
+      "judgeAllocated": [
+        "FR_judgeAllocatedList_2"
+      ],
+      "netValueOfHome": "100000",
+      "rSolicitorFirm": "FR Respondent Sols",
+      "rSolicitorName": "Test Resp Sol",
+      "soleTraderName": "NA",
+      "applicantFMName": "Applicant",
+      "assignedToJudge": "juitestjudgefinancialremedy@gmail.com",
+      "authorisation2b": "solicitor",
+      "caseAllocatedTo": "Yes",
+      "consentD81Joint": {
+        "document_url": "http://document-management-store:8080/documents/ed0b6cc7-54fc-4932-bb20-91c42b47792c",
+        "document_filename": "dummy1-1649341720076259.pdf",
+        "document_binary_url": "http://document-management-store:8080/documents/ed0b6cc7-54fc-4932-bb20-91c42b47792c/binary"
+      },
+      "dateOfSepration": null,
+      "interimHearings": [
+        {
+          "id": "39cce085-9e41-43c0-b340-8cfe05e24002",
+          "value": {
+            "interimHearingDate": "2000-10-10",
+            "interimHearingTime": "13:00",
+            "interimHearingType": "Maintenance Pending Suit (MPS)",
+            "interim_regionList": "southwest",
+            "interim_cfcCourtList": null,
+            "interim_walesFRCList": null,
+            "interim_londonFRCList": null,
+            "interim_devonCourtList": null,
+            "interim_dorsetCourtList": null,
+            "interim_humberCourtList": null,
+            "interim_midlandsFRCList": null,
+            "interim_bristolCourtList": "FR_bristolList_2",
+            "interim_newportCourtList": null,
+            "interim_northEastFRCList": null,
+            "interim_northWestFRCList": null,
+            "interim_southEastFRCList": null,
+            "interim_southWestFRCList": "bristol",
+            "interim_swanseaCourtList": null,
+            "interimHearingTimeEstimate": "2 Hour",
+            "interim_liverpoolCourtList": null,
+            "interimPromptForAnyDocument": "Yes",
+            "interim_birminghamCourtList": null,
+            "interim_cleavelandCourtList": null,
+            "interim_kentSurreyCourtList": null,
+            "interim_lancashireCourtList": null,
+            "interim_manchesterCourtList": null,
+            "interim_northWalesCourtList": null,
+            "interim_nottinghamCourtList": null,
+            "interim_nwyorkshireCourtList": null,
+            "interim_bedfordshireCourtList": null,
+            "interim_thamesvalleyCourtList": null,
+            "interimUploadAdditionalDocument": {
+              "document_url": "http://document-management-store:8080/documents/e92f0b10-70e7-4715-8794-68bbc6e3f568",
+              "document_filename": "NocLitigantSolicitorAddedLetter.pdf",
+              "document_binary_url": "http://document-management-store:8080/documents/e92f0b10-70e7-4715-8794-68bbc6e3f568/binary"
+            },
+            "interimAdditionalInformationAboutHearing": "This is test hearing"
+          }
+        },
+        {
+          "id": "bd517a7e-89e3-4e7b-a7df-3796794977b7",
+          "value": {
+            "interimHearingDate": "2040-10-10",
+            "interimHearingTime": "5 hour",
+            "interimHearingType": "First Directions Appointment (FDA)",
+            "interim_regionList": "london",
+            "interim_cfcCourtList": "FR_s_CFCList_2",
+            "interim_walesFRCList": null,
+            "interim_londonFRCList": "cfc",
+            "interim_devonCourtList": null,
+            "interim_dorsetCourtList": null,
+            "interim_humberCourtList": null,
+            "interim_midlandsFRCList": null,
+            "interim_bristolCourtList": null,
+            "interim_newportCourtList": null,
+            "interim_northEastFRCList": null,
+            "interim_northWestFRCList": null,
+            "interim_southEastFRCList": null,
+            "interim_southWestFRCList": null,
+            "interim_swanseaCourtList": null,
+            "interimHearingTimeEstimate": "Test",
+            "interim_liverpoolCourtList": null,
+            "interimPromptForAnyDocument": "Yes",
+            "interim_birminghamCourtList": null,
+            "interim_cleavelandCourtList": null,
+            "interim_kentSurreyCourtList": null,
+            "interim_lancashireCourtList": null,
+            "interim_manchesterCourtList": null,
+            "interim_northWalesCourtList": null,
+            "interim_nottinghamCourtList": null,
+            "interim_nwyorkshireCourtList": null,
+            "interim_bedfordshireCourtList": null,
+            "interim_thamesvalleyCourtList": null,
+            "interimUploadAdditionalDocument": {
+              "document_url": "http://document-management-store:8080/documents/2cc8a196-39a9-45d9-8f19-5f04081c3b95",
+              "document_filename": "InterimHearingNotice.pdf",
+              "document_binary_url": "http://document-management-store:8080/documents/2cc8a196-39a9-45d9-8f19-5f04081c3b95/binary"
+            },
+            "interimAdditionalInformationAboutHearing": "This is second hearing"
+          }
+        }
+      ],
+      "rSolicitorEmail": "testRespSolicitor@email.com",
+      "rSolicitorPhone": null,
+      "respondentLName": "test",
+      "bristolCourtList": "FR_bristolList_5",
+      "consentMiniFormA": {
+        "document_url": "http://document-management-store:8080/documents/94c21cf5-a2f4-46b7-bec4-6ab26971819b",
+        "document_filename": "OnlineForm.pdf",
+        "document_binary_url": "http://document-management-store:8080/documents/94c21cf5-a2f4-46b7-bec4-6ab26971819b/binary"
+      },
+      "respondentFMName": "respondent",
+      "southWestFRCList": "bristol",
+      "authorisationName": "Test Resp Sol",
+      "divorceCaseNumber": "DD12D12345",
+      "fastTrackDecision": "No",
+      "judgeTimeEstimate": "standardTime",
+      "rSolicitorAddress": {
+        "County": "",
+        "Country": "United Kingdom",
+        "PostCode": "SW1H 9AJ",
+        "PostTown": "London",
+        "AddressLine1": "Ministry Of Justice",
+        "AddressLine2": "Seventh Floor 102 Petty France",
+        "AddressLine3": ""
+      },
+      "appOtherCollection": [
+        {
+          "id": "86325d98-9097-4b33-b78c-866a850ad3ff",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://document-management-store:8080/documents/9baf0fb3-6211-41aa-b24b-98edbfe9bec2",
+              "document_filename": "Sample Order G-B.docx",
+              "document_binary_url": "http://document-management-store:8080/documents/9baf0fb3-6211-41aa-b24b-98edbfe9bec2/binary"
+            },
+            "hearingDetails": null,
+            "caseDocumentType": "other",
+            "caseDocumentOther": "my proposed order",
+            "caseDocumentParty": "applicant",
+            "caseDocumentConfidential": null
+          }
+        }
+      ],
+      "applicantShareDocs": "Yes",
+      "consentD81Question": "Yes",
+      "rSolicitorDXnumber": null,
+      "solicitorReference": "RG-123456789",
+      "uploadCaseDocument": [],
+      "consentD81Applicant": null,
+      "consentOrderFRCName": "Bath Law Courts",
+      "divorceStageReached": "Petition Issued",
+      "rSolicitorReference": "RG-987654321",
+      "respondentShareDocs": "Yes",
+      "applicantRepresented": "Yes",
+      "consentD81Respondent": null,
+      "consentOrderFRCEmail": "BristolFRC.bristol.countycourt@justice.gov.uk",
+      "consentOrderFRCPhone": "0117 366 4880",
+      "helpWithFeesQuestion": "Yes",
+      "promptForAnyDocument": "No",
+      "applicantAttendedMIAM": "Yes",
+      "divorceUploadPetition": {
+        "document_url": "http://document-management-store:8080/documents/21faadfd-ea28-4e0a-a0b7-64f582c760ea",
+        "document_filename": "BLANK DOCUMENT.pdf",
+        "document_binary_url": "http://document-management-store:8080/documents/21faadfd-ea28-4e0a-a0b7-64f582c760ea/binary"
+      },
+      "isApplicantsHomeCourt": "No",
+      "respondentRepresented": "Yes",
+      "applicantSolicitorFirm": "financialremedydemoorg",
+      "applicantSolicitorName": "Saul Goodman",
+      "applicationAllocatedTo": "No",
+      "consentOrderFRCAddress": "The Law Courts, North Parade Road, Bath, BA1 5AF",
+      "consentOtherCollection": [],
+      "applicantSolicitorEmail": "testSolicitor@email.com",
+      "applicantSolicitorPhone": "01234567489",
+      "appOtherCollectionShared": [
+        {
+          "id": "86325d98-9097-4b33-b78c-866a850ad3ff",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://document-management-store:8080/documents/9baf0fb3-6211-41aa-b24b-98edbfe9bec2",
+              "document_filename": "Sample Order G-B.docx",
+              "document_binary_url": "http://document-management-store:8080/documents/9baf0fb3-6211-41aa-b24b-98edbfe9bec2/binary"
+            },
+            "hearingDetails": null,
+            "caseDocumentType": "other",
+            "caseDocumentOther": "my proposed order",
+            "caseDocumentParty": "applicant",
+            "caseDocumentConfidential": null
+          }
+        }
+      ],
+      "estimatedAssetsChecklist": [
+        "estimatedAssetsChecklist_3"
+      ],
+      "nameOfCourtDivorceCentre": "Anytown",
+      "appChronologiesCollection": [
+        {
+          "id": "4671d014-3d49-4d63-9d53-fd8ffd4197a1",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://document-management-store:8080/documents/1928ca2f-602e-472f-844f-a91e6b3c5cd5",
+              "document_filename": "Applicant Statement of Issues.pdf",
+              "document_binary_url": "http://document-management-store:8080/documents/1928ca2f-602e-472f-844f-a91e6b3c5cd5/binary"
+            },
+            "hearingDetails": null,
+            "caseDocumentType": "Statement of Issues",
+            "caseDocumentOther": null,
+            "caseDocumentParty": "applicant",
+            "caseDocumentConfidential": null
+          }
+        },
+        {
+          "id": "a3989085-940a-4bdc-bfa3-affaac23f1c1",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://document-management-store:8080/documents/2d133ff2-5492-4808-8418-481eed7c2736",
+              "document_filename": "Applicant Statement of Issues.pdf",
+              "document_binary_url": "http://document-management-store:8080/documents/2d133ff2-5492-4808-8418-481eed7c2736/binary"
+            },
+            "hearingDetails": null,
+            "caseDocumentType": "Statement of Issues",
+            "caseDocumentOther": null,
+            "caseDocumentParty": "applicant",
+            "caseDocumentConfidential": null
+          }
+        }
+      ],
+      "applicantSolicitorAddress": {
+        "County": null,
+        "Country": null,
+        "PostCode": "SW1H 9AJ",
+        "PostTown": "London",
+        "AddressLine1": "102 Petty France",
+        "AddressLine2": "Westminster",
+        "AddressLine3": null
+      },
+      "divorcePetitionIssuedDate": "2021-02-01",
+      "familyMediatorServiceName": "NA",
+      "specialAssistanceRequired": null,
+      "appFormEExhibitsCollection": [
+        {
+          "id": "b144db63-8946-4450-8e50-4ad770ffda54",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://document-management-store:8080/documents/6746f710-2362-431c-90be-cd5c2a11d2b8",
+              "document_filename": "complexity questions.docx",
+              "document_binary_url": "http://document-management-store:8080/documents/6746f710-2362-431c-90be-cd5c2a11d2b8/binary"
+            },
+            "hearingDetails": null,
+            "caseDocumentType": "Applicant - Form E",
+            "caseDocumentOther": null,
+            "caseDocumentParty": "applicant",
+            "caseDocumentConfidential": null
+          }
+        }
+      ],
+      "applicantSolicitorDXnumber": null,
+      "mediatorRegistrationNumber": "NA",
+      "ApplicantOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "Z6Y6NI7",
+          "OrganisationName": "financialremedydemoorg"
+        },
+        "OrgPolicyReference": null,
+        "PreviousOrganisations": [],
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
+      },
+      "addToComplexityListOfCourts": "trueYes",
+      "appHearingBundlesCollection": [
+        {
+          "id": "a3e5e7f4-5b9d-4123-afbb-5ab9e3112f6d",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://document-management-store:8080/documents/0cb4fca0-9402-401b-a322-9f82ee5bf21d",
+              "document_filename": "Faux Trial Bundle.pdf",
+              "document_binary_url": "http://document-management-store:8080/documents/0cb4fca0-9402-401b-a322-9f82ee5bf21d/binary"
+            },
+            "hearingDetails": null,
+            "caseDocumentType": "Trial Bundle",
+            "caseDocumentOther": null,
+            "caseDocumentParty": "applicant",
+            "caseDocumentConfidential": null
+          }
+        }
+      ],
+      "respFormEExhibitsCollection": [
+        {
+          "id": "73dbc7d9-7c8c-4c17-9a01-c16bae74d758",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://document-management-store:8080/documents/5b60675e-635f-48ac-8aa3-27feb9a45137",
+              "document_filename": "Sample Form E.pdf",
+              "document_binary_url": "http://document-management-store:8080/documents/5b60675e-635f-48ac-8aa3-27feb9a45137/binary"
+            },
+            "hearingDetails": null,
+            "caseDocumentType": "Applicant - Form E",
+            "caseDocumentOther": null,
+            "caseDocumentParty": "respondent",
+            "caseDocumentConfidential": null
+          }
+        }
+      ],
+      "RespondentOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "Z6Y6NI7",
+          "OrganisationName": "financialremedydemoorg"
+        },
+        "OrgPolicyReference": null,
+        "PreviousOrganisations": [],
+        "OrgPolicyCaseAssignedRole": "[RESPSOLICITOR]"
+      },
+      "natureOfApplicationChecklist": [
+        "Lump Sum Order"
+      ],
+      "potentialAllegationChecklist": [
+        "notApplicable"
+      ],
+      "specificArrangementsRequired": null,
+      "appChronologiesCollectionShared": [
+        {
+          "id": "4671d014-3d49-4d63-9d53-fd8ffd4197a1",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://document-management-store:8080/documents/1928ca2f-602e-472f-844f-a91e6b3c5cd5",
+              "document_filename": "Applicant Statement of Issues.pdf",
+              "document_binary_url": "http://document-management-store:8080/documents/1928ca2f-602e-472f-844f-a91e6b3c5cd5/binary"
+            },
+            "hearingDetails": null,
+            "caseDocumentType": "Statement of Issues",
+            "caseDocumentOther": null,
+            "caseDocumentParty": "applicant",
+            "caseDocumentConfidential": null
+          }
+        },
+        {
+          "id": "a3989085-940a-4bdc-bfa3-affaac23f1c1",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://document-management-store:8080/documents/2d133ff2-5492-4808-8418-481eed7c2736",
+              "document_filename": "Applicant Statement of Issues.pdf",
+              "document_binary_url": "http://document-management-store:8080/documents/2d133ff2-5492-4808-8418-481eed7c2736/binary"
+            },
+            "hearingDetails": null,
+            "caseDocumentType": "Statement of Issues",
+            "caseDocumentOther": null,
+            "caseDocumentParty": "applicant",
+            "caseDocumentConfidential": null
+          }
+        }
+      ],
+      "appFormEExhibitsCollectionShared": [
+        {
+          "id": "b144db63-8946-4450-8e50-4ad770ffda54",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://document-management-store:8080/documents/6746f710-2362-431c-90be-cd5c2a11d2b8",
+              "document_filename": "complexity questions.docx",
+              "document_binary_url": "http://document-management-store:8080/documents/6746f710-2362-431c-90be-cd5c2a11d2b8/binary"
+            },
+            "hearingDetails": null,
+            "caseDocumentType": "Applicant - Form E",
+            "caseDocumentOther": null,
+            "caseDocumentParty": "applicant",
+            "caseDocumentConfidential": null
+          }
+        }
+      ],
+      "additionalInformationAboutHearing": null,
+      "appHearingBundlesCollectionShared": [
+        {
+          "id": "a3e5e7f4-5b9d-4123-afbb-5ab9e3112f6d",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://document-management-store:8080/documents/0cb4fca0-9402-401b-a322-9f82ee5bf21d",
+              "document_filename": "Faux Trial Bundle.pdf",
+              "document_binary_url": "http://document-management-store:8080/documents/0cb4fca0-9402-401b-a322-9f82ee5bf21d/binary"
+            },
+            "hearingDetails": null,
+            "caseDocumentType": "Trial Bundle",
+            "caseDocumentOther": null,
+            "caseDocumentParty": "applicant",
+            "caseDocumentConfidential": null
+          }
+        }
+      ],
+      "consentNatureOfApplicationAddress": null,
+      "respFormEExhibitsCollectionShared": [
+        {
+          "id": "73dbc7d9-7c8c-4c17-9a01-c16bae74d758",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://document-management-store:8080/documents/5b60675e-635f-48ac-8aa3-27feb9a45137",
+              "document_filename": "Sample Form E.pdf",
+              "document_binary_url": "http://document-management-store:8080/documents/5b60675e-635f-48ac-8aa3-27feb9a45137/binary"
+            },
+            "hearingDetails": null,
+            "caseDocumentType": "Applicant - Form E",
+            "caseDocumentOther": null,
+            "caseDocumentParty": "respondent",
+            "caseDocumentConfidential": null
+          }
+        }
+      ],
+      "applicantSolicitorConsentForEmails": "Yes",
+      "consentNatureOfApplicationMortgage": null,
+      "consentNatureOfApplicationChecklist": [
+        "Maintenance Pending Suit"
+      ],
+      "iHCollectionItemIds": [
+        {
+          "id": "a3e5e7f4-5b9d-4123-afbb-5ab9e3112f6d",
+          "value": {
+            "ihItemIds": "39cce085-9e41-43c0-b340-8cfe05e24002"
+          }
+        }
+      ]
+    }
+  }
+}

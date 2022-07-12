@@ -5,17 +5,33 @@ import org.junit.Test;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
 
+import java.util.Map;
+
 import static org.hamcrest.Matchers.is;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BEDFORDSHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BIRMINGHAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BIRMINGHAM_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BRISTOLFRC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CFC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CFC_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DEVON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DORSET;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_REGION_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_LONDON_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_MIDLANDS_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_NORTHEAST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_NORTHWEST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_SOUTHEAST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_SOUTHWEST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_WALES_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENTFRC_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LANCASHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIVERPOOL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIVERPOOL_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON;
@@ -29,6 +45,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NEWPORT_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHEAST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHEAST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHWALES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHWEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHWEST_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM;
@@ -38,8 +55,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHWEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWANSEA;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWANSEA_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.THAMESVALLEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES_FRC_LIST;
 
@@ -403,5 +422,64 @@ public class ContestedCourtHelperTest {
         details = getCaseDetailsWithAllocatedValues(region, subRegionListName, subRegion, courtListName,
             court);
         MatcherAssert.assertThat(ContestedCourtHelper.getSelectedCourt(details), is(expectedValue));
+    }
+
+    @Test
+    public void interim_walesFRCCourts() {
+        verifyCorrectInterimHearingCourtReturned(WALES, INTERIM_WALES_FRC_LIST, NEWPORT);
+        verifyCorrectInterimHearingCourtReturned(WALES, INTERIM_WALES_FRC_LIST, SWANSEA);
+        verifyCorrectInterimHearingCourtReturned(WALES, INTERIM_WALES_FRC_LIST, NORTHWALES);
+    }
+
+    @Test
+    public void interim_southWestFRCCourts() {
+        verifyCorrectInterimHearingCourtReturned(SOUTHWEST, INTERIM_SOUTHWEST_FRC_LIST, DEVON);
+        verifyCorrectInterimHearingCourtReturned(SOUTHWEST, INTERIM_SOUTHWEST_FRC_LIST, DORSET);
+        verifyCorrectInterimHearingCourtReturned(SOUTHWEST, INTERIM_SOUTHWEST_FRC_LIST, BRISTOLFRC);
+    }
+
+    @Test
+    public void interim_southEastFRCCourts() {
+        verifyCorrectInterimHearingCourtReturned(SOUTHEAST, INTERIM_SOUTHEAST_FRC_LIST, KENT);
+        verifyCorrectInterimHearingCourtReturned(SOUTHEAST, INTERIM_SOUTHEAST_FRC_LIST, BEDFORDSHIRE);
+        verifyCorrectInterimHearingCourtReturned(SOUTHEAST, INTERIM_SOUTHEAST_FRC_LIST, THAMESVALLEY);
+    }
+
+    @Test
+    public void interim_northEastFRCCourts() {
+        verifyCorrectInterimHearingCourtReturned(NORTHEAST, INTERIM_NORTHEAST_FRC_LIST, CLEAVELAND);
+        verifyCorrectInterimHearingCourtReturned(NORTHEAST, INTERIM_NORTHEAST_FRC_LIST, NWYORKSHIRE);
+        verifyCorrectInterimHearingCourtReturned(NORTHEAST, INTERIM_NORTHEAST_FRC_LIST, HSYORKSHIRE);
+    }
+
+    @Test
+    public void interim_northWestFRCCourts() {
+        verifyCorrectInterimHearingCourtReturned(NORTHWEST, INTERIM_NORTHWEST_FRC_LIST, LIVERPOOL);
+        verifyCorrectInterimHearingCourtReturned(NORTHWEST, INTERIM_NORTHWEST_FRC_LIST, MANCHESTER);
+        verifyCorrectInterimHearingCourtReturned(NORTHWEST, INTERIM_NORTHWEST_FRC_LIST, LANCASHIRE);
+    }
+
+    @Test
+    public void interim_londonFRCCourts() {
+        verifyCorrectInterimHearingCourtReturned(LONDON, INTERIM_LONDON_FRC_LIST, CFC);
+    }
+
+    @Test
+    public void interim_midlandsFRCCourts() {
+        verifyCorrectInterimHearingCourtReturned(MIDLANDS, INTERIM_MIDLANDS_FRC_LIST, NOTTINGHAM);
+        verifyCorrectInterimHearingCourtReturned(MIDLANDS, INTERIM_MIDLANDS_FRC_LIST, BIRMINGHAM);
+    }
+
+    private void verifyCorrectInterimHearingCourtReturned(final String region, final String subRegionListName, final String subRegion) {
+        Map<String, Object> interimCaseData = getCaseDetailsWithAllocatedValuesForInterimHearing(region, subRegionListName, subRegion);
+        String selectedInterimHearingFrc = ContestedCourtHelper.getSelectedInterimHearingFrc(interimCaseData);
+        MatcherAssert.assertThat(selectedInterimHearingFrc, is(subRegion));
+    }
+
+    private Map<String, Object> getCaseDetailsWithAllocatedValuesForInterimHearing(String region, String subRegionListName, String subRegion) {
+        CaseDetails details = defaultConsentedCaseDetails();
+        details.getData().put(INTERIM_HEARING_REGION_LIST, region);
+        details.getData().put(subRegionListName, subRegion);
+        return details.getData();
     }
 }
