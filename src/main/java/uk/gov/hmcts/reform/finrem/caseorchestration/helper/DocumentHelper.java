@@ -93,6 +93,10 @@ public class DocumentHelper {
     private final ObjectMapper objectMapper;
     private final CaseDataService caseDataService;
 
+    public enum PaperNotificationRecipient {
+        APPLICANT, RESPONDENT, SOLICITOR
+    }
+
     public static CtscContactDetails buildCtscContactDetails() {
         return CtscContactDetails.builder()
             .serviceCentre(CTSC_SERVICE_CENTRE)
@@ -410,8 +414,5 @@ public class DocumentHelper {
         return objectMapper.convertValue(caseData.get(HEARING_NOTICES_COLLECTION),
             new TypeReference<>() {
             });
-
-    public enum PaperNotificationRecipient {
-        APPLICANT, RESPONDENT, SOLICITOR
     }
 }
