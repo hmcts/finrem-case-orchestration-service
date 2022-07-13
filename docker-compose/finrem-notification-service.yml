@@ -1,0 +1,11 @@
+---
+version: '3'
+
+services:
+  finrem-notification-service:
+    image: hmctspublic.azurecr.io/finrem/ns:latest
+    container_name: finrem-notification-service
+    environment:
+      UK_GOV_NOTIFY_API_KEY: ${UK_GOV_NOTIFY_API_KEY}
+    ports:
+      - 8086:8086

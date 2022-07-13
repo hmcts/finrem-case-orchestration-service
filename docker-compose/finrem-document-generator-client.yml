@@ -1,0 +1,15 @@
+---
+version: '3'
+
+services:
+  finrem-document-generator-client:
+    image: hmctspublic.azurecr.io/finrem/dgcs:latest
+    container_name: finrem-document-generator-client
+    environment:
+      EVIDENCE_MANAGEMENT_CLIENT_API_BASEURL: http://localhost:4006
+      AUTH_PROVIDER_SERVICE_CLIENT_BASEURL: http://localhost:8489
+      PDF_SERVICE_BASEURL: ${PDF_SERVICE_BASEURL}
+      IDAM_S2S_URL: http://localhost:8489
+      PDF_SERVICE_ACCESS_KEY: ${PDF_SERVICE_ACCESS_KEY}
+    ports:
+      - 4009:4009

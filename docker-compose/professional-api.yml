@@ -1,0 +1,13 @@
+---
+version: '3'
+
+services:
+  professional-api:
+    image: hmctspublic.azurecr.io/rd/professional-api:latest   #Not Multi-Arch yet :(
+    container_name: professional-api
+    environment:
+      AUTH_IDAM_CLIENT_BASEURL: http://localhost:5000
+    ports:
+      - 8090:8090
+    healthcheck:
+      retries: 40
