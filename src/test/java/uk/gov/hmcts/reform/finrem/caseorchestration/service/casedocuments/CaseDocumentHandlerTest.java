@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Before;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -26,6 +27,7 @@ public abstract class CaseDocumentHandlerTest {
 
     @Before
     public void setUp() {
+        mapper.registerModule(new JavaTimeModule());
         caseDetails = buildCaseDetails();
         caseData = caseDetails.getData();
     }

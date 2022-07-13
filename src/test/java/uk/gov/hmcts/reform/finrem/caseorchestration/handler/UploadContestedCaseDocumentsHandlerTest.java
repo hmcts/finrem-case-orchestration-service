@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,7 +39,6 @@ public class UploadContestedCaseDocumentsHandlerTest extends CaseDocumentHandler
     @Mock
     ApplicantChronologiesStatementHandler applicantChronologiesStatementHandler;
 
-    ObjectMapper objectMapper = new ObjectMapper();
     private UploadContestedCaseDocumentsAboutToSubmitHandler uploadContestedCaseDocumentsHandler;
 
     private final List<ContestedUploadedDocumentData> uploadDocumentList = new ArrayList<>();
@@ -46,7 +46,7 @@ public class UploadContestedCaseDocumentsHandlerTest extends CaseDocumentHandler
     @Before
     public void setUpTest() {
         uploadContestedCaseDocumentsHandler = new UploadContestedCaseDocumentsAboutToSubmitHandler(
-            Arrays.asList(applicantCaseSummariesHandler, applicantChronologiesStatementHandler), objectMapper);
+            Arrays.asList(applicantCaseSummariesHandler, applicantChronologiesStatementHandler), mapper);
     }
 
     @Test
