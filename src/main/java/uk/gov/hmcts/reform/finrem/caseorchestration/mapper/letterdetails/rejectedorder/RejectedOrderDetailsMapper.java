@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.reject
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.DocumentTemplateDetails;
@@ -19,6 +20,7 @@ import java.util.UUID;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element.element;
 
+@Component
 public class RejectedOrderDetailsMapper extends AbstractLetterDetailsMapper {
 
     public static final String REFUSAL_ORDER_HEADER =  "Sitting in the Family Court";

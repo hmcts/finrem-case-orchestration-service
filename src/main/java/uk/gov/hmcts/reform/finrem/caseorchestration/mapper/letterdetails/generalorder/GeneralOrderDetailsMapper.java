@@ -1,21 +1,16 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.generalorder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.CourtListWrapper;
 
-import java.util.HashMap;
-import java.util.Map;
-
-@RequiredArgsConstructor
 @Component
-public class GeneralOrderDetailsMapper {
+public class GeneralOrderDetailsMapper extends AbstractLetterDetailsMapper {
 
     private static final String GENERAL_ORDER_COURT_CONSENTED = "SITTING in private";
     private static final String GENERAL_ORDER_COURT_SITTING = "SITTING AT the Family Court at the ";
@@ -23,14 +18,12 @@ public class GeneralOrderDetailsMapper {
     private static final String GENERAL_ORDER_HEADER_ONE_CONSENTED = "Sitting in the Family Court";
     private static final String GENERAL_ORDER_HEADER_TWO = "sitting in the";
 
-    private static final String CASE_DETAILS = "caseDetails";
-    private static final String CASE_DATA = "case_data";
+    public GeneralOrderDetailsMapper(CourtDetailsMapper courtDetailsMapper, ObjectMapper objectMapper) {
+        super(courtDetailsMapper, objectMapper);
+    }
 
-    private final CourtDetailsMapper courtDetailsMapper;
-    private final ObjectMapper objectMapper;
-
-    public GeneralOrderDetails buildGeneralOrderDetails(FinremCaseDetails caseDetails,
-                                                        CourtListWrapper courtList) {
+    @Override
+    public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtListWrapper courtList) {
         return GeneralOrderDetails.builder()
             .divorceCaseNumber(caseDetails.getCaseData().getDivorceCaseNumber())
             .applicantName(caseDetails.getCaseData().getFullApplicantName())
@@ -44,20 +37,6 @@ public class GeneralOrderDetailsMapper {
             .generalOrderDate(String.valueOf(caseDetails.getCaseData().getGeneralOrderWrapper().getGeneralOrderDate()))
             .generalOrderBodyText(caseDetails.getCaseData().getGeneralOrderWrapper().getGeneralOrderBodyText())
             .build();
-    }
-
-    public Map<String, Object> getGeneralOrderDetailsAsMap(FinremCaseDetails caseDetails,
-                                                           CourtListWrapper courtList) {
-        objectMapper.registerModule(new JavaTimeModule());
-
-        Map<String, Object> generalOrderDetailsMap = objectMapper.convertValue(buildGeneralOrderDetails(caseDetails, courtList),
-            TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, Object.class));
-
-        Map<String, Object> caseDetailsMap = Map.of(
-            CASE_DATA, generalOrderDetailsMap,
-            "id", caseDetails.getId());
-
-        return Map.of(CASE_DETAILS, caseDetailsMap);
     }
 
     private String getHeaderOne(FinremCaseDetails caseDetails) {

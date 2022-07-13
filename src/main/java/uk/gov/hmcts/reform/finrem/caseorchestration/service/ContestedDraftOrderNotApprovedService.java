@@ -49,7 +49,7 @@ public class ContestedDraftOrderNotApprovedService {
 
     private Map<String, Object> applyGetDocumentDetailsMap(FinremCaseDetails caseDetails) {
 
-        return contestedDraftOrderNotApprovedDetailsMapper.getConsentOrderApprovedLetterDetailsAsMap(caseDetails,
+        return contestedDraftOrderNotApprovedDetailsMapper.getDocumentTemplateDetailsAsMap(caseDetails,
             caseDetails.getCaseData().getRegionWrapper().getDefaultCourtList());
     }
 

@@ -5,12 +5,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.DocumentTemplateDetails;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ConsentOrderApprovedLetterDetails {
+public class ConsentOrderApprovedLetterDetails implements DocumentTemplateDetails {
     @JsonProperty("divorceCaseNumber")
     private String divorceCaseNumber;
     @JsonProperty("applicantFMName")

@@ -48,6 +48,7 @@ public class ContestedDocumentController extends BaseController {
         @NotNull @RequestBody @Parameter(description = "CaseData") String source) {
 
         CallbackRequest callback = finremCallbackRequestDeserializer.deserialize(source);
+        validateCaseData(callback);
         log.info("Received request to generate Contested Mini Form A for Case ID : {}", callback.getCaseDetails().getId());
 
         FinremCaseData caseData = callback.getCaseDetails().getCaseData();

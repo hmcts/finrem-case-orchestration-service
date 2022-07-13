@@ -55,7 +55,7 @@ public class GeneralOrderService {
     }
 
     private Map<String, Object> applyAddExtraFields(FinremCaseDetails caseDetails) {
-        return generalOrderDetailsMapper.getGeneralOrderDetailsAsMap(
+        return generalOrderDetailsMapper.getDocumentTemplateDetailsAsMap(
             caseDetails,
             caseDetails.getCaseData().getRegionWrapper().getDefaultCourtList());
     }

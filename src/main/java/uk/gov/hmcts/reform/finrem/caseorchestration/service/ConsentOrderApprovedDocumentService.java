@@ -52,7 +52,7 @@ public class ConsentOrderApprovedDocumentService {
             caseDetails.getId());
 
         Map<String, Object> placeholdersMap = consentOrderApprovedLetterDetailsMapper
-            .getConsentOrderApprovedLetterDetailsAsMap(caseDetails);
+            .getDocumentTemplateDetailsAsMap(caseDetails, caseDetails.getCaseData().getRegionWrapper().getDefaultCourtList());
 
         return genericDocumentService.generateDocumentFromPlaceholdersMap(authToken, placeholdersMap,
             documentConfiguration.getApprovedConsentOrderTemplate(),

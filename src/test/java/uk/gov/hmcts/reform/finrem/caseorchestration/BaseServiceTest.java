@@ -223,12 +223,4 @@ public abstract class BaseServiceTest extends BaseTest {
             throw new RuntimeException(e);
         }
     }
-
-    protected CaseDocument buildCaseDocument(String url, String binaryUrl, String filename) {
-        CaseDocument document = new CaseDocument();
-        document.setDocumentUrl(url);
-        document.setDocumentBinaryUrl(binaryUrl);
-        document.setDocumentFilename(filename);
-        return document;
-    }
 }

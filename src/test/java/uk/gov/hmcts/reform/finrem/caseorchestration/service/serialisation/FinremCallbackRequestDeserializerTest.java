@@ -75,7 +75,6 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.JudgeNotApprovedReasonsCollection;
 import uk.gov.hmcts.reform.finrem.ccd.domain.JudgeTimeEstimate;
 import uk.gov.hmcts.reform.finrem.ccd.domain.JudgeType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.KentSurreyCourt;
-import uk.gov.hmcts.reform.finrem.ccd.domain.LondonCourt;
 import uk.gov.hmcts.reform.finrem.ccd.domain.MiamDomesticViolence;
 import uk.gov.hmcts.reform.finrem.ccd.domain.MiamExemption;
 import uk.gov.hmcts.reform.finrem.ccd.domain.MiamOtherGrounds;

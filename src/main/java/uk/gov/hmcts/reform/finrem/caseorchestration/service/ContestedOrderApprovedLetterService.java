@@ -21,7 +21,7 @@ public class ContestedOrderApprovedLetterService {
 
     public void generateAndStoreContestedOrderApprovedLetter(FinremCaseDetails caseDetails, String authorisationToken) {
         Map<String, Object> letterDetailsMap = contestOrderApprovedLetterDetailsMapper
-            .getConsentOrderApprovedLetterDetailsAsMap(caseDetails,
+            .getDocumentTemplateDetailsAsMap(caseDetails,
                 caseDetails.getCaseData().getRegionWrapper().getDefaultCourtList());
 
         Document approvedOrderCoverLetter = genericDocumentService.generateDocumentFromPlaceholdersMap(authorisationToken,

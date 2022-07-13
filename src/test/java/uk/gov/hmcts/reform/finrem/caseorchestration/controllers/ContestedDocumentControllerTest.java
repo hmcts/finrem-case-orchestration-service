@@ -10,6 +10,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
@@ -20,6 +21,7 @@ import java.net.URISyntaxException;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
@@ -44,6 +46,9 @@ public class ContestedDocumentControllerTest extends BaseControllerTest {
 
     @MockBean
     protected IdamService idamService;
+
+    @MockBean
+    protected FinremCallbackRequestDeserializer finremCallbackRequestDeserializer;
 
     @Before
     public void setUp() {
@@ -72,6 +77,7 @@ public class ContestedDocumentControllerTest extends BaseControllerTest {
     @Test
     public void generateMiniFormA() throws Exception {
         whenServiceGeneratesDocument().thenReturn(newDocument());
+        when(finremCallbackRequestDeserializer.deserialize(any())).thenReturn(getCallbackRequest());
 
         mvc.perform(post(endpoint())
             .content(requestContent.toString())
@@ -87,6 +93,7 @@ public class ContestedDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void generateMiniFormAHttpError400() throws Exception {
+        when(finremCallbackRequestDeserializer.deserialize(any())).thenReturn(getCallbackRequestEmptyCaseData());
         mvc.perform(post(endpoint())
             .content("kwuilebge")
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -96,6 +103,7 @@ public class ContestedDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void generateMiniFormAHttpError500() throws Exception {
+        when(finremCallbackRequestDeserializer.deserialize(any())).thenReturn(getCallbackRequest());
         whenServiceGeneratesDocument().thenThrow(feignError());
 
         mvc.perform(post(endpoint())

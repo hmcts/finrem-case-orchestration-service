@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.minifo
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.DocumentTemplateDetails;
@@ -23,17 +24,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Component
 public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper {
 
-    private Map<String, Object> miniFormAFixedListValues;
-    private final OptionIdToValueTranslator optionIdToValueTranslator;
-
     public ContestedMiniFormADetailsMapper(CourtDetailsMapper courtDetailsMapper,
-                                           ObjectMapper objectMapper,
-                                           OptionIdToValueTranslator optionIdToValueTranslator) {
+                                           ObjectMapper objectMapper) {
         super(courtDetailsMapper, objectMapper);
-        miniFormAFixedListValues = new HashMap<>();
-        this.optionIdToValueTranslator = optionIdToValueTranslator;
     }
 
     @Override

@@ -5,11 +5,16 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -25,9 +30,12 @@ public class BulkPrintControllerTest extends BaseControllerTest {
         = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
 
     @MockBean private ConsentOrderPrintService consentOrderPrintService;
+    @MockBean private FinremCallbackRequestDeserializer finremCallbackRequestDeserializer;
 
     @Test
     public void shouldSendForBulkPrint() throws Exception {
+        when(finremCallbackRequestDeserializer.deserialize(any())).thenReturn(CallbackRequest.builder()
+            .caseDetails(FinremCaseDetails.builder().caseData(FinremCaseData.builder().build()).build()).build());
         mvc.perform(
             post(BULK_PRINT_URI)
                 .content(resourceContentAsString(CONSENTED_BULK_PRINT_CONSENT_ORDER_NOT_APPROVED_JSON))
@@ -40,6 +48,8 @@ public class BulkPrintControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldThrowExceptionOnSendForBulkPrint() throws Exception {
+        when(finremCallbackRequestDeserializer.deserialize(any())).thenReturn(CallbackRequest.builder()
+                .caseDetails(FinremCaseDetails.builder().caseData(FinremCaseData.builder().build()).build()).build());
         doThrow(feignError()).when(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), any());
 
         mvc.perform(

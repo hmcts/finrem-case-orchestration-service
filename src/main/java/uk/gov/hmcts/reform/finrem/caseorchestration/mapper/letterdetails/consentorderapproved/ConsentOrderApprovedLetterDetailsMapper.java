@@ -5,24 +5,27 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.CourtListWrapper;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
-@RequiredArgsConstructor
 @Component
-public class ConsentOrderApprovedLetterDetailsMapper {
+public class ConsentOrderApprovedLetterDetailsMapper extends AbstractLetterDetailsMapper {
 
-    private static final String CASE_DETAILS = "caseDetails";
-    private static final String CASE_DATA = "case_data";
+    public ConsentOrderApprovedLetterDetailsMapper(CourtDetailsMapper courtDetailsMapper, ObjectMapper objectMapper) {
+        super(courtDetailsMapper, objectMapper);
+    }
 
-    private final ObjectMapper objectMapper;
-
-    public ConsentOrderApprovedLetterDetails buildConsentOrderApprovedLetterDetails(FinremCaseDetails caseDetails) {
+    @Override
+    public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtListWrapper courtList) {
         FinremCaseData caseData = caseDetails.getCaseData();
         return ConsentOrderApprovedLetterDetails.builder()
             .civilPartnership(caseData.getCivilPartnership().getYesOrNo())
@@ -38,20 +41,6 @@ public class ConsentOrderApprovedLetterDetailsMapper {
             .orderDirectionJudgeName(getJudgeName(caseDetails))
             .servePensionProviderOther(nullToEmpty(caseData.getServePensionProviderOther()))
             .build();
-    }
-
-    public Map<String, Object> getConsentOrderApprovedLetterDetailsAsMap(FinremCaseDetails caseDetails) {
-        objectMapper.registerModule(new JavaTimeModule());
-
-        Map<String, Object> consentOrderApprovedLetterDetailsMap = objectMapper.convertValue(
-            buildConsentOrderApprovedLetterDetails(caseDetails),
-            TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, Object.class));
-
-        Map<String, Object> caseDetailsMap = Map.of(
-            CASE_DATA, consentOrderApprovedLetterDetailsMap,
-            "id", caseDetails.getId());
-
-        return Map.of(CASE_DETAILS, caseDetailsMap);
     }
 
     private String getRespondentFirstName(FinremCaseDetails caseDetails) {

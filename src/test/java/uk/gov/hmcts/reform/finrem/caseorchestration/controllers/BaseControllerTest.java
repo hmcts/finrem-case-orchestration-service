@@ -205,4 +205,20 @@ public abstract class BaseControllerTest extends BaseTest {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
+
+    protected uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest getCallbackRequest() {
+        return uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest.builder()
+            .caseDetails(FinremCaseDetails.builder().caseData(FinremCaseData.builder().build()).build())
+            .eventType(EventType.ALLOCATE_TO_JUDGE)
+            .caseDetailsBefore(FinremCaseDetails.builder().caseData(FinremCaseData.builder().build()).build())
+            .build();
+    }
+
+    protected uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest getCallbackRequestEmptyCaseData() {
+        return uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest.builder()
+            .caseDetails(FinremCaseDetails.builder().build())
+            .eventType(EventType.ALLOCATE_TO_JUDGE)
+            .caseDetailsBefore(FinremCaseDetails.builder().build())
+            .build();
+    }
 }
