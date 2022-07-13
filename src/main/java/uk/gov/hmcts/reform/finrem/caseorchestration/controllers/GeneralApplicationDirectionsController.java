@@ -49,7 +49,7 @@ public class GeneralApplicationDirectionsController extends BaseController {
 
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> submitGeneralApplication(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @ApiParam("CaseData") String source) {
+        @NotNull @RequestBody @Parameter(description = "CaseData") String source) {
 
         CallbackRequest callback = finremCallbackRequestDeserializer.deserialize(source);
 
@@ -81,7 +81,7 @@ public class GeneralApplicationDirectionsController extends BaseController {
 
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> startGeneralApplication(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @ApiParam("CaseData") String source) {
+        @NotNull @RequestBody @Parameter(description = "CaseData") String source) {
 
         CallbackRequest callback = finremCallbackRequestDeserializer.deserialize(source);
 
@@ -107,7 +107,7 @@ public class GeneralApplicationDirectionsController extends BaseController {
 
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> submitInterimHearing(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @ApiParam("CaseData") String source) {
+        @NotNull @RequestBody @Parameter(description = "CaseData") String source) {
 
         CallbackRequest callback = finremCallbackRequestDeserializer.deserialize(source);
 

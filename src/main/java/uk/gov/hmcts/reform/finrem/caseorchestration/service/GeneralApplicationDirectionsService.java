@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocu
 import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.GeneralApplicationRegionWrapper;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.GeneralApplicationWrapper;
 
 import java.util.ArrayList;
@@ -36,8 +35,10 @@ public class GeneralApplicationDirectionsService {
     private final GeneralApplicationOrderDetailsMapper generalApplicationOrderDetailsMapper;
 
     public void startGeneralApplicationDirections(FinremCaseDetails caseDetails) {
-        caseDetails.getCaseData().getRegionWrapper().setGeneralApplicationRegionWrapper(null);
+        caseDetails.getCaseData().getRegionWrapper()
+            .setGeneralApplicationRegionWrapper(null);
         GeneralApplicationWrapper generalApplicationData = caseDetails.getCaseData().getGeneralApplicationWrapper();
+
 
         generalApplicationData.setGeneralApplicationHearingRequired(null);
         generalApplicationData.setGeneralApplicationDirectionsHearingDate(null);

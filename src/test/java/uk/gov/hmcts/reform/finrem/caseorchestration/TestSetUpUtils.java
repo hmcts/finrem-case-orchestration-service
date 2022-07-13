@@ -25,6 +25,9 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.NottinghamCourt;
+import uk.gov.hmcts.reform.finrem.ccd.domain.PaymentDocument;
+import uk.gov.hmcts.reform.finrem.ccd.domain.PaymentDocumentCollection;
+import uk.gov.hmcts.reform.finrem.ccd.domain.PaymentDocumentType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.PensionDocumentType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.PensionType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.PensionTypeCollection;
@@ -164,6 +167,16 @@ public class TestSetUpUtils {
         return caseDocument;
     }
 
+    public static uk.gov.hmcts.reform.finrem.ccd.domain.Document newDocument(String documentName,
+                                                                             String filename,
+                                                                             String binaryUrl) {
+        return uk.gov.hmcts.reform.finrem.ccd.domain.Document.builder()
+            .filename(filename)
+            .url(documentName)
+            .binaryUrl(binaryUrl)
+            .build();
+    }
+
     public static TypedCaseDocument pensionDocument() {
         TypedCaseDocument document = new TypedCaseDocument();
         document.setPensionDocument(caseDocument());
@@ -189,6 +202,15 @@ public class TestSetUpUtils {
         document.setId(PENSION_ID);
 
         return document;
+    }
+
+    public static PaymentDocumentCollection paymentDocumentData() {
+        return PaymentDocumentCollection.builder().value(
+            PaymentDocument.builder()
+                .typeOfDocument(PaymentDocumentType.COPY_OF_PAPER_FORM_A)
+                .uploadedDocument(newDocument())
+                .build()
+        ).build();
     }
 
     public static PensionTypeCollection pensionTypeCollection() {

@@ -57,6 +57,11 @@ public class NotificationService {
         sendNotificationEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails), uri);
     }
 
+    public void sendConsentedHWFSuccessfulConfirmationEmail(FinremCaseDetails caseDetails) {
+        URI uri = buildUri(notificationServiceConfiguration.getHwfSuccessful());
+        sendNotificationEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails), uri);
+    }
+
     public void sendAssignToJudgeConfirmationEmailToApplicantSolicitor(FinremCaseDetails caseDetails) {
         sendAssignToJudgeConfirmationEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
@@ -344,11 +349,11 @@ public class NotificationService {
         sendNotificationEmail(notificationRequest, uri);
     }
 
-    public void sendUpdateFrcInformationEmailToAppSolicitor(CaseDetails caseDetails) {
+    public void sendUpdateFrcInformationEmailToAppSolicitor(FinremCaseDetails caseDetails) {
         sendUpdateFrcInformationEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
 
-    public void sendUpdateFrcInformationEmailToRespondentSolicitor(CaseDetails caseDetails) {
+    public void sendUpdateFrcInformationEmailToRespondentSolicitor(FinremCaseDetails caseDetails) {
         sendUpdateFrcInformationEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
 
@@ -357,7 +362,7 @@ public class NotificationService {
         sendNotificationEmail(notificationRequest, uri);
     }
 
-    public void sendUpdateFrcInformationEmailToCourt(CaseDetails caseDetails) throws JsonProcessingException {
+    public void sendUpdateFrcInformationEmailToCourt(FinremCaseDetails caseDetails) throws JsonProcessingException {
         String recipientEmail = getRecipientEmail(caseDetails);
 
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
@@ -461,14 +466,15 @@ public class NotificationService {
             nullToEmpty(caseDetails.getCaseData().getApplicantSolicitorName()));
     }
 
-    private String getRecipientEmail(CaseDetails caseDetails) throws JsonProcessingException {
+    private String getRecipientEmail(FinremCaseDetails caseDetails) throws JsonProcessingException {
         if (featureToggleService.isSendToFRCEnabled()) {
-            Map<String, Object> data = caseDetails.getData();
+            FinremCaseData caseData = caseDetails.getCaseData();
             Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
-            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(data.get(CaseHearingFunctions.getSelectedCourt(data)));
+            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(caseData.getSelectedCourt());
 
             return (String) courtDetails.get(COURT_DETAILS_EMAIL_KEY);
         }
+
         return DEFAULT_EMAIL;
     }
 }

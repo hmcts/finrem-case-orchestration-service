@@ -30,16 +30,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.
 
 @Component
 @RequiredArgsConstructor
-@Builder
 public class LetterDetailsMapper {
-    private String applicantName;
-    private String respondentName;
-    private String reference;
-    private String caseNumber;
-    private String letterDate;
-    private FrcCourtDetails courtDetails;
-    private Addressee addressee;
-
     private static final String CASE_DETAILS = "caseDetails";
     private static final String CASE_DATA = "case_data";
 

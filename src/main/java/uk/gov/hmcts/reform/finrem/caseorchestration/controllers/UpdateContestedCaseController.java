@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
 import uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse;
@@ -29,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.NoCSolicitorDetailsHelper.removeSolicitorAddress;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -73,9 +76,6 @@ public class UpdateContestedCaseController extends BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    private void cleanupAdditionalDocuments(FinremCaseData caseData) {
-        if (caseData.getPromptForAnyDocument().isNoOrNull()) {
-            caseData.setUploadAdditionalDocument(null);
     @PostMapping(path = "/update-contested-case-solicitor", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Handles update case details and cleans up the data fields based on the options chosen for Consented Cases")
     @ApiResponses(value = {
@@ -85,19 +85,21 @@ public class UpdateContestedCaseController extends BaseController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> updateContestedCaseSolicitor(
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
-        @RequestBody CallbackRequest ccdRequest) {
+        @RequestBody String source) {
 
-        CaseDetails caseDetails = ccdRequest.getCaseDetails();
+        CallbackRequest ccdRequest = finremCallbackRequestDeserializer.deserialize(source);
+
+        FinremCaseDetails caseDetails = ccdRequest.getCaseDetails();
         log.info("Received request to update contested case solicitor contact details with Case ID: {}", caseDetails.getId());
 
         validateCaseData(ccdRequest);
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(removeSolicitorAddress(caseDetails, true)).build());
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(removeSolicitorAddress(caseDetails)).build());
     }
 
-    private void cleanupAdditionalDocuments(Map<String, Object> caseData) {
-        if (equalsTo((String) caseData.get("promptForAnyDocument"), NO_VALUE)) {
-            caseData.put("uploadAdditionalDocument", null);
+    private void cleanupAdditionalDocuments(FinremCaseData caseData) {
+        if (caseData.getPromptForAnyDocument().isNoOrNull()) {
+            caseData.setUploadAdditionalDocument(null);
         }
     }
 

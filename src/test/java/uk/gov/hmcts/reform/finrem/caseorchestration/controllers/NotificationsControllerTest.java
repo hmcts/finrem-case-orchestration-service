@@ -71,7 +71,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequestString());
 
-        verify(notificationService).sendConsentedHWFSuccessfulConfirmationEmail(any());
+        verify(notificationService).sendConsentedHWFSuccessfulConfirmationEmail(isA(CaseDetails.class));
         verifyNoInteractions(helpWithFeesDocumentService);
     }
 
@@ -896,34 +896,34 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void givenNoticeOfChangeWhenSendNoticeOfChangeNotificationsThenSendNoticeOfChangeServiceCalled() {
+    public void givenNoticeOfChangeWhenSendNoticeOfChangeNotificationsThenSendNoticeOfChangeServiceCalled() throws JsonProcessingException {
 
-        notificationsController.sendNoticeOfChangeNotifications("authToken", buildCallbackRequestWithBeforeCaseDetails());
+        notificationsController.sendNoticeOfChangeNotifications("authToken", buildCallbackRequestWithBeforeCaseDetailsString());
 
         verify(notificationService, times(1)).sendNoticeOfChangeEmail(any());
 
-        verify(nocLetterNotificationService, times(1)).sendNoticeOfChangeLetters(any(CaseDetails.class), any(CaseDetails.class), anyString());
+        verify(nocLetterNotificationService, times(1)).sendNoticeOfChangeLetters(any(FinremCaseDetails.class),
+            any(FinremCaseDetails.class), anyString());
     }
 
     @Test
-    public void givenNoticeOfChangeAsCaseworker_whenSendNoCNotifications_ThenSendNoticeOfChangeServiceCalled() {
+    public void givenNoticeOfChangeAsCaseworker_whenSendNoCNotifications_ThenSendNoticeOfChangeServiceCalled() throws JsonProcessingException {
         when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(true);
         notificationsController.sendNoticeOfChangeNotificationsCaseworker("authtoken",
-            buildNoCCaseworkerCallbackRequest());
+            buildNoCCaseworkerCallbackRequestString());
 
         verify(notificationService, times(1)).sendNoticeOfChangeEmailCaseworker(any());
 
         verify(nocLetterNotificationService, times(1))
-            .sendNoticeOfChangeLetters(any(CaseDetails.class), any(CaseDetails.class), anyString());
+            .sendNoticeOfChangeLetters(any(FinremCaseDetails.class), any(FinremCaseDetails.class), anyString());
     }
 
     @Test
     public void givenUpdateFrc_whenSendEmail_thenNotificationServiceCalledThreeTimes() throws JsonProcessingException {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class))).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(FinremCaseData.class))).thenReturn(true);
 
-        notificationsController.sendUpdateFrcNotifications(AUTH_TOKEN, buildCallbackRequest());
+        notificationsController.sendUpdateFrcNotifications(AUTH_TOKEN, buildNewCallbackRequestString());
         verify(notificationService, times(1)).sendUpdateFrcInformationEmailToAppSolicitor(any());
         verify(notificationService, times(1)).sendUpdateFrcInformationEmailToRespondentSolicitor(any());
         verify(notificationService, times(1)).sendUpdateFrcInformationEmailToCourt(any());
@@ -933,10 +933,9 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @Test
     public void givenUpdateFrc_whenAppSolNotAgreeToReceiveEmails_thenNotificationServiceCalledTwice() throws JsonProcessingException {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class))).thenReturn(false);
-        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(FinremCaseData.class))).thenReturn(true);
 
-        notificationsController.sendUpdateFrcNotifications(AUTH_TOKEN, buildCallbackRequest());
+        notificationsController.sendUpdateFrcNotifications(AUTH_TOKEN, buildNewCallbackRequestStringNoAppSolConsent());
         verify(notificationService, never()).sendUpdateFrcInformationEmailToAppSolicitor(any());
         verify(notificationService, times(1)).sendUpdateFrcInformationEmailToRespondentSolicitor(any());
         verify(notificationService, times(1)).sendUpdateFrcInformationEmailToCourt(any());
@@ -946,10 +945,9 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @Test
     public void givenUpdateFrc_whenRespSolNotAgreeToReceiveEmails_thenNotificationServiceCalledTwice() throws JsonProcessingException {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class))).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(isA(Map.class))).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(FinremCaseData.class))).thenReturn(false);
 
-        notificationsController.sendUpdateFrcNotifications(AUTH_TOKEN, buildCallbackRequest());
+        notificationsController.sendUpdateFrcNotifications(AUTH_TOKEN, buildNewCallbackRequestString());
         verify(notificationService, times(1)).sendUpdateFrcInformationEmailToAppSolicitor(any());
         verify(notificationService, never()).sendUpdateFrcInformationEmailToRespondentSolicitor(any());
         verify(notificationService, times(1)).sendUpdateFrcInformationEmailToCourt(any());

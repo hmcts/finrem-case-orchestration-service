@@ -1,24 +1,21 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedRefusalOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.RefusalOrderCollection;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,7 +23,6 @@ import java.util.Optional;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
@@ -36,20 +32,15 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_LATEST_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_PREVIEW_DOCUMENT;
 
 public class ContestedDraftOrderNotApprovedServiceTest extends BaseServiceTest {
 
     @Autowired private ContestedDraftOrderNotApprovedService refusalOrderService;
-    @Autowired private ObjectMapper objectMapper;
     @Autowired private DocumentConfiguration documentConfiguration;
     @Autowired private FinremCallbackRequestDeserializer deserializer;
 
     @MockBean private GenericDocumentService genericDocumentService;
 
-    @Captor private ArgumentCaptor<FinremCaseDetails> caseDetailsArgumentCaptor;
     @Captor private ArgumentCaptor<Map<String, Object>> placeholdersMapArgumentCaptor;
 
     @Before
@@ -59,10 +50,11 @@ public class ContestedDraftOrderNotApprovedServiceTest extends BaseServiceTest {
 
     @Test
     public void generateRefusalOrderWithOneReason() throws Exception {
-        refusalOrderService.createAndSetRefusalOrderPreviewDocument(AUTH_TOKEN, contestedCaseDetails(false));
+        FinremCaseDetails caseDetails = contestedCaseDetails(false);
+        refusalOrderService.createAndSetRefusalOrderPreviewDocument(AUTH_TOKEN, caseDetails);
 
 
-        CaseDocument result = (CaseDocument) documentMap.get(CONTESTED_APPLICATION_NOT_APPROVED_PREVIEW_DOCUMENT);
+        Document result = caseDetails.getCaseData().getRefusalOrderPreviewDocument();
         doCaseDocumentAssert(result);
 
         verifyAdditionalFieldsWithSingularReason();
@@ -70,42 +62,41 @@ public class ContestedDraftOrderNotApprovedServiceTest extends BaseServiceTest {
 
     @Test
     public void generateRefusalOrderWithMultipleReasons() throws Exception {
-        Map<String, Object> documentMap = refusalOrderService.createAndSetRefusalOrderPreviewDocument(AUTH_TOKEN, contestedCaseDetails(true));
+        FinremCaseDetails caseDetails = contestedCaseDetails(true);
+        refusalOrderService.createAndSetRefusalOrderPreviewDocument(AUTH_TOKEN, caseDetails);
 
-        CaseDocument result = (CaseDocument) documentMap.get(CONTESTED_APPLICATION_NOT_APPROVED_PREVIEW_DOCUMENT);
+        Document result = caseDetails.getCaseData().getRefusalOrderPreviewDocument();
         doCaseDocumentAssert(result);
         verifyAdditionalFieldsWithMultipleReasons();
     }
 
     @Test
     public void submitContestedGeneralOrder() throws Exception {
-        Map<String, Object> documentMap = refusalOrderService.populateRefusalOrderCollection(contestedCaseDetails(true));
+        FinremCaseDetails caseDetails = contestedCaseDetails(true);
+        refusalOrderService.populateRefusalOrderCollection(contestedCaseDetails(true));
 
-        List<ContestedRefusalOrderData> refusalOrders =
-            (List<ContestedRefusalOrderData>) documentMap.get(CONTESTED_APPLICATION_NOT_APPROVED_COLLECTION);
+        List<RefusalOrderCollection> refusalOrders = caseDetails.getCaseData().getRefusalOrderCollection();
 
         assertThat(refusalOrders, hasSize(2));
-        assertThat(refusalOrders.get(0).getId(), is("1234"));
-        assertThat(refusalOrders.get(0).getContestedRefusalOrder().getRefusalOrderAdditionalDocument().getDocumentUrl(), is("http://dm-store/lhjbyuivu87y989hijbb"));
-        assertThat(refusalOrders.get(0).getContestedRefusalOrder().getRefusalOrderAdditionalDocument().getDocumentFilename(),
+        assertThat(refusalOrders.get(0).getValue().getRefusalOrderAdditionalDocument().getUrl(), is("http://dm-store/lhjbyuivu87y989hijbb"));
+        assertThat(refusalOrders.get(0).getValue().getRefusalOrderAdditionalDocument().getFilename(),
             is("app_docs.pdf"));
-        assertThat(refusalOrders.get(0).getContestedRefusalOrder().getRefusalOrderAdditionalDocument().getDocumentBinaryUrl(),
+        assertThat(refusalOrders.get(0).getValue().getRefusalOrderAdditionalDocument().getBinaryUrl(),
             is("http://dm-store/lhjbyuivu87y989hijbb/binary"));
 
-        assertThat(refusalOrders.get(1).getId(), notNullValue());
-        assertThat(refusalOrders.get(1).getContestedRefusalOrder().getRefusalOrderAdditionalDocument().getDocumentUrl(),
+        assertThat(refusalOrders.get(1).getValue().getRefusalOrderAdditionalDocument().getUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d"));
-        assertThat(refusalOrders.get(1).getContestedRefusalOrder().getRefusalOrderAdditionalDocument().getDocumentFilename(),
+        assertThat(refusalOrders.get(1).getValue().getRefusalOrderAdditionalDocument().getFilename(),
             is("refusalOrderTestFilename.pdf"));
-        assertThat(refusalOrders.get(1).getContestedRefusalOrder().getRefusalOrderAdditionalDocument().getDocumentBinaryUrl(),
+        assertThat(refusalOrders.get(1).getValue().getRefusalOrderAdditionalDocument().getBinaryUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
 
-        CaseDocument latestRefusalOrder = (CaseDocument) documentMap.get(CONTESTED_APPLICATION_NOT_APPROVED_LATEST_DOCUMENT);
-        assertThat(latestRefusalOrder.getDocumentUrl(),
+        Document latestRefusalOrder = caseDetails.getCaseData().getLatestRefusalOrder();
+        assertThat(latestRefusalOrder.getUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d"));
-        assertThat(latestRefusalOrder.getDocumentFilename(),
+        assertThat(latestRefusalOrder.getFilename(),
             is("refusalOrderTestFilename.pdf"));
-        assertThat(latestRefusalOrder.getDocumentBinaryUrl(),
+        assertThat(latestRefusalOrder.getBinaryUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
     }
 
@@ -118,7 +109,7 @@ public class ContestedDraftOrderNotApprovedServiceTest extends BaseServiceTest {
 
     @Test
     public void getLatestRefusalReasonShouldReturnEmptyOptionalIfNoReason() {
-        Optional<CaseDocument> doc = refusalOrderService.getLatestRefusalReason(CaseDetails.builder().data(new HashMap<>()).build());
+        Optional<Document> doc = refusalOrderService.getLatestRefusalReason(FinremCaseDetails.builder().caseData(new FinremCaseData()).build());
         assertThat(doc.isPresent(), is(false));
     }
 
@@ -132,18 +123,19 @@ public class ContestedDraftOrderNotApprovedServiceTest extends BaseServiceTest {
         }
     }
 
-    private static void doCaseDocumentAssert(CaseDocument result) {
-        assertThat(result.getDocumentFilename(), is(FILE_NAME));
-        assertThat(result.getDocumentUrl(), is(DOC_URL));
-        assertThat(result.getDocumentBinaryUrl(), is(BINARY_URL));
+    private static void doCaseDocumentAssert(Document result) {
+        assertThat(result.getFilename(), is(FILE_NAME));
+        assertThat(result.getUrl(), is(DOC_URL));
+        assertThat(result.getBinaryUrl(), is(BINARY_URL));
     }
 
     void verifyAdditionalFieldsWithMultipleReasons() {
-        verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
+        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
+            placeholdersMapArgumentCaptor.capture(),
             eq(documentConfiguration.getContestedDraftOrderNotApprovedTemplate()),
             eq(documentConfiguration.getContestedDraftOrderNotApprovedFileName()));
 
-        Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
+        Map<String, Object> data = placeholdersMapArgumentCaptor.getValue();
         assertThat(data.get("ApplicantName"), is("Contested Applicant Name"));
         assertThat(data.get("RespondentName"), is("Contested Respondent Name"));
         assertThat(data.get("Court"), is("Nottingham County Court and Family Court"));

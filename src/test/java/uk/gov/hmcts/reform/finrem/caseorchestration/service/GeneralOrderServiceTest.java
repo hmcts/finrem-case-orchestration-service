@@ -1,29 +1,29 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsentedData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContestedData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
+import uk.gov.hmcts.reform.finrem.ccd.domain.ContestedGeneralOrderCollection;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.GeneralOrderAddressTo;
+import uk.gov.hmcts.reform.finrem.ccd.domain.GeneralOrderCollection;
 
-import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
@@ -34,36 +34,31 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_ADDRESS_TO;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_COLLECTION_CONSENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_COLLECTION_CONSENTED_IN_CONTESTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_COLLECTION_CONTESTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
 
 public class GeneralOrderServiceTest extends BaseServiceTest {
 
     @Autowired private GeneralOrderService generalOrderService;
-    @Autowired private ObjectMapper objectMapper;
     @Autowired private DocumentConfiguration documentConfiguration;
+    @Autowired private FinremCallbackRequestDeserializer deserializer;
 
     @MockBean
     private GenericDocumentService genericDocumentService;
 
     @Captor
-    private ArgumentCaptor<CaseDetails> caseDetailsArgumentCaptor;
+    private ArgumentCaptor<Map<String, Object>> placeholdersMapCaptor;
 
     @Before
     public void setUp() {
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(newDocument());
     }
 
     @Test
     public void generateGeneralOrderConsented() throws Exception {
-        Map<String, Object> documentMap = generalOrderService.createAndSetGeneralOrder(AUTH_TOKEN, consentedCaseDetails());
+        FinremCaseDetails caseDetails = consentedCaseDetails();
+        generalOrderService.createAndSetGeneralOrder(AUTH_TOKEN, caseDetails);
 
-        CaseDocument result = (CaseDocument) documentMap.get(GENERAL_ORDER_PREVIEW_DOCUMENT);
+        Document result = caseDetails.getCaseData().getGeneralOrderWrapper().getGeneralOrderPreviewDocument();
         doCaseDocumentAssert(result);
 
         verifyAdditionalFieldsConsented();
@@ -71,9 +66,10 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
 
     @Test
     public void generateGeneralOrderContested() throws Exception {
-        Map<String, Object> documentMap = generalOrderService.createAndSetGeneralOrder(AUTH_TOKEN, contestedCaseDetails());
+        FinremCaseDetails caseDetails = contestedCaseDetails();
+        generalOrderService.createAndSetGeneralOrder(AUTH_TOKEN, caseDetails);
 
-        CaseDocument result = (CaseDocument) documentMap.get(GENERAL_ORDER_PREVIEW_DOCUMENT);
+        Document result = caseDetails.getCaseData().getGeneralOrderWrapper().getGeneralOrderPreviewDocument();
         doCaseDocumentAssert(result);
 
         verifyAdditionalFieldsContested();
@@ -81,40 +77,40 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
 
     @Test
     public void submitContestedGeneralOrder() throws Exception {
-        Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(contestedCaseDetails());
+        FinremCaseDetails caseDetails = contestedCaseDetails();
+        generalOrderService.populateGeneralOrderCollection(caseDetails);
+        List<ContestedGeneralOrderCollection> generalOrders = caseDetails.getCaseData().getGeneralOrderWrapper().getGeneralOrders();
 
-        List<GeneralOrderContestedData> generalOrders = (List<GeneralOrderContestedData>) documentMap.get(GENERAL_ORDER_COLLECTION_CONTESTED);
         assertThat(generalOrders, hasSize(2));
-        assertThat(generalOrders.get(0).getId(), is("1234"));
-        assertThat(generalOrders.get(0).getGeneralOrder().getGeneralOrder().getDocumentUrl(), is("http://dm-store/lhjbyuivu87y989hijbb"));
-        assertThat(generalOrders.get(0).getGeneralOrder().getGeneralOrder().getDocumentFilename(),
+        assertThat(generalOrders.get(0).getValue().getAdditionalDocument().getUrl(), is("http://dm-store/lhjbyuivu87y989hijbb"));
+        assertThat(generalOrders.get(0).getValue().getAdditionalDocument().getFilename(),
             is("generalOrder.pdf"));
-        assertThat(generalOrders.get(0).getGeneralOrder().getGeneralOrder().getDocumentBinaryUrl(),
+        assertThat(generalOrders.get(0).getValue().getAdditionalDocument().getBinaryUrl(),
             is("http://dm-store/lhjbyuivu87y989hijbb/binary"));
 
-        assertThat(generalOrders.get(1).getId(), notNullValue());
-        assertThat(generalOrders.get(1).getGeneralOrder().getGeneralOrder().getDocumentUrl(),
+        assertThat(generalOrders.get(1).getValue().getAdditionalDocument().getUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d"));
-        assertThat(generalOrders.get(1).getGeneralOrder().getGeneralOrder().getDocumentFilename(),
+        assertThat(generalOrders.get(1).getValue().getAdditionalDocument().getFilename(),
             is("WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg"));
-        assertThat(generalOrders.get(1).getGeneralOrder().getGeneralOrder().getDocumentBinaryUrl(),
+        assertThat(generalOrders.get(1).getValue().getAdditionalDocument().getBinaryUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
-        assertThat(generalOrders.get(1).getGeneralOrder().getAddressTo(), is("Applicant"));
+        assertThat(generalOrders.get(1).getValue().getGeneralOrderAddressTo(), is(GeneralOrderAddressTo.APPLICANT));
 
-        CaseDocument latestGeneralOrder = (CaseDocument) documentMap.get(GENERAL_ORDER_LATEST_DOCUMENT);
-        assertThat(latestGeneralOrder.getDocumentUrl(),
+        Document latestGeneralOrder = caseDetails.getCaseData().getGeneralOrderWrapper().getGeneralOrderLatestDocument();
+        assertThat(latestGeneralOrder.getUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d"));
-        assertThat(latestGeneralOrder.getDocumentFilename(),
+        assertThat(latestGeneralOrder.getFilename(),
             is("WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg"));
-        assertThat(latestGeneralOrder.getDocumentBinaryUrl(),
+        assertThat(latestGeneralOrder.getBinaryUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
     }
 
     @Test
     public void generateGeneralOrderConsentedInContested() throws Exception {
-        Map<String, Object> documentMap = generalOrderService.createAndSetGeneralOrder(AUTH_TOKEN, consentedInContestedCaseDetails());
+        FinremCaseDetails caseDetails = consentedInContestedCaseDetails();
+        generalOrderService.createAndSetGeneralOrder(AUTH_TOKEN, caseDetails);
 
-        CaseDocument result = (CaseDocument) documentMap.get(GENERAL_ORDER_PREVIEW_DOCUMENT);
+        Document result = caseDetails.getCaseData().getGeneralOrderWrapper().getGeneralOrderPreviewDocument();
         doCaseDocumentAssert(result);
 
         verifyAdditionalFieldsContested();
@@ -122,148 +118,136 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
 
     @Test
     public void submitConsentedInContestedGeneralOrder() throws Exception {
-        Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(consentedInContestedCaseDetails());
+        FinremCaseDetails caseDetails = consentedInContestedCaseDetails();
+        generalOrderService.populateGeneralOrderCollection(caseDetails);
 
-        List<GeneralOrderContestedData> generalOrders = (List<GeneralOrderContestedData>) documentMap.get(
-            GENERAL_ORDER_COLLECTION_CONSENTED_IN_CONTESTED);
+        List<ContestedGeneralOrderCollection> generalOrders = caseDetails.getCaseData().getGeneralOrderWrapper().getGeneralOrdersConsent();
+
         assertThat(generalOrders, hasSize(2));
-        assertThat(generalOrders.get(0).getId(), is("1234"));
-        assertThat(generalOrders.get(0).getGeneralOrder().getGeneralOrder().getDocumentUrl(), is("http://dm-store/lhjbyuivu87y989hijbb"));
-        assertThat(generalOrders.get(0).getGeneralOrder().getGeneralOrder().getDocumentFilename(),
+        assertThat(generalOrders.get(0).getValue().getAdditionalDocument().getUrl(), is("http://dm-store/lhjbyuivu87y989hijbb"));
+        assertThat(generalOrders.get(0).getValue().getAdditionalDocument().getFilename(),
             is("app_docs.pdf"));
-        assertThat(generalOrders.get(0).getGeneralOrder().getGeneralOrder().getDocumentBinaryUrl(),
+        assertThat(generalOrders.get(0).getValue().getAdditionalDocument().getBinaryUrl(),
             is("http://dm-store/lhjbyuivu87y989hijbb/binary"));
 
-        assertThat(generalOrders.get(1).getId(), notNullValue());
-        assertThat(generalOrders.get(1).getGeneralOrder().getGeneralOrder().getDocumentUrl(),
+        assertThat(generalOrders.get(1).getValue().getAdditionalDocument().getUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d"));
-        assertThat(generalOrders.get(1).getGeneralOrder().getGeneralOrder().getDocumentFilename(),
+        assertThat(generalOrders.get(1).getValue().getAdditionalDocument().getFilename(),
             is("WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg"));
-        assertThat(generalOrders.get(1).getGeneralOrder().getGeneralOrder().getDocumentBinaryUrl(),
+        assertThat(generalOrders.get(1).getValue().getAdditionalDocument().getBinaryUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
-        assertThat(generalOrders.get(1).getGeneralOrder().getAddressTo(), is("Applicant"));
+        assertThat(generalOrders.get(1).getValue().getGeneralOrderAddressTo(), is(GeneralOrderAddressTo.APPLICANT));
 
-        CaseDocument latestGeneralOrder = (CaseDocument) documentMap.get(GENERAL_ORDER_LATEST_DOCUMENT);
-        assertThat(latestGeneralOrder.getDocumentUrl(),
+        Document latestGeneralOrder = caseDetails.getCaseData().getGeneralOrderWrapper().getGeneralOrderLatestDocument();
+        assertThat(latestGeneralOrder.getUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d"));
-        assertThat(latestGeneralOrder.getDocumentFilename(),
+        assertThat(latestGeneralOrder.getFilename(),
             is("WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg"));
-        assertThat(latestGeneralOrder.getDocumentBinaryUrl(),
+        assertThat(latestGeneralOrder.getBinaryUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
     }
 
     @Test
     public void submitConsentedGeneralOrder() throws Exception {
-        Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(consentedCaseDetails());
-        List<GeneralOrderConsentedData> generalOrders = (List<GeneralOrderConsentedData>) documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED);
+        FinremCaseDetails caseDetails = consentedCaseDetails();
+        generalOrderService.populateGeneralOrderCollection(caseDetails);
+        List<GeneralOrderCollection> generalOrders = caseDetails.getCaseData().getGeneralOrderWrapper().getGeneralOrderCollection();
         assertThat(generalOrders, hasSize(2));
-        assertThat(generalOrders.get(0).getId(), is("1234"));
-        assertThat(generalOrders.get(0).getGeneralOrder().getGeneralOrder().getDocumentUrl(),
+        assertThat(generalOrders.get(0).getValue().getGeneralOrderDocumentUpload().getUrl(),
             is("http://dm-store/lhjbyuivu87y989hijbb"));
-        assertThat(generalOrders.get(0).getGeneralOrder().getGeneralOrder().getDocumentFilename(),
+        assertThat(generalOrders.get(0).getValue().getGeneralOrderDocumentUpload().getFilename(),
             is("app_docs.pdf"));
-        assertThat(generalOrders.get(0).getGeneralOrder().getGeneralOrder().getDocumentBinaryUrl(),
+        assertThat(generalOrders.get(0).getValue().getGeneralOrderDocumentUpload().getBinaryUrl(),
             is("http://dm-store/lhjbyuivu87y989hijbb/binary"));
 
-        assertThat(generalOrders.get(1).getId(), notNullValue());
-        assertThat(generalOrders.get(1).getGeneralOrder().getGeneralOrder().getDocumentUrl(),
+        assertThat(generalOrders.get(1).getValue().getGeneralOrderDocumentUpload().getUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d"));
-        assertThat(generalOrders.get(1).getGeneralOrder().getGeneralOrder().getDocumentFilename(),
+        assertThat(generalOrders.get(1).getValue().getGeneralOrderDocumentUpload().getFilename(),
             is("WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg"));
-        assertThat(generalOrders.get(1).getGeneralOrder().getGeneralOrder().getDocumentBinaryUrl(),
+        assertThat(generalOrders.get(1).getValue().getGeneralOrderDocumentUpload().getBinaryUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
-        assertThat(generalOrders.get(1).getGeneralOrder().getAddressTo(), is("Applicant"));
+        assertThat(generalOrders.get(1).getValue().getGeneralOrderAddressTo(), is(GeneralOrderAddressTo.APPLICANT));
 
-        CaseDocument latestGeneralOrder = (CaseDocument) documentMap.get(GENERAL_ORDER_LATEST_DOCUMENT);
-        assertThat(latestGeneralOrder.getDocumentUrl(),
+        Document latestGeneralOrder = caseDetails.getCaseData().getGeneralOrderWrapper().getGeneralOrderLatestDocument();
+        assertThat(latestGeneralOrder.getUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d"));
-        assertThat(latestGeneralOrder.getDocumentFilename(),
+        assertThat(latestGeneralOrder.getFilename(),
             is("WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg"));
-        assertThat(latestGeneralOrder.getDocumentBinaryUrl(),
+        assertThat(latestGeneralOrder.getBinaryUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
     }
 
     @Test
     public void addressToFormattedCorrectlyForApplicant() throws Exception {
-        CaseDetails details = consentedCaseDetails();
-        details.getData().put(GENERAL_ORDER_ADDRESS_TO, "applicant");
-        Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(details);
-        List<GeneralOrderConsentedData> generalOrders = (List<GeneralOrderConsentedData>) documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED);
-        assertThat(generalOrders.get(1).getGeneralOrder().getAddressTo(), is("Applicant"));
+        FinremCaseDetails details = consentedCaseDetails();
+        details.getCaseData().getGeneralOrderWrapper().setGeneralOrderAddressTo(GeneralOrderAddressTo.APPLICANT);
+
+        generalOrderService.populateGeneralOrderCollection(details);
+        List<GeneralOrderCollection> generalOrders = details.getCaseData().getGeneralOrderWrapper().getGeneralOrderCollection();
+        assertThat(generalOrders.get(1).getValue().getGeneralOrderAddressTo(), is(GeneralOrderAddressTo.APPLICANT));
     }
 
     @Test
     public void addressToFormattedCorrectlyForApplicantSolicitor() throws Exception {
-        CaseDetails details = consentedCaseDetails();
-        details.getData().put(GENERAL_ORDER_ADDRESS_TO, "applicantSolicitor");
-        Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(details);
-        List<GeneralOrderConsentedData> generalOrders = (List<GeneralOrderConsentedData>) documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED);
-        assertThat(generalOrders.get(1).getGeneralOrder().getAddressTo(), is("Applicant Solicitor"));
+        FinremCaseDetails details = consentedCaseDetails();
+        details.getCaseData().getGeneralOrderWrapper().setGeneralOrderAddressTo(GeneralOrderAddressTo.APPLICANT_SOLICITOR);
+        generalOrderService.populateGeneralOrderCollection(details);
+        List<GeneralOrderCollection> generalOrders = details.getCaseData().getGeneralOrderWrapper().getGeneralOrderCollection();
+        assertThat(generalOrders.get(1).getValue().getGeneralOrderAddressTo(), is(GeneralOrderAddressTo.APPLICANT_SOLICITOR));
     }
 
     @Test
     public void addressToFormattedCorrectlyForRespondentSolicitor() throws Exception {
-        CaseDetails details = consentedCaseDetails();
-        details.getData().put(GENERAL_ORDER_ADDRESS_TO, "respondentSolicitor");
-        Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(details);
-        List<GeneralOrderConsentedData> generalOrders = (List<GeneralOrderConsentedData>) documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED);
-        assertThat(generalOrders.get(1).getGeneralOrder().getAddressTo(), is("Respondent Solicitor"));
-    }
-
-    @Test
-    public void addressToFormattedCorrectlyReturnsEmptyStringForInvalid() throws Exception {
-        CaseDetails details = consentedCaseDetails();
-        details.getData().put(GENERAL_ORDER_ADDRESS_TO, "invalid");
-        Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(details);
-        List<GeneralOrderConsentedData> generalOrders = (List<GeneralOrderConsentedData>) documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED);
-        assertThat(generalOrders.get(1).getGeneralOrder().getAddressTo(), is(""));
+        FinremCaseDetails details = consentedCaseDetails();
+        details.getCaseData().getGeneralOrderWrapper().setGeneralOrderAddressTo(GeneralOrderAddressTo.RESPONDENT_SOLICITOR);
+        generalOrderService.populateGeneralOrderCollection(details);
+        List<GeneralOrderCollection> generalOrders = details.getCaseData().getGeneralOrderWrapper().getGeneralOrderCollection();
+        assertThat(generalOrders.get(1).getValue().getGeneralOrderAddressTo(), is(GeneralOrderAddressTo.RESPONDENT_SOLICITOR));
     }
 
     @Test
     public void getsCorrectGeneralOrdersForPrintingConsented() throws Exception {
-        CaseDetails details = consentedCaseDetails();
-        BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(details.getData());
-        assertThat(latestGeneralOrder.getBinaryFileUrl(), is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
+        FinremCaseDetails details = consentedCaseDetails();
+        BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(details.getCaseData());
+        assertThat(latestGeneralOrder.getBinaryFileUrl(),
+            is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
     }
 
     @Test
     public void getsZeroGeneralOrdersForPrintingWhenNoneConsented() throws Exception {
-        CaseDetails details = consentedCaseDetails();
-        details.getData().put(GENERAL_ORDER_LATEST_DOCUMENT, null);
-        BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(details.getData());
+        FinremCaseDetails details = consentedCaseDetails();
+        details.getCaseData().getGeneralOrderWrapper().setGeneralOrderLatestDocument(null);
+        BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(details.getCaseData());
         assertNull(latestGeneralOrder);
     }
 
-    private CaseDetails consentedCaseDetails() throws Exception {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/general-order-consented.json")) {
-            return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-        }
+    private FinremCaseDetails consentedCaseDetails() throws Exception {
+        return deserializer.deserialize(new String(Files.readAllBytes(Paths.get("/fixtures/general-order-consented.json"))))
+            .getCaseDetails();
     }
 
-    private CaseDetails contestedCaseDetails() throws Exception {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/general-order-contested.json")) {
-            return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-        }
+    private FinremCaseDetails contestedCaseDetails() throws Exception {
+        return deserializer.deserialize(new String(Files.readAllBytes(Paths.get("/fixtures/general-order-contested.json"))))
+            .getCaseDetails();
     }
 
-    private static void doCaseDocumentAssert(CaseDocument result) {
-        assertThat(result.getDocumentFilename(), is(FILE_NAME));
-        assertThat(result.getDocumentUrl(), is(DOC_URL));
-        assertThat(result.getDocumentBinaryUrl(), is(BINARY_URL));
+    private static void doCaseDocumentAssert(Document result) {
+        assertThat(result.getFilename(), is(FILE_NAME));
+        assertThat(result.getUrl(), is(DOC_URL));
+        assertThat(result.getBinaryUrl(), is(BINARY_URL));
     }
 
-    private CaseDetails consentedInContestedCaseDetails() throws Exception {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/general-order-consented-in-contested.json")) {
-            return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-        }
+    private FinremCaseDetails consentedInContestedCaseDetails() throws Exception {
+        return deserializer.deserialize(new String(Files.readAllBytes(Paths.get("/fixtures/general-order-consented-in-contested.json"))))
+            .getCaseDetails();
     }
 
     void verifyAdditionalFieldsConsented() {
         verify(genericDocumentService, times(1))
-            .generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
+            .generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), placeholdersMapCaptor.capture(),
                 eq(documentConfiguration.getGeneralOrderTemplate()), eq(documentConfiguration.getGeneralOrderFileName()));
 
-        Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
+        Map<String, Object> data = placeholdersMapCaptor.getValue();
         assertThat(data.get("DivorceCaseNumber"), is("DD12D12345"));
         assertThat(data.get("ApplicantName"), is("Consented Applicant Name"));
         assertThat(data.get("RespondentName"), is("Consented Respondent Name"));
@@ -277,10 +261,10 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
 
     void verifyAdditionalFieldsContested() {
         verify(genericDocumentService, times(1))
-            .generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
+            .generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), placeholdersMapCaptor.capture(),
                 eq(documentConfiguration.getGeneralOrderTemplate()), eq(documentConfiguration.getGeneralOrderFileName()));
 
-        Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
+        Map<String, Object> data = placeholdersMapCaptor.getValue();
         assertThat(data.get("DivorceCaseNumber"), is("DD98D76543"));
         assertThat(data.get("ApplicantName"), is("Contested Applicant Name"));
         assertThat(data.get("RespondentName"), is("Contested Respondent Name"));

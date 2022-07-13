@@ -43,7 +43,7 @@ public class BulkPrintController extends BaseController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> bulkPrint(
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authorisationToken,
-        @NotNull @RequestBody @ApiParam("Callback") String source) {
+        @NotNull @RequestBody @Parameter(description = "Callback") String source) {
 
         CallbackRequest callbackRequest = finremCallbackRequestDeserializer.deserialize(source);
 

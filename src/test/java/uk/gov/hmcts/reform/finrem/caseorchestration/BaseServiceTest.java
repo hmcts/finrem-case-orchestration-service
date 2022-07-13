@@ -59,6 +59,11 @@ public abstract class BaseServiceTest extends BaseTest {
         return CaseDetails.builder().id(Long.valueOf(123)).caseTypeId(CASE_TYPE_ID_CONTESTED).data(caseData).build();
     }
 
+    protected FinremCaseDetails buildFinremCaseDetails() {
+        FinremCaseData caseData = new FinremCaseData();
+        return FinremCaseDetails.builder().id(123L).caseType(CaseType.CONTESTED).caseData(caseData).build();
+    }
+
     protected CallbackRequest getConsentedCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(SOLICITOR_EMAIL, TEST_SOLICITOR_EMAIL);

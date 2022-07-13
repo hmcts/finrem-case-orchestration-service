@@ -8,12 +8,16 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
-import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +31,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_AUTHORISATION_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_NATURE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_NATURE_OF_APPLICATION_3A;
@@ -42,7 +46,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
 
 public class OnlineFormDocumentServiceTest extends BaseServiceTest {
 
@@ -57,18 +60,20 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
     private OnlineFormDocumentService onlineFormDocumentService;
     @Autowired
     private OptionIdToValueTranslator translator;
+    @Autowired
+    private FinremCallbackRequestDeserializer deserializer;
 
     @Captor
-    private ArgumentCaptor<CaseDetails> caseDetailsArgumentCaptor;
+    private ArgumentCaptor<Map<String, Object>> placeholdersMapCaptor;
 
     @Before
     public void setUp() {
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(newDocument());
     }
 
     @Test
     public void generateMiniFormA() {
-        assertCaseDocument(onlineFormDocumentService.generateMiniFormA(AUTH_TOKEN, CaseDetails.builder().build()));
+        assertCaseDocument(onlineFormDocumentService.generateMiniFormA(AUTH_TOKEN, FinremCaseDetails.builder().build()));
 
         verify(genericDocumentService).generateDocument(AUTH_TOKEN, CaseDetails.builder().build(),
             documentConfiguration.getMiniFormTemplate(), documentConfiguration.getMiniFormFileName());
@@ -76,8 +81,8 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void generateContestedMiniFormA() {
-        assertCaseDocument(onlineFormDocumentService.generateContestedMiniFormA(AUTH_TOKEN, CaseDetails.builder().build()));
-        verify(genericDocumentService).generateDocument(AUTH_TOKEN, CaseDetails.builder().build(),
+        assertCaseDocument(onlineFormDocumentService.generateContestedMiniFormA(AUTH_TOKEN, FinremCaseDetails.builder().build()));
+        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(AUTH_TOKEN, new HashMap(),
             documentConfiguration.getContestedMiniFormTemplate(), documentConfiguration.getContestedMiniFormFileName());
     }
 
@@ -85,34 +90,32 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
     public void generateConsentedInContestedMiniFormA() throws Exception {
         assertCaseDocument(onlineFormDocumentService.generateConsentedInContestedMiniFormA(consentedInContestedCaseDetails(), AUTH_TOKEN));
 
-        verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
+        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), placeholdersMapCaptor.capture(),
             eq(documentConfiguration.getMiniFormTemplate()), eq(documentConfiguration.getMiniFormFileName()));
 
-        verifyAdditionalFields(caseDetailsArgumentCaptor.getValue().getData());
+        verifyAdditionalFields(placeholdersMapCaptor.getValue());
     }
 
     @Test
     public void generateContestedDraftMiniFormA() {
-        assertCaseDocument(onlineFormDocumentService.generateDraftContestedMiniFormA(AUTH_TOKEN, CaseDetails.builder().data(caseData()).build()));
+        assertCaseDocument(onlineFormDocumentService.generateDraftContestedMiniFormA(AUTH_TOKEN,
+            FinremCaseDetails.builder().caseData(caseData()).build()));
 
-        verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
-            eq(documentConfiguration.getContestedDraftMiniFormTemplate()), eq(documentConfiguration.getContestedDraftMiniFormFileName()));
+        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), placeholdersMapCaptor.capture(),
+            eq(documentConfiguration.getContestedDraftMiniFormTemplate()),
+            eq(documentConfiguration.getContestedDraftMiniFormFileName()));
     }
 
-    private Map<String, Object> caseData() {
-        Map<String, Object> documentMap = new HashMap<>();
-        documentMap.put("document_url", "http://test.url");
-
-        Map<String, Object> data = new HashMap<>();
-        data.put(MINI_FORM_A, documentMap);
+    private FinremCaseData caseData() {
+        FinremCaseData data = new FinremCaseData();
+        data.setMiniFormA(Document.builder().url("http://test.url").build());
 
         return data;
     }
 
-    private CaseDetails consentedInContestedCaseDetails() throws Exception {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/mini-form-a-consent-in-contested.json")) {
-            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-        }
+    private FinremCaseDetails consentedInContestedCaseDetails() throws Exception {
+        return deserializer.deserialize(new String(Files.readAllBytes(Paths.get("/fixtures/mini-form-a-consent-in-contested.json"))))
+            .getCaseDetails();
     }
 
     private void verifyAdditionalFields(Map<String, Object> data) {

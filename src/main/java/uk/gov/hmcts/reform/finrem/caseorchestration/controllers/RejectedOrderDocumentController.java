@@ -43,7 +43,7 @@ public class RejectedOrderDocumentController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateConsentOrderNotApproved(
             @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-            @RequestBody @ApiParam("CaseData") String source) {
+            @RequestBody @Parameter(description = "CaseData") String source) {
 
         CallbackRequest request = finremCallbackRequestDeserializer.deserialize(source);
 
@@ -69,7 +69,7 @@ public class RejectedOrderDocumentController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> previewConsentOrderNotApproved(
             @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-            @RequestBody @ApiParam("CaseData") String source) {
+            @RequestBody @Parameter(description = "CaseData") String source) {
 
         CallbackRequest request = finremCallbackRequestDeserializer.deserialize(source);
 

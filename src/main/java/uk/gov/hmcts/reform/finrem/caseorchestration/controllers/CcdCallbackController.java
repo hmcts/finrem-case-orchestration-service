@@ -52,7 +52,7 @@ public class CcdCallbackController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> ccdAboutToStart(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @ApiParam("CaseData") String source) {
+        @NotNull @RequestBody @Parameter(description = "CaseData") String source) {
 
         CallbackRequest callbackRequest = finremCallbackRequestDeserializer.deserialize(source);
 
@@ -75,7 +75,7 @@ public class CcdCallbackController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> ccdAboutToSubmit(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @ApiParam("CaseData") String source) {
+        @NotNull @RequestBody @Parameter(description = "CaseData") String source) {
 
         CallbackRequest callbackRequest = finremCallbackRequestDeserializer.deserialize(source);
 
@@ -98,7 +98,7 @@ public class CcdCallbackController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> ccdMidEvent(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @ApiParam("CaseData") String source) {
+        @NotNull @RequestBody @Parameter(description = "CaseData") String source) {
 
         CallbackRequest callbackRequest = finremCallbackRequestDeserializer.deserialize(source);
 
@@ -121,7 +121,7 @@ public class CcdCallbackController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> ccdSubmittedEvent(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @ApiParam("CaseData") String source) {
+        @NotNull @RequestBody @Parameter(description = "CaseData") String source) {
 
         CallbackRequest callbackRequest = finremCallbackRequestDeserializer.deserialize(source);
 

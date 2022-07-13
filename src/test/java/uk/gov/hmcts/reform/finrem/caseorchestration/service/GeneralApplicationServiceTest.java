@@ -28,6 +28,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.when;
@@ -77,7 +78,7 @@ public class GeneralApplicationServiceTest {
 
         CaseDocument caseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
         when(documentHelper.convertToCaseDocument(any())).thenReturn(caseDocument);
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), anyString()))
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(isA(CaseDocument.class), anyString()))
             .thenReturn(getCaseDocument(PDF_FORMAT_EXTENSION));
     }
 

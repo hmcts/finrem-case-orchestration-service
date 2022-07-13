@@ -1,19 +1,39 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.ccd.domain.BirminghamCourt;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CfcCourt;
+import uk.gov.hmcts.reform.finrem.ccd.domain.ClevelandCourt;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.HumberCourt;
+import uk.gov.hmcts.reform.finrem.ccd.domain.KentSurreyCourt;
+import uk.gov.hmcts.reform.finrem.ccd.domain.LiverpoolCourt;
+import uk.gov.hmcts.reform.finrem.ccd.domain.ManchesterCourt;
+import uk.gov.hmcts.reform.finrem.ccd.domain.NewportCourt;
+import uk.gov.hmcts.reform.finrem.ccd.domain.NottinghamCourt;
+import uk.gov.hmcts.reform.finrem.ccd.domain.NwYorkshireCourt;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Region;
+import uk.gov.hmcts.reform.finrem.ccd.domain.RegionLondonFrc;
+import uk.gov.hmcts.reform.finrem.ccd.domain.RegionMidlandsFrc;
+import uk.gov.hmcts.reform.finrem.ccd.domain.RegionNorthEastFrc;
+import uk.gov.hmcts.reform.finrem.ccd.domain.RegionNorthWestFrc;
+import uk.gov.hmcts.reform.finrem.ccd.domain.RegionSouthEastFrc;
+import uk.gov.hmcts.reform.finrem.ccd.domain.RegionWalesFrc;
+import uk.gov.hmcts.reform.finrem.ccd.domain.SwanseaCourt;
+import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
-import java.util.HashMap;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -33,53 +53,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.pensionDocumentData;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BIRMINGHAM;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BIRMINGHAM_COURTLIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ALLOCATED_TO;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CFC;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CFC_COURTLIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.paymentDocumentData;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_ADDRESS_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_NAME_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_PHONE_KEY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_A_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE_COURTLIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENTFRC_COURTLIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIVERPOOL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIVERPOOL_COURTLIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_FRC_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MANCHESTER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MANCHESTER_COURTLIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS_FRC_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NEWPORT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NEWPORT_COURTLIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHEAST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHEAST_FRC_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHWEST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHWEST_FRC_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM_COURTLIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NWYORKSHIRE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NWYORKSHIRE_COURTLIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST_FRC_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWANSEA;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWANSEA_COURTLIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES_FRC_LIST;
 
 public class HearingDocumentServiceTest extends BaseServiceTest {
 
@@ -92,16 +73,16 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     @MockBean BulkPrintService bulkPrintService;
 
     @Captor private ArgumentCaptor<List<BulkPrintDocument>> bulkPrintDocumentsCaptor;
-    @Captor private ArgumentCaptor<CaseDetails> caseDetailsArgumentCaptor;
+    @Captor private ArgumentCaptor<Map<String,Object>> placeholdersCaptor;
 
     @Before
     public void setUp() {
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(newDocument());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void fastTrackDecisionNotSupplied() {
-        CaseDetails caseDetails = CaseDetails.builder().data(ImmutableMap.of()).build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().caseData(new FinremCaseData()).build();
         hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetails);
     }
 
@@ -130,7 +111,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void sendToBulkPrint() {
-        CaseDetails caseDetails = caseDetails(NO_VALUE);
+        FinremCaseDetails caseDetails = caseDetails(NO_VALUE);
 
         hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, AUTH_TOKEN);
 
@@ -145,9 +126,8 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void sendToBulkPrint_multipleFormA() {
-        CaseDetails caseDetails = caseDetails(YES_VALUE);
-
-        caseDetails.getData().put(FORM_A_COLLECTION, asList(pensionDocumentData(), pensionDocumentData(), pensionDocumentData()));
+        FinremCaseDetails caseDetails = caseDetails(YES_VALUE);
+        caseDetails.getCaseData().setCopyOfPaperFormA(asList(paymentDocumentData(), paymentDocumentData(), paymentDocumentData()));
 
         hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, AUTH_TOKEN);
 
@@ -162,9 +142,12 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void verifySwanseaCourtDetails() {
-        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
-            WALES, WALES_FRC_LIST, SWANSEA, SWANSEA_COURTLIST, "FR_swansea_hc_list_1"));
+    public void verifySwanseaCourtDetails()  {
+        FinremCaseDetails caseDetails = caseDetailsWithCourtDetails();
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.WALES);
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().setWalesFrcList(RegionWalesFrc.SWANSEA);
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
+            .setSwanseaCourtList(SwanseaCourt.FR_swanseaList_1);
 
         verifyAdditionalNonFastTrackFields();
 
@@ -175,8 +158,11 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void verifyNewportCourtDetails() {
-        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
-            WALES, WALES_FRC_LIST, NEWPORT, NEWPORT_COURTLIST, "FR_newport_hc_list_1"));
+        FinremCaseDetails caseDetails = caseDetailsWithCourtDetails();
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.WALES);
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().setWalesFrcList(RegionWalesFrc.NEWPORT);
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
+            .setNewportCourtList(NewportCourt.FR_newportList_1);
 
         verifyAdditionalNonFastTrackFields();
 
@@ -186,19 +172,12 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void verifyNoWalesFrc() {
-        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
-            WALES, SOUTHEAST_FRC_LIST, SWANSEA, SWANSEA_COURTLIST, "FR_swansea_hc_list_1"));
-
-        verifyAdditionalNonFastTrackFields();
-
-        verifyCourtDetailsFieldsNotSet();
-    }
-
-    @Test
     public void verifyKentCourtDetails() {
-        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
-            SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST, "FR_kent_surrey_hc_list_1"));
+        FinremCaseDetails caseDetails = caseDetailsWithCourtDetails();
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.SOUTHEAST);
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().setSouthEastFrcList(RegionSouthEastFrc.KENT);
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
+            .setKentSurreyCourtList(KentSurreyCourt.FR_kent_surreyList_1);
 
         verifyAdditionalNonFastTrackFields();
 
@@ -208,19 +187,12 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void verifyNoSouthEastFrc() {
-        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
-            SOUTHEAST, WALES_FRC_LIST, KENT, KENTFRC_COURTLIST, "FR_kent_surrey_hc_list_1"));
-
-        verifyAdditionalNonFastTrackFields();
-
-        verifyCourtDetailsFieldsNotSet();
-    }
-
-    @Test
     public void verifyCleavelandCourtDetails() {
-        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
-            NORTHEAST, NORTHEAST_FRC_LIST, CLEAVELAND, CLEAVELAND_COURTLIST, "FR_cleaveland_hc_list_1"));
+        FinremCaseDetails caseDetails = caseDetailsWithCourtDetails();
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.NORTHEAST);
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().setNorthEastFrcList(RegionNorthEastFrc.CLEVELAND);
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
+            .setCleavelandCourtList(ClevelandCourt.FR_CLEVELAND_LIST_1);
 
         verifyAdditionalNonFastTrackFields();
 
@@ -231,8 +203,12 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void verifyNwYorkshireCourtDetails() {
-        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
-            NORTHEAST, NORTHEAST_FRC_LIST, NWYORKSHIRE, NWYORKSHIRE_COURTLIST, "FR_nw_yorkshire_hc_list_1"));
+        FinremCaseDetails caseDetails = caseDetailsWithCourtDetails();
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.NORTHEAST);
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper()
+            .setNorthEastFrcList(RegionNorthEastFrc.NW_YORKSHIRE);
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
+            .setNwYorkshireCourtList(NwYorkshireCourt.HARROGATE_COURT);
 
         verifyAdditionalNonFastTrackFields();
 
@@ -243,8 +219,12 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void verifyHumberCourtDetails() {
-        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
-            NORTHEAST, NORTHEAST_FRC_LIST, HSYORKSHIRE, HSYORKSHIRE_COURTLIST, "FR_humber_hc_list_1"));
+        FinremCaseDetails caseDetails = caseDetailsWithCourtDetails();
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.NORTHEAST);
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper()
+            .setNorthEastFrcList(RegionNorthEastFrc.HS_YORKSHIRE);
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
+            .setHumberCourtList(HumberCourt.FR_humberList_1);
 
         verifyAdditionalNonFastTrackFields();
 
@@ -254,19 +234,12 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void verifyNoNorthEastFrc() {
-        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
-            NORTHEAST, NORTHWEST_FRC_LIST, HSYORKSHIRE, HSYORKSHIRE_COURTLIST, "FR_humber_hc_list_1"));
-
-        verifyAdditionalNonFastTrackFields();
-
-        verifyCourtDetailsFieldsNotSet();
-    }
-
-    @Test
     public void verifyLiverpoolCourtDetails() {
-        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
-            NORTHWEST, NORTHWEST_FRC_LIST, LIVERPOOL, LIVERPOOL_COURTLIST, "FR_liverpool_hc_list_1"));
+        FinremCaseDetails caseDetails = caseDetailsWithCourtDetails();
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.NORTHWEST);
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().setNorthWestFrcList(RegionNorthWestFrc.LIVERPOOL);
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
+            .setLiverpoolCourtList(LiverpoolCourt.LIVERPOOL_CIVIL_FAMILY_COURT);
 
         verifyAdditionalNonFastTrackFields();
 
@@ -277,8 +250,11 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void verifyManchesterCourtDetails() {
-        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
-            NORTHWEST, NORTHWEST_FRC_LIST, MANCHESTER, MANCHESTER_COURTLIST, "FR_manchester_hc_list_1"));
+        FinremCaseDetails caseDetails = caseDetailsWithCourtDetails();
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.NORTHWEST);
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().setNorthWestFrcList(RegionNorthWestFrc.MANCHESTER);
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
+            .setManchesterCourtList(ManchesterCourt.MANCHESTER_COURT);
 
         verifyAdditionalNonFastTrackFields();
 
@@ -288,19 +264,12 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void verifyNoNorthWestFrc() {
-        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
-            NORTHWEST, NORTHEAST_FRC_LIST, MANCHESTER, MANCHESTER_COURTLIST, "FR_manchester_hc_list_1"));
-
-        verifyAdditionalNonFastTrackFields();
-
-        verifyCourtDetailsFieldsNotSet();
-    }
-
-    @Test
     public void verifyCfcCourtDetails() {
-        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
-            LONDON, LONDON_FRC_LIST, CFC, CFC_COURTLIST, "FR_s_CFCList_1"));
+        FinremCaseDetails caseDetails = caseDetailsWithCourtDetails();
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.LONDON);
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().setLondonFrcList(RegionLondonFrc.LONDON);
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
+            .setCfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT);
 
         verifyAdditionalNonFastTrackFields();
 
@@ -310,19 +279,12 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void verifyNoLondonFrc() {
-        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
-            LONDON, MIDLANDS_FRC_LIST, CFC, CFC_COURTLIST, "FR_s_CFCList_1"));
-
-        verifyAdditionalNonFastTrackFields();
-
-        verifyCourtDetailsFieldsNotSet();
-    }
-
-    @Test
     public void verifyNottinghamCourtDetails() {
-        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
-            MIDLANDS, MIDLANDS_FRC_LIST, NOTTINGHAM, NOTTINGHAM_COURTLIST, "FR_s_NottinghamList_1"));
+        FinremCaseDetails caseDetails = caseDetailsWithCourtDetails();
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.MIDLANDS);
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().setMidlandsFrcList(RegionMidlandsFrc.NOTTINGHAM);
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
+            .setNottinghamCourtList(NottinghamCourt.NOTTINGHAM_COUNTY_COURT_AND_FAMILY_COURT);
 
         verifyAdditionalNonFastTrackFields();
 
@@ -333,44 +295,17 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void verifyBirminghamCourtDetails() {
-        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
-            MIDLANDS, MIDLANDS_FRC_LIST, BIRMINGHAM, BIRMINGHAM_COURTLIST, "FR_birmingham_hc_list_1"));
+        FinremCaseDetails caseDetails = caseDetailsWithCourtDetails();
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.MIDLANDS);
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().setMidlandsFrcList(RegionMidlandsFrc.BIRMINGHAM);
+        caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
+            .setBirminghamCourtList(BirminghamCourt.BIRMINGHAM_CIVIL_AND_FAMILY_JUSTICE_CENTRE);
 
         verifyAdditionalNonFastTrackFields();
 
         verifyCourtDetailsFields(
             "Birmingham Civil And Family Justice Centre", "Priory Courts, 33 Bull Street, Birmingham, B4 6DS",
             "0300 123 5577", "FRCBirmingham@justice.gov.uk");
-    }
-
-    @Test
-    public void verifyNoMidlandsFrc() {
-        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
-            MIDLANDS, LONDON_FRC_LIST, BIRMINGHAM, BIRMINGHAM_COURTLIST, "FR_birmingham_hc_list_1"));
-
-        verifyAdditionalNonFastTrackFields();
-
-        verifyCourtDetailsFieldsNotSet();
-    }
-
-    @Test
-    public void verifyInvalidCourt() {
-        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
-            MIDLANDS, MIDLANDS_FRC_LIST, BIRMINGHAM, BIRMINGHAM_COURTLIST, "invalid_court"));
-
-        verifyAdditionalNonFastTrackFields();
-
-        verifyCourtDetailsFieldsNotSet();
-    }
-
-    @Test
-    public void verifyInvalidCourtList() {
-        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
-            MIDLANDS, MIDLANDS_FRC_LIST, BIRMINGHAM, NEWPORT_COURTLIST, "FR_birmingham_hc_list_1"));
-
-        verifyAdditionalNonFastTrackFields();
-
-        verifyCourtDetailsFieldsNotSet();
     }
 
     @Test
@@ -382,52 +317,54 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         verifyCourtDetailsFieldsNotSet();
     }
 
-    private CaseDetails makeItNonFastTrackDecisionCase() {
+    private FinremCaseDetails makeItNonFastTrackDecisionCase() {
         return caseDetails(NO_VALUE);
     }
 
-    private CaseDetails makeItFastTrackDecisionCase() {
+    private FinremCaseDetails makeItFastTrackDecisionCase() {
         return caseDetails(YES_VALUE);
     }
 
-    private CaseDetails makeItJudiciaryFastTrackDecisionCase() {
-        Map<String, Object> caseData =
-            ImmutableMap.of(FAST_TRACK_DECISION, NO_VALUE,
-                CASE_ALLOCATED_TO, YES_VALUE, HEARING_DATE, DATE_OF_HEARING);
-        return CaseDetails.builder().data(caseData).build();
+    private FinremCaseDetails makeItJudiciaryFastTrackDecisionCase() {
+        FinremCaseData caseData = new FinremCaseData();
+        caseData.setFastTrackDecision(YesOrNo.forValue(NO_VALUE));
+        caseData.setCaseAllocatedTo(YesOrNo.forValue(YES_VALUE));
+        caseData.setHearingDate(LocalDate.parse(DATE_OF_HEARING, DateTimeFormatter.ofPattern("yyyy/MM/dd")));
+        return FinremCaseDetails.builder().caseData(caseData).build();
     }
 
-    private CaseDetails caseDetails(String isFastTrackDecision) {
-        Map<String, Object> caseData = new HashMap<>();
+    private FinremCaseDetails caseDetails(String isFastTrackDecision) {
 
-        caseData.put(FAST_TRACK_DECISION, isFastTrackDecision);
-        caseData.put(HEARING_DATE, DATE_OF_HEARING);
-        caseData.put(FORM_A_COLLECTION, singletonList(pensionDocumentData()));
-        caseData.put(FORM_C, caseDocument());
-        caseData.put(FORM_G, caseDocument());
+        FinremCaseData caseData = new FinremCaseData();
+        caseData.setFastTrackDecision(YesOrNo.forValue(isFastTrackDecision));
+        caseData.setHearingDate(LocalDate.parse(DATE_OF_HEARING, DateTimeFormatter.ofPattern("yyyy/MM/dd")));
+        caseData.setCopyOfPaperFormA(singletonList(paymentDocumentData()));
+        caseData.setFormC(newDocument());
+        caseData.setFormG(newDocument());
 
-        return CaseDetails.builder().data(caseData).build();
+        return FinremCaseDetails.builder().caseData(caseData).build();
     }
 
-    private CaseDetails caseDetailsWithCourtDetails(String region, String frcList, String frc, String courtList, String court) {
-        Map<String, Object> caseData =
-            ImmutableMap.of(FAST_TRACK_DECISION, NO_VALUE, HEARING_DATE, DATE_OF_HEARING, REGION, region, frcList, frc, courtList, court);
-        return CaseDetails.builder().data(caseData).build();
+    private FinremCaseDetails caseDetailsWithCourtDetails() {
+        FinremCaseData caseData = new FinremCaseData();
+        caseData.setFastTrackDecision(YesOrNo.forValue(NO_VALUE));
+        caseData.setHearingDate(LocalDate.parse(DATE_OF_HEARING, DateTimeFormatter.ofPattern("yyyy/MM/dd")));
+        return FinremCaseDetails.builder().caseData(caseData).build();
     }
 
     void verifyAdditionalFastTrackFields() {
-        verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
+        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), placeholdersCaptor.capture(),
             eq(documentConfiguration.getFormCFastTrackTemplate()), eq(documentConfiguration.getFormCFileName()));
         verify(genericDocumentService, never()).generateDocument(any(), any(), eq(documentConfiguration.getFormCNonFastTrackTemplate()), any());
         verify(genericDocumentService, never()).generateDocument(any(), any(), eq(documentConfiguration.getFormGTemplate()), any());
 
-        Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
+        Map<String, Object> data = placeholdersCaptor.getValue();
         assertThat(data.get("formCCreatedDate"), is(notNullValue()));
         assertThat(data.get("eventDatePlus21Days"), is(notNullValue()));
     }
 
     void verifyCourtDetailsFields(String courtName, String courtAddress, String phone, String email) {
-        Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
+        Map<String, Object> data = placeholdersCaptor.getValue();
         @SuppressWarnings("unchecked")
         Map<String, Object> courtDetails = (Map<String, Object>) data.get("courtDetails");
         assertThat(courtDetails.get(COURT_DETAILS_NAME_KEY), is(courtName));
@@ -437,19 +374,19 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     }
 
     void verifyCourtDetailsFieldsNotSet() {
-        Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
+        Map<String, Object> data = placeholdersCaptor.getValue();
         assertThat(data.get("courtDetails"), is(nullValue()));
     }
 
     void verifyAdditionalNonFastTrackFields() {
-        verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
+        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), placeholdersCaptor.capture(),
             eq(documentConfiguration.getFormCNonFastTrackTemplate()), eq(documentConfiguration.getFormCFileName()));
         verify(genericDocumentService, never())
             .generateDocument(any(), any(), eq(documentConfiguration.getFormCFastTrackTemplate()), any());
         verify(genericDocumentService)
             .generateDocument(eq(AUTH_TOKEN), any(), eq(documentConfiguration.getFormGTemplate()), eq(documentConfiguration.getFormGFileName()));
 
-        Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
+        Map<String, Object> data = placeholdersCaptor.getValue();
         assertThat(data.get("formCCreatedDate"), is(notNullValue()));
         assertThat(data.get("hearingDateLess35Days"), is(notNullValue()));
         assertThat(data.get("hearingDateLess14Days"), is(notNullValue()));

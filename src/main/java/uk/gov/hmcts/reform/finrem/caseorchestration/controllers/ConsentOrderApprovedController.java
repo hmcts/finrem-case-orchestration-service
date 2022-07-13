@@ -68,7 +68,7 @@ public class ConsentOrderApprovedController extends BaseController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> consentOrderApproved(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
-        @NotNull @RequestBody @ApiParam("CaseData") String source) {
+        @NotNull @RequestBody @Parameter(description = "CaseData") String source) {
 
         CallbackRequest callbackRequest = callbackRequestDeserializer.deserialize(source);
 
@@ -102,7 +102,7 @@ public class ConsentOrderApprovedController extends BaseController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> consentInContestedConsentOrderApproved(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
-        @NotNull @RequestBody @ApiParam("CaseData") String source) {
+        @NotNull @RequestBody @Parameter(description = "CaseData") String source) {
 
         CallbackRequest callbackRequest =
             callbackRequestDeserializer.deserialize(source);
@@ -133,7 +133,7 @@ public class ConsentOrderApprovedController extends BaseController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> consentInContestedSendOrder(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
-        @NotNull @RequestBody @ApiParam("CaseData") String source) {
+        @NotNull @RequestBody @Parameter(description = "CaseData") String source) {
 
         CallbackRequest callback = callbackRequestDeserializer.deserialize(source);
         FinremCaseDetails caseDetails = callback.getCaseDetails();
@@ -145,7 +145,7 @@ public class ConsentOrderApprovedController extends BaseController {
             .build());
     }
 
-    private void generateAndPrepareDocuments(String authToken, CaseDetails caseDetails) {
+    private void generateAndPrepareDocuments(String authToken, FinremCaseDetails caseDetails) {
         log.info("Generating and preparing documents for latest consent order, case {}", caseDetails.getId());
 
         FinremCaseData caseData = caseDetails.getCaseData();

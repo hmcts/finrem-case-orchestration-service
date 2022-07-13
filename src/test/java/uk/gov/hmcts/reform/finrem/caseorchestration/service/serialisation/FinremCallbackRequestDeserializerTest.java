@@ -15,8 +15,6 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.ApplicantRepresentedPaper;
 import uk.gov.hmcts.reform.finrem.ccd.domain.ApplicantRole;
 import uk.gov.hmcts.reform.finrem.ccd.domain.ApplicationNotApproved;
 import uk.gov.hmcts.reform.finrem.ccd.domain.ApplicationNotApprovedCollection;
-import uk.gov.hmcts.reform.finrem.ccd.domain.ApprovedOrder;
-import uk.gov.hmcts.reform.finrem.ccd.domain.ApprovedOrderCollection;
 import uk.gov.hmcts.reform.finrem.ccd.domain.AssignToJudgeReason;
 import uk.gov.hmcts.reform.finrem.ccd.domain.AuthorisationSignedBy;
 import uk.gov.hmcts.reform.finrem.ccd.domain.BenefitPayment;
@@ -310,9 +308,9 @@ public class FinremCallbackRequestDeserializerTest {
     }
 
     private void assertApprovedOrderCollection(FinremCaseData caseData) {
-        List<ApprovedOrderCollection> expected = List.of(
-            ApprovedOrderCollection.builder()
-                .value(ApprovedOrder.builder()
+        List<ConsentOrderCollection> expected = List.of(
+            ConsentOrderCollection.builder()
+                .value(ConsentOrder.builder()
                     .consentOrder(getTestDocument())
                     .orderLetter(getTestDocument())
                     .pensionDocuments(List.of(

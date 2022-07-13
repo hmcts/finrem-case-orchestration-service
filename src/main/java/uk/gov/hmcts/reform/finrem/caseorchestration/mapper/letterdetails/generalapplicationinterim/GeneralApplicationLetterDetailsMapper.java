@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.CourtListWrapper;
 
 import java.time.LocalDate;
 
-@RequiredArgsConstructor
 @Component
 public class GeneralApplicationLetterDetailsMapper extends AbstractLetterDetailsMapper {
 

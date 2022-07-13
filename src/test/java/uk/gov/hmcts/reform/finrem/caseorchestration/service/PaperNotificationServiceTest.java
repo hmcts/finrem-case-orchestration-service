@@ -3,19 +3,22 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finremCaseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 
@@ -27,72 +30,76 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
     @MockBean private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
     @MockBean private ManualPaymentDocumentService manualPaymentDocumentService;
     @MockBean private BulkPrintService bulkPrintService;
-    @MockBean private CaseDataService caseDataService;
 
     @Test
     public void sendAssignToJudgeNotificationLetterIfIsPaperApplication() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-        when(caseDataService.isPaperApplication(any())).thenReturn(true);
-        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
+        FinremCaseDetails caseDetails = buildFinremCaseDetails();
+        caseDetails.getCaseData().setCcdCaseType(CaseType.CONSENTED);
+        caseDetails.getCaseData().setPaperApplication(YesOrNo.YES);
+        caseDetails.getCaseData().getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.YES);
 
-        paperNotificationService.printAssignToJudgeNotification(buildCaseDetails(), AUTH_TOKEN);
+        paperNotificationService.printAssignToJudgeNotification(caseDetails, AUTH_TOKEN);
 
-        verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(any(CaseDetails.class), eq(AUTH_TOKEN), eq(APPLICANT));
-        verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(any(CaseDetails.class), eq(AUTH_TOKEN), eq(RESPONDENT));
-        verify(bulkPrintService, times(2)).sendDocumentForPrint(any(), any());
+        verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(any(FinremCaseDetails.class), eq(AUTH_TOKEN), eq(APPLICANT));
+        verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(any(FinremCaseDetails.class), eq(AUTH_TOKEN), eq(RESPONDENT));
+        verify(bulkPrintService, times(2)).sendDocumentForPrint(isA(Document.class), any());
     }
 
     @Test
     public void shouldNotSendApplicantConsentInContestedAssignToJudgeConfirmationNotification() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
-        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
-        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
+        FinremCaseDetails caseDetails = buildFinremCaseDetails();
+        caseDetails.getCaseData().setCcdCaseType(CaseType.CONSENTED);
+        caseDetails.getCaseData().setPaperApplication(YesOrNo.YES);
+        caseDetails.getCaseData().getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
+        caseDetails.getCaseData().getContactDetailsWrapper().setSolicitorAgreeToReceiveEmails(YesOrNo.YES);
+        caseDetails.getCaseData().getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.YES);
 
-        paperNotificationService.printConsentInContestedAssignToJudgeConfirmationNotification(buildCaseDetails(), AUTH_TOKEN);
+        paperNotificationService.printConsentInContestedAssignToJudgeConfirmationNotification(caseDetails, AUTH_TOKEN);
 
         verify(assignedToJudgeDocumentService, never()).generateConsentInContestedAssignedToJudgeNotificationLetter(
-            any(CaseDetails.class), eq(AUTH_TOKEN), eq(APPLICANT));
+            any(FinremCaseDetails.class), eq(AUTH_TOKEN), eq(APPLICANT));
         verify(assignedToJudgeDocumentService).generateConsentInContestedAssignedToJudgeNotificationLetter(
-            any(CaseDetails.class), eq(AUTH_TOKEN), eq(RESPONDENT));
-        verify(bulkPrintService).sendDocumentForPrint(any(), any());
+            any(FinremCaseDetails.class), eq(AUTH_TOKEN), eq(RESPONDENT));
+        verify(bulkPrintService).sendDocumentForPrint(isA(Document.class), any());
     }
 
     @Test
     public void sendConsentInContestedAssignToJudgeNotificationLetterIfShouldSend() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
-        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
+        FinremCaseDetails caseDetails = buildFinremCaseDetails();
+        caseDetails.getCaseData().setCcdCaseType(CaseType.CONSENTED);
+        caseDetails.getCaseData().getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
+        caseDetails.getCaseData().getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.YES);
 
-        paperNotificationService.printConsentInContestedAssignToJudgeConfirmationNotification(buildCaseDetails(), AUTH_TOKEN);
+
+        paperNotificationService.printConsentInContestedAssignToJudgeConfirmationNotification(caseDetails, AUTH_TOKEN);
 
         verify(assignedToJudgeDocumentService).generateConsentInContestedAssignedToJudgeNotificationLetter(any(), eq(AUTH_TOKEN), eq(APPLICANT));
         verify(assignedToJudgeDocumentService).generateConsentInContestedAssignedToJudgeNotificationLetter(any(), eq(AUTH_TOKEN), eq(RESPONDENT));
-        verify(bulkPrintService, times(2)).sendDocumentForPrint(any(), any());
+        verify(bulkPrintService, times(2)).sendDocumentForPrint(isA(Document.class), any());
     }
 
     @Test
     public void sendContestedManualPaymentLetters() {
-        when(caseDataService.isContestedApplication(any())).thenReturn(true);
-        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
-        when(caseDataService.isPaperApplication(any())).thenReturn(true);
-        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
+        FinremCaseDetails caseDetails = buildFinremCaseDetails();
+        caseDetails.getCaseData().setCcdCaseType(CaseType.CONTESTED);
+        caseDetails.getCaseData().setPaperApplication(YesOrNo.YES);
+        caseDetails.getCaseData().getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
 
-        paperNotificationService.printManualPaymentNotification(buildCaseDetails(), AUTH_TOKEN);
+        paperNotificationService.printManualPaymentNotification(caseDetails, AUTH_TOKEN);
 
         verify(manualPaymentDocumentService).generateManualPaymentLetter(any(), any(), eq(APPLICANT));
         verify(manualPaymentDocumentService).generateManualPaymentLetter(any(), any(), eq(RESPONDENT));
-        verify(bulkPrintService, times(2)).sendDocumentForPrint(any(), any());
+        verify(bulkPrintService, times(2)).sendDocumentForPrint(isA(Document.class), any());
     }
 
     @Test
     public void shouldPrintForApplicantIfNotRepresented() {
         final String json
             = "/fixtures/refusal-order-contested.json";
-        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
-        caseDetails.getData().put("applicantRepresented", "No");
-        caseDetails.getData().remove("applicantSolicitorConsentForEmails");
-        caseDetails.getData().put("paperApplication", "No");
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(json, mapper);
+        caseDetails.getCaseData().getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
+        caseDetails.getCaseData().getContactDetailsWrapper().setApplicantSolicitorConsentForEmails(null);
+        caseDetails.getCaseData().setPaperApplication(YesOrNo.NO);
 
         assertThat(paperNotificationService.shouldPrintForApplicant(caseDetails), is(true));
     }
@@ -101,10 +108,10 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
     public void shouldPrintForApplicantIfRepresentedButNotAgreedToEmail() {
         final String json
             = "/fixtures/refusal-order-contested.json";
-        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
-        caseDetails.getData().put("applicantRepresented", "Yes");
-        caseDetails.getData().put("applicantSolicitorConsentForEmails", "No");
-        caseDetails.getData().put("paperApplication", "No");
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(json, mapper);
+        caseDetails.getCaseData().getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
+        caseDetails.getCaseData().getContactDetailsWrapper().setApplicantSolicitorConsentForEmails(YesOrNo.NO);
+        caseDetails.getCaseData().setPaperApplication(YesOrNo.NO);
 
         assertThat(paperNotificationService.shouldPrintForApplicant(caseDetails), is(true));
     }
@@ -113,8 +120,8 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
     public void shouldPrintForApplicantIfPaperCase() {
         final String json
             = "/fixtures/refusal-order-contested.json";
-        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
-        caseDetails.getData().put("paperApplication", "YES");
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(json, mapper);
+        caseDetails.getCaseData().setPaperApplication(YesOrNo.YES);
 
         assertThat(paperNotificationService.shouldPrintForApplicant(caseDetails), is(true));
     }

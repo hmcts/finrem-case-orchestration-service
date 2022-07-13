@@ -510,8 +510,10 @@ public class NotificationsController extends BaseController {
             content = {@Content(mediaType = "application/json", schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
     public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendManualPaymentPaperNotification(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
-        @RequestBody CallbackRequest callbackRequest) {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        @RequestBody String source) {
+        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest =
+            finremCallbackRequestDeserializer.deserialize(source);
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request to send Manual Payment Letter for Case ID: {}", caseDetails.getId());
         validateCaseData(callbackRequest);
 
@@ -695,17 +697,19 @@ public class NotificationsController extends BaseController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200",
             description = "Update FRC information notificatons sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendUpdateFrcNotifications(
+            content = {@Content(mediaType = "application/json",
+                schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
+    ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendUpdateFrcNotifications(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
-        @RequestBody CallbackRequest callbackRequest) throws JsonProcessingException {
+        @RequestBody String source) throws JsonProcessingException {
+        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest = finremCallbackRequestDeserializer.deserialize(source);
         log.info("Received request to send update FRC info notifications for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
 
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData caseData = caseDetails.getCaseData();
 
-        if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
+        if (caseData.isApplicantSolicitorAgreeToReceiveEmails()) {
             log.info("Sending email notification to Applicant Solicitor for 'Update Frc information'");
             notificationService.sendUpdateFrcInformationEmailToAppSolicitor(caseDetails);
         }
@@ -719,7 +723,9 @@ public class NotificationsController extends BaseController {
         notificationService.sendUpdateFrcInformationEmailToCourt(caseDetails);
         paperNotificationService.printUpdateFrcInformationNotification(caseDetails, authToken);
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        return ResponseEntity.ok(uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseData)
+            .build());
     }
 
     private boolean requiresNotifications(uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest) {

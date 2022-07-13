@@ -1,21 +1,22 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.hamcrest.core.Is;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.OrderRefusalCollection;
+import uk.gov.hmcts.reform.finrem.ccd.domain.UploadOrderCollection;
+import uk.gov.hmcts.reform.finrem.ccd.domain.UploadOrderDocumentType;
 
-import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -31,103 +32,94 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.REJECTED_ORDER_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_PREVIEW_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
 
 public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
 
     @Autowired private RefusalOrderDocumentService refusalOrderDocumentService;
-    @Autowired private ObjectMapper objectMapper;
+    @Autowired private FinremCallbackRequestDeserializer deserializer;
 
     @MockBean private GenericDocumentService genericDocumentService;
 
-    @Captor private ArgumentCaptor<CaseDetails> generateDocumentCaseDetailsCaptor;
+    @Captor private ArgumentCaptor<Map<String, Object>> placeholdersMapCaptor;
+
 
     @Before
     public void setUp() {
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(newDocument());
     }
 
     @Test
     public void generateConsentOrderNotApproved() throws Exception {
-        CaseDetails caseDetails = caseDetails("/fixtures/model/case-details.json");
+        FinremCaseDetails caseDetails = caseDetails("/fixtures/model/case-details.json");
 
-        Map<String, Object> caseData = refusalOrderDocumentService.generateConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
-        ConsentOrderData consentOrderData = consentOrderData(caseData);
+        FinremCaseData caseData = refusalOrderDocumentService.generateConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
+        UploadOrderCollection consentOrderData = consentOrderData(caseData);
 
-        assertThat(consentOrderData.getId(), is(notNullValue()));
-        assertThat(consentOrderData.getConsentOrder().getDocumentType(), is(REJECTED_ORDER_TYPE));
-        assertThat(consentOrderData.getConsentOrder().getDocumentDateAdded(), is(notNullValue()));
-        assertThat(consentOrderData.getConsentOrder().getDocumentComment(), is(equalTo("System Generated")));
+        assertThat(consentOrderData.getValue(), is(notNullValue()));
+        assertThat(consentOrderData.getValue().getDocumentType(), is(UploadOrderDocumentType.GENERAL_ORDER));
+        assertThat(consentOrderData.getValue().getDocumentDateAdded(), is(notNullValue()));
+        assertThat(consentOrderData.getValue().getDocumentComment(), is(equalTo("System Generated")));
 
         assertCaseDataExtraFields();
         assertConsentedCaseDataExtraFields();
-        assertCaseDocument(consentOrderData.getConsentOrder().getDocumentLink());
+        assertCaseDocument(consentOrderData.getValue().getDocumentLink());
     }
 
     @Test
     public void generateConsentOrderNotApprovedConsentInContested() throws Exception {
-        CaseDetails caseDetails = caseDetails("/fixtures/refusal-order-consent-in-contested.json");
+        FinremCaseDetails caseDetails = caseDetails("/fixtures/refusal-order-consent-in-contested.json");
 
-        Map<String, Object> caseData = refusalOrderDocumentService.generateConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
+        FinremCaseData caseData = refusalOrderDocumentService.generateConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
+        assertThat(caseData.getConsentOrderWrapper().getConsentedNotApprovedOrders(), hasSize(1));
 
-        assertThat(getDocumentList(caseData, CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION), hasSize(1));
         assertCaseDataExtraFields();
         assertContestedCaseDataExtraFields("Birmingham Civil And Family Justice Centre");
     }
 
     @Test
     public void multipleConsentOrderNotApprovedConsentInContested() throws Exception {
-        CaseDetails caseDetails = caseDetails("/fixtures/refusal-order-consent-in-contested.json");
+        FinremCaseDetails caseDetails = caseDetails("/fixtures/refusal-order-consent-in-contested.json");
 
-        Map<String, Object> caseData = refusalOrderDocumentService.generateConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
+        FinremCaseData caseData = refusalOrderDocumentService.generateConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
 
-        assertThat(getDocumentList(caseData, CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION), hasSize(1));
+        assertThat(caseData.getConsentOrderWrapper().getConsentedNotApprovedOrders(), hasSize(1));
         caseData = refusalOrderDocumentService.generateConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
-        assertThat(getDocumentList(caseData, CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION), hasSize(2));
+        assertThat(caseData.getConsentOrderWrapper().getConsentedNotApprovedOrders(), hasSize(2));
     }
 
     @Test
     public void multipleRefusalOrdersGenerateConsentOrderNotApproved() throws Exception {
-        CaseDetails caseDetails = caseDetails("/fixtures/model/copy-case-details-multiple-orders.json");
+        FinremCaseDetails caseDetails = caseDetails("/fixtures/model/copy-case-details-multiple-orders.json");
 
-        Map<String, Object> caseData = refusalOrderDocumentService.generateConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
-        List<OrderRefusalData> orderRefusalData = refusalOrderCollection(caseData);
+        FinremCaseData caseData = refusalOrderDocumentService.generateConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
+        List<OrderRefusalCollection> orderRefusalData = caseData.getOrderRefusalCollection();
         assertThat(orderRefusalData.size(), is(2));
-        assertThat(orderRefusalData.get(0).getId(), Is.is("1"));
-        assertThat(orderRefusalData.get(1).getId(), Is.is("1"));
 
-        ConsentOrderData consentOrderData = consentOrderData(caseData);
-        assertThat(consentOrderData.getId(), is(notNullValue()));
-        assertThat(consentOrderData.getConsentOrder().getDocumentType(), is(REJECTED_ORDER_TYPE));
-        assertThat(consentOrderData.getConsentOrder().getDocumentDateAdded(), is(notNullValue()));
-        assertThat(consentOrderData.getConsentOrder().getDocumentComment(), is(equalTo("System Generated")));
+        UploadOrderCollection consentOrderData = consentOrderData(caseData);
+        assertThat(consentOrderData.getValue().getDocumentType(), is(REJECTED_ORDER_TYPE));
+        assertThat(consentOrderData.getValue().getDocumentDateAdded(), is(notNullValue()));
+        assertThat(consentOrderData.getValue().getDocumentComment(), is(equalTo("System Generated")));
 
-        assertCaseDocument(consentOrderData.getConsentOrder().getDocumentLink());
+        assertCaseDocument(consentOrderData.getValue().getDocumentLink());
     }
 
     @Test
     public void previewConsentOrderNotApproved() throws Exception {
-        CaseDetails caseDetails = caseDetails("/fixtures/model/case-details.json");
-        Map<String, Object> caseData = refusalOrderDocumentService.previewConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
-        CaseDocument caseDocument = getCaseDocument(caseData);
+        FinremCaseDetails caseDetails = caseDetails("/fixtures/model/case-details.json");
+        FinremCaseData caseData = refusalOrderDocumentService.previewConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
+        Document caseDocument = caseData.getOrderRefusalPreviewDocument();
 
         assertCaseDataExtraFields();
         assertConsentedCaseDataExtraFields();
         assertCaseDocument(caseDocument);
     }
 
-    private List<CaseDocument> getDocumentList(Map<String, Object> data, String field) {
-        return objectMapper.convertValue(data.get(field), new TypeReference<>() {});
-    }
-
     private void assertCaseDataExtraFields() {
-        verify(genericDocumentService, times(1)).generateDocument(any(), generateDocumentCaseDetailsCaptor.capture(),
+        verify(genericDocumentService, times(1)).generateDocumentFromPlaceholdersMap(any(),
+            placeholdersMapCaptor.capture(),
             any(), any());
-        Map<String, Object> caseData = generateDocumentCaseDetailsCaptor.getValue().getData();
+        Map<String, Object> caseData = placeholdersMapCaptor.getValue();
 
         assertThat(caseData.get("ApplicantName"), is("Poor Guy"));
         assertThat(caseData.get("RespondentName"), is("john smith"));
@@ -136,9 +128,9 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
     }
 
     private void assertConsentedCaseDataExtraFields() {
-        verify(genericDocumentService, times(1)).generateDocument(any(), generateDocumentCaseDetailsCaptor.capture(),
+        verify(genericDocumentService, times(1)).generateDocumentFromPlaceholdersMap(any(), placeholdersMapCaptor.capture(),
             any(), any());
-        Map<String, Object> caseData = generateDocumentCaseDetailsCaptor.getValue().getData();
+        Map<String, Object> caseData = placeholdersMapCaptor.getValue();
 
         assertThat(caseData.get("CourtName"), is("SITTING in private"));
 
@@ -147,9 +139,9 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
     }
 
     private void assertContestedCaseDataExtraFields(String expectedCourtDetailsCourtName) {
-        verify(genericDocumentService, times(1)).generateDocument(any(), generateDocumentCaseDetailsCaptor.capture(),
+        verify(genericDocumentService, times(1)).generateDocumentFromPlaceholdersMap(any(), placeholdersMapCaptor.capture(),
             any(), any());
-        Map<String, Object> caseData = generateDocumentCaseDetailsCaptor.getValue().getData();
+        Map<String, Object> caseData = placeholdersMapCaptor.getValue();
 
         assertThat(caseData.get("CourtName"), is("SITTING AT the Family Court at the Birmingham Civil and Family Justice Centre"));
 
@@ -158,28 +150,17 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
 
     }
 
-    private CaseDocument getCaseDocument(Map<String, Object> caseData) {
-        Object orderRefusalPreviewDocument = caseData.get(ORDER_REFUSAL_PREVIEW_COLLECTION);
-
-        return objectMapper.convertValue(orderRefusalPreviewDocument, CaseDocument.class);
-    }
-
-    private ConsentOrderData consentOrderData(Map<String, Object> caseData) {
-        List<ConsentOrderData> list = objectMapper.convertValue(caseData.get(UPLOAD_ORDER), new TypeReference<>() {});
+    private UploadOrderCollection consentOrderData(FinremCaseData caseData) {
+        List<UploadOrderCollection> list = caseData.getUploadOrder();
 
         return list
                 .stream()
-                .filter(cd -> cd.getConsentOrder().getDocumentType().equals(REJECTED_ORDER_TYPE))
+                .filter(cd -> cd.getValue().getDocumentType().equals(UploadOrderDocumentType.GENERAL_ORDER))
                 .findFirst().orElseThrow(() -> new IllegalStateException(REJECTED_ORDER_TYPE + " missing"));
     }
 
-    private CaseDetails caseDetails(String name) throws Exception {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(name)) {
-            return objectMapper.readValue(resourceAsStream, CaseDetails.class);
-        }
-    }
-
-    private List<OrderRefusalData> refusalOrderCollection(Map<String, Object> caseData) {
-        return objectMapper.convertValue(caseData.get(ORDER_REFUSAL_COLLECTION), new TypeReference<>() {});
+    private FinremCaseDetails caseDetails(String name) throws Exception {
+        return deserializer.deserialize(new String(Files.readAllBytes(Paths.get(name))))
+            .getCaseDetails();
     }
 }

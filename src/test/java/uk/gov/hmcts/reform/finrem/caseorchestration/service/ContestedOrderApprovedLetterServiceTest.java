@@ -5,10 +5,15 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.JudgeType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.NottinghamCourt;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Region;
+import uk.gov.hmcts.reform.finrem.ccd.domain.RegionMidlandsFrc;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -21,19 +26,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultContestedCaseDetails;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_COVER_LETTER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_TYPE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS_FRC_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM_COURTLIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultContestedFinremCaseDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
 
 public class ContestedOrderApprovedLetterServiceTest extends BaseServiceTest {
 
@@ -42,43 +36,45 @@ public class ContestedOrderApprovedLetterServiceTest extends BaseServiceTest {
 
     @MockBean private GenericDocumentService genericDocumentService;
 
-    @Captor private ArgumentCaptor<CaseDetails> caseDetailsArgumentCaptor;
+    @Captor private ArgumentCaptor<Map<String, Object>> placeholdersMapArgumentCaptor;
 
     @Test
     public void whenContestedApprovedOrderLetterGenerated_thenTemplateVarsPopulatedAndDocumentCreatedAndStoredInCaseDetails() {
-        CaseDocument expectedCaseDocument = caseDocument();
+        Document expectedCaseDocument = newDocument();
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(expectedCaseDocument);
 
-        CaseDetails caseDetails = testCaseDetails();
+        FinremCaseDetails caseDetails = testCaseDetails();
         contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, AUTH_TOKEN);
 
-        verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
+        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
+            placeholdersMapArgumentCaptor.capture(),
             eq(documentConfiguration.getContestedOrderApprovedCoverLetterTemplate()),
             eq(documentConfiguration.getContestedOrderApprovedCoverLetterFileName()));
 
         verifyTemplateVariablesArePopulated();
-        assertThat(caseDetails.getData().get(CONTESTED_ORDER_APPROVED_COVER_LETTER), is(expectedCaseDocument));
+        assertThat(caseDetails.getCaseData().getOrderApprovedCoverLetter(), is(expectedCaseDocument));
     }
 
-    private CaseDetails testCaseDetails() {
-        CaseDetails caseDetails = defaultContestedCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
+    private FinremCaseDetails testCaseDetails() {
+        FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
+        FinremCaseData caseData = caseDetails.getCaseData();
 
-        caseData.put(APPLICANT_FIRST_MIDDLE_NAME, "Contested Applicant");
-        caseData.put(APPLICANT_LAST_NAME, "Name");
-        caseData.put(CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME, "Contested Respondent");
-        caseData.put(CONTESTED_RESPONDENT_LAST_NAME, "Name");
-        caseData.put(REGION, MIDLANDS);
-        caseData.put(MIDLANDS_FRC_LIST, NOTTINGHAM);
-        caseData.put(NOTTINGHAM_COURTLIST, "FR_s_NottinghamList_1");
-        caseData.put(CONTESTED_ORDER_APPROVED_JUDGE_TYPE, "Her Honour");
-        caseData.put(CONTESTED_ORDER_APPROVED_JUDGE_NAME, "Judge Contested");
+        caseData.getContactDetailsWrapper().setApplicantFmName("Contested Applicant");
+        caseData.getContactDetailsWrapper().setApplicantLname("Name");
+        caseData.getContactDetailsWrapper().setRespondentFmName("Contested Respondent");
+        caseData.getContactDetailsWrapper().setRespondentLname("Name");
+        caseData.getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.MIDLANDS);
+        caseData.getRegionWrapper().getDefaultRegionWrapper().setMidlandsFrcList(RegionMidlandsFrc.NOTTINGHAM);
+        caseData.getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
+            .setNottinghamCourtList(NottinghamCourt.NOTTINGHAM_COUNTY_COURT_AND_FAMILY_COURT);
+        caseData.setOrderApprovedJudgeType(JudgeType.HER_HONOUR_JUDGE);
+        caseData.setOrderApprovedJudgeName("Contested");
 
         return caseDetails;
     }
 
     private void verifyTemplateVariablesArePopulated() {
-        Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
+        Map<String, Object> data = placeholdersMapArgumentCaptor.getValue();
         assertThat(data.get("ApplicantName"), is("Contested Applicant Name"));
         assertThat(data.get("RespondentName"), is("Contested Respondent Name"));
         assertThat(data.get("Court"), is("Nottingham County Court and Family Court"));

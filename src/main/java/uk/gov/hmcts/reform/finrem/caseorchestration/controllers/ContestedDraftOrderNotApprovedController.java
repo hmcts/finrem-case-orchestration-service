@@ -56,7 +56,7 @@ public class ContestedDraftOrderNotApprovedController extends BaseController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> initialiseApplicationNotApprovedProperties(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @ApiParam("CaseData") String source) {
+        @NotNull @RequestBody @Parameter(description = "CaseData") String source) {
 
         CallbackRequest callback = callbackRequestDeserializer.deserialize(source);
         FinremCaseDetails caseDetails = callback.getCaseDetails();
@@ -82,7 +82,7 @@ public class ContestedDraftOrderNotApprovedController extends BaseController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> previewApplicationNotApprovedDocument(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @ApiParam("CaseData") String source) {
+        @NotNull @RequestBody @Parameter(description = "CaseData") String source) {
 
         CallbackRequest callback = callbackRequestDeserializer.deserialize(source);
 
@@ -105,7 +105,7 @@ public class ContestedDraftOrderNotApprovedController extends BaseController {
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> createGeneralLetter(
-        @NotNull @RequestBody @ApiParam("CaseData") String source) {
+        @NotNull @RequestBody @Parameter(description = "CaseData") String source) {
         CallbackRequest callback = callbackRequestDeserializer.deserialize(source);
 
         FinremCaseDetails caseDetails = callback.getCaseDetails();
@@ -127,7 +127,7 @@ public class ContestedDraftOrderNotApprovedController extends BaseController {
 
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendRefusalReason(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @ApiParam("CaseData") String source) {
+        @NotNull @RequestBody @Parameter(description = "CaseData") String source) {
 
         CallbackRequest callback = callbackRequestDeserializer.deserialize(source);
 
