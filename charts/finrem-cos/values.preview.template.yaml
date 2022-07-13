@@ -10,7 +10,5 @@ java:
   keyVaults:
     finrem:
       secrets:
-        - name: finrem-case-orchestration-service-s2s-key
-          alias: AUTH_PROVIDER_SERVICE_CLIENT_KEY
-        - name: idam-secret
-          alias: OAUTH2_CLIENT_FINREM
+        - finrem-case-orchestration-service-s2s-key
+        - idam-secret
