@@ -38,6 +38,3 @@ pacts/
 
 # Log file
 *.log
-
-lib/applicationinsights-agent-*.jar
-lib/applicationinsights.log
