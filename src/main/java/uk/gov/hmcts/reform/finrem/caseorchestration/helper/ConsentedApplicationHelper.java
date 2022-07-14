@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CONSENT_ORDER_CAMELCASE_LABEL_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CONSENT_ORDER_LOWERCASE_LABEL_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CONSENT_OTHER_DOC_LABEL_VALUE;
@@ -24,8 +23,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 public class ConsentedApplicationHelper {
 
     public void setConsentVariationOrderLabelField(Map<String, Object> caseData) {
-        List<String> natureOfApplicationList = (List<String>) caseData.get("natureOfApplication2");
-        if (nonNull(natureOfApplicationList) && natureOfApplicationList.contains("Variation Order")) {
+        if (Boolean.TRUE.equals(isVariationOrder(caseData))) {
             caseData.put(CV_ORDER_CAMELCASE_LABEL_FIELD, VARIATION_ORDER_CAMELCASE_LABEL_VALUE);
             caseData.put(CV_LOWERCASE_LABEL_FIELD, VARIATION_ORDER_LOWERCASE_LABEL_VALUE);
             caseData.put(CV_OTHER_DOC_LABEL_FIELD, CV_OTHER_DOC_LABEL_VALUE);
@@ -34,5 +32,10 @@ public class ConsentedApplicationHelper {
             caseData.put(CV_LOWERCASE_LABEL_FIELD, CONSENT_ORDER_LOWERCASE_LABEL_VALUE);
             caseData.put(CV_OTHER_DOC_LABEL_FIELD, CONSENT_OTHER_DOC_LABEL_VALUE);
         }
+    }
+
+    public Boolean isVariationOrder(final Map<String, Object> caseData) {
+        List<String> natureOfApplicationList = (List<String>) caseData.get("natureOfApplication2");
+        return (!natureOfApplicationList.isEmpty() && natureOfApplicationList.contains("Variation Order"));
     }
 }
