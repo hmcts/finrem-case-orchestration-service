@@ -43,15 +43,12 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_JUDGE_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
@@ -105,7 +102,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     @MockBean private NotificationRequestMapper notificationRequestMapper;
     @MockBean private CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
     @MockBean private CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
-
+    @MockBean private CaseDataService caseDataService;
     @SpyBean
     private NotificationServiceConfiguration notificationServiceConfiguration;
 
@@ -892,9 +889,11 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void shouldEmailRespondentSolicitor_shouldReturnTrue() {
         Map<String, Object> caseData = new HashMap<>();
-        caseData.put(PAPER_APPLICATION, NO_VALUE);
-        caseData.put(CONTESTED_RESPONDENT_REPRESENTED, YES_VALUE);
-        caseData.put(RESP_SOLICITOR_EMAIL, TEST_USER_EMAIL);
+
+        when(caseDataService.isPaperApplication(caseData)).thenReturn(false);
+        when(caseDataService.isRespondentRepresentedByASolicitor(caseData)).thenReturn(true);
+        when(caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData)).thenReturn(true);
+
         caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, YES_VALUE);
 
         assertTrue(notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData));
@@ -932,9 +931,11 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void shouldEmailContestedAppSolicitor_shouldReturnTrue() {
         Map<String, Object> caseData = new HashMap<>();
-        caseData.put(PAPER_APPLICATION, NO_VALUE);
-        caseData.put(APPLICANT_REPRESENTED, YES_VALUE);
-        caseData.put(CONTESTED_SOLICITOR_EMAIL, TEST_USER_EMAIL);
+
+        when(caseDataService.isPaperApplication(caseData)).thenReturn(false);
+        when(caseDataService.isApplicantRepresentedByASolicitor(caseData)).thenReturn(true);
+        when(caseDataService.isNotEmpty(CONTESTED_SOLICITOR_EMAIL, caseData)).thenReturn(true);
+
         caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, YES_VALUE);
 
         assertTrue(notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(caseData));
@@ -967,46 +968,6 @@ public class NotificationServiceTest extends BaseServiceTest {
         caseData.put(APPLICANT_REPRESENTED, YES_VALUE);
 
         assertFalse(notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(caseData));
-    }
-
-    @Test
-    public void shouldEmailApplicantSolicitor_contested() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, YES_VALUE);
-
-        CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONTESTED).data(caseData).build();
-
-        assertTrue(notificationService.isApplicantSolicitorEmailCommunicationEnabled(caseDetails));
-    }
-
-    @Test
-    public void shouldNotEmailApplicantSolicitor_contested() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, NO_VALUE);
-
-        CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONTESTED).data(caseData).build();
-
-        assertFalse(notificationService.isApplicantSolicitorEmailCommunicationEnabled(caseDetails));
-    }
-
-    @Test
-    public void shouldEmailApplicantSolicitor_consented() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED, YES_VALUE);
-
-        CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONSENTED).data(caseData).build();
-
-        assertTrue(notificationService.isApplicantSolicitorEmailCommunicationEnabled(caseDetails));
-    }
-
-    @Test
-    public void shouldNotEmailApplicantSolicitor_consented() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED, NO_VALUE);
-
-        CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONSENTED).data(caseData).build();
-
-        assertFalse(notificationService.isApplicantSolicitorEmailCommunicationEnabled(caseDetails));
     }
 
     @Test
@@ -1078,6 +1039,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
 
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_NOTICE_OF_CHANGE_CONSENTED))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
@@ -1131,6 +1093,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
 
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_NOC_CASEWORKER_CONSENTED))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
@@ -1194,6 +1157,54 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         notificationService.sendUpdateFrcInformationEmailToCourt(callbackRequest.getCaseDetails());
         verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
+    }
+
+    @Test
+    public void trueWhenApplicantSolicitorIsRegisteredAndAcceptingEmails() {
+        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+
+        assertTrue(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(any()));
+    }
+
+    @Test
+    public void falseWhenApplicantSolicitorIsNotRegisteredAndAcceptingEmails() {
+        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(false);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+
+        assertFalse(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(any()));
+    }
+
+    @Test
+    public void trueWhenRespondentSolicitorIsRegisteredAndAcceptingEmails() {
+        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(true);
+
+        Map<String, Object> caseData = new HashMap<>();
+
+        when(caseDataService.isPaperApplication(caseData)).thenReturn(false);
+        when(caseDataService.isRespondentRepresentedByASolicitor(caseData)).thenReturn(true);
+        when(caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData)).thenReturn(true);
+
+        caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, YES_VALUE);
+        CaseDetails caseDetails = CaseDetails.builder().data(caseData).build();
+
+        assertTrue(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails));
+    }
+
+    @Test
+    public void falseWhenRespondentSolicitorIsNotRegisteredAndAcceptingEmails() {
+        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(false);
+
+        Map<String, Object> caseData = new HashMap<>();
+
+        when(caseDataService.isPaperApplication(caseData)).thenReturn(false);
+        when(caseDataService.isRespondentRepresentedByASolicitor(caseData)).thenReturn(true);
+        when(caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData)).thenReturn(true);
+
+        caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, YES_VALUE);
+        CaseDetails caseDetails = CaseDetails.builder().data(caseData).build();
+
+        assertFalse(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails));
     }
 
     @Test
