@@ -508,7 +508,7 @@ public class NotificationsController extends BaseController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
-        if (notificationService.isApplicantSolicitorEmailCommunicationEnabled(caseDetails)) {
+        if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             log.info("Sending email notification to Applicant Solicitor about consent order not approved being sent");
             notificationService.sendConsentOrderNotApprovedSentEmailToApplicantSolicitor(caseDetails);
         }

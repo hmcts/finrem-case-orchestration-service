@@ -672,7 +672,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void whenConsentOrderNotApprovedSentEmail_thenNotificationEmailsSentToSolicitors() {
-        when(notificationService.isApplicantSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
 
         notificationsController.sendConsentOrderNotApprovedSentEmail(buildCallbackRequest());
@@ -683,7 +683,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void whenConsentOrderApprovedAndSolicitorEmailsNotEnabled_thenDoNotEmailSolicitors() {
-        when(notificationService.isApplicantSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
 
         notificationsController.sendConsentOrderNotApprovedSentEmail(buildCallbackRequest());
