@@ -922,9 +922,12 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void shouldNotEmailRespondentSolicitor() {
         Map<String, Object> caseData = new HashMap<>();
+
         when(caseDataService.isPaperApplication(caseData)).thenReturn(true);
         when(caseDataService.isRespondentRepresentedByASolicitor(caseData)).thenReturn(false);
         when(caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData)).thenReturn(false);
+
+        caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, null);
 
         assertFalse(notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData));
     }
