@@ -935,8 +935,6 @@ public class NotificationServiceTest extends BaseServiceTest {
         when(caseDataService.isRespondentRepresentedByASolicitor(caseData)).thenReturn(false);
         when(caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData)).thenReturn(false);
 
-        caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, NO_VALUE);
-
         assertFalse(notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData));
     }
 
