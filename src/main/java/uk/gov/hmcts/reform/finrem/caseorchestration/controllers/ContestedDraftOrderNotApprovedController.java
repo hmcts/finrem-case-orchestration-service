@@ -85,12 +85,11 @@ public class ContestedDraftOrderNotApprovedController extends BaseController {
         @NotNull @RequestBody @Parameter(description = "CaseData") String source) {
 
         CallbackRequest callback = callbackRequestDeserializer.deserialize(source);
+        validateCaseData(callback);
 
         FinremCaseDetails caseDetails = callback.getCaseDetails();
         FinremCaseData caseData = caseDetails.getCaseData();
-
         log.info("Received request to preview application not approved document for Case ID: {}", caseDetails.getId());
-        validateCaseData(callback);
 
         contestedNotApprovedService.createAndSetRefusalOrderPreviewDocument(authorisationToken, caseDetails);
 

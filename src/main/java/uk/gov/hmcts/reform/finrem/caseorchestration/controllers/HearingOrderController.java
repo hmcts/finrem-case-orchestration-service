@@ -55,6 +55,7 @@ public class HearingOrderController extends BaseController {
         @NotNull @RequestBody @Parameter(description = "CaseData") String source) {
 
         CallbackRequest callback = finremCallbackRequestDeserializer.deserialize(source);
+        validateCaseData(callback);
 
         FinremCaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to start event storing hearing order for case: {}", caseDetails.getId());
@@ -76,11 +77,11 @@ public class HearingOrderController extends BaseController {
         @NotNull @RequestBody @Parameter(description = "CaseData") String source) {
 
         CallbackRequest callback = finremCallbackRequestDeserializer.deserialize(source);
+        validateCaseData(callback);
 
         FinremCaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to store hearing order for case: {}", caseDetails.getId());
 
-        validateCaseData(callback);
 
         FinremCaseData caseData = caseDetails.getCaseData();
         hearingOrderService.convertToPdfAndStampAndStoreLatestDraftHearingOrder(caseDetails, authorisationToken);
@@ -102,8 +103,9 @@ public class HearingOrderController extends BaseController {
         @NotNull @RequestBody @Parameter(description = "CaseData") String source) {
 
         CallbackRequest callback = finremCallbackRequestDeserializer.deserialize(source);
-        FinremCaseDetails caseDetails = callback.getCaseDetails();
         validateCaseData(callback);
+
+        FinremCaseDetails caseDetails = callback.getCaseDetails();
 
         prepareFieldsForOrderApprovedCoverLetter(caseDetails, authorisationToken);
 

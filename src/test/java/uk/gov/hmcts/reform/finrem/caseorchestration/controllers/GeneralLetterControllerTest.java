@@ -8,10 +8,10 @@ import org.springframework.http.MediaType;
 import org.springframework.web.client.HttpServerErrorException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralLetterService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -39,9 +39,13 @@ public class GeneralLetterControllerTest extends BaseControllerTest {
     @MockBean
     private IdamService idamService;
 
+    @MockBean
+    private FinremCallbackRequestDeserializer deserializer;
+
     @Test
     public void generateGeneralLetterSuccess() throws Exception {
         doValidCaseDataSetUp();
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest());
 
         mvc.perform(post(GENERAL_LETTER_URL)
             .content(requestContent.toString())
@@ -55,6 +59,7 @@ public class GeneralLetterControllerTest extends BaseControllerTest {
     @Test
     public void generateGeneralLetter400Error() throws Exception {
         doEmptyCaseDataSetUp();
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequestEmptyCaseData());
 
         mvc.perform(post(GENERAL_LETTER_URL)
             .content(requestContent.toString())
@@ -66,6 +71,7 @@ public class GeneralLetterControllerTest extends BaseControllerTest {
     @Test
     public void generateGeneralLetter500Error() throws Exception {
         doValidCaseDataSetUp();
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest());
         doThrow(feignError()).when(generalLetterService).createGeneralLetter(eq(AUTH_TOKEN), isA(FinremCaseDetails.class));
 
         mvc.perform(post(GENERAL_LETTER_URL)
@@ -78,22 +84,25 @@ public class GeneralLetterControllerTest extends BaseControllerTest {
     @Test
     public void startGeneralLetterPropertiesSuccess() throws Exception {
         when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn("Integration Test");
+        when(deserializer.deserialize(any()))
+            .thenReturn(getCallbackRequest(resourceContentAsString("/fixtures/general-letter.json")));
 
         mvc.perform(post(START_GENERAL_LETTER_URL)
             .content(resourceContentAsString("/fixtures/general-letter.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.generalLetterAddressTo", is(nullValue())))
-            .andExpect(jsonPath("$.data.generalLetterRecipient", is(nullValue())))
-            .andExpect(jsonPath("$.data.generalLetterRecipientAddress", is(nullValue())))
+            .andExpect(jsonPath("$.data.generalLetterAddressTo").doesNotExist())
+            .andExpect(jsonPath("$.data.generalLetterRecipient").doesNotExist())
+            .andExpect(jsonPath("$.data.generalLetterRecipientAddress").doesNotExist())
             .andExpect(jsonPath("$.data.generalLetterCreatedBy", is("Integration Test")))
-            .andExpect(jsonPath("$.data.generalLetterBody", is(nullValue())));
+            .andExpect(jsonPath("$.data.generalLetterBody").doesNotExist());
     }
 
     @Test
     public void startGeneralLetterPropertiesBadRequest() throws Exception {
         doEmptyCaseDataSetUp();
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequestEmptyCaseData());
 
         mvc.perform(post(START_GENERAL_LETTER_URL)
             .content(requestContent.toString())
@@ -106,6 +115,8 @@ public class GeneralLetterControllerTest extends BaseControllerTest {
     public void startGeneralLetterPropertiesInternalServerError() throws Exception {
         when(idamService.getIdamFullName(AUTH_TOKEN))
             .thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
+        when(deserializer.deserialize(any()))
+            .thenReturn(getCallbackRequest(resourceContentAsString("/fixtures/general-letter.json")));
 
         mvc.perform(post(START_GENERAL_LETTER_URL)
             .content(resourceContentAsString("/fixtures/general-letter.json"))
@@ -117,6 +128,7 @@ public class GeneralLetterControllerTest extends BaseControllerTest {
     @Test
     public void previewGeneralLetterSuccess() throws Exception {
         doValidCaseDataSetUp();
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest());
 
         mvc.perform(post(PREVIEW_GENERAL_LETTER_URL)
             .content(requestContent.toString())

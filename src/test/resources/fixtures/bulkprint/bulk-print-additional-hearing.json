@@ -1,12 +1,13 @@
 {
   "token": "token_test",
-  "event_id": "some_event_id",
+  "event_id": "FR_issueApplication",
   "case_details": {
     "id": 1234567890,
     "jurisdiction": "DIVORCE",
-    "state": "caseFileSubmitted",
+    "state": "caseAdded",
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
+      "ccdCaseType": "FinancialRemedyContested",
       "paperApplication": "Yes",
       "divorcePetitionIssuedDate": "2010-01-01",
       "hearingDate": "2021-01-01",
@@ -44,6 +45,23 @@
       "nottinghamCourtList": "FR_s_NottinghamList_1",
       "natureOfApplicationChecklist": [
         "periodicalPaymentOrder"
+      ],
+      "draftDirectionDetailsCollection": [
+        {
+          "value": {
+            "isThisFinalYN": "Yes",
+            "isAnotherHearingYN": "Yes",
+            "typeOfHearing": "Final Hearing (FH)",
+            "timeEstimate": "standardTime",
+            "additionalTime": "additional time",
+            "listingInstructor": "listing Instructor",
+            "localCourt": {
+              "region": "london",
+              "londonList": "cfc",
+              "cfcCourtList": "FR_s_CFCList_1"
+            }
+          }
+        }
       ],
       "applicantSolicitorConsentForEmails": "Yes",
       "applicantSolicitorDXnumber": null,

@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDoc
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import java.io.File;
@@ -32,6 +33,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -56,6 +58,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @MockBean private AdditionalHearingDocumentService additionalHearingDocumentService;
     @MockBean private ValidateHearingService validateHearingService;
     @MockBean private CaseDataService caseDataService;
+    @MockBean private FinremCallbackRequestDeserializer deserializer;
 
 
     @Before
@@ -78,6 +81,8 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void generateHearingDocumentHttpError400() throws Exception {
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequestEmptyCaseData());
+
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
             .content("kwuilebge")
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -89,6 +94,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     public void generateHearingDocumentFormC() throws Exception {
         when(hearingDocumentService.generateHearingDocuments(eq(AUTH_TOKEN), isA(FinremCaseDetails.class)))
             .thenReturn(ImmutableMap.of("formC", newDocument()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest());
 
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
             .content(requestContent.toString())
@@ -109,6 +115,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
         when(hearingDocumentService.generateHearingDocuments(eq(AUTH_TOKEN), isA(FinremCaseDetails.class)))
             .thenReturn(ImmutableMap.of("formC", newDocument()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
 
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
             .content(requestContent.toString())
@@ -124,6 +131,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     public void generateMiniFormAHttpError500() throws Exception {
         when(hearingDocumentService.generateHearingDocuments(eq(AUTH_TOKEN), isA(FinremCaseDetails.class)))
                 .thenThrow(feignError());
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest());
 
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
                 .content(requestContent.toString())
@@ -138,6 +146,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
         when(hearingDocumentService.alreadyHadFirstHearing(isA(FinremCaseDetails.class))).thenReturn(true);
         when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
 
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
                 .content(requestContent.toString())
@@ -151,6 +160,8 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void generateHearingDocumentDirectionOrder_isAnotherHearingTrue() throws Exception {
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest());
+
         mvc.perform(post(DIRECTION_ORDER_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -163,6 +174,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @Test
     public void generateHearingDocumentDirectionOrder_CourtDetailsParseException() throws Exception {
         doThrow(new CourtDetailsParseException()).when(additionalHearingDocumentService).createAndStoreAdditionalHearingDocuments(any(), any());
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest());
 
         mvc.perform(post(DIRECTION_ORDER_URL)
             .content(requestContent.toString())
@@ -175,6 +187,8 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @Test
     public void shouldReturnBadRequestWhenCaseDataIsMissingInRequest() throws Exception {
         doEmptyCaseDataSetUp();
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequestEmptyCaseData());
+
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -190,6 +204,9 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
         requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
             .getResource("/fixtures/pba-validate.json")).toURI()));
+
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -208,6 +225,9 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
         requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
             .getResource("/fixtures/contested/validate-hearing-withoutfastTrackDecision.json")).toURI()));
+
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -226,6 +246,9 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
         requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
             .getResource("/fixtures/contested/validate-hearing-with-fastTrackDecision.json")).toURI()));
+
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -243,6 +266,9 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
         requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
             .getResource("/fixtures/contested/validate-hearing-successfully.json")).toURI()));
+
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -256,6 +282,8 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     public void generateHearingDocumentDirectionOrderMostRecentEnteredAtTheTop() throws Exception {
         requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
             .getResource("/fixtures/contested/validate-hearing-successfully.json")).toURI()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(DIRECTION_ORDER_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)

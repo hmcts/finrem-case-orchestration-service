@@ -1,9 +1,9 @@
 {
-  "event_id": "some_event_id",
+  "event_id": "FR_issueApplication",
   "case_details": {
     "id": "123",
     "jurisdiction": "DIVORCE",
-    "state": "applicationDrafted",
+    "state": "applicationIssued",
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
       "PBANumber": "PBA123",
@@ -97,13 +97,11 @@
       "helpWithFeesQuestion": "No",
       "natureOfApplication2": [
         "Lump Sum Order",
-        "Periodical Payment Order",
         "Pension Sharing Order",
         "Pension Attachment Order",
         "Pension Compensation Sharing Order",
         "Pension Compensation Attachment Order",
-        "A settlement or a transfer of property",
-        "Property Adjustment Order"
+        "A settlement or a transfer of property"
       ],
       "natureOfApplication5": "No",
       "natureOfApplication6": [

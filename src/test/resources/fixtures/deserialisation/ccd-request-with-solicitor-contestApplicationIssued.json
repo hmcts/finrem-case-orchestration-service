@@ -850,28 +850,28 @@
           }
         }
       ],
-      "applicantAttendedMiam": "Yes",
-      "claimingExemptionMiam": "Yes",
-      "familyMediatorMiam": "Yes",
-      "miamExemptionsChecklist": [
+      "applicantAttendedMIAM": "Yes",
+      "claimingExemptionMIAM": "Yes",
+      "familyMediatorMIAM": "Yes",
+      "MIAMExemptionsChecklist": [
         "domesticViolence",
         "urgency",
         "previousMIAMattendance",
         "other"
       ],
-      "miamDomesticViolenceChecklist": [
+      "MIAMDomesticViolenceChecklist": [
         "FR_ms_MIAMDomesticViolenceChecklist_Value_1",
         "FR_ms_MIAMDomesticViolenceChecklist_Value_9",
         "FR_ms_MIAMDomesticViolenceChecklist_Value_18",
         "FR_ms_MIAMDomesticViolenceChecklist_Value_22"
       ],
-      "miamUrgencyReasonChecklist": [
+      "MIAMUrgencyReasonChecklist": [
         "FR_ms_MIAMUrgencyReasonChecklist_Value_1",
         "FR_ms_MIAMUrgencyReasonChecklist_Value_3",
         "FR_ms_MIAMUrgencyReasonChecklist_Value_5"
       ],
-      "miamPreviousAttendanceChecklist": "FR_ms_MIAMPreviousAttendanceChecklist_Value_2",
-      "miamOtherGroundsChecklist": "FR_ms_MIAMOtherGroundsChecklist_Value_1",
+      "MIAMPreviousAttendanceChecklist": "FR_ms_MIAMPreviousAttendanceChecklist_Value_2",
+      "MIAMOtherGroundsChecklist": "FR_ms_MIAMOtherGroundsChecklist_Value_1",
       "natureOfApplication5b": "FR_nature_of_application_2",
       "respondentAddress": {
         "AddressLine1": "line2",

@@ -8,9 +8,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DefaultsConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
@@ -45,7 +45,7 @@ public class MiniFormAControllerTest extends BaseControllerTest {
 
     @MockBean protected OnlineFormDocumentService documentService;
     @MockBean protected IdamService idamService;
-    @MockBean protected CaseDataService caseDataService;
+    @MockBean protected FinremCallbackRequestDeserializer deserializer;
 
     @MockBean
     protected DefaultsConfiguration defaultsConfiguration;
@@ -76,7 +76,9 @@ public class MiniFormAControllerTest extends BaseControllerTest {
     public void generateMiniFormA() throws Exception {
         doRequestSetUpConsented();
         whenServiceGeneratesDocument().thenReturn(newDocument());
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+        when(defaultsConfiguration.getAssignedToJudgeDefault())
+            .thenReturn("new_application@mailinator.com");
 
         mvc.perform(post(endpoint())
             .content(requestContent.toString())
@@ -97,6 +99,7 @@ public class MiniFormAControllerTest extends BaseControllerTest {
     @Test
     public void generateMiniFormAHttpError400() throws Exception {
         doRequestSetUpConsented();
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequestEmptyCaseData());
         mvc.perform(post(endpoint())
             .content("kwuilebge")
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -107,6 +110,7 @@ public class MiniFormAControllerTest extends BaseControllerTest {
     @Test
     public void generateMiniFormAHttpError500() throws Exception {
         doRequestSetUpConsented();
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
         whenServiceGeneratesDocument().thenThrow(feignError());
 
         mvc.perform(post(endpoint())
@@ -120,7 +124,7 @@ public class MiniFormAControllerTest extends BaseControllerTest {
     public void generateMiniFormAWhenConsentedInContested() throws Exception {
         doRequestSetUpContested();
         whenServiceGeneratesConsentedInContestedMiniFormA().thenReturn(newDocument());
-        when(caseDataService.isConsentedInContestedCase(any())).thenReturn(true);
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
 
         mvc.perform(post(endpoint())
             .content(requestContent.toString())
@@ -136,7 +140,8 @@ public class MiniFormAControllerTest extends BaseControllerTest {
     public void generateMiniFormAWhenConsentedInContestedExpectContestedFieldToBePopulated() throws Exception {
         doRequestSetUpContested();
         whenServiceGeneratesConsentedInContestedMiniFormA().thenReturn(newDocument());
-        when(caseDataService.isConsentedInContestedCase(any())).thenReturn(false);
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+        when(defaultsConfiguration.getAssignedToJudgeDefault()).thenReturn("new_application@mailinator.com");
 
         mvc.perform(post(endpoint())
                 .content(requestContent.toString())

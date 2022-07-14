@@ -49,11 +49,10 @@ public class GeneralLetterController extends BaseController {
         @NotNull @RequestBody @Parameter(description = "CaseData") String source) {
 
         CallbackRequest callback = finremCallbackRequestDeserializer.deserialize(source);
+        validateCaseData(callback);
 
         FinremCaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to clear general letter fields for Case ID: {}", caseDetails.getId());
-
-        validateCaseData(callback);
 
         FinremCaseData caseData = caseDetails.getCaseData();
 
@@ -79,10 +78,10 @@ public class GeneralLetterController extends BaseController {
         @NotNull @RequestBody @Parameter(description = "CaseData") String source) {
 
         CallbackRequest callback = finremCallbackRequestDeserializer.deserialize(source);
+        validateCaseData(callback);
 
         FinremCaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to preview general letter for Case ID: {}", caseDetails.getId());
-        validateCaseData(callback);
 
         if (generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails).isEmpty()) {
             generalLetterService.previewGeneralLetter(authorisationToken, caseDetails);
@@ -106,10 +105,10 @@ public class GeneralLetterController extends BaseController {
         @NotNull @RequestBody @Parameter(description = "CaseData") String source) {
 
         CallbackRequest callback = finremCallbackRequestDeserializer.deserialize(source);
+        validateCaseData(callback);
 
         FinremCaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request for generating general letter with Case ID: {}", caseDetails.getId());
-        validateCaseData(callback);
 
         if (generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails).isEmpty()) {
             generalLetterService.createGeneralLetter(authorisationToken, caseDetails);

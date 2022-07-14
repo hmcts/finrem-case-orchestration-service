@@ -5,6 +5,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -13,6 +14,7 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -23,6 +25,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignE
 public class GeneralOrderControllerTest extends BaseControllerTest {
 
     @MockBean private GeneralOrderService documentService;
+
+    @MockBean private FinremCallbackRequestDeserializer deserializer;
 
     public String generateEndpoint() {
         return "/case-orchestration/documents/preview-general-order";
@@ -35,6 +39,7 @@ public class GeneralOrderControllerTest extends BaseControllerTest {
     @Test
     public void generateGeneralOrderSuccess() throws Exception {
         doValidCaseDataSetUp();
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest());
 
         mvc.perform(post(generateEndpoint())
             .content(requestContent.toString())
@@ -48,6 +53,7 @@ public class GeneralOrderControllerTest extends BaseControllerTest {
     @Test
     public void generateGeneralOrder400Error() throws Exception {
         doEmptyCaseDataSetUp();
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequestEmptyCaseData());
 
         mvc.perform(post(generateEndpoint())
             .content(requestContent.toString())
@@ -59,6 +65,7 @@ public class GeneralOrderControllerTest extends BaseControllerTest {
     @Test
     public void generateGeneralOrder500Error() throws Exception {
         doValidCaseDataSetUp();
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest());
         doThrow(feignError()).when(documentService)
             .createAndSetGeneralOrder(eq(AUTH_TOKEN), isA(FinremCaseDetails.class));
 
@@ -72,12 +79,14 @@ public class GeneralOrderControllerTest extends BaseControllerTest {
     @Test
     public void submitGeneralOrderSuccess() throws Exception {
         doValidCaseDataSetUp();
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest());
 
         mvc.perform(post(submitEndpoint())
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
+
         verify(documentService, times(1)).populateGeneralOrderCollection(any(FinremCaseDetails.class));
     }
 }

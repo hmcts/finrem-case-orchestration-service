@@ -1,9 +1,9 @@
 {
   "token": "token_test",
-  "event_id": "some_event_id",
+  "event_id": "FR_issueApplication",
   "case_details": {
     "jurisdiction": "DIVORCE",
-    "state": "applicationDrafted",
+    "state": "caseAdded",
     "case_type_id": "FinancialRemedyMVP2",
     "case_data": {
       "PBANumber": "PBA123456",
@@ -96,13 +96,11 @@
       "helpWithFeesQuestion": "No",
       "natureOfApplication2": [
         "Lump Sum Order",
-        "Periodical Payment Order",
         "Pension Sharing Order",
         "Pension Attachment Order",
         "Pension Compensation Sharing Order",
         "Pension Compensation Attachment Order",
-        "A settlement or a transfer of property",
-        "Property Adjustment Order"
+        "A settlement or a transfer of property"
       ],
       "natureOfApplication5": "No",
       "natureOfApplication6": [
@@ -130,8 +128,7 @@
               "Insufficient information provided – A",
               "Insufficient information provided – B",
               "Transferred to Applicant’s home Court",
-              "Transferred to Applicant's home Court",
-              "Other"
+              "Other (please specify)"
             ],
             "orderRefusalDate": "2003-02-01",
             "orderRefusalDocs": {
@@ -158,7 +155,7 @@
         {
           "id": "1",
           "value": {
-            "DocumentType": "pdf",
+            "DocumentType": "generalOrder",
             "DocumentLink": {
               "document_url": "http://doc1",
               "document_filename": "doc1",

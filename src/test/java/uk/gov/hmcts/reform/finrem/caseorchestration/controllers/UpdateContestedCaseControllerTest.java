@@ -2,12 +2,14 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import java.io.File;
@@ -16,6 +18,7 @@ import java.net.URISyntaxException;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
@@ -50,6 +53,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
 
     @MockBean
     private OnlineFormDocumentService onlineFormDocumentService;
+    @MockBean
+    private FinremCallbackRequestDeserializer deserializer;
 
     @Before
     public void setUp() {
@@ -65,9 +70,10 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     public void shouldDeleteNDecreeAbsoluteWhenSolicitorChooseToDecreeNisiForContested() throws Exception {
         when(onlineFormDocumentService.generateDraftContestedMiniFormA(eq(AUTH_TOKEN), isA(FinremCaseDetails.class)))
             .thenReturn(newDocument());
-
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/amend-divorce-details-decree-nisi.json").toURI()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -89,6 +95,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     public void shouldDeleteDecreeNisiWhenSolicitorChooseToDecreeAbsoluteForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/amend-divorce-details-decree-absolute.json").toURI()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -105,6 +113,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     public void shouldDeleteDecreeAbsoluteWhenSolicitorChooseToPetitionIssuedForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/amend-divorce-details-petition-issued.json").toURI()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -123,6 +133,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     public void shouldRemovePropertyAdjustmentOrderDetailsWhenSolicitorUncheckedForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-property-adjustment-order-details.json").toURI()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -138,6 +149,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     public void shouldUpdatePropertyAdjustmentOrderDecisionDetailForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-property-adjustment-order-details.json").toURI()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -153,6 +166,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     public void shouldRemoveAdditionalPropertyDetailsForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-additional-property-details.json").toURI()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -166,6 +181,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     public void shouldRemovePeriodicPaymentOrderDetailsWhenSolicitorUncheckedForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-periodic-payment-order-details.json").toURI()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -174,7 +191,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .andDo(print())
             .andExpect(jsonPath("$.data.paymentForChildrenDecision").doesNotExist())
             .andExpect(jsonPath("$.data.benefitForChildrenDecision").doesNotExist())
-            .andExpect(jsonPath("$.data.benefitPaymentChecklist").doesNotExist());
+            .andExpect(jsonPath("$.data.benefitPaymentChecklist", is(Matchers.empty())));
     }
 
     @Test
@@ -182,6 +199,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource(
                 "/fixtures/contested/update-periodic-payment-details-for-no-payment-for-children.json").toURI()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -189,7 +208,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.benefitForChildrenDecision").doesNotExist())
-            .andExpect(jsonPath("$.data.benefitPaymentChecklist").doesNotExist());
+            .andExpect(jsonPath("$.data.benefitPaymentChecklist", is(Matchers.empty())));
     }
 
     @Test
@@ -197,6 +216,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource(
                 "/fixtures/contested/update-periodic-payment-details-with-benefits-for-children.json").toURI()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -210,6 +231,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     public void shouldRemoveSolicitorDetailsWhenRespondentIsNotRepresentedBySolicitorForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-respondent-solicitor-details.json").toURI()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -229,6 +252,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     public void shouldRemoveRespondentAddressWhenRespondentIsRepresentedBySolicitorForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-respondent-address-details.json").toURI()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -244,6 +269,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     public void shouldUpdateFastTrackDetailsForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-respondent-address-details.json").toURI()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -257,6 +284,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     public void shouldNotUpdateFastTrackDetailsForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-respondent-solicitor-details.json").toURI()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -270,6 +299,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     public void shouldRemoveComplexityDetailsForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-complexity-details.json").toURI()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -288,6 +319,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     public void shouldRemoveAdditionalReasonForComplexityForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-other-reason-for-complexity.json").toURI()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -301,6 +334,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     public void shouldRemoveReasonForLocalCourtForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/is-applicant-home-court.json").toURI()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -314,6 +349,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     public void shouldRemoveMiamExceptionsWhenApplicantAttendedMiamForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-exceptions-when-applicant-attended-miam.json").toURI()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -334,6 +371,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource(
                 "/fixtures/contested/update-miam-exceptions-when-applicant-not-claiming-exemption.json").toURI()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -354,6 +393,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource(
                 "/fixtures/contested/update-miam-exceptions-when-applicant-attended-family-mediator.json").toURI()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -371,6 +412,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     public void shouldRemoveDomesticViolenceCheckListForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-domestic-violence-checklist.json").toURI()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -388,6 +431,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     public void shouldRemoveUrgencyCheckListForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-urgency-checklist.json").toURI()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -405,6 +450,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     public void shouldRemovePreviousMiamAttendanceCheckListForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-previousMiamAttendance-checklist.json").toURI()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -423,6 +470,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     public void shouldRemoveOtherGroundsMiamCheckListForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-other-checklist.json").toURI()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -440,6 +489,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     public void shouldNotRemoveMiamCheckListForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/do-not-remove-checklists.json").toURI()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -457,6 +508,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     public void shouldRemoveMiamCertificationDetailsWhenApplicantIsNotAttendedMiamForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-miam-certification-details.json").toURI()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -476,6 +529,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource(
                 "/fixtures/contested/cleanup-miam-certification-details-when-applicant-attended-miam.json").toURI()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -494,6 +549,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     public void shouldCleanupAdditionalDocumentsForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/cleanup-addtional-documents.json").toURI()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -508,6 +565,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     public void shouldNotCleanupAdditionalDocumentsForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-property-adjustment-order-details.json").toURI()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -522,6 +581,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     public void shouldDeleteRespondentSolicitorContactDetailsContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/remove-respondent-solicitor-details.json").toURI()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE_SOLICITOR)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -542,6 +603,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     public void shouldDeleteApplicantSolicitorContactDetailsContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/applicant-solicitor-to-draft-order-with-email-consent.json").toURI()));
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
+
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE_SOLICITOR)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)

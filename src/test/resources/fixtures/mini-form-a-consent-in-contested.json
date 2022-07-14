@@ -1,6 +1,6 @@
 {
   "token": "token_test",
-  "event_id": "some_event_id",
+  "event_id": "FR_issueApplication",
   "case_details": {
     "id": 1234567890,
     "jurisdiction": "DIVORCE",
@@ -98,8 +98,8 @@
       "consentOrderForChildrenQuestion1": "Yes",
       "consentNatureOfApplication5": "No",
       "consentNatureOfApplication6": [
-        "item1",
-        "item2"
+        "Step Child or Step Children",
+        "disability expenses"
       ],
       "consentNatureOfApplication7": "test",
       "solicitorAgreeToReceiveEmails": "Yes"

@@ -65,11 +65,10 @@ public class HearingDocumentController extends BaseController {
             @NotNull @RequestBody @Parameter(description = "CaseData") String source) {
 
         CallbackRequest callbackRequest = finremCallbackRequestDeserializer.deserialize(source);
+        validateCaseData(callbackRequest);
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request for validating a hearing for Case ID: {}", caseDetails.getId());
-
-        validateCaseData(callbackRequest);
 
         List<String> errors = validateHearingService.validateHearingErrors(caseDetails);
         if (!errors.isEmpty()) {
@@ -84,22 +83,6 @@ public class HearingDocumentController extends BaseController {
             .warnings(warnings).build());
     }
 
-    private void generateHearingDocuments(String authorisationToken, FinremCaseDetails caseDetails) {
-        if (hearingDocumentService.alreadyHadFirstHearing(caseDetails)) {
-            if (caseDetails.getCaseData().isContestedPaperApplication()) {
-                additionalHearingDocumentService.createAdditionalHearingDocuments(authorisationToken, caseDetails);
-            }
-        } else {
-            Map<String, Object> forms = hearingDocumentService.generateHearingDocuments(authorisationToken, caseDetails);
-            if (forms.containsKey(FORM_C)) {
-                caseDetails.getCaseData().setFormC((Document) forms.get(FORM_C));
-            }
-            if (forms.containsKey(FORM_G)) {
-                caseDetails.getCaseData().setFormG((Document) forms.get(FORM_G));
-            }
-        }
-    }
-
     @PostMapping(path = "/contested-upload-direction-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(summary = "Handles direction order generation. Serves as a callback from CCD")
     @ApiResponses(value = {
@@ -112,9 +95,9 @@ public class HearingDocumentController extends BaseController {
         @NotNull @RequestBody @Parameter(description = "CaseData") String source) {
 
         CallbackRequest callback = finremCallbackRequestDeserializer.deserialize(source);
+        validateCaseData(callback);
 
         FinremCaseDetails caseDetails = callback.getCaseDetails();
-        validateCaseData(callback);
         FinremCaseData caseData = caseDetails.getCaseData();
         List<String> errors = new ArrayList<>();
 
@@ -132,6 +115,22 @@ public class HearingDocumentController extends BaseController {
             .data(caseData)
             .errors(errors)
             .build());
+    }
+
+    private void generateHearingDocuments(String authorisationToken, FinremCaseDetails caseDetails) {
+        if (hearingDocumentService.alreadyHadFirstHearing(caseDetails)) {
+            if (caseDetails.getCaseData().isContestedPaperApplication()) {
+                additionalHearingDocumentService.createAdditionalHearingDocuments(authorisationToken, caseDetails);
+            }
+        } else {
+            Map<String, Object> forms = hearingDocumentService.generateHearingDocuments(authorisationToken, caseDetails);
+            if (forms.containsKey(FORM_C)) {
+                caseDetails.getCaseData().setFormC((Document) forms.get(FORM_C));
+            }
+            if (forms.containsKey(FORM_G)) {
+                caseDetails.getCaseData().setFormG((Document) forms.get(FORM_G));
+            }
+        }
     }
 
     private void sortDirectionDetailsCollection(FinremCaseData caseData) {

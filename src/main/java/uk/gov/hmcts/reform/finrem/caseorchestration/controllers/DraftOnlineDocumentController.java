@@ -33,7 +33,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
 @RequiredArgsConstructor
-public class DraftOnlineDocumentController {
+public class DraftOnlineDocumentController extends BaseController {
 
     private final OnlineFormDocumentService service;
     private final IdamService idamService;
@@ -51,6 +51,7 @@ public class DraftOnlineDocumentController {
         @NotNull @RequestBody @Parameter(description = "CaseData") String source) {
 
         CallbackRequest callback = finremCallbackRequestDeserializer.deserialize(source);
+        validateCaseData(callback);
 
         log.info("Received request to generate draft Contested Mini Form A for Case ID : {}",
             callback.getCaseDetails().getId());

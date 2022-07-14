@@ -35,7 +35,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
 @RequiredArgsConstructor
-public class MiniFormAController extends BaseController {
+public class  MiniFormAController extends BaseController {
 
     private final OnlineFormDocumentService service;
     private final DefaultsConfiguration defaultsConfiguration;
@@ -57,6 +57,7 @@ public class MiniFormAController extends BaseController {
         @NotNull @RequestBody @Parameter(description = "CaseData") String source) {
 
         CallbackRequest callback = finremCallbackRequestDeserializer.deserialize(source);
+        validateCaseData(callback);
 
         log.info("Received request to generate Consented Mini Form A for Case ID : {}", callback.getCaseDetails().getId());
 
@@ -68,11 +69,12 @@ public class MiniFormAController extends BaseController {
             caseData.setMiniFormA(miniFormA);
 
             log.info("Defaulting AssignedToJudge fields for Case ID: {}", callback.getCaseDetails().getId());
-            populateAssignToJudgeFields(caseData);
         } else {
             Document consentMiniFormA = service.generateConsentedInContestedMiniFormA(callback.getCaseDetails(), authorisationToken);
             caseData.getConsentOrderWrapper().setConsentMiniFormA(consentMiniFormA);
         }
+
+        populateAssignToJudgeFields(caseData);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }

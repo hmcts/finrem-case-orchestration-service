@@ -5,13 +5,16 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -21,6 +24,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignE
 @WebMvcTest(GeneralApplicationDirectionsController.class)
 public class GeneralApplicationDirectionsControllerTest extends BaseControllerTest {
 
+    private static final String RESOURCE_PATH = "/fixtures/general-application.json";
+
     private static final String SUBMIT_GENERAL_APPLICATION_URL = "/case-orchestration/submit-general-application-directions";
     private static final String START_GENERAL_APPLICATION_URL = "/case-orchestration/start-general-application-directions";
     private static final String INTERIM_HEARING_URL = "/case-orchestration/submit-for-interim-hearing";
@@ -28,21 +33,30 @@ public class GeneralApplicationDirectionsControllerTest extends BaseControllerTe
     @MockBean
     private GeneralApplicationDirectionsService generalApplicationDirectionsService;
 
+    @MockBean
+    private FinremCallbackRequestDeserializer deserializer;
+
     @Test
     public void startGeneralApplicationDirectionsSuccess() throws Exception {
+        when(deserializer.deserialize(any()))
+            .thenReturn(getCallbackRequest(resourceContentAsString(RESOURCE_PATH)));
         mvc.perform(post(START_GENERAL_APPLICATION_URL)
-            .content(resourceContentAsString("/fixtures/general-application.json"))
+            .content(resourceContentAsString(RESOURCE_PATH))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(generalApplicationDirectionsService, times(1)).startGeneralApplicationDirections(isA(FinremCaseDetails.class));
+        verify(generalApplicationDirectionsService, times(1))
+            .startGeneralApplicationDirections(isA(FinremCaseDetails.class));
     }
 
     @Test
     public void submitGeneralApplicationDirectionsSuccess() throws Exception {
+        when(deserializer.deserialize(any()))
+            .thenReturn(getCallbackRequest(resourceContentAsString(RESOURCE_PATH)));
+
         mvc.perform(post(SUBMIT_GENERAL_APPLICATION_URL)
-            .content(resourceContentAsString("/fixtures/general-application.json"))
+            .content(resourceContentAsString(RESOURCE_PATH))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
@@ -54,6 +68,7 @@ public class GeneralApplicationDirectionsControllerTest extends BaseControllerTe
     @Test
     public void startGeneralApplication400Error() throws Exception {
         doEmptyCaseDataSetUp();
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequestEmptyCaseData());
 
         mvc.perform(post(START_GENERAL_APPLICATION_URL)
             .content(requestContent.toString())
@@ -65,6 +80,7 @@ public class GeneralApplicationDirectionsControllerTest extends BaseControllerTe
     @Test
     public void startGeneralApplication500Error() throws Exception {
         doValidCaseDataSetUp();
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest());
         doThrow(feignError()).when(generalApplicationDirectionsService)
             .startGeneralApplicationDirections(isA(FinremCaseDetails.class));
 
@@ -78,6 +94,7 @@ public class GeneralApplicationDirectionsControllerTest extends BaseControllerTe
     @Test
     public void submitGeneralApplication400Error() throws Exception {
         doEmptyCaseDataSetUp();
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequestEmptyCaseData());
 
         mvc.perform(post(SUBMIT_GENERAL_APPLICATION_URL)
             .content(requestContent.toString())
@@ -89,6 +106,8 @@ public class GeneralApplicationDirectionsControllerTest extends BaseControllerTe
     @Test
     public void submitGeneralApplication500Error() throws Exception {
         doValidCaseDataSetUp();
+
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest());
         doThrow(feignError()).when(generalApplicationDirectionsService)
             .submitGeneralApplicationDirections(isA(FinremCaseDetails.class), eq(AUTH_TOKEN));
 
@@ -101,8 +120,10 @@ public class GeneralApplicationDirectionsControllerTest extends BaseControllerTe
 
     @Test
     public void submitInterimHearing() throws Exception {
+        when(deserializer.deserialize(any()))
+            .thenReturn(getCallbackRequest(resourceContentAsString(RESOURCE_PATH)));
         mvc.perform(post(INTERIM_HEARING_URL)
-                .content(resourceContentAsString("/fixtures/general-application.json"))
+                .content(resourceContentAsString(RESOURCE_PATH))
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());

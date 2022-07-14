@@ -5,11 +5,16 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.SendOrderContestedAboutToSubmitHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
+
+import java.time.LocalDate;
 
 import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -30,11 +35,15 @@ public class ContestedOrderControllerTest extends BaseControllerTest {
     private IdamService idamService;
 
     @MockBean
+    private FinremCallbackRequestDeserializer finremCallbackRequestDeserializer;
+
+    @MockBean
     private SendOrderContestedAboutToSubmitHandler sendOrderContestedAboutToSubmitHandler;
 
     @Test
     public void shouldThrowExceptionWhenHearingDateNotFound() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
+        when(finremCallbackRequestDeserializer.deserialize(any())).thenReturn(getCallbackRequest());
 
         loadRequestContentWith(CONTESTED_VALIDATE_HEARING_DATE_JSON);
         mvc.perform(post("/case-orchestration//contested/validateHearingDate")
@@ -50,6 +59,9 @@ public class ContestedOrderControllerTest extends BaseControllerTest {
     @Test
     public void shouldSuccessfullyProcessWhenHearingDateFound() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
+        CallbackRequest callbackRequest = getCallbackRequest();
+        callbackRequest.getCaseDetails().getCaseData().setHearingDate(LocalDate.of(2019, 05, 04));
+        when(finremCallbackRequestDeserializer.deserialize(any())).thenReturn(callbackRequest);
 
         loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
         mvc.perform(post("/case-orchestration//contested/validateHearingDate")
@@ -65,6 +77,7 @@ public class ContestedOrderControllerTest extends BaseControllerTest {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
 
         loadRequestContentWith(CONTESTED_VALIDATE_HEARING_DATE_JSON);
+        when(finremCallbackRequestDeserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
         mvc.perform(post("/case-orchestration/contested/sortUploadedHearingBundles")
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -72,9 +85,7 @@ public class ContestedOrderControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.hearingUploadBundle").isArray())
             .andExpect(jsonPath("$.data.hearingUploadBundle[0].value.hearingBundleFdr",
-                is("NO")))
-            .andExpect(jsonPath("$.data.hearingUploadBundle[0].id",
-                is("83922295-dbaa-471f-95ff-93efdf200fab")))
+                is("No")))
             .andExpect(jsonPath("$.data.hearingUploadBundle[1].value.hearingBundleDate",
                 is("2022-08-20")))
             .andExpect(jsonPath("$.data.hearingUploadBundle[1].value.hearingBundleDocuments[0]"
@@ -83,10 +94,8 @@ public class ContestedOrderControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.hearingUploadBundle[1].value.hearingBundleDocuments[1]"
                     + ".value.bundleDocuments.document_filename",
                 is("InterimHearingNotice-1649341720076259.pdf")))
-            .andExpect(jsonPath("$.data.hearingUploadBundle[1].id",
-                is("d090f7a0-5897-4577-a07f-2137483cb1f9")))
             .andExpect(jsonPath("$.data.hearingUploadBundle[1].value.hearingBundleFdr",
-                is("YES")));
+                is("Yes")));
 
     }
 
@@ -95,6 +104,7 @@ public class ContestedOrderControllerTest extends BaseControllerTest {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
 
         loadRequestContentWith(CONTESTED_VALIDATE_INVALID_DOC_JSON);
+        when(finremCallbackRequestDeserializer.deserialize(any())).thenReturn(getCallbackRequest(requestContent.toString()));
         mvc.perform(post("/case-orchestration//contested/sortUploadedHearingBundles")
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)

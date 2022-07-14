@@ -362,9 +362,10 @@ public class NotificationsController extends BaseController {
 
         uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest =
             finremCallbackRequestDeserializer.deserialize(source);
+        validateCaseData(callbackRequest);
 
         log.info("Received request to send email for 'Prepare for Hearing' for Case ID: {}", callbackRequest.getCaseDetails().getId());
-        validateCaseData(callbackRequest);
+
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         if (caseDetails.getCaseData().isApplicantSolicitorAgreeToReceiveEmails()) {
@@ -378,8 +379,9 @@ public class NotificationsController extends BaseController {
             notificationService.sendPrepareForHearingEmailRespondent(caseDetails);
         }
 
+        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         if (caseDetails.getCaseData().isContestedPaperApplication()) {
-            if (hearingDocumentService.alreadyHadFirstHearing(callbackRequest.getCaseDetailsBefore())) {
+            if (hearingDocumentService.alreadyHadFirstHearing(caseDetailsBefore)) {
                 log.info("Sending Additional Hearing Document to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
                 additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, caseDetails);
             } else {

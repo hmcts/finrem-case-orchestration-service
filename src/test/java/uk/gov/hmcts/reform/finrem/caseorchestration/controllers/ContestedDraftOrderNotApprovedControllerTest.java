@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedDraftOrderNotApprovedService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
@@ -22,7 +23,6 @@ import java.net.URISyntaxException;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -52,6 +52,7 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
     @MockBean private PaperNotificationService paperNotificationService;
     @MockBean private IdamService idamService;
     @MockBean private DocumentHelper documentHelper;
+    @MockBean private FinremCallbackRequestDeserializer finremCallbackRequestDeserializer;
 
     private static final String START_REFUSAL_ORDER_URL = "/case-orchestration/contested-application-not-approved-start";
     private static final String PREVIEW_REFUSAL_ORDER_URL = "/case-orchestration/documents/preview-refusal-order";
@@ -67,6 +68,7 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
     @Test
     public void startRefusalOrderPropertiesSuccess() throws Exception {
         refusalOrderStartControllerSetUp();
+        when(finremCallbackRequestDeserializer.deserialize(any())).thenReturn(getCallbackRequest());
         when(idamService.getIdamFullName(BEARER_TOKEN)).thenReturn("User Name");
 
         mvc.perform(post(START_REFUSAL_ORDER_URL)
@@ -74,16 +76,16 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
             .header(AUTHORIZATION_HEADER, BEARER_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data." + CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_TYPE, is(nullValue())))
-            .andExpect(jsonPath("$.data." + CONTESTED_APPLICATION_NOT_APPROVED_DATE, is(nullValue())))
-            .andExpect(jsonPath("$.data." + CONTESTED_APPLICATION_NOT_APPROVED_PREVIEW_DOCUMENT, is(nullValue())))
+            .andExpect(jsonPath("$.data." + CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_TYPE).doesNotExist())
+            .andExpect(jsonPath("$.data." + CONTESTED_APPLICATION_NOT_APPROVED_DATE).doesNotExist())
+            .andExpect(jsonPath("$.data." + CONTESTED_APPLICATION_NOT_APPROVED_PREVIEW_DOCUMENT).doesNotExist())
             .andExpect(jsonPath("$.data." + CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_NAME, is("User Name")));
     }
 
     @Test
     public void startRefusalOrderPropertiesBadRequest() throws Exception {
         doEmptyCaseDataSetUp();
-
+        when(finremCallbackRequestDeserializer.deserialize(any())).thenReturn(getCallbackRequestEmptyCaseData());
         mvc.perform(post(START_REFUSAL_ORDER_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, BEARER_TOKEN)
@@ -94,6 +96,7 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
     @Test
     public void startRefusalOrderPropertiesInternalServerError() throws Exception {
         refusalOrderStartControllerSetUp();
+        when(finremCallbackRequestDeserializer.deserialize(any())).thenReturn(getCallbackRequest());
         when(idamService.getIdamFullName(BEARER_TOKEN))
             .thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
@@ -113,6 +116,7 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
     @Test
     public void previewRefusalOrderSuccess() throws Exception {
         doValidCaseDataSetUp();
+        when(finremCallbackRequestDeserializer.deserialize(any())).thenReturn(getCallbackRequest());
 
         mvc.perform(post(PREVIEW_REFUSAL_ORDER_URL)
             .content(requestContent.toString())
@@ -127,6 +131,7 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
     @Test
     public void previewRefusalOrder400Error() throws Exception {
         doEmptyCaseDataSetUp();
+        when(finremCallbackRequestDeserializer.deserialize(any())).thenReturn(getCallbackRequestEmptyCaseData());
 
         mvc.perform(post(PREVIEW_REFUSAL_ORDER_URL)
             .content(requestContent.toString())
@@ -138,6 +143,7 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
     @Test
     public void previewRefusalOrder500Error() throws Exception {
         doValidCaseDataSetUp();
+        when(finremCallbackRequestDeserializer.deserialize(any())).thenReturn(getCallbackRequest());
         doThrow(feignError()).when(contestedDraftOrderNotApprovedService)
             .createAndSetRefusalOrderPreviewDocument(eq(AUTH_TOKEN), isA(FinremCaseDetails.class));
 
@@ -151,6 +157,7 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
     @Test
     public void submitRefusalOrderSuccess() throws Exception {
         doValidCaseDataSetUp();
+        when(finremCallbackRequestDeserializer.deserialize(any())).thenReturn(getCallbackRequest());
         whenServicePopulatesCollection().thenReturn(finremCaseDataWithRefusalOrder());
 
         mvc.perform(post(SUBMIT_REFUSAL_ORDER_URL)
@@ -164,7 +171,7 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
     @Test
     public void submitRefusalOrder400Error() throws Exception {
         doEmptyCaseDataSetUp();
-
+        when(finremCallbackRequestDeserializer.deserialize(any())).thenReturn(getCallbackRequestEmptyCaseData());
         mvc.perform(post(SUBMIT_REFUSAL_ORDER_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -175,6 +182,7 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
     @Test
     public void submitSendRefusalReasonWithRefusalAndShouldPrintForApplicantTrue() throws Exception {
         doValidRefusalOrder();
+        when(finremCallbackRequestDeserializer.deserialize(any())).thenReturn(getCallbackRequest());
         when(contestedDraftOrderNotApprovedService.getLatestRefusalReason(any())).thenReturn(Optional.of(newDocument()));
         when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
         when(paperNotificationService.shouldPrintForRespondent(any())).thenReturn(true);
@@ -191,6 +199,7 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
     @Test
     public void submitSendRefusalReasonWithRefusalAndShouldNotPrintForParties() throws Exception {
         doValidRefusalOrder();
+        when(finremCallbackRequestDeserializer.deserialize(any())).thenReturn(getCallbackRequest());
         when(contestedDraftOrderNotApprovedService.getLatestRefusalReason(any())).thenReturn(Optional.of(newDocument()));
         when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(false);
         when(paperNotificationService.shouldPrintForRespondent(any())).thenReturn(false);
@@ -207,6 +216,7 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
     @Test
     public void submitSendRefusalReasonWithNotRefusalReasonNotPrint() throws Exception {
         doValidCaseDataSetUpForPaperApplication();
+        when(finremCallbackRequestDeserializer.deserialize(any())).thenReturn(getCallbackRequest());
         mvc.perform(post(SUBMIT_REFUSAL_REASON_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)

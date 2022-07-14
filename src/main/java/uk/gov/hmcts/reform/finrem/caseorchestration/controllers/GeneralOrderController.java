@@ -47,10 +47,10 @@ public class GeneralOrderController extends BaseController {
         @NotNull @RequestBody @Parameter(description = "CaseData") String source) {
 
         CallbackRequest callback = finremCallbackRequestDeserializer.deserialize(source);
+        validateCaseData(callback);
 
         FinremCaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request for generating general order with Case ID: {}", caseDetails.getId());
-        validateCaseData(callback);
 
         service.createAndSetGeneralOrder(authorisationToken, caseDetails);
 
@@ -70,10 +70,10 @@ public class GeneralOrderController extends BaseController {
         @NotNull @RequestBody @Parameter(description = "CaseData") String source) {
 
         CallbackRequest callback = finremCallbackRequestDeserializer.deserialize(source);
+        validateCaseData(callback);
 
         FinremCaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request for storing general order with Case ID: {}", caseDetails.getId());
-        validateCaseData(callback);
 
         service.populateGeneralOrderCollection(caseDetails);
 

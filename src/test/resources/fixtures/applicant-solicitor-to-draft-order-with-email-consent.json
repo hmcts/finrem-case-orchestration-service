@@ -1,10 +1,11 @@
 {
   "token": "test_token",
-  "event_id": "event1",
+  "event_id": "FR_issueApplication",
   "case_details": {
     "id": "12345678",
     "jurisdiction": "divorce",
-    "state": "created",
+    "state": "caseAdded",
+    "case_type_id": "FinancialRemedyContested",
     "case_data": {
       "PBANumber": "PBA123456",
       "d81Question": "No",
@@ -42,7 +43,7 @@
         {
           "id": "1",
           "value": {
-            "typeOfDocument": "pdf",
+            "typeOfDocument": "Letter",
             "uploadedDocument": {
               "document_url": "http://file1",
               "document_filename": "file1",
@@ -75,7 +76,7 @@
         {
           "id": "1",
           "value": {
-            "typeOfDocument": "pdf",
+            "typeOfDocument": "Form PPF1",
             "uploadedDocument": {
               "document_url": "http://file1",
               "document_filename": "file1",
@@ -100,13 +101,13 @@
       "divorceStageReached": "Decree Nisi",
       "helpWithFeesQuestion": "No",
       "natureOfApplication2": [
-        "item1",
-        "item2"
+        "periodicalPaymentOrder",
+        "Pension Sharing Order"
       ],
       "natureOfApplication5": "No",
       "natureOfApplication6": [
-        "item1",
-        "item2"
+        "Step Child or Step Children",
+        "disability expenses"
       ],
       "natureOfApplication7": "test",
       "natureOfApplication3a": "test",
@@ -126,21 +127,21 @@
       "orderForChildrenQuestion1": "Yes",
       "solicitorAgreeToReceiveEmails": "Yes",
       "solicitorResponsibleForDraftingOrder": "applicantSolicitor",
-      "orderDirection": "test",
+      "orderDirection": "Order Accepted as drafted",
       "orderDirectionOpt1": {
         "document_url": "http://file1",
         "document_filename": "file1",
         "document_binary_url": "http://file1.binary"
       },
-      "orderDirectionAbsolute": "test",
-      "orderDirectionJudge": "test",
+      "orderDirectionAbsolute": "Yes",
+      "orderDirectionJudge": "His Honour Judge",
       "orderDirectionJudgeName": "test",
       "orderDirectionDate": "2010-01-01",
       "dueDate": "2010-01-01",
       "issueDate": "2010-01-01",
       "orderDirectionAddComments": "test",
       "orderDirectionOpt2": "test",
-      "assignedToJudgeReason": "test",
+      "assignedToJudgeReason": "Resubmitted draft consent order",
       "assignedToJudge": "judge1",
       "referToJudgeDate": "2010-01-01",
       "referToJudgeText": "test",
@@ -161,7 +162,7 @@
           "id": "1",
           "value": {
             "orderRefusal": [
-              "Other"
+              "Other (please specify)"
             ],
             "orderRefusalDate": "2003-02-01",
             "orderRefusalDocs": {
@@ -188,7 +189,7 @@
         {
           "id": "1",
           "value": {
-            "DocumentType": "pdf",
+            "DocumentType": "consentOrder",
             "DocumentLink": {
               "document_url": "http://doc1",
               "document_filename": "doc1",
@@ -205,7 +206,7 @@
         {
           "id": "1",
           "value": {
-            "DocumentType": "pdf",
+            "DocumentType": "generalOrder",
             "DocumentLink": {
               "document_url": "http://doc1",
               "document_filename": "doc1",
@@ -222,7 +223,7 @@
         {
           "id": "1",
           "value": {
-            "DocumentType": "pdf",
+            "DocumentType": "Application",
             "DocumentLink": {
               "document_url": "http://doc1",
               "document_filename": "doc1",
@@ -256,7 +257,7 @@
         {
           "id": "1",
           "value": {
-            "DocumentType": "pdf",
+            "DocumentType": "RespondentLetterEmail",
             "DocumentLink": {
               "document_url": "http://doc1",
               "document_filename": "doc1",

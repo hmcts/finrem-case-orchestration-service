@@ -29,7 +29,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
 @RequiredArgsConstructor
-public class RejectedOrderDocumentController {
+public class RejectedOrderDocumentController extends BaseController {
 
     private final RefusalOrderDocumentService refusalOrderDocumentService;
     private final FinremCallbackRequestDeserializer finremCallbackRequestDeserializer;
@@ -46,6 +46,7 @@ public class RejectedOrderDocumentController {
             @RequestBody @Parameter(description = "CaseData") String source) {
 
         CallbackRequest request = finremCallbackRequestDeserializer.deserialize(source);
+        validateCaseData(request);
 
         FinremCaseDetails caseDetails = request.getCaseDetails();
         log.info("Received request to generate 'Consent Order Not Approved' for Case ID: {}", caseDetails.getId());
@@ -72,6 +73,7 @@ public class RejectedOrderDocumentController {
             @RequestBody @Parameter(description = "CaseData") String source) {
 
         CallbackRequest request = finremCallbackRequestDeserializer.deserialize(source);
+        validateCaseData(request);
 
         log.info("Received request to preview generated 'Consent Order Not Approved' for Case ID: {}", request.getCaseDetails().getId());
         FinremCaseData caseData = refusalOrderDocumentService.previewConsentOrderNotApproved(authorisationToken, request.getCaseDetails());
