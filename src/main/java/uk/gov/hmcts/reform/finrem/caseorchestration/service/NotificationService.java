@@ -393,10 +393,6 @@ public class NotificationService {
             && YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED)));
     }
 
-    public boolean isApplicantSolicitorEmailCommunicationEnabled(CaseDetails caseDetails) {
-        return caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails);
-    }
-
     public boolean isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(CaseDetails caseDetails) {
         return caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)
             && checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails);

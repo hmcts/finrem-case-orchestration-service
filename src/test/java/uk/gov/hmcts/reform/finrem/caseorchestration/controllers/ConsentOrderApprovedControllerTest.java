@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
@@ -52,6 +53,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     @MockBean private ConsentOrderPrintService consentOrderPrintService;
     @MockBean private NotificationService notificationService;
     @MockBean private DocumentHelper documentHelper;
+    @MockBean private CaseDataService caseDataService;
 
     public String consentOrderApprovedEndpoint() {
         return "/case-orchestration/documents/consent-order-approved";
@@ -157,7 +159,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
-        when(notificationService.isApplicantSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
@@ -182,7 +184,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
-        when(notificationService.isApplicantSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
