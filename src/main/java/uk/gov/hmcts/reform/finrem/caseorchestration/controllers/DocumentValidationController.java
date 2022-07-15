@@ -62,11 +62,11 @@ public class DocumentValidationController extends BaseController {
 
     private AboutToStartOrSubmitCallbackResponse response(CallbackRequest callbackRequest, String field, String authorisationToken) {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        AboutToStartOrSubmitCallbackResponseBuilder builder = builder();
+        AboutToStartOrSubmitCallbackResponseBuilder builder = builder().data(caseData);
         if (nonNull(caseData.get(field))) {
             DocumentValidationResponse response = service.validateDocument(callbackRequest, field, authorisationToken);
             return builder.errors(response.getErrors()).build();
         }
-        return builder().build();
+        return builder.build();
     }
 }
