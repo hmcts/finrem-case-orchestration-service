@@ -117,6 +117,7 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.SolUploadDocument;
 import uk.gov.hmcts.reform.finrem.ccd.domain.SolUploadDocumentCollection;
 import uk.gov.hmcts.reform.finrem.ccd.domain.SolUploadDocumentType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.SolicitorToDraftOrder;
+import uk.gov.hmcts.reform.finrem.ccd.domain.StageReached;
 import uk.gov.hmcts.reform.finrem.ccd.domain.UploadAdditionalDocument;
 import uk.gov.hmcts.reform.finrem.ccd.domain.UploadAdditionalDocumentCollection;
 import uk.gov.hmcts.reform.finrem.ccd.domain.UploadConfidentialDocument;
@@ -206,6 +207,7 @@ public class FinremCallbackRequestDeserializerTest {
         setCallbackString(SOL_CONTEST_CALLBACK_REQUEST);
         CallbackRequest callbackRequest = callbackRequestDeserializer.deserialize(callback);
         FinremCaseData caseData = callbackRequest.getCaseDetails().getCaseData();
+        System.out.println(caseData);
         assertMiam(caseData);
         assertNotNull(callbackRequest);
         assertAmendedConsentOrderCollection(caseData);
@@ -372,6 +374,7 @@ public class FinremCallbackRequestDeserializerTest {
             JudgeType.DEPUTY_DISTRICT_JUDGE);
         assertEquals(caseData.getGeneralLetterWrapper().getGeneralLetterAddressTo(), GeneralLetterAddressToType.APPLICANT_SOLICITOR);
         assertEquals(caseData.getGeneralApplicationWrapper().getGeneralApplicationOutcome(), GeneralApplicationOutcome.NOT_APPROVED);
+        assertEquals(caseData.getDivorceStageReached(), StageReached.DECREE_NISI);
     }
 
     private void assertMiam(FinremCaseData caseData) {

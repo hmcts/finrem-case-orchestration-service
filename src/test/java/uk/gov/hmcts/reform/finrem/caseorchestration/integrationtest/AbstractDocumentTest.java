@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import org.junit.Before;
@@ -25,8 +26,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OptionIdToValueTranslator;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.delete;
@@ -77,11 +80,16 @@ public abstract class AbstractDocumentTest extends BaseTest {
 
     protected CallbackRequest request;
 
+    protected JsonNode requestContent;
+
     @Before
-    public void setUp() throws IOException {
+    public void setUp() throws Exception {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(getTestFixture())) {
             request = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         }
+
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource(getTestFixture()).toURI()));
     }
 
     protected String getTestFixture() {

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.isNull;
 import static org.springframework.util.ObjectUtils.isEmpty;
@@ -123,10 +124,12 @@ public class SendOrderContestedAboutToSubmitHandler implements CallbackHandler {
                     hearingDocumentPack.add(documentHelper.getDocumentAsBulkPrintDocument(caseDocument).orElse(null)));
         }
 
-        List<BulkPrintDocument> otherHearingDocuments = documentHelper.getDocumentsAsBulkPrintDocuments(
-            caseData.getHearingOrderOtherDocuments().stream()
+        List<Document> hearingOrderOtherDocs = Optional.ofNullable(caseData.getHearingOrderOtherDocuments())
+            .orElse(new ArrayList<>()).stream()
             .map(DocumentCollection::getValue)
-                .collect(Collectors.toList()));
+            .collect(Collectors.toList());
+
+        List<BulkPrintDocument> otherHearingDocuments = documentHelper.getDocumentsAsBulkPrintDocuments(hearingOrderOtherDocs);
 
         if (otherHearingDocuments != null) {
             hearingDocumentPack.addAll(otherHearingDocuments);

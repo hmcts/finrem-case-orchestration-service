@@ -39,7 +39,7 @@ public class GenerateMiniFormATest extends AbstractDocumentTest {
 
     void generateDocument() throws Exception {
         webClient.perform(MockMvcRequestBuilders.post(apiUrl())
-            .content(objectMapper.writeValueAsString(request))
+            .content(requestContent.toString())
             .header(AUTHORIZATION, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE)
             .accept(APPLICATION_JSON_VALUE))

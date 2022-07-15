@@ -90,6 +90,7 @@
       },
       "solicitorDXnumber": null,
       "appRespondentLName": "Korivi",
+      "respondentAddressConfidential": "No",
       "solicitorReference": "LL01",
       "appRespondentFMName": "test",
       "divorceStageReached": "Decree Nisi",

@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.EventType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.SendOrderEventPostStateOption;
+import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -108,9 +109,11 @@ public class SendOrderContestedSubmittedHandlerTest {
 
     @Test
     public void givenAgreedToReceiveEmails_WhenHandle_ThenSendContestOrderApprovedEmail() {
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+        CallbackRequest request = createCallbackRequestWithFinalOrder();
+        request.getCaseDetails().getCaseData().getContactDetailsWrapper()
+            .setApplicantSolicitorConsentForEmails(YesOrNo.YES);
 
-        sendOrderContestedSubmittedHandler.handle(createCallbackRequestWithFinalOrder(), AUTH_TOKEN);
+        sendOrderContestedSubmittedHandler.handle(request, AUTH_TOKEN);
 
         verify(notificationService).sendContestOrderApprovedEmailApplicant(any());
     }
@@ -154,7 +157,8 @@ public class SendOrderContestedSubmittedHandlerTest {
 
     private CallbackRequest buildCallbackRequest() {
         FinremCaseData caseData = new FinremCaseData();
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123L).caseData(caseData).build();
+        caseData.setCcdCaseType(CaseType.CONTESTED);
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().caseType(CaseType.CONTESTED).id(123L).caseData(caseData).build();
         return CallbackRequest.builder().eventType(EventType.PREPARE_FOR_HEARING).caseDetails(caseDetails).build();
     }
 

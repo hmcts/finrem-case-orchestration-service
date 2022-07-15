@@ -758,7 +758,7 @@
           }
         }
       ],
-      "nocParty": "Applicant",
+      "nocParty": "applicant",
       "generalApplicationReceivedFrom": "case",
       "generalApplicationDirectionsJudgeType": "Deputy District Judge",
       "generalApplicationCollection": [

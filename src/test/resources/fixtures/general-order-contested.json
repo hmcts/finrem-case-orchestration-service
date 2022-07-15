@@ -1,13 +1,14 @@
 {
   "token": "token_test",
-  "event_id": "some_event_id",
+  "event_id": "FR_issueApplication",
   "case_details": {
     "id": 1234567890,
     "jurisdiction": "DIVORCE",
-    "state": "applicationDrafted",
+    "state": "caseAdded",
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
       "PBANumber": "PBA123456",
+      "paperApplication": "Yes",
       "d81Question": "No",
       "PBAreference": "ABCD",
       "d81Applicant": {
@@ -84,7 +85,7 @@
       "generalOrderJudgeType": "Her Honour Judge",
       "generalOrderJudgeName": "Contested",
       "generalOrderRecitals": "Contested Recitals",
-      "generalOrderDate": "01/06/2020",
+      "generalOrderDate": "2020-06-01",
       "generalOrderBodyText": "Test is dummy text for contested",
       "generalOrderAddressTo": "applicant",
       "generalOrderPreviewDocument": {
@@ -108,7 +109,48 @@
         "document_url": "http://dm-store/lhjbyuivu87y989hijbb",
         "document_filename": "generalOrder.pdf",
         "document_binary_url": "http://dm-store/lhjbyuivu87y989hijbb/binary"
-      }
+      },
+      "additionalHearingDocuments": [
+        {
+          "value": {
+            "additionalHearingDocument": {
+              "document_url": "http://dm-store/lhjbyuivu87y989hijbb",
+              "document_filename": "generalOrder.pdf",
+              "document_binary_url": "http://dm-store/lhjbyuivu87y989hijbb/binary"
+            }
+          }
+        }
+      ],
+      "orderApprovedCoverLetter": {
+        "document_url": "http://dm-store/lhjbyuivu87y989hijbb",
+        "document_filename": "Other.pdf",
+        "document_binary_url": "http://dm-store/lhjbyuivu87y989hijbb/binary"
+      },
+      "latestDraftHearingOrder": {
+        "document_url": "http://dm-store/lhjbyuivu87y989hijbb",
+        "document_filename": "generalOrder.pdf",
+        "document_binary_url": "http://dm-store/lhjbyuivu87y989hijbb/binary"
+      },
+      "hearingOrderOtherDocuments": [
+        {
+          "value": {
+            "document_url": "http://dm-store/lhjbyuivu87y989hijbb",
+            "document_filename": "hearingOrderOtherDocuments.pdf",
+            "document_binary_url": "http://dm-store/lhjbyuivu87y989hijbb/binary"
+          }
+        }
+      ],
+      "uploadHearingOrder": [
+        {
+          "value": {
+            "uploadDraftDocument": {
+              "document_url": "http://dm-store/lhjbyuivu87y989hijbb",
+              "document_filename": "uploadHearingOrder.pdf",
+              "document_binary_url": "http://dm-store/lhjbyuivu87y989hijbb/binary"
+            }
+          }
+        }
+      ]
     }
   }
 }

@@ -67,7 +67,7 @@ public class UploadContestedCaseDocumentsHandlerTest extends CaseDocumentHandler
     public void givenUploadCaseDocument_When_IsValid_ThenExecuteHandlers() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        uploadDocumentList.add(createContestedUploadDocumentItem("Other", "applicant", YesOrNo.YES, YesOrNo.NO, "Other Example"));
+        uploadDocumentList.add(createContestedUploadDocumentItem("other", "applicant", YesOrNo.YES, YesOrNo.NO, "Other Example"));
         caseDetails.getCaseData().getUploadCaseDocumentWrapper().setUploadCaseDocument(uploadDocumentList);
         uploadContestedCaseDocumentsHandler.handle(callbackRequest, AUTH_TOKEN);
 
