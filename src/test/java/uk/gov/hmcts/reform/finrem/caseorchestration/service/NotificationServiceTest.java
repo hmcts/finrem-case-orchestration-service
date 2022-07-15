@@ -1221,6 +1221,49 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void isContestedAndApplicantSolicitorIsNotRegisteredOrAcceptingEmails() {
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(false);
+        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(false);
+
+        assertTrue(notificationService.isContestedApplicationAndApplicantOrRespondentSolicitorsIsNotRegisteredOrAcceptingEmails(any()));
+    }
+
+    @Test
+    public void isContestedAndApplicantAndRespondentSolicitorIsRegisteredAndAcceptingEmails() {
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(true);
+        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(true);
+
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, YES_VALUE);
+
+        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(true);
+        when(caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData)).thenReturn(true);
+        when(caseDataService.isPaperApplication(any())).thenReturn(false);
+        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
+
+        CaseDetails caseDetails = CaseDetails.builder().data(caseData).build();
+
+        assertFalse(notificationService.isContestedApplicationAndApplicantOrRespondentSolicitorsIsNotRegisteredOrAcceptingEmails(caseDetails));
+    }
+
+    @Test
+    public void isContestedAndRespondentSolicitorIsNotRegisteredOrAcceptingEmails() {
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(true);
+        when(caseDataService.isPaperApplication(any())).thenReturn(true);
+        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
+
+        Map<String, Object> caseData = new HashMap<>();
+        when(caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData)).thenReturn(false);
+        caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, null);
+        CaseDetails caseDetails = CaseDetails.builder().data(caseData).build();
+
+        assertTrue(notificationService.isContestedApplicationAndApplicantOrRespondentSolicitorsIsNotRegisteredOrAcceptingEmails(caseDetails));
+    }
+
+    @Test
     public void sendInterimHearingNotificationEmailToApplicantSolicitor() {
         CallbackRequest callbackRequest = buildInterimHearingCallbackRequest();
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();

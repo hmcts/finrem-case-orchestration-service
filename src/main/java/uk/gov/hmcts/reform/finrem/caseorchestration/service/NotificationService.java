@@ -415,6 +415,11 @@ public class NotificationService {
             && checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails);
     }
 
+    public boolean isContestedApplicationAndApplicantOrRespondentSolicitorsIsNotRegisteredOrAcceptingEmails(CaseDetails caseDetails) {
+        return caseDataService.isContestedApplication(caseDetails)
+            && (!isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)
+            || !isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails));
+    }
 
     private URI buildUri(String endPoint) {
         return fromHttpUrl(notificationServiceConfiguration.getUrl()
