@@ -405,8 +405,10 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         when(notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
         additionalHearingDocumentService.bulkPrintAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
 
-        verify(bulkPrintService, never()).printRespondentDocuments(any(), any(), any());
-        verify(bulkPrintService, never()).printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService, timeout(100).times(0))
+            .printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService, timeout(100).times(0))
+            .printApplicantDocuments(any(), any(), any());
     }
 
     @Test
@@ -433,7 +435,9 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         when(notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
         additionalHearingDocumentService.bulkPrintAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
 
-        verify(bulkPrintService, never()).printRespondentDocuments(any(), any(), any());
-        verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService, timeout(100).times(0))
+            .printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService, timeout(100).times(1))
+            .printApplicantDocuments(any(), any(), any());
     }
 }
