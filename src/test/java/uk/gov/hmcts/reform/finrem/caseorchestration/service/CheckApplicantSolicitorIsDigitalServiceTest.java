@@ -41,7 +41,7 @@ public class CheckApplicantSolicitorIsDigitalServiceTest {
         caseData.put(APPLICANT_REPRESENTED, YES_VALUE);
         caseData.put(APPLICANT_ORGANISATION_POLICY, OrganisationPolicy.builder()
             .orgPolicyCaseAssignedRole(APP_SOLICITOR_POLICY)
-            .organisation(Organisation.builder().organisationID("TestID").organisationName("TestName").build())
+            .organisation(Organisation.builder().organisationID("ORG1234").organisationName("TestName").build())
             .build());
         caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONTESTED).id(123L).data(caseData).build();
     }

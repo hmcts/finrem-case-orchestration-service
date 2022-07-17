@@ -42,7 +42,7 @@ public class CheckRespondentSolicitorIsDigitalServiceTest {
         caseData.put(CONTESTED_RESPONDENT_REPRESENTED, YES_VALUE);
         caseData.put(RESPONDENT_ORGANISATION_POLICY, OrganisationPolicy.builder()
             .orgPolicyCaseAssignedRole(RESP_SOLICITOR_POLICY)
-            .organisation(Organisation.builder().organisationID("TestIdResp").organisationName("TestName").build())
+            .organisation(Organisation.builder().organisationID("ORG1234").organisationName("TestName").build())
             .build());
         caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONTESTED).id(123L).data(caseData).build();
     }
