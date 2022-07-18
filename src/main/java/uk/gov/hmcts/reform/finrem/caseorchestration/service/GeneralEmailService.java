@@ -59,7 +59,6 @@ public class GeneralEmailService {
     }
 
     private List<GeneralEmail> convertToGeneralEmailList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<>() {
-        });
+        return objectMapper.convertValue(object, new TypeReference<>() {});
     }
 }
