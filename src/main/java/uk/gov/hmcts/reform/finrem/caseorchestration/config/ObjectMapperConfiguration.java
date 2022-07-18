@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
 import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
@@ -31,13 +30,11 @@ public class ObjectMapperConfiguration {
 
     @Bean
     public ObjectMapper objectMapper() {
-        ObjectMapper objectMapper = JsonMapper
-            .builder()
-            .addModule(new JavaTimeModule())
-            .addModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
+        ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .registerModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            .build();
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
         featureToggleSerialisation(objectMapper);
 
@@ -45,8 +42,7 @@ public class ObjectMapperConfiguration {
     }
 
     private void featureToggleSerialisation(ObjectMapper objectMapper) {
-        Map<Class, List<String>> fieldsIgnoredDuringSerialisation =
-            featureToggleService.getFieldsIgnoredDuringSerialisation();
+        Map<Class, List<String>> fieldsIgnoredDuringSerialisation = featureToggleService.getFieldsIgnoredDuringSerialisation();
         if (!fieldsIgnoredDuringSerialisation.isEmpty()) {
             objectMapper.registerModule(makeSimpleModuleWithCustomBeanSerializerModifier());
         }
@@ -59,8 +55,7 @@ public class ObjectMapperConfiguration {
                 super.setupModule(context);
                 context.addBeanSerializerModifier(new BeanSerializerModifier() {
                     @Override
-                    public List<BeanPropertyWriter> changeProperties(SerializationConfig config,
-                                                                     BeanDescription beanDesc,
+                    public List<BeanPropertyWriter> changeProperties(SerializationConfig config, BeanDescription beanDesc,
                                                                      List<BeanPropertyWriter> beanProperties) {
                         return removeIgnoredFieldsBeanProperties(beanProperties);
                     }
@@ -70,14 +65,14 @@ public class ObjectMapperConfiguration {
     }
 
     private List<BeanPropertyWriter> removeIgnoredFieldsBeanProperties(List<BeanPropertyWriter> beanProperties) {
-        Map<Class, List<String>> fieldsIgnoredDuringSerialisation =
-            featureToggleService.getFieldsIgnoredDuringSerialisation();
+        Map<Class, List<String>> fieldsIgnoredDuringSerialisation = featureToggleService.getFieldsIgnoredDuringSerialisation();
         Set<Class> classesWithIgnoredFields = fieldsIgnoredDuringSerialisation.keySet();
-        return beanProperties.stream().filter(beanPropertyWriter -> {
-            Class beanDeclaringClass = beanPropertyWriter.getMember().getDeclaringClass();
-            return !classesWithIgnoredFields.contains(beanDeclaringClass) || !fieldsIgnoredDuringSerialisation
-                .get(beanDeclaringClass)
-                .contains(beanPropertyWriter.getName());
-        }).collect(Collectors.toList());
+        return beanProperties.stream()
+            .filter(beanPropertyWriter -> {
+                Class beanDeclaringClass = beanPropertyWriter.getMember().getDeclaringClass();
+                return !classesWithIgnoredFields.contains(beanDeclaringClass)
+                    || !fieldsIgnoredDuringSerialisation.get(beanDeclaringClass).contains(beanPropertyWriter.getName());
+            })
+            .collect(Collectors.toList());
     }
 }

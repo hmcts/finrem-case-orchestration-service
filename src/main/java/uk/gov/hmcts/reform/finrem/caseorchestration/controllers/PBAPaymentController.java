@@ -1,8 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.google.common.collect.ImmutableList;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -63,10 +63,10 @@ public class PBAPaymentController extends BaseController {
 
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/pba-payment", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Handles PBA Payments for Consented and Contested Journeys")
+    @ApiOperation(value = "Handles PBA Payments for Consented and Contested Journeys")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> pbaPayment(
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
-        @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callbackRequest) {
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request for PBA payment for consented for Case ID: {}", caseDetails.getId());
@@ -97,10 +97,10 @@ public class PBAPaymentController extends BaseController {
 
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/assign-applicant-solicitor", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Handles assign applicant solicitor call")
+    @ApiOperation(value = "Handles assign applicant solicitor call")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> applicantOrganisationCheck(
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
-        @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callbackRequest) {
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request for assign applicant solicitor for Case ID: {}", caseDetails.getId());

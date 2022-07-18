@@ -1,11 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
+
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -41,16 +40,16 @@ public class CcdCallbackController {
 
 
     @PostMapping(path = "/ccdAboutToStartEvent")
-    @Operation(summary = "Handles AboutToStart callback requests from CCD")
+    @ApiOperation(value = "Handles AboutToStart callback requests from CCD")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Callback was processed successfully or in case of an error message is attached to the case",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
-        @ApiResponse(responseCode = "400", description = "Bad Request"),
-        @ApiResponse(responseCode = "500", description = "Internal Server Error")})
+        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
+            response = AboutToStartOrSubmitCallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request"),
+        @ApiResponse(code = 500, message = "Internal Server Error")
+    })
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> ccdAboutToStart(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callbackRequest) {
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) {
 
         log.info("About to start Financial Remedy case callback `{}` received for Case ID `{}`",
             callbackRequest.getEventId(),
@@ -62,16 +61,16 @@ public class CcdCallbackController {
     }
 
     @PostMapping(path = "/ccdAboutToSubmitEvent")
-    @Operation(summary = "Handles AboutToSubmit callback requests from CCD")
+    @ApiOperation(value = "Handles AboutToSubmit callback requests from CCD")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Callback was processed successfully or in case of an error message is attached to the case",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
-        @ApiResponse(responseCode = "400", description = "Bad Request"),
-        @ApiResponse(responseCode = "500", description = "Internal Server Error")})
+        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
+            response = AboutToStartOrSubmitCallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request"),
+        @ApiResponse(code = 500, message = "Internal Server Error")
+    })
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> ccdAboutToSubmit(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callbackRequest) {
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) {
 
         log.info("About to submit Financial Remedy case callback `{}` received for Case ID `{}`",
             callbackRequest.getEventId(),
@@ -83,16 +82,16 @@ public class CcdCallbackController {
     }
 
     @PostMapping(path = "/ccdMidEvent")
-    @Operation(summary = "Handles MidEvent callback requests from CCD")
+    @ApiOperation(value = "Handles MidEvent callback requests from CCD")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Callback was processed successfully or in case of an error message is attached to the case",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
-        @ApiResponse(responseCode = "400", description = "Bad Request"),
-        @ApiResponse(responseCode = "500", description = "Internal Server Error")})
+        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
+            response = AboutToStartOrSubmitCallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request"),
+        @ApiResponse(code = 500, message = "Internal Server Error")
+    })
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> ccdMidEvent(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callbackRequest) {
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) {
 
         log.info("Mid Event Financial Remedy case callback `{}` received for Case ID `{}`",
             callbackRequest.getEventId(),
@@ -104,16 +103,16 @@ public class CcdCallbackController {
     }
 
     @PostMapping(path = "/ccdSubmittedEvent")
-    @Operation(summary = "Handles Submitted callback requests from CCD")
+    @ApiOperation(value = "Handles Submitted callback requests from CCD")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Callback was processed successfully or in case of an error message is attached to the case",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
-        @ApiResponse(responseCode = "400", description = "Bad Request"),
-        @ApiResponse(responseCode = "500", description = "Internal Server Error")})
+        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
+            response = AboutToStartOrSubmitCallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request"),
+        @ApiResponse(code = 500, message = "Internal Server Error")
+    })
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> ccdSubmittedEvent(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callbackRequest) {
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) {
 
         log.info("Submitted Financial Remedy case callback `{}` received for Case ID `{}`",
             callbackRequest.getEventId(),
