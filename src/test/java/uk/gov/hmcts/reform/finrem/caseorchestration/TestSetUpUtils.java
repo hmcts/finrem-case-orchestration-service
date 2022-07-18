@@ -246,6 +246,15 @@ public class TestSetUpUtils {
 
     public static CaseDetails defaultContestedCaseDetails() {
         Map<String, Object> caseData = new HashMap<>();
+        List<String> natureOfApplication =  List.of("Lump Sum Order",
+            "Periodical Payment Order",
+            "Pension Sharing Order",
+            "Pension Attachment Order",
+            "Pension Compensation Sharing Order",
+            "Pension Compensation Attachment Order",
+            "A settlement or a transfer of property",
+            "Property Adjustment Order");
+        caseData.put("natureOfApplication2", natureOfApplication);
         populateApplicantNameAndAddress(caseData);
         populateRespondentNameAndAddressContested(caseData);
         populateCourtDetails(caseData);

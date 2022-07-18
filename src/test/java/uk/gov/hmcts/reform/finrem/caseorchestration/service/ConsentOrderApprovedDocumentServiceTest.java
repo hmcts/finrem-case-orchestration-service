@@ -86,8 +86,6 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     @Value("${document.approvedConsentOrderFileName}")
     private String documentApprovedConsentOrderFileName;
 
-    @Value("${document.approvedVariationOrderTemplate}")
-    private String approvedVariationOrderTemplate;
     @Value("${document.approvedVariationOrderFileName}")
     private String approvedVariationOrderFileName;
 
@@ -107,9 +105,6 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
         when(documentClientMock.generatePdf(matchDocumentGenerationRequestTemplateAndFilename(documentBulkPrintTemplate,
             documentBulkPrintFileName), anyString())).thenReturn(defaultCoversheet);
-
-        when(documentClientMock.generatePdf(matchDocumentGenerationRequestTemplateAndFilename(approvedVariationOrderTemplate,
-            approvedVariationOrderFileName), anyString())).thenReturn(variationDocument());
 
         when(documentClientMock.generatePdf(matchDocumentGenerationRequestTemplateAndFilename(documentApprovedConsentOrderTemplate,
             documentApprovedConsentOrderFileName), anyString())).thenReturn(document());
@@ -134,6 +129,8 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     @Test
     public void shouldGenerateApprovedVariationOrderLetterForConsented() {
         caseDetails = defaultConsentedCaseDetailsForVariationOrder();
+        when(documentClientMock.generatePdf(matchDocumentGenerationRequestTemplateAndFilename(documentApprovedConsentOrderTemplate,
+            approvedVariationOrderFileName), anyString())).thenReturn(variationDocument());
         CaseDocument caseDocument = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, AUTH_TOKEN);
 
         assertThat(caseDocument.getDocumentFilename(), is(VARIATION_FILE_NAME));
@@ -141,7 +138,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         assertThat(caseDocument.getDocumentBinaryUrl(), is(BINARY_URL));
 
         verify(documentClientMock, atLeastOnce()).generatePdf(
-            matchDocumentGenerationRequestTemplateAndFilename(approvedVariationOrderTemplate, approvedVariationOrderFileName),
+            matchDocumentGenerationRequestTemplateAndFilename(documentApprovedConsentOrderTemplate, approvedVariationOrderFileName),
             anyString());
     }
 
