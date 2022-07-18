@@ -1,9 +1,11 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
 
+@Slf4j
 @RequiredArgsConstructor
 public enum EventType {
 
@@ -28,6 +30,7 @@ public enum EventType {
     }
 
     public static EventType getEventType(String ccdType) {
+        log.info("Event type to process {}", ccdType);
         return Arrays.stream(EventType.values())
             .filter(eventTypeValue -> eventTypeValue.ccdType.equals(ccdType))
             .findFirst().orElseThrow(IllegalArgumentException::new);
