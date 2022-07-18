@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Before;
 import org.junit.Test;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -22,13 +20,12 @@ public class ApplicantCaseSummariesHandlerTest extends CaseDocumentHandlerTest {
     private CaseDetails caseDetails;
     private Map<String, Object> caseData;
     private final List<ContestedUploadedDocumentData> uploadDocumentList = new ArrayList<>();
-    private final ObjectMapper mapper = new ObjectMapper();
 
     ApplicantCaseSummariesHandler applicantCaseSummariesHandler = new ApplicantCaseSummariesHandler(mapper);
 
     @Before
     public void setUp() {
-        mapper.registerModule(new JavaTimeModule());
+        super.setUp();
         caseDetails = buildCaseDetails();
         caseData = caseDetails.getData();
     }
