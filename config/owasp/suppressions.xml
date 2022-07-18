@@ -46,4 +46,10 @@
         <packageUrl regex="true">^pkg:maven/com.ibm.icu/icu4j@.*$</packageUrl>
         <cve>CVE-2018-18928</cve>
     </suppress>
+
+    <suppress until="2022-09-15">
+        <notes><![CDATA[ file name: spring-cloud-commons-2.1.1.RELEASE.jar]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework\.cloud/spring\-cloud\-commons@.*$</packageUrl>
+        <cve>CVE-2022-31569</cve>
+    </suppress>
 </suppressions>
