@@ -13,6 +13,8 @@ public enum EventType {
     SOLICITOR_CREATE("FR_solicitorCreate"),
     AMEND_APP_DETAILS("FR_amendApplicationDetails"),
     AMEND_CONTESTED_APP_DETAILS("FR_amendApplication"),
+    AMEND_CONSENT_ORDER("FR_amendedConsentOrder"),
+    RESPOND_TO_ORDER("FR_respondToOrder"),
     AMEND_CASE("FR_amendCase"),
     APPROVE_ORDER("FR_approveApplication"),
     REJECT_ORDER("FR_orderRefusal"),

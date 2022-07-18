@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
@@ -50,7 +51,44 @@ public abstract class BaseServiceTest extends BaseTest {
 
     protected CaseDetails buildCaseDetails() {
         Map<String, Object> caseData = new HashMap<>();
+        List<String> natureOfApplication =  List.of("Lump Sum Order",
+            "Periodical Payment Order",
+            "Pension Sharing Order",
+            "Pension Attachment Order",
+            "Pension Compensation Sharing Order",
+            "Pension Compensation Attachment Order",
+            "A settlement or a transfer of property",
+            "Property Adjustment Order");
+        caseData.put("natureOfApplication2", natureOfApplication);
         return CaseDetails.builder().id(Long.valueOf(123)).caseTypeId(CASE_TYPE_ID_CONTESTED).data(caseData).build();
+    }
+
+    protected CallbackRequest getConsentedCallbackRequestForVariationOrder() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(SOLICITOR_EMAIL, TEST_SOLICITOR_EMAIL);
+        caseData.put(CONSENTED_SOLICITOR_NAME, TEST_SOLICITOR_NAME);
+        caseData.put(SOLICITOR_REFERENCE, TEST_SOLICITOR_REFERENCE);
+        caseData.put(RESP_SOLICITOR_EMAIL, TEST_RESP_SOLICITOR_EMAIL);
+        caseData.put(RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_NAME);
+        caseData.put(RESP_SOLICITOR_REFERENCE, TEST_RESP_SOLICITOR_REFERENCE);
+        caseData.put(DIVORCE_CASE_NUMBER, TEST_DIVORCE_CASE_NUMBER);
+        List<String> natureOfApplication =  List.of("Lump Sum Order",
+            "Periodical Payment Order",
+            "Pension Sharing Order",
+            "Pension Attachment Order",
+            "Pension Compensation Sharing Order",
+            "Pension Compensation Attachment Order",
+            "A settlement or a transfer of property",
+            "Variation Order",
+            "Property Adjustment Order");
+        caseData.put("natureOfApplication2", natureOfApplication);
+        return CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                .caseTypeId(CASE_TYPE_ID_CONSENTED)
+                .id(12345L)
+                .data(caseData)
+                .build())
+            .build();
     }
 
     protected CallbackRequest getConsentedCallbackRequest() {
@@ -62,6 +100,15 @@ public abstract class BaseServiceTest extends BaseTest {
         caseData.put(RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_NAME);
         caseData.put(RESP_SOLICITOR_REFERENCE, TEST_RESP_SOLICITOR_REFERENCE);
         caseData.put(DIVORCE_CASE_NUMBER, TEST_DIVORCE_CASE_NUMBER);
+        List<String> natureOfApplication =  List.of("Lump Sum Order",
+            "Periodical Payment Order",
+            "Pension Sharing Order",
+            "Pension Attachment Order",
+            "Pension Compensation Sharing Order",
+            "Pension Compensation Attachment Order",
+            "A settlement or a transfer of property",
+            "Property Adjustment Order");
+        caseData.put("natureOfApplication2", natureOfApplication);
         return CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
                 .caseTypeId(CASE_TYPE_ID_CONSENTED)
@@ -81,6 +128,15 @@ public abstract class BaseServiceTest extends BaseTest {
         caseData.put(RESP_SOLICITOR_REFERENCE, TEST_RESP_SOLICITOR_REFERENCE);
         caseData.put(DIVORCE_CASE_NUMBER, TEST_DIVORCE_CASE_NUMBER);
         caseData.put(INCLUDES_REPRESENTATIVE_UPDATE, YES_VALUE);
+        List<String> natureOfApplication =  List.of("Lump Sum Order",
+            "Periodical Payment Order",
+            "Pension Sharing Order",
+            "Pension Attachment Order",
+            "Pension Compensation Sharing Order",
+            "Pension Compensation Attachment Order",
+            "A settlement or a transfer of property",
+            "Property Adjustment Order");
+        caseData.put("natureOfApplication2", natureOfApplication);
         return CallbackRequest.builder()
             .eventId(UPDATE_CONTACT_DETAILS_EVENT)
             .caseDetails(CaseDetails.builder()

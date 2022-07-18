@@ -13,7 +13,7 @@ public class NotificationRequestTest {
     public void shouldReturnNotificationRequestData() {
         underTest = new NotificationRequest("12345", "67890", "D123",
             "Padmaja", "test@test.com", "nottingham", "consented", "general body",
-            CTSC_OPENING_HOURS);
+            CTSC_OPENING_HOURS,"consent");
         assertEquals("12345", underTest.getCaseReferenceNumber());
         assertEquals("67890", underTest.getSolicitorReferenceNumber());
         assertEquals("D123", underTest.getDivorceCaseNumber());
@@ -23,6 +23,7 @@ public class NotificationRequestTest {
         assertEquals("consented", underTest.getCaseType());
         assertEquals("general body", underTest.getGeneralEmailBody());
         assertEquals(CTSC_OPENING_HOURS, underTest.getPhoneOpeningHours());
+        assertEquals("consent", underTest.getCaseOrderType());
     }
 
     @Test

@@ -34,6 +34,13 @@ public class ConsentOrderController extends BaseController {
     private final ConsentOrderService consentOrderService;
     private final IdamService idamService;
 
+
+    /**
+     * This endpoint is moved to SolicitorCreateConsentedAboutToSubmitHandler.java.
+     * @deprecated
+     * This method will be removed in future versions.
+     */
+    @Deprecated(since = "18-July-2022", forRemoval = true)
     @PostMapping(path = "/update-latest-consent-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "CCD Callback to update the latest Consent Order details")
     @ApiResponses(value = {

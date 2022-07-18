@@ -36,6 +36,7 @@ public class ConsentedApplicationHelper {
 
     public Boolean isVariationOrder(final Map<String, Object> caseData) {
         List<String> natureOfApplicationList = (List<String>) caseData.get("natureOfApplication2");
+        log.info("Nature list {}", natureOfApplicationList);
         return (!natureOfApplicationList.isEmpty() && natureOfApplicationList.contains("Variation Order"));
     }
 }

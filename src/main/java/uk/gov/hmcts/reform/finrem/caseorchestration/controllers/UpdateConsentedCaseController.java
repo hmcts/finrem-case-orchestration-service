@@ -61,6 +61,13 @@ public class UpdateConsentedCaseController extends BaseController {
 
     @Autowired private FeatureToggleService featureToggleService;
 
+
+    /**
+     * This endpoint is moved to AmendApplicationAboutToSubmitHandler.java.
+     * @deprecated
+     * This method will be removed in future versions.
+     */
+    @Deprecated(since = "18-July-2022", forRemoval = true)
     @PostMapping(path = "/update-case", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles update case details and cleans up the data fields based on the options chosen for Consented Cases")
     @ApiResponses(value = {

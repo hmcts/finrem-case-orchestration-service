@@ -29,4 +29,6 @@ public class NotificationRequest {
     private String generalEmailBody;
     @JsonProperty("phoneOpeningHours")
     private String phoneOpeningHours;
+    @JsonProperty("caseOrderType")
+    private String caseOrderType;
 }

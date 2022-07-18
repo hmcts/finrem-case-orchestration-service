@@ -31,6 +31,12 @@ public class RejectedOrderDocumentController {
 
     private final RefusalOrderDocumentService refusalOrderDocumentService;
 
+    /**
+     * This endpoint is moved to RejectedConsentOrderAboutToSubmitHandler.java.
+     * @deprecated
+     * This method will be removed in future versions.
+     */
+    @Deprecated(since = "18-July-2022", forRemoval = true)
     @PostMapping(path = "/documents/consent-order-not-approved", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles Consent Order Not Approved Order Generation. Serves as a callback from CCD")
     @ApiResponses(value = {
