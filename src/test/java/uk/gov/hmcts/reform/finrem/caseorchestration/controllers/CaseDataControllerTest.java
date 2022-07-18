@@ -299,20 +299,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldSuccessfullySetDefaultValue() throws Exception {
-        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
-        when(caseDataService.isContestedApplication(any())).thenReturn(true);
-
-        loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
-        mvc.perform(post("/case-orchestration/default-values")
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.civilPartnership", is(NO_VALUE)));
-    }
-
-    @Test
     public void shouldSuccessfullySetOrgPolicies() throws Exception {
 
         loadRequestContentWith(PATH + "no-org-policies.json");
