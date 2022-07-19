@@ -123,7 +123,7 @@ public class HearingOrderService {
         caseData.put(LATEST_DRAFT_HEARING_ORDER, stampedHearingOrder);
     }
 
-    private void updateCaseDataForLatestHearingOrderCollection(Map<String, Object> caseData, CaseDocument stampedHearingOrder) {
+    public void updateCaseDataForLatestHearingOrderCollection(Map<String, Object> caseData, CaseDocument stampedHearingOrder) {
         List<HearingOrderCollectionData> finalOrderCollection = Optional.ofNullable(documentHelper.getFinalOrderDocuments(caseData))
             .orElse(new ArrayList<>());
 
