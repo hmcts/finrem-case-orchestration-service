@@ -86,7 +86,7 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
 
         ApprovedOrder approvedOrder = approvedOrderBuilder.build();
 
-        if (!documentHelper.getPensionDocumentsData(caseData).isEmpty()) {
+        if (Boolean.FALSE.equals(pensionDocumentsExists(caseData))) {
             log.info("Pension Documents not empty for case - stamping Pension Documents and adding to approvedOrder for case {}",
                 caseDetails.getId());
 
@@ -104,7 +104,7 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
 
         log.info("Successfully generated documents for 'Consent Order Approved' for case {}", caseDetails.getId());
 
-        if (documentHelper.getPensionDocumentsData(caseData).isEmpty()) {
+        if (Boolean.TRUE.equals(pensionDocumentsExists(caseData))) {
             log.info("Case {} has no pension documents, updating status to {} and sending for bulk print",
                 caseDetails.getId(),
                 CONSENT_ORDER_MADE);
@@ -137,5 +137,10 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
 
     private List<PensionCollectionData> getPensionDocuments(Map<String, Object> caseData) {
         return mapper.convertValue(caseData.get(PENSION_DOCS_COLLECTION), new TypeReference<>() {});
+    }
+
+    private Boolean pensionDocumentsExists(Map<String, Object> caseData) {
+        List<CaseDocument> pensionDocumentsData = documentHelper.getPensionDocumentsData(caseData);
+        return pensionDocumentsData.isEmpty();
     }
 }
