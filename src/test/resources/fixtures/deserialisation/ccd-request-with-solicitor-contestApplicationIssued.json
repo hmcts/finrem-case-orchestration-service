@@ -893,6 +893,12 @@
         "AddressLine2": "line2",
         "AddressLine3": "line3"
       },
+      "AddressConfidential": "Yes",
+      "applicantAddressConfidential": "Yes",
+      "respondentAddressConfidential": "Yes",
+      "respondentAddressHidden": "Yes",
+      "applicantAddressHidden": "Yes",
+      "updateIncludesRepresentativeChange": "Yes",
       "solicitorAgreeToReceiveEmails": "Yes",
       "solicitorDXnumber": "string",
       "solicitorEmail": "email@hmcts.net",

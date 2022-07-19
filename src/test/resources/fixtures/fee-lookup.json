@@ -1,6 +1,7 @@
 {
   "token": "token_test",
   "event_id": "FR_issueApplication",
+  "id": 123456789,
   "case_details": {
     "jurisdiction": "DIVORCE",
     "state": "caseAdded",

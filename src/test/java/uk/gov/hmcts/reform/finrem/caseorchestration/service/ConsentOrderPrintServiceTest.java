@@ -261,8 +261,8 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         final String consentedBulkPrintConsentOrderNotApprovedJson
             = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
         FinremCaseDetails caseDetails = finremCaseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
-        caseDetails.getCaseData().getContactDetailsWrapper().setApplicantAddressConfidential(YesOrNo.YES);
-        caseDetails.getCaseData().getContactDetailsWrapper().setRespondentAddressConfidential(YesOrNo.YES);
+        caseDetails.getCaseData().getContactDetailsWrapper().setApplicantAddressHiddenFromRespondent(YesOrNo.YES);
+        caseDetails.getCaseData().getContactDetailsWrapper().setRespondentAddressHiddenFromApplicant(YesOrNo.YES);
 
         when(coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
         when(coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);

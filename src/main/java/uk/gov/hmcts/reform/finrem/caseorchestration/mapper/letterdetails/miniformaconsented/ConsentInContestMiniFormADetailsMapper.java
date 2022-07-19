@@ -25,17 +25,33 @@ public class ConsentInContestMiniFormADetailsMapper extends AbstractLetterDetail
 
     @Override
     public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtListWrapper courtList) {
+        FinremCaseData caseData = caseDetails.getCaseData();
+        MiniFormADetails.MiniFormADetailsBuilder builder = setApplicantFields(MiniFormADetails.builder(), caseDetails);
+        builder = setRespondentFields(builder, caseDetails);
+        builder = setNatureApplicationFields(builder, caseData);
+        builder = setOtherData(builder, caseData);
+        return builder.build();
+    }
+
+    private MiniFormADetails.MiniFormADetailsBuilder setApplicantFields(MiniFormADetails.MiniFormADetailsBuilder builder,
+                                                                        FinremCaseDetails caseDetails) {
         ContactDetailsWrapper contactDetails = caseDetails.getCaseData().getContactDetailsWrapper();
         FinremCaseData caseData = caseDetails.getCaseData();
-        return MiniFormADetails.builder()
+        return builder
             .applicantFmName(contactDetails.getApplicantFmName())
             .applicantLName(contactDetails.getApplicantLname())
             .appRespondentFmName(contactDetails.getRespondentFmName())
             .appRespondentLName(contactDetails.getRespondentLname())
             .solicitorName(caseData.getApplicantSolicitorName())
             .solicitorAddress(caseData.getApplicantSolicitorAddress())
-            .solicitorFirm(contactDetails.getApplicantSolicitorFirm())
-            .solicitorReference(contactDetails.getSolicitorReference())
+            .solicitorFirm(contactDetails.getApplicantSolicitorFirm());
+    }
+
+    private MiniFormADetails.MiniFormADetailsBuilder setRespondentFields(MiniFormADetails.MiniFormADetailsBuilder builder,
+                                                                         FinremCaseDetails caseDetails) {
+        ContactDetailsWrapper contactDetails = caseDetails.getCaseData().getContactDetailsWrapper();
+        FinremCaseData caseData = caseDetails.getCaseData();
+        return builder
             .respondentSolicitorAddress(contactDetails.getRespondentSolicitorAddress())
             .respondentSolicitorEmail(contactDetails.getRespondentSolicitorEmail())
             .respondentSolicitorName(caseData.getRespondentSolicitorName())
@@ -46,35 +62,43 @@ public class ConsentInContestMiniFormADetailsMapper extends AbstractLetterDetail
             .respondentEmail(contactDetails.getRespondentEmail())
             .respondentPhone(contactDetails.getRespondentPhone())
             .appRespondentRep(contactDetails.getContestedRespondentRepresented().getYesOrNo())
-            .authorisation2b(caseData.getAuthorisation2b())
-            .authorisation3(String.valueOf(caseData.getAuthorisation3()))
-            .authorisationName(caseData.getAuthorisationName())
-            .authorisationFirm(caseData.getAuthorisationFirm())
+            .respondentAddressConfidential(contactDetails.getRespondentAddressHiddenFromApplicant().getYesOrNo());
+    }
+
+    private MiniFormADetails.MiniFormADetailsBuilder setNatureApplicationFields(MiniFormADetails.MiniFormADetailsBuilder builder,
+                                                                                FinremCaseData caseData) {
+
+        return builder
             .natureOfApplication2(getNatureOfApplication2ListAsString(caseData))
             .natureOfApplication3a(caseData.getConsentOrderWrapper().getConsentNatureOfApplicationAddress())
             .natureOfApplication3b(caseData.getConsentOrderWrapper().getConsentNatureOfApplicationMortgage())
             .natureOfApplication5(caseData.getConsentOrderWrapper().getConsentNatureOfApplication5().getYesOrNo())
             .natureOfApplication6(getNatureOfApplication6ListAsString(caseData))
-            .natureOfApplication7(caseData.getConsentOrderWrapper().getConsentNatureOfApplication7())
+            .natureOfApplication7(caseData.getConsentOrderWrapper().getConsentNatureOfApplication7());
+    }
+
+    private MiniFormADetails.MiniFormADetailsBuilder setOtherData(MiniFormADetails.MiniFormADetailsBuilder builder,
+                                                                  FinremCaseData caseData) {
+        return builder
+            .authorisation2b(caseData.getAuthorisation2b())
+            .authorisation3(String.valueOf(caseData.getAuthorisation3()))
+            .authorisationName(caseData.getAuthorisationName())
+            .authorisationFirm(caseData.getAuthorisationFirm())
             .issueDate(String.valueOf(caseData.getIssueDate()))
             .divorceCaseNumber(caseData.getDivorceCaseNumber())
-            .orderForChildrenQuestion1(caseData.getConsentOrderWrapper().getConsentOrderForChildrenQuestion1().getYesOrNo())
-            .respondentAddressConfidential(contactDetails.getRespondentAddressConfidential().getYesOrNo())
-            .build();
+            .orderForChildrenQuestion1(caseData.getConsentOrderWrapper().getConsentOrderForChildrenQuestion1().getYesOrNo());
     }
 
     private List<String> getNatureOfApplication2ListAsString(FinremCaseData caseData) {
-        List<NatureApplication> natureOfApplication2List = caseData.getConsentOrderWrapper()
-            .getConsentNatureOfApplicationChecklist();
-        return natureOfApplication2List.stream()
+        return  caseData.getConsentOrderWrapper().getConsentNatureOfApplicationChecklist()
+            .stream()
             .map(NatureApplication::getText)
             .collect(Collectors.toList());
     }
 
     private List<String> getNatureOfApplication6ListAsString(FinremCaseData caseData) {
-        List<ConsentNatureOfApplication> childrenOrders = caseData.getConsentOrderWrapper()
-            .getConsentNatureOfApplication6();
-        return childrenOrders.stream()
+        return caseData.getConsentOrderWrapper().getConsentNatureOfApplication6()
+            .stream()
             .map(ConsentNatureOfApplication::getId)
             .collect(Collectors.toList());
     }

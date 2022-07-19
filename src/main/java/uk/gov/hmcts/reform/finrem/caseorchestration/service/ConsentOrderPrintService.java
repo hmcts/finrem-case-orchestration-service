@@ -50,7 +50,7 @@ public class ConsentOrderPrintService {
         UUID respondentLetterId = sendConsentOrderForBulkPrintRespondent(respondentCoverSheet, caseDetails, authorisationToken);
         FinremCaseData caseData = caseDetails.getCaseData();
 
-        if (caseData.getContactDetailsWrapper().getRespondentAddressConfidential().isYes()) {
+        if (caseData.getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant().isYes()) {
             log.info("Case {}, has been marked as confidential. Adding coversheet to confidential field", caseDetails.getId());
             caseData.setBulkPrintCoverSheetRes(null);
             caseData.setBulkPrintCoverSheetResConfidential(respondentCoverSheet);

@@ -25,7 +25,6 @@ public class MiniFormADetailsMapper extends AbstractLetterDetailsMapper {
     public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtListWrapper courtList) {
         ContactDetailsWrapper contactDetails = caseDetails.getCaseData().getContactDetailsWrapper();
         FinremCaseData caseData = caseDetails.getCaseData();
-        System.out.println(caseData);
         return MiniFormADetails.builder()
             .applicantFmName(contactDetails.getApplicantFmName())
             .applicantLName(contactDetails.getApplicantLname())
@@ -58,7 +57,7 @@ public class MiniFormADetailsMapper extends AbstractLetterDetailsMapper {
             .issueDate(String.valueOf(caseData.getIssueDate()))
             .divorceCaseNumber(caseData.getDivorceCaseNumber())
             .orderForChildrenQuestion1(caseData.getNatureApplicationWrapper().getOrderForChildrenQuestion1().getYesOrNo())
-            .respondentAddressConfidential(contactDetails.getRespondentAddressConfidential().getYesOrNo())
+            .respondentAddressConfidential(contactDetails.getRespondentAddressHiddenFromApplicant().getYesOrNo())
             .build();
     }
 

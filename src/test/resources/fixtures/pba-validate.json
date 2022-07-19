@@ -12,7 +12,7 @@
       "ApplicantOrganisationPolicy": {
         "OrganisationID": "123"
       },
-      "state": "applicationDrafted",
+      "state": "caseAdded",
       "PBANumber": "PBA123",
       "d81Question": "No",
       "PBAreference": "ABCD",

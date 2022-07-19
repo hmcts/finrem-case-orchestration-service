@@ -375,6 +375,9 @@ public class FinremCallbackRequestDeserializerTest {
         assertEquals(caseData.getGeneralLetterWrapper().getGeneralLetterAddressTo(), GeneralLetterAddressToType.APPLICANT_SOLICITOR);
         assertEquals(caseData.getGeneralApplicationWrapper().getGeneralApplicationOutcome(), GeneralApplicationOutcome.NOT_APPROVED);
         assertEquals(caseData.getDivorceStageReached(), StageReached.DECREE_NISI);
+        assertEquals(YesOrNo.YES, caseData.getContactDetailsWrapper().getUpdateIncludesRepresentativeChange());
+        assertEquals(YesOrNo.YES, caseData.getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent());
+        assertEquals(YesOrNo.YES, caseData.getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant());
     }
 
     private void assertMiam(FinremCaseData caseData) {

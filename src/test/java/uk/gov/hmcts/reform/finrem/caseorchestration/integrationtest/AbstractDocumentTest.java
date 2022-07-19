@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import org.junit.Before;
 import org.junit.ClassRule;
-import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,18 +17,16 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OptionIdToValueTranslator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.delete;
@@ -42,7 +39,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 
@@ -72,6 +68,9 @@ public abstract class AbstractDocumentTest extends BaseTest {
     @Autowired
     protected OptionIdToValueTranslator optionIdToValueTranslator;
 
+    @Autowired
+    FinremCallbackRequestDeserializer deserializer;
+
     @ClassRule
     public static WireMockClassRule documentGeneratorService = new WireMockClassRule(4009);
 
@@ -79,6 +78,8 @@ public abstract class AbstractDocumentTest extends BaseTest {
     public static WireMockClassRule idamService = new WireMockClassRule(4501);
 
     protected CallbackRequest request;
+
+    protected uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest newRequest;
 
     protected JsonNode requestContent;
 
@@ -90,6 +91,8 @@ public abstract class AbstractDocumentTest extends BaseTest {
 
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource(getTestFixture()).toURI()));
+
+        newRequest = deserializer.deserialize(requestContent.toString());
     }
 
     protected String getTestFixture() {
@@ -99,18 +102,6 @@ public abstract class AbstractDocumentTest extends BaseTest {
     protected abstract DocumentGenerationRequest documentRequest();
 
     protected abstract String apiUrl();
-
-    @Test
-    public void documentGeneratorServiceError() throws Exception {
-        generateDocumentServiceErrorStub();
-
-        webClient.perform(MockMvcRequestBuilders.post(apiUrl())
-            .content(objectMapper.writeValueAsString(request))
-            .header(AUTHORIZATION, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE)
-            .accept(APPLICATION_JSON_VALUE))
-            .andExpect(status().isInternalServerError());
-    }
 
     void generateDocumentServiceSuccessStub() throws JsonProcessingException {
         documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
@@ -128,16 +119,6 @@ public abstract class AbstractDocumentTest extends BaseTest {
             delete(urlMatching(DELETE_DOCUMENT_CONTEXT_PATH.concat("\\?fileUrl=").concat(TEMP_URL)))
                 .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
                 .willReturn(aResponse().withStatus(status.value())));
-    }
-
-    private void generateDocumentServiceErrorStub() throws JsonProcessingException {
-        documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
-            .withRequestBody(equalToJson(objectMapper.writeValueAsString(documentRequest()), true, true))
-            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
-            .withHeader(CONTENT_TYPE, equalTo("application/json"))
-            .willReturn(aResponse()
-                .withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)));
     }
 
     void idamServiceStub() {
