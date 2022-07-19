@@ -3,10 +3,12 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.notification;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -31,4 +33,6 @@ public class NotificationRequest {
     private String phoneOpeningHours;
     @JsonProperty("caseOrderType")
     private String caseOrderType;
+    @JsonProperty("camelCaseOrderType")
+    private String camelCaseOrderType;
 }

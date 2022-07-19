@@ -127,8 +127,10 @@ public class NotificationRequestMapper {
         if (caseDataService.isConsentedApplication(caseDetails)) {
             if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(mapOfCaseData))) {
                 notificationRequest.setCaseOrderType("variation");
+                notificationRequest.setCamelCaseOrderType("Variation");
             } else {
                 notificationRequest.setCaseOrderType("consent");
+                notificationRequest.setCamelCaseOrderType("Consent");
             }
             log.info("caseOrder Type is {} for case ID: {}", notificationRequest.getCaseOrderType(),
                 notificationRequest.getCaseReferenceNumber());
