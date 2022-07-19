@@ -42,7 +42,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFu
 @RequiredArgsConstructor
 public class NotificationService {
 
-    private static final String DEFAULT_EMAIL = "fr_applicant_solicitor1@mailinator.com";
     private final NotificationServiceConfiguration notificationServiceConfiguration;
     private final RestTemplate restTemplate;
     private final FeatureToggleService featureToggleService;
@@ -51,6 +50,8 @@ public class NotificationService {
     private final CaseDataService caseDataService;
     private final CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
     private final CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
+
+    private static final String DEFAULT_EMAIL = "fr_applicant_solicitor1@mailinator.com";
 
     public void sendConsentedHWFSuccessfulConfirmationEmail(CaseDetails caseDetails) {
         URI uri = buildUri(notificationServiceConfiguration.getHwfSuccessful());
@@ -313,8 +314,20 @@ public class NotificationService {
         sendConsentOrderNotApprovedSentEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
 
+    public void sendInterimHearingNotificationEmailToApplicantSolicitor(CaseDetails caseDetails,
+                                                                        Map<String, Object> interimHearingData) {
+        sendInterimNotificationEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails,
+            interimHearingData));
+    }
+
     public void sendInterimNotificationEmailToApplicantSolicitor(CaseDetails caseDetails) {
         sendInterimNotificationEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
+    }
+
+    public void sendInterimHearingNotificationEmailToRespondentSolicitor(CaseDetails caseDetails,
+                                                                         Map<String, Object> interimHearingData) {
+        sendInterimNotificationEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails,
+            interimHearingData));
     }
 
     public void sendInterimNotificationEmailToRespondentSolicitor(CaseDetails caseDetails) {

@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-
-import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -31,6 +30,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequiredArgsConstructor
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
+@SuppressWarnings("unchecked")
 public class PaymentConfirmationController extends BaseController {
 
     private final PaymentConfirmationService paymentConfirmationService;
@@ -38,7 +38,7 @@ public class PaymentConfirmationController extends BaseController {
 
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/payment-confirmation", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Handles PBA Payments Confirmation")
+    @ApiOperation(value = "Handles PBA Payments Confirmation")
     public ResponseEntity<SubmittedCallbackResponse> paymentConfirmation(
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
         @RequestBody CallbackRequest callbackRequest) throws IOException {
@@ -75,12 +75,13 @@ public class PaymentConfirmationController extends BaseController {
 
     private String addCourtContactInformation(String confirmationBody, CaseDetails caseDetails) {
         Map<String, Object> courtDetails = CaseHearingFunctions.buildFrcCourtDetails(caseDetails.getData());
-
-        return String.format(confirmationBody,
+        String body = String.format(confirmationBody,
             courtDetails.get(COURT_DETAILS_NAME_KEY),
             courtDetails.get(COURT_DETAILS_ADDRESS_KEY),
             courtDetails.get(COURT_DETAILS_EMAIL_KEY),
             courtDetails.get(COURT_DETAILS_PHONE_KEY)
         );
+
+        return body;
     }
 }
