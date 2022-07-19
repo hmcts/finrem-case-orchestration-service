@@ -314,8 +314,20 @@ public class NotificationService {
         sendConsentOrderNotApprovedSentEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
 
+    public void sendInterimHearingNotificationEmailToApplicantSolicitor(CaseDetails caseDetails,
+                                                                        Map<String, Object> interimHearingData) {
+        sendInterimNotificationEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails,
+            interimHearingData));
+    }
+
     public void sendInterimNotificationEmailToApplicantSolicitor(CaseDetails caseDetails) {
         sendInterimNotificationEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
+    }
+
+    public void sendInterimHearingNotificationEmailToRespondentSolicitor(CaseDetails caseDetails,
+                                                                         Map<String, Object> interimHearingData) {
+        sendInterimNotificationEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails,
+            interimHearingData));
     }
 
     public void sendInterimNotificationEmailToRespondentSolicitor(CaseDetails caseDetails) {
