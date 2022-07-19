@@ -12,6 +12,7 @@ public enum EventType {
     SEND_ORDER("FR_sendOrder"),
     PREPARE_FOR_HEARING("FR_prepareForHearing"),
     UPLOAD_CASE_FILES("FR_uploadCaseFiles"),
+    INTERIM_HEARING("FR_listForInterimHearing"),
     SOLICITOR_CREATE("FR_solicitorCreate"),
     AMEND_APP_DETAILS("FR_amendApplicationDetails"),
     AMEND_CONTESTED_APP_DETAILS("FR_amendApplication"),

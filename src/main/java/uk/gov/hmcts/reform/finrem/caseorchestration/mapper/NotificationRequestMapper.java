@@ -48,8 +48,18 @@ public class NotificationRequestMapper {
     private static final String CONTESTED = "contested";
 
 
+    public NotificationRequest getNotificationRequestForRespondentSolicitor(CaseDetails caseDetails,
+                                                                            Map<String, Object> interimHearingData) {
+        return buildNotificationRequest(caseDetails, getCaseDataKeysForRespondentSolicitor(), interimHearingData);
+    }
+
     public NotificationRequest getNotificationRequestForRespondentSolicitor(CaseDetails caseDetails) {
         return buildNotificationRequest(caseDetails, getCaseDataKeysForRespondentSolicitor());
+    }
+
+    public NotificationRequest getNotificationRequestForApplicantSolicitor(CaseDetails caseDetails,
+                                                                           Map<String, Object> interimHearingData) {
+        return buildNotificationRequest(caseDetails, getContestedCaseDataKeysForApplicantSolicitor(), interimHearingData);
     }
 
     public NotificationRequest getNotificationRequestForApplicantSolicitor(CaseDetails caseDetails) {
@@ -112,6 +122,33 @@ public class NotificationRequestMapper {
 
     private NotificationRequest buildNotificationRequest(CaseDetails caseDetails,
                                                          SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
+        NotificationRequest notificationRequest = getNotificationCoreData(caseDetails, solicitorCaseDataKeysWrapper);
+
+        if (caseDataService.isContestedApplication(caseDetails)) {
+            String selectedCourt = ContestedCourtHelper.getSelectedFrc(caseDetails);
+            notificationRequest.setSelectedCourt(selectedCourt);
+
+            log.info("selectedCourt is {} for case ID: {}", selectedCourt, notificationRequest.getCaseReferenceNumber());
+        }
+
+        return notificationRequest;
+    }
+
+    private NotificationRequest buildNotificationRequest(CaseDetails caseDetails,
+                                                         SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper,
+                                                         Map<String, Object> interimHearingData) {
+
+        NotificationRequest notificationRequest = getNotificationCoreData(caseDetails, solicitorCaseDataKeysWrapper);
+
+        String selectedCourt = ContestedCourtHelper.getSelectedInterimHearingFrc(interimHearingData);
+        notificationRequest.setSelectedCourt(selectedCourt);
+
+        log.info("selectedCourt is {} for case ID: {}", selectedCourt, notificationRequest.getCaseReferenceNumber());
+
+        return notificationRequest;
+    }
+
+    private NotificationRequest getNotificationCoreData(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
         NotificationRequest notificationRequest = new NotificationRequest();
         Map<String, Object> mapOfCaseData = caseDetails.getData();
 
@@ -134,13 +171,6 @@ public class NotificationRequestMapper {
             }
             log.info("caseOrder Type is {} for case ID: {}", notificationRequest.getCaseOrderType(),
                 notificationRequest.getCaseReferenceNumber());
-        }
-
-        if (caseDataService.isContestedApplication(caseDetails)) {
-            String selectedCourt = ContestedCourtHelper.getSelectedFrc(caseDetails);
-            notificationRequest.setSelectedCourt(selectedCourt);
-
-            log.info("selectedCourt is {} for case ID: {}", selectedCourt, notificationRequest.getCaseReferenceNumber());
         }
 
         return notificationRequest;
