@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.OptionIdToValueTrans
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.delete;
@@ -113,6 +114,26 @@ public abstract class AbstractDocumentTest extends BaseTest {
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .withBody(objectMapper.writeValueAsString(document()))));
+    }
+
+
+    void generateOutOfFaimlyCourtResolutionDocumentServiceSuccessStub() throws JsonProcessingException {
+        documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
+            .withRequestBody(equalToJson(objectMapper.writeValueAsString(documentOfcrRequest()), true, true))
+            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
+            .withHeader(CONTENT_TYPE, equalTo("application/json"))
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withBody(objectMapper.writeValueAsString(document()))));
+    }
+
+    protected DocumentGenerationRequest documentOfcrRequest() {
+        return DocumentGenerationRequest.builder()
+            .template(documentConfiguration.getOutOfFamilyCourtResolutionTemplate())
+            .fileName(documentConfiguration.getOutOfFamilyCourtResolutionName())
+            .values(Collections.singletonMap("caseDetails", request.getCaseDetails()))
+            .build();
     }
 
     void deleteDocumentServiceStubWith(HttpStatus status) {

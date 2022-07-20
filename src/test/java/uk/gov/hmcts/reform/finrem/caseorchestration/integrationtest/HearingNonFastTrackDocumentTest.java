@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import com.google.common.collect.ImmutableList;
@@ -34,6 +35,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGener
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.HashMap;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
@@ -51,8 +53,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ISSUE_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OUT_OF_FAMILY_COURT_RESOLUTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.DATE_BETWEEN_12_AND_16_WEEKS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.REQUIRED_FIELD_EMPTY_ERROR;
 
@@ -110,6 +115,7 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
     public void generateFormCAndFormGSuccess() throws Exception {
         generateDocumentServiceSuccessStub(formCDocumentRequest());
         generateDocumentServiceSuccessStub(formGDocumentRequest());
+        generateDocumentServiceSuccessStub(formOutOfFaimilyCourtResolutionDocumentRequest());
 
         MvcResult mvcResult;
         int requestsMade = 0;
@@ -130,13 +136,15 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         }
 
         assertThat(mvcResult.getResponse().getStatus(), is(HttpStatus.OK.value()));
-        assertThat(mvcResult.getResponse().getContentAsString(), is(expectedCaseData()));
+        assertThat(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), new TypeReference<>() {}),
+            is(objectMapper.readValue(expectedCaseData(), new TypeReference<HashMap<String, Object>>(){})));
     }
 
     @Test
     public void generateFormCAndFormGServiceError() throws Exception {
         generateDocumentServiceSuccessStub(formCDocumentRequest());
         generateDocumentServiceErrorStub(formGDocumentRequest());
+        generateDocumentServiceSuccessStub(formOutOfFaimilyCourtResolutionDocumentRequest());
 
         webClient.perform(MockMvcRequestBuilders.post(API_URL)
             .content(objectMapper.writeValueAsString(request))
@@ -159,6 +167,10 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
             .andExpect(content().json(expectedErrorData(), true));
     }
 
+    private DocumentGenerationRequest formOutOfFaimilyCourtResolutionDocumentRequest() {
+        return documentRequest(config.getOutOfFamilyCourtResolutionTemplate(), config.getOutOfFamilyCourtResolutionName());
+    }
+
     private DocumentGenerationRequest formGDocumentRequest() {
         return documentRequest(config.getFormGTemplate(), config.getFormGFileName());
     }
@@ -176,8 +188,9 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
 
     private String expectedCaseData() throws JsonProcessingException {
         CaseDetails caseDetails = request.getCaseDetails();
-        caseDetails.getData().put("formC", caseDocument());
-        caseDetails.getData().put("formG", caseDocument());
+        caseDetails.getData().put(FORM_C, caseDocument());
+        caseDetails.getData().put(FORM_G, caseDocument());
+        caseDetails.getData().put(OUT_OF_FAMILY_COURT_RESOLUTION, caseDocument());
 
         return objectMapper.writeValueAsString(
             AboutToStartOrSubmitCallbackResponse.builder()
