@@ -21,6 +21,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.util.ResourceUtils;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -29,9 +30,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
@@ -57,6 +62,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 @Category(IntegrationTest.class)
 public class NotificationsTest extends BaseTest {
 
+    public static final String FIXTURES_CONSENTED_CCD_REQUEST_JSON = "/fixtures/consented-ccd-request-with-solicitor-agreed-to-emails.json";
     @MockBean
     GenericDocumentService genericDocumentService;
     @MockBean
@@ -83,14 +89,20 @@ public class NotificationsTest extends BaseTest {
     @Autowired
     private MockMvc webClient;
 
+    @Autowired
+    FinremCallbackRequestDeserializer deserializer;
+
     @ClassRule
     public static WireMockClassRule notificationService = new WireMockClassRule(8086);
 
     private CallbackRequest request;
+    private uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest newRequest;
 
     @Before
     public void setUp() throws IOException {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/consented-ccd-request-with-solicitor-agreed-to-emails.json")) {
+        File file = ResourceUtils.getFile(this.getClass().getResource("/fixtures/consented-ccd-request-with-solicitor-agreed-to-emails.json"));
+        newRequest = deserializer.deserialize(new String(Files.readAllBytes(file.toPath())));
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(FIXTURES_CONSENTED_CCD_REQUEST_JSON)) {
             request = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         }
     }
@@ -104,7 +116,7 @@ public class NotificationsTest extends BaseTest {
             .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
             .andDo(print())
-            .andExpect(content().json(expectedCaseData()));
+            .andExpect(content().json(expectedFinremCaseData()));
         verify(postRequestedFor(urlEqualTo(NOTIFY_HWF_SUCCESSFUL_CONTEXT_PATH))
             .withHeader(CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE)));
     }
@@ -129,10 +141,10 @@ public class NotificationsTest extends BaseTest {
         webClient.perform(MockMvcRequestBuilders.post(CONSENT_ORDER_AVAILABLE_URL)
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(objectMapper.writeValueAsString(request)))
+            .content(objectMapper.writeValueAsString(newRequest)))
             .andExpect(status().isOk())
             .andDo(print())
-            .andExpect(content().json(expectedCaseData()));
+            .andExpect(content().json(expectedFinremCaseData()));
         verify(postRequestedFor(urlEqualTo(NOTIFY_CONSENT_ORDER_AVAILABLE_CONTEXT_PATH))
             .withHeader(CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE)));
     }
@@ -155,12 +167,12 @@ public class NotificationsTest extends BaseTest {
     public void notifyAssignToJudge() throws Exception {
         stubForNotification(NOTIFY_ASSIGN_TO_JUDGE_CONTEXT_PATH, HttpStatus.OK.value());
         webClient.perform(MockMvcRequestBuilders.post(ASSIGNED_TO_JUDGE_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(objectMapper.writeValueAsString(request)))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(newRequest)))
             .andExpect(status().isOk())
             .andDo(print())
-            .andExpect(content().json(expectedCaseData()));
+            .andExpect(content().json(expectedFinremCaseData()));
         verify(postRequestedFor(urlEqualTo(NOTIFY_ASSIGN_TO_JUDGE_CONTEXT_PATH))
             .withHeader(CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE)));
     }
@@ -171,10 +183,10 @@ public class NotificationsTest extends BaseTest {
         webClient.perform(MockMvcRequestBuilders.post(NOTICE_OF_CHANGE_URL)
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(objectMapper.writeValueAsString(newRequest)))
             .andExpect(status().isOk())
             .andDo(print())
-            .andExpect(content().json(expectedCaseData()));
+            .andExpect(content().json(expectedFinremCaseData()));
         verify(postRequestedFor(urlEqualTo(NOTIFY_NOTICE_OF_CHANGE_CONTEXT_PATH))
             .withHeader(CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE)));
     }
@@ -183,6 +195,13 @@ public class NotificationsTest extends BaseTest {
         CaseDetails caseDetails = request.getCaseDetails();
         return objectMapper.writeValueAsString(AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDetails.getData()).build());
+    }
+
+    private String expectedFinremCaseData() throws JsonProcessingException {
+        FinremCaseDetails caseDetails = newRequest.getCaseDetails();
+
+        return objectMapper.writeValueAsString(uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse
+            .builder().data(caseDetails.getCaseData()).build());
     }
 
     private void stubForNotification(String url, int value) {

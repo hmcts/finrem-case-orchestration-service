@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
@@ -17,30 +16,25 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OptionIdToValueTranslator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
 
 import java.io.File;
-import java.io.InputStream;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.delete;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
@@ -51,7 +45,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.docume
 @Category(IntegrationTest.class)
 public abstract class AbstractDocumentTest extends BaseTest {
 
-    private static final String GENERATE_DOCUMENT_CONTEXT_PATH = "/version/1/generate-pdf";
     private static final String TEMP_URL = "http://doc1";
     private static final String DELETE_DOCUMENT_CONTEXT_PATH = "/version/1/delete-pdf-document";
     private static final String IDAM_SERVICE_CONTEXT_PATH = "/details";
@@ -77,18 +70,12 @@ public abstract class AbstractDocumentTest extends BaseTest {
     @ClassRule
     public static WireMockClassRule idamService = new WireMockClassRule(4501);
 
-    protected CallbackRequest request;
-
-    protected uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest newRequest;
+    protected CallbackRequest newRequest;
 
     protected JsonNode requestContent;
 
     @Before
     public void setUp() throws Exception {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(getTestFixture())) {
-            request = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
-        }
-
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource(getTestFixture()).toURI()));
 
@@ -99,20 +86,7 @@ public abstract class AbstractDocumentTest extends BaseTest {
         return "/fixtures/fee-lookup.json";
     }
 
-    protected abstract DocumentGenerationRequest documentRequest();
-
     protected abstract String apiUrl();
-
-    void generateDocumentServiceSuccessStub() throws JsonProcessingException {
-        documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
-            .withRequestBody(equalToJson(objectMapper.writeValueAsString(documentRequest()), true, true))
-            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
-            .withHeader(CONTENT_TYPE, equalTo("application/json"))
-            .willReturn(aResponse()
-                .withStatus(HttpStatus.OK.value())
-                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                .withBody(objectMapper.writeValueAsString(document()))));
-    }
 
     void deleteDocumentServiceStubWith(HttpStatus status) {
         documentGeneratorService.stubFor(

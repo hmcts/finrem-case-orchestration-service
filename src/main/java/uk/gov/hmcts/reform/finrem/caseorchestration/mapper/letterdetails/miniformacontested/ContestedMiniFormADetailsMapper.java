@@ -2,30 +2,30 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.minifo
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.DocumentTemplateDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.OptionIdToValueTranslator;
 import uk.gov.hmcts.reform.finrem.ccd.domain.BenefitPayment;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.MiamDomesticViolence;
 import uk.gov.hmcts.reform.finrem.ccd.domain.MiamExemption;
+import uk.gov.hmcts.reform.finrem.ccd.domain.MiamOtherGrounds;
+import uk.gov.hmcts.reform.finrem.ccd.domain.MiamPreviousAttendance;
 import uk.gov.hmcts.reform.finrem.ccd.domain.MiamUrgencyReason;
 import uk.gov.hmcts.reform.finrem.ccd.domain.NatureApplication;
-import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.CourtListWrapper;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.MiamWrapper;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo.getYesOrNo;
 
 @Component
 public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper {
@@ -40,57 +40,110 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
         ContactDetailsWrapper contactDetails = caseDetails.getCaseData().getContactDetailsWrapper();
         MiamWrapper miamDetails = caseDetails.getCaseData().getMiamWrapper();
         FinremCaseData caseData = caseDetails.getCaseData();
-        return ContestedMiniFormADetails.builder()
-            //core case data
-            .fastTrackDecision(caseData.getFastTrackDecision().getYesOrNo())
-            .divorceCaseNumber(caseData.getDivorceCaseNumber())
-            .issueDate(String.valueOf(caseData.getIssueDate()))
-            //contact details
+
+        ContestedMiniFormADetails.ContestedMiniFormADetailsBuilder builder =
+            setApplicantDetails(ContestedMiniFormADetails.builder(), contactDetails, caseData);
+
+        builder = setRespondentDetails(builder, contactDetails, caseData);
+        builder = setNatureApplicationDetails(builder, caseData);
+        builder = setCoreCaseData(builder, caseData, contactDetails);
+        builder = setMiamDetails(builder, caseData, miamDetails);
+
+        return builder.build();
+    }
+
+    private ContestedMiniFormADetails.ContestedMiniFormADetailsBuilder setApplicantDetails(
+        ContestedMiniFormADetails.ContestedMiniFormADetailsBuilder builder,
+        ContactDetailsWrapper contactDetails,
+        FinremCaseData caseData) {
+
+        return builder
             .applicantFmName(contactDetails.getApplicantFmName())
             .applicantLName(contactDetails.getApplicantLname())
+            .applicantAddress(contactDetails.getApplicantAddress())
+            .applicantPhone(contactDetails.getApplicantPhone())
+            .applicantEmail(contactDetails.getApplicantEmail())
+            .applicantAddressConfidential(getYesOrNo(contactDetails.getApplicantAddressHiddenFromRespondent()))
+            .applicantRepresented(getYesOrNo(contactDetails.getApplicantRepresented()))
+            .applicantSolicitorName(caseData.getApplicantSolicitorName())
+            .applicantSolicitorAddress(contactDetails.getApplicantSolicitorAddress())
+            .applicantSolicitorFirm(contactDetails.getApplicantSolicitorFirm())
+            .solicitorReference(contactDetails.getSolicitorReference());
+    }
+
+    private ContestedMiniFormADetails.ContestedMiniFormADetailsBuilder setRespondentDetails(
+        ContestedMiniFormADetails.ContestedMiniFormADetailsBuilder builder,
+        ContactDetailsWrapper contactDetails,
+        FinremCaseData caseData) {
+
+        return builder
             .respondentFMName(contactDetails.getRespondentFmName())
             .respondentLName(contactDetails.getRespondentLname())
-            .applicantAddress(contactDetails.getApplicantAddress())
             .respondentAddress(contactDetails.getRespondentAddress())
-            .applicantPhone(contactDetails.getApplicantPhone())
             .respondentPhone(contactDetails.getRespondentPhone())
-            .applicantEmail(contactDetails.getApplicantEmail())
             .respondentEmail(contactDetails.getRespondentEmail())
-            .applicantAddressConfidential(getYesOrNo(contactDetails.getApplicantAddressHiddenFromRespondent()))
             .respondentAddressConfidential(getYesOrNo(contactDetails.getRespondentAddressHiddenFromApplicant()))
-            .applicantRepresented(getYesOrNo(contactDetails.getApplicantRepresented()))
             .respondentRepresented(getYesOrNo(contactDetails.getContestedRespondentRepresented()))
-            .applicantSolicitorName(caseData.getApplicantSolicitorName())
             .respondentSolicitorName(caseData.getRespondentSolicitorName())
-            .applicantSolicitorAddress(contactDetails.getApplicantSolicitorAddress())
             .respondentSolicitorAddress(contactDetails.getRespondentSolicitorAddress())
-            .applicantSolicitorFirm(contactDetails.getApplicantSolicitorFirm())
             .respondentSolicitorFirm(contactDetails.getRespondentSolicitorFirm())
-            .solicitorReference(contactDetails.getSolicitorReference())
             .respondentSolicitorReference(contactDetails.getRespondentSolicitorReference())
-            .respondentSolicitorEmail(contactDetails.getRespondentSolicitorEmail())
-            //Miam, application details and nature of application
+            .respondentSolicitorEmail(contactDetails.getRespondentSolicitorEmail());
+    }
+
+    private ContestedMiniFormADetails.ContestedMiniFormADetailsBuilder setNatureApplicationDetails(
+        ContestedMiniFormADetails.ContestedMiniFormADetailsBuilder builder,
+        FinremCaseData caseData) {
+        return builder
             .natureOfApplicationChecklist(getNatureOfApplicationChecklist(caseData))
+            .natureOfApplication7(caseData.getNatureApplicationWrapper().getNatureOfApplication7())
             .mortgageDetail(caseData.getMortgageDetail())
             .propertyAddress(caseData.getPropertyAddress())
             .propertyAdjustmentOrderDetail(getPropertyAdjustmentOrderDetailCollectionAsMapList(caseData))
             .paymentForChildrenDecision(getYesOrNo(caseData.getPaymentForChildrenDecision()))
             .benefitForChildrenDecision(getYesOrNo(caseData.getBenefitForChildrenDecision()))
-            .benefitPaymentChecklist(getBenefitPaymentChecklist(caseData))
-            .natureOfApplication7(caseData.getNatureApplicationWrapper().getNatureOfApplication7())
+            .benefitPaymentChecklist(getBenefitPaymentChecklist(caseData));
+    }
+
+    private ContestedMiniFormADetails.ContestedMiniFormADetailsBuilder setCoreCaseData(
+        ContestedMiniFormADetails.ContestedMiniFormADetailsBuilder builder,
+        FinremCaseData caseData,
+        ContactDetailsWrapper contactDetails) {
+        return builder
+            .fastTrackDecision(getYesOrNo(caseData.getFastTrackDecision()))
+            .divorceCaseNumber(caseData.getDivorceCaseNumber())
+            .issueDate(String.valueOf(caseData.getIssueDate()))
             .authorisationName(caseData.getAuthorisationName())
             .authorisationFirm(contactDetails.getSolicitorFirm())
             .authorisation2b(caseData.getAuthorisation2b())
-            .authorisation3(String.valueOf(caseData.getAuthorisation3()))
+            .authorisation3(String.valueOf(caseData.getAuthorisation3()));
+    }
+
+    private ContestedMiniFormADetails.ContestedMiniFormADetailsBuilder setMiamDetails(
+        ContestedMiniFormADetails.ContestedMiniFormADetailsBuilder builder,
+        FinremCaseData caseData,
+        MiamWrapper miamDetails) {
+        return builder
             .claimingExemptionMiam(getYesOrNo(miamDetails.getClaimingExemptionMiam()))
-            .familyMediatorMiam(miamDetails.getFamilyMediatorMiam().getYesOrNo())
-            .applicantAttendedMiam(miamDetails.getApplicantAttendedMiam().getYesOrNo())
+            .familyMediatorMiam(getYesOrNo(miamDetails.getFamilyMediatorMiam()))
+            .applicantAttendedMiam(getYesOrNo(miamDetails.getApplicantAttendedMiam()))
             .miamExemptionsChecklist(getMiamExemptionsChecklist(caseData))
             .miamDomesticViolenceChecklist(getMiamDomesticViolenceChecklist(caseData))
             .miamUrgencyReasonChecklist(getMiamUrgencyReasonsChecklist(caseData))
-            .miamPreviousAttendanceChecklist(miamDetails.getMiamPreviousAttendanceChecklist().getText())
-            .miamOtherGroundsChecklist(miamDetails.getMiamOtherGroundsChecklist().getText())
-            .build();
+            .miamPreviousAttendanceChecklist(getMiamPreviousAttendanceChecklist(miamDetails))
+            .miamOtherGroundsChecklist(getMiamOtherGroundsChecklist(miamDetails));
+    }
+
+    private String getMiamOtherGroundsChecklist(MiamWrapper miamDetails) {
+        return Optional.ofNullable(miamDetails.getMiamOtherGroundsChecklist())
+            .map(MiamOtherGrounds::getText)
+            .orElse(null);
+    }
+
+    private String getMiamPreviousAttendanceChecklist(MiamWrapper miamDetails) {
+        return Optional.ofNullable(miamDetails.getMiamPreviousAttendanceChecklist())
+            .map(MiamPreviousAttendance::getText)
+            .orElse(null);
     }
 
     private List<String> getNatureOfApplicationChecklist(FinremCaseData caseData) {
@@ -138,11 +191,5 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
         return Optional.ofNullable(caseData.getPropertyAdjustmentOrderDetail()).orElse(new ArrayList<>()).stream()
             .map(detail -> objectMapper.convertValue(detail, new TypeReference<Map<String, Object>>() {}))
             .collect(Collectors.toList());
-    }
-
-    private String getYesOrNo(YesOrNo answer) {
-        return YesOrNo.isYes(answer)
-            ? YesOrNo.YES.getYesOrNo()
-            : YesOrNo.NO.getYesOrNo();
     }
 }

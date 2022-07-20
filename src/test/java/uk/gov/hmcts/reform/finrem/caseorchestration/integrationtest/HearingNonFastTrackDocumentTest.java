@@ -2,19 +2,19 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
@@ -23,36 +23,35 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
+import uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
+import java.util.Map;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ISSUE_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.DATE_BETWEEN_12_AND_16_WEEKS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.REQUIRED_FIELD_EMPTY_ERROR;
 
@@ -65,18 +64,25 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHeari
 @Category(IntegrationTest.class)
 public class HearingNonFastTrackDocumentTest extends BaseTest {
 
-    private static final String GENERATE_DOCUMENT_CONTEXT_PATH = "/version/1/generate-pdf";
+    protected static final String CASE_DETAILS = "caseDetails";
+    protected static final String CASE_DATA = "case_data";
+
     private static final String API_URL = "/case-orchestration/documents/hearing";
     private static final String JSON_CONTENT_PATH = "/fixtures/contested/validate-hearing-withoutfastTrackDecision.json";
 
     @Autowired protected ObjectMapper objectMapper;
     @Autowired protected MockMvc webClient;
     @Autowired protected DocumentConfiguration config;
+    @Autowired protected FinremCallbackRequestDeserializer deserializer;
 
-    @ClassRule
-    public static WireMockClassRule documentGeneratorServiceClass = new WireMockClassRule(4009);
-    @Rule
-    public WireMockClassRule documentGeneratorService = documentGeneratorServiceClass;
+    @MockBean
+    GenericDocumentService genericDocumentService;
+
+    @Captor
+    ArgumentCaptor<Map<String, Object>> formCPlaceholdersMapCaptor;
+
+    @Captor
+    ArgumentCaptor<Map<String, Object>> formGPlaceholdersMapCaptor;
 
     private static String requestJson;
     protected CallbackRequest request;
@@ -88,55 +94,60 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
 
     @Before
     public void setUp() throws IOException {
-        request = objectMapper.readValue(requestJson, CallbackRequest.class);
+        request = deserializer.deserialize(requestJson);
     }
 
     @Test
     public void missingIssueDate() throws Exception {
-        doMissingMustFieldTest(ISSUE_DATE);
+        FinremCaseDetails caseDetails = request.getCaseDetails();
+        caseDetails.getCaseData().setIssueDate(null);
+
+        performRequestWithExpectedError();
     }
 
     @Test
     public void missingHearingDate() throws Exception {
-        doMissingMustFieldTest(HEARING_DATE);
+        FinremCaseDetails caseDetails = request.getCaseDetails();
+        caseDetails.getCaseData().setHearingDate(null);
+
+        performRequestWithExpectedError();
     }
 
     @Test
     public void missingFastTrackDecision() throws Exception {
-        doMissingMustFieldTest(FAST_TRACK_DECISION);
+        FinremCaseDetails caseDetails = request.getCaseDetails();
+        caseDetails.getCaseData().setFastTrackDecision(null);
+
+        performRequestWithExpectedError();
     }
 
-    @Test
-    public void generateFormCAndFormGSuccess() throws Exception {
-        generateDocumentServiceSuccessStub(formCDocumentRequest());
-        generateDocumentServiceSuccessStub(formGDocumentRequest());
-
-        MvcResult mvcResult;
-        int requestsMade = 0;
-        do {
-            if (requestsMade > 0) {
-                Thread.sleep(100);
-            }
-            mvcResult = webClient.perform(MockMvcRequestBuilders.post(API_URL)
+    private void performRequestWithExpectedError() throws Exception {
+        webClient.perform(MockMvcRequestBuilders.post(API_URL)
                 .content(objectMapper.writeValueAsString(request))
                 .header(AUTHORIZATION, AUTH_TOKEN)
                 .contentType(APPLICATION_JSON_VALUE)
                 .accept(APPLICATION_JSON_VALUE))
-                .andReturn();
-        } while (++requestsMade < 5 && mvcResult.getResponse().getStatus() == HttpStatus.INTERNAL_SERVER_ERROR.value());
+            .andExpect(status().isOk())
+            .andExpect(content().json(expectedErrorData(), true));
+    }
 
-        if (requestsMade > 1) {
-            System.out.println("generateFormCAndFormGSuccess requests made: " + requestsMade);
-        }
+    @Test
+    public void generateFormCAndFormGSuccess() throws Exception {
+        setUpMockContext();
+
+        MvcResult mvcResult = getMvcResult();
 
         assertThat(mvcResult.getResponse().getStatus(), is(HttpStatus.OK.value()));
         assertThat(mvcResult.getResponse().getContentAsString(), is(expectedCaseData()));
+
+        assertDocumentServiceInteraction();
+        assertPlaceHoldersMap(formCPlaceholdersMapCaptor);
+        assertPlaceHoldersMap(formGPlaceholdersMapCaptor);
     }
 
     @Test
     public void generateFormCAndFormGServiceError() throws Exception {
-        generateDocumentServiceSuccessStub(formCDocumentRequest());
-        generateDocumentServiceErrorStub(formGDocumentRequest());
+        setUpErrorMockContext();
 
         webClient.perform(MockMvcRequestBuilders.post(API_URL)
             .content(objectMapper.writeValueAsString(request))
@@ -146,25 +157,50 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
             .andExpect(status().isInternalServerError());
     }
 
-    private void doMissingMustFieldTest(String missingFieldKey) throws Exception {
-        CaseDetails caseDetails = request.getCaseDetails();
-        caseDetails.getData().put(missingFieldKey, null);
+    private MvcResult getMvcResult() throws Exception {
+        MvcResult mvcResult;
+        int requestsMade = 0;
+        do {
+            if (requestsMade > 0) {
+                Thread.sleep(100);
+            }
+            mvcResult = performRequest();
+        } while (++requestsMade < 5 && mvcResult.getResponse().getStatus() == HttpStatus.INTERNAL_SERVER_ERROR.value());
 
-        webClient.perform(MockMvcRequestBuilders.post(API_URL)
-            .content(objectMapper.writeValueAsString(request))
-            .header(AUTHORIZATION, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE)
-            .accept(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(content().json(expectedErrorData(), true));
+        if (requestsMade > 1) {
+            System.out.println("generateFormCAndFormGSuccess requests made: " + requestsMade);
+        }
+        return mvcResult;
     }
 
-    private DocumentGenerationRequest formGDocumentRequest() {
-        return documentRequest(config.getFormGTemplate(), config.getFormGFileName());
+    private MvcResult performRequest() throws Exception {
+        return webClient.perform(MockMvcRequestBuilders.post(API_URL)
+                .content(objectMapper.writeValueAsString(request))
+                .header(AUTHORIZATION, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
+            .andReturn();
     }
 
-    private DocumentGenerationRequest formCDocumentRequest() {
-        return documentRequest(config.getFormCNonFastTrackTemplate(), config.getFormCFileName());
+    private void setUpMockContext() {
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(),
+            eq(config.getFormCNonFastTrackTemplate()), eq(config.getFormCFileName()))).thenReturn(newDocument());
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(),
+            eq(config.getFormGTemplate()), eq(config.getFormGFileName()))).thenReturn(newDocument());
+    }
+
+    private void setUpErrorMockContext() {
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(),
+            eq(config.getFormCNonFastTrackTemplate()), eq(config.getFormCFileName()))).thenThrow(feignError());
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(),
+            eq(config.getFormGTemplate()), eq(config.getFormGFileName()))).thenThrow(feignError());
+    }
+
+    private void assertDocumentServiceInteraction() {
+        verify(genericDocumentService, atLeastOnce()).generateDocumentFromPlaceholdersMap(any(), formCPlaceholdersMapCaptor.capture(),
+            eq(config.getFormCNonFastTrackTemplate()),  eq(config.getFormCFileName()));
+        verify(genericDocumentService, atLeastOnce()).generateDocumentFromPlaceholdersMap(any(), formGPlaceholdersMapCaptor.capture(),
+            eq(config.getFormGTemplate()), eq(config.getFormGFileName()));
     }
 
     private String expectedErrorData() throws JsonProcessingException {
@@ -175,45 +211,26 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
     }
 
     private String expectedCaseData() throws JsonProcessingException {
-        CaseDetails caseDetails = request.getCaseDetails();
-        caseDetails.getData().put("formC", caseDocument());
-        caseDetails.getData().put("formG", caseDocument());
+        FinremCaseDetails caseDetails = request.getCaseDetails();
+        caseDetails.getCaseData().setFormC(newDocument());
+        caseDetails.getCaseData().setFormG(newDocument());
 
         return objectMapper.writeValueAsString(
             AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseDetails.getData())
+                .data(caseDetails.getCaseData())
                 .warnings(ImmutableList.of(DATE_BETWEEN_12_AND_16_WEEKS))
                 .build());
     }
 
-    private DocumentGenerationRequest documentRequest(String template, String fileName) {
-        return DocumentGenerationRequest.builder()
-            .template(template)
-            .fileName(fileName)
-            .values(Collections.singletonMap("caseDetails", request.getCaseDetails()))
-            .build();
-    }
-
-    private void generateDocumentServiceSuccessStub(DocumentGenerationRequest documentRequest) throws JsonProcessingException {
-        documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
-            .withRequestBody(equalToJson(objectMapper.writeValueAsString(documentRequest),
-                true, true))
-            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
-            .withHeader(CONTENT_TYPE, equalTo("application/json"))
-            .willReturn(aResponse()
-                .withStatus(HttpStatus.OK.value())
-                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                .withBody(objectMapper.writeValueAsString(document()))));
-    }
-
-    private void generateDocumentServiceErrorStub(DocumentGenerationRequest documentRequest) throws JsonProcessingException {
-        documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
-            .withRequestBody(equalToJson(objectMapper.writeValueAsString(documentRequest),
-                true, true))
-            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
-            .withHeader(CONTENT_TYPE, equalTo("application/json"))
-            .willReturn(aResponse()
-                .withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)));
+    private void assertPlaceHoldersMap(ArgumentCaptor<Map<String, Object>> placeholdersMapCaptor) {
+        Map<String, Object> caseDetailsMap = (Map<String, Object>) placeholdersMapCaptor.getValue().get(CASE_DETAILS);
+        Map<String, Object> placeholdersMap = (Map<String, Object>) caseDetailsMap.get(CASE_DATA);
+        assertEquals("Poor", placeholdersMap.get("applicantFMName"));
+        assertEquals("Guy", placeholdersMap.get("applicantLName"));
+        assertEquals("DD12D12345", placeholdersMap.get("divorceCaseNumber"));
+        assertEquals("2019-03-24", placeholdersMap.get("hearingDate"));
+        FrcCourtDetails courtDetails = objectMapper.convertValue(placeholdersMap.get("courtDetails"), FrcCourtDetails.class);
+        assertEquals("Bristol Civil and Family Justice Centre", courtDetails.getCourtName());
+        assertEquals("2 Redcliff Street, Bristol, BS1 6GR", courtDetails.getCourtAddress());
     }
 }

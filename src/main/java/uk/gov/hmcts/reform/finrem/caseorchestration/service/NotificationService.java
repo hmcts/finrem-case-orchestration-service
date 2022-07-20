@@ -394,7 +394,7 @@ public class NotificationService {
     public boolean shouldEmailRespondentSolicitor(FinremCaseData caseData) {
         return !caseData.isPaperCase()
             && caseData.isRespondentRepresentedByASolicitor()
-            && !caseData.getContactDetailsWrapper().getRespondentSolicitorEmail().isEmpty()
+            && !nullToEmpty(caseData.getContactDetailsWrapper().getRespondentSolicitorEmail()).isEmpty()
             && caseData.isRespondentSolicitorAgreeToReceiveEmails();
     }
 

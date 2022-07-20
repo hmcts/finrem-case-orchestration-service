@@ -13,12 +13,15 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.OrderRefusalCollection;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.CourtListWrapper;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element.element;
+import static uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo.getYesOrNo;
 
 @Component
 public class RejectedOrderDetailsMapper extends AbstractLetterDetailsMapper {
@@ -29,9 +32,7 @@ public class RejectedOrderDetailsMapper extends AbstractLetterDetailsMapper {
 
     private static final Map<String, String> REFUSAL_KEYS =
         ImmutableMap.of("Transferred to Applicant’s home Court", "Transferred to Applicant home Court - A",
-            "Transferred to Applicant's home Court", "Transferred to Applicant home Court - B"
-        );
-
+            "Transferred to Applicant's home Court", "Transferred to Applicant home Court - B");
 
     public RejectedOrderDetailsMapper(CourtDetailsMapper courtDetailsMapper, ObjectMapper objectMapper) {
         super(courtDetailsMapper, objectMapper);
@@ -44,7 +45,7 @@ public class RejectedOrderDetailsMapper extends AbstractLetterDetailsMapper {
         return RejectedOrderDetails.builder()
             .applicantName(caseData.getFullApplicantName())
             .respondentName(caseData.getRespondentFullName())
-            .civilPartnership(caseData.getCivilPartnership().getYesOrNo())
+            .civilPartnership(getYesOrNo(caseData.getCivilPartnership()))
             .divorceCaseNumber(caseData.getDivorceCaseNumber())
             .refusalOrderHeader(REFUSAL_ORDER_HEADER)
             .courtDetails(courtDetails)
@@ -61,8 +62,9 @@ public class RejectedOrderDetailsMapper extends AbstractLetterDetailsMapper {
 
     private List<Element<TranslatedOrderRefusalDocument>> getTranslatedRefusalOrderCollection(FinremCaseData caseData) {
 
-        return caseData.getOrderRefusalCollectionNew().stream().map(
-            refusalOrder -> element(UUID.randomUUID(),
+        return Optional.ofNullable(caseData.getOrderRefusalCollectionNew()).orElse(new ArrayList<>())
+            .stream()
+            .map(refusalOrder -> element(UUID.randomUUID(),
                 TranslatedOrderRefusalDocument.builder()
                     .orderRefusal(getReasonsAsStringAndTranslate(refusalOrder))
                     .orderRefusalAddComments(refusalOrder.getValue().getOrderRefusalAddComments())

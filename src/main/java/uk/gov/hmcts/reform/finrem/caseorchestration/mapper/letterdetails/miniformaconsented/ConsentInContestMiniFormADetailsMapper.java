@@ -13,8 +13,12 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.NatureApplication;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.CourtListWrapper;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo.getYesOrNo;
 
 @Component
 public class ConsentInContestMiniFormADetailsMapper extends AbstractLetterDetailsMapper {
@@ -61,8 +65,8 @@ public class ConsentInContestMiniFormADetailsMapper extends AbstractLetterDetail
             .respondentAddress(contactDetails.getRespondentAddress())
             .respondentEmail(contactDetails.getRespondentEmail())
             .respondentPhone(contactDetails.getRespondentPhone())
-            .appRespondentRep(contactDetails.getContestedRespondentRepresented().getYesOrNo())
-            .respondentAddressConfidential(contactDetails.getRespondentAddressHiddenFromApplicant().getYesOrNo());
+            .appRespondentRep(getYesOrNo(contactDetails.getContestedRespondentRepresented()))
+            .respondentAddressConfidential(getYesOrNo(contactDetails.getRespondentAddressHiddenFromApplicant()));
     }
 
     private MiniFormADetails.MiniFormADetailsBuilder setNatureApplicationFields(MiniFormADetails.MiniFormADetailsBuilder builder,
@@ -72,7 +76,7 @@ public class ConsentInContestMiniFormADetailsMapper extends AbstractLetterDetail
             .natureOfApplication2(getNatureOfApplication2ListAsString(caseData))
             .natureOfApplication3a(caseData.getConsentOrderWrapper().getConsentNatureOfApplicationAddress())
             .natureOfApplication3b(caseData.getConsentOrderWrapper().getConsentNatureOfApplicationMortgage())
-            .natureOfApplication5(caseData.getConsentOrderWrapper().getConsentNatureOfApplication5().getYesOrNo())
+            .natureOfApplication5(getYesOrNo(caseData.getConsentOrderWrapper().getConsentNatureOfApplication5()))
             .natureOfApplication6(getNatureOfApplication6ListAsString(caseData))
             .natureOfApplication7(caseData.getConsentOrderWrapper().getConsentNatureOfApplication7());
     }
@@ -86,18 +90,20 @@ public class ConsentInContestMiniFormADetailsMapper extends AbstractLetterDetail
             .authorisationFirm(caseData.getAuthorisationFirm())
             .issueDate(String.valueOf(caseData.getIssueDate()))
             .divorceCaseNumber(caseData.getDivorceCaseNumber())
-            .orderForChildrenQuestion1(caseData.getConsentOrderWrapper().getConsentOrderForChildrenQuestion1().getYesOrNo());
+            .orderForChildrenQuestion1(getYesOrNo(caseData.getConsentOrderWrapper().getConsentOrderForChildrenQuestion1()));
     }
 
     private List<String> getNatureOfApplication2ListAsString(FinremCaseData caseData) {
-        return  caseData.getConsentOrderWrapper().getConsentNatureOfApplicationChecklist()
+        return  Optional.ofNullable(caseData.getConsentOrderWrapper().getConsentNatureOfApplicationChecklist())
+            .orElse(new ArrayList<>())
             .stream()
             .map(NatureApplication::getText)
             .collect(Collectors.toList());
     }
 
     private List<String> getNatureOfApplication6ListAsString(FinremCaseData caseData) {
-        return caseData.getConsentOrderWrapper().getConsentNatureOfApplication6()
+        return Optional.ofNullable(caseData.getConsentOrderWrapper().getConsentNatureOfApplication6())
+            .orElse(new ArrayList<>())
             .stream()
             .map(ConsentNatureOfApplication::getId)
             .collect(Collectors.toList());

@@ -53,6 +53,7 @@ public class HearingDocumentService {
     }
 
     private Map<String, Object> generateFormCAndG(Pair<FinremCaseDetails, String> pair) {
+
         Map<String, Object> formCDetailsMap = formCLetterDetailsMapper.getDocumentTemplateDetailsAsMap(pair.getLeft(),
             pair.getLeft().getCaseData().getRegionWrapper().getDefaultCourtList());
 

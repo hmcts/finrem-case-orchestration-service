@@ -7,15 +7,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.ccd.domain.ChildrenOrder;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.NatureApplication;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +41,7 @@ public class GenerateMiniFormATest extends AbstractDocumentTest {
     private static final String API_URL = "/case-orchestration/documents/generate-mini-form-a";
 
     @MockBean
-    GenericDocumentService genericDocumentServiceMock;
+    protected GenericDocumentService genericDocumentServiceMock;
 
     @Captor
     ArgumentCaptor<Map<String, Object>> placeholdersMapCaptor;
@@ -59,19 +56,13 @@ public class GenerateMiniFormATest extends AbstractDocumentTest {
         setUpMockContext();
         idamServiceStub();
         generateDocument();
-
-        verify(genericDocumentServiceMock, times(1))
-            .generateDocumentFromPlaceholdersMap(any(), placeholdersMapCaptor.capture(),
-                eq(documentConfiguration.getMiniFormTemplate()),  eq(documentConfiguration.getMiniFormFileName()));
-
+        verifyDocumentServiceInteraction();
         assertPlaceholdersMap();
     }
 
     @Test
     public void documentGeneratorServiceError() throws Exception {
-        when(genericDocumentServiceMock.generateDocumentFromPlaceholdersMap(any(), any(),
-            eq(documentConfiguration.getMiniFormTemplate()),
-            eq(documentConfiguration.getMiniFormFileName()))).thenThrow(feignError());
+        setUp500MockContext();
 
         webClient.perform(MockMvcRequestBuilders.post(apiUrl())
                 .content(objectMapper.writeValueAsString(newRequest))
@@ -79,6 +70,18 @@ public class GenerateMiniFormATest extends AbstractDocumentTest {
                 .contentType(APPLICATION_JSON_VALUE)
                 .accept(APPLICATION_JSON_VALUE))
             .andExpect(status().isInternalServerError());
+    }
+
+    protected void setUp500MockContext() {
+        when(genericDocumentServiceMock.generateDocumentFromPlaceholdersMap(any(), any(),
+            eq(documentConfiguration.getMiniFormTemplate()),
+            eq(documentConfiguration.getMiniFormFileName()))).thenThrow(feignError());
+    }
+
+    protected void verifyDocumentServiceInteraction() {
+        verify(genericDocumentServiceMock, times(1))
+            .generateDocumentFromPlaceholdersMap(any(), placeholdersMapCaptor.capture(),
+                eq(documentConfiguration.getMiniFormTemplate()),  eq(documentConfiguration.getMiniFormFileName()));
     }
 
     void setUpMockContext() {
@@ -97,7 +100,7 @@ public class GenerateMiniFormATest extends AbstractDocumentTest {
             .andExpect(content().json(getCaseDataAsString()));
     }
 
-    private Map<String, Object> expectedCaseData() {
+    Map<String, Object> expectedCaseData() {
         FinremCaseDetails caseDetails = newRequest.getCaseDetails();
         caseDetails.getCaseData().setMiniFormA(newDocument());
 
@@ -110,27 +113,7 @@ public class GenerateMiniFormATest extends AbstractDocumentTest {
         return objectMapper.writeValueAsString(expectedCaseData());
     }
 
-    @Override
-    protected DocumentGenerationRequest documentRequest() {
-        return DocumentGenerationRequest.builder()
-            .template(documentConfiguration.getMiniFormTemplate())
-            .fileName(documentConfiguration.getMiniFormFileName())
-            .values(expectedCaseData())
-            .build();
-    }
-
-    CaseDetails copyWithOptionValueTranslation(CaseDetails caseDetails) {
-        try {
-            CaseDetails deepCopy = objectMapper.readValue(objectMapper.writeValueAsString(caseDetails), CaseDetails.class);
-
-            optionIdToValueTranslator.translateFixedListOptions(deepCopy);
-            return deepCopy;
-        } catch (IOException e) {
-            throw new IllegalStateException();
-        }
-    }
-
-    private void assertPlaceholdersMap() {
+    protected void assertPlaceholdersMap() {
         Map<String, Object> caseDetailsMap = (Map<String, Object>) placeholdersMapCaptor.getValue().get(CASE_DETAILS);
         Map<String, Object> placeholdersMap = (Map<String, Object>) caseDetailsMap.get(CASE_DATA);
         assertTrue(((List<String>) placeholdersMap.get("natureOfApplication2")).containsAll(getNatureApplication2List()));
