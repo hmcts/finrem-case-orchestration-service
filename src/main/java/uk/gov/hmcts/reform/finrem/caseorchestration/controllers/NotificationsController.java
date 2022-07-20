@@ -346,7 +346,8 @@ public class NotificationsController extends BaseController {
                 log.info("Sending Additional Hearing Document to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
                 additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, caseDetails);
             } else {
-                log.info("Sending Forms A, C, G to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
+                log.info("Sending Forms A, C, G & Out of family court resolution to bulk print for"
+                    + " Contested Paper Case ID: {}", caseDetails.getId());
                 hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, authorisationToken);
             }
         }

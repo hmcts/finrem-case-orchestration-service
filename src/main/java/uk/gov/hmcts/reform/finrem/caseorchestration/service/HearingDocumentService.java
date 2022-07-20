@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
@@ -25,6 +24,7 @@ import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OUT_OF_FAMILY_COURT_RESOLUTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.addFastTrackFields;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.addNonFastTrackFields;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
@@ -41,7 +41,7 @@ public class HearingDocumentService {
     private final ObjectMapper objectMapper;
     private final BulkPrintService bulkPrintService;
 
-    public Map<String, Object> generateHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
+    public Map<String, CaseDocument> generateHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
         CaseDetails courtDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         courtDetailsCopy = addCourtFields(courtDetailsCopy);
 
@@ -51,14 +51,16 @@ public class HearingDocumentService {
             .orElseThrow(() -> new IllegalArgumentException("missing fastTrackDecision"));
     }
 
-    private Map<String, Object> courtCoverSheetDocuments(Pair<CaseDetails, String> pair) {
-        return Optional.of(pair)
+    private Map<String, CaseDocument> courtCoverSheetDocuments(Pair<CaseDetails, String> pair) {
+        Map<String, CaseDocument> objectMap = Optional.of(pair)
             .filter(this::isFastTrackApplication)
             .map(this::generateFastTrackFormC)
             .orElseGet(() -> generateFormCAndG(pair));
+        objectMap.put(OUT_OF_FAMILY_COURT_RESOLUTION, generatOutOfFamilyCourtResolutionDocument(pair));
+        return objectMap;
     }
 
-    private Map<String, Object> generateFormCAndG(Pair<CaseDetails, String> pair) {
+    private Map<String, CaseDocument> generateFormCAndG(Pair<CaseDetails, String> pair) {
         CompletableFuture<CaseDocument> formCNonFastTrack =
             supplyAsync(() -> genericDocumentService.generateDocument(pair.getRight(), addNonFastTrackFields.apply(pair.getLeft()),
                 documentConfiguration.getFormCNonFastTrackTemplate(), documentConfiguration.getFormCFileName()));
@@ -70,14 +72,25 @@ public class HearingDocumentService {
             .thenCombine(formG, this::createDocumentMap).join();
     }
 
-    private Map<String, Object> createDocumentMap(CaseDocument formC, CaseDocument formG) {
-        return ImmutableMap.of(FORM_C, formC, FORM_G, formG);
+    private Map<String, CaseDocument> createDocumentMap(CaseDocument formC, CaseDocument formG) {
+        Map<String, CaseDocument> documentMap = new HashMap<>();
+        documentMap.put(FORM_C,formC);
+        documentMap.put(FORM_G,formG);
+        return documentMap;
     }
 
-    private Map<String, Object> generateFastTrackFormC(Pair<CaseDetails, String> pair) {
-        return ImmutableMap.of(FORM_C,
+    private Map<String, CaseDocument> generateFastTrackFormC(Pair<CaseDetails, String> pair) {
+        Map<String, CaseDocument> documentMap = new HashMap<>();
+        documentMap.put(FORM_C,
             genericDocumentService.generateDocument(pair.getRight(), addFastTrackFields.apply(pair.getLeft()),
                 documentConfiguration.getFormCFastTrackTemplate(), documentConfiguration.getFormCFileName()));
+        return documentMap;
+    }
+
+    private CaseDocument generatOutOfFamilyCourtResolutionDocument(Pair<CaseDetails, String> pair) {
+        return genericDocumentService.generateDocument(pair.getRight(), addFastTrackFields.apply(pair.getLeft()),
+                documentConfiguration.getOutOfFamilyCourtResolutionTemplate(),
+                documentConfiguration.getOutOfFamilyCourtResolutionName());
     }
 
     private boolean isFastTrackApplication(Pair<CaseDetails, String> pair) {
@@ -121,6 +134,7 @@ public class HearingDocumentService {
 
         documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, FORM_C).ifPresent(caseDocuments::add);
         documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, FORM_G).ifPresent(caseDocuments::add);
+        documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, OUT_OF_FAMILY_COURT_RESOLUTION).ifPresent(caseDocuments::add);
 
         List<CaseDocument> formACaseDocuments = documentHelper.getFormADocumentsData(caseData);
         caseDocuments.addAll(formACaseDocuments.stream().map(documentHelper::getCaseDocumentAsBulkPrintDocument).collect(Collectors.toList()));
