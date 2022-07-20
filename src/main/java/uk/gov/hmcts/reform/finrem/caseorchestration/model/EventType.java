@@ -10,8 +10,10 @@ public enum EventType {
     SEND_ORDER("FR_sendOrder"),
     PREPARE_FOR_HEARING("FR_prepareForHearing"),
     UPLOAD_CASE_FILES("FR_uploadCaseFiles"),
+    INTERIM_HEARING("FR_listForInterimHearing"),
     CLOSE("FR_close"),
     MANAGE_CASE_DOCUMENTS("FR_manageCaseDocuments"),
+    UPLOAD_APPROVED_ORDER("FR_uploadApprovedOrder"),
     NONE("");
 
     private final String ccdType;
