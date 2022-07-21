@@ -32,8 +32,8 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     private static final String CONTESTED_FORM_C_JSON = "validate-hearing-with-fastTrackDecision1.json";
     private static final String APPLICANT_NAME_HEARING = "Guy";
     private static final String SOLICITOR_REF_HEARING = "LL01";
-    private static final String contestedDir = "/json/contested/";
-    private static final String consentedDir = "/json/consented/";
+    private static final String CONTESTED_DIR = "/json/contested/";
+    private static final String CONSENTED_DIR = "/json/consented/";
 
     private String url1;
     private JsonPath jsonPathEvaluator;
@@ -65,7 +65,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Test
     public void convertDocumentToPdf()  {
 
-        JsonPath jsonPathEvaluator = generateDocument(CONTESTED_HEARING_ORDER_CONVERT_TO_PDF_JSON, hearingOrderStoreUrl, contestedDir);
+        JsonPath jsonPathEvaluator = generateDocument(CONTESTED_HEARING_ORDER_CONVERT_TO_PDF_JSON, hearingOrderStoreUrl, CONTESTED_DIR);
 
         assertTrue(jsonPathEvaluator.get("data.latestDraftHearingOrder.document_filename").toString()
             .equalsIgnoreCase("approvedConvertedHearingOrder.pdf"));
@@ -74,9 +74,9 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Test
     public void verifyBulkPrintDocumentGenerationShouldReturnOkResponseCode() {
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(GENERAL_ORDER_JSON, documentRejectedOrderUrl,
-            BINARY_URL_TYPE, "generalOrder", consentedDir);
+            BINARY_URL_TYPE, "generalOrder", CONSENTED_DIR);
 
-        String payload = utils.getJsonFromFile("bulk-print.json", consentedDir)
+        String payload = utils.getJsonFromFile("bulk-print.json", CONSENTED_DIR)
             .replace("$DOCUMENT-BINARY-URL", documentUrl);
         jsonPathEvaluator = utils.getResponseData(caseOrchestration + "/bulk-print", payload, "data");
 
@@ -87,18 +87,18 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     @Test
     public void verifyContestedDraftDocumentGenerationShouldReturnOkResponseCode() {
-        utils.validatePostSuccess(generateContestedUrl, CONTESTED_FORM_C_JSON, contestedDir);
+        utils.validatePostSuccess(generateContestedUrl, CONTESTED_FORM_C_JSON, CONTESTED_DIR);
     }
 
     @Test
     public void verifyDocumentGenerationPostResponseContent() {
-        generateDocument(MINI_FORM_A_JSON, generatorUrl, consentedDir);
+        generateDocument(MINI_FORM_A_JSON, generatorUrl, CONSENTED_DIR);
     }
 
     @Test
     public void verifyRejectedOrderDocumentGenerationPostResponseContent() {
 
-        JsonPath jsonPathEvaluator = generateDocument(GENERAL_ORDER_JSON, documentRejectedOrderUrl, consentedDir);
+        JsonPath jsonPathEvaluator = generateDocument(GENERAL_ORDER_JSON, documentRejectedOrderUrl, CONSENTED_DIR);
 
         assertTrue(jsonPathEvaluator.get("data.uploadOrder[0].value.DocumentType").toString()
             .equalsIgnoreCase("generalOrder"));
@@ -107,32 +107,32 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Test
     public void verifyContestedDocumentGenerationPostResponseContent() {
 
-        generateDocument(MINI_FORM_A_CONTESTED_JSON, generateContestedUrl, contestedDir);
+        generateDocument(MINI_FORM_A_CONTESTED_JSON, generateContestedUrl, CONTESTED_DIR);
     }
 
     @Test
     public void verifyContestedDraftDocumentGenerationPostResponseContent() {
 
-        generateDocument(MINI_FORM_A_CONTESTED_JSON, generateContestedDraftUrl, contestedDir);
+        generateDocument(MINI_FORM_A_CONTESTED_JSON, generateContestedDraftUrl, CONTESTED_DIR);
     }
 
     @Test
     public void verifyContestedFormCDocumentGenerationPostResponseContent() {
 
-        generateDocument(CONTESTED_FORM_C_JSON, generateHearingUrl, contestedDir);
+        generateDocument(CONTESTED_FORM_C_JSON, generateHearingUrl, CONTESTED_DIR);
     }
 
     @Test
     public void verifyContestedFormGDocumentGenerationPostResponseContent() {
 
-        generateDocument(CONTESTED_FORM_G_JSON, generateHearingUrl, contestedDir);
+        generateDocument(CONTESTED_FORM_G_JSON, generateHearingUrl, CONTESTED_DIR);
     }
 
     @Test
     public void verifyRejectedOrderGeneratedDocumentCanBeAccessedAndVerifyGetResponseContent() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(GENERAL_ORDER_JSON, documentRejectedOrderUrl,
-            "document", "generalOrder", consentedDir);
+            "document", "generalOrder", CONSENTED_DIR);
 
         JsonPath jsonPathEvaluator1 = accessGeneratedDocument(fileRetrieveUrl(documentUrl));
 
@@ -143,7 +143,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     public void verifyGeneratedDocumentCanBeAccessedAndVerifyGetResponseContent() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINI_FORM_A_JSON, generatorUrl,
-            "document", MINI_FORM_A, consentedDir);
+            "document", MINI_FORM_A, CONSENTED_DIR);
 
         JsonPath jsonPathEvaluator1 = accessGeneratedDocument(fileRetrieveUrl(documentUrl));
         assertTrue(jsonPathEvaluator1.get("mimeType").toString().equalsIgnoreCase("application/pdf"));
@@ -154,7 +154,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     public void verifyGeneratedContestedDocumentCanBeAccessedAndVerifyGetResponseContent() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINI_FORM_A_CONTESTED_JSON, generateContestedUrl,
-            "document", MINI_FORM_A, contestedDir);
+            "document", MINI_FORM_A, CONTESTED_DIR);
 
         JsonPath jsonPathEvaluator1 = accessGeneratedDocument(fileRetrieveUrl(documentUrl));
 
@@ -166,7 +166,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     public void verifyGeneratedFormCContestedDocumentCanBeAccessedAndVerifyGetResponseContent() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(CONTESTED_FORM_C_JSON, generateHearingUrl,
-            "document", "hearing", contestedDir);
+            "document", "hearing", CONTESTED_DIR);
 
         JsonPath jsonPathEvaluator1 = accessGeneratedDocument(fileRetrieveUrl(documentUrl));
 
@@ -178,7 +178,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     public void verifyGeneratedFormGContestedDocumentCanBeAccessedAndVerifyGetResponseContent() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(CONTESTED_FORM_G_JSON, generateHearingUrl,
-            "document", "hearing", contestedDir);
+            "document", "hearing", CONTESTED_DIR);
 
         JsonPath jsonPathEvaluator1 = accessGeneratedDocument(fileRetrieveUrl(documentUrl));
 
@@ -190,7 +190,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     public void downloadDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINI_FORM_A_JSON, generatorUrl,
-            BINARY_URL_TYPE, MINI_FORM_A, consentedDir);
+            BINARY_URL_TYPE, MINI_FORM_A, CONSENTED_DIR);
 
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
 
@@ -205,7 +205,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     public void downloadRejectOrderDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(GENERAL_ORDER_JSON, documentRejectedOrderUrl,
-            BINARY_URL_TYPE, "generalOrder", consentedDir);
+            BINARY_URL_TYPE, "generalOrder", CONSENTED_DIR);
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
         assertTrue(documentContent.contains("Approved by:  District Judge test3"));
     }
@@ -214,7 +214,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     public void downloadContestedDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINI_FORM_A_CONTESTED_JSON, generateContestedUrl,
-            BINARY_URL_TYPE, MINI_FORM_A, contestedDir);
+            BINARY_URL_TYPE, MINI_FORM_A, CONTESTED_DIR);
 
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
 
@@ -226,7 +226,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     public void downloadContestedFormCDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(CONTESTED_FORM_C_JSON, generateHearingUrl,
-            BINARY_URL_TYPE, "hearing", contestedDir);
+            BINARY_URL_TYPE, "hearing", CONTESTED_DIR);
 
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
 
@@ -239,7 +239,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     public void downloadContestedFormGDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(CONTESTED_FORM_G_JSON, generateHearingUrl,
-            BINARY_URL_TYPE, "hearing", contestedDir);
+            BINARY_URL_TYPE, "hearing", CONTESTED_DIR);
 
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
 

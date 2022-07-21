@@ -42,6 +42,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TIME_ESTIMATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.courtDetailsMap;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
 
 @Service
@@ -56,9 +57,9 @@ public class AdditionalHearingDocumentService {
     private final BulkPrintService bulkPrintService;
     private final CaseDataService caseDataService;
 
-    public void createAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) throws JsonProcessingException {
+    public void createAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
-        Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
+        Map<String, Object> courtDetailsMap = courtDetailsMap();
         Map<String, Object> courtDetails = (Map<String, Object>)
             courtDetailsMap.get(caseData.get(CaseHearingFunctions.getSelectedCourt(caseData)));
 

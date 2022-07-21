@@ -16,11 +16,9 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
@@ -46,8 +44,6 @@ public class NotificationsController extends BaseController {
     private final PaperNotificationService paperNotificationService;
     private final GeneralEmailService generalEmailService;
     private final CaseDataService caseDataService;
-    private final HearingDocumentService hearingDocumentService;
-    private final AdditionalHearingDocumentService additionalHearingDocumentService;
     private final TransferCourtService transferCourtService;
     private final FeatureToggleService featureToggleService;
     private final NocLetterNotificationService nocLetterNotificationService;
@@ -316,43 +312,6 @@ public class NotificationsController extends BaseController {
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
-    }
-
-    @PostMapping(value = "/prepare-for-hearing", consumes = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "send e-mail for 'Prepare for Hearing'.")
-    @ApiResponses(value = {
-        @ApiResponse(code = 204, message = "'Prepare for Hearing' e-mail sent successfully",
-            response = AboutToStartOrSubmitCallbackResponse.class)})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendPrepareForHearingEmail(
-        @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @RequestBody CallbackRequest callbackRequest) {
-
-        log.info("Received request to send email for 'Prepare for Hearing' for Case ID: {}", callbackRequest.getCaseDetails().getId());
-        validateCaseData(callbackRequest);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-
-        if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-            log.info("Sending email notification to Applicant Solicitor for 'Prepare for Hearing'");
-            notificationService.sendPrepareForHearingEmailApplicant(caseDetails);
-        }
-
-        if (featureToggleService.isRespondentJourneyEnabled() && notificationService.shouldEmailRespondentSolicitor(caseDetails.getData())) {
-            log.info("Sending email notification to Respondent Solicitor for 'Prepare for Hearing'");
-            notificationService.sendPrepareForHearingEmailRespondent(caseDetails);
-        }
-
-        if (caseDataService.isContestedPaperApplication(caseDetails)) {
-            if (hearingDocumentService.alreadyHadFirstHearing(callbackRequest.getCaseDetailsBefore())) {
-                log.info("Sending Additional Hearing Document to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
-                additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, caseDetails);
-            } else {
-                log.info("Sending Forms A, C, G & Out of family court resolution to bulk print for"
-                    + " Contested Paper Case ID: {}", caseDetails.getId());
-                hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, authorisationToken);
-            }
-        }
-
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
 
     @PostMapping(value = "/prepare-for-hearing-order-sent", consumes = APPLICATION_JSON_VALUE)

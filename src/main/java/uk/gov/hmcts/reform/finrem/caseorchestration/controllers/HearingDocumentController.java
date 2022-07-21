@@ -21,13 +21,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
 import javax.validation.constraints.NotNull;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -46,46 +42,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 public class HearingDocumentController extends BaseController {
 
-    private final HearingDocumentService hearingDocumentService;
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
-    private final ValidateHearingService validateHearingService;
-    private final CaseDataService caseDataService;
     private final ObjectMapper objectMapper;
-
-    @PostMapping(path = "/documents/hearing", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Handles Form C and G generation. Serves as a callback from CCD")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
-            response = AboutToStartOrSubmitCallbackResponse.class),
-        @ApiResponse(code = 400, message = "Bad Request"),
-        @ApiResponse(code = 500, message = "Internal Server Error")})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateHearingDocument(
-            @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-            @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) throws IOException {
-
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Received request for validating a hearing for Case ID: {}", caseDetails.getId());
-
-        validateCaseData(callbackRequest);
-
-        List<String> errors = validateHearingService.validateHearingErrors(caseDetails);
-        if (!errors.isEmpty()) {
-            return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
-                .errors(errors)
-                .build());
-        }
-
-        if (hearingDocumentService.alreadyHadFirstHearing(caseDetails)) {
-            if (caseDataService.isContestedPaperApplication(caseDetails)) {
-                additionalHearingDocumentService.createAdditionalHearingDocuments(authorisationToken, caseDetails);
-            }
-        } else {
-            caseDetails.getData().putAll(hearingDocumentService.generateHearingDocuments(authorisationToken, caseDetails));
-        }
-
-        List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).warnings(warnings).build());
-    }
 
     @PostMapping(path = "/contested-upload-direction-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles direction order generation. Serves as a callback from CCD")

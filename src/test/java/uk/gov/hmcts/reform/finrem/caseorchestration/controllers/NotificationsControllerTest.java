@@ -13,17 +13,14 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
-
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -54,8 +51,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @MockBean private PaperNotificationService paperNotificationService;
     @MockBean private GeneralEmailService generalEmailService;
     @MockBean private HelpWithFeesDocumentService helpWithFeesDocumentService;
-    @MockBean private HearingDocumentService hearingDocumentService;
-    @MockBean private AdditionalHearingDocumentService additionalHearingDocumentService;
     @MockBean private CaseDataService caseDataService;
     @MockBean private TransferCourtService transferCourtService;
     @MockBean private FeatureToggleService featureToggleService;
@@ -213,42 +208,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
         notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
 
         verifyNoInteractions(notificationService);
-    }
-
-    @Test
-    public void givenSolAgreedToEmails_and_noPreviousHearing_shouldSendPrepareForHearingEmail_and_PrintHearingDocuments() {
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
-        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
-        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(false);
-
-        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
-
-        verify(notificationService).sendPrepareForHearingEmailApplicant(any());
-        verify(notificationService).sendPrepareForHearingEmailRespondent(any());
-        verify(hearingDocumentService).sendFormCAndGForBulkPrint(any(), eq(AUTH_TOKEN));
-    }
-
-    @Test
-    public void shouldNotSendPrepareForHearingEmailWhenNotAgreed() {
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
-
-        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
-
-        verify(notificationService, never()).sendPrepareForHearingEmailApplicant(any());
-        verify(notificationService, never()).sendPrepareForHearingEmailRespondent(any());
-    }
-
-    @Test
-    public void givenHadPreviousHearing_whenNotifyHearingInvoked_thenPrintAdditionalHearingDocuments() {
-        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
-        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
-
-        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
-
-        verify(additionalHearingDocumentService).sendAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
     }
 
     @Test

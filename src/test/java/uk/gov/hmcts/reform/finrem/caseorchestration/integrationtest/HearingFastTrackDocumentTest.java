@@ -22,7 +22,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHeari
 
 public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
 
-    private static final String API_URL = "/case-orchestration/documents/hearing";
+    private static final String API_URL = "/case-orchestration/ccdAboutToSubmitEvent";
 
     @Override
     protected DocumentGenerationRequest documentRequest() {
@@ -49,10 +49,10 @@ public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
         generateOutOfFaimlyCourtResolutionDocumentServiceSuccessStub();
 
         webClient.perform(MockMvcRequestBuilders.post(API_URL)
-            .content(objectMapper.writeValueAsString(request))
-            .header(AUTHORIZATION, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .accept(MediaType.APPLICATION_JSON_VALUE))
+                .content(objectMapper.writeValueAsString(request))
+                .header(AUTHORIZATION, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(content().json(expectedCaseData()));
     }
@@ -65,6 +65,7 @@ public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
         return objectMapper.writeValueAsString(
             AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDetails.getData())
+                .errors(ImmutableList.of())
                 .warnings(ImmutableList.of(DATE_BETWEEN_6_AND_10_WEEKS))
                 .build());
     }

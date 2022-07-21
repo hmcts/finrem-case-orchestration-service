@@ -18,14 +18,16 @@ import static org.hamcrest.Matchers.startsWith;
 public class ValidateHearingDatesTest extends IntegrationTestBase {
 
     @Value("${cos.document.hearing.api}")
+    private String hearing;
+    @Value("${cos.document.hearing.validation.api}")
     private String validateHearing;
 
-    private String contestedDir = "/json/contested/";
-    private String consentedDir = "/json/consented/";
+    private static final String CONTESTED_DIR = "/json/contested/";
+    private static final String CONSENTED_DIR = "/json/consented/";
 
     @Test
     public void verifyShouldReturnBadRequestWhenCaseDataIsMissingInRequest() {
-        Response response = utils.getResponse(validateHearing, "empty-casedata1.json",consentedDir);
+        Response response = utils.getResponse(validateHearing, "empty-casedata1.json", CONSENTED_DIR);
 
         assertThat(response.getStatusCode(), is(HttpStatus.SC_BAD_REQUEST));
         assertThat(response.body().asString(), startsWith("Some server side exception occurred. Please check logs for details"));
@@ -33,25 +35,25 @@ public class ValidateHearingDatesTest extends IntegrationTestBase {
 
     @Test
     public void verifyShouldThrowErrorWhenIssueDateAndHearingDateAreEmpty() {
-        assertThat(getResponseAndAssertSuccessStatusCode(validateHearing, "pba-validate1.json",consentedDir).jsonPath().get("errors[0]"),
+        assertThat(getResponseAndAssertSuccessStatusCode(validateHearing, "pba-validate1.json", CONTESTED_DIR).jsonPath().get("errors[0]"),
             is("Issue Date, fast track decision or hearingDate is empty"));
     }
 
     @Test
     public void verifyShouldThrowWarningsWhenNotFastTrackDecision() {
-        assertThat(getResponseAndAssertSuccessStatusCode(validateHearing, "validate-hearing-without-fastTrackDecision1.json",
-            contestedDir).jsonPath().get("warnings[0]"), is("Date of the hearing must be between 12 and 16 weeks."));
+        assertThat(getResponseAndAssertSuccessStatusCode(hearing, "validate-hearing-without-fastTrackDecision1.json",
+            CONTESTED_DIR).jsonPath().get("warnings[0]"), is("Date of the hearing must be between 12 and 16 weeks."));
     }
 
     @Test
     public void verifyshouldThrowWarningsWhenFastTrackDecision() {
-        assertThat(getResponseAndAssertSuccessStatusCode(validateHearing, "validate-hearing-with-fastTrackDecision1.json",
-            contestedDir).jsonPath().get("warnings[0]"), is("Date of the Fast Track hearing must be between 6 and 10 weeks."));
+        assertThat(getResponseAndAssertSuccessStatusCode(hearing, "validate-hearing-with-fastTrackDecision1.json",
+            CONTESTED_DIR).jsonPath().get("warnings[0]"), is("Date of the Fast Track hearing must be between 6 and 10 weeks."));
     }
 
     @Test
     public void verifyShouldSuccessfullyValidate() {
-        assertThat(getResponseAndAssertSuccessStatusCode(validateHearing, "validate-hearing-successfully1.json", contestedDir)
+        assertThat(getResponseAndAssertSuccessStatusCode(hearing, "validate-hearing-successfully1.json", CONTESTED_DIR)
             .jsonPath().getList("warnings"), is(empty()));
     }
 

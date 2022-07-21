@@ -320,6 +320,14 @@ public final class CaseHearingFunctions {
         }
     }
 
+    public static Map<String, Object> courtDetailsMap() {
+        try (InputStream resourceAsStream = CaseHearingFunctions.class.getResourceAsStream(COURT_DETAILS_JSON_PATH)) {
+            return new ObjectMapper().readValue(resourceAsStream, HashMap.class);
+        } catch (Exception exception) {
+            throw new IllegalStateException(exception.getMessage(), exception);
+        }
+    }
+
     static String getFrcCourtDetailsAsOneLineAddressString(Map<String, Object> courtDetailsMap) {
         return StringUtils.joinWith(", ", courtDetailsMap.get(COURT_DETAILS_NAME_KEY), courtDetailsMap.get(COURT_DETAILS_ADDRESS_KEY));
     }

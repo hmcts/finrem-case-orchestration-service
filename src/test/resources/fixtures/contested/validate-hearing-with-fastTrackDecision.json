@@ -1,5 +1,5 @@
 {
-  "event_id": "some_event_id",
+  "event_id": "FR_addSchedulingListingInfo",
   "case_details": {
     "id": "123",
     "jurisdiction": "DIVORCE",

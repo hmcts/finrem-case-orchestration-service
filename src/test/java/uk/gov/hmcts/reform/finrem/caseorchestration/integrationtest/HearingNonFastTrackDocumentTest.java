@@ -43,6 +43,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
@@ -71,11 +72,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHeari
 public class HearingNonFastTrackDocumentTest extends BaseTest {
 
     private static final String GENERATE_DOCUMENT_CONTEXT_PATH = "/version/1/generate-pdf";
-    private static final String API_URL = "/case-orchestration/documents/hearing";
+    private static final String ABOUT_TO_SUBMIT_URL = "/case-orchestration/ccdAboutToSubmitEvent";
+    private static final String ABOUT_TO_START_URL = "/case-orchestration/ccdAboutToStartEvent";
     private static final String JSON_CONTENT_PATH = "/fixtures/contested/validate-hearing-withoutfastTrackDecision.json";
 
     @Autowired protected ObjectMapper objectMapper;
-    @Autowired protected MockMvc webClient;
+    @Autowired protected MockMvc mockMvc;
     @Autowired protected DocumentConfiguration config;
 
     @ClassRule
@@ -123,7 +125,7 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
             if (requestsMade > 0) {
                 Thread.sleep(100);
             }
-            mvcResult = webClient.perform(MockMvcRequestBuilders.post(API_URL)
+            mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(ABOUT_TO_SUBMIT_URL)
                 .content(objectMapper.writeValueAsString(request))
                 .header(AUTHORIZATION, AUTH_TOKEN)
                 .contentType(APPLICATION_JSON_VALUE)
@@ -146,7 +148,7 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         generateDocumentServiceErrorStub(formGDocumentRequest());
         generateDocumentServiceSuccessStub(formOutOfFaimilyCourtResolutionDocumentRequest());
 
-        webClient.perform(MockMvcRequestBuilders.post(API_URL)
+        mockMvc.perform(MockMvcRequestBuilders.post(ABOUT_TO_SUBMIT_URL)
             .content(objectMapper.writeValueAsString(request))
             .header(AUTHORIZATION, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE)
@@ -158,13 +160,13 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         CaseDetails caseDetails = request.getCaseDetails();
         caseDetails.getData().put(missingFieldKey, null);
 
-        webClient.perform(MockMvcRequestBuilders.post(API_URL)
-            .content(objectMapper.writeValueAsString(request))
-            .header(AUTHORIZATION, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE)
-            .accept(APPLICATION_JSON_VALUE))
+        mockMvc.perform(MockMvcRequestBuilders.post(ABOUT_TO_START_URL)
+                .content(objectMapper.writeValueAsString(request))
+                .header(AUTHORIZATION, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andExpect(content().json(expectedErrorData(), true));
+            .andExpect(content().string(containsString(REQUIRED_FIELD_EMPTY_ERROR)));
     }
 
     private DocumentGenerationRequest formOutOfFaimilyCourtResolutionDocumentRequest() {
@@ -179,13 +181,6 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         return documentRequest(config.getFormCNonFastTrackTemplate(), config.getFormCFileName());
     }
 
-    private String expectedErrorData() throws JsonProcessingException {
-        return objectMapper.writeValueAsString(
-            AboutToStartOrSubmitCallbackResponse.builder()
-                .errors(ImmutableList.of(REQUIRED_FIELD_EMPTY_ERROR))
-                .build());
-    }
-
     private String expectedCaseData() throws JsonProcessingException {
         CaseDetails caseDetails = request.getCaseDetails();
         caseDetails.getData().put(FORM_C, caseDocument());
@@ -195,6 +190,7 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         return objectMapper.writeValueAsString(
             AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDetails.getData())
+                .errors(ImmutableList.of())
                 .warnings(ImmutableList.of(DATE_BETWEEN_12_AND_16_WEEKS))
                 .build());
     }
