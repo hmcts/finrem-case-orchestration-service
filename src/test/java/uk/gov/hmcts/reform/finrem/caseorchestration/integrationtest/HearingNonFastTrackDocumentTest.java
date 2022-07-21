@@ -73,7 +73,6 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
 
     private static final String GENERATE_DOCUMENT_CONTEXT_PATH = "/version/1/generate-pdf";
     private static final String ABOUT_TO_SUBMIT_URL = "/case-orchestration/ccdAboutToSubmitEvent";
-    private static final String ABOUT_TO_START_URL = "/case-orchestration/ccdAboutToStartEvent";
     private static final String JSON_CONTENT_PATH = "/fixtures/contested/validate-hearing-withoutfastTrackDecision.json";
 
     @Autowired protected ObjectMapper objectMapper;
@@ -160,7 +159,7 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         CaseDetails caseDetails = request.getCaseDetails();
         caseDetails.getData().put(missingFieldKey, null);
 
-        mockMvc.perform(MockMvcRequestBuilders.post(ABOUT_TO_START_URL)
+        mockMvc.perform(MockMvcRequestBuilders.post(ABOUT_TO_SUBMIT_URL)
                 .content(objectMapper.writeValueAsString(request))
                 .header(AUTHORIZATION, AUTH_TOKEN)
                 .contentType(APPLICATION_JSON_VALUE)

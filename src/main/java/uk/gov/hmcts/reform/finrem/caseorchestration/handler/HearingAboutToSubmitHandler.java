@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
+import com.google.common.collect.ImmutableList;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,13 @@ public class HearingAboutToSubmitHandler implements CallbackHandler {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request for list for hearing for Case ID: {}", caseDetails.getId());
 
+        final List<String> errors = validateHearingService.validateHearingErrors(caseDetails);
+        if (!errors.isEmpty()) {
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .errors(errors)
+                .build();
+        }
+
         if (hearingDocumentService.alreadyHadFirstHearing(caseDetails)) {
             if (caseDataService.isContestedPaperApplication(caseDetails)) {
                 additionalHearingDocumentService.createAdditionalHearingDocuments(userAuthorisation, caseDetails);
@@ -48,6 +56,8 @@ public class HearingAboutToSubmitHandler implements CallbackHandler {
         }
         List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
 
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).warnings(warnings).build();
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData())
+            .errors(ImmutableList.of())
+            .warnings(warnings).build();
     }
 }

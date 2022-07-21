@@ -19,15 +19,13 @@ public class ValidateHearingDatesTest extends IntegrationTestBase {
 
     @Value("${cos.document.hearing.api}")
     private String hearing;
-    @Value("${cos.document.hearing.validation.api}")
-    private String validateHearing;
 
     private static final String CONTESTED_DIR = "/json/contested/";
     private static final String CONSENTED_DIR = "/json/consented/";
 
     @Test
     public void verifyShouldReturnBadRequestWhenCaseDataIsMissingInRequest() {
-        Response response = utils.getResponse(validateHearing, "empty-casedata1.json", CONSENTED_DIR);
+        Response response = utils.getResponse(hearing, "empty-casedata1.json", CONSENTED_DIR);
 
         assertThat(response.getStatusCode(), is(HttpStatus.SC_BAD_REQUEST));
         assertThat(response.body().asString(), startsWith("Some server side exception occurred. Please check logs for details"));
@@ -35,7 +33,7 @@ public class ValidateHearingDatesTest extends IntegrationTestBase {
 
     @Test
     public void verifyShouldThrowErrorWhenIssueDateAndHearingDateAreEmpty() {
-        assertThat(getResponseAndAssertSuccessStatusCode(validateHearing, "pba-validate1.json", CONTESTED_DIR).jsonPath().get("errors[0]"),
+        assertThat(getResponseAndAssertSuccessStatusCode(hearing, "pba-validate1.json", CONTESTED_DIR).jsonPath().get("errors[0]"),
             is("Issue Date, fast track decision or hearingDate is empty"));
     }
 

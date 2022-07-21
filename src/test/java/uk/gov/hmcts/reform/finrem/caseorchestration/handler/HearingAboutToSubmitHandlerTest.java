@@ -23,9 +23,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentServi
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -58,6 +60,7 @@ public class HearingAboutToSubmitHandlerTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private static final String AUTH_TOKEN = "tokien:)";
+    private static final String INVALID_HEARING_JSON = "/fixtures/contested/invalid-hearing.json";
     private static final String FAST_TRACK_JSON = "/fixtures/contested/validate-hearing-with-fastTrackDecision.json";
     private static final String FAST_TRACK_PAPER_JSON = "/fixtures/contested/validate-hearing-with-fastTrackDecision-paperApplication.json";
     private static final String ADDITIONAL_DOC_JSON = "/fixtures/bulkprint/bulk-print-additional-hearing.json";
@@ -90,6 +93,30 @@ public class HearingAboutToSubmitHandlerTest {
         assertThat(handler
                 .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.LIST_FOR_HEARING),
             is(false));
+    }
+
+    @Test
+    public void givenCase_whenMandatoryFieldNotPresent_thenIssueError() {
+        CallbackRequest callbackRequest = buildCallbackRequest(INVALID_HEARING_JSON);
+        when(validateHearingService.validateHearingErrors(callbackRequest.getCaseDetails()))
+            .thenReturn(ImmutableList.of("Issue Date, fast track decision or hearingDate is empty"));
+        AboutToStartOrSubmitCallbackResponse response = handler.handle(callbackRequest, AUTH_TOKEN);
+        assertThat(response.getErrors(), contains("Issue Date, fast track decision or hearingDate is empty"));
+    }
+
+    @Test
+    public void givenCase_whenMandatoryFieldPresent_thenHandleRequest() {
+        CallbackRequest callbackRequest = buildCallbackRequest(INVALID_HEARING_JSON);
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        caseData.put("issueDate","2019-03-04");
+        caseData.put("hearingDate","2019-03-04");
+        caseData.put("fastTrackDecision","yes");
+
+        when(validateHearingService.validateHearingErrors(callbackRequest.getCaseDetails()))
+            .thenReturn(new ArrayList<>());
+
+        AboutToStartOrSubmitCallbackResponse response = handler.handle(callbackRequest, AUTH_TOKEN);
+        assertTrue(response.getErrors().isEmpty());
     }
 
     @Test
