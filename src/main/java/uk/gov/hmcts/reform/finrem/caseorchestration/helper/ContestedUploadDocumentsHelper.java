@@ -72,41 +72,57 @@ public class ContestedUploadDocumentsHelper {
         List<ContestedUploadedDocumentData> uploadedDocuments = getDocumentCollection(caseData, collection);
 
         if (respondentJourneyEnabled) {
-            filterConfidentialDocs(uploadedDocuments, caseData, APPLICANT_CONFIDENTIAL_DOCS_COLLECTION, APPLICANT);
-            filterHearingBundles(uploadedDocuments, caseData, APP_HEARING_BUNDLES_COLLECTION, APPLICANT);
-            filterFormEExhibits(uploadedDocuments, caseData, APP_FORM_E_EXHIBITS_COLLECTION, APPLICANT);
-            filterChronologiesStatements(uploadedDocuments, caseData, APP_CHRONOLOGIES_STATEMENTS_COLLECTION, APPLICANT);
-            filterQuestionnairesAnswers(uploadedDocuments, caseData, APP_QUESTIONNAIRES_ANSWERS_COLLECTION, APPLICANT);
-            filterStatementsExhibits(uploadedDocuments, caseData, APP_STATEMENTS_EXHIBITS_COLLECTION, APPLICANT);
-            filterCaseSummaries(uploadedDocuments, caseData, APP_CASE_SUMMARIES_COLLECTION, APPLICANT);
-            filterFormsH(uploadedDocuments, caseData, APP_FORMS_H_COLLECTION, APPLICANT);
-            filterExpertEvidence(uploadedDocuments, caseData, APP_EXPERT_EVIDENCE_COLLECTION, APPLICANT);
-            filterCorrespondenceDocs(uploadedDocuments, caseData, APP_CORRESPONDENCE_COLLECTION, APPLICANT);
-            filterOtherDocs(uploadedDocuments, caseData, APP_OTHER_COLLECTION, APPLICANT);
+            applicantDocuments(caseData, uploadedDocuments);
 
-            filterConfidentialDocs(uploadedDocuments, caseData, RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION, RESPONDENT);
-            filterHearingBundles(uploadedDocuments, caseData, RESP_HEARING_BUNDLES_COLLECTION, RESPONDENT);
-            filterFormEExhibits(uploadedDocuments, caseData, RESP_FORM_E_EXHIBITS_COLLECTION, RESPONDENT);
-            filterChronologiesStatements(uploadedDocuments, caseData, RESP_CHRONOLOGIES_STATEMENTS_COLLECTION, RESPONDENT);
-            filterQuestionnairesAnswers(uploadedDocuments, caseData, RESP_QUESTIONNAIRES_ANSWERS_COLLECTION, RESPONDENT);
-            filterStatementsExhibits(uploadedDocuments, caseData, RESP_STATEMENTS_EXHIBITS_COLLECTION, RESPONDENT);
-            filterCaseSummaries(uploadedDocuments, caseData, RESP_CASE_SUMMARIES_COLLECTION, RESPONDENT);
-            filterFormsH(uploadedDocuments, caseData, RESP_FORM_H_COLLECTION, RESPONDENT);
-            filterExpertEvidence(uploadedDocuments, caseData, RESP_EXPERT_EVIDENCE_COLLECTION, RESPONDENT);
-            filterCorrespondenceDocs(uploadedDocuments, caseData, RESP_CORRESPONDENCE_COLLECTION, RESPONDENT);
-            filterOtherDocs(uploadedDocuments, caseData, RESP_OTHER_COLLECTION, RESPONDENT);
+            respondentDocuments(caseData, uploadedDocuments);
         } else {
-            filterCorrespondence(uploadedDocuments, caseData, APPLICANT_CORRESPONDENCE_COLLECTION, APPLICANT);
-            filterForms(uploadedDocuments, caseData, APPLICANT_FR_FORM_COLLECTION, APPLICANT);
-            filterEvidence(uploadedDocuments, caseData, APPLICANT_EVIDENCE_COLLECTION, APPLICANT);
-            filterTrialBundle(uploadedDocuments, caseData, APPLICANT_TRIAL_BUNDLE_COLLECTION, APPLICANT);
+            applicantElseDocuments(caseData, uploadedDocuments);
 
-            filterCorrespondence(uploadedDocuments, caseData, RESPONDENT_CORRESPONDENCE_COLLECTION, RESPONDENT);
-            filterForms(uploadedDocuments, caseData, RESPONDENT_FR_FORM_COLLECTION, RESPONDENT);
-            filterEvidence(uploadedDocuments, caseData, RESPONDENT_EVIDENCE_COLLECTION, RESPONDENT);
-            filterTrialBundle(uploadedDocuments, caseData, RESPONDENT_TRIAL_BUNDLE_COLLECTION, RESPONDENT);
+            respondentElseDocuments(caseData, uploadedDocuments);
         }
         caseData.put(collection, uploadedDocuments);
+    }
+
+    private void respondentElseDocuments(Map<String, Object> caseData, List<ContestedUploadedDocumentData> uploadedDocuments) {
+        filterCorrespondence(uploadedDocuments, caseData, RESPONDENT_CORRESPONDENCE_COLLECTION, RESPONDENT);
+        filterForms(uploadedDocuments, caseData, RESPONDENT_FR_FORM_COLLECTION, RESPONDENT);
+        filterEvidence(uploadedDocuments, caseData, RESPONDENT_EVIDENCE_COLLECTION, RESPONDENT);
+        filterTrialBundle(uploadedDocuments, caseData, RESPONDENT_TRIAL_BUNDLE_COLLECTION, RESPONDENT);
+    }
+
+    private void applicantElseDocuments(Map<String, Object> caseData, List<ContestedUploadedDocumentData> uploadedDocuments) {
+        filterCorrespondence(uploadedDocuments, caseData, APPLICANT_CORRESPONDENCE_COLLECTION, APPLICANT);
+        filterForms(uploadedDocuments, caseData, APPLICANT_FR_FORM_COLLECTION, APPLICANT);
+        filterEvidence(uploadedDocuments, caseData, APPLICANT_EVIDENCE_COLLECTION, APPLICANT);
+        filterTrialBundle(uploadedDocuments, caseData, APPLICANT_TRIAL_BUNDLE_COLLECTION, APPLICANT);
+    }
+
+    private void respondentDocuments(Map<String, Object> caseData, List<ContestedUploadedDocumentData> uploadedDocuments) {
+        filterConfidentialDocs(uploadedDocuments, caseData, RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION, RESPONDENT);
+        filterHearingBundles(uploadedDocuments, caseData, RESP_HEARING_BUNDLES_COLLECTION, RESPONDENT);
+        filterFormEExhibits(uploadedDocuments, caseData, RESP_FORM_E_EXHIBITS_COLLECTION, RESPONDENT);
+        filterChronologiesStatements(uploadedDocuments, caseData, RESP_CHRONOLOGIES_STATEMENTS_COLLECTION, RESPONDENT);
+        filterQuestionnairesAnswers(uploadedDocuments, caseData, RESP_QUESTIONNAIRES_ANSWERS_COLLECTION, RESPONDENT);
+        filterStatementsExhibits(uploadedDocuments, caseData, RESP_STATEMENTS_EXHIBITS_COLLECTION, RESPONDENT);
+        filterCaseSummaries(uploadedDocuments, caseData, RESP_CASE_SUMMARIES_COLLECTION, RESPONDENT);
+        filterFormsH(uploadedDocuments, caseData, RESP_FORM_H_COLLECTION, RESPONDENT);
+        filterExpertEvidence(uploadedDocuments, caseData, RESP_EXPERT_EVIDENCE_COLLECTION, RESPONDENT);
+        filterCorrespondenceDocs(uploadedDocuments, caseData, RESP_CORRESPONDENCE_COLLECTION, RESPONDENT);
+        filterOtherDocs(uploadedDocuments, caseData, RESP_OTHER_COLLECTION, RESPONDENT);
+    }
+
+    private void applicantDocuments(Map<String, Object> caseData, List<ContestedUploadedDocumentData> uploadedDocuments) {
+        filterConfidentialDocs(uploadedDocuments, caseData, APPLICANT_CONFIDENTIAL_DOCS_COLLECTION, APPLICANT);
+        filterHearingBundles(uploadedDocuments, caseData, APP_HEARING_BUNDLES_COLLECTION, APPLICANT);
+        filterFormEExhibits(uploadedDocuments, caseData, APP_FORM_E_EXHIBITS_COLLECTION, APPLICANT);
+        filterChronologiesStatements(uploadedDocuments, caseData, APP_CHRONOLOGIES_STATEMENTS_COLLECTION, APPLICANT);
+        filterQuestionnairesAnswers(uploadedDocuments, caseData, APP_QUESTIONNAIRES_ANSWERS_COLLECTION, APPLICANT);
+        filterStatementsExhibits(uploadedDocuments, caseData, APP_STATEMENTS_EXHIBITS_COLLECTION, APPLICANT);
+        filterCaseSummaries(uploadedDocuments, caseData, APP_CASE_SUMMARIES_COLLECTION, APPLICANT);
+        filterFormsH(uploadedDocuments, caseData, APP_FORMS_H_COLLECTION, APPLICANT);
+        filterExpertEvidence(uploadedDocuments, caseData, APP_EXPERT_EVIDENCE_COLLECTION, APPLICANT);
+        filterCorrespondenceDocs(uploadedDocuments, caseData, APP_CORRESPONDENCE_COLLECTION, APPLICANT);
+        filterOtherDocs(uploadedDocuments, caseData, APP_OTHER_COLLECTION, APPLICANT);
     }
 
     private List<ContestedUploadedDocumentData> getDocumentCollection(Map<String, Object> caseData, String collection) {
