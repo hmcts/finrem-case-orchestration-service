@@ -22,6 +22,7 @@ public enum EventType {
     APPROVE_ORDER("FR_approveApplication"),
     REJECT_ORDER("FR_orderRefusal"),
     CLOSE("FR_close"),
+    MANAGE_CASE_DOCUMENTS("FR_manageCaseDocuments"),
     UPLOAD_APPROVED_ORDER("FR_uploadApprovedOrder"),
     NONE("");
 
