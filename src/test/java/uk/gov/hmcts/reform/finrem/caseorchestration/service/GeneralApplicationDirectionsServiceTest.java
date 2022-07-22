@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.GeneralApplicationRegionWrapper;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.GeneralApplicationWrapper;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -71,8 +72,8 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     private FinremCaseDetails caseDetails;
 
     @Before
-    public void setup() {
-        caseDetails = finremCaseDetailsFromResource("/fixtures/general-application-directions.json", objectMapper);
+    public void setup() throws IOException {
+        caseDetails = finremCaseDetailsFromResource(getResource("/fixtures/general-application-directions.json"), objectMapper);
 
         when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any()))
             .thenReturn(newDocument(DOC_URL, FILE_NAME,
@@ -116,10 +117,9 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         verify(bulkPrintService, times(1)).printRespondentDocuments(any(), eq(AUTH_TOKEN),
             printDocumentsRequestDocumentListCaptor.capture());
 
-        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue();
+        Map<String, Object> data = getDataFromCaptor(documentGenerationRequestCaseDetailsCaptor);
 
         assertThat(data, allOf(
-            Matchers.<String, Object>hasEntry("ccdCaseNumber", 1234567890L),
             hasEntry("courtDetails", ImmutableMap.of(
                 "courtName", "Kingston-Upon-Thames County Court And Family Court",
                 "courtAddress", "Kingston upon Thames County Court, St James Road, Kingston-upon-Thames, KT1 2AD",
@@ -136,7 +136,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
 
     @Test
     public void givenNoHearingRequired_whenGeneralApplicationDirectionsSubmitted_thenGeneralOrderIsPrinted() {
-        caseDetails.getCaseData().getGeneralApplicationWrapper().setGeneralApplicationHearingRequired(YesOrNo.NO);
+        caseDetails.getCaseData().getGeneralApplicationWrapper().setGeneralApplicationDirectionsHearingRequired(YesOrNo.NO);
         generalApplicationDirectionsService.submitGeneralApplicationDirections(caseDetails, AUTH_TOKEN);
 
         assertCaseDataHasGeneralApplicationDirectionsDocument();
@@ -150,7 +150,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             printDocumentsRequestDocumentListCaptor.capture());
         verify(bulkPrintService, times(1)).printRespondentDocuments(any(), eq(AUTH_TOKEN), any());
 
-        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue();
+        Map<String, Object> data = getDataFromCaptor(documentGenerationRequestCaseDetailsCaptor);
         assertThat(data, allOf(
             hasEntry("courtDetails", ImmutableMap.of(
                 "courtName", "Kingston-Upon-Thames County Court And Family Court",
@@ -165,8 +165,8 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenPaperApplicationInterimHearingRequired_thenInterimHearingNoticeIsPrinted() {
-        caseDetails = finremCaseDetailsFromResource("/fixtures/contested-interim-hearing.json", objectMapper);
+    public void givenPaperApplicationInterimHearingRequired_thenInterimHearingNoticeIsPrinted() throws IOException {
+        caseDetails = finremCaseDetailsFromResource(getResource("/fixtures/contested-interim-hearing.json"), objectMapper);
         when(genericDocumentService.convertDocumentIfNotPdfAlready(isA(Document.class), any()))
             .thenReturn(newDocument(INTE_DOC_URL, INTE_FILE_NAME, INTE_BINARY_URL));
         generalApplicationDirectionsService.submitInterimHearing(caseDetails, AUTH_TOKEN);
@@ -182,30 +182,26 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         verify(genericDocumentService, times(1))
             .convertDocumentIfNotPdfAlready(isA(Document.class), eq(AUTH_TOKEN));
 
-        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue();
+        Map<String, Object> data = getDataFromCaptor(documentGenerationRequestCaseDetailsCaptor);
+
         assertThat(data, allOf(
-            hasEntry("courtDetails", ImmutableMap.of(
-                "courtName", "Kingston-Upon-Thames County Court And Family Court",
-                "courtAddress", "Kingston upon Thames County Court, St James Road, Kingston-upon-Thames, KT1 2AD",
-                "phoneNumber", "0208 972 8700",
-                "email", "enquiries.kingston.countycourt@justice.gov.uk")),
             Matchers.<String, Object>hasEntry("applicantName", "Poor Guy"),
             Matchers.<String, Object>hasEntry("respondentName", "test Korivi"),
-            Matchers.<String, Object>hasEntry("applicantRepresented", "No"),
-            Matchers.<String, Object>hasEntry("respondentRepresented", "No"),
-            Matchers.<String, Object>hasEntry("interim_cfcCourtList", "FR_s_CFCList_4"),
             Matchers.<String, Object>hasEntry("interimHearingDate", "2020-06-01"),
             Matchers.<String, Object>hasEntry("interimHearingTime", "2:00 pm"),
-            Matchers.<String, Object>hasEntry("interimHearingTimeEstimate", "30 minutes"),
+            Matchers.<String, Object>hasEntry("interimTimeEstimate", "30 minutes"),
             Matchers.<String, Object>hasEntry("interimAdditionalInformationAboutHearing", "refreshments will be provided"),
+            Matchers.<String, Object>hasEntry("divorceCaseNumber", "DD12D12345"),
+            Matchers.<String, Object>hasEntry("hearingVenue", "Kingston-Upon-Thames County Court And Family Court, Kingston upon Thames "
+                + "County Court, St James Road, Kingston-upon-Thames, KT1 2AD"),
             hasKey("letterDate")));
 
         assertCaseDataHasInterimDocument();
     }
 
     @Test
-    public void givenApplicationIsNotPaperInterimHearingRequired_thenInterimHearingNoticeIsPrinted() {
-        caseDetails = finremCaseDetailsFromResource("/fixtures/contested-interim-hearing-nopaper.json", objectMapper);
+    public void givenApplicationIsNotPaperInterimHearingRequired_thenInterimHearingNoticeIsPrinted() throws IOException {
+        caseDetails = finremCaseDetailsFromResource(getResource("/fixtures/contested-interim-hearing-nopaper.json"), objectMapper);
         when(genericDocumentService.convertDocumentIfNotPdfAlready(isA(Document.class), any()))
             .thenReturn(newDocument(INTE_DOC_URL, INTE_FILE_NAME, INTE_BINARY_URL));
         generalApplicationDirectionsService.submitInterimHearing(caseDetails, AUTH_TOKEN);
@@ -221,7 +217,8 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         verify(genericDocumentService, times(1))
             .convertDocumentIfNotPdfAlready(isA(Document.class), eq(AUTH_TOKEN));
 
-        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue();
+        Map<String, Object> data = getDataFromCaptor(documentGenerationRequestCaseDetailsCaptor);
+
         assertThat(data, allOf(
             hasEntry("courtDetails", ImmutableMap.of(
                 "courtName", "Kingston-Upon-Thames County Court And Family Court",
@@ -230,15 +227,10 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
                 "email", "enquiries.kingston.countycourt@justice.gov.uk")),
             Matchers.<String, Object>hasEntry("applicantName", "Poor Guy"),
             Matchers.<String, Object>hasEntry("respondentName", "test Korivi"),
-            Matchers.<String, Object>hasEntry("applicantRepresented", "No"),
-            Matchers.<String, Object>hasEntry("respondentRepresented", "No"),
-            Matchers.<String, Object>hasEntry("interim_cfcCourtList", "FR_s_CFCList_4"),
             Matchers.<String, Object>hasEntry("interimHearingDate", "2020-06-01"),
             Matchers.<String, Object>hasEntry("interimHearingTime", "2:00 pm"),
-            Matchers.<String, Object>hasEntry("interimHearingTimeEstimate", "30 minutes"),
+            Matchers.<String, Object>hasEntry("interimTimeEstimate", "30 minutes"),
             Matchers.<String, Object>hasEntry("interimAdditionalInformationAboutHearing", "refreshments will be provided"),
-            Matchers.<String, Object>hasEntry("applicantSolicitorConsentForEmails", "No"),
-            Matchers.<String, Object>hasEntry("RespSolNotificationsEmailConsent", "No"),
             hasKey("letterDate")));
 
         assertCaseDataHasInterimDocument();

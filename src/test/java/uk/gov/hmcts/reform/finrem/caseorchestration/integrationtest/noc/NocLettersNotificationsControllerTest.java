@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.util.ResourceUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseControllerTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.NotificationsController;
@@ -19,6 +20,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotific
 import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -55,7 +59,7 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
     ArgumentCaptor<FinremCaseDetails> finremCaseDetailsArgumentCaptor;
 
     @Test
-    public void shouldCallNotificationsServiceCorrectly() {
+    public void shouldCallNotificationsServiceCorrectly() throws IOException {
 
         Document litigantSolicitorAddedCaseDocument = Document.builder().filename("docFileNameAdded").build();
         when(genericDocumentServiceMock.generateDocumentFromPlaceholdersMap(anyString(), anyMap(),
@@ -69,7 +73,7 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
             eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorRevokedFileName()))).thenReturn(
             litigantSolicitorRemovedCaseDocument);
 
-        notificationsController.sendNoticeOfChangeNotifications("authToken", DIGITAL_CALLBACK);
+        notificationsController.sendNoticeOfChangeNotifications("authToken", getCallbackRequestString(DIGITAL_CALLBACK));
 
         verify(notificationService).sendNoticeOfChangeEmail(finremCaseDetailsArgumentCaptor.capture());
         verify(genericDocumentServiceMock).generateDocumentFromPlaceholdersMap(eq("authToken"), placeholdersMapArgumentCaptor.capture(),
@@ -84,20 +88,20 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
             eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorRevokedTemplate()),
             eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorRevokedFileName()));
 
-        verify(bulkPrintService).sendDocumentForPrint(litigantSolicitorAddedCaseDocument, finremCaseDetailsArgumentCaptor.capture());
-        verify(bulkPrintService).sendDocumentForPrint(litigantSolicitorRemovedCaseDocument, finremCaseDetailsArgumentCaptor.capture());
+        verify(bulkPrintService).sendDocumentForPrint(eq(litigantSolicitorAddedCaseDocument), finremCaseDetailsArgumentCaptor.capture());
+        verify(bulkPrintService).sendDocumentForPrint(eq(litigantSolicitorRemovedCaseDocument), finremCaseDetailsArgumentCaptor.capture());
 
     }
 
     @Test
-    public void shouldCallNotificationServiceCorrectlyNonDigitalSolicitorRemoved() {
+    public void shouldCallNotificationServiceCorrectlyNonDigitalSolicitorRemoved() throws IOException {
         Document litigantSolicitorAddedCaseDocument = Document.builder().filename("docFileNameAdded").build();
         when(genericDocumentServiceMock.generateDocumentFromPlaceholdersMap(anyString(), anyMap(),
             eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorAddedTemplate()),
             eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorAddedFileName()))).thenReturn(
             litigantSolicitorAddedCaseDocument);
 
-        notificationsController.sendNoticeOfChangeNotifications("authToken", NON_DIGITAL_CALLBACK);
+        notificationsController.sendNoticeOfChangeNotifications("authToken", getCallbackRequestString(NON_DIGITAL_CALLBACK));
 
         verify(notificationService).sendNoticeOfChangeEmail(finremCaseDetailsArgumentCaptor.capture());
         verify(genericDocumentServiceMock).generateDocumentFromPlaceholdersMap(eq("authToken"), placeholdersMapArgumentCaptor.capture(),
@@ -108,7 +112,7 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
 
         assertNotificationLetterDetails(letterAddedDetailsMap);
 
-        verify(bulkPrintService).sendDocumentForPrint(litigantSolicitorAddedCaseDocument, finremCaseDetailsArgumentCaptor.capture());
+        verify(bulkPrintService).sendDocumentForPrint(eq(litigantSolicitorAddedCaseDocument), finremCaseDetailsArgumentCaptor.capture());
     }
 
     private void assertNotificationLetterDetails(Map letterAddedDetailsMap) {
@@ -119,5 +123,10 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
         String applicantName = caseData.get("applicantName").toString();
         assertThat(applicantName, is("Poor Guy"));
 
+    }
+
+    private String getCallbackRequestString(String filePath) throws IOException {
+        File file = ResourceUtils.getFile(this.getClass().getResource(filePath));
+        return new String(Files.readAllBytes(file.toPath()));
     }
 }

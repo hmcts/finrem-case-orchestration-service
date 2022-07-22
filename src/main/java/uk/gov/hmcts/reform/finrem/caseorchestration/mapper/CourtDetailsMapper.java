@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CourtList;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.CourtListWrapper;
 
 import java.lang.reflect.Field;
@@ -41,7 +42,7 @@ public class CourtDetailsMapper {
         List<Field> initialisedCourtField = getInitialisedCourtField(courtListWrapper);
 
         if (initialisedCourtField.size() != 1) {
-            throw new IllegalStateException("More than one court selected in case data");
+            throw new IllegalStateException("There must be exactly one court selected in case data");
         }
 
         try {
@@ -67,8 +68,9 @@ public class CourtDetailsMapper {
         Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(),
             TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, Object.class));
 
-        return objectMapper.convertValue(courtDetailsMap.get(
-            nullToEmpty(initialisedCourtField.get(0).get(courtListWrapper))),
-            new TypeReference<>() {});
+        CourtList selectedCourtField = (CourtList) initialisedCourtField.get(0).get(courtListWrapper);
+        Object courtDetailsObject = courtDetailsMap.get(nullToEmpty(selectedCourtField.getSelectedCourtId()));
+
+        return objectMapper.convertValue(courtDetailsObject, new TypeReference<>() {});
     }
 }

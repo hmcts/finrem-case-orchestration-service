@@ -16,6 +16,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import static uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo.isYes;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -88,7 +90,7 @@ public class BulkPrintService {
     private BulkPrintDocument generateApplicantCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
         Document applicantCoverSheet = coverSheetService.generateApplicantCoverSheet(caseDetails, authorisationToken);
 
-        if (caseDetails.getCaseData().getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent().isYes()) {
+        if (isYes(caseDetails.getCaseData().getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent())) {
             log.info("Case {}, has been marked as confidential. Adding coversheet to confidential field", caseDetails.getId());
             caseDetails.getCaseData().setBulkPrintCoverSheetApp(null);
             caseDetails.getCaseData().setBulkPrintCoverSheetAppConfidential(applicantCoverSheet);
@@ -103,7 +105,7 @@ public class BulkPrintService {
     private BulkPrintDocument generateRespondentCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
         Document respondentCoverSheet = coverSheetService.generateRespondentCoverSheet(caseDetails, authorisationToken);
 
-        if (caseDetails.getCaseData().getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant().isYes()) {
+        if (isYes(caseDetails.getCaseData().getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant())) {
             log.info("Case {}, has been marked as confidential. Adding coversheet to confidential field", caseDetails.getId());
             caseDetails.getCaseData().setBulkPrintCoverSheetRes(null);
             caseDetails.getCaseData().setBulkPrintCoverSheetResConfidential(respondentCoverSheet);

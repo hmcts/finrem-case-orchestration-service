@@ -50,7 +50,7 @@ public class DocumentOrderingService {
 
     private List<ConsentOrderCollection> getApprovedOrders(FinremCaseData caseData) {
         return caseData.isConsentedInContestedCase()
-            ? caseData.getContestedConsentedApprovedOrders()
+            ? caseData.getConsentOrderWrapper().getContestedConsentedApprovedOrders()
             : caseData.getApprovedOrderCollection();
     }
 }

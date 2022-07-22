@@ -86,7 +86,7 @@ public abstract class AbstractLetterHandler implements LetterHandler {
     }
 
     protected boolean isApplicant(RepresentationUpdate representationUpdate) {
-        return representationUpdate.getParty().equals(COR_APPLICANT);
+        return representationUpdate.getParty().equalsIgnoreCase(COR_APPLICANT);
     }
 
     protected boolean isCaseFieldPopulated(String caseDataField) {

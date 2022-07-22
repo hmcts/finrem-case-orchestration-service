@@ -7,15 +7,20 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Address;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.GeneralLetterAddressToType;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
 public class AddresseeGeneratorHelper {
+
+    public static final String ADDRESS_MAP = "addressMap";
+    public static final String NAME_MAP = "nameMap";
 
     public static Addressee generateAddressee(FinremCaseDetails caseDetails,
                                               DocumentHelper.PaperNotificationRecipient recipient) {
@@ -37,15 +42,17 @@ public class AddresseeGeneratorHelper {
     }
 
     private static String getAppName(FinremCaseData caseData) {
-        return !nullToEmpty(caseData.getContactDetailsWrapper().getApplicantAddress()).isEmpty()
-            ? caseData.getFullApplicantName()
-            : caseData.getApplicantSolicitorName();
+        return caseData.isApplicantRepresentedByASolicitor()
+            ? caseData.getApplicantSolicitorName()
+            : caseData.getFullApplicantName();
+
     }
 
     private static Address getAppAddress(FinremCaseData caseData) {
-        return !nullToEmpty(caseData.getContactDetailsWrapper().getApplicantAddress()).isEmpty()
-            ? caseData.getContactDetailsWrapper().getApplicantAddress()
-            : caseData.getApplicantSolicitorAddress();
+        return caseData.isApplicantRepresentedByASolicitor()
+            ? caseData.getApplicantSolicitorAddress()
+            : caseData.getContactDetailsWrapper().getApplicantAddress();
+
     }
 
     private static Addressee getRespondentAddressee(FinremCaseData caseData) {
@@ -56,15 +63,16 @@ public class AddresseeGeneratorHelper {
     }
 
     private static String getRespName(FinremCaseData caseData) {
-        return nullToEmpty(caseData.getContactDetailsWrapper().getRespondentAddress()).isEmpty()
-            ? caseData.getRespondentFullName()
-            : caseData.getRespondentSolicitorName();
+        return caseData.isRespondentRepresentedByASolicitor()
+            ? caseData.getRespondentSolicitorName()
+            : caseData.getRespondentFullName();
     }
 
     private static Address getRespAddress(FinremCaseData caseData) {
-        return !nullToEmpty(caseData.getContactDetailsWrapper().getRespondentAddress()).isEmpty()
-            ? caseData.getContactDetailsWrapper().getRespondentAddress()
-            : caseData.getContactDetailsWrapper().getRespondentSolicitorAddress();
+        return caseData.isRespondentRepresentedByASolicitor()
+            ? caseData.getContactDetailsWrapper().getRespondentSolicitorAddress()
+            : caseData.getContactDetailsWrapper().getRespondentAddress();
+
     }
 
     public static String formatAddressForLetterPrinting(Address address) {
@@ -82,5 +90,27 @@ public class AddresseeGeneratorHelper {
                 .collect(Collectors.joining("\n"));
         }
         return "";
+    }
+
+    public static Map<String, Map<GeneralLetterAddressToType, ?>> getAddressToCaseDataMapping(FinremCaseData data) {
+        Map<GeneralLetterAddressToType, Address> generalLetterAddressToValueToAddress = Map.of(
+            GeneralLetterAddressToType.APPLICANT_SOLICITOR, getAddressOrNew(data.getApplicantSolicitorAddress()),
+            GeneralLetterAddressToType.RESPONDENT_SOLICITOR, getAddressOrNew(data.getContactDetailsWrapper().getRespondentSolicitorAddress()),
+            GeneralLetterAddressToType.RESPONDENT, getAddressOrNew(data.getContactDetailsWrapper().getRespondentAddress()),
+            GeneralLetterAddressToType.OTHER, getAddressOrNew(data.getGeneralLetterWrapper().getGeneralLetterRecipientAddress()));
+
+        Map<GeneralLetterAddressToType, String> generalLetterAddressToName = Map.of(
+            GeneralLetterAddressToType.APPLICANT_SOLICITOR, nullToEmpty(data.getApplicantSolicitorName()),
+            GeneralLetterAddressToType.RESPONDENT_SOLICITOR, nullToEmpty(data.getRespondentSolicitorName()),
+            GeneralLetterAddressToType.RESPONDENT, nullToEmpty(data.getRespondentFullName()),
+            GeneralLetterAddressToType.OTHER, nullToEmpty(data.getGeneralLetterWrapper().getGeneralLetterRecipient()));
+
+        return Map.of(
+            ADDRESS_MAP, generalLetterAddressToValueToAddress,
+            NAME_MAP, generalLetterAddressToName);
+    }
+
+    public static Address getAddressOrNew(Address address) {
+        return Optional.ofNullable(address).orElse(new Address());
     }
 }

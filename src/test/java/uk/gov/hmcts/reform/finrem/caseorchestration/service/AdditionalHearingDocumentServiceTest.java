@@ -28,8 +28,11 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.RegionSouthEastFrc;
 import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.DefaultCourtListWrapper;
 
+import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -48,6 +51,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDoc
 
 public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
 
+    static final String CASE_DETAILS = "caseDetails";
+    static final String CASE_DATA = "case_data";
+
+    public static final String BULK_PRINT_ADDITIONAL_HEARING_JSON = "/fixtures/bulkprint/bulk-print-additional-hearing.json";
     @Autowired private AdditionalHearingDocumentService additionalHearingDocumentService;
     @Autowired private ObjectMapper objectMapper;
 
@@ -65,17 +72,15 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void generateAndAddAdditionalHearingDocument() {
-        FinremCaseDetails caseDetails = finremCaseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json",
+    public void generateAndAddAdditionalHearingDocument() throws IOException {
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource(BULK_PRINT_ADDITIONAL_HEARING_JSON),
             objectMapper);
+        when(additionalHearingDetailsMapper.getDocumentTemplateDetailsAsMap(any(), any())).thenReturn(expectedPlaceholdersMap());
         additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
 
-        verify(genericDocumentService, times(1)).generateDocumentFromPlaceholdersMap(any(),
-            placeholdersMapCaptor.capture(), any(), any());
-        verify(additionalHearingDetailsMapper, times(1))
-            .getAdditionalHearingDetailsAsMap(finremCaseDetailsCaptor.capture(), any());
+        verifyInteractions();
 
-        Map<String, Object> data = placeholdersMapCaptor.getValue();
+        Map<String, Object> data = getCaseDataFromCaptor();
 
         assertThat(data.get("CCDCaseNumber"), is(1234567890L));
         assertThat(data.get("DivorceCaseNumber"), is("AB01D23456"));
@@ -101,7 +106,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
     @Test
     public void createAndStoreAdditionalHearingDocuments() throws JsonProcessingException {
         FinremCaseData caseData = baseCaseData();
-        caseData.setDirectionDetailsCollection(buildDirectionDetailsCollectionDataList(false));
+        caseData.setDirectionDetailsCollection(buildDirectionDetailsCollectionDataList(true));
 
         FinremCaseDetails caseDetails = FinremCaseDetails
             .builder()
@@ -109,14 +114,14 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
             .caseData(caseData)
             .build();
 
+        when(additionalHearingDetailsMapper.getDocumentTemplateDetailsAsMap(any(), any()))
+            .thenReturn(expectedPlaceholdersMapHastingsCourt());
+
         additionalHearingDocumentService.createAndStoreAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
 
-        verify(genericDocumentService, times(1)).generateDocumentFromPlaceholdersMap(any(),
-            placeholdersMapCaptor.capture(), any(), any());
-        verify(additionalHearingDetailsMapper, times(1))
-            .getAdditionalHearingDetailsAsMap(finremCaseDetailsCaptor.capture(), any());
+        verifyInteractions();
 
-        Map<String, Object> data = placeholdersMapCaptor.getValue();
+        Map<String, Object> data = getCaseDataFromCaptor();
 
         assertThat(data.get("CCDCaseNumber"), is(1234567890L));
         assertThat(data.get("DivorceCaseNumber"), is("AB01D23456"));
@@ -136,7 +141,21 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         assertThat(data.get("CourtEmail"), is("FRCKSS@justice.gov.uk"));
 
 
-        assertThat(finremCaseDetailsCaptor.getValue().getCaseData().getAdditionalHearingDocuments(), is(notNullValue()));
+        assertThat(caseDetails.getCaseData().getAdditionalHearingDocuments(), is(notNullValue()));
+    }
+
+    private void verifyInteractions() {
+        verify(genericDocumentService, times(1)).generateDocumentFromPlaceholdersMap(any(),
+            placeholdersMapCaptor.capture(), any(), any());
+        verify(additionalHearingDetailsMapper, times(1))
+            .getDocumentTemplateDetailsAsMap(finremCaseDetailsCaptor.capture(), any());
+    }
+
+    private Map<String, Object> getCaseDataFromCaptor() {
+        Map<String, Object> caseDetailsMap = placeholdersMapCaptor.getValue();
+        Map<String, Object> caseDataMap = (Map) caseDetailsMap.get(CASE_DETAILS);
+        Map<String, Object> data = (Map) caseDataMap.get(CASE_DATA);
+        return data;
     }
 
     @Test
@@ -149,17 +168,15 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         FinremCaseDetails caseDetails = FinremCaseDetails
             .builder()
             .id(1234567890L)
-            .caseData(caseData)
-            .build();
+            .caseData(caseData).build();
 
+        when(additionalHearingDetailsMapper.getDocumentTemplateDetailsAsMap(any(), any()))
+            .thenReturn(expectedPlaceholdersMapLongerHearing());
         additionalHearingDocumentService.createAndStoreAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
 
-        verify(genericDocumentService, times(1)).generateDocumentFromPlaceholdersMap(any(),
-            placeholdersMapCaptor.capture(), any(), any());
-        verify(additionalHearingDetailsMapper, times(1))
-            .getAdditionalHearingDetailsAsMap(finremCaseDetailsCaptor.capture(), any());
+        verifyInteractions();
 
-        Map<String, Object> data = placeholdersMapCaptor.getValue();
+        Map<String, Object> data = getCaseDataFromCaptor();
 
         assertThat(data.get("CCDCaseNumber"), is(1234567890L));
         assertThat(data.get("DivorceCaseNumber"), is("AB01D23456"));
@@ -228,10 +245,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
 
         additionalHearingDocumentService.createAndStoreAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
 
-        verify(genericDocumentService, times(1)).generateDocumentFromPlaceholdersMap(any(),
-            placeholdersMapCaptor.capture(), any(), any());
-        verify(additionalHearingDetailsMapper, times(1)).getAdditionalHearingDetailsAsMap(
-            finremCaseDetailsCaptor.capture(), any());
+        verifyInteractions();
 
         FinremCaseDetails capturedDetails = finremCaseDetailsCaptor.getValue();
 
@@ -251,10 +265,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
 
         additionalHearingDocumentService.createAndStoreAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
 
-        verify(genericDocumentService, times(1)).generateDocumentFromPlaceholdersMap(any(),
-            placeholdersMapCaptor.capture(), any(), any());
-        verify(additionalHearingDetailsMapper, times(1)).getAdditionalHearingDetailsAsMap(
-            finremCaseDetailsCaptor.capture(), any());
+        verifyInteractions();
 
         FinremCaseDetails capturedDetails = finremCaseDetailsCaptor.getValue();
 
@@ -277,10 +288,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
 
         additionalHearingDocumentService.createAndStoreAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
 
-        verify(genericDocumentService, times(1)).generateDocumentFromPlaceholdersMap(any(),
-            placeholdersMapCaptor.capture(), any(), any());
-        verify(additionalHearingDetailsMapper, times(1)).getAdditionalHearingDetailsAsMap(
-            finremCaseDetailsCaptor.capture(), any());
+        verifyInteractions();
 
         FinremCaseDetails capturedDetails = finremCaseDetailsCaptor.getValue();
 
@@ -321,7 +329,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
                 .build())
             .build();
 
-        return List.of(directionDetailsCollection);
+        return new ArrayList<>(List.of(directionDetailsCollection));
     }
 
     private void addEntryToDirectionDetailsCollectionDataList(
@@ -365,5 +373,83 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
             .build();
 
         return List.of(directionOrder);
+    }
+
+    private Map<String, Object> expectedPlaceholdersMap() {
+        Map<String, Object> placeholdersMap = new HashMap<>(Map.of(
+            "CCDCaseNumber", 1234567890L,
+            "DivorceCaseNumber", "AB01D23456",
+            "ApplicantName", "Test Applicant",
+            "RespondentName", "Name Respondent",
+            "HearingType", "Directions (DIR)",
+            "HearingVenue", "Nottingham County Court And Family Court",
+            "HearingDate", "2021-01-01",
+            "HearingLength", "30 minutes",
+            "HearingTime", "12:00",
+            "AdditionalHearingDated", "notNull"));
+
+        placeholdersMap.put("AnyOtherDirections", "N/A");
+        placeholdersMap.put("CourtName", "Nottingham County Court And Family Court");
+        placeholdersMap.put("CourtAddress", "60 Canal Street, Nottingham NG1 7EJ");
+        placeholdersMap.put("CourtPhone", "0115 910 3504");
+        placeholdersMap.put("CourtEmail", "FRCNottingham@justice.gov.uk");
+
+        Map<String, Object> caseDataMap = Map.of(
+            CASE_DATA, placeholdersMap,
+            "id", 1234567890L);
+
+        return Map.of(CASE_DETAILS, caseDataMap);
+    }
+
+    private Map<String, Object> expectedPlaceholdersMapHastingsCourt() {
+        Map<String, Object> placeholdersMap = new HashMap<>(Map.of(
+            "CCDCaseNumber", 1234567890L,
+            "DivorceCaseNumber", "AB01D23456",
+            "ApplicantName", "Test Applicant",
+            "RespondentName", "Name Respondent",
+            "HearingType", "Final Hearing (FH)",
+            "HearingVenue", "Hastings County Court And Family Court Hearing Centre",
+            "HearingDate", "2020-01-01",
+            "HearingLength", "12",
+            "HearingTime", "12",
+            "AdditionalHearingDated", "notNull"));
+
+        placeholdersMap.put("AnyOtherDirections", "N/A");
+        placeholdersMap.put("CourtName", "Hastings County Court And Family Court Hearing Centre");
+        placeholdersMap.put("CourtAddress", "The Law Courts, Bohemia Road, Hastings, TN34 1QX");
+        placeholdersMap.put("CourtPhone", "01634 887900");
+        placeholdersMap.put("CourtEmail", "FRCKSS@justice.gov.uk");
+
+        Map<String, Object> caseDataMap = Map.of(
+            CASE_DATA, placeholdersMap,
+            "id", 1234567890L);
+
+        return Map.of(CASE_DETAILS, caseDataMap);
+    }
+
+    private Map<String, Object> expectedPlaceholdersMapLongerHearing() {
+        Map<String, Object> placeholdersMap = new HashMap<>(Map.of(
+            "CCDCaseNumber", 1234567890L,
+            "DivorceCaseNumber", "AB01D23456",
+            "ApplicantName", "Test Applicant",
+            "RespondentName", "Name Respondent",
+            "HearingType", "Final Hearing (FH)",
+            "HearingVenue", "Nottingham County Court And Family Court",
+            "HearingDate", "2021-01-01",
+            "HearingLength", "1 hour",
+            "HearingTime", "15:00",
+            "AdditionalHearingDated", "notNull"));
+
+        placeholdersMap.put("AnyOtherDirections", "N/A");
+        placeholdersMap.put("CourtName", "Nottingham County Court And Family Court");
+        placeholdersMap.put("CourtAddress", "60 Canal Street, Nottingham NG1 7EJ");
+        placeholdersMap.put("CourtPhone", "0115 910 3504");
+        placeholdersMap.put("CourtEmail", "FRCNottingham@justice.gov.uk");
+
+        Map<String, Object> caseDataMap = Map.of(
+            CASE_DATA, placeholdersMap,
+            "id", 1234567890L);
+
+        return Map.of(CASE_DETAILS, caseDataMap);
     }
 }

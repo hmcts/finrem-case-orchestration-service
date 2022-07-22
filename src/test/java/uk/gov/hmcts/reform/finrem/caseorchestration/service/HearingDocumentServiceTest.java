@@ -11,8 +11,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.ccd.domain.BirminghamCourt;
+import uk.gov.hmcts.reform.finrem.ccd.domain.BristolCourt;
 import uk.gov.hmcts.reform.finrem.ccd.domain.CfcCourt;
 import uk.gov.hmcts.reform.finrem.ccd.domain.ClevelandCourt;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.HumberCourt;
@@ -33,7 +35,6 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.SwanseaCourt;
 import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -42,7 +43,6 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
@@ -64,7 +64,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class HearingDocumentServiceTest extends BaseServiceTest {
 
-    private static final String DATE_OF_HEARING = "2019-01-01";
+    private static final LocalDate DATE_OF_HEARING = LocalDate.of(2019, 01, 01);
 
     @Autowired private HearingDocumentService hearingDocumentService;
     @Autowired private DocumentConfiguration documentConfiguration;
@@ -77,7 +77,8 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
     @Before
     public void setUp() {
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(newDocument());
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any()))
+            .thenReturn(newDocument());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -97,15 +98,15 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     public void generateJudiciaryBasedFastTrackFormC() {
         Map<String, Object> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN,
             makeItJudiciaryFastTrackDecisionCase());
-        assertCaseDocument((CaseDocument) result.get(FORM_C));
+        assertCaseDocument((Document) result.get(FORM_C));
         verifyAdditionalFastTrackFields();
     }
 
     @Test
     public void generateNonFastTrackFormCAndFormG() {
         Map<String, Object> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, makeItNonFastTrackDecisionCase());
-        assertCaseDocument((CaseDocument) result.get(FORM_C));
-        assertCaseDocument((CaseDocument) result.get(FORM_G));
+        assertCaseDocument((Document) result.get(FORM_C));
+        assertCaseDocument((Document) result.get(FORM_G));
         verifyAdditionalNonFastTrackFields();
     }
 
@@ -149,6 +150,8 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
             .setSwanseaCourtList(SwanseaCourt.FR_swanseaList_1);
 
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetails);
+
         verifyAdditionalNonFastTrackFields();
 
         verifyCourtDetailsFields(
@@ -163,6 +166,8 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().setWalesFrcList(RegionWalesFrc.NEWPORT);
         caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
             .setNewportCourtList(NewportCourt.FR_newportList_1);
+
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetails);
 
         verifyAdditionalNonFastTrackFields();
 
@@ -179,6 +184,8 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
             .setKentSurreyCourtList(KentSurreyCourt.FR_kent_surreyList_1);
 
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetails);
+
         verifyAdditionalNonFastTrackFields();
 
         verifyCourtDetailsFields(
@@ -193,6 +200,8 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().setNorthEastFrcList(RegionNorthEastFrc.CLEVELAND);
         caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
             .setCleavelandCourtList(ClevelandCourt.FR_CLEVELAND_LIST_1);
+
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetails);
 
         verifyAdditionalNonFastTrackFields();
 
@@ -210,6 +219,8 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
             .setNwYorkshireCourtList(NwYorkshireCourt.HARROGATE_COURT);
 
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetails);
+
         verifyAdditionalNonFastTrackFields();
 
         verifyCourtDetailsFields(
@@ -226,6 +237,8 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
             .setHumberCourtList(HumberCourt.FR_humberList_1);
 
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetails);
+
         verifyAdditionalNonFastTrackFields();
 
         verifyCourtDetailsFields(
@@ -240,6 +253,8 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().setNorthWestFrcList(RegionNorthWestFrc.LIVERPOOL);
         caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
             .setLiverpoolCourtList(LiverpoolCourt.LIVERPOOL_CIVIL_FAMILY_COURT);
+
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetails);
 
         verifyAdditionalNonFastTrackFields();
 
@@ -256,6 +271,8 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
             .setManchesterCourtList(ManchesterCourt.MANCHESTER_COURT);
 
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetails);
+
         verifyAdditionalNonFastTrackFields();
 
         verifyCourtDetailsFields(
@@ -270,6 +287,8 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().setLondonFrcList(RegionLondonFrc.LONDON);
         caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
             .setCfcCourtList(CfcCourt.BROMLEY_COUNTY_COURT_AND_FAMILY_COURT);
+
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetails);
 
         verifyAdditionalNonFastTrackFields();
 
@@ -286,6 +305,8 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
             .setNottinghamCourtList(NottinghamCourt.NOTTINGHAM_COUNTY_COURT_AND_FAMILY_COURT);
 
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetails);
+
         verifyAdditionalNonFastTrackFields();
 
         verifyCourtDetailsFields(
@@ -301,20 +322,13 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         caseDetails.getCaseData().getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
             .setBirminghamCourtList(BirminghamCourt.BIRMINGHAM_CIVIL_AND_FAMILY_JUSTICE_CENTRE);
 
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetails);
+
         verifyAdditionalNonFastTrackFields();
 
         verifyCourtDetailsFields(
             "Birmingham Civil And Family Justice Centre", "Priory Courts, 33 Bull Street, Birmingham, B4 6DS",
             "0300 123 5577", "FRCBirmingham@justice.gov.uk");
-    }
-
-    @Test
-    public void verifyNoRegionProvided() {
-        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetails(NO_VALUE));
-
-        verifyAdditionalNonFastTrackFields();
-
-        verifyCourtDetailsFieldsNotSet();
     }
 
     private FinremCaseDetails makeItNonFastTrackDecisionCase() {
@@ -329,7 +343,8 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         FinremCaseData caseData = new FinremCaseData();
         caseData.setFastTrackDecision(YesOrNo.forValue(NO_VALUE));
         caseData.setCaseAllocatedTo(YesOrNo.forValue(YES_VALUE));
-        caseData.setHearingDate(LocalDate.parse(DATE_OF_HEARING, DateTimeFormatter.ofPattern("yyyy/MM/dd")));
+        caseData.setHearingDate(DATE_OF_HEARING);
+        caseData.getRegionWrapper().getDefaultCourtList().setBristolCourtList(BristolCourt.FR_bristolList_1);
         return FinremCaseDetails.builder().caseData(caseData).build();
     }
 
@@ -337,8 +352,9 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         FinremCaseData caseData = new FinremCaseData();
         caseData.setFastTrackDecision(YesOrNo.forValue(isFastTrackDecision));
-        caseData.setHearingDate(LocalDate.parse(DATE_OF_HEARING, DateTimeFormatter.ofPattern("yyyy/MM/dd")));
+        caseData.setHearingDate(DATE_OF_HEARING);
         caseData.setCopyOfPaperFormA(singletonList(paymentDocumentData()));
+        caseData.getRegionWrapper().getDefaultCourtList().setBristolCourtList(BristolCourt.FR_bristolList_1);
         caseData.setFormC(newDocument());
         caseData.setFormG(newDocument());
 
@@ -348,7 +364,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     private FinremCaseDetails caseDetailsWithCourtDetails() {
         FinremCaseData caseData = new FinremCaseData();
         caseData.setFastTrackDecision(YesOrNo.forValue(NO_VALUE));
-        caseData.setHearingDate(LocalDate.parse(DATE_OF_HEARING, DateTimeFormatter.ofPattern("yyyy/MM/dd")));
+        caseData.setHearingDate(DATE_OF_HEARING);
         return FinremCaseDetails.builder().caseData(caseData).build();
     }
 
@@ -358,13 +374,13 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         verify(genericDocumentService, never()).generateDocument(any(), any(), eq(documentConfiguration.getFormCNonFastTrackTemplate()), any());
         verify(genericDocumentService, never()).generateDocument(any(), any(), eq(documentConfiguration.getFormGTemplate()), any());
 
-        Map<String, Object> data = placeholdersCaptor.getValue();
+        Map<String, Object> data = getDataFromCaptor(placeholdersCaptor);
         assertThat(data.get("formCCreatedDate"), is(notNullValue()));
         assertThat(data.get("eventDatePlus21Days"), is(notNullValue()));
     }
 
     void verifyCourtDetailsFields(String courtName, String courtAddress, String phone, String email) {
-        Map<String, Object> data = placeholdersCaptor.getValue();
+        Map<String, Object> data = getDataFromCaptor(placeholdersCaptor);
         @SuppressWarnings("unchecked")
         Map<String, Object> courtDetails = (Map<String, Object>) data.get("courtDetails");
         assertThat(courtDetails.get(COURT_DETAILS_NAME_KEY), is(courtName));
@@ -373,20 +389,17 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         assertThat(courtDetails.get(COURT_DETAILS_PHONE_KEY), is(phone));
     }
 
-    void verifyCourtDetailsFieldsNotSet() {
-        Map<String, Object> data = placeholdersCaptor.getValue();
-        assertThat(data.get("courtDetails"), is(nullValue()));
-    }
-
     void verifyAdditionalNonFastTrackFields() {
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), placeholdersCaptor.capture(),
             eq(documentConfiguration.getFormCNonFastTrackTemplate()), eq(documentConfiguration.getFormCFileName()));
         verify(genericDocumentService, never())
-            .generateDocument(any(), any(), eq(documentConfiguration.getFormCFastTrackTemplate()), any());
+            .generateDocumentFromPlaceholdersMap(any(), any(),
+                eq(documentConfiguration.getFormCFastTrackTemplate()), any());
         verify(genericDocumentService)
-            .generateDocument(eq(AUTH_TOKEN), any(), eq(documentConfiguration.getFormGTemplate()), eq(documentConfiguration.getFormGFileName()));
+            .generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), any(), eq(documentConfiguration.getFormGTemplate()),
+                eq(documentConfiguration.getFormGFileName()));
 
-        Map<String, Object> data = placeholdersCaptor.getValue();
+        Map<String, Object> data = getDataFromCaptor(placeholdersCaptor);
         assertThat(data.get("formCCreatedDate"), is(notNullValue()));
         assertThat(data.get("hearingDateLess35Days"), is(notNullValue()));
         assertThat(data.get("hearingDateLess14Days"), is(notNullValue()));

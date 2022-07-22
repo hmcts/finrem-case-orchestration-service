@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.util.ResourceUtils;
 import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.ccd.domain.AdditionalDocumentType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.AdditionalHearingDocument;
@@ -141,6 +142,7 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.MiamWrapper;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -153,10 +155,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FinremCallbackRequestDeserializerTest {
 
-    private static final String REFUSAL_ORDER_CALLBACK_REQUEST = "fixtures/refusal-order-contested.json";
-    private static final String CONTESTED_INTERIM_CALLBACK_REQUEST = "fixtures/contested-interim-hearing.json";
-    private static final String SOL_CONTEST_CALLBACK_REQUEST = "fixtures/deserialisation/ccd-request-with-solicitor-contestApplicationIssued.json";
-    private static final String BASIC_REQUEST = "fixtures/deserialisation/basic-request.json";
+    private static final String REFUSAL_ORDER_CALLBACK_REQUEST = "/fixtures/refusal-order-contested.json";
+    private static final String CONTESTED_INTERIM_CALLBACK_REQUEST = "/fixtures/contested-interim-hearing.json";
+    private static final String SOL_CONTEST_CALLBACK_REQUEST = "/fixtures/deserialisation/ccd-request-with-solicitor-contestApplicationIssued.json";
+    private static final String BASIC_REQUEST = "/fixtures/deserialisation/basic-request.json";
 
     private FinremCallbackRequestDeserializer callbackRequestDeserializer;
 
@@ -207,6 +209,9 @@ public class FinremCallbackRequestDeserializerTest {
         setCallbackString(SOL_CONTEST_CALLBACK_REQUEST);
         CallbackRequest callbackRequest = callbackRequestDeserializer.deserialize(callback);
         FinremCaseData caseData = callbackRequest.getCaseDetails().getCaseData();
+        System.out.println(callback);
+        System.out.println();
+        System.out.println();
         System.out.println(caseData);
         assertMiam(caseData);
         assertNotNull(callbackRequest);
@@ -245,11 +250,14 @@ public class FinremCallbackRequestDeserializerTest {
         assertUploadOrder(caseData);
         assertUploadDocuments(caseData);
         assertConsentOrderWrapper(caseData);
+
+        assertNotNull(caseData.getContactDetailsWrapper().getApplicantSolicitorAddress());
+        assertEquals(caseData.getContactDetailsWrapper().getApplicantSolicitorAddress().getAddressLine1(), "Line1");
     }
 
     private void setCallbackString(String fileName) throws IOException {
-        String path = Objects.requireNonNull(getClass().getClassLoader().getResource(fileName)).getFile();
-        callback = FileUtils.readFileToString(new File(path), StandardCharsets.UTF_8.name());
+        File file = ResourceUtils.getFile(this.getClass().getResource(fileName));
+        callback =  new String(Files.readAllBytes(file.toPath()));
     }
 
     private Document getTestDocument() {

@@ -1,6 +1,6 @@
 {
   "token": "test_token",
-  "event_id": "consentedOrderApproved",
+  "event_id": "FR_consentOrderApproved",
   "case_details": {
     "id": 1596638099618923,
     "jurisdiction": "DIVORCE",
@@ -30,7 +30,7 @@
       "rSolicitorName": null,
       "consentD81Question": "Yes",
       "divorceStageReached": "Decree Absolute",
-      "southEastFRCList": "kentfrc",
+      "southEastFRCList": "kent",
       "applicantFMName": "Joe",
       "fastTrackDecision": "No",
       "potentialAllegationChecklist": [

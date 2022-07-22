@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.generalapplicationinterim.GeneralApplicationLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.generalapplicationorder.GeneralApplicationOrderDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.interimhearing.GeneralApplicationInterimHearingNoticeDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
@@ -21,6 +22,7 @@ import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
+import static uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo.isYes;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +35,7 @@ public class GeneralApplicationDirectionsService {
     private final DocumentHelper documentHelper;
     private final GeneralApplicationLetterDetailsMapper generalApplicationLetterDetailsMapper;
     private final GeneralApplicationOrderDetailsMapper generalApplicationOrderDetailsMapper;
+    private final GeneralApplicationInterimHearingNoticeDetailsMapper generalApplicationInterimHearingNoticeDetailsMapper;
 
     public void startGeneralApplicationDirections(FinremCaseDetails caseDetails) {
         caseDetails.getCaseData().getRegionWrapper()
@@ -87,7 +90,7 @@ public class GeneralApplicationDirectionsService {
     }
 
     private Document prepareInterimHearingRequiredNoticeDocument(FinremCaseDetails caseDetails, String authorisationToken) {
-        Map<String, Object> interimLetterDetailsMap = generalApplicationLetterDetailsMapper
+        Map<String, Object> interimLetterDetailsMap = generalApplicationInterimHearingNoticeDetailsMapper
             .getDocumentTemplateDetailsAsMap(caseDetails, caseDetails.getCaseData().getRegionWrapper().getInterimCourtList());
 
         return genericDocumentService.generateDocumentFromPlaceholdersMap(authorisationToken, interimLetterDetailsMap,
@@ -105,7 +108,7 @@ public class GeneralApplicationDirectionsService {
         FinremCaseData caseData = caseDetails.getCaseData();
         List<BulkPrintDocument> documents = new ArrayList<>();
         Document directionsDocument =
-            caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsHearingRequired().isYes()
+            isYes(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsHearingRequired())
                 ? prepareHearingRequiredNoticeDocument(caseDetails, authorisationToken)
                 : prepareGeneralApplicationDirectionsOrderDocument(caseDetails, authorisationToken);
 
@@ -147,7 +150,7 @@ public class GeneralApplicationDirectionsService {
 
     private Document prepareHearingRequiredNoticeDocument(FinremCaseDetails caseDetails, String authorisationToken) {
         Map<String, Object> letterDetailsMap = generalApplicationLetterDetailsMapper.getDocumentTemplateDetailsAsMap(
-            caseDetails, caseDetails.getCaseData().getRegionWrapper().getGeneralApplicationCourtList());
+            caseDetails, caseDetails.getCaseData().getRegionWrapper().getDefaultCourtList());
 
         return genericDocumentService.generateDocumentFromPlaceholdersMap(authorisationToken, letterDetailsMap,
             documentConfiguration.getGeneralApplicationHearingNoticeTemplate(),

@@ -1,31 +1,25 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.additionalhearing;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.CourtListWrapper;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
-@RequiredArgsConstructor
 @Component
-public class AdditionalHearingDetailsMapper {
+public class AdditionalHearingDetailsMapper extends AbstractLetterDetailsMapper {
 
-    private static final String CASE_DETAILS = "caseDetails";
-    private static final String CASE_DATA = "case_data";
+    public AdditionalHearingDetailsMapper(CourtDetailsMapper courtDetailsMapper, ObjectMapper objectMapper) {
+        super(courtDetailsMapper, objectMapper);
+    }
 
-    private final CourtDetailsMapper courtDetailsMapper;
-    private final ObjectMapper objectMapper;
-
-    public AdditionalHearingDetails buildAdditionalHearingDetails(FinremCaseDetails caseDetails,
-                                                                  CourtListWrapper courtList) {
+    @Override
+    public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtListWrapper courtList) {
         FrcCourtDetails courtDetails = courtDetailsMapper.getCourtDetails(courtList);
 
         return AdditionalHearingDetails.builder()
@@ -44,20 +38,5 @@ public class AdditionalHearingDetailsMapper {
             .hearingTime(caseDetails.getCaseData().getHearingTime())
             .additionalHearingDated(new Date())
             .build();
-    }
-
-    public Map<String, Object> getAdditionalHearingDetailsAsMap(FinremCaseDetails caseDetails,
-                                                                CourtListWrapper courtList) {
-        objectMapper.registerModule(new JavaTimeModule());
-
-        Map<String, Object> additionalHearingDetailsMap = objectMapper.convertValue(
-            buildAdditionalHearingDetails(caseDetails, courtList),
-            TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, Object.class));
-
-        Map<String, Object> caseDetailsMap = Map.of(
-            CASE_DATA, additionalHearingDetailsMap,
-            "id", caseDetails.getId());
-
-        return Map.of(CASE_DETAILS, caseDetailsMap);
     }
 }

@@ -11,9 +11,12 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
+import static java.lang.Enum.valueOf;
 import static java.util.Objects.isNull;
+import static uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo.isYes;
 
 @Slf4j
 @Service
@@ -35,7 +38,7 @@ public class ConsentOrderPrintService {
             UUID applicantLetterId = shouldPrintOrderApprovedDocuments(caseDetails, authorisationToken)
                 ? printApplicantConsentOrderApprovedDocuments(caseDetails, authorisationToken)
                 : printApplicantConsentOrderNotApprovedDocuments(caseDetails, authorisationToken);
-            caseData.setBulkPrintLetterIdApp(String.valueOf(applicantLetterId));
+            caseData.setBulkPrintLetterIdApp(getUuidAsString(applicantLetterId));
         }
 
         if (paperNotificationService.shouldPrintForRespondent(caseDetails)) {
@@ -50,13 +53,13 @@ public class ConsentOrderPrintService {
         UUID respondentLetterId = sendConsentOrderForBulkPrintRespondent(respondentCoverSheet, caseDetails, authorisationToken);
         FinremCaseData caseData = caseDetails.getCaseData();
 
-        if (caseData.getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant().isYes()) {
+        if (isYes(caseData.getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant())) {
             log.info("Case {}, has been marked as confidential. Adding coversheet to confidential field", caseDetails.getId());
             caseData.setBulkPrintCoverSheetRes(null);
             caseData.setBulkPrintCoverSheetResConfidential(respondentCoverSheet);
         } else {
             caseData.setBulkPrintCoverSheetRes(respondentCoverSheet);
-            caseData.setBulkPrintLetterIdRes(String.valueOf(respondentLetterId));
+            caseData.setBulkPrintLetterIdRes(getUuidAsString(respondentLetterId));
         }
 
         log.info("Generated Respondent CoverSheet for bulk print, case {}. coversheet: {}, letterId : {}", caseDetails.getId(),
@@ -116,5 +119,9 @@ public class ConsentOrderPrintService {
 
         return isOrderApprovedCollectionPresent && (!isOrderNotApprovedCollectionPresent
             || documentOrderingService.isOrderApprovedCollectionModifiedLaterThanNotApprovedCollection(caseDetails, authorisationToken));
+    }
+
+    private String getUuidAsString(UUID uuid) {
+        return Optional.ofNullable(uuid).map(String::valueOf).orElse(null);
     }
 }

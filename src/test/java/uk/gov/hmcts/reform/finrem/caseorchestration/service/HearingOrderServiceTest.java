@@ -21,6 +21,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -39,6 +40,7 @@ public class HearingOrderServiceTest extends BaseServiceTest {
 
     @Test
     public void convertPdfDocument() {
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(eq(newDocument()), eq(AUTH_TOKEN))).thenReturn(newDocument());
         when(genericDocumentService.stampDocument(isA(Document.class), eq(AUTH_TOKEN))).thenReturn(newDocument());
 
         FinremCaseData caseData = prepareCaseData(makeDraftDirectionOrderCollectionWithOneElement());
@@ -46,7 +48,8 @@ public class HearingOrderServiceTest extends BaseServiceTest {
 
         hearingOrderService.convertToPdfAndStampAndStoreLatestDraftHearingOrder(caseDetails, AUTH_TOKEN);
 
-        verify(genericDocumentService).stampDocument(isA(Document.class), eq(AUTH_TOKEN));
+        verify(genericDocumentService).convertDocumentIfNotPdfAlready(isA(Document.class), eq(AUTH_TOKEN));
+       // verify(genericDocumentService).stampDocument(isA(Document.class), eq(AUTH_TOKEN));
 
         Document latestDraftHearingOrder = caseData.getLatestDraftHearingOrder();
         assertThat(latestDraftHearingOrder, is(notNullValue()));
@@ -112,10 +115,14 @@ public class HearingOrderServiceTest extends BaseServiceTest {
     }
 
     private DraftDirectionOrder makeDraftDirectionOrder() {
-        return DraftDirectionOrder.builder().uploadDraftDocument(Document.builder()
+        return DraftDirectionOrder.builder().uploadDraftDocument(draftDirectionDocument()).build();
+    }
+
+    private Document draftDirectionDocument() {
+        return Document.builder()
             .binaryUrl(DRAFT_DIRECTION_ORDER_BIN_URL)
             .filename(FILENAME_ENDING_WITH_DOCX)
-            .build()).build();
+            .build();
     }
 
     private FinremCaseData prepareCaseData(List<DraftDirectionOrderCollection> draftDirectionOrders) {

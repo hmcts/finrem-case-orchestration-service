@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetai
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.RepresentationUpdate;
@@ -169,7 +170,7 @@ public class NotificationRequestMapper {
         notificationRequest.setDivorceCaseNumber(caseData.getDivorceCaseNumber());
         notificationRequest.setName(solicitorCaseDataKeysWrapper.getSolicitorNameKey());
         notificationRequest.setNotificationEmail(solicitorCaseDataKeysWrapper.getSolicitorEmailKey());
-        notificationRequest.setCaseType(caseDetails.getCaseType().getCcdType());
+        notificationRequest.setCaseType(getCaseType(caseDetails));
 
         if (caseData.isContestedApplication()) {
             FrcCourtDetails courtDetails = courtDetailsMapper.getCourtDetails(caseData.getRegionWrapper().getDefaultCourtList());
@@ -180,5 +181,9 @@ public class NotificationRequestMapper {
         }
 
         return notificationRequest;
+    }
+
+    private String getCaseType(FinremCaseDetails caseDetails) {
+        return caseDetails.getCaseType().equals(CaseType.CONSENTED) ? CONSENTED : CONTESTED;
     }
 }

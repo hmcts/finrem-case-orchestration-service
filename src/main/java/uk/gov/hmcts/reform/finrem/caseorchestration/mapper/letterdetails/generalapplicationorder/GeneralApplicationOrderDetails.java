@@ -21,4 +21,10 @@ public class GeneralApplicationOrderDetails implements DocumentTemplateDetails {
     private String respondentName;
     @JsonProperty("letterDate")
     private String letterDate;
+    private String divorceCaseNumber;
+    private String civilPartnership;
+    private String generalApplicationDirectionsJudgeType;
+    private String generalApplicationDirectionsJudgeName;
+    private String generalApplicationDirectionsCourtOrderDate;
+    private String generalApplicationDirectionsTextFromJudge;
 }

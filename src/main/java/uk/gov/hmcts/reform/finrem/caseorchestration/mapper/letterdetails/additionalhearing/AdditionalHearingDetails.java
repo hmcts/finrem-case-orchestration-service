@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.DocumentTemplateDetails;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -13,7 +14,7 @@ import java.util.Date;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AdditionalHearingDetails {
+public class AdditionalHearingDetails implements DocumentTemplateDetails {
     @JsonProperty("HearingType")
     private String hearingType;
     @JsonProperty("HearingVenue")

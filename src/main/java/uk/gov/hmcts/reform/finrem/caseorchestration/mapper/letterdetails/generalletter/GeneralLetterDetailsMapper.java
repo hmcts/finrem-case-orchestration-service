@@ -3,11 +3,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.genera
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.DocumentTemplateDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Address;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.GeneralLetterAddressToType;
@@ -16,7 +15,10 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.CourtListWrapper;
 import java.util.Date;
 import java.util.List;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper.ADDRESS_MAP;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper.NAME_MAP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper.formatAddressForLetterPrinting;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper.getAddressToCaseDataMapping;
 
 @Component
 public class GeneralLetterDetailsMapper extends AbstractLetterDetailsMapper {
@@ -42,22 +44,14 @@ public class GeneralLetterDetailsMapper extends AbstractLetterDetailsMapper {
     private Addressee getAddressee(FinremCaseDetails caseDetails) {
         FinremCaseData caseData = caseDetails.getCaseData();
         GeneralLetterAddressToType recipient = caseData.getGeneralLetterWrapper().getGeneralLetterAddressTo();
-
-        if (recipient.equals(GeneralLetterAddressToType.APPLICANT_SOLICITOR)) {
-            return AddresseeGeneratorHelper.generateAddressee(caseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT);
-        } else if (recipient.equals(GeneralLetterAddressToType.OTHER)) {
-            return getOtherAddressee(caseData);
-        }
-
-        return AddresseeGeneratorHelper.generateAddressee(caseDetails, DocumentHelper.PaperNotificationRecipient.RESPONDENT);
+        return Addressee.builder()
+                .name((String) getAddressToCaseDataMapping(caseData).get(NAME_MAP).get(recipient))
+                .formattedAddress(getFormattedAddress(caseData, recipient))
+                .build();
     }
 
-    private Addressee getOtherAddressee(FinremCaseData caseData) {
-        return Addressee.builder()
-            .name(caseData.getGeneralLetterWrapper().getGeneralLetterRecipient())
-            .formattedAddress(formatAddressForLetterPrinting(caseData.getGeneralLetterWrapper()
-                .getGeneralLetterRecipientAddress()))
-            .build();
+    private String getFormattedAddress(FinremCaseData caseData, GeneralLetterAddressToType recipient) {
+        return formatAddressForLetterPrinting((Address) getAddressToCaseDataMapping(caseData).get(ADDRESS_MAP).get(recipient));
     }
 
     private String getSolicitorReference(FinremCaseData caseData) {

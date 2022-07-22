@@ -2,12 +2,15 @@ package uk.gov.hmcts.reform.finrem.caseorchestration;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.util.ResourceUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
 import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
@@ -15,6 +18,10 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.NottinghamCourt;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Region;
 import uk.gov.hmcts.reform.finrem.ccd.domain.RegionMidlandsFrc;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,6 +59,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @DirtiesContext
 public abstract class BaseServiceTest extends BaseTest {
 
+    public static final String CASE_DETAILS = "caseDetails";
+    public static final String CASE_DATA = "case_data";
+
     @Autowired protected ObjectMapper mapper;
 
     protected CaseDetails buildCaseDetails() {
@@ -67,7 +77,7 @@ public abstract class BaseServiceTest extends BaseTest {
     protected CallbackRequest getConsentedCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(SOLICITOR_EMAIL, TEST_SOLICITOR_EMAIL);
-        caseData.put(CONSENTED_SOLICITOR_NAME, CONSENTED_SOLICITOR_NAME);
+        caseData.put(CONSENTED_SOLICITOR_NAME, TEST_SOLICITOR_NAME);
         caseData.put(SOLICITOR_REFERENCE, TEST_SOLICITOR_REFERENCE);
         caseData.put(RESP_SOLICITOR_EMAIL, TEST_RESP_SOLICITOR_EMAIL);
         caseData.put(RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_NAME);
@@ -85,12 +95,13 @@ public abstract class BaseServiceTest extends BaseTest {
     protected uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest getConsentedNewCallbackRequest() {
         FinremCaseData caseData = new FinremCaseData();
         caseData.getContactDetailsWrapper().setSolicitorEmail(TEST_SOLICITOR_EMAIL);
-        caseData.getContactDetailsWrapper().setSolicitorName(CONSENTED_SOLICITOR_NAME);
+        caseData.getContactDetailsWrapper().setSolicitorName(TEST_SOLICITOR_NAME);
         caseData.getContactDetailsWrapper().setSolicitorReference(TEST_SOLICITOR_REFERENCE);
         caseData.getContactDetailsWrapper().setRespondentSolicitorEmail(TEST_RESP_SOLICITOR_EMAIL);
         caseData.getContactDetailsWrapper().setRespondentSolicitorName(TEST_RESP_SOLICITOR_NAME);
         caseData.getContactDetailsWrapper().setRespondentSolicitorReference(TEST_RESP_SOLICITOR_REFERENCE);
         caseData.setDivorceCaseNumber(TEST_DIVORCE_CASE_NUMBER);
+        caseData.setCcdCaseType(CaseType.CONSENTED);
 
         return uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest.builder()
             .caseDetails(FinremCaseDetails.builder()
@@ -134,6 +145,7 @@ public abstract class BaseServiceTest extends BaseTest {
 
     protected uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest getContestedNewCallbackRequest() {
         FinremCaseData caseData = getFinremCaseData();
+        caseData.setCcdCaseType(CaseType.CONTESTED);
         return uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest.builder()
             .caseDetails(FinremCaseDetails.builder()
                 .caseType(CaseType.CONTESTED)
@@ -222,5 +234,17 @@ public abstract class BaseServiceTest extends BaseTest {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    protected String getResource(String resourcePath) throws IOException {
+        File file = ResourceUtils.getFile(this.getClass().getResource(resourcePath));
+        return new String(Files.readAllBytes(file.toPath()));
+    }
+
+    protected Map<String, Object> getDataFromCaptor(ArgumentCaptor<Map<String, Object>> documentGenerationRequestCaseDetailsCaptor) {
+        Map<String, Object> placeholdersMap = documentGenerationRequestCaseDetailsCaptor.getValue();
+        Map<String, Object> caseDetails = (Map) placeholdersMap.get(CASE_DETAILS);
+        Map<String, Object> data = (Map) caseDetails.get(CASE_DATA);
+        return data;
     }
 }

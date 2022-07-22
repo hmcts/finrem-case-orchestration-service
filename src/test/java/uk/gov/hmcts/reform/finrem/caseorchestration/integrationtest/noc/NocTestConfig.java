@@ -1,10 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.noc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
@@ -18,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateSolicitorDetai
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.NoticeOfChangeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
 
 @TestConfiguration
 @ComponentScan(basePackages = {"uk.gov.hmcts.reform.finrem.caseorchestration.service.noc",
@@ -32,6 +35,11 @@ public class NocTestConfig {
     @Bean
     public UpdateSolicitorDetailsService solicitorContactDetailsService() {
         return new UpdateSolicitorDetailsService(prdOrganisationService, new ObjectMapper(), caseDataService());
+    }
+
+    @Bean
+    public FinremCallbackRequestDeserializer deserializerService() {
+        return new FinremCallbackRequestDeserializer(new ObjectMapper());
     }
 
     @MockBean
@@ -57,6 +65,7 @@ public class NocTestConfig {
     private UpdateRepresentationWorkflowService updateRepresentationWorkflowService;
     @MockBean
     private UpdateRepresentationService updateRepresentationService;
-
+    @MockBean
+    private CourtDetailsMapper courtDetailsMapper;
 }
 

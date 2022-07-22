@@ -38,6 +38,7 @@ public class FinremCallbackRequestDeserializer implements Deserializer<CallbackR
         try {
             CallbackRequest callbackRequest = mapper.readValue(source, new TypeReference<>() {});
             callbackRequest.getCaseDetails().getCaseData().setCcdCaseType(callbackRequest.getCaseDetails().getCaseType());
+            callbackRequest.getCaseDetails().getCaseData().setCcdCaseId(String.valueOf(callbackRequest.getCaseDetails().getId()));
             callbackRequest.getCaseDetails().getCaseData().getContactDetailsWrapper()
                 .setApplicantAddressHiddenFromRespondent(getAddressConfidential(source, APP_ADDRESS_CONFIDENTIAL, APPLICANT_KEY_LENGTH));
             callbackRequest.getCaseDetails().getCaseData().getContactDetailsWrapper()

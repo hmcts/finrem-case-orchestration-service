@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.google.common.collect.ImmutableMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,10 +21,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiPredicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper.ADDRESS_MAP;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper.getAddressToCaseDataMapping;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
 @Service
@@ -38,7 +39,7 @@ public class GeneralLetterService {
     private final DocumentConfiguration documentConfiguration;
     private final GeneralLetterDetailsMapper generalLetterDetailsMapper;
 
-    final BiPredicate<Field, Address> isAddressEmpty = (field, address) -> {
+    final BiPredicate<Field, Address> isAddressFieldEmpty = (field, address) -> {
         try {
             field.setAccessible(true);
             return !nullToEmpty(field.get(address)).isEmpty();
@@ -73,14 +74,12 @@ public class GeneralLetterService {
         GeneralLetterCollection generalLetter = GeneralLetterCollection.builder()
             .value(GeneralLetter.builder()
                 .generatedLetter(document)
-                .build())
-            .build();
+                .build()).build();
 
         FinremCaseData caseData = caseDetails.getCaseData();
 
         List<GeneralLetterCollection> generalLetters = Optional.ofNullable(caseData.getGeneralLetterWrapper()
-                .getGeneralLetterCollection())
-            .orElse(new ArrayList<>());
+                .getGeneralLetterCollection()).orElse(new ArrayList<>());
 
         generalLetters.add(generalLetter);
         caseData.getGeneralLetterWrapper().setGeneralLetterCollection(generalLetters);
@@ -89,16 +88,10 @@ public class GeneralLetterService {
     public List<String> getCaseDataErrorsForCreatingPreviewOrFinalLetter(FinremCaseDetails caseDetails) {
         FinremCaseData data = caseDetails.getCaseData();
 
-        Map<GeneralLetterAddressToType, Address> generalLetterAddressToValueToAddress = ImmutableMap.of(
-            GeneralLetterAddressToType.APPLICANT_SOLICITOR, data.getApplicantSolicitorAddress(),
-            GeneralLetterAddressToType.RESPONDENT_SOLICITOR, data.getContactDetailsWrapper().getRespondentSolicitorAddress(),
-            GeneralLetterAddressToType.RESPONDENT, data.getContactDetailsWrapper().getRespondentAddress(),
-            GeneralLetterAddressToType.OTHER, data.getGeneralLetterWrapper().getGeneralLetterRecipientAddress());
-
         GeneralLetterAddressToType generalLetterAddressTo = data.getGeneralLetterWrapper().getGeneralLetterAddressTo();
-        Address recipientAddress = generalLetterAddressToValueToAddress.get(generalLetterAddressTo);
+        Address recipientAddress = (Address) getAddressToCaseDataMapping(data).get(ADDRESS_MAP).get(generalLetterAddressTo);
         if (isAddressEmpty(recipientAddress)) {
-            return List.of(String.format("Address is missing for recipient type %s", generalLetterAddressTo));
+            return List.of(String.format("Address is missing for recipient type %s", generalLetterAddressTo.getValue()));
         } else {
             return emptyList();
         }
@@ -121,10 +114,9 @@ public class GeneralLetterService {
             return true;
         }
 
-        List<Field> initialisedFields = Stream.of(Address.class.getDeclaredFields())
-            .filter(field -> isAddressEmpty.test(field, address))
-            .collect(Collectors.toList());
-
-        return initialisedFields.size() == 0;
+        return Stream.of(Address.class.getDeclaredFields())
+            .filter(field -> isAddressFieldEmpty.test(field, address))
+            .collect(toList())
+            .size() == 0;
     }
 }

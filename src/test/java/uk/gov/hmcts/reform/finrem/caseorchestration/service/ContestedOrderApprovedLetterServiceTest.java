@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.contestorderapproved.ContestOrderApprovedLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
@@ -25,7 +26,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultContestedFinremCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
 
@@ -35,13 +35,17 @@ public class ContestedOrderApprovedLetterServiceTest extends BaseServiceTest {
     @Autowired private DocumentConfiguration documentConfiguration;
 
     @MockBean private GenericDocumentService genericDocumentService;
+    @MockBean private ContestOrderApprovedLetterDetailsMapper contestOrderApprovedLetterDetailsMapper;
 
     @Captor private ArgumentCaptor<Map<String, Object>> placeholdersMapArgumentCaptor;
 
     @Test
     public void whenContestedApprovedOrderLetterGenerated_thenTemplateVarsPopulatedAndDocumentCreatedAndStoredInCaseDetails() {
         Document expectedCaseDocument = newDocument();
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(expectedCaseDocument);
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any()))
+            .thenReturn(expectedCaseDocument);
+        when(contestOrderApprovedLetterDetailsMapper.getDocumentTemplateDetailsAsMap(any(), any()))
+            .thenReturn(getPlaceholdersMap());
 
         FinremCaseDetails caseDetails = testCaseDetails();
         contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, AUTH_TOKEN);
@@ -74,11 +78,33 @@ public class ContestedOrderApprovedLetterServiceTest extends BaseServiceTest {
     }
 
     private void verifyTemplateVariablesArePopulated() {
-        Map<String, Object> data = placeholdersMapArgumentCaptor.getValue();
+        Map<String, Object> data = getDataFromCaptor();
         assertThat(data.get("ApplicantName"), is("Contested Applicant Name"));
         assertThat(data.get("RespondentName"), is("Contested Respondent Name"));
         assertThat(data.get("Court"), is("Nottingham County Court and Family Court"));
         assertThat(data.get("JudgeDetails"), is("Her Honour Judge Contested"));
         assertThat(data.get("letterDate"), is(LocalDate.now()));
+    }
+
+    private Map<String, Object> getDataFromCaptor() {
+        Map<String, Object> caseDetails = placeholdersMapArgumentCaptor.getValue();
+        Map<String, Object> caseData = (Map<String, Object>) caseDetails.get(CASE_DETAILS);
+        Map<String, Object> data = (Map<String, Object>) caseData.get(CASE_DATA);
+        return data;
+    }
+
+    private Map<String, Object> getPlaceholdersMap() {
+        Map<String, Object> placeholders = Map.of(
+            "ApplicantName", "Contested Applicant Name",
+            "RespondentName", "Contested Respondent Name",
+            "Court", "Nottingham County Court and Family Court",
+            "JudgeDetails", "Her Honour Judge Contested",
+            "letterDate", LocalDate.now()
+        );
+
+        Map<String, Object> caseDataMap = Map.of(
+            CASE_DATA, placeholders,
+            "id", 123L);
+        return Map.of(CASE_DETAILS, caseDataMap);
     }
 }

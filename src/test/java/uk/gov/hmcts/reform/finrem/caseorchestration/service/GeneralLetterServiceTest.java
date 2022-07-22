@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
@@ -17,8 +18,7 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.GeneralLetterAddressToType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.GeneralLetterCollection;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -44,10 +44,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 
 public class GeneralLetterServiceTest extends BaseServiceTest {
 
+    public static final String GENERAL_LETTER_CONTESTED_JSON = "/fixtures/contested/general-letter-contested.json";
+    public static final String GENERAL_LETTER_JSON = "/fixtures/general-letter.json";
     @Autowired
     private GeneralLetterService generalLetterService;
     @Autowired
     private ObjectMapper mapper;
+    @Qualifier("finremCallbackRequestDeserializer")
     @Autowired
     private FinremCallbackRequestDeserializer deserializer;
 
@@ -61,12 +64,12 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
 
     @Before
     public void setup() {
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(newDocument());
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any())).thenReturn(newDocument());
     }
 
     @Test
-    public void generateGeneralLetter() {
-        FinremCaseDetails caseDetails = finremCaseDetailsFromResource("/fixtures/general-letter.json", mapper);
+    public void generateGeneralLetter() throws IOException {
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource(GENERAL_LETTER_JSON), mapper);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
 
         List<GeneralLetterCollection> generalLetterData = caseDetails.getCaseData().getGeneralLetterWrapper().getGeneralLetterCollection();
@@ -78,10 +81,10 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         verify(genericDocumentService, times(1)).generateDocumentFromPlaceholdersMap(any(),
             documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
 
-        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue();
+        Map<String, Object> data = getDataFromCaptor(documentGenerationRequestCaseDetailsCaptor);
         assertThat(data.get("generalLetterCreatedDate"), is(notNullValue()));
-        assertThat(data.get("ccdCaseNumber"), is(1234567890L));
-        assertThat(((Addressee) data.get(ADDRESSEE)).getFormattedAddress(), is("""
+        assertThat(data.get("ccdCaseNumber"), is("1234567890"));
+        assertThat(mapper.convertValue(data.get(ADDRESSEE), Addressee.class).getFormattedAddress(), is("""
             50 Applicant Solicitor Street
             Second Address Line
             Greater London
@@ -92,10 +95,10 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void generateContestedGeneralLetter() {
-        FinremCaseDetails caseDetails = finremCaseDetailsFromResource("/fixtures/contested/general-letter-contested.json", mapper);
-        generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
+    public void generateContestedGeneralLetter() throws IOException {
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource(GENERAL_LETTER_CONTESTED_JSON), mapper);
         caseDetails.getCaseData().setCcdCaseType(CaseType.CONTESTED);
+        generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
 
         List<GeneralLetterCollection> generalLetterData = caseDetails.getCaseData().getGeneralLetterWrapper().getGeneralLetterCollection();
         assertThat(generalLetterData, hasSize(2));
@@ -106,10 +109,11 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         verify(genericDocumentService, times(1)).generateDocumentFromPlaceholdersMap(any(),
             documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
 
-        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue();
+        Map<String, Object> data = getDataFromCaptor(documentGenerationRequestCaseDetailsCaptor);
         assertThat(data.get("generalLetterCreatedDate"), is(notNullValue()));
-        assertThat(data.get("ccdCaseNumber"), is(1234567890L));
-        assertThat(((Addressee) data.get(ADDRESSEE)).getFormattedAddress(), is("""
+        assertThat(data.get("ccdCaseNumber"), is("1234567890"));
+        System.out.println(data.get(ADDRESSEE));
+        assertThat(mapper.convertValue(data.get(ADDRESSEE), Addressee.class).getFormattedAddress(), is("""
             50 Applicant Solicitor Street
             Second Address Line
             Greater London
@@ -120,8 +124,8 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenNoPreviousGeneralLettersGenerated_generateGeneralLetter() {
-        FinremCaseDetails caseDetails = finremCaseDetailsFromResource("/fixtures/general-letter-empty-collection.json", mapper);
+    public void givenNoPreviousGeneralLettersGenerated_generateGeneralLetter() throws IOException {
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource("/fixtures/general-letter-empty-collection.json"), mapper);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
         caseDetails.getCaseData().setCcdCaseType(CaseType.CONSENTED);
 
@@ -133,9 +137,9 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         verify(genericDocumentService, times(1)).generateDocumentFromPlaceholdersMap(any(),
             documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
 
-        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue();
+        Map<String, Object> data = getDataFromCaptor(documentGenerationRequestCaseDetailsCaptor);
         assertThat(data.get("generalLetterCreatedDate"), is(notNullValue()));
-        assertThat(data.get("ccdCaseNumber"), is(1234567891L));
+        assertThat(data.get("ccdCaseNumber"), is("1234567891"));
     }
 
     @Test
@@ -152,8 +156,8 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void whenGeneralLetterPreviewCalled_thenPreviewDocumentIsAddedToCaseData() {
-        FinremCaseDetails caseDetails = finremCaseDetailsFromResource("/fixtures/general-letter.json", mapper);
+    public void whenGeneralLetterPreviewCalled_thenPreviewDocumentIsAddedToCaseData() throws IOException {
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource("/fixtures/general-letter.json"), mapper);
 
         assertThat(caseDetails.getCaseData().getGeneralLetterWrapper().getGeneralLetterPreview(), is(nullValue()));
 
@@ -162,24 +166,24 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenAddressIsMissing_whenCaseDataErrorsFetched_ThereIsAnError() {
-        FinremCaseDetails caseDetails = finremCaseDetailsFromResource("/fixtures/general-letter-missing-address.json", mapper);
+    public void givenAddressIsMissing_whenCaseDataErrorsFetched_ThereIsAnError() throws IOException {
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource("/fixtures/general-letter-missing-address.json"), mapper);
 
         List<String> errors = generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails);
         assertThat(errors, hasItem("Address is missing for recipient type respondent"));
     }
 
     @Test
-    public void givenAddressIsPresent_whenCaseDataErrorsFetched_ThereIsNoError() {
-        FinremCaseDetails caseDetails = finremCaseDetailsFromResource("/fixtures/general-letter.json", mapper);
+    public void givenAddressIsPresent_whenCaseDataErrorsFetched_ThereIsNoError() throws IOException {
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource("/fixtures/general-letter.json"), mapper);
 
         List<String> errors = generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails);
         assertThat(errors, is(empty()));
     }
 
     @Test
-    public void whenGeneralLetterIsCreated_thenItGetsSentToBulkPrint() {
-        FinremCaseDetails caseDetails = finremCaseDetailsFromResource("/fixtures/general-letter.json", mapper);
+    public void whenGeneralLetterIsCreated_thenItGetsSentToBulkPrint() throws IOException {
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource("/fixtures/general-letter.json"), mapper);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
         verify(bulkPrintService, times(1)).sendDocumentForPrint(any(Document.class), any());
     }
@@ -197,12 +201,13 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
 
         verify(genericDocumentService, times(invocation)).generateDocumentFromPlaceholdersMap(any(),
             documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
-        Addressee addressee = (Addressee) documentGenerationRequestCaseDetailsCaptor.getValue().get(ADDRESSEE);
+        Map<String, Object> data = getDataFromCaptor(documentGenerationRequestCaseDetailsCaptor);
+        Addressee addressee = mapper.convertValue(data.get(ADDRESSEE), Addressee.class);
         assertThat(addressee.getName(), is(expectedName));
     }
 
     private FinremCaseDetails caseDetails() throws Exception {
-        return deserializer.deserialize(new String(Files.readAllBytes(Paths.get("/fixtures/general-letter.json"))))
+        return deserializer.deserialize(getResource("/fixtures/general-letter.json"))
             .getCaseDetails();
     }
 

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.LetterDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.BasicLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.LetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.CourtListWrapper;
@@ -22,11 +22,10 @@ public class BulkPrintCoverLetterDetailsMapper extends LetterDetailsMapper {
     }
 
     @Override
-    public LetterDetails buildLetterDetails(FinremCaseDetails caseDetails,
-                                            DocumentHelper.PaperNotificationRecipient recipient,
-                                            CourtListWrapper courtList) {
-        BulkPrintLetterDetails letterDetails =
-            (BulkPrintLetterDetails) super.buildLetterDetails(caseDetails, recipient, courtList);
+    public BasicLetterDetails buildLetterDetails(FinremCaseDetails caseDetails,
+                                                 DocumentHelper.PaperNotificationRecipient recipient,
+                                                 CourtListWrapper courtList) {
+        BasicLetterDetails letterDetails = super.buildLetterDetails(caseDetails, recipient, courtList);
         letterDetails.setCourtContactDetails(formatCtscContactDetailsForCoversheet());
 
         return letterDetails;

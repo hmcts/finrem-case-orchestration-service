@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.Address;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-public class BasicLetterDetails implements LetterDetails {
+public class BasicLetterDetails {
     private String applicantName;
     private String respondentName;
     private String reference;
@@ -26,4 +26,5 @@ public class BasicLetterDetails implements LetterDetails {
     private Addressee addressee;
     private CtscContactDetails ctscContactDetails;
     private String divorceCaseNumber;
+    private String courtContactDetails;
 }

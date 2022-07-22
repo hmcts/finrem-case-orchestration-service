@@ -8,7 +8,7 @@
     "id": 1234567890,
     "jurisdiction": "DIVORCE",
     "state": "caseAdded",
-    "case_type_id": "FinancialRemedyMVP2",
+    "case_type_id": "FinancialRemedyContested",
     "case_data": {
       "paperApplication": "Yes",
       "PBANumber": "PBA123456",
@@ -131,7 +131,8 @@
       "generalApplicationDirectionsHearingRequired": "Yes",
       "interimHearingDate": "2020-06-01",
       "interimHearingTime": "2:00 pm",
-      "interimHearingTimeEstimate": "30 minutes",
+      "interimTimeEstimate": "30 minutes",
+      "interimHearingType": "Directions (DIR)",
       "generalApplicationDirections_cfcCourtList": "FR_s_CFCList_2",
       "interimAdditionalInformationAboutHearing": "refreshments will be provided",
       "generalApplicationDirectionsRecitals": "phantom of the opera",

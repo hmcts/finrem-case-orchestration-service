@@ -39,7 +39,7 @@ public class AdditionalHearingDocumentService {
         FinremCaseData caseData = caseDetails.getCaseData();
 
         Map<String, Object> additionalHearingPlaceholdersMap = additionalHearingDetailsMapper
-            .getAdditionalHearingDetailsAsMap(caseDetails, caseData.getRegionWrapper().getDefaultCourtList());
+            .getDocumentTemplateDetailsAsMap(caseDetails, caseData.getRegionWrapper().getDefaultCourtList());
 
         Document document = generateAdditionalHearingDocument(additionalHearingPlaceholdersMap, authorisationToken);
         addAdditionalHearingDocumentToCaseData(caseDetails, document);
@@ -80,7 +80,7 @@ public class AdditionalHearingDocumentService {
             //Generate and store new additional hearing document using latestDirectionDetailsCollectionItem
             FinremCaseDetails caseDetailsCopy = getLatestHearingCaseDetailsVersion(caseDetails, latestDirectionDetailsCollectionItem);
             Map<String, Object> additionalHearingPlaceholdersMap = additionalHearingDetailsMapper
-                .getAdditionalHearingDetailsAsMap(caseDetailsCopy, latestDirectionDetailsCollectionItem.getLocalCourt());
+                .getDocumentTemplateDetailsAsMap(caseDetailsCopy, latestDirectionDetailsCollectionItem.getLocalCourt());
 
             Document document = generateAdditionalHearingDocument(additionalHearingPlaceholdersMap, authorisationToken);
             addAdditionalHearingDocumentToCaseData(caseDetails, document);

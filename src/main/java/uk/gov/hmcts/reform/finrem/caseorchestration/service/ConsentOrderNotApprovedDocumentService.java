@@ -48,7 +48,8 @@ public class ConsentOrderNotApprovedDocumentService {
             : documents;
     }
 
-    private void addEitherNotApprovedOrderOrGeneralOrderIfApplicable(FinremCaseDetails caseDetails, List<BulkPrintDocument> existingList,
+    private void addEitherNotApprovedOrderOrGeneralOrderIfApplicable(FinremCaseDetails caseDetails,
+                                                                     List<BulkPrintDocument> existingList,
                                                                      String authorisationToken) {
         List<Document> notApprovedOrderDocuments = notApprovedConsentOrder(caseDetails);
         Optional<Document> generalOrder = ofNullable(caseDetails.getCaseData().getGeneralOrderWrapper().getGeneralOrderLatestDocument());

@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetai
 public class GeneralApplicationLetterDetails implements DocumentTemplateDetails {
     @JsonProperty("ccdCaseNumber")
     private String ccdCaseNumber;
+    private String divorceCaseNumber;
     @JsonProperty("courtDetails")
     private FrcCourtDetails courtDetails;
     @JsonProperty("applicantName")
@@ -25,4 +26,9 @@ public class GeneralApplicationLetterDetails implements DocumentTemplateDetails 
     private String letterDate;
     @JsonProperty("hearingVenue")
     private String hearingVenue;
+    private String generalApplicationDirectionsHearingDate;
+    private String generalApplicationDirectionsHearingTime;
+    private String generalApplicationDirectionsHearingTimeEstimate;
+    private String generalApplicationDirectionsAdditionalInformation;
+
 }

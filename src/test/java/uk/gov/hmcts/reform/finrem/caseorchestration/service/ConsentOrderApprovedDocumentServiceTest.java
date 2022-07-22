@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
+import java.io.IOException;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -107,10 +108,11 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldGenerateAndPopulateApprovedConsentOrderLetterForConsentInContested() {
-        FinremCaseDetails caseDetails = finremCaseDetailsFromResource("/fixtures/contested/consent-in-contested-application-approved.json", mapper);
+    public void shouldGenerateAndPopulateApprovedConsentOrderLetterForConsentInContested() throws IOException {
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource("/fixtures/contested/consent-in-contested-application-approved.json"), mapper);
         consentOrderApprovedDocumentService.generateAndPopulateConsentOrderLetter(caseDetails, AUTH_TOKEN);
-        List<ConsentOrderCollection> approvedOrders = caseDetails.getCaseData().getContestedConsentedApprovedOrders();
+        List<ConsentOrderCollection> approvedOrders = caseDetails.getCaseData().getConsentOrderWrapper()
+            .getContestedConsentedApprovedOrders();
 
         assertCaseDocument(approvedOrders.get(approvedOrders.size() - 1).getValue().getOrderLetter());
         verify(documentClientMock, atLeastOnce()).generatePdf(
@@ -119,8 +121,9 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldGenerateApprovedConsentOrderLetterForContested() {
-        FinremCaseDetails contestedDetails = finremCaseDetailsFromResource("/fixtures/contested/consent-in-contested-application-approved.json", mapper);
+    public void shouldGenerateApprovedConsentOrderLetterForContested() throws IOException {
+        FinremCaseDetails contestedDetails =
+            finremCaseDetailsFromResource(getResource("/fixtures/contested/consent-in-contested-application-approved.json"), mapper);
         Document caseDocument = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(contestedDetails, AUTH_TOKEN);
 
         assertCaseDocument(caseDocument);
@@ -200,7 +203,6 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
         List<BulkPrintDocument> documents = consentOrderApprovedDocumentService.prepareApplicantLetterPack(caseDetailsTemp, AUTH_TOKEN);
 
-        System.out.println(documents);
         assertThat(documents, hasSize(3));
         assertThat(documents.get(0).getBinaryFileUrl(), is(ORDER_LETTER_URL));
         assertThat(documents.get(1).getBinaryFileUrl(), is(CONSENT_ORDER_URL));
@@ -211,11 +213,11 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     public void whenPreparingApplicantLetterPack_paperApplication() throws Exception {
         FinremCaseDetails caseDetailsTemp = documentHelper.deepCopy(caseDetails, FinremCaseDetails.class);
         caseDetailsTemp.getCaseData().setPaperApplication(YesOrNo.YES);
+        caseDetailsTemp.getCaseData().setCcdCaseType(CaseType.CONSENTED);
         addConsentOrderApprovedDataToCaseDetails(caseDetailsTemp);
 
         List<BulkPrintDocument> documents = consentOrderApprovedDocumentService.prepareApplicantLetterPack(caseDetailsTemp, AUTH_TOKEN);
 
-        System.out.println(documents);
         assertThat(documents, hasSize(4));
         assertThat(documents.get(0).getBinaryFileUrl(), is(CONSENT_ORDER_APPROVED_COVER_LETTER_URL));
         assertThat(documents.get(1).getBinaryFileUrl(), is(ORDER_LETTER_URL));
@@ -233,14 +235,14 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         caseData.setConsentOrder(newDocument());
 
         consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData, AUTH_TOKEN);
-        assertThat(caseData.getContestedConsentedApprovedOrders(), hasSize(1));
+        assertThat(caseData.getConsentOrderWrapper().getContestedConsentedApprovedOrders(), hasSize(1));
 
         consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData, AUTH_TOKEN);
-        assertThat(caseData.getContestedConsentedApprovedOrders(), hasSize(2));
+        assertThat(caseData.getConsentOrderWrapper().getContestedConsentedApprovedOrders(), hasSize(2));
     }
 
     @Test
-    public void shouldConvertCollectionDocument() {
+    public void shouldConvertCollectionDocument() throws IOException {
         List<Document> documents = consentOrderApprovedDocumentService.approvedOrderCollection(caseDetails());
 
         assertThat(documents, hasSize(3));
@@ -256,19 +258,25 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
             .filename(CONSENT_ORDER_URL)
             .build();
 
+        Document orderLetterDoc = Document.builder()
+            .url(ORDER_LETTER_URL)
+            .binaryUrl(ORDER_LETTER_URL)
+            .filename(ORDER_LETTER_URL)
+            .build();
+
         ConsentOrderCollection approvedOrder = ConsentOrderCollection
             .builder()
             .value(ConsentOrder.builder()
                 .consentOrder(consentOrderDoc)
                 .pensionDocuments(singletonList(pensionData))
-                .orderLetter(consentOrderDoc)
+                .orderLetter(orderLetterDoc)
                 .build())
             .build();
 
         caseDetails.getCaseData().setApprovedOrderCollection(singletonList(approvedOrder));
     }
 
-    private FinremCaseDetails caseDetails() {
-        return finremCaseDetailsFromResource("/fixtures/bulkprint/bulk-print.json", mapper);
+    private FinremCaseDetails caseDetails() throws IOException {
+        return finremCaseDetailsFromResource(getResource("/fixtures/bulkprint/bulk-print.json"), mapper);
     }
 }

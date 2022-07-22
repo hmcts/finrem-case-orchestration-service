@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -55,7 +56,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldSendDocumentForBulkPrint() {
+    public void shouldSendDocumentForBulkPrint() throws IOException {
         UUID bulkPrintLetterId = bulkPrintService.sendDocumentForPrint(
             new Document(), caseDetails());
 
@@ -71,10 +72,10 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldPrintApplicantDocuments() {
+    public void shouldPrintApplicantDocuments() throws IOException {
         final String consentedBulkPrintConsentOrderNotApprovedJson
             = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
-        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource(consentedBulkPrintConsentOrderNotApprovedJson), mapper);
         List<BulkPrintDocument> bulkPrintDocuments = bulkPrintDocumentList();
 
         when(coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
@@ -94,10 +95,10 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldPrintRespondentDocuments() {
+    public void shouldPrintRespondentDocuments() throws IOException {
         final String consentedBulkPrintConsentOrderNotApprovedJson
             = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
-        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource(consentedBulkPrintConsentOrderNotApprovedJson), mapper);
         List<BulkPrintDocument> bulkPrintDocuments = bulkPrintDocumentList();
 
         when(coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
@@ -123,19 +124,19 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldNotPrintForApplicantIfRepresentedAgreedToEmailAndNotPaperCase() {
+    public void shouldNotPrintForApplicantIfRepresentedAgreedToEmailAndNotPaperCase() throws IOException {
         final String json
             = "/fixtures/refusal-order-contested.json";
-        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(json, mapper);
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource(json), mapper);
 
         assertThat(paperNotificationService.shouldPrintForApplicant(caseDetails), is(false));
     }
 
     @Test
-    public void shouldSaveApplicantDocumentsToConfidentialCollectionWhenAddressIsConfidential() {
+    public void shouldSaveApplicantDocumentsToConfidentialCollectionWhenAddressIsConfidential() throws IOException {
         final String consentedBulkPrintConsentOrderNotApprovedJson
             = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
-        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource(consentedBulkPrintConsentOrderNotApprovedJson), mapper);
         caseDetails.getCaseData().getContactDetailsWrapper().setApplicantAddressHiddenFromRespondent(YesOrNo.YES);
         List<BulkPrintDocument> bulkPrintDocuments = bulkPrintDocumentList();
 
@@ -150,10 +151,10 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldSaveRespondentDocumentsToConfidentialCollectionWhenAddressIsConfidential() {
+    public void shouldSaveRespondentDocumentsToConfidentialCollectionWhenAddressIsConfidential() throws IOException {
         final String consentedBulkPrintConsentOrderNotApprovedJson
             = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
-        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource(consentedBulkPrintConsentOrderNotApprovedJson), mapper);
         caseDetails.getCaseData().getContactDetailsWrapper().setRespondentAddressHiddenFromApplicant(YesOrNo.YES);
         List<BulkPrintDocument> bulkPrintDocuments = bulkPrintDocumentList();
 
@@ -167,7 +168,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         assertThat(caseDetails.getCaseData().getBulkPrintCoverSheetRes(), is(nullValue()));
     }
 
-    private FinremCaseDetails caseDetails() {
-        return finremCaseDetailsFromResource("/fixtures/bulkprint/bulk-print.json", mapper);
+    private FinremCaseDetails caseDetails() throws IOException {
+        return finremCaseDetailsFromResource(getResource("/fixtures/bulkprint/bulk-print.json"), mapper);
     }
 }

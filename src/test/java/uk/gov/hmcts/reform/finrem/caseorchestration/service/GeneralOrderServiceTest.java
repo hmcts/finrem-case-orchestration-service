@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
@@ -16,14 +17,14 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.GeneralOrderAddressTo;
 import uk.gov.hmcts.reform.finrem.ccd.domain.GeneralOrderCollection;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
@@ -40,6 +41,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
 
     @Autowired private GeneralOrderService generalOrderService;
     @Autowired private DocumentConfiguration documentConfiguration;
+    @Qualifier("finremCallbackRequestDeserializer")
     @Autowired private FinremCallbackRequestDeserializer deserializer;
 
     @MockBean
@@ -50,7 +52,8 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
 
     @Before
     public void setUp() {
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(newDocument());
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any()))
+            .thenReturn(newDocument());
     }
 
     @Test
@@ -94,7 +97,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
             is("WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg"));
         assertThat(generalOrders.get(1).getValue().getAdditionalDocument().getBinaryUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
-        assertThat(generalOrders.get(1).getValue().getGeneralOrderAddressTo(), is(GeneralOrderAddressTo.APPLICANT));
+        assertThat(generalOrders.get(1).getValue().getGeneralOrderAddressTo(), is(GeneralOrderAddressTo.APPLICANT.getText()));
 
         Document latestGeneralOrder = caseDetails.getCaseData().getGeneralOrderWrapper().getGeneralOrderLatestDocument();
         assertThat(latestGeneralOrder.getUrl(),
@@ -136,7 +139,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
             is("WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg"));
         assertThat(generalOrders.get(1).getValue().getAdditionalDocument().getBinaryUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
-        assertThat(generalOrders.get(1).getValue().getGeneralOrderAddressTo(), is(GeneralOrderAddressTo.APPLICANT));
+        assertThat(generalOrders.get(1).getValue().getGeneralOrderAddressTo(), is(GeneralOrderAddressTo.APPLICANT.getText()));
 
         Document latestGeneralOrder = caseDetails.getCaseData().getGeneralOrderWrapper().getGeneralOrderLatestDocument();
         assertThat(latestGeneralOrder.getUrl(),
@@ -166,7 +169,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
             is("WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg"));
         assertThat(generalOrders.get(1).getValue().getGeneralOrderDocumentUpload().getBinaryUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
-        assertThat(generalOrders.get(1).getValue().getGeneralOrderAddressTo(), is(GeneralOrderAddressTo.APPLICANT));
+        assertThat(generalOrders.get(1).getValue().getGeneralOrderAddressTo(), is(GeneralOrderAddressTo.APPLICANT.getText()));
 
         Document latestGeneralOrder = caseDetails.getCaseData().getGeneralOrderWrapper().getGeneralOrderLatestDocument();
         assertThat(latestGeneralOrder.getUrl(),
@@ -184,7 +187,8 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
 
         generalOrderService.populateGeneralOrderCollection(details);
         List<GeneralOrderCollection> generalOrders = details.getCaseData().getGeneralOrderWrapper().getGeneralOrderCollection();
-        assertThat(generalOrders.get(1).getValue().getGeneralOrderAddressTo(), is(GeneralOrderAddressTo.APPLICANT));
+        assertThat(generalOrders.get(1).getValue().getGeneralOrderAddressTo(),
+            is(GeneralOrderAddressTo.APPLICANT.getText()));
     }
 
     @Test
@@ -193,7 +197,8 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         details.getCaseData().getGeneralOrderWrapper().setGeneralOrderAddressTo(GeneralOrderAddressTo.APPLICANT_SOLICITOR);
         generalOrderService.populateGeneralOrderCollection(details);
         List<GeneralOrderCollection> generalOrders = details.getCaseData().getGeneralOrderWrapper().getGeneralOrderCollection();
-        assertThat(generalOrders.get(1).getValue().getGeneralOrderAddressTo(), is(GeneralOrderAddressTo.APPLICANT_SOLICITOR));
+        assertThat(generalOrders.get(1).getValue().getGeneralOrderAddressTo(),
+            is(GeneralOrderAddressTo.APPLICANT_SOLICITOR.getText()));
     }
 
     @Test
@@ -202,7 +207,8 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         details.getCaseData().getGeneralOrderWrapper().setGeneralOrderAddressTo(GeneralOrderAddressTo.RESPONDENT_SOLICITOR);
         generalOrderService.populateGeneralOrderCollection(details);
         List<GeneralOrderCollection> generalOrders = details.getCaseData().getGeneralOrderWrapper().getGeneralOrderCollection();
-        assertThat(generalOrders.get(1).getValue().getGeneralOrderAddressTo(), is(GeneralOrderAddressTo.RESPONDENT_SOLICITOR));
+        assertThat(generalOrders.get(1).getValue().getGeneralOrderAddressTo(),
+            is(GeneralOrderAddressTo.RESPONDENT_SOLICITOR.getText()));
     }
 
     @Test
@@ -222,23 +228,24 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     }
 
     private FinremCaseDetails consentedCaseDetails() throws Exception {
-        return deserializer.deserialize(new String(Files.readAllBytes(Paths.get("/fixtures/general-order-consented.json"))))
+        return deserializer.deserialize(getResource("/fixtures/general-order-consented.json"))
             .getCaseDetails();
     }
 
     private FinremCaseDetails contestedCaseDetails() throws Exception {
-        return deserializer.deserialize(new String(Files.readAllBytes(Paths.get("/fixtures/general-order-contested.json"))))
+        return deserializer.deserialize(getResource("/fixtures/general-order-contested.json"))
             .getCaseDetails();
     }
 
     private static void doCaseDocumentAssert(Document result) {
+        assertNotNull(result);
         assertThat(result.getFilename(), is(FILE_NAME));
         assertThat(result.getUrl(), is(DOC_URL));
         assertThat(result.getBinaryUrl(), is(BINARY_URL));
     }
 
     private FinremCaseDetails consentedInContestedCaseDetails() throws Exception {
-        return deserializer.deserialize(new String(Files.readAllBytes(Paths.get("/fixtures/general-order-consented-in-contested.json"))))
+        return deserializer.deserialize(getResource("/fixtures/general-order-consented-in-contested.json"))
             .getCaseDetails();
     }
 
@@ -247,14 +254,14 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
             .generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), placeholdersMapCaptor.capture(),
                 eq(documentConfiguration.getGeneralOrderTemplate()), eq(documentConfiguration.getGeneralOrderFileName()));
 
-        Map<String, Object> data = placeholdersMapCaptor.getValue();
+        Map<String, Object> data = getDataFromCaptor(placeholdersMapCaptor);
         assertThat(data.get("DivorceCaseNumber"), is("DD12D12345"));
         assertThat(data.get("ApplicantName"), is("Consented Applicant Name"));
         assertThat(data.get("RespondentName"), is("Consented Respondent Name"));
         assertThat(data.get("GeneralOrderCourt"), is("SITTING in private"));
         assertThat(data.get("GeneralOrderJudgeDetails"), is("His Honour Judge Consented"));
         assertThat(data.get("GeneralOrderRecitals"), is("Consented Recitals"));
-        assertThat(data.get("GeneralOrderDate"), is("01/01/2020"));
+        assertThat(data.get("GeneralOrderDate"), is("2020-01-01"));
         assertThat(data.get("GeneralOrderBodyText"), is("Test is dummy text for consented"));
         assertThat(data.get("GeneralOrderHeaderOne"), is("Sitting in the Family Court"));
     }
@@ -264,14 +271,14 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
             .generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), placeholdersMapCaptor.capture(),
                 eq(documentConfiguration.getGeneralOrderTemplate()), eq(documentConfiguration.getGeneralOrderFileName()));
 
-        Map<String, Object> data = placeholdersMapCaptor.getValue();
+        Map<String, Object> data = getDataFromCaptor(placeholdersMapCaptor);
         assertThat(data.get("DivorceCaseNumber"), is("DD98D76543"));
         assertThat(data.get("ApplicantName"), is("Contested Applicant Name"));
         assertThat(data.get("RespondentName"), is("Contested Respondent Name"));
-        assertThat(data.get("GeneralOrderCourt"), is("Nottingham County Court and Family Court"));
+        assertThat(data.get("GeneralOrderCourt"), is("Nottingham County Court And Family Court"));
         assertThat(data.get("GeneralOrderJudgeDetails"), is("Her Honour Judge Contested"));
         assertThat(data.get("GeneralOrderRecitals"), is("Contested Recitals"));
-        assertThat(data.get("GeneralOrderDate"), is("01/06/2020"));
+        assertThat(data.get("GeneralOrderDate"), is("2020-06-01"));
         assertThat(data.get("GeneralOrderBodyText"), is("Test is dummy text for contested"));
         assertThat(data.get("GeneralOrderHeaderOne"), is("In the Family Court"));
         assertThat(data.get("GeneralOrderHeaderTwo"), is("sitting in the"));

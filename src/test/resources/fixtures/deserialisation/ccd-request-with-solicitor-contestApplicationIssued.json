@@ -7,6 +7,15 @@
       "PBANumber": "PBA222",
       "PBAPaymentReference": "PBAPaymentRef123",
       "PBAreference": "PBARef123",
+      "applicantSolicitorAddress": {
+        "AddressLine1": "Line1",
+        "AddressLine2": "Line2",
+        "AddressLine3": "Line3",
+        "Country": "UK",
+        "County": "Surrey",
+        "PostCode": "CR5 2JX",
+        "PostTown": "Purley"
+      },
       "amendedConsentOrderCollection": [
         {
           "id": "1",
@@ -147,7 +156,7 @@
           }
         }
       ],
-      "representationUpdateHistory": [
+      "RepresentationUpdateHistory": [
         {
           "value": {
             "party": "applicant",
@@ -667,7 +676,7 @@
       ],
       "consentOrderFrcName": "Bromley",
       "consentOrderFrcAddress": {
-        "addressLine1": "Address"
+        "AddressLine1": "Address"
       },
       "divorceDecreeNisiDate": "2022-02-02",
       "divorceDecreeAbsoluteDate": "2022-02-02",
@@ -715,7 +724,7 @@
         "document_filename": "doc1",
         "document_binary_url": "http://doc1.binary"
       },
-      "contestedConsentedApprovedOrders": [
+      "Contested_ConsentedApprovedOrders": [
         {
           "value": {
             "consentOrder": {

@@ -37,7 +37,7 @@ public class LetterDetailsMapper {
     private final ObjectMapper objectMapper;
     private final CourtDetailsMapper courtDetailsMapper;
 
-    public LetterDetails buildLetterDetails(FinremCaseDetails caseDetails,
+    public BasicLetterDetails buildLetterDetails(FinremCaseDetails caseDetails,
                                                  DocumentHelper.PaperNotificationRecipient recipient,
                                                  CourtListWrapper courtList) {
         return BasicLetterDetails.builder()

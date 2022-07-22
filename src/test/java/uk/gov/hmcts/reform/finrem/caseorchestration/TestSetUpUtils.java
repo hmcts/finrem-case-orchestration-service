@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Address;
+import uk.gov.hmcts.reform.finrem.ccd.domain.BristolCourt;
 import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
@@ -255,6 +256,8 @@ public class TestSetUpUtils {
     public static FinremCaseDetails defaultConsentedFinremCaseDetails() {
         FinremCaseData caseData = new FinremCaseData();
         caseData.setCcdCaseType(CaseType.CONSENTED);
+        caseData.getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
+            .setBristolCourtList(BristolCourt.FR_bristolList_1);
         populateApplicantNameAndAddress(caseData);
         populateRespondentNameAndAddressConsented(caseData);
 
@@ -344,9 +347,9 @@ public class TestSetUpUtils {
         }
     }
 
-    public static FinremCaseDetails finremCaseDetailsFromResource(String resourcePath, ObjectMapper mapper) {
+    public static FinremCaseDetails finremCaseDetailsFromResource(String json, ObjectMapper mapper) {
         FinremCallbackRequestDeserializer deserializer = new FinremCallbackRequestDeserializer(mapper);
-        return deserializer.deserialize(resourcePath).getCaseDetails();
+        return deserializer.deserialize(json).getCaseDetails();
     }
 
     private static void populateRespondentNameAndAddressConsented(Map<String, Object> caseData) {
@@ -449,6 +452,16 @@ public class TestSetUpUtils {
             new uk.gov.hmcts.reform.finrem.ccd.domain.Document();
         caseDocument.setUrl(DOC_URL);
         caseDocument.setFilename(FILE_NAME);
+        caseDocument.setBinaryUrl(BINARY_URL);
+
+        return caseDocument;
+    }
+
+    public static uk.gov.hmcts.reform.finrem.ccd.domain.Document wordDoc() {
+        uk.gov.hmcts.reform.finrem.ccd.domain.Document caseDocument =
+            new uk.gov.hmcts.reform.finrem.ccd.domain.Document();
+        caseDocument.setUrl(DOC_URL);
+        caseDocument.setFilename("doc.docx");
         caseDocument.setBinaryUrl(BINARY_URL);
 
         return caseDocument;

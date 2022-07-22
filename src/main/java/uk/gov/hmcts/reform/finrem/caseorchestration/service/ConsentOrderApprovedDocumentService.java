@@ -112,11 +112,11 @@ public class ConsentOrderApprovedDocumentService {
     public void generateAndPopulateConsentOrderLetter(FinremCaseDetails caseDetails, String authToken) {
         FinremCaseData caseData = caseDetails.getCaseData();
         Document orderLetter = generateApprovedConsentOrderLetter(caseDetails, authToken);
-        List<ConsentOrderCollection> approvedOrders = caseData.getContestedConsentedApprovedOrders();
+        List<ConsentOrderCollection> approvedOrders = caseData.getConsentOrderWrapper().getContestedConsentedApprovedOrders();
         if (approvedOrders != null && !approvedOrders.isEmpty()) {
             ConsentOrder approvedOrder = approvedOrders.get(approvedOrders.size() - 1).getValue();
             approvedOrder.setOrderLetter(orderLetter);
-            caseData.setContestedConsentedApprovedOrders(approvedOrders);
+            caseData.getConsentOrderWrapper().setContestedConsentedApprovedOrders(approvedOrders);
         }
     }
 
@@ -133,7 +133,8 @@ public class ConsentOrderApprovedDocumentService {
         caseData.setConsentOrder(stampedDoc);
         caseData.setConsentPensionCollection(pensionDocs);
 
-        List<ConsentOrderCollection> approvedOrders = caseData.getContestedConsentedApprovedOrders();
+        List<ConsentOrderCollection> approvedOrders =
+            Optional.ofNullable(caseData.getConsentOrderWrapper().getContestedConsentedApprovedOrders()).orElse(new ArrayList<>());
 
         ConsentOrderCollection approvedOrder = ConsentOrderCollection.builder()
             .value(ConsentOrder.builder()
@@ -142,11 +143,7 @@ public class ConsentOrderApprovedDocumentService {
                 .build()).build();
 
         approvedOrders.add(approvedOrder);
-        caseData.setContestedConsentedApprovedOrders(approvedOrders);
-    }
-
-    List<CollectionElement<ApprovedOrder>> getConsentInContestedApprovedOrderCollection(Map<String, Object> caseData) {
-        return mapper.convertValue(caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION), new TypeReference<>() {});
+        caseData.getConsentOrderWrapper().setContestedConsentedApprovedOrders(approvedOrders);
     }
 
     public List<Document> approvedOrderCollection(FinremCaseDetails caseDetails) {
@@ -171,7 +168,7 @@ public class ConsentOrderApprovedDocumentService {
 
     private List<ConsentOrderCollection> getApprovedOrders(FinremCaseData caseData) {
         return caseData.isConsentedInContestedCase()
-            ? caseData.getContestedConsentedApprovedOrders()
+            ? caseData.getConsentOrderWrapper().getContestedConsentedApprovedOrders()
             : caseData.getApprovedOrderCollection();
     }
 }

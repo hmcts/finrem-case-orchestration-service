@@ -10,12 +10,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.Abstrac
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.JudgeType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.PensionProvider;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.CourtListWrapper;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
+import static uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo.getYesOrNo;
 
 @Component
 public class ConsentOrderApprovedLetterDetailsMapper extends AbstractLetterDetailsMapper {
@@ -28,19 +32,25 @@ public class ConsentOrderApprovedLetterDetailsMapper extends AbstractLetterDetai
     public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtListWrapper courtList) {
         FinremCaseData caseData = caseDetails.getCaseData();
         return ConsentOrderApprovedLetterDetails.builder()
-            .civilPartnership(caseData.getCivilPartnership().getYesOrNo())
+            .civilPartnership(getYesOrNo(caseData.getCivilPartnership()))
             .applicantFirstName(caseData.getContactDetailsWrapper().getApplicantFmName())
             .applicantLastName(caseData.getContactDetailsWrapper().getApplicantLname())
             .respondentFirstName(getRespondentFirstName(caseDetails))
             .respondentLastName(getRespondentLastName(caseDetails))
-            .servePensionProviderResponsibility(caseData.getServePensionProviderResponsibility().getValue())
-            .servePensionProvider(caseData.getServePensionProvider().getYesOrNo())
+            .servePensionProviderResponsibility(getServePensionProviderResponsibility(caseData))
+            .servePensionProvider(getYesOrNo(caseData.getServePensionProvider()))
             .divorceCaseNumber(caseData.getDivorceCaseNumber())
             .orderDirectionDate(getDirectionDate(caseDetails))
             .orderDirectionJudge(getJudgeTitle(caseDetails))
             .orderDirectionJudgeName(getJudgeName(caseDetails))
             .servePensionProviderOther(nullToEmpty(caseData.getServePensionProviderOther()))
             .build();
+    }
+
+    private String getServePensionProviderResponsibility(FinremCaseData caseData) {
+        return Optional.ofNullable(caseData.getServePensionProviderResponsibility())
+            .map(PensionProvider::getValue)
+            .orElse(null);
     }
 
     private String getRespondentFirstName(FinremCaseDetails caseDetails) {
@@ -58,7 +68,8 @@ public class ConsentOrderApprovedLetterDetailsMapper extends AbstractLetterDetai
     private String getJudgeTitle(FinremCaseDetails caseDetails) {
         return caseDetails.getCaseData().isContestedApplication()
             ? caseDetails.getCaseData().getConsentOrderWrapper().getConsentSelectJudge()
-            : caseDetails.getCaseData().getOrderDirectionJudge().getValue();
+            : Optional.ofNullable(caseDetails.getCaseData().getOrderDirectionJudge())
+            .map(JudgeType::getValue).orElse(null);
     }
 
     private String getJudgeName(FinremCaseDetails caseDetails) {
