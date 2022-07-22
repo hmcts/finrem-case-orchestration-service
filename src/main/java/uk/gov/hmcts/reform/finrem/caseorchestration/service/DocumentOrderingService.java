@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.EvidenceManagementClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -27,7 +26,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 public class DocumentOrderingService {
 
-    private final EvidenceManagementClient evidenceManagementClient;
+    private final EvidenceManagementAuditService evidenceManagementAuditService;
     private final DocumentHelper documentHelper;
     private final CaseDataService caseDataService;
     private final ObjectMapper objectMapper;
@@ -36,15 +35,15 @@ public class DocumentOrderingService {
      * Returns true if document A was modified later than document B, false otherwise.
      */
     public boolean isDocumentModifiedLater(CaseDocument documentA, CaseDocument documentB, String authorisationToken) {
-        List<FileUploadResponse> auditResponse = evidenceManagementClient.auditFileUrls(authorisationToken, asList(
+        List<FileUploadResponse> auditResponse = evidenceManagementAuditService.audit(asList(
             documentA.getDocumentUrl(),
-            documentB.getDocumentUrl()));
+            documentB.getDocumentUrl()), authorisationToken);
 
         if (auditResponse.size() != 2) {
             throw new IllegalStateException();
         }
 
-        return auditResponse.get(0).getModifiedOn().after(
+        return auditResponse.get(0).getModifiedOn().isAfter(
             auditResponse.get(1).getModifiedOn());
     }
 

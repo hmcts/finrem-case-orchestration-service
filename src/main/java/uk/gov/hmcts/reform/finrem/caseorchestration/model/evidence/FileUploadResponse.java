@@ -6,7 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 
-import java.util.Date;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * The class name FileUploadResponse is to maintain consistency. It was created in Evidence Management Client
@@ -24,7 +25,14 @@ public class FileUploadResponse {
     private String mimeType;
     private String createdBy;
     private String lastModifiedBy;
-    private Date createdOn;
-    private Date modifiedOn;
+    private String createdOn;
+    private String modifiedOn;
     private HttpStatus status;
+
+    public ZonedDateTime getModifiedOn() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z");
+        ZonedDateTime zonedDateTime = ZonedDateTime.parse("2015-05-05 10:15:30 Europe/Paris", formatter);
+
+        return zonedDateTime;
+    }
 }

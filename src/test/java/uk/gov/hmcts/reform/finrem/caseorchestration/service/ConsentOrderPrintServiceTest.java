@@ -10,7 +10,6 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.EvidenceManagementClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
@@ -55,7 +54,7 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
 
     @Autowired private ObjectMapper mapper;
     @Autowired private ConsentOrderPrintService consentOrderPrintService;
-    @Autowired private EvidenceManagementClient evidenceManagementClientMock;
+    @MockBean private EvidenceManagementAuditService evidenceManagementAuditService;
 
     @MockBean private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
     @MockBean private GenerateCoverSheetService coverSheetService;
@@ -249,9 +248,9 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         when(consentOrderNotApprovedDocumentService.notApprovedConsentOrder(any())).thenReturn(singletonList(caseDocument));
         Date now = new Date();
         Date beforeNow = new Date(now.getTime() - 1);
-        when(evidenceManagementClientMock.auditFileUrls(eq(AUTH_TOKEN), any())).thenReturn(asList(
-            FileUploadResponse.builder().modifiedOn(now).build(),
-            FileUploadResponse.builder().modifiedOn(beforeNow).build()));
+        when(evidenceManagementAuditService.audit(any(), eq(AUTH_TOKEN))).thenReturn(asList(
+            FileUploadResponse.builder().modifiedOn(now.toString()).build(),
+            FileUploadResponse.builder().modifiedOn(beforeNow.toString()).build()));
 
         consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, AUTH_TOKEN);
 

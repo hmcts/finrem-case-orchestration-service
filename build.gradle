@@ -33,7 +33,8 @@ def versions = [
         idamClient           : '2.0.1',
         jjwt                 : '0.9.1',
         skyscreamer          : '1.5.0',
-        jaxbOsgi             : '2.3.3'
+        jaxbOsgi             : '2.3.3',
+        springHateoas        : '1.5.1'
 ]
 
 project.ext {
@@ -315,6 +316,7 @@ dependencies {
     implementation group: 'com.github.hmcts', name: 'bsp-common-lib', version: versions.bspCommonLib
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: versions.apacheLogging
     implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: versions.apacheLogging
+    implementation group: 'org.springframework.hateoas', name: 'spring-hateoas', version: versions.springHateoas
 
     developmentOnly group: 'org.springframework.boot', name: 'spring-boot-devtools'
 

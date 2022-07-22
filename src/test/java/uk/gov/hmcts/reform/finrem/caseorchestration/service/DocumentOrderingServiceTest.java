@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.EvidenceManagementClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
@@ -33,14 +32,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class DocumentOrderingServiceTest extends BaseServiceTest {
 
     @Autowired
-    private EvidenceManagementClient evidenceManagementClientMock;
+    private EvidenceManagementAuditService evidenceManagementAuditService;
 
     @Autowired
     private DocumentOrderingService documentOrderingService;
 
     @Test(expected = IllegalStateException.class)
     public void givenCheckingForDocumentOrder_whenResponseWithoutTwoElementsReceived_thenIllegalStateExceptionIsThrown() {
-        when(evidenceManagementClientMock.auditFileUrls(eq(AUTH_TOKEN), any())).thenReturn(singletonList(FileUploadResponse.builder().build()));
+        when(evidenceManagementAuditService.audit(any(), eq(AUTH_TOKEN))).thenReturn(singletonList(FileUploadResponse.builder().build()));
         documentOrderingService.isDocumentModifiedLater(anyCaseDocument(), anyCaseDocument(), AUTH_TOKEN);
     }
 
@@ -76,9 +75,9 @@ public class DocumentOrderingServiceTest extends BaseServiceTest {
         Date earlier = new Date();
         Date later = new Date(earlier.getTime() + 1);
 
-        when(evidenceManagementClientMock.auditFileUrls(eq(AUTH_TOKEN), any())).thenReturn(asList(
-            FileUploadResponse.builder().modifiedOn(later).build(),
-            FileUploadResponse.builder().modifiedOn(earlier).build()));
+        when(evidenceManagementAuditService.audit(any(), eq(AUTH_TOKEN))).thenReturn(asList(
+            FileUploadResponse.builder().modifiedOn(later.toString()).build(),
+            FileUploadResponse.builder().modifiedOn(earlier.toString()).build()));
     }
 
     private CaseDocument anyCaseDocument() {
