@@ -71,7 +71,7 @@ public class FinremCallbackRequestDeserializer implements Deserializer<CallbackR
     private int getNextAlphanumericIndex(String source, int index) {
         int i = index;
         while (!Character.isAlphabetic(source.charAt(i))) {
-            i ++;
+            i++;
         }
         return i - index;
     }
