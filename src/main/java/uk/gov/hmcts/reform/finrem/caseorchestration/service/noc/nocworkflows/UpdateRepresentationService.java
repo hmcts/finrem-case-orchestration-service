@@ -44,9 +44,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UpdateRepresentationService {
 
-    private static final String CHANGE_ORGANISATION_REQUEST = "changeOrganisationRequestField";
-    private static final String NOC_EVENT = "nocRequest";
-    private static final String REPRESENTATION_UPDATE_HISTORY = "RepresentationUpdateHistory";
     private final AuditEventService auditEventService;
     private final IdamAuthService idamClient;
     private final ObjectMapper objectMapper;
@@ -57,8 +54,12 @@ public class UpdateRepresentationService {
     private final AddedSolicitorService addedSolicitorService;
     private final RemovedSolicitorService removedSolicitorService;
 
+    private static final String CHANGE_ORGANISATION_REQUEST = "changeOrganisationRequestField";
+    private static final String NOC_EVENT = "nocRequest";
+    private static final String REPRESENTATION_UPDATE_HISTORY = "RepresentationUpdateHistory";
+
     public Map<String, Object> updateRepresentationAsSolicitor(CaseDetails caseDetails,
-                                                               String authToken) {
+                                                               String authToken)  {
 
         log.info("Updating representation for case ID {}", caseDetails.getId());
 
@@ -87,9 +88,9 @@ public class UpdateRepresentationService {
     }
 
     private Map<String, Object> updateRepresentationUpdateHistory(CaseDetails caseDetails,
-                                                                  ChangedRepresentative addedSolicitor,
-                                                                  ChangedRepresentative removedSolicitor,
-                                                                  ChangeOrganisationRequest changeRequest) {
+                                                              ChangedRepresentative addedSolicitor,
+                                                              ChangedRepresentative removedSolicitor,
+                                                              ChangeOrganisationRequest changeRequest) {
 
         Map<String, Object> caseData = caseDetails.getData();
         RepresentationUpdateHistory current = getCurrentRepresentationUpdateHistory(caseData);
@@ -169,8 +170,7 @@ public class UpdateRepresentationService {
     private RepresentationUpdateHistory getCurrentRepresentationUpdateHistory(Map<String, Object> caseData) {
         return RepresentationUpdateHistory.builder()
             .representationUpdateHistory(objectMapper.convertValue(caseData.get(REPRESENTATION_UPDATE_HISTORY),
-                new TypeReference<>() {
-                })).build();
+                new TypeReference<>() {})).build();
     }
 
     private ChangeOfRepresentationRequest buildChangeOfRepresentationRequest(CaseDetails caseDetails,

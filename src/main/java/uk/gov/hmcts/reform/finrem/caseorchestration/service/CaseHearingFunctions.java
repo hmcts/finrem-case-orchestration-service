@@ -112,7 +112,7 @@ public final class CaseHearingFunctions {
             GENERAL_APPLICATION_DIRECTIONS_WALES_FRC);
     }
 
-    static String getSelectedCourtIH(Map<String, Object> mapOfCaseData) {
+    public static String getSelectedCourtIH(Map<String, Object> mapOfCaseData) {
         return INTERIM_HEARING_PREFIX + getSelectedCourt(mapOfCaseData, INTERIM_REGION,
             INTERIM_MIDLANDS_FRC_LIST, INTERIM_LONDON_FRC_LIST, INTERIM_NORTHWEST_FRC_LIST,
             INTERIM_NORTHEAST_FRC_LIST, INTERIM_SOUTHWEST_FRC_LIST, INTERIM_SOUTHEAST_FRC_LIST,
@@ -264,11 +264,11 @@ public final class CaseHearingFunctions {
 
     public static Map<String, Object> buildConsentedFrcCourtDetails() {
         return new ObjectMapper().convertValue(FrcCourtDetails.builder()
-            .courtName(OrchestrationConstants.CTSC_COURT_NAME)
-            .courtAddress(OrchestrationConstants.CTSC_COURT_ADDRESS)
-            .phoneNumber(OrchestrationConstants.CTSC_PHONE_NUMBER)
-            .email((OrchestrationConstants.CTSC_EMAIL_ADDRESS))
-            .build(), Map.class);
+                .courtName(OrchestrationConstants.CTSC_COURT_NAME)
+                .courtAddress(OrchestrationConstants.CTSC_COURT_ADDRESS)
+                .phoneNumber(OrchestrationConstants.CTSC_PHONE_NUMBER)
+                .email((OrchestrationConstants.CTSC_EMAIL_ADDRESS))
+                .build(), Map.class);
     }
 
     public static String getCourtDetailsString() {
@@ -281,5 +281,21 @@ public final class CaseHearingFunctions {
 
     static String getFrcCourtDetailsAsOneLineAddressString(Map<String, Object> courtDetailsMap) {
         return StringUtils.joinWith(", ", courtDetailsMap.get(COURT_DETAILS_NAME_KEY), courtDetailsMap.get(COURT_DETAILS_ADDRESS_KEY));
+    }
+
+    public static Map<String, Object> buildInterimHearingFrcCourtDetails(Map<String, Object> data) {
+        try {
+            Map<String, Object> courtDetailsMap = new ObjectMapper().readValue(getCourtDetailsString(), HashMap.class);
+            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(data.get(getSelectedCourtIH(data)));
+
+            return new ObjectMapper().convertValue(FrcCourtDetails.builder()
+                .courtName((String) courtDetails.get(COURT_DETAILS_NAME_KEY))
+                .courtAddress((String) courtDetails.get(COURT_DETAILS_ADDRESS_KEY))
+                .phoneNumber((String) courtDetails.get(COURT_DETAILS_PHONE_KEY))
+                .email((String) courtDetails.get(COURT_DETAILS_EMAIL_KEY))
+                .build(), Map.class);
+        } catch (Exception e) {
+            return Collections.emptyMap();
+        }
     }
 }

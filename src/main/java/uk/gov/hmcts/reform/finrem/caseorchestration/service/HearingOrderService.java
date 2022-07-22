@@ -107,7 +107,7 @@ public class HearingOrderService {
         caseData.setLatestDraftHearingOrder(stampedHearingOrder);
     }
 
-    private void updateCaseDataForLatestHearingOrderCollection(FinremCaseData caseData, Document stampedHearingOrder) {
+    public void updateCaseDataForLatestHearingOrderCollection(FinremCaseData caseData, Document stampedHearingOrder) {
 
         List<DirectionOrderCollection> finalOrderCollection = Optional.ofNullable(caseData.getFinalOrderCollection())
             .orElse(new ArrayList<>());

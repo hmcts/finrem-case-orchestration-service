@@ -33,7 +33,7 @@ public class DocumentOrderingService {
             throw new IllegalStateException();
         }
 
-        return auditResponse.get(0).getModifiedOn().after(
+        return  auditResponse.get(0).getModifiedOn().after(
             auditResponse.get(1).getModifiedOn());
     }
 

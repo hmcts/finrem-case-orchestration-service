@@ -1,11 +1,9 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -56,11 +54,10 @@ public class NotificationsController extends BaseController {
     private final FinremCallbackRequestDeserializer finremCallbackRequestDeserializer;
 
     @PostMapping(value = "/hwf-successful", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "Notify Applicant/Applicant Solicitor of HWF Successful by email or letter.")
+    @ApiOperation(value = "Notify Applicant/Applicant Solicitor of HWF Successful by email or letter.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "HWFSuccessful notification sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
+        @ApiResponse(code = 200, message = "HWFSuccessful notification sent successfully",
+            response = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendHwfSuccessfulConfirmationNotification(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @RequestBody String source) {
@@ -91,11 +88,10 @@ public class NotificationsController extends BaseController {
     }
 
     @PostMapping(value = "/assign-to-judge", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "Notify solicitor when Judge assigned to case via email or letter")
+    @ApiOperation(value = "Notify solicitor when Judge assigned to case via email or letter")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Case assigned to Judge notification sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation =  uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
+        @ApiResponse(code = 204, message = "Case assigned to Judge notification sent successfully",
+            response =  uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendAssignToJudgeConfirmationNotification(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @RequestBody String source) {
@@ -128,11 +124,10 @@ public class NotificationsController extends BaseController {
     }
 
     @PostMapping(value = "/assign-to-judge-consent-in-contested", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "Notify applicant and respondent when Judge assigned to case via letter")
+    @ApiOperation(value = "Notify applicant and respondent when Judge assigned to case via letter")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Case assigned to Judge notification sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
+        @ApiResponse(code = 204, message = "Case assigned to Judge notification sent successfully",
+            response = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendConsentInContestedAssignToJudgeConfirmationPaperNotification(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @RequestBody String source) {
@@ -153,11 +148,10 @@ public class NotificationsController extends BaseController {
     }
 
     @PostMapping(value = "/consent-order-made", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send e-mail for Consent Order Made.")
+    @ApiOperation(value = "send e-mail for Consent Order Made.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Consent order made e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
+        @ApiResponse(code = 204, message = "Consent order made e-mail sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendConsentOrderMadeConfirmationEmail(
         @RequestBody CallbackRequest callbackRequest) {
 
@@ -182,11 +176,10 @@ public class NotificationsController extends BaseController {
     }
 
     @PostMapping(value = "/order-not-approved", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send e-mail for consent/contest order not approved.")
+    @ApiOperation(value = "send e-mail for consent/contest order not approved.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Consent/Contest order not approved e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
+        @ApiResponse(code = 204, message = "Consent/Contest order not approved e-mail sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendConsentOrderNotApprovedEmail(
         @RequestBody CallbackRequest callbackRequest) {
         log.info("Received request to send email for 'Consent/Contest Order Not Approved' for Case ID: {}", callbackRequest.getCaseDetails().getId());
@@ -219,11 +212,10 @@ public class NotificationsController extends BaseController {
     }
 
     @PostMapping(value = "/contested-consent-order-approved", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send e-mail for contested consent order approved.")
+    @ApiOperation(value = "send e-mail for contested consent order approved.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Contested consent order approved e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
+        @ApiResponse(code = 204, message = "Contested consent order approved e-mail sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendContestedConsentOrderApprovedEmail(
         @RequestBody CallbackRequest callbackRequest) {
 
@@ -246,11 +238,10 @@ public class NotificationsController extends BaseController {
     }
 
     @PostMapping(value = "/contested-consent-order-not-approved", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send e-mail for contested consent order not approved.")
+    @ApiOperation(value = "send e-mail for contested consent order not approved.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Contested consent order not approved e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
+        @ApiResponse(code = 204, message = "Contested consent order not approved e-mail sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendContestedConsentOrderNotApprovedEmail(
         @RequestBody CallbackRequest callbackRequest) {
         validateCaseData(callbackRequest);
@@ -271,11 +262,10 @@ public class NotificationsController extends BaseController {
     }
 
     @PostMapping(value = "/general-order-raised", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send e-mail for general order raised.")
+    @ApiOperation(value = "send e-mail for general order raised.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "General order raised e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
+        @ApiResponse(code = 204, message = "General order raised e-mail sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendGeneralOrderRaisedEmail(
         @RequestBody CallbackRequest callbackRequest) {
 
@@ -318,11 +308,10 @@ public class NotificationsController extends BaseController {
     }
 
     @PostMapping(value = "/consent-order-available", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send e-mail for Consent order available.")
+    @ApiOperation(value = "send e-mail for Consent order available.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Consent order available e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
+        @ApiResponse(code = 204, message = "Consent order available e-mail sent successfully",
+            response = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendConsentOrderAvailableEmail(
         @RequestBody String source) {
 
@@ -351,11 +340,10 @@ public class NotificationsController extends BaseController {
     }
 
     @PostMapping(value = "/prepare-for-hearing", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send e-mail for 'Prepare for Hearing'.")
+    @ApiOperation(value = "send e-mail for 'Prepare for Hearing'.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "'Prepare for Hearing' e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
+        @ApiResponse(code = 204, message = "'Prepare for Hearing' e-mail sent successfully",
+            response = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendPrepareForHearingEmail(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @RequestBody String source) {
@@ -396,11 +384,10 @@ public class NotificationsController extends BaseController {
     }
 
     @PostMapping(value = "/prepare-for-hearing-order-sent", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send e-mail for 'Prepare for Hearing (after order sent)'.")
+    @ApiOperation(value = "send e-mail for 'Prepare for Hearing (after order sent)'.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "'Prepare for Hearing (after send order)' e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
+        @ApiResponse(code = 204, message = "'Prepare for Hearing (after send order)' e-mail sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendPrepareForHearingOrderSentEmail(
         @RequestBody CallbackRequest callbackRequest) {
 
@@ -424,11 +411,10 @@ public class NotificationsController extends BaseController {
     }
 
     @PostMapping(value = "/contest-application-issued", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send e-mail for Contested 'Application Issued'.")
+    @ApiOperation(value = "send e-mail for Contested 'Application Issued'.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Consent order available e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
+        @ApiResponse(code = 204, message = "Consent order available e-mail sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendContestedApplicationIssuedEmail(
         @RequestBody CallbackRequest callbackRequest) {
         log.info("Received request to send email for Contested 'Application Issued' for Case ID: {}", callbackRequest.getCaseDetails().getId());
@@ -450,11 +436,10 @@ public class NotificationsController extends BaseController {
     }
 
     @PostMapping(value = "/draft-order", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send e-mail for Solicitor To Draft Order")
+    @ApiOperation(value = "send e-mail for Solicitor To Draft Order")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Draft Order e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
+        @ApiResponse(code = 204, message = "Draft Order e-mail sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendDraftOrderEmail(
         @RequestBody CallbackRequest callbackRequest) {
 
@@ -480,11 +465,10 @@ public class NotificationsController extends BaseController {
     }
 
     @PostMapping(value = "/general-email", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send a general email")
+    @ApiOperation(value = "send a general email")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "General e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
+        @ApiResponse(code = 204, message = "General e-mail sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendGeneralEmail(
         @RequestBody CallbackRequest callbackRequest) {
 
@@ -505,11 +489,10 @@ public class NotificationsController extends BaseController {
     }
 
     @PostMapping(value = "/manual-payment", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send a manual payment letter")
+    @ApiOperation(value = "send a manual payment letter")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Manual Payment letter sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
+        @ApiResponse(code = 204, message = "Manual Payment letter sent successfully",
+            response = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendManualPaymentPaperNotification(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @RequestBody String source) {
@@ -527,11 +510,10 @@ public class NotificationsController extends BaseController {
     }
 
     @PostMapping(value = "/general-application-refer-to-judge", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send general application refer to judge email")
+    @ApiOperation(value = "send general application refer to judge email")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "General application refer to judge email sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
+        @ApiResponse(code = 204, message = "General application refer to judge email sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendGeneralApplicationReferToJudgeEmail(
         @RequestBody CallbackRequest callbackRequest) {
         log.info("Received request to send general application refer to judge email for Case ID: {}", callbackRequest.getCaseDetails().getId());
@@ -544,11 +526,10 @@ public class NotificationsController extends BaseController {
     }
 
     @PostMapping(value = "/general-application-outcome", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send general application outcome email")
+    @ApiOperation(value = "send general application outcome email")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "General Application Outcome email sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
+        @ApiResponse(code = 204, message = "General Application Outcome email sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendGeneralApplicationOutcomeEmail(
         @RequestBody CallbackRequest callbackRequest) throws IOException {
         log.info("Received request to send General Application Outcome email for Case ID: {}", callbackRequest.getCaseDetails().getId());
@@ -561,11 +542,10 @@ public class NotificationsController extends BaseController {
     }
 
     @PostMapping(value = "/consent-order-not-approved-sent", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send consent order not approved sent email")
+    @ApiOperation(value = "send consent order not approved sent email")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Consent order not approved sent email sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
+        @ApiResponse(code = 204, message = "Consent order not approved sent email sent successfully",
+            response = SubmittedCallbackResponse.class)})
     public ResponseEntity<SubmittedCallbackResponse> sendConsentOrderNotApprovedSentEmail(
         @RequestBody CallbackRequest callbackRequest) {
         validateCaseData(callbackRequest);
@@ -589,11 +569,10 @@ public class NotificationsController extends BaseController {
     }
 
     @PostMapping(value = "/transfer-to-local-court", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send a transfer to local courts email")
+    @ApiOperation(value = "send a transfer to local courts email")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Transfer to Local Courts e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
+        @ApiResponse(code = 204, message = "Transfer to Local Courts e-mail sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendTransferCourtsEmail(
         @RequestBody CallbackRequest callbackRequest) {
 
@@ -613,11 +592,10 @@ public class NotificationsController extends BaseController {
     }
 
     @PostMapping(value = "/prepare-for-interim-hearing", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send general application refer to judge email")
+    @ApiOperation(value = "send general application refer to judge email")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "General application refer to judge email sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
+        @ApiResponse(code = 204, message = "General application refer to judge email sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendInterimHearingNotification(
         @RequestBody CallbackRequest callbackRequest) {
         log.info("Received request to send general application refer to judge email for Case ID: {}", callbackRequest.getCaseDetails().getId());
@@ -641,11 +619,10 @@ public class NotificationsController extends BaseController {
 
 
     @PostMapping(value = "/notice-of-change", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "Send a notice of change to the Solicitor email and a letter to the organization.")
+    @ApiOperation(value = "Send a notice of change to the Solicitor email and a letter to the organization.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Notice of change e-mail and letter sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
+        @ApiResponse(code = 204, message = "Notice of change e-mail and letter sent successfully",
+            response = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendNoticeOfChangeNotifications(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @RequestBody String source) {
@@ -666,11 +643,10 @@ public class NotificationsController extends BaseController {
     }
 
     @PostMapping(value = "/notice-of-change/caseworker", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "Send a notice of change to the Solicitor email and a letter to the organization.")
+    @ApiOperation(value = "Send a notice of change to the Solicitor email and a letter to the organization.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Notice of change e-mail and letter sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
+        @ApiResponse(code = 204, message = "Notice of change e-mail and letter sent successfully",
+            response = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendNoticeOfChangeNotificationsCaseworker(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @RequestBody String source) {
@@ -695,12 +671,10 @@ public class NotificationsController extends BaseController {
     }
 
     @PostMapping(value = "/update-frc", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "Send FRC change update notifications")
+    @ApiOperation(value = "Send FRC change update notifications")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Update FRC information notificatons sent successfully",
-            content = {@Content(mediaType = "application/json",
-                schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
+        @ApiResponse(code = 204, message = "Update FRC information notificatons sent successfully",
+            response = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class)})
     ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendUpdateFrcNotifications(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @RequestBody String source) throws JsonProcessingException {

@@ -40,6 +40,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -294,6 +296,27 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
 
         assertThat(capturedDetails.getCaseData().getLatestDraftHearingOrder(), is(nullValue()));
     }
+    @Test
+    public void givenAdditionalDocumentsToBeStored_whenCreateAndStoreAdditionalHearingDocumentsFromApprovedOrder_thenStore() {
+        CaseDocument expectedDocument = CaseDocument.builder().documentBinaryUrl("docBin").documentFilename("docFilename")
+            .documentUrl("docUrl").build();
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(expectedDocument);
+        Map<String, Object> caseData = baseCaseData();
+        List<HearingOrderCollectionData> hearingOrderCollectionData = buildHearingOrderCollectionData();
+        caseData.put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
+        CaseDetails caseDetails = CaseDetails
+            .builder()
+            .id(1234567890L)
+            .data(caseData)
+            .build();
+
+        additionalHearingDocumentService.createAndStoreAdditionalHearingDocumentsFromApprovedOrder(AUTH_TOKEN, caseDetails);
+        assertTrue(caseDetails.getData().containsKey(LATEST_DRAFT_HEARING_ORDER));
+        CaseDocument actualDocument = mapper.convertValue(caseDetails.getData().get(LATEST_DRAFT_HEARING_ORDER),
+            CaseDocument.class);
+        assertEquals(expectedDocument, actualDocument);
+    }
+
 
 
     private FinremCaseData baseCaseData() {

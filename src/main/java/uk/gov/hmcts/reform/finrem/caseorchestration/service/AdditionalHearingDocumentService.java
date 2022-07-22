@@ -138,4 +138,35 @@ public class AdditionalHearingDocumentService {
 
         return caseDetailsCopy;
     }
+
+    private void convertHearingOrderCollectionDocumentsToPdf(HearingOrderCollectionData element,
+                                                             String authorisationToken) {
+        CaseDocument pdfApprovedOrder = genericDocumentService.convertDocumentIfNotPdfAlready(
+            element.getHearingOrderDocuments().getUploadDraftDocument(), authorisationToken);
+        element.getHearingOrderDocuments().setUploadDraftDocument(pdfApprovedOrder);
+    }
+
+    public void createAndStoreAdditionalHearingDocumentsFromApprovedOrder(String authorisationToken, CaseDetails caseDetails) {
+        List<HearingOrderCollectionData> hearingOrderCollectionData = documentHelper.getHearingOrderDocuments(caseDetails.getData());
+
+        if (hearingOrderCollectionHasEntries(hearingOrderCollectionData)) {
+            populateLatestDraftHearingOrderWithLatestEntry(caseDetails, hearingOrderCollectionData, authorisationToken);
+        }
+    }
+
+    private boolean hearingOrderCollectionHasEntries(List<HearingOrderCollectionData> hearingOrderCollectionData) {
+        return hearingOrderCollectionData != null
+            && !hearingOrderCollectionData.isEmpty()
+            && hearingOrderCollectionData.get(hearingOrderCollectionData.size() - 1).getHearingOrderDocuments() != null;
+    }
+
+    private void populateLatestDraftHearingOrderWithLatestEntry(CaseDetails caseDetails,
+                                                                List<HearingOrderCollectionData> hearingOrderCollectionData,
+                                                                String authorisationToken) {
+        hearingOrderCollectionData.forEach(element -> convertHearingOrderCollectionDocumentsToPdf(element, authorisationToken));
+        caseDetails.getData().put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
+        caseDetails.getData().put(LATEST_DRAFT_HEARING_ORDER,
+            hearingOrderCollectionData.get(hearingOrderCollectionData.size() - 1)
+                .getHearingOrderDocuments().getUploadDraftDocument());
+    }
 }

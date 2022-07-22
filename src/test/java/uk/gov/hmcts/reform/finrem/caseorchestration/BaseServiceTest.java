@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +18,15 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.NottinghamCourt;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Region;
 import uk.gov.hmcts.reform.finrem.ccd.domain.RegionMidlandsFrc;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
@@ -63,6 +67,7 @@ public abstract class BaseServiceTest extends BaseTest {
     public static final String CASE_DATA = "case_data";
 
     @Autowired protected ObjectMapper mapper;
+    private static final String TEST_JSON = "/fixtures/contested/interim-hearing-two-collection.json";
 
     protected CaseDetails buildCaseDetails() {
         Map<String, Object> caseData = new HashMap<>();
@@ -246,5 +251,18 @@ public abstract class BaseServiceTest extends BaseTest {
         Map<String, Object> caseDetails = (Map) placeholdersMap.get(CASE_DETAILS);
         Map<String, Object> data = (Map) caseDetails.get(CASE_DATA);
         return data;
+    }
+
+    protected CallbackRequest buildInterimHearingCallbackRequest()  {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(TEST_JSON)) {
+            return mapper.readValue(resourceAsStream, CallbackRequest.class);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected List<InterimHearingData> convertToInterimHearingDataList(Object object) {
+        return mapper.convertValue(object, new TypeReference<>() {
+        });
     }
 }

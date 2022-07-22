@@ -138,6 +138,33 @@ public class NotificationRequestMapper {
     @Deprecated
     private NotificationRequest buildNotificationRequest(CaseDetails caseDetails,
                                                          SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
+        NotificationRequest notificationRequest = getNotificationCoreData(caseDetails, solicitorCaseDataKeysWrapper);
+
+        if (caseDataService.isContestedApplication(caseDetails)) {
+            String selectedCourt = ContestedCourtHelper.getSelectedFrc(caseDetails);
+            notificationRequest.setSelectedCourt(selectedCourt);
+
+            log.info("selectedCourt is {} for case ID: {}", selectedCourt, notificationRequest.getCaseReferenceNumber());
+        }
+
+        return notificationRequest;
+    }
+
+    private NotificationRequest buildNotificationRequest(CaseDetails caseDetails,
+                                                         SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper,
+                                                         Map<String, Object> interimHearingData) {
+
+        NotificationRequest notificationRequest = getNotificationCoreData(caseDetails, solicitorCaseDataKeysWrapper);
+
+        String selectedCourt = ContestedCourtHelper.getSelectedInterimHearingFrc(interimHearingData);
+        notificationRequest.setSelectedCourt(selectedCourt);
+
+        log.info("selectedCourt is {} for case ID: {}", selectedCourt, notificationRequest.getCaseReferenceNumber());
+
+        return notificationRequest;
+    }
+
+    private NotificationRequest getNotificationCoreData(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
         NotificationRequest notificationRequest = new NotificationRequest();
         Map<String, Object> mapOfCaseData = caseDetails.getData();
 
@@ -150,13 +177,6 @@ public class NotificationRequestMapper {
         notificationRequest.setGeneralEmailBody(Objects.toString(mapOfCaseData.get(GENERAL_EMAIL_BODY)));
         notificationRequest.setCaseType(getCaseType(caseDetails));
         notificationRequest.setPhoneOpeningHours(CTSC_OPENING_HOURS);
-
-        if (caseDataService.isContestedApplication(caseDetails)) {
-            String selectedCourt = ContestedCourtHelper.getSelectedFrc(caseDetails);
-            notificationRequest.setSelectedCourt(selectedCourt);
-
-            log.info("selectedCourt is {} for case ID: {}", selectedCourt, notificationRequest.getCaseReferenceNumber());
-        }
 
         return notificationRequest;
     }
