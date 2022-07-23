@@ -53,6 +53,7 @@ public class OrchestrationConstants {
     public static final String CTSC_OPENING_HOURS = "from 8am to 6pm, Monday to Friday";
 
     // VARIATION ORDER RELATED
+    public static final String VARIATION_ORDER = "Variation Order";
     public static final String CV_ORDER_CAMELCASE_LABEL_FIELD = "consentVariationOrderLabelC";
     public static final String VARIATION_ORDER_CAMELCASE_LABEL_VALUE = "Consent / Variation Order";
     public static final String CONSENT_ORDER_CAMELCASE_LABEL_VALUE = "Consent Order";
