@@ -1,8 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.core.Is;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,12 +18,12 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.InterimHearingCollection;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -33,7 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertFalse;
@@ -52,10 +49,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_JUDGE_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finremCaseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
 
 public class NotificationServiceTest extends BaseServiceTest {
@@ -95,6 +92,8 @@ public class NotificationServiceTest extends BaseServiceTest {
     private static final String ERROR_500_MESSAGE = "500 Internal Server Error";
     private static final String TEST_USER_EMAIL = "fr_applicant_sol@sharklasers.com";
     private static final String NOTTINGHAM_FRC_EMAIL = "FRCNottingham@justice.gov.uk";
+
+    private static final String TEST_JSON = "/fixtures/contested/interim-hearing-two-collection.json";
 
     @Autowired private NotificationService notificationService;
     @Autowired private RestTemplate restTemplate;
@@ -1156,55 +1155,41 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void sendInterimHearingNotificationEmailToApplicantSolicitor() {
-        CallbackRequest callbackRequest = buildInterimHearingCallbackRequest();
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+    public void sendInterimHearingNotificationEmailToApplicantSolicitor() throws IOException {
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource(TEST_JSON), mapper);
+        FinremCaseData caseData = caseDetails.getCaseData();
 
-        List<InterimHearingData> interimHearingList = Optional.ofNullable(caseData.get(INTERIM_HEARING_COLLECTION))
-            .map(this::convertToInterimHearingDataList).orElse(Collections.emptyList());
-
-        List<InterimHearingItem> interimHearingItems
-            = interimHearingList.stream().map(InterimHearingData::getValue).collect(Collectors.toList());
-
-        List<Map<String, Object>> interimDataMap = interimHearingItems.stream()
-            .map(obj -> new ObjectMapper().convertValue(obj, new TypeReference<Map<String, Object>>() {
-            })).collect(Collectors.toList());
+        List<InterimHearingCollection> interimHearingList = Optional.ofNullable(caseData.getInterimWrapper().getInterimHearings())
+            .orElse(Collections.emptyList());
 
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_INTERIM_HEARING))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
 
-        interimDataMap.forEach(data -> {
-            notificationService.sendInterimHearingNotificationEmailToApplicantSolicitor(callbackRequest.getCaseDetails(), data);
-            verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails(), data);
+        interimHearingList.forEach(data -> {
+            notificationService.sendInterimHearingNotificationEmailToApplicantSolicitor(caseDetails, data);
+            verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(caseDetails, data);
         });
 
 
     }
 
     @Test
-    public void sendInterimHearingNotificationEmailToRespondentSolicitor() {
-        CallbackRequest callbackRequest = buildInterimHearingCallbackRequest();
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+    public void sendInterimHearingNotificationEmailToRespondentSolicitor() throws IOException {
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource(TEST_JSON), mapper);
+        FinremCaseData caseData = caseDetails.getCaseData();
 
-        List<InterimHearingData> interimHearingList = Optional.ofNullable(caseData.get(INTERIM_HEARING_COLLECTION))
-            .map(this::convertToInterimHearingDataList).orElse(Collections.emptyList());
-
-        List<InterimHearingItem> interimHearingItems
-            = interimHearingList.stream().map(InterimHearingData::getValue).collect(Collectors.toList());
-
-        List<Map<String, Object>> interimDataMap = interimHearingItems.stream()
-            .map(obj -> new ObjectMapper().convertValue(obj, new TypeReference<Map<String, Object>>() {
-            })).collect(Collectors.toList());
+        List<InterimHearingCollection> interimHearingList = Optional.ofNullable(caseData.getInterimWrapper().getInterimHearings())
+            .orElse(Collections.emptyList());
 
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_INTERIM_HEARING))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
 
 
-        interimDataMap.forEach(data -> {
-            notificationService.sendInterimHearingNotificationEmailToRespondentSolicitor(callbackRequest.getCaseDetails(), data);
-            verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails(), data);
+        interimHearingList.forEach(data -> {
+            notificationService.sendInterimHearingNotificationEmailToRespondentSolicitor(caseDetails, data);
+            verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(caseDetails, data);
         });
     }
 }

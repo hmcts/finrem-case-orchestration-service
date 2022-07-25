@@ -1,63 +1,31 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.InterimHearingHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocumentsData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.InterimHearingBulkPrintDocumentsData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.InterimHearingCollection;
+import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
+import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.InterimRegionWrapper;
+import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.InterimWrapper;
 
-import java.io.InputStream;
+import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_ADDITIONAL_INFO;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_BEDFORDSHIRE_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_BIRMINGHAM_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_BRISTOL_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_CFC_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_CLEAVELAND_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DEVON_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DORSET_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_HUMBER_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_KENT_SURREY_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_LANCASHIRE_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_LIVERPOOL_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_LONDON_FRC_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_MANCHESTER_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_MIDLANDS_FRC_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_NEWPORT_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_NORTHEAST_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_NORTHWALES_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_NORTHWEST_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_NOTTINGHAM_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_NWYORKSHIRE_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_PROMPT_FOR_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_REGION_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_SOUTHEAST_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_SOUTHWEST_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_SWANSEA_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_THAMESVALLEY_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_TIME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_TIME_ESTIMATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_TYPE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_UPLOADED_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_WALES_FRC_COURT_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finremCaseDetailsFromResource;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
 
 public class InterimHearingServiceTest extends BaseServiceTest  {
 
@@ -71,10 +39,7 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
     private NotificationService notificationService;
     @MockBean
     private CaseDataService caseDataService;
-    @Autowired
-    private InterimHearingHelper interimHearingHelper;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
     private static final String AUTH_TOKEN = "tokien:)";
     private static final String BEFORE_MIGRATION_TEST_JSON =
         "/fixtures/contested/interim-hearing-one-collection.json";
@@ -89,20 +54,20 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
 
 
     @Test
-    public void givenContestedPaperCaseWithBeforeMigrationToHearingCollection_WhenModifiedDuringMigration_ThenItShouldSendToBulkPrint() {
-        CaseDetails caseDetails = buildCaseDetails(BEFORE_MIGRATION_TEST_JSON);
-        CaseDetails caseDetailsBefore = buildCaseDetails(MODIFIED_DURING_MIGRATION_TEST_JSON);
+    public void givenContestedPaperCaseWithBeforeMigrationToHearingCollection_WhenModifiedDuringMigration_ThenItShouldSendToBulkPrint() throws IOException {
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource(BEFORE_MIGRATION_TEST_JSON), mapper);
+        FinremCaseDetails caseDetailsBefore = finremCaseDetailsFromResource(getResource(MODIFIED_DURING_MIGRATION_TEST_JSON), mapper);
 
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(newDocument());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(isA(Document.class), any())).thenReturn(newDocument());
 
         interimHearingService.submitInterimHearing(caseDetails,caseDetailsBefore, AUTH_TOKEN);
 
         verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
         verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
 
-        Map<String, Object> caseData = caseDetails.getData();
-        List<InterimHearingData> interimHearingList = interimHearingHelper.isThereAnExistingInterimHearing(caseData);
+        FinremCaseData caseData = caseDetails.getCaseData();
+        List<InterimHearingCollection> interimHearingList = caseData.getInterimWrapper().getInterimHearings();
 
         assertEquals("2000-10-10", interimHearingList.get(0).getValue().getInterimHearingDate());
         assertEquals("15:00", interimHearingList.get(0).getValue().getInterimHearingTime());
@@ -115,20 +80,20 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
     }
 
     @Test
-    public void givenContestedPaperCaseWithTwoHearing_WhenExistingHearingModified_ThenItShouldSendBothToBulkPrint() {
-        CaseDetails caseDetails = buildCaseDetails(ONE_MIGRATED_AND_ONE_ADDED_HEARING_JSON);
-        CaseDetails caseDetailsBefore = buildCaseDetails(ONE_MIGRATED_MODIFIED_AND_ONE_ADDED_HEARING_JSON);
+    public void givenContestedPaperCaseWithTwoHearing_WhenExistingHearingModified_ThenItShouldSendBothToBulkPrint() throws IOException {
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource(ONE_MIGRATED_AND_ONE_ADDED_HEARING_JSON), mapper);
+        FinremCaseDetails caseDetailsBefore = finremCaseDetailsFromResource(getResource(ONE_MIGRATED_MODIFIED_AND_ONE_ADDED_HEARING_JSON), mapper);
 
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(newDocument());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(isA(Document.class), any())).thenReturn(newDocument());
 
         interimHearingService.submitInterimHearing(caseDetails,caseDetailsBefore, AUTH_TOKEN);
 
         verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
         verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
 
-        Map<String, Object> caseData = caseDetails.getData();
-        List<InterimHearingData> interimHearingList = interimHearingHelper.isThereAnExistingInterimHearing(caseData);
+        FinremCaseData caseData = caseDetails.getCaseData();
+        List<InterimHearingCollection> interimHearingList = caseData.getInterimWrapper().getInterimHearings();
 
         assertEquals("2000-10-10", interimHearingList.get(0).getValue().getInterimHearingDate());
         assertEquals("2040-10-10", interimHearingList.get(1).getValue().getInterimHearingDate());
@@ -141,20 +106,20 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
     }
 
     @Test
-    public void givenContestedPaperCase_WhenOneNewHearingAddedToExistingCase_ThenItShouldSendOnlyNewHEaringDetailsToBulkPrint() {
-        CaseDetails caseDetails = buildCaseDetails(ONE_MIGRATED_AND_ONE_ADDED_HEARING_JSON);
-        CaseDetails caseDetailsBefore = buildCaseDetails(ONE_MIGRATED_AND_ONE_ADDED_HEARING_JSON);
+    public void givenContestedPaperCase_WhenOneNewHearingAddedToExistingCase_ThenItShouldSendOnlyNewHEaringDetailsToBulkPrint() throws IOException {
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource(ONE_MIGRATED_AND_ONE_ADDED_HEARING_JSON), mapper);
+        FinremCaseDetails caseDetailsBefore = finremCaseDetailsFromResource(getResource(ONE_MIGRATED_AND_ONE_ADDED_HEARING_JSON), mapper);
 
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(newDocument());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(isA(Document.class), any())).thenReturn(newDocument());
 
         interimHearingService.submitInterimHearing(caseDetails,caseDetailsBefore, AUTH_TOKEN);
 
         verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
         verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
 
-        Map<String, Object> caseData = caseDetails.getData();
-        List<InterimHearingData> interimHearingList = interimHearingHelper.isThereAnExistingInterimHearing(caseData);
+        FinremCaseData caseData = caseDetails.getCaseData();
+        List<InterimHearingCollection> interimHearingList = caseData.getInterimWrapper().getInterimHearings();
 
         assertEquals("2000-10-10", interimHearingList.get(0).getValue().getInterimHearingDate());
         assertEquals("2040-10-10", interimHearingList.get(1).getValue().getInterimHearingDate());
@@ -163,48 +128,48 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
     }
 
     @Test
-    public void givenContestedPaperCase_WhenMultipleHearingAdded_ThenItShouldSendAllToBulkPrint() {
-        CaseDetails caseDetails = buildCaseDetails(TEST_NEW_JSON);
-        CaseDetails caseDetailsBefore = buildCaseDetails(TEST_NEW_JSON);
+    public void givenContestedPaperCase_WhenMultipleHearingAdded_ThenItShouldSendAllToBulkPrint() throws IOException {
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource(TEST_NEW_JSON), mapper);
+        FinremCaseDetails caseDetailsBefore = finremCaseDetailsFromResource(getResource(TEST_NEW_JSON), mapper);
 
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(newDocument());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(isA(Document.class), any())).thenReturn(newDocument());
 
         interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
         verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
         verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
 
-        List<InterimHearingData> interimHearingList = interimHearingHelper.isThereAnExistingInterimHearing(caseDetails.getData());
+        List<InterimHearingCollection> interimHearingList = caseDetails.getCaseData().getInterimWrapper().getInterimHearings();
 
         assertEquals("2010-10-10", interimHearingList.get(0).getValue().getInterimHearingDate());
         assertEquals("2020-10-10", interimHearingList.get(1).getValue().getInterimHearingDate());
         assertEquals("2030-10-10", interimHearingList.get(2).getValue().getInterimHearingDate());
 
         List<InterimHearingBulkPrintDocumentsData> bulkPrintDocumentsList =
-            interimHearingHelper.getInterimHearingBulkPrintDocumentList(caseDetails.getData());
+            caseDetails.getCaseData().getInterimWrapper().getInterimHearingDocuments();
 
         assertEquals(3, bulkPrintDocumentsList.size());
     }
 
     @Test
-    public void givenContestedMultipleHearing_WhenNoConsentToEmail_ThenItShouldSendAllToBulkPrint() {
-        CaseDetails caseDetails = buildCaseDetails(TEST_NEW_JSON);
+    public void givenContestedMultipleHearing_WhenNoConsentToEmail_ThenItShouldSendAllToBulkPrint() throws IOException {
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource(TEST_NEW_JSON), mapper);
 
-        caseDetails.getData().put("paperApplication", "No");
-        caseDetails.getData().put("applicantSolicitorConsentForEmails", "No");
-        caseDetails.getData().put("respondentRepresented", "No");
+        caseDetails.getCaseData().setPaperApplication(YesOrNo.NO);
+        caseDetails.getCaseData().getContactDetailsWrapper().setApplicantSolicitorConsentForEmails(YesOrNo.NO);
+        caseDetails.getCaseData().getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.NO);
 
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(newDocument());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(isA(Document.class), any())).thenReturn(newDocument());
 
-        CaseDetails caseDetailsBefore = buildCaseDetails(TEST_NEW_JSON);
+        FinremCaseDetails caseDetailsBefore = finremCaseDetailsFromResource(getResource(TEST_NEW_JSON), mapper);
         interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
         verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
         verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
 
-        List<InterimHearingData> interimHearingList = interimHearingHelper.isThereAnExistingInterimHearing(caseDetails.getData());
+        List<InterimHearingCollection> interimHearingList = caseDetails.getCaseData().getInterimWrapper().getInterimHearings();
 
         assertEquals("2010-10-10", interimHearingList.get(0).getValue().getInterimHearingDate());
         assertEquals("2020-10-10", interimHearingList.get(1).getValue().getInterimHearingDate());
@@ -213,94 +178,52 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
 
 
     @Test
-    public void givenContestedPaperCase_WhenPaperCase_ThenItShouldNotSendNotificaton() {
-        CaseDetails caseDetails = buildCaseDetails(TEST_NEW_JSON);
-        CaseDetails caseDetailsBefore = buildCaseDetails(TEST_NEW_JSON);
+    public void givenContestedPaperCase_WhenPaperCase_ThenItShouldNotSendNotificaton() throws IOException {
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource(TEST_NEW_JSON), mapper);
+        FinremCaseDetails caseDetailsBefore = finremCaseDetailsFromResource(getResource(TEST_NEW_JSON), mapper);
 
-        caseDetails.getData().put("paperApplication", "Yes");
-
-        when(caseDataService.isPaperApplication(any())).thenReturn(true);
+        caseDetails.getCaseData().setPaperApplication(YesOrNo.YES);
 
         interimHearingService.sendNotification(caseDetails, caseDetailsBefore);
 
-        verify(caseDataService).isPaperApplication(any());
         verify(caseDataService, never()).isApplicantSolicitorAgreeToReceiveEmails(any());
 
-        verify(notificationService, never()).shouldEmailRespondentSolicitor(any());
-        verify(notificationService, never()).sendInterimHearingNotificationEmailToApplicantSolicitor(any(), anyMap());
-        verify(notificationService, never()).sendInterimHearingNotificationEmailToRespondentSolicitor(any(), anyMap());
+        verify(notificationService, never()).shouldEmailRespondentSolicitor(isA(FinremCaseData.class));
+        verify(notificationService, never()).sendInterimHearingNotificationEmailToApplicantSolicitor(any(),
+            isA(InterimHearingCollection.class));
+        verify(notificationService, never()).sendInterimHearingNotificationEmailToRespondentSolicitor(any(),
+            isA(InterimHearingCollection.class));
     }
 
     @Test
-    public void givenContestedNotPaperCase_WhenPaperCase_ThenItShouldSendNotificaton() {
-        CaseDetails caseDetails = buildCaseDetails(TEST_NEW_JSON);
-        caseDetails.getData().put("paperApplication", "No");
+    public void givenContestedNotPaperCase_WhenPaperCase_ThenItShouldSendNotification() throws IOException {
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource(TEST_NEW_JSON), mapper);
+        caseDetails.getCaseData().setPaperApplication(YesOrNo.NO);
+        caseDetails.getCaseData().getContactDetailsWrapper().setApplicantSolicitorConsentForEmails(YesOrNo.YES);
 
-        when(caseDataService.isPaperApplication(any())).thenReturn(false);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(isA(FinremCaseData.class))).thenReturn(true);
 
-        CaseDetails caseDetailsBefore = buildCaseDetails(TEST_NEW_JSON);
+        FinremCaseDetails caseDetailsBefore = finremCaseDetailsFromResource(getResource(TEST_NEW_JSON), mapper);
         interimHearingService.sendNotification(caseDetails, caseDetailsBefore);
 
-        verify(caseDataService).isPaperApplication(any());
-
-        verify(caseDataService, times(3)).isApplicantSolicitorAgreeToReceiveEmails(any());
-        verify(notificationService, times(3)).shouldEmailRespondentSolicitor(any());
-        verify(notificationService, times(3)).sendInterimHearingNotificationEmailToApplicantSolicitor(any(), anyMap());
-        verify(notificationService,times(3)).sendInterimHearingNotificationEmailToRespondentSolicitor(any(), anyMap());
+        verify(notificationService, times(3)).shouldEmailRespondentSolicitor(isA(FinremCaseData.class));
+        verify(notificationService, times(3)).sendInterimHearingNotificationEmailToApplicantSolicitor(any(),
+            isA(InterimHearingCollection.class));
+        verify(notificationService,times(3)).sendInterimHearingNotificationEmailToRespondentSolicitor(any(),
+            isA(InterimHearingCollection.class));
     }
 
-    private CaseDetails buildCaseDetails(String path)  {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(path)) {
-            return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private CaseDetails buildCaseDetailsBefore(String path)  {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(path)) {
-            return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetailsBefore();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void verifyNonCollectionData(Map<String, Object> data) {
-        assertNull(data.get(INTERIM_HEARING_TYPE));
-        assertNull(data.get(INTERIM_HEARING_DATE));
-        assertNull(data.get(INTERIM_HEARING_TIME));
-        assertNull(data.get(INTERIM_HEARING_TIME_ESTIMATE));
-        assertNull(data.get(INTERIM_HEARING_REGION_LIST));
-        assertNull(data.get(INTERIM_HEARING_CFC_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_WALES_FRC_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_LONDON_FRC_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_DEVON_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_DORSET_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_HUMBER_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_MIDLANDS_FRC_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_BRISTOL_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_NEWPORT_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_NORTHEAST_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_NORTHWEST_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_SOUTHEAST_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_SOUTHWEST_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_SWANSEA_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_LIVERPOOL_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_BIRMINGHAM_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_CLEAVELAND_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_KENT_SURREY_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_LANCASHIRE_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_MANCHESTER_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_NORTHWALES_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_NOTTINGHAM_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_NWYORKSHIRE_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_BEDFORDSHIRE_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_THAMESVALLEY_COURT_LIST));
-        assertNull(data.get(INTERIM_HEARING_ADDITIONAL_INFO));
-        assertNull(data.get(INTERIM_HEARING_PROMPT_FOR_DOCUMENT));
-        assertNull(data.get(INTERIM_HEARING_UPLOADED_DOCUMENT));
-        assertNull(data.get(INTERIM_HEARING_DOCUMENT));
+    private void verifyNonCollectionData(FinremCaseData data) {
+        InterimWrapper interimData = data.getInterimWrapper();
+        InterimRegionWrapper interimRegionData = data.getRegionWrapper().getInterimRegionWrapper();
+        assertNull(interimData.getInterimHearingType());
+        assertNull(interimData.getInterimHearingDate());
+        assertNull(interimData.getInterimHearingTime());
+        assertNull(interimData.getInterimTimeEstimate());
+        assertNull(interimData.getInterimAdditionalInformationAboutHearing());
+        assertNull(interimData.getInterimUploadAdditionalDocument());
+        assertNull(interimData.getInterimPromptForAnyDocument());
+        assertNull(interimData.getInterimHearingDirectionsDocument());
+        assertEquals(interimRegionData, new InterimRegionWrapper());
     }
 }

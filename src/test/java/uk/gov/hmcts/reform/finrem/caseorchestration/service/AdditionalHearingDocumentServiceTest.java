@@ -41,8 +41,8 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -298,22 +298,20 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
     }
     @Test
     public void givenAdditionalDocumentsToBeStored_whenCreateAndStoreAdditionalHearingDocumentsFromApprovedOrder_thenStore() {
-        CaseDocument expectedDocument = CaseDocument.builder().documentBinaryUrl("docBin").documentFilename("docFilename")
-            .documentUrl("docUrl").build();
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(expectedDocument);
-        Map<String, Object> caseData = baseCaseData();
-        List<HearingOrderCollectionData> hearingOrderCollectionData = buildHearingOrderCollectionData();
-        caseData.put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
-        CaseDetails caseDetails = CaseDetails
+        Document expectedDocument = Document.builder().binaryUrl("docBin").filename("docFilename")
+            .url("docUrl").build();
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(isA(Document.class), any())).thenReturn(expectedDocument);
+        FinremCaseData caseData = baseCaseData();
+        caseData.setUploadHearingOrder(buildHearingOrderCollectionData());
+        FinremCaseDetails caseDetails = FinremCaseDetails
             .builder()
             .id(1234567890L)
-            .data(caseData)
+            .caseData(caseData)
             .build();
 
         additionalHearingDocumentService.createAndStoreAdditionalHearingDocumentsFromApprovedOrder(AUTH_TOKEN, caseDetails);
-        assertTrue(caseDetails.getData().containsKey(LATEST_DRAFT_HEARING_ORDER));
-        CaseDocument actualDocument = mapper.convertValue(caseDetails.getData().get(LATEST_DRAFT_HEARING_ORDER),
-            CaseDocument.class);
+        assertThat(caseData.getLatestDraftHearingOrder(), is(notNullValue()));
+        Document actualDocument = caseData.getLatestDraftHearingOrder();
         assertEquals(expectedDocument, actualDocument);
     }
 
