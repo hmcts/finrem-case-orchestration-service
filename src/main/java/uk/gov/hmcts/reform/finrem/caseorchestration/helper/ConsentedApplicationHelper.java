@@ -5,7 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -41,11 +43,12 @@ public class ConsentedApplicationHelper {
     public Boolean isVariationOrder(final Map<String, Object> caseData) {
         List<String> natureOfApplicationList = getNatureOfApplicationList(caseData);
         log.info("Nature list {}", natureOfApplicationList);
-        return (!natureOfApplicationList.isEmpty() && natureOfApplicationList.contains(VARIATION_ORDER));
+        return (!CollectionUtils.isEmpty(natureOfApplicationList) && natureOfApplicationList.contains(VARIATION_ORDER));
     }
 
     public List<String> getNatureOfApplicationList(final Map<String, Object> caseData) {
-        return convertToList(caseData.get(CONSENTED_NATURE_OF_APPLICATION));
+        Object obj = caseData.get(CONSENTED_NATURE_OF_APPLICATION);
+        return obj == null ? new ArrayList<>() : convertToList(caseData.get(CONSENTED_NATURE_OF_APPLICATION));
     }
 
     public List<String> convertToList(Object object) {

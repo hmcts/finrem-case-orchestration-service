@@ -10,6 +10,9 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CONSENT_ORDER_CAMELCASE_LABEL_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CONSENT_ORDER_LOWERCASE_LABEL_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CONSENT_OTHER_DOC_LABEL_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CV_LOWERCASE_LABEL_FIELD;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CV_ORDER_CAMELCASE_LABEL_FIELD;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CV_OTHER_DOC_LABEL_FIELD;
@@ -43,6 +46,18 @@ public class ConsentedApplicationHelperTest {
         assertEquals(CV_OTHER_DOC_LABEL_VALUE, data.get(CV_OTHER_DOC_LABEL_FIELD));
     }
 
+    @Test
+    public void givenCase_whenEmptyNatureOfApplicationIsEmpty_thenReturnEmptyList() {
+        CallbackRequest callbackRequest =  callbackRequest();
+        Map<String, Object> data = callbackRequest.getCaseDetails().getData();
+
+        ConsentedApplicationHelper helper = new ConsentedApplicationHelper();
+        helper.setConsentVariationOrderLabelField(callbackRequest.getCaseDetails().getData());
+
+        assertEquals(CONSENT_ORDER_CAMELCASE_LABEL_VALUE, data.get(CV_ORDER_CAMELCASE_LABEL_FIELD));
+        assertEquals(CONSENT_ORDER_LOWERCASE_LABEL_VALUE, data.get(CV_LOWERCASE_LABEL_FIELD));
+        assertEquals(CONSENT_OTHER_DOC_LABEL_VALUE, data.get(CV_OTHER_DOC_LABEL_FIELD));
+    }
 
     private CallbackRequest callbackRequest() {
         return CallbackRequest

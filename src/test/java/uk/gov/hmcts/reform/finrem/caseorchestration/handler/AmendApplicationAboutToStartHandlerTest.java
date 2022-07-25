@@ -103,6 +103,23 @@ public class AmendApplicationAboutToStartHandlerTest {
         assertEquals(NO_VALUE, responseData.get(CIVIL_PARTNERSHIP));
     }
 
+    @Test
+    public void givenCase_whenNatureListIsEmptyAndIntendsToIsApplyToVary_thenShouldAddToNatureList() {
+        CallbackRequest callbackRequest = callbackRequest();
+
+        Map<String, Object> data = callbackRequest.getCaseDetails().getData();
+        data.put(APPLICANT_INTENDS, "ApplyToVary");
+
+        AboutToStartOrSubmitCallbackResponse response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        final Map<String, Object> responseData = response.getData();
+        final List<String> list = helper.convertToList(responseData.get(CONSENTED_NATURE_OF_APPLICATION));
+
+        assertThat(list, hasItems(VARIATION_ORDER));
+        assertThat(list, hasSize(1));
+        assertEquals(NO_VALUE, responseData.get(CIVIL_PARTNERSHIP));
+    }
+
     private CallbackRequest callbackRequest() {
         return CallbackRequest
             .builder()
