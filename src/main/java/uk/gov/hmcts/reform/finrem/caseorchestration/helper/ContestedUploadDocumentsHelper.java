@@ -106,7 +106,8 @@ public class ContestedUploadDocumentsHelper {
             return new ArrayList<>();
         }
 
-        return mapper.convertValue(caseData.get(collection), new TypeReference<>() {});
+        return mapper.convertValue(caseData.get(collection), new TypeReference<>() {
+        });
     }
 
     private boolean isTypeValidForCorrespondence(String caseDocumentType) {
