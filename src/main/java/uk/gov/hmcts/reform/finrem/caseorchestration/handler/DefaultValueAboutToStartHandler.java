@@ -24,7 +24,6 @@ public class DefaultValueAboutToStartHandler implements CallbackHandler {
         return CallbackType.ABOUT_TO_START.equals(callbackType)
             && (CaseType.CONSENTED.equals(caseType) || CaseType.CONTESTED.equals(caseType))
             && (EventType.SOLICITOR_CREATE.equals(eventType)
-            || EventType.AMEND_APP_DETAILS.equals(eventType)
             || EventType.AMEND_CASE.equals(eventType)
             || EventType.AMEND_CONTESTED_APP_DETAILS.equals(eventType));
     }

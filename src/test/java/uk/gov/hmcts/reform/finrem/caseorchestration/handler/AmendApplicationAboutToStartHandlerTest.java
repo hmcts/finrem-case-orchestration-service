@@ -18,7 +18,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.VARIATION_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_NATURE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_INTENDS_TO;
 
@@ -79,6 +82,7 @@ public class AmendApplicationAboutToStartHandlerTest {
 
         assertThat(list, hasItems(VARIATION_ORDER));
         assertThat(list, hasSize(3));
+        assertEquals(NO_VALUE, responseData.get(CIVIL_PARTNERSHIP));
     }
 
     @Test
@@ -96,6 +100,7 @@ public class AmendApplicationAboutToStartHandlerTest {
 
         assertThat(list, hasItems("Pension document","Lump sum"));
         assertThat(list, hasSize(2));
+        assertEquals(NO_VALUE, responseData.get(CIVIL_PARTNERSHIP));
     }
 
     private CallbackRequest callbackRequest() {

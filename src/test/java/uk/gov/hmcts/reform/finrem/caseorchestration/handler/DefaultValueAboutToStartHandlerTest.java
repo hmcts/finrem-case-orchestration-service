@@ -33,13 +33,6 @@ public class DefaultValueAboutToStartHandlerTest {
     }
 
     @Test
-    public void givenConsentedCase_whenEventIsAmendApp_thenHandlerCanHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.AMEND_APP_DETAILS),
-            is(true));
-    }
-
-    @Test
     public void givenConsentedCase_whenEventIsSolCreate_thenHandlerCanHandle() {
         assertThat(handler
                 .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.SOLICITOR_CREATE),
