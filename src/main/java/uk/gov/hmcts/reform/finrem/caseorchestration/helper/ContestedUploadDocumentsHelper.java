@@ -100,7 +100,7 @@ public class ContestedUploadDocumentsHelper {
     }
 
     private List<ContestedUploadedDocumentData>
-    getDocumentCollection(Map<String, Object> caseData, String collection) {
+         getDocumentCollection(Map<String, Object> caseData, String collection) {
 
         if (StringUtils.isEmpty(caseData.get(collection))) {
             return new ArrayList<>();
@@ -537,7 +537,7 @@ public class ContestedUploadDocumentsHelper {
     }
 
     private List<ContestedUploadedDocumentData>
-    getTrialBundleUploadedList(List<ContestedUploadedDocumentData> uploadedDocuments) {
+        getTrialBundleUploadedList(List<ContestedUploadedDocumentData> uploadedDocuments) {
 
         return uploadedDocuments.stream()
             .filter(d -> isTrialBundle(d.getUploadedCaseDocument()))
