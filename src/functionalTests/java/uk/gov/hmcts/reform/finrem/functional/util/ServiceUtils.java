@@ -1,30 +1,29 @@
 package uk.gov.hmcts.reform.finrem.functional.util;
 
-import io.restassured.response.Response;
-import net.serenitybdd.rest.SerenityRest;
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.EvidenceManagementUploadService;
 
 import java.io.File;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static org.junit.Assert.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.DOCUMENT_BINARY_URL;
 
 @Component
 public class ServiceUtils {
 
-    @Value("${evidence.management.client.api}")
-    private String evidenceManagementClientBaseUrl;
+    @Autowired
+    private EvidenceManagementUploadService evidenceManagementUploadService;
 
     @Autowired
     private FunctionalTestUtils functionalTestUtils;
@@ -42,20 +41,16 @@ public class ServiceUtils {
             e.printStackTrace();
         }
 
-        Response response = SerenityRest.given()
-            .headers(functionalTestUtils.getHeader())
-            .multiPart("file", file, fileContentType)
-            .post(evidenceManagementClientBaseUrl.concat("/upload"))
-            .andReturn();
-        assertEquals(HttpStatus.OK.value(), response.statusCode());
+        MultipartFile multipartFile = new MockMultipartFile("file", "file",
+            fileContentType, file.getPath().getBytes());
+        List<FileUploadResponse> fileUploadResponse =
+            evidenceManagementUploadService.upload(Collections.singletonList(multipartFile),
+                functionalTestUtils.getAuthToken(), "");
 
-        JSONArray responseJson = new JSONArray(response.body().asString());
-
-        JSONObject fileUploadResponse = (JSONObject) responseJson.get(0);
         Map<String, String> uploadedDocument = new HashMap<>();
-        uploadedDocument.put("document_url", fileUploadResponse.get("fileUrl").toString());
-        uploadedDocument.put("document_filename", fileUploadResponse.get("fileName").toString());
-        uploadedDocument.put(DOCUMENT_BINARY_URL, fileUploadResponse.get("fileUrl").toString() + "/binary");
+        uploadedDocument.put("document_url", fileUploadResponse.get(0).getFileUrl());
+        uploadedDocument.put("document_filename",fileUploadResponse.get(0).getFileName());
+        uploadedDocument.put(DOCUMENT_BINARY_URL, fileUploadResponse.get(0).getFileUrl() + "/binary");
 
         return uploadedDocument;
     }

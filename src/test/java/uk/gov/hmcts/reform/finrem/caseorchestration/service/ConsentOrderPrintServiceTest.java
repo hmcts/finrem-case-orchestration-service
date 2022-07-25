@@ -15,7 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocu
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -246,11 +246,9 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         when(consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(caseDetails, AUTH_TOKEN))
             .thenReturn(bulkPrintDocumentList());
         when(consentOrderNotApprovedDocumentService.notApprovedConsentOrder(any())).thenReturn(singletonList(caseDocument));
-        Date now = new Date();
-        Date beforeNow = new Date(now.getTime() - 1);
         when(evidenceManagementAuditService.audit(any(), eq(AUTH_TOKEN))).thenReturn(asList(
-            FileUploadResponse.builder().modifiedOn(now.toString()).build(),
-            FileUploadResponse.builder().modifiedOn(beforeNow.toString()).build()));
+            FileUploadResponse.builder().modifiedOn(LocalDateTime.now().toString()).build(),
+            FileUploadResponse.builder().modifiedOn(LocalDateTime.now().minusDays(2).toString()).build()));
 
         consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, AUTH_TOKEN);
 

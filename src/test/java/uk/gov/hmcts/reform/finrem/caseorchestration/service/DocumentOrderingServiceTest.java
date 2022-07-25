@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
@@ -12,7 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOr
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import static java.util.Arrays.asList;
@@ -31,7 +32,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @ActiveProfiles("test-mock-feign-clients")
 public class DocumentOrderingServiceTest extends BaseServiceTest {
 
-    @Autowired
+    @MockBean
     private EvidenceManagementAuditService evidenceManagementAuditService;
 
     @Autowired
@@ -72,12 +73,10 @@ public class DocumentOrderingServiceTest extends BaseServiceTest {
     }
 
     private void mockEvidenceManagementClientToReturnFirstDocumentIsLater() {
-        Date earlier = new Date();
-        Date later = new Date(earlier.getTime() + 1);
 
         when(evidenceManagementAuditService.audit(any(), eq(AUTH_TOKEN))).thenReturn(asList(
-            FileUploadResponse.builder().modifiedOn(later.toString()).build(),
-            FileUploadResponse.builder().modifiedOn(earlier.toString()).build()));
+            FileUploadResponse.builder().modifiedOn(LocalDateTime.now().plusDays(2).toString()).build(),
+            FileUploadResponse.builder().modifiedOn(LocalDateTime.now().toString()).build()));
     }
 
     private CaseDocument anyCaseDocument() {

@@ -64,9 +64,9 @@ public class EvidenceManagementUploadService {
                     .getHref())
                 .fileName(document.get("originalDocumentName").asText())
                 .createdBy(getTextFromJsonNode(document, "createdBy"))
+                .createdBy(document.get("createdBy").asText())
                 .createdOn(document.get("createdOn").asText())
                 .lastModifiedBy(getTextFromJsonNode(document, "lastModifiedBy"))
-                .modifiedOn(getTextFromJsonNode(document, "modifiedOn"))
                 .mimeType(document.get("mimeType").asText())
                 .build();
     }
