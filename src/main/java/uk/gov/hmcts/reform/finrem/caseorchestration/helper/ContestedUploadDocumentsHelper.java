@@ -53,21 +53,24 @@ public class ContestedUploadDocumentsHelper {
         caseData.put(collection, uploadedDocuments);
     }
 
-    private void respondentElseDocuments(Map<String, Object> caseData, List<ContestedUploadedDocumentData> uploadedDocuments) {
+    private void respondentElseDocuments(Map<String, Object> caseData,
+                                         List<ContestedUploadedDocumentData> uploadedDocuments) {
         filterCorrespondence(uploadedDocuments, caseData, RESPONDENT_CORRESPONDENCE_COLLECTION, RESPONDENT);
         filterForms(uploadedDocuments, caseData, RESPONDENT_FR_FORM_COLLECTION, RESPONDENT);
         filterEvidence(uploadedDocuments, caseData, RESPONDENT_EVIDENCE_COLLECTION, RESPONDENT);
         filterTrialBundle(uploadedDocuments, caseData, RESPONDENT_TRIAL_BUNDLE_COLLECTION, RESPONDENT);
     }
 
-    private void applicantElseDocuments(Map<String, Object> caseData, List<ContestedUploadedDocumentData> uploadedDocuments) {
+    private void applicantElseDocuments(Map<String, Object> caseData,
+                                        List<ContestedUploadedDocumentData> uploadedDocuments) {
         filterCorrespondence(uploadedDocuments, caseData, APPLICANT_CORRESPONDENCE_COLLECTION, APPLICANT);
         filterForms(uploadedDocuments, caseData, APPLICANT_FR_FORM_COLLECTION, APPLICANT);
         filterEvidence(uploadedDocuments, caseData, APPLICANT_EVIDENCE_COLLECTION, APPLICANT);
         filterTrialBundle(uploadedDocuments, caseData, APPLICANT_TRIAL_BUNDLE_COLLECTION, APPLICANT);
     }
 
-    private void respondentDocuments(Map<String, Object> caseData, List<ContestedUploadedDocumentData> uploadedDocuments) {
+    private void respondentDocuments(Map<String, Object> caseData,
+                                     List<ContestedUploadedDocumentData> uploadedDocuments) {
         filterConfidentialDocs(uploadedDocuments, caseData, RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION, RESPONDENT);
         filterHearingBundles(uploadedDocuments, caseData, RESP_HEARING_BUNDLES_COLLECTION, RESPONDENT);
         filterFormEExhibits(uploadedDocuments, caseData, RESP_FORM_E_EXHIBITS_COLLECTION, RESPONDENT);
@@ -81,7 +84,8 @@ public class ContestedUploadDocumentsHelper {
         filterOtherDocs(uploadedDocuments, caseData, RESP_OTHER_COLLECTION, RESPONDENT);
     }
 
-    private void applicantDocuments(Map<String, Object> caseData, List<ContestedUploadedDocumentData> uploadedDocuments) {
+    private void applicantDocuments(Map<String, Object> caseData,
+                                    List<ContestedUploadedDocumentData> uploadedDocuments) {
         filterConfidentialDocs(uploadedDocuments, caseData, APPLICANT_CONFIDENTIAL_DOCS_COLLECTION, APPLICANT);
         filterHearingBundles(uploadedDocuments, caseData, APP_HEARING_BUNDLES_COLLECTION, APPLICANT);
         filterFormEExhibits(uploadedDocuments, caseData, APP_FORM_E_EXHIBITS_COLLECTION, APPLICANT);
@@ -95,7 +99,8 @@ public class ContestedUploadDocumentsHelper {
         filterOtherDocs(uploadedDocuments, caseData, APP_OTHER_COLLECTION, APPLICANT);
     }
 
-    private List<ContestedUploadedDocumentData> getDocumentCollection(Map<String, Object> caseData, String collection) {
+    private List<ContestedUploadedDocumentData>
+    getDocumentCollection(Map<String, Object> caseData, String collection) {
 
         if (StringUtils.isEmpty(caseData.get(collection))) {
             return new ArrayList<>();
@@ -358,9 +363,11 @@ public class ContestedUploadDocumentsHelper {
                 && isTypeValidForChronologiesStatements(d.getUploadedCaseDocument().getCaseDocumentType()))
             .collect(Collectors.toList());
 
-        List<ContestedUploadedDocumentData> chronologiesStatementsCollection = getDocumentCollection(caseData, collection);
+        List<ContestedUploadedDocumentData> chronologiesStatementsCollection =
+            getDocumentCollection(caseData, collection);
         chronologiesStatementsCollection.addAll(chronologiesStatementsFiltered);
-        log.info("Adding items: {}, to Chronologies and Statements of Issues Collection", chronologiesStatementsFiltered);
+        log.info("Adding items: {}, to Chronologies and Statements of Issues Collection",
+            chronologiesStatementsFiltered);
         uploadedDocuments.removeAll(chronologiesStatementsFiltered);
 
         if (!chronologiesStatementsCollection.isEmpty()) {
@@ -380,9 +387,11 @@ public class ContestedUploadDocumentsHelper {
                 && isTypeValidForQuestionnairesAnswers(d.getUploadedCaseDocument().getCaseDocumentType()))
             .collect(Collectors.toList());
 
-        List<ContestedUploadedDocumentData> questionnairesAnswersCollection = getDocumentCollection(caseData, collection);
+        List<ContestedUploadedDocumentData> questionnairesAnswersCollection =
+            getDocumentCollection(caseData, collection);
         questionnairesAnswersCollection.addAll(questionnairesAnswersFiltered);
-        log.info("Adding items: {}, to Questionnaires & Answers to Questionnaires & Exhibits Collection", questionnairesAnswersFiltered);
+        log.info("Adding items: {}, to Questionnaires & Answers to Questionnaires & Exhibits Collection",
+            questionnairesAnswersFiltered);
         uploadedDocuments.removeAll(questionnairesAnswersFiltered);
 
         if (!questionnairesAnswersCollection.isEmpty()) {
@@ -526,7 +535,8 @@ public class ContestedUploadDocumentsHelper {
         return !getTrialBundleUploadedList(getDocumentCollection(caseData, CONTESTED_UPLOADED_DOCUMENTS)).isEmpty();
     }
 
-    private List<ContestedUploadedDocumentData> getTrialBundleUploadedList(List<ContestedUploadedDocumentData> uploadedDocuments) {
+    private List<ContestedUploadedDocumentData>
+    getTrialBundleUploadedList(List<ContestedUploadedDocumentData> uploadedDocuments) {
 
         return uploadedDocuments.stream()
             .filter(d -> isTrialBundle(d.getUploadedCaseDocument()))
