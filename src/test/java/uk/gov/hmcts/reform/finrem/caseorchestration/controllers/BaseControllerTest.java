@@ -99,7 +99,7 @@ public abstract class BaseControllerTest extends BaseTest {
         caseData.put(RESP_SOLICITOR_EMAIL, "abc@mailinator.com");
         caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, "YES");
         CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(123)).data(caseData).build();
-        return CallbackRequest.builder().caseDetails(caseDetails).build();
+        return CallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build();
     }
 
     protected CaseDocument getCaseDocument() {

@@ -18,4 +18,3 @@ public class ContestedUploadedDocumentData {
     @JsonProperty("value")
     private ContestedUploadedDocument uploadedCaseDocument;
 }
-

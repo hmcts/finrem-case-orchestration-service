@@ -106,7 +106,6 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     @Before
     public void setup() {
         caseDetails = caseDetailsFromResource("/fixtures/general-application-directions.json", objectMapper);
-
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument(DOC_URL, FILE_NAME,
             GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL));
     }
