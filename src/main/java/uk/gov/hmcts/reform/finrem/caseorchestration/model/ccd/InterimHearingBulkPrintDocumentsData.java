@@ -10,11 +10,11 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class ContestedUploadedDocumentData {
+@AllArgsConstructor
+public class InterimHearingBulkPrintDocumentsData {
     @JsonProperty("id")
     private String id;
     @JsonProperty("value")
-    private ContestedUploadedDocument uploadedCaseDocument;
+    private InterimHearingBulkPrintDocument value;
 }

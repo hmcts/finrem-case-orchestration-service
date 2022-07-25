@@ -405,6 +405,12 @@ public class DocumentHelper {
         return BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl()).build();
     }
 
+    public List<CaseDocument> getHearingNoticeDocuments(Map<String, Object> caseData) {
+        return objectMapper.convertValue(caseData.get(HEARING_NOTICES_COLLECTION),
+            new TypeReference<>() {
+            });
+    }
+
     public enum PaperNotificationRecipient {
         APPLICANT, RESPONDENT, SOLICITOR
     }

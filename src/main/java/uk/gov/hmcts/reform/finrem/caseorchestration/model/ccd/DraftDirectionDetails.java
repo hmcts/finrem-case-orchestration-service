@@ -12,9 +12,14 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ContestedUploadedDocumentData {
-    @JsonProperty("id")
-    private String id;
-    @JsonProperty("value")
-    private ContestedUploadedDocument uploadedCaseDocument;
+public class DraftDirectionDetails {
+
+    @JsonProperty("isThisFinalYN")
+    private String isFinal;
+
+    @JsonProperty("isAnotherHearingYN")
+    private String isAnotherHearing;
+
+    @JsonProperty("typeOfHearing")
+    private String typeOfHearing;
 }
