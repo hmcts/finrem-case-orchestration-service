@@ -41,7 +41,7 @@ public class ServiceUtils {
             e.printStackTrace();
         }
 
-        MultipartFile multipartFile = new MockMultipartFile("file", "file",
+        MultipartFile multipartFile = new MockMultipartFile(fileToUpload, fileToUpload,
             fileContentType, file.getPath().getBytes());
         List<FileUploadResponse> fileUploadResponse =
             evidenceManagementUploadService.upload(Collections.singletonList(multipartFile),
