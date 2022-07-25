@@ -6,7 +6,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.EvidenceManagementUploadService;
+import uk.gov.hmcts.reform.finrem.functional.service.EvidenceManagementUploadService;
 
 import java.io.File;
 import java.net.URISyntaxException;
