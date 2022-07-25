@@ -43,7 +43,7 @@ public abstract class CaseDocumentHandler<T> {
         }
     }
 
-    protected List<ContestedUploadedDocumentData> sortDocumentsByDateDesc(List<ContestedUploadedDocumentData> data ) {
+    protected List<ContestedUploadedDocumentData> sortDocumentsByDateDesc(List<ContestedUploadedDocumentData> data) {
 
         Function<ContestedUploadedDocumentData, ContestedUploadedDocument> getDocuments =
             ContestedUploadedDocumentData::getUploadedCaseDocument;
