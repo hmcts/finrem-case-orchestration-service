@@ -19,11 +19,11 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.APPLICANT_INTENDS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.VARIATION_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_NATURE_OF_APPLICATION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_INTENDS_TO;
 
 public class AmendApplicationAboutToStartHandlerTest {
 
@@ -73,7 +73,7 @@ public class AmendApplicationAboutToStartHandlerTest {
 
         Map<String, Object> data = callbackRequest.getCaseDetails().getData();
         data.put(CONSENTED_NATURE_OF_APPLICATION, List.of("Pension document","Lump sum"));
-        data.put(APPLICANT_INTENDS_TO, "ApplyToVary");
+        data.put(APPLICANT_INTENDS, "ApplyToVary");
 
         AboutToStartOrSubmitCallbackResponse response = handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -91,7 +91,7 @@ public class AmendApplicationAboutToStartHandlerTest {
 
         Map<String, Object> data = callbackRequest.getCaseDetails().getData();
         data.put(CONSENTED_NATURE_OF_APPLICATION, List.of("Pension document","Lump sum"));
-        data.put(APPLICANT_INTENDS_TO, "ApplyToCourtFor");
+        data.put(APPLICANT_INTENDS, "ApplyToCourtFor");
 
         AboutToStartOrSubmitCallbackResponse response = handler.handle(callbackRequest, AUTH_TOKEN);
 

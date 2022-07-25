@@ -15,11 +15,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.APPLICANT_INTENDS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.VARIATION_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_NATURE_OF_APPLICATION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_INTENDS_TO;
 
 @Slf4j
 @Service
@@ -42,7 +42,8 @@ public class AmendApplicationAboutToStartHandler implements CallbackHandler {
         log.info("Received request to set nature of application for consented case with Case ID: {}", caseDetails.getId());
 
         Map<String, Object> caseData = caseDetails.getData();
-        final String intends = Objects.toString(caseData.get(APPLICANT_INTENDS_TO), "");
+        log.info("caseData ={}= for case id {}", caseData, caseDetails.getId());
+        final String intends = Objects.toString(caseData.get(APPLICANT_INTENDS), "");
         log.info("Applicant intends to {} for case id: {}",intends, caseDetails.getId());
 
         if (intends.equalsIgnoreCase("ApplyToVary"))  {
