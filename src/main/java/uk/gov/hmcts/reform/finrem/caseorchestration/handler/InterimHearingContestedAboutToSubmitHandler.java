@@ -3,13 +3,13 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InterimHearingService;
+import uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.EventType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 @Slf4j
 @Service
@@ -28,10 +28,10 @@ public class InterimHearingContestedAboutToSubmitHandler implements CallbackHand
     @Override
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
                                                        String userAuthorisation) {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         log.info("About to submit Interim hearing for case id {}", caseDetails.getId());
         interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, userAuthorisation);
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build();
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getCaseData()).build();
     }
 }

@@ -5,11 +5,11 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadApprovedOrderService;
+import uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.EventType;
 
 import java.util.List;
 
@@ -17,7 +17,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -50,12 +49,10 @@ public class UploadApprovedOrderAboutToSubmitHandlerTest extends UploadApprovedO
     public void givenContestedCase_whenAboutToSubmitUploadApprovedOrderAndNoErrors_thenHandle() {
         when(uploadApprovedOrderService
             .handleUploadApprovedOrderAboutToSubmit(callbackRequest.getCaseDetails(), AUTH_TOKEN))
-            .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+            .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getCaseData()).build());
 
-        AboutToStartOrSubmitCallbackResponse response = uploadApprovedOrderAboutToSubmitHandler
-            .handle(callbackRequest, AUTH_TOKEN);
+        uploadApprovedOrderAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        assertTrue(response.getData().containsKey(SUCCESS_KEY));
         verify(uploadApprovedOrderService, times(1))
             .handleUploadApprovedOrderAboutToSubmit(callbackRequest.getCaseDetails(), AUTH_TOKEN);
     }

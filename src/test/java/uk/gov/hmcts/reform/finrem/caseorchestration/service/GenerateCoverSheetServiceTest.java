@@ -145,11 +145,11 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
             any());
         Map<String, Object> data = getDataFromCaptor(generateDocumentCaseDetailsCaptor);
 
-        String expectedCourtContactDetails = """
-            HMCTS Financial Remedy
-            PO BOX 12746
-            HARLOW
-            CM20 9QZ""";
+        String expectedCourtContactDetails =
+            "HMCTS Financial Remedy\n"
+            + "PO BOX 12746\n"
+            + "HARLOW\n"
+            + "CM20 9QZ";
 
         assertThat(data, hasKey(ADDRESSEE));
         assertThat(data, hasKey(COURT_CONTACT_DETAILS));

@@ -84,12 +84,12 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         Map<String, Object> data = getDataFromCaptor(documentGenerationRequestCaseDetailsCaptor);
         assertThat(data.get("generalLetterCreatedDate"), is(notNullValue()));
         assertThat(data.get("ccdCaseNumber"), is("1234567890"));
-        assertThat(mapper.convertValue(data.get(ADDRESSEE), Addressee.class).getFormattedAddress(), is("""
-            50 Applicant Solicitor Street
-            Second Address Line
-            Greater London
-            London
-            SE12 9SE"""));
+        assertThat(mapper.convertValue(data.get(ADDRESSEE), Addressee.class).getFormattedAddress(),
+            is("50 Applicant Solicitor Street\n"
+            + "Second Address Line\n"
+            + "Greater London\n"
+            + "London\n"
+            + "SW1V 4FG"));
         assertThat(data.get("applicantFullName"), is("Poor Guy"));
         assertThat(data.get("respondentFullName"), is("test Korivi"));
     }
@@ -113,12 +113,12 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         assertThat(data.get("generalLetterCreatedDate"), is(notNullValue()));
         assertThat(data.get("ccdCaseNumber"), is("1234567890"));
         System.out.println(data.get(ADDRESSEE));
-        assertThat(mapper.convertValue(data.get(ADDRESSEE), Addressee.class).getFormattedAddress(), is("""
-            50 Applicant Solicitor Street
-            Second Address Line
-            Greater London
-            London
-            SW1V 4FG"""));
+        assertThat(mapper.convertValue(data.get(ADDRESSEE), Addressee.class).getFormattedAddress(),
+            is("50 Applicant Solicitor Street\n"
+            + "Second Address Line\n"
+            + "Greater London\n"
+            + "London\n"
+            + "SW1V 4FG"));
         assertThat(data.get("applicantFullName"), is("Poor Guy"));
         assertThat(data.get("respondentFullName"), is("Sarah Beatrice Korivi"));
     }

@@ -5,15 +5,13 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadApprovedOrderService;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.EventType;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -45,11 +43,9 @@ public class UploadApprovedOrderAboutToStartHandlerTest extends UploadApprovedOr
     @Test
     public void givenContestedCase_whenAboutToStartUploadApprovedOrder_thenHandle() {
         when(uploadApprovedOrderService.prepareFieldsForOrderApprovedCoverLetter(callbackRequest.getCaseDetails()))
-            .thenReturn(caseData);
-        AboutToStartOrSubmitCallbackResponse response = uploadApprovedOrderAboutToStartHandler
-            .handle(callbackRequest, AUTH_TOKEN);
+            .thenReturn(callbackRequest.getCaseDetails().getCaseData());
+        uploadApprovedOrderAboutToStartHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        assertTrue(response.getData().containsKey(SUCCESS_KEY));
         verify(uploadApprovedOrderService, times(1))
             .prepareFieldsForOrderApprovedCoverLetter(callbackRequest.getCaseDetails());
     }

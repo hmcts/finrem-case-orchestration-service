@@ -3,12 +3,13 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ManageCaseDocumentsService;
+import uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.EventType;
 
 @Slf4j
 @Service
@@ -29,6 +30,6 @@ public class ManageCaseDocumentsContestedAboutToSubmitCaseHandler implements Cal
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(
             manageCaseDocumentsService.manageCaseDocuments(
-                callbackRequest.getCaseDetails().getData())).build();
+                callbackRequest.getCaseDetails().getCaseData())).build();
     }
 }

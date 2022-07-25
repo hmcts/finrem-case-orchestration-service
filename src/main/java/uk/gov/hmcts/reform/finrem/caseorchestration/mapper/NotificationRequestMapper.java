@@ -13,8 +13,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.InterimHearingCollection;
 import uk.gov.hmcts.reform.finrem.ccd.domain.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.ccd.domain.RepresentationUpdateHistoryCollection;
+import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.CourtListWrapper;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -57,6 +59,11 @@ public class NotificationRequestMapper {
         return buildNotificationRequest(caseDetails, getRespondentSolicitorCaseData(caseDetails.getCaseData()));
     }
 
+    public NotificationRequest getNotificationRequestForRespondentSolicitor(FinremCaseDetails caseDetails,
+                                                                            InterimHearingCollection interimHearingData) {
+        return buildNotificationRequest(caseDetails, getRespondentSolicitorCaseData(caseDetails.getCaseData()), interimHearingData);
+    }
+
     @Deprecated
     public NotificationRequest getNotificationRequestForApplicantSolicitor(CaseDetails caseDetails) {
         return caseDataService.isConsentedApplication(caseDetails)
@@ -66,6 +73,11 @@ public class NotificationRequestMapper {
 
     public NotificationRequest getNotificationRequestForApplicantSolicitor(FinremCaseDetails caseDetails) {
         return buildNotificationRequest(caseDetails, getApplicantSolicitorCaseData(caseDetails.getCaseData()));
+    }
+
+    public NotificationRequest getNotificationRequestForApplicantSolicitor(FinremCaseDetails caseDetails,
+                                                                           InterimHearingCollection interimHearingData) {
+        return buildNotificationRequest(caseDetails, getApplicantSolicitorCaseData(caseDetails.getCaseData()), interimHearingData);
     }
 
     public NotificationRequest getNotificationRequestForNoticeOfChange(FinremCaseDetails caseDetails) {
@@ -150,16 +162,35 @@ public class NotificationRequestMapper {
         return notificationRequest;
     }
 
-    private NotificationRequest buildNotificationRequest(CaseDetails caseDetails,
+    private NotificationRequest buildNotificationRequest(FinremCaseDetails caseDetails,
                                                          SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper,
-                                                         Map<String, Object> interimHearingData) {
+                                                         InterimHearingCollection interimHearingData) {
 
         NotificationRequest notificationRequest = getNotificationCoreData(caseDetails, solicitorCaseDataKeysWrapper);
+        CourtListWrapper courtInfo = interimHearingData.getValue().getInterimRegionWrapper().getCourtListWrapper();
 
-        String selectedCourt = ContestedCourtHelper.getSelectedInterimHearingFrc(interimHearingData);
+        FrcCourtDetails courtDetails = courtDetailsMapper.getCourtDetails(courtInfo);
+        String selectedCourt = courtDetails.getCourtName();
         notificationRequest.setSelectedCourt(selectedCourt);
 
         log.info("selectedCourt is {} for case ID: {}", selectedCourt, notificationRequest.getCaseReferenceNumber());
+
+        return notificationRequest;
+    }
+
+    private NotificationRequest getNotificationCoreData(FinremCaseDetails caseDetails,
+                                                        SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
+        NotificationRequest notificationRequest = new NotificationRequest();
+        FinremCaseData caseData = caseDetails.getCaseData();
+
+        notificationRequest.setCaseReferenceNumber(Objects.toString(caseDetails.getId()));
+        notificationRequest.setSolicitorReferenceNumber(solicitorCaseDataKeysWrapper.getSolicitorReferenceKey());
+        notificationRequest.setDivorceCaseNumber(caseData.getDivorceCaseNumber());
+        notificationRequest.setName(solicitorCaseDataKeysWrapper.getSolicitorNameKey());
+        notificationRequest.setNotificationEmail(solicitorCaseDataKeysWrapper.getSolicitorEmailKey());
+        notificationRequest.setGeneralEmailBody(caseData.getGeneralEmailBody());
+        notificationRequest.setCaseType(getCaseType(caseDetails));
+        notificationRequest.setPhoneOpeningHours(CTSC_OPENING_HOURS);
 
         return notificationRequest;
     }

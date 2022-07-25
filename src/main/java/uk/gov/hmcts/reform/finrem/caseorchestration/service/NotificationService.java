@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.Check
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.InterimHearingCollection;
 
 import java.io.IOException;
 import java.net.URI;
@@ -321,8 +322,8 @@ public class NotificationService {
         sendConsentOrderNotApprovedSentEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
 
-    public void sendInterimHearingNotificationEmailToApplicantSolicitor(CaseDetails caseDetails,
-                                                                        Map<String, Object> interimHearingData) {
+    public void sendInterimHearingNotificationEmailToApplicantSolicitor(FinremCaseDetails caseDetails,
+                                                                        InterimHearingCollection interimHearingData) {
         sendInterimNotificationEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails,
             interimHearingData));
     }
@@ -331,8 +332,8 @@ public class NotificationService {
         sendInterimNotificationEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
 
-    public void sendInterimHearingNotificationEmailToRespondentSolicitor(CaseDetails caseDetails,
-                                                                         Map<String, Object> interimHearingData) {
+    public void sendInterimHearingNotificationEmailToRespondentSolicitor(FinremCaseDetails caseDetails,
+                                                                         InterimHearingCollection interimHearingData) {
         sendInterimNotificationEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails,
             interimHearingData));
     }

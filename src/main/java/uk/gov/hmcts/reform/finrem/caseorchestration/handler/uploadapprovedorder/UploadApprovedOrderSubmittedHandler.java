@@ -1,26 +1,23 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.uploadapprovedorder;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDirectionsCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ApprovedOrderNoticeOfHearingService;
+import uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.EventType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.HearingDirectionDetail;
+import uk.gov.hmcts.reform.finrem.ccd.domain.HearingDirectionDetailsCollection;
 
 import java.util.List;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DIRECTION_DETAILS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo.isYes;
 
 @Slf4j
 @Service
@@ -38,24 +35,22 @@ public class UploadApprovedOrderSubmittedHandler implements CallbackHandler {
 
     @Override
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest, String userAuthorisation) {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         if (isAnotherHearingToBeListed(caseDetails)) {
             approvedOrderNoticeOfHearingService.printHearingNoticePackAndSendToApplicantAndRespondent(caseDetails, userAuthorisation);
         }
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build();
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getCaseData()).build();
     }
 
-    private boolean isAnotherHearingToBeListed(CaseDetails caseDetails) {
-        Optional<AdditionalHearingDirectionsCollection> latestHearingDirections =
+    private boolean isAnotherHearingToBeListed(FinremCaseDetails caseDetails) {
+        Optional<HearingDirectionDetail> latestHearingDirections =
             getLatestAdditionalHearingDirections(caseDetails);
-        return latestHearingDirections.isPresent()
-            && YES_VALUE.equals(latestHearingDirections.get().getIsAnotherHearingYN());
+        return latestHearingDirections.isPresent() && isYes(latestHearingDirections.get().getIsAnotherHearingYN());
     }
 
-    private Optional<AdditionalHearingDirectionsCollection> getLatestAdditionalHearingDirections(CaseDetails caseDetails) {
-        List<Element<AdditionalHearingDirectionsCollection>> additionalHearingDetailsCollection =
-            new ObjectMapper().convertValue(caseDetails.getData().get(HEARING_DIRECTION_DETAILS_COLLECTION),
-                new TypeReference<>() {});
+    private Optional<HearingDirectionDetail> getLatestAdditionalHearingDirections(FinremCaseDetails caseDetails) {
+        List<HearingDirectionDetailsCollection> additionalHearingDetailsCollection = caseDetails.getCaseData()
+            .getHearingDirectionDetailsCollection();
 
         return additionalHearingDetailsCollection != null && !additionalHearingDetailsCollection.isEmpty()
             ? Optional.of(additionalHearingDetailsCollection.get(additionalHearingDetailsCollection.size() - 1).getValue())

@@ -1,40 +1,37 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CaseDocumentParty;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CaseDocumentType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.UploadCaseDocument;
+import uk.gov.hmcts.reform.finrem.ccd.domain.UploadCaseDocumentCollection;
+import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_CHRONOLOGIES_STATEMENTS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_FORMS_H_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FDR_DOCS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_FORM_H_COLLECTION;
 
 public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
 
     @Autowired
     private ManageCaseDocumentsService manageCaseDocumentsService;
 
-    private CaseDetails caseDetails;
+    private FinremCaseDetails caseDetails;
 
-    private Map<String, Object> caseData;
+    private FinremCaseData caseData;
 
-    private final List<ContestedUploadedDocumentData> uploadDocumentList = new ArrayList<>();
+    private final List<UploadCaseDocumentCollection> uploadDocumentList = new ArrayList<>();
 
     @MockBean
     private FeatureToggleService featureToggleService;
@@ -43,188 +40,212 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
     public void setUp() {
         when(featureToggleService.isManageBundleEnabled()).thenReturn(false);
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        caseDetails = buildCaseDetails();
-        caseData = caseDetails.getData();
+        caseDetails = buildFinremCaseDetails();
+        caseData = caseDetails.getCaseData();
     }
 
     @Test
     public void givenCaseData_whenSetApplicantAndRespondentDocumentsCollection_thenApplicantDocumentsUploaded() {
 
-        uploadDocumentList.add(createContestedUploadDocumentItem("1", "Chronology", "Applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem(UUID.randomUUID(), CaseDocumentType.CHRONOLOGY,
+            CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
 
-        caseDetails.getData().put(APP_CHRONOLOGIES_STATEMENTS_COLLECTION, uploadDocumentList);
+        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setAppChronologiesCollection(uploadDocumentList);
 
         manageCaseDocumentsService.setApplicantAndRespondentDocumentsCollection(caseDetails);
 
-        assertThat(getDocumentCollection(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION), hasSize(1));
+        assertThat(caseData.getUploadCaseDocumentWrapper().getManageCaseDocumentCollection(), hasSize(1));
     }
 
     @Test
     public void givenCaseData_whenSetApplicantAndRespondentDocumentsCollection_thenRespondentDocumentsUploaded() {
 
-        uploadDocumentList.add(createContestedUploadDocumentItem("1","Chronology", "respondent", "no", null));
-
-        caseDetails.getData().put(RESP_CHRONOLOGIES_STATEMENTS_COLLECTION, uploadDocumentList);
+        uploadDocumentList.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.CHRONOLOGY, CaseDocumentParty.RESPONDENT,
+            YesOrNo.NO, null));
+        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setRespChronologiesCollection(uploadDocumentList);
 
         manageCaseDocumentsService.setApplicantAndRespondentDocumentsCollection(caseDetails);
 
-        assertThat(getDocumentCollection(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION), hasSize(1));
+        assertThat(caseData.getUploadCaseDocumentWrapper().getManageCaseDocumentCollection(), hasSize(1));
     }
 
     @Test
     public void givenCaseDataMap_whenRemoveDeletedFilesFromCaseData_thenApplicantAndRespondentKeysDoNotExistInCaseData() {
 
-        manageCaseDocumentsService.manageCaseDocuments(populateCaseData().getData());
+        manageCaseDocumentsService.manageCaseDocuments(populateCaseData().getCaseData());
 
-        assertThat(getDocumentCollection(caseData, RESP_CHRONOLOGIES_STATEMENTS_COLLECTION), hasSize(1));
+        assertThat(caseData.getUploadCaseDocumentWrapper().getRespChronologiesCollection(), hasSize(1));
     }
 
     @Test
     public void givenCaseDataManageCaseDocuments_whenDocumentInWrongCollection_thenMoveItToRespChronologiesCollection() {
 
-        List<ContestedUploadedDocumentData> chronologyDocs = new ArrayList<>();
+        List<UploadCaseDocumentCollection> chronologyDocs = new ArrayList<>();
 
-        chronologyDocs.add(createContestedUploadDocumentItem("4","Chronology", "applicant", "no", null));
+        UUID someId = UUID.randomUUID();
 
-        List<ContestedUploadedDocumentData> caseDocs = new ArrayList<>();
-        caseDocs.add(createContestedUploadDocumentItem("1","Chronology", "respondent", "no", null));
-        caseDocs.add(createContestedUploadDocumentItem("2","Chronology", "respondent", "no", null));
-        caseDocs.add(createContestedUploadDocumentItem("3","Chronology", "respondent", "no", null));
-        caseDocs.add(createContestedUploadDocumentItem("4","Chronology", "respondent", "no", null));
+        chronologyDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT,
+            YesOrNo.NO, null));
 
-        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, caseDocs);
-        caseDetails.getData().put(APP_CHRONOLOGIES_STATEMENTS_COLLECTION, chronologyDocs);
+        List<UploadCaseDocumentCollection> caseDocs = new ArrayList<>();
+        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(), CaseDocumentType.CHRONOLOGY, CaseDocumentParty.RESPONDENT,
+            YesOrNo.NO, null));
+        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.CHRONOLOGY, CaseDocumentParty.RESPONDENT,
+            YesOrNo.NO, null));
+        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.CHRONOLOGY, CaseDocumentParty.RESPONDENT,
+            YesOrNo.NO, null));
+        caseDocs.add(createContestedUploadDocumentItem(someId,CaseDocumentType.CHRONOLOGY, CaseDocumentParty.RESPONDENT,
+            YesOrNo.NO, null));
 
-        manageCaseDocumentsService.manageCaseDocuments(caseDetails.getData());
+        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setManageCaseDocumentCollection(caseDocs);
+        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setAppChronologiesCollection(chronologyDocs);
 
-        assertThat(getDocumentCollection(caseData, APP_CHRONOLOGIES_STATEMENTS_COLLECTION), hasSize(0));
-        assertThat(getDocumentCollection(caseData, RESP_CHRONOLOGIES_STATEMENTS_COLLECTION), hasSize(4));
+        manageCaseDocumentsService.manageCaseDocuments(caseDetails.getCaseData());
+
+        assertThat(caseData.getUploadCaseDocumentWrapper().getAppChronologiesCollection(), hasSize(0));
+        assertThat(caseData.getUploadCaseDocumentWrapper().getRespChronologiesCollection(), hasSize(4));
     }
 
     @Test
     public void givenCaseDataManageCaseDocuments_whenDocumentInWrongCollection_thenMoveItToRightCollectionFormH() {
 
-        List<ContestedUploadedDocumentData> chronologyDocs = new ArrayList<>();
+        List<UploadCaseDocumentCollection> chronologyDocs = new ArrayList<>();
 
-        chronologyDocs.add(createContestedUploadDocumentItem("4","Chronology", "respondent", "no", null));
+        UUID someId = UUID.randomUUID();
 
-        List<ContestedUploadedDocumentData> caseDocs = new ArrayList<>();
-        caseDocs.add(createContestedUploadDocumentItem("1","Chronology", "applicant", "no", null));
-        caseDocs.add(createContestedUploadDocumentItem("2","Chronology", "applicant", "no", null));
-        caseDocs.add(createContestedUploadDocumentItem("3","Chronology", "applicant", "no", null));
-        caseDocs.add(createContestedUploadDocumentItem("4","Form H", "applicant", "no", null));
+        chronologyDocs.add(createContestedUploadDocumentItem(someId,CaseDocumentType.CHRONOLOGY, CaseDocumentParty.RESPONDENT, YesOrNo.NO, null));
 
-        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, caseDocs);
-        caseDetails.getData().put(RESP_CHRONOLOGIES_STATEMENTS_COLLECTION, chronologyDocs);
+        List<UploadCaseDocumentCollection> caseDocs = new ArrayList<>();
+        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
+        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
+        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
+        caseDocs.add(createContestedUploadDocumentItem(someId,CaseDocumentType.FORM_H, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
 
-        manageCaseDocumentsService.manageCaseDocuments(caseDetails.getData());
+        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setManageCaseDocumentCollection(caseDocs);
+        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setRespChronologiesCollection(chronologyDocs);
 
-        assertThat(getDocumentCollection(caseData, RESP_CHRONOLOGIES_STATEMENTS_COLLECTION), hasSize(0));
-        assertThat(getDocumentCollection(caseData, APP_CHRONOLOGIES_STATEMENTS_COLLECTION), hasSize(3));
-        assertThat(getDocumentCollection(caseData, APP_FORMS_H_COLLECTION), hasSize(1));
+        manageCaseDocumentsService.manageCaseDocuments(caseDetails.getCaseData());
+
+        assertThat(caseData.getUploadCaseDocumentWrapper().getRespChronologiesCollection(), hasSize(0));
+        assertThat(caseData.getUploadCaseDocumentWrapper().getAppChronologiesCollection(), hasSize(3));
+        assertThat(caseData.getUploadCaseDocumentWrapper().getRespFormsHCollection(), hasSize(1));
     }
 
     @Test
     public void givenCaseDataManageCaseDocuments_whenDocumentInWrongCollection_thenMoveItToAppChronologiesCollection() {
 
-        List<ContestedUploadedDocumentData> formH = new ArrayList<>();
+        List<UploadCaseDocumentCollection> formH = new ArrayList<>();
 
-        formH.add(createContestedUploadDocumentItem("4","Form H", "applicant", "no", null));
+        UUID someId = UUID.randomUUID();
 
-        List<ContestedUploadedDocumentData> caseDocs = new ArrayList<>();
-        caseDocs.add(createContestedUploadDocumentItem("1","Form H", "respondent", "no", null));
-        caseDocs.add(createContestedUploadDocumentItem("2","Form H", "respondent", "no", null));
-        caseDocs.add(createContestedUploadDocumentItem("3","Form H", "respondent", "no", null));
-        caseDocs.add(createContestedUploadDocumentItem("4","Chronology", "respondent", "no", null));
+        formH.add(createContestedUploadDocumentItem(someId,CaseDocumentType.FORM_H, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
 
-        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, caseDocs);
-        caseDetails.getData().put(APP_FORMS_H_COLLECTION, formH);
+        List<UploadCaseDocumentCollection> caseDocs = new ArrayList<>();
+        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(), CaseDocumentType.FORM_H, CaseDocumentParty.RESPONDENT,
+            YesOrNo.NO, null));
+        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.FORM_H, CaseDocumentParty.RESPONDENT,
+            YesOrNo.NO, null));
+        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.FORM_H, CaseDocumentParty.RESPONDENT,
+            YesOrNo.NO, null));
+        caseDocs.add(createContestedUploadDocumentItem(someId,CaseDocumentType.CHRONOLOGY, CaseDocumentParty.RESPONDENT, YesOrNo.NO, null));
 
-        manageCaseDocumentsService.manageCaseDocuments(caseDetails.getData());
+        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setManageCaseDocumentCollection(caseDocs);
+        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setAppFormsHCollection(formH);
 
-        assertThat(getDocumentCollection(caseData, APP_FORMS_H_COLLECTION), hasSize(0));
-        assertThat(getDocumentCollection(caseData, RESP_FORM_H_COLLECTION), hasSize(3));
-        assertThat(getDocumentCollection(caseData, RESP_CHRONOLOGIES_STATEMENTS_COLLECTION), hasSize(1));
+
+        manageCaseDocumentsService.manageCaseDocuments(caseDetails.getCaseData());
+
+        assertThat(caseData.getUploadCaseDocumentWrapper().getAppFormsHCollection(), hasSize(0));
+        assertThat(caseData.getUploadCaseDocumentWrapper().getRespFormsHCollection(), hasSize(3));
+        assertThat(caseData.getUploadCaseDocumentWrapper().getRespChronologiesCollection(), hasSize(1));
     }
 
     @Test
     public void givenCaseDataManageCaseDocuments_whenDocumentStaysInCollection_thenRemoveItFromCaseCollection() {
 
-        List<ContestedUploadedDocumentData> formH = new ArrayList<>();
+        List<UploadCaseDocumentCollection> formH = new ArrayList<>();
 
-        formH.add(createContestedUploadDocumentItem("4","Form H", "applicant", "no", null));
+        UUID someId = UUID.randomUUID();
 
-        List<ContestedUploadedDocumentData> caseDocuments = new ArrayList<>();
-        caseDocuments.add(createContestedUploadDocumentItem("1","Form H", "respondent", "no", null));
-        caseDocuments.add(createContestedUploadDocumentItem("2","Form H", "respondent", "no", null));
-        caseDocuments.add(createContestedUploadDocumentItem("3","Form H", "respondent", "no", null));
-        caseDocuments.add(createContestedUploadDocumentItem("4","Form H", "applicant", "no", null));
+        formH.add(createContestedUploadDocumentItem(someId,CaseDocumentType.FORM_H, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
 
-        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, caseDocuments);
-        caseDetails.getData().put(APP_FORMS_H_COLLECTION, formH);
+        List<UploadCaseDocumentCollection> caseDocuments = new ArrayList<>();
+        caseDocuments.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.FORM_H, CaseDocumentParty.RESPONDENT,
+            YesOrNo.NO, null));
+        caseDocuments.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.FORM_H, CaseDocumentParty.RESPONDENT,
+            YesOrNo.NO, null));
+        caseDocuments.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.FORM_H, CaseDocumentParty.RESPONDENT,
+            YesOrNo.NO, null));
+        caseDocuments.add(createContestedUploadDocumentItem(someId,CaseDocumentType.FORM_H, CaseDocumentParty.APPLICANT,
+            YesOrNo.NO, null));
 
-        manageCaseDocumentsService.manageCaseDocuments(caseDetails.getData());
+        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setManageCaseDocumentCollection(caseDocuments);
+        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setAppFormsHCollection(formH);
 
-        assertThat(getDocumentCollection(caseData, APP_FORMS_H_COLLECTION), hasSize(1));
-        assertThat(getDocumentCollection(caseData, RESP_FORM_H_COLLECTION), hasSize(3));
+        manageCaseDocumentsService.manageCaseDocuments(caseDetails.getCaseData());
+
+        assertThat(caseData.getUploadCaseDocumentWrapper().getAppFormsHCollection(), hasSize(1));
+        assertThat(caseData.getUploadCaseDocumentWrapper().getRespFormsHCollection(), hasSize(3));
     }
 
     @Test
     public void givenCaseDataManageCaseDocuments_whenDocumentIsNotFdrDocument_thenMoveItToRightCollectionFromFdr() {
 
-        List<ContestedUploadedDocumentData> formHFdrDocs = new ArrayList<>();
+        List<UploadCaseDocumentCollection> formHFdrDocs = new ArrayList<>();
 
-        formHFdrDocs.add(createContestedUploadDocumentItem("4","Form H", null, "no", null));
+        UUID someId = UUID.randomUUID();
 
-        List<ContestedUploadedDocumentData> caseDocs = new ArrayList<>();
-        caseDocs.add(createContestedUploadDocumentItem("1","Chronology", "applicant", "no", null));
-        caseDocs.add(createContestedUploadDocumentItem("2","Chronology", "applicant", "no", null));
-        caseDocs.add(createContestedUploadDocumentItem("3","Chronology", "applicant", "no", null));
-        caseDocs.add(createContestedUploadDocumentItem("4","Form H", "applicant", "no", null));
+        formHFdrDocs.add(createContestedUploadDocumentItem(someId,CaseDocumentType.FORM_H, null, YesOrNo.NO, null));
 
-        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, caseDocs);
-        caseDetails.getData().put(FDR_DOCS_COLLECTION, formHFdrDocs);
+        List<UploadCaseDocumentCollection> caseDocs = new ArrayList<>();
+        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT,
+            YesOrNo.NO, null));
+        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT,
+            YesOrNo.NO, null));
+        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT,
+            YesOrNo.NO, null));
+        caseDocs.add(createContestedUploadDocumentItem(someId,CaseDocumentType.FORM_H, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
 
-        manageCaseDocumentsService.manageCaseDocuments(caseDetails.getData());
+        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setManageCaseDocumentCollection(caseDocs);
+        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setFdrCaseDocumentCollection(formHFdrDocs);
 
-        assertThat(getDocumentCollection(caseData, APP_CHRONOLOGIES_STATEMENTS_COLLECTION), hasSize(3));
-        assertThat(getDocumentCollection(caseData, FDR_DOCS_COLLECTION), hasSize(0));
+        manageCaseDocumentsService.manageCaseDocuments(caseDetails.getCaseData());
+
+        assertThat(caseData.getUploadCaseDocumentWrapper().getAppChronologiesCollection(), hasSize(3));
+        assertThat(caseData.getUploadCaseDocumentWrapper().getFdrCaseDocumentCollection(), hasSize(0));
     }
 
-    private CaseDetails populateCaseData() {
+    private FinremCaseDetails populateCaseData() {
 
-        uploadDocumentList.add(createContestedUploadDocumentItem("123","Chronology", "Respondent", "no", null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("456","Chronology", "Respondent", "no", null));
+        UUID someId = UUID.randomUUID();
+        UUID otherId = UUID.randomUUID();
 
-        List<ContestedUploadedDocumentData> caseDocs = new ArrayList<>();
-        caseDocs.add(createContestedUploadDocumentItem("123", "Chronology", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem(someId,CaseDocumentType.CHRONOLOGY, CaseDocumentParty.RESPONDENT,
+            YesOrNo.NO, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem(otherId,CaseDocumentType.CHRONOLOGY, CaseDocumentParty.RESPONDENT,
+            YesOrNo.NO, null));
 
-        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, caseDocs);
-
-        caseDetails.getData().put(RESP_CHRONOLOGIES_STATEMENTS_COLLECTION, uploadDocumentList);
+        List<UploadCaseDocumentCollection> caseDocs = new ArrayList<>();
+        caseDocs.add(createContestedUploadDocumentItem(someId, CaseDocumentType.CHRONOLOGY, CaseDocumentParty.RESPONDENT, YesOrNo.NO, null));
+        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setManageCaseDocumentCollection(caseDocs);
+        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setRespChronologiesCollection(uploadDocumentList);
 
         return caseDetails;
     }
 
-    private List<ContestedUploadedDocumentData> getDocumentCollection(Map<String, Object> data, String field) {
-        return mapper.convertValue(data.get(field),
-            new TypeReference<>() {
-            });
-    }
+    private UploadCaseDocumentCollection createContestedUploadDocumentItem(UUID id, CaseDocumentType type, CaseDocumentParty party,
+                                                                           YesOrNo isConfidential, String other) {
 
-    private ContestedUploadedDocumentData createContestedUploadDocumentItem(String id, String type, String party,
-                                                                            String isConfidential, String other) {
-
-        return ContestedUploadedDocumentData.builder()
+        return UploadCaseDocumentCollection.builder()
             .id(id)
-            .uploadedCaseDocument(ContestedUploadedDocument
+            .value(UploadCaseDocument
                 .builder()
-                .caseDocuments(new CaseDocument())
+                .caseDocuments(new Document())
                 .caseDocumentType(type)
                 .caseDocumentParty(party)
                 .caseDocumentConfidential(isConfidential)
                 .caseDocumentOther(other)
-                .caseDocumentFdr("no")
+                .caseDocumentFdr(YesOrNo.NO)
                 .hearingDetails("hearingDetails")
                 .build())
             .build();
