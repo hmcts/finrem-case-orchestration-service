@@ -23,7 +23,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCo
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 
 import javax.validation.constraints.NotNull;
 
@@ -50,7 +52,9 @@ public class HearingDocumentController extends BaseController {
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
     private final ValidateHearingService validateHearingService;
     private final CaseDataService caseDataService;
+    private final NotificationService notificationService;
     private final ObjectMapper objectMapper;
+    private final CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
 
     @PostMapping(path = "/documents/hearing", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles Form C and G generation. Serves as a callback from CCD")
@@ -84,6 +88,17 @@ public class HearingDocumentController extends BaseController {
         }
 
         List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
+
+        if (notificationService.isContestedApplicationAndApplicantOrRespondentSolicitorsIsNotRegisteredOrAcceptingEmails(caseDetails)) {
+            CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+            if (caseDetailsBefore != null && hearingDocumentService.alreadyHadFirstHearing(caseDetailsBefore)) {
+                log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
+                additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, caseDetails);
+            } else {
+                log.info("Sending Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
+                hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, authorisationToken);
+            }
+        }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).warnings(warnings).build());
     }
 
@@ -122,7 +137,7 @@ public class HearingDocumentController extends BaseController {
         List<DirectionDetailsCollectionData> directionDetailsCollectionList = Optional.ofNullable(caseData.get(DIRECTION_DETAILS_COLLECTION_CT))
             .map(this::convertToDirectionDetailsDataList).orElse(Collections.emptyList());
 
-        if (! directionDetailsCollectionList.isEmpty()) {
+        if (!directionDetailsCollectionList.isEmpty()) {
             List<DirectionDetailsCollectionData> sortedDirectionDetailsCollectionList = directionDetailsCollectionList
                 .stream()
                 .filter(e -> (e.getDirectionDetailsCollection() != null &&  e.getDirectionDetailsCollection().getDateOfHearing() != null))

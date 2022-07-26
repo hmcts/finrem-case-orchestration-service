@@ -1,5 +1,8 @@
 {
   "event_id": "some_event_id",
+  "case_details_before": {
+    "state": "applicationIssued"
+  },
   "case_details": {
     "id": "123",
     "jurisdiction": "DIVORCE",
@@ -7,7 +10,6 @@
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
       "PBANumber": "PBA123",
-      "d81Question": "No",
       "PBAreference": "ABCD",
       "consentOrder": {
         "document_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d",
@@ -66,8 +68,8 @@
       "authorisationName": "test",
       "divorceCaseNumber": "DD12D12345",
       "issueDate": "2019-03-04",
-      "hearingDate": "2019-03-24",
-      "fastTrackDecision": "no",
+      "hearingDate": "2019-05-04",
+      "fastTrackDecision": "Yes",
       "pensionCollection": [
         {
           "id": "ad403dd7-75da-4ca6-8cf6-24a5e42f5bf4",
@@ -82,15 +84,6 @@
         }
       ],
       "respondentAddress": {
-        "County": "Essex",
-        "Country": "United Kingdom",
-        "PostCode": "SE12 9SE",
-        "PostTown": "London",
-        "AddressLine1": "252 Marvels Lane",
-        "AddressLine2": "AddressGlobalUK",
-        "AddressLine3": "London"
-      },
-      "applicantAddress": {
         "County": "Essex",
         "Country": "United Kingdom",
         "PostCode": "SE12 9SE",
