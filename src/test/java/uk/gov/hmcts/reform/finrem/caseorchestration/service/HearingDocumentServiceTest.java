@@ -93,6 +93,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
     @Captor private ArgumentCaptor<List<BulkPrintDocument>> bulkPrintDocumentsCaptor;
     @Captor private ArgumentCaptor<CaseDetails> caseDetailsArgumentCaptor;
+    @MockBean private NotificationService notificationService;
 
     @Before
     public void setUp() {
@@ -134,6 +135,9 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, AUTH_TOKEN);
 
+        when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(false);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(true);
+
         verify(bulkPrintService).printApplicantDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
         verify(bulkPrintService).printRespondentDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
 
@@ -150,6 +154,9 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         caseDetails.getData().put(FORM_A_COLLECTION, asList(pensionDocumentData(), pensionDocumentData(), pensionDocumentData()));
 
         hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, AUTH_TOKEN);
+
+        when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(false);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(true);
 
         verify(bulkPrintService).printApplicantDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
 
