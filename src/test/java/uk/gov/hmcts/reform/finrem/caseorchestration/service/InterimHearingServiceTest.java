@@ -226,7 +226,7 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
         verify(caseDataService).isPaperApplication(any());
         verify(caseDataService, never()).isApplicantSolicitorAgreeToReceiveEmails(any());
 
-        verify(notificationService, never()).shouldEmailRespondentSolicitor(any());
+        verify(notificationService, never()).isRespondentSolicitorEmailCommunicationEnabled(any());
         verify(notificationService, never()).sendInterimHearingNotificationEmailToApplicantSolicitor(any(), anyMap());
         verify(notificationService, never()).sendInterimHearingNotificationEmailToRespondentSolicitor(any(), anyMap());
     }
@@ -238,7 +238,7 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
 
         when(caseDataService.isPaperApplication(any())).thenReturn(false);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
 
         CaseDetails caseDetailsBefore = buildCaseDetails(TEST_NEW_JSON);
         interimHearingService.sendNotification(caseDetails, caseDetailsBefore);
@@ -246,7 +246,7 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
         verify(caseDataService).isPaperApplication(any());
 
         verify(caseDataService, times(3)).isApplicantSolicitorAgreeToReceiveEmails(any());
-        verify(notificationService, times(3)).shouldEmailRespondentSolicitor(any());
+        verify(notificationService, times(3)).isRespondentSolicitorEmailCommunicationEnabled(any());
         verify(notificationService, times(3)).sendInterimHearingNotificationEmailToApplicantSolicitor(any(), anyMap());
         verify(notificationService,times(3)).sendInterimHearingNotificationEmailToRespondentSolicitor(any(), anyMap());
     }

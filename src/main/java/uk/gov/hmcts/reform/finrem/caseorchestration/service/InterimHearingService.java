@@ -366,7 +366,7 @@ public class InterimHearingService {
             log.info("Sending email notification to Applicant Solicitor about interim hearing");
             notificationService.sendInterimHearingNotificationEmailToApplicantSolicitor(caseDetails, interimHearingData);
         }
-        if (notificationService.shouldEmailRespondentSolicitor(caseDetails.getData())) {
+        if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
             log.info("Sending email notification to Respondent Solicitor about interim hearing");
             notificationService.sendInterimHearingNotificationEmailToRespondentSolicitor(caseDetails, interimHearingData);
         }

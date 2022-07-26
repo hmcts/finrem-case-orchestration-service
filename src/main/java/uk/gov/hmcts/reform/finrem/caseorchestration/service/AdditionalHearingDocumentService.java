@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import static java.util.Collections.singletonList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
@@ -55,6 +56,8 @@ public class AdditionalHearingDocumentService {
     private final ObjectMapper objectMapper;
     private final BulkPrintService bulkPrintService;
     private final CaseDataService caseDataService;
+    private final NotificationService notificationService;
+
 
     public void createAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) throws JsonProcessingException {
         Map<String, Object> caseData = caseDetails.getData();
@@ -210,7 +213,7 @@ public class AdditionalHearingDocumentService {
         caseData.put(ADDITIONAL_HEARING_DOCUMENT_COLLECTION, additionalHearingDocumentDataList);
     }
 
-    private void bulkPrintAdditionalHearingDocuments(CaseDetails caseDetails, String authorisationToken) {
+    public void bulkPrintAdditionalHearingDocuments(CaseDetails caseDetails, String authorisationToken) {
         List<AdditionalHearingDocumentData> additionalHearingDocumentData =
             documentHelper.convertToAdditionalHearingDocumentData(
                 caseDetails.getData().get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION));
@@ -220,8 +223,14 @@ public class AdditionalHearingDocumentService {
         List<BulkPrintDocument> document = singletonList(documentHelper.getBulkPrintDocumentFromCaseDocument(
                 additionalHearingDocument.getAdditionalHearingDocument().getDocument()));
 
-        bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, document);
-        bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, document);
+        if (!notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
+            CompletableFuture.runAsync(() ->
+                bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, document));
+        }
+        if (!notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
+            CompletableFuture.runAsync(() ->
+                bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, document));
+        }
     }
 
     private void convertHearingOrderCollectionDocumentsToPdf(HearingOrderCollectionData element,
