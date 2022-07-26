@@ -8,22 +8,17 @@ import org.springframework.test.web.servlet.ResultActions;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 
-import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.DOCUMENT_BINARY_URL;
 
 @WebMvcTest(ConsentOrderApprovedController.class)
 public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
@@ -31,8 +26,39 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     @MockBean private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     @MockBean private ConsentOrderPrintService consentOrderPrintService;
 
+    public String contestedConsentOrderApprovedEndpoint() {
+        return "/case-orchestration/consent-in-contested/consent-order-approved";
+    }
+
     public String contestedConsentSendOrderEndpoint() {
         return "/case-orchestration/consent-in-contested/send-order";
+    }
+
+    @Test
+    public void consentInContestedConsentOrderApprovedShouldProcessDocuments() throws Exception {
+        doValidCaseDataSetUp();
+
+        mvc.perform(post(contestedConsentOrderApprovedEndpoint())
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verify(consentOrderApprovedDocumentService, times(1)).stampAndPopulateContestedConsentApprovedOrderCollection(any(), eq(AUTH_TOKEN));
+        verify(consentOrderApprovedDocumentService, times(1)).generateAndPopulateConsentOrderLetter(any(), eq(AUTH_TOKEN));
+    }
+
+    @Test
+    public void consentInContestedConsentOrderApprovedShouldProcessPensionDocs() throws Exception {
+        doValidConsentInContestWithPensionData();
+
+        mvc.perform(post(contestedConsentOrderApprovedEndpoint())
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verify(consentOrderApprovedDocumentService).stampAndPopulateContestedConsentApprovedOrderCollection(any(), eq(AUTH_TOKEN));
     }
 
     @Test
@@ -62,11 +88,5 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
 
         result.andExpect(status().isOk());
         verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), eq(AUTH_TOKEN));
-    }
-
-    private void assertDocument(ResultActions result, String path) throws Exception {
-        result.andExpect(jsonPath(path + "document_url", is(DOC_URL)))
-            .andExpect(jsonPath(path + "document_filename", is(FILE_NAME)))
-            .andExpect(jsonPath(path + DOCUMENT_BINARY_URL, is(BINARY_URL)));
     }
 }

@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
@@ -49,6 +50,8 @@ public class ApprovedConsentOrderAboutToSubmitHandlerTest {
     @Mock
     private GenericDocumentService genericDocumentService;
     @Mock
+    private CaseDataService caseDataService;
+    @Mock
     private ConsentOrderPrintService consentOrderPrintService;
     @Mock
     private NotificationService notificationService;
@@ -60,6 +63,8 @@ public class ApprovedConsentOrderAboutToSubmitHandlerTest {
     private static final String AUTH_TOKEN = "4d73f8d4-2a8d-48e2-af91-11cbaa642345";
     private static final String APPROVE_ORDER_VALID_JSON = "/fixtures/pba-validate.json";
     private static final String APPROVE_ORDER_NO_PENSION_VALID_JSON = "/fixtures/bulkprint/bulk-print-no-pension-collection.json";
+    private static final String NO_PENSION_VALID_JSON = "/fixtures/bulkprint/bulk-print-no-pension-collection.json";
+
 
     @Before
     public void setup() {
@@ -67,6 +72,7 @@ public class ApprovedConsentOrderAboutToSubmitHandlerTest {
             genericDocumentService,
             consentOrderPrintService,
             notificationService,
+            caseDataService,
             documentHelper,
             objectMapper);
     }
@@ -112,8 +118,8 @@ public class ApprovedConsentOrderAboutToSubmitHandlerTest {
         verify(documentHelper, times(2)).getPensionDocumentsData(any());
         verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), any());
         verify(notificationService).sendConsentOrderAvailableCtscEmail(any());
-        verify(notificationService).shouldEmailApplicantSolicitor(any());
-        verify(notificationService).shouldEmailRespondentSolicitor(any());
+        verify(caseDataService).isApplicantSolicitorAgreeToReceiveEmails(any());
+        verify(notificationService).isRespondentSolicitorEmailCommunicationEnabled(any());
     }
 
     @Test(expected = FeignException.InternalServerError.class)
@@ -137,12 +143,30 @@ public class ApprovedConsentOrderAboutToSubmitHandlerTest {
     }
 
     @Test
+    public void givenCase_whenNoPendsion_thenShouldUpdateStateToConsentOrderMadeAndBulkPrint() {
+        CallbackRequest callbackRequest = doValidCaseDataSetUp(NO_PENSION_VALID_JSON);
+        whenServiceGeneratesDocument().thenReturn(caseDocument());
+        whenAnnexStampingDocument().thenReturn(caseDocument());
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+
+        AboutToStartOrSubmitCallbackResponse response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertEquals(response.getData().get(STATE), CONSENT_ORDER_MADE.toString());
+
+        verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), any());
+        verify(notificationService).sendConsentOrderAvailableCtscEmail(any());
+        verify(notificationService).sendConsentOrderAvailableEmailToApplicantSolicitor(any());
+        verify(notificationService).sendConsentOrderAvailableEmailToRespondentSolicitor(any());
+    }
+
+    @Test
     public void shouldUpdateStateToConsentOrderMadeAndBulkPrint_noEmails() {
         CallbackRequest callbackRequest = doValidCaseDataSetUp(APPROVE_ORDER_NO_PENSION_VALID_JSON);
         whenServiceGeneratesDocument().thenReturn(caseDocument());
         whenAnnexStampingDocument().thenReturn(caseDocument());
-        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
-        when(notificationService.shouldEmailApplicantSolicitor(any())).thenReturn(false);
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
 
         AboutToStartOrSubmitCallbackResponse response = handler.handle(callbackRequest, AUTH_TOKEN);
 

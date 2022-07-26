@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
@@ -43,6 +44,7 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
     private final GenericDocumentService genericDocumentService;
     private final ConsentOrderPrintService consentOrderPrintService;
     private final NotificationService notificationService;
+    private final CaseDataService caseDataService;
     private final DocumentHelper documentHelper;
     private final ObjectMapper mapper;
 
@@ -116,12 +118,11 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
                 caseData.put(STATE, CONSENT_ORDER_MADE.toString());
                 notificationService.sendConsentOrderAvailableCtscEmail(caseDetails);
 
-                if (notificationService.shouldEmailApplicantSolicitor(caseDetails)) {
+                if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
                     log.info("case - {}: Sending email notification for to Applicant Solicitor for 'Consent Order Available'", caseDetails.getId());
                     notificationService.sendConsentOrderAvailableEmailToApplicantSolicitor(caseDetails);
                 }
-
-                if (notificationService.shouldEmailRespondentSolicitor(caseData)) {
+                if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData)) {
                     log.info("case - {}: Sending email notification to Respondent Solicitor for 'Consent Order Available'", caseDetails.getId());
                     notificationService.sendConsentOrderAvailableEmailToRespondentSolicitor(caseDetails);
                 }

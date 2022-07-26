@@ -46,7 +46,7 @@ public class RejectedConsentOrderSubmittedHandler implements CallbackHandler {
         }
 
         Map<String, Object> caseData = caseDetails.getData();
-        if (notificationService.shouldEmailRespondentSolicitor(caseData)) {
+        if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData)) {
             if (caseDataService.isConsentedApplication(caseDetails)) {
                 log.info("Sending email notification to Respondent Solicitor for 'Consent Order Not Approved'");
                 notificationService.sendConsentOrderNotApprovedEmailToRespondentSolicitor(caseDetails);

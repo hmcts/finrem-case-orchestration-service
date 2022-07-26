@@ -42,7 +42,7 @@ public class ApprovedConsentOrderSubmittedHandler implements CallbackHandler {
             notificationService.sendConsentOrderMadeConfirmationEmailToApplicantSolicitor(caseDetails);
         }
 
-        if (notificationService.shouldEmailRespondentSolicitor(caseData)) {
+        if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData)) {
             log.info("Sending email notification to Respondent Solicitor for 'Consent Order Made'");
             notificationService.sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(caseDetails);
         }

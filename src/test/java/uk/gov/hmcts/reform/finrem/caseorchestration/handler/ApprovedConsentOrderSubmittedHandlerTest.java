@@ -90,7 +90,7 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
         CallbackRequest callbackRequest = getConsentedCallbackRequestForConsentOrder();
         when(caseDataService.isConsentedApplication(callbackRequest.getCaseDetails())).thenReturn(true);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(callbackRequest.getCaseDetails())).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(callbackRequest.getCaseDetails().getData())).thenReturn(true);
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(callbackRequest.getCaseDetails().getData())).thenReturn(true);
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -103,7 +103,7 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
         CallbackRequest callbackRequest = getConsentedCallbackRequestForConsentOrder();
 
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(callbackRequest.getCaseDetails())).thenReturn(false);
-        when(notificationService.shouldEmailRespondentSolicitor(callbackRequest.getCaseDetails().getData())).thenReturn(false);
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(callbackRequest.getCaseDetails().getData())).thenReturn(false);
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -116,7 +116,7 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
         CallbackRequest callbackRequest = getConsentedCallbackRequestForVariationOrder();
         when(caseDataService.isConsentedApplication(callbackRequest.getCaseDetails())).thenReturn(true);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(callbackRequest.getCaseDetails())).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(callbackRequest.getCaseDetails().getData())).thenReturn(true);
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(callbackRequest.getCaseDetails().getData())).thenReturn(true);
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -128,7 +128,7 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
     public void givenVariationOrderCase_WhenNoConsentToEmail_ThenNoNotificationSent() {
         CallbackRequest callbackRequest = getConsentedCallbackRequestForVariationOrder();
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(callbackRequest.getCaseDetails())).thenReturn(false);
-        when(notificationService.shouldEmailRespondentSolicitor(callbackRequest.getCaseDetails().getData())).thenReturn(false);
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(callbackRequest.getCaseDetails().getData())).thenReturn(false);
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
