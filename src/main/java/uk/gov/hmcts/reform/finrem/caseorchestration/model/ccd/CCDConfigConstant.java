@@ -450,6 +450,7 @@ public class CCDConfigConstant {
     public static final String RESP_CORRESPONDENCE_COLLECTION = "respCorrespondenceDocsColl";
     public static final String RESP_OTHER_COLLECTION = "respOtherCollection";
 
+
     public static final String AMENDED_CONSENT_ORDER = "AmendedConsentOrder";
 
     //organisation policy
