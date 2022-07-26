@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.functional.service;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -16,7 +16,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.util.List;
@@ -37,14 +36,14 @@ public class EvidenceManagementUploadService {
 
     private final RestTemplate template;
     private final AuthTokenGenerator authTokenGenerator;
-    private final IdamAuthService idamAuthService;
+    private final IdamAuthService userService;
 
     @Value("${document.management.store.upload.url}")
     private String documentManagementStoreUploadUrl;
 
     public List<FileUploadResponse> upload(@NonNull final List<MultipartFile> files, final String authorizationToken,
                                            String requestId) {
-        UserDetails userDetails = idamAuthService.getUserDetails(authorizationToken);
+        UserDetails userDetails = userService.getUserDetails(authorizationToken);
         HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity<>(param(files), headers(userDetails.getId()));
 
         JsonNode documents = Objects.requireNonNull(template.postForObject(documentManagementStoreUploadUrl, httpEntity, ObjectNode.class))
@@ -65,9 +64,9 @@ public class EvidenceManagementUploadService {
                     .getHref())
                 .fileName(document.get("originalDocumentName").asText())
                 .createdBy(getTextFromJsonNode(document, "createdBy"))
-                .createdBy(document.get("createdBy").asText())
                 .createdOn(document.get("createdOn").asText())
                 .lastModifiedBy(getTextFromJsonNode(document, "lastModifiedBy"))
+                .modifiedOn(getTextFromJsonNode(document, "modifiedOn"))
                 .mimeType(document.get("mimeType").asText())
                 .build();
     }
