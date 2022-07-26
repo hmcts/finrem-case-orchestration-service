@@ -335,7 +335,7 @@ public class NotificationsController extends BaseController {
         @ApiResponse(responseCode = "204",
             description = "'Prepare for Hearing' e-mail sent successfully",
             content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendPrepareForHearingEmail(
+    public ResponseEntity<SubmittedCallbackResponse> sendPrepareForHearingEmail(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @RequestBody CallbackRequest callbackRequest) {
 
