@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import static java.util.Collections.singletonList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
@@ -36,10 +37,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ADDITIONAL_INFO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TIME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TIME_ESTIMATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
 
 @Service
@@ -53,6 +56,8 @@ public class AdditionalHearingDocumentService {
     private final ObjectMapper objectMapper;
     private final BulkPrintService bulkPrintService;
     private final CaseDataService caseDataService;
+    private final NotificationService notificationService;
+
 
     public void createAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) throws JsonProcessingException {
         Map<String, Object> caseData = caseDetails.getData();
@@ -74,6 +79,30 @@ public class AdditionalHearingDocumentService {
         bulkPrintAdditionalHearingDocuments(caseDetails, authorisationToken);
     }
 
+    public void createAndStoreAdditionalHearingDocumentsFromApprovedOrder(String authorisationToken, CaseDetails caseDetails) {
+        List<HearingOrderCollectionData> hearingOrderCollectionData = documentHelper.getHearingOrderDocuments(caseDetails.getData());
+
+        if (hearingOrderCollectionHasEntries(hearingOrderCollectionData)) {
+            populateLatestDraftHearingOrderWithLatestEntry(caseDetails, hearingOrderCollectionData, authorisationToken);
+        }
+    }
+
+    private boolean hearingOrderCollectionHasEntries(List<HearingOrderCollectionData> hearingOrderCollectionData) {
+        return hearingOrderCollectionData != null
+            && !hearingOrderCollectionData.isEmpty()
+            && hearingOrderCollectionData.get(hearingOrderCollectionData.size() - 1).getHearingOrderDocuments() != null;
+    }
+
+    private void populateLatestDraftHearingOrderWithLatestEntry(CaseDetails caseDetails,
+                                                 List<HearingOrderCollectionData> hearingOrderCollectionData,
+                                                 String authorisationToken) {
+        hearingOrderCollectionData.forEach(element -> convertHearingOrderCollectionDocumentsToPdf(element, authorisationToken));
+        caseDetails.getData().put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
+        caseDetails.getData().put(LATEST_DRAFT_HEARING_ORDER,
+            hearingOrderCollectionData.get(hearingOrderCollectionData.size() - 1)
+                .getHearingOrderDocuments().getUploadDraftDocument());
+    }
+
     public void createAndStoreAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails)
         throws CourtDetailsParseException, JsonProcessingException {
 
@@ -82,8 +111,11 @@ public class AdditionalHearingDocumentService {
         if (hearingOrderCollectionData != null
             && !hearingOrderCollectionData.isEmpty()
             && hearingOrderCollectionData.get(hearingOrderCollectionData.size() - 1).getHearingOrderDocuments() != null) {
+            hearingOrderCollectionData.forEach(element -> convertHearingOrderCollectionDocumentsToPdf(element, authorisationToken));
+            caseDetails.getData().put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
             caseDetails.getData().put(LATEST_DRAFT_HEARING_ORDER,
-                hearingOrderCollectionData.get(hearingOrderCollectionData.size() - 1).getHearingOrderDocuments().getUploadDraftDocument());
+                hearingOrderCollectionData.get(hearingOrderCollectionData.size() - 1)
+                    .getHearingOrderDocuments().getUploadDraftDocument());
         }
 
         List<DirectionDetailsCollectionData> directionDetailsCollectionList = documentHelper
@@ -97,7 +129,7 @@ public class AdditionalHearingDocumentService {
                 directionDetailsCollectionList.get(directionDetailsCollectionList.size() - 1).getDirectionDetailsCollection();
 
             //if the latest court hearing has specified another hearing as No, dont create an additional hearing document
-            if (NO_VALUE.equalsIgnoreCase(caseDataService.nullToEmpty(latestDirectionDetailsCollectionItem.getIsAnotherHearingYN()))) {
+            if (NO_VALUE.equalsIgnoreCase(nullToEmpty(latestDirectionDetailsCollectionItem.getIsAnotherHearingYN()))) {
                 log.info("Additional hearing document not required for case: {}", caseDetails.getId());
                 return;
             }
@@ -163,7 +195,7 @@ public class AdditionalHearingDocumentService {
         caseData.put("RespondentName", caseDataService.buildFullRespondentName(caseDetails));
     }
 
-    private void addAdditionalHearingDocumentToCaseData(CaseDetails caseDetails, CaseDocument document) {
+    protected void addAdditionalHearingDocumentToCaseData(CaseDetails caseDetails, CaseDocument document) {
         AdditionalHearingDocumentData generatedDocumentData = AdditionalHearingDocumentData.builder()
             .additionalHearingDocument(AdditionalHearingDocument.builder()
                 .document(document)
@@ -181,7 +213,7 @@ public class AdditionalHearingDocumentService {
         caseData.put(ADDITIONAL_HEARING_DOCUMENT_COLLECTION, additionalHearingDocumentDataList);
     }
 
-    private void bulkPrintAdditionalHearingDocuments(CaseDetails caseDetails, String authorisationToken) {
+    public void bulkPrintAdditionalHearingDocuments(CaseDetails caseDetails, String authorisationToken) {
         List<AdditionalHearingDocumentData> additionalHearingDocumentData =
             documentHelper.convertToAdditionalHearingDocumentData(
                 caseDetails.getData().get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION));
@@ -191,7 +223,20 @@ public class AdditionalHearingDocumentService {
         List<BulkPrintDocument> document = singletonList(documentHelper.getBulkPrintDocumentFromCaseDocument(
             additionalHearingDocument.getAdditionalHearingDocument().getDocument()));
 
-        bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, document);
-        bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, document);
+        if (!notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
+            CompletableFuture.runAsync(() ->
+                bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, document));
+        }
+        if (!notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
+            CompletableFuture.runAsync(() ->
+                bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, document));
+        }
+    }
+
+    private void convertHearingOrderCollectionDocumentsToPdf(HearingOrderCollectionData element,
+                                                             String authorisationToken) {
+        CaseDocument pdfApprovedOrder = genericDocumentService.convertDocumentIfNotPdfAlready(
+            element.getHearingOrderDocuments().getUploadDraftDocument(), authorisationToken);
+        element.getHearingOrderDocuments().setUploadDraftDocument(pdfApprovedOrder);
     }
 }
