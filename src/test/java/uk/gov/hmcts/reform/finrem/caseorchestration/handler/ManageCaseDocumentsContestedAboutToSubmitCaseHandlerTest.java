@@ -22,7 +22,7 @@ import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ManageCaseDocumentsContestedAboutToStartCaseHandlerTest {
+public class ManageCaseDocumentsContestedAboutToSubmitCaseHandlerTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -30,30 +30,30 @@ public class ManageCaseDocumentsContestedAboutToStartCaseHandlerTest {
     private ManageCaseDocumentsService manageCaseDocumentsService;
 
     @InjectMocks
-    private ManageCaseDocumentsContestedAboutToStartCaseHandler manageCaseDocumentsAboutToStartCaseHandler;
+    private ManageCaseDocumentsContestedAboutToSubmitCaseHandler manageCaseDocumentsAboutToSubmitCaseHandler;
 
     @Test
-    public void givenACcdCallbackContestedCase_WhenAnAboutToStartEventManageCaseDocuments_thenHandlerCanHandle() {
-        assertThat(manageCaseDocumentsAboutToStartCaseHandler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.MANAGE_CASE_DOCUMENTS),
+    public void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventManageCaseDocuments_thenHandlerCanHandle() {
+        assertThat(manageCaseDocumentsAboutToSubmitCaseHandler
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.MANAGE_CASE_DOCUMENTS),
             is(true));
     }
 
     @Test
-    public void givenACcdCallbackConsentedCase_WhenAnAboutToStartEventManageCaseDocuments_thenHandlerCanNotHandle() {
-        assertThat(manageCaseDocumentsAboutToStartCaseHandler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.MANAGE_CASE_DOCUMENTS),
+    public void givenACcdCallbackConsentedCase_WhenAnAboutToSubmitEventManageCaseDocuments_thenHandlerCanNotHandle() {
+        assertThat(manageCaseDocumentsAboutToSubmitCaseHandler
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.MANAGE_CASE_DOCUMENTS),
             is(false));
     }
 
     @Test
-    public void givenManageCaseDocumentsAboutToStartCaseHandlerShouldCallUploadCaseFilesAboutToSubmitHandlerMethod() {
+    public void givenManageCaseDocumentsAboutToSubmitCaseHandlerShouldCallUploadCaseFilesAboutToSubmitHandlerMethod() {
 
         CallbackRequest callbackRequest =
             CallbackRequest.builder().caseDetails(generalOrderContestedCaseDetails()).build();
-        manageCaseDocumentsAboutToStartCaseHandler.handle(callbackRequest, AUTH_TOKEN);
+        manageCaseDocumentsAboutToSubmitCaseHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(manageCaseDocumentsService).setApplicantAndRespondentDocumentsCollection(any());
+        verify(manageCaseDocumentsService).manageCaseDocuments(any());
     }
 
     private CaseDetails generalOrderContestedCaseDetails() {

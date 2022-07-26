@@ -50,7 +50,7 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
     @Test
     public void givenCaseData_whenSetApplicantAndRespondentDocumentsCollection_thenApplicantDocumentsUploaded() {
 
-        uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "Applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("1", "Chronology", "Applicant", "no", null));
 
         caseDetails.getData().put(APP_CHRONOLOGIES_STATEMENTS_COLLECTION, uploadDocumentList);
 
@@ -62,9 +62,8 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
     @Test
     public void givenCaseData_whenSetApplicantAndRespondentDocumentsCollection_thenRespondentDocumentsUploaded() {
 
-        uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("1","Chronology", "respondent", "no", null));
 
-        uploadDocumentList.get(0).setId("1");
         caseDetails.getData().put(RESP_CHRONOLOGIES_STATEMENTS_COLLECTION, uploadDocumentList);
 
         manageCaseDocumentsService.setApplicantAndRespondentDocumentsCollection(caseDetails);
@@ -85,19 +84,13 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
 
         List<ContestedUploadedDocumentData> chronologyDocs = new ArrayList<>();
 
-        chronologyDocs.add(createContestedUploadDocumentItem("Chronology", "applicant", "no", null));
-        chronologyDocs.get(0).setId("4");
+        chronologyDocs.add(createContestedUploadDocumentItem("4","Chronology", "applicant", "no", null));
 
         List<ContestedUploadedDocumentData> caseDocs = new ArrayList<>();
-        caseDocs.add(createContestedUploadDocumentItem("Chronology", "respondent", "no", null));
-        caseDocs.add(createContestedUploadDocumentItem("Chronology", "respondent", "no", null));
-        caseDocs.add(createContestedUploadDocumentItem("Chronology", "respondent", "no", null));
-        caseDocs.add(createContestedUploadDocumentItem("Chronology", "respondent", "no", null));
-
-        caseDocs.get(0).setId("1");
-        caseDocs.get(1).setId("2");
-        caseDocs.get(2).setId("3");
-        caseDocs.get(3).setId("4");
+        caseDocs.add(createContestedUploadDocumentItem("1","Chronology", "respondent", "no", null));
+        caseDocs.add(createContestedUploadDocumentItem("2","Chronology", "respondent", "no", null));
+        caseDocs.add(createContestedUploadDocumentItem("3","Chronology", "respondent", "no", null));
+        caseDocs.add(createContestedUploadDocumentItem("4","Chronology", "respondent", "no", null));
 
         caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, caseDocs);
         caseDetails.getData().put(APP_CHRONOLOGIES_STATEMENTS_COLLECTION, chronologyDocs);
@@ -113,19 +106,13 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
 
         List<ContestedUploadedDocumentData> chronologyDocs = new ArrayList<>();
 
-        chronologyDocs.add(createContestedUploadDocumentItem("Chronology", "respondent", "no", null));
-        chronologyDocs.get(0).setId("4");
+        chronologyDocs.add(createContestedUploadDocumentItem("4","Chronology", "respondent", "no", null));
 
         List<ContestedUploadedDocumentData> caseDocs = new ArrayList<>();
-        caseDocs.add(createContestedUploadDocumentItem("Chronology", "applicant", "no", null));
-        caseDocs.add(createContestedUploadDocumentItem("Chronology", "applicant", "no", null));
-        caseDocs.add(createContestedUploadDocumentItem("Chronology", "applicant", "no", null));
-        caseDocs.add(createContestedUploadDocumentItem("Form H", "applicant", "no", null));
-
-        caseDocs.get(0).setId("1");
-        caseDocs.get(1).setId("2");
-        caseDocs.get(2).setId("3");
-        caseDocs.get(3).setId("4");
+        caseDocs.add(createContestedUploadDocumentItem("1","Chronology", "applicant", "no", null));
+        caseDocs.add(createContestedUploadDocumentItem("2","Chronology", "applicant", "no", null));
+        caseDocs.add(createContestedUploadDocumentItem("3","Chronology", "applicant", "no", null));
+        caseDocs.add(createContestedUploadDocumentItem("4","Form H", "applicant", "no", null));
 
         caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, caseDocs);
         caseDetails.getData().put(RESP_CHRONOLOGIES_STATEMENTS_COLLECTION, chronologyDocs);
@@ -142,19 +129,13 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
 
         List<ContestedUploadedDocumentData> formH = new ArrayList<>();
 
-        formH.add(createContestedUploadDocumentItem("Form H", "applicant", "no", null));
-        formH.get(0).setId("4");
+        formH.add(createContestedUploadDocumentItem("4","Form H", "applicant", "no", null));
 
         List<ContestedUploadedDocumentData> caseDocs = new ArrayList<>();
-        caseDocs.add(createContestedUploadDocumentItem("Form H", "respondent", "no", null));
-        caseDocs.add(createContestedUploadDocumentItem("Form H", "respondent", "no", null));
-        caseDocs.add(createContestedUploadDocumentItem("Form H", "respondent", "no", null));
-        caseDocs.add(createContestedUploadDocumentItem("Chronology", "respondent", "no", null));
-
-        caseDocs.get(0).setId("1");
-        caseDocs.get(1).setId("2");
-        caseDocs.get(2).setId("3");
-        caseDocs.get(3).setId("4");
+        caseDocs.add(createContestedUploadDocumentItem("1","Form H", "respondent", "no", null));
+        caseDocs.add(createContestedUploadDocumentItem("2","Form H", "respondent", "no", null));
+        caseDocs.add(createContestedUploadDocumentItem("3","Form H", "respondent", "no", null));
+        caseDocs.add(createContestedUploadDocumentItem("4","Chronology", "respondent", "no", null));
 
         caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, caseDocs);
         caseDetails.getData().put(APP_FORMS_H_COLLECTION, formH);
@@ -171,19 +152,13 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
 
         List<ContestedUploadedDocumentData> formH = new ArrayList<>();
 
-        formH.add(createContestedUploadDocumentItem("Form H", "applicant", "no", null));
-        formH.get(0).setId("4");
+        formH.add(createContestedUploadDocumentItem("4","Form H", "applicant", "no", null));
 
         List<ContestedUploadedDocumentData> caseDocuments = new ArrayList<>();
-        caseDocuments.add(createContestedUploadDocumentItem("Form H", "respondent", "no", null));
-        caseDocuments.add(createContestedUploadDocumentItem("Form H", "respondent", "no", null));
-        caseDocuments.add(createContestedUploadDocumentItem("Form H", "respondent", "no", null));
-        caseDocuments.add(createContestedUploadDocumentItem("Form H", "applicant", "no", null));
-
-        caseDocuments.get(0).setId("1");
-        caseDocuments.get(1).setId("2");
-        caseDocuments.get(2).setId("3");
-        caseDocuments.get(3).setId("4");
+        caseDocuments.add(createContestedUploadDocumentItem("1","Form H", "respondent", "no", null));
+        caseDocuments.add(createContestedUploadDocumentItem("2","Form H", "respondent", "no", null));
+        caseDocuments.add(createContestedUploadDocumentItem("3","Form H", "respondent", "no", null));
+        caseDocuments.add(createContestedUploadDocumentItem("4","Form H", "applicant", "no", null));
 
         caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, caseDocuments);
         caseDetails.getData().put(APP_FORMS_H_COLLECTION, formH);
@@ -199,19 +174,13 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
 
         List<ContestedUploadedDocumentData> formHFdrDocs = new ArrayList<>();
 
-        formHFdrDocs.add(createContestedUploadDocumentItem("Form H", null, "no", null));
-        formHFdrDocs.get(0).setId("4");
+        formHFdrDocs.add(createContestedUploadDocumentItem("4","Form H", null, "no", null));
 
         List<ContestedUploadedDocumentData> caseDocs = new ArrayList<>();
-        caseDocs.add(createContestedUploadDocumentItem("Chronology", "applicant", "no", null));
-        caseDocs.add(createContestedUploadDocumentItem("Chronology", "applicant", "no", null));
-        caseDocs.add(createContestedUploadDocumentItem("Chronology", "applicant", "no", null));
-        caseDocs.add(createContestedUploadDocumentItem("Form H", "applicant", "no", null));
-
-        caseDocs.get(0).setId("1");
-        caseDocs.get(1).setId("2");
-        caseDocs.get(2).setId("3");
-        caseDocs.get(3).setId("4");
+        caseDocs.add(createContestedUploadDocumentItem("1","Chronology", "applicant", "no", null));
+        caseDocs.add(createContestedUploadDocumentItem("2","Chronology", "applicant", "no", null));
+        caseDocs.add(createContestedUploadDocumentItem("3","Chronology", "applicant", "no", null));
+        caseDocs.add(createContestedUploadDocumentItem("4","Form H", "applicant", "no", null));
 
         caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, caseDocs);
         caseDetails.getData().put(FDR_DOCS_COLLECTION, formHFdrDocs);
@@ -224,18 +193,11 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
 
     private CaseDetails populateCaseData() {
 
-        uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "Respondent", "no", null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "Respondent", "no", null));
-
-        uploadDocumentList.get(0).setId("123");
-        uploadDocumentList.get(1).setId("456");
-
-        ContestedUploadedDocumentData data = new ContestedUploadedDocumentData();
-        data.setId("123");
-        data.setUploadedCaseDocument(new ContestedUploadedDocument());
+        uploadDocumentList.add(createContestedUploadDocumentItem("123","Chronology", "Respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("456","Chronology", "Respondent", "no", null));
 
         List<ContestedUploadedDocumentData> caseDocs = new ArrayList<>();
-        caseDocs.add(createContestedUploadDocumentItem("Chronology", "respondent", "no", null));
+        caseDocs.add(createContestedUploadDocumentItem("123", "Chronology", "respondent", "no", null));
 
         caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, caseDocs);
 
@@ -250,10 +212,11 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
             });
     }
 
-    private ContestedUploadedDocumentData createContestedUploadDocumentItem(String type, String party,
+    private ContestedUploadedDocumentData createContestedUploadDocumentItem(String id, String type, String party,
                                                                             String isConfidential, String other) {
 
         return ContestedUploadedDocumentData.builder()
+            .id(id)
             .uploadedCaseDocument(ContestedUploadedDocument
                 .builder()
                 .caseDocuments(new CaseDocument())

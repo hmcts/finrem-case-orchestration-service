@@ -30,7 +30,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class ManageCaseDocumentsService {
 
     private final ObjectMapper mapper;
-    private final List<CaseDocumentHandler> caseDocumentHandlers;
+    private final List<CaseDocumentHandler<ContestedUploadedDocumentData>> caseDocumentHandlers;
 
     public Map<String, Object> setApplicantAndRespondentDocumentsCollection(CaseDetails caseDetails) {
 
@@ -53,12 +53,8 @@ public class ManageCaseDocumentsService {
         findAndRemoveMovedDocumentFromCollections(caseData, idToCollectionData);
 
         List<ContestedUploadedDocumentData> caseDocuments = getAllDocumentsInCollection(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
-
         caseDocumentHandlers.forEach(h -> h.handle(caseDocuments, caseData));
-
         caseData.put(CONTESTED_UPLOADED_DOCUMENTS, caseDocuments);
-
-        caseData.put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, caseDocuments);
 
         return caseData;
     }
@@ -99,19 +95,15 @@ public class ManageCaseDocumentsService {
             CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
         documentIdsAndCollection.forEach((documentId, collection) ->
             getAllDocumentsInCollection(caseData, collection)
-            .forEach(contestedUploadedDocumentData -> {
-                if (collection.startsWith("app") || collection.startsWith("resp") || collection.startsWith("fdr")) {
-                    caseData.put(collection, findIfDocumentExistInCollectionAfterMove(
-                        caseData, getAllDocumentsInCollection(caseData, collection), contestedUploadedDocumentData,
-                        caseDocumentsCollection));
-                }
-            }));
+                .forEach(contestedUploadedDocumentData -> caseData.put(collection, findIfDocumentExistInCollectionAfterMove(
+                    caseData, getAllDocumentsInCollection(caseData, collection), contestedUploadedDocumentData,
+                    caseDocumentsCollection))));
     }
 
     private List<ContestedUploadedDocumentData> findIfDocumentExistInCollectionAfterMove(Map<String, Object> caseData,
-                                                                      List<ContestedUploadedDocumentData> collection,
-                                                                      ContestedUploadedDocumentData documentToCheck,
-                                                                      List<ContestedUploadedDocumentData> caseDocumentCollection) {
+                                                                                         List<ContestedUploadedDocumentData> collection,
+                                                                                         ContestedUploadedDocumentData documentToCheck,
+                                                                                         List<ContestedUploadedDocumentData> caseDocumentCollection) {
 
         for (Iterator<ContestedUploadedDocumentData> it = caseDocumentCollection.iterator(); it.hasNext(); ) {
 
@@ -167,5 +159,3 @@ public class ManageCaseDocumentsService {
         });
     }
 }
-
-

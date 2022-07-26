@@ -9,28 +9,32 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ManageCaseDocumentsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.InterimHearingService;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ManageCaseDocumentsContestedAboutToStartCaseHandler implements CallbackHandler {
+public class InterimHearingContestedSubmittedHandler implements CallbackHandler {
 
-    private final ManageCaseDocumentsService manageCaseDocumentsService;
+    private final InterimHearingService interimHearingService;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.ABOUT_TO_START.equals(callbackType)
+        return CallbackType.SUBMITTED.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.MANAGE_CASE_DOCUMENTS.equals(eventType);
+            && EventType.INTERIM_HEARING.equals(eventType);
     }
 
     @Override
-    public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest, String userAuthorisation) {
+    public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
+                                                       String userAuthorisation) {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
 
-        return AboutToStartOrSubmitCallbackResponse.builder().data(
-            manageCaseDocumentsService.setApplicantAndRespondentDocumentsCollection(caseDetails)).build();
+        interimHearingService.sendNotification(caseDetails, caseDetailsBefore);
+
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(callbackRequest.getCaseDetails().getData()).build();
     }
 }
