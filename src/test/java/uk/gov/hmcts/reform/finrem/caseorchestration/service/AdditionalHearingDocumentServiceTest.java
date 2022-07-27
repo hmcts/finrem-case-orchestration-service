@@ -315,6 +315,15 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         assertEquals(expectedDocument, actualDocument);
     }
 
+    @Test
+    public void givenEmptyList_whenBulkPrintAdditionalHearingDocuments_thenDoNothing() {
+        CaseDetails caseDetails = CaseDetails.builder().data(new HashMap<>()).build();
+
+        additionalHearingDocumentService.bulkPrintAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
+        verify(bulkPrintService, never()).printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService, never()).printRespondentDocuments(any(), any(), any());
+    }
+
 
     private Map<String, Object> baseCaseData() {
         Map<String, Object> caseData = new HashMap<>();
