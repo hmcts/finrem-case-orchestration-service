@@ -1205,9 +1205,8 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void isContestedAndRespondentSolicitorIsNotRegisteredOrAcceptingEmails() {
-        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
         when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(true);
-        when(caseDataService.isPaperApplication(any())).thenReturn(true);
         when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
 
         Map<String, Object> caseData = new HashMap<>();
