@@ -417,7 +417,7 @@ public class NotificationService {
     }
 
     public boolean isContestedApplicationAndApplicantOrRespondentSolicitorsIsNotRegisteredOrAcceptingEmails(CaseDetails caseDetails) {
-        return caseDataService.isContestedApplication(caseDetails)
+        return caseDataService.isContestedPaperApplication(caseDetails)
             && (!isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)
             || !isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails));
     }

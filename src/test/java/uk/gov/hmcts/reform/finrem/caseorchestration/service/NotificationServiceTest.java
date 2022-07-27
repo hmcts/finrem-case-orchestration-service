@@ -1177,7 +1177,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void givenAppIsContestedAndApplicantSolicitorIsNotRegisteredOrAcceptingEmails_shouldSendLettersApplicantSolicitor() {
-        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
         when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(false);
         when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(false);
 

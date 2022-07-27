@@ -215,13 +215,8 @@ public class AdditionalHearingDocumentService {
 
     public void bulkPrintAdditionalHearingDocuments(CaseDetails caseDetails, String authorisationToken) {
         List<AdditionalHearingDocumentData> additionalHearingDocumentData =
-            Optional.ofNullable(documentHelper.convertToAdditionalHearingDocumentData(
-                caseDetails.getData().get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION))).orElse(new ArrayList<>());
-
-        if (additionalHearingDocumentData.isEmpty()) {
-            log.error("Hearing document data was empty for case {}", caseDetails.getId());
-            return;
-        }
+            documentHelper.convertToAdditionalHearingDocumentData(
+                caseDetails.getData().get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION));
 
         AdditionalHearingDocumentData additionalHearingDocument = additionalHearingDocumentData.get(additionalHearingDocumentData.size() - 1);
 
