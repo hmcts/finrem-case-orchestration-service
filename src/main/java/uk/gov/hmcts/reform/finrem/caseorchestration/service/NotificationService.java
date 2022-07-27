@@ -395,13 +395,14 @@ public class NotificationService {
         log.info("caseDataService.isPaperApplication {}", caseDataService.isPaperApplication(caseData));
         log.info("caseDataService.isRespondentRepresentedByASolicitor {}", caseDataService.isRespondentRepresentedByASolicitor(caseData));
         log.info("caseDataService.isNotEmpty {}", caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData));
-        boolean resSolConsent = YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT)));
-        log.info("RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT {}", resSolConsent);
+        log.info("RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT {}", caseData.get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT));
+        log.info("caseDataService.isPaperApplication {}",
+            YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT))));
 
         return !caseDataService.isPaperApplication(caseData)
             && caseDataService.isRespondentRepresentedByASolicitor(caseData)
             && caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData)
-            && resSolConsent;
+            && YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT)));
     }
 
     public boolean isContestedApplicantSolicitorEmailCommunicationEnabled(Map<String, Object> caseData) {
