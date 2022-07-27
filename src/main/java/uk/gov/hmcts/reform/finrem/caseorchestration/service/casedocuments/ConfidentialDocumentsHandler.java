@@ -10,8 +10,12 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.ccd.domain.UploadConfidentialDocument;
 import uk.gov.hmcts.reform.finrem.ccd.domain.UploadConfidentialDocumentCollection;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo.isYes;
 
 @Component
 @Slf4j
@@ -34,14 +38,15 @@ public class ConfidentialDocumentsHandler extends CaseDocumentHandler<UploadConf
             .filter(d -> d.getValue().getCaseDocuments() != null
                 && d.getValue().getCaseDocumentType() != null
                 && d.getValue().getCaseDocumentConfidential() != null
-                && d.getValue().getCaseDocumentConfidential().isYes())
+                && isYes(d.getValue().getCaseDocumentConfidential()))
             .collect(Collectors.toList());
 
 
         log.info("Adding items: {}, to Confidential Documents Collection", confidentialFiltered);
         uploadedDocuments.removeAll(confidentialFiltered);
 
-        List<UploadConfidentialDocumentCollection> confidentialDocsCollection = caseData.getConfidentialDocumentsUploaded();
+        List<UploadConfidentialDocumentCollection> confidentialDocsCollection =
+            Optional.ofNullable(caseData.getConfidentialDocumentsUploaded()).orElse(new ArrayList<>());
 
         if (!confidentialFiltered.isEmpty()) {
             List<UploadConfidentialDocumentCollection> confidentialDocs = confidentialFiltered.stream().map(

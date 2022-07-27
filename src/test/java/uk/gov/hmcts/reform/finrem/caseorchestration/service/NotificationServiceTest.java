@@ -1023,14 +1023,15 @@ public class NotificationServiceTest extends BaseServiceTest {
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(isA(FinremCaseDetails.class))).thenReturn(true);
+        FinremCaseDetails caseDetails = getContestedNewCallbackRequest().getCaseDetails();
 
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_NOTICE_OF_CHANGE_CONTESTED))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
 
-        notificationService.sendNoticeOfChangeEmail(newCallbackRequest.getCaseDetails());
+        notificationService.sendNoticeOfChangeEmail(caseDetails);
 
-        verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(newCallbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(caseDetails);
         verify(notificationServiceConfiguration).getContestedNoticeOfChange();
     }
 
@@ -1057,14 +1058,15 @@ public class NotificationServiceTest extends BaseServiceTest {
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(isA(FinremCaseDetails.class))).thenReturn(false);
+        FinremCaseDetails caseDetails = getContestedNewCallbackRequest().getCaseDetails();
 
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_NOTICE_OF_CHANGE_CONTESTED))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
 
-        notificationService.sendNoticeOfChangeEmail(newCallbackRequest.getCaseDetails());
+        notificationService.sendNoticeOfChangeEmail(caseDetails);
 
-        verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(newCallbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(caseDetails);
         verify(notificationServiceConfiguration).getContestedNoticeOfChange();
     }
 
@@ -1074,14 +1076,15 @@ public class NotificationServiceTest extends BaseServiceTest {
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(isA(FinremCaseDetails.class))).thenReturn(true);
+        FinremCaseDetails caseDetails = getContestedNewCallbackRequest().getCaseDetails();
 
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_NOC_CASEWORKER_CONTESTED))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
 
-        notificationService.sendNoticeOfChangeEmailCaseworker(newCallbackRequest.getCaseDetails());
+        notificationService.sendNoticeOfChangeEmailCaseworker(caseDetails);
 
-        verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(newCallbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(caseDetails);
         verify(notificationServiceConfiguration).getContestedNoCCaseworker();
     }
 
@@ -1108,14 +1111,15 @@ public class NotificationServiceTest extends BaseServiceTest {
         notificationRequest.setName(TEST_SOLICITOR_NAME);
         when(notificationRequestMapper.getNotificationRequestForNoticeOfChange(any())).thenReturn(notificationRequest);
         when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(isA(FinremCaseDetails.class))).thenReturn(false);
+        FinremCaseDetails caseDetails = getContestedNewCallbackRequest().getCaseDetails();
 
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_NOC_CASEWORKER_CONTESTED))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
 
-        notificationService.sendNoticeOfChangeEmailCaseworker(newCallbackRequest.getCaseDetails());
+        notificationService.sendNoticeOfChangeEmailCaseworker(caseDetails);
 
-        verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(newCallbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(caseDetails);
         verify(notificationServiceConfiguration).getContestedNoCCaseworker();
         verify(mockRestTemplate, never()).exchange(any(), eq(HttpMethod.POST), any(), eq(String.class));
     }

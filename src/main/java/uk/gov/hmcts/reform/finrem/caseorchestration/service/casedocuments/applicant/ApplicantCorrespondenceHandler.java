@@ -6,7 +6,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.Corres
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.UploadCaseDocumentCollection;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class ApplicantCorrespondenceHandler extends CorrespondenceHandler {
@@ -18,7 +20,8 @@ public class ApplicantCorrespondenceHandler extends CorrespondenceHandler {
 
     @Override
     protected List<UploadCaseDocumentCollection> getDocumentCollection(FinremCaseData caseData) {
-        return caseData.getUploadCaseDocumentWrapper().getAppCorrespondenceDocsCollection();
+        return Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getAppCorrespondenceDocsCollection())
+            .orElse(new ArrayList<>());
     }
 
     @Override

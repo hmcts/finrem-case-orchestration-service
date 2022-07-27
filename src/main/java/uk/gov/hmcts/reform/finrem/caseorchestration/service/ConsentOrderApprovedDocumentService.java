@@ -1,19 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.LetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.consentorderapproved.ConsentOrderApprovedLetterDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.ccd.domain.ConsentOrder;
 import uk.gov.hmcts.reform.finrem.ccd.domain.ConsentOrderCollection;
@@ -29,9 +22,6 @@ import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_PENSION_COLLECTION;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +31,6 @@ public class ConsentOrderApprovedDocumentService {
     private final GenericDocumentService genericDocumentService;
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
-    private final ObjectMapper mapper;
     private final ConsentOrderApprovedLetterDetailsMapper consentOrderApprovedLetterDetailsMapper;
     private final LetterDetailsMapper letterDetailsMapper;
 
@@ -168,7 +157,7 @@ public class ConsentOrderApprovedDocumentService {
 
     private List<ConsentOrderCollection> getApprovedOrders(FinremCaseData caseData) {
         return caseData.isConsentedInContestedCase()
-            ? caseData.getConsentOrderWrapper().getContestedConsentedApprovedOrders()
-            : caseData.getApprovedOrderCollection();
+            ? Optional.ofNullable(caseData.getConsentOrderWrapper().getContestedConsentedApprovedOrders()).orElse(new ArrayList<>())
+            : Optional.ofNullable(caseData.getApprovedOrderCollection()).orElse(new ArrayList<>());
     }
 }

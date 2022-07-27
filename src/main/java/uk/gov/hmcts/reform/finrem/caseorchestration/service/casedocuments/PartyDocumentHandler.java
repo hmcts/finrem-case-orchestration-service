@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 
 import lombok.extern.slf4j.Slf4j;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.ccd.domain.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.UploadCaseDocument;
@@ -27,7 +28,7 @@ public abstract class PartyDocumentHandler extends CaseDocumentHandler<UploadCas
                 UploadCaseDocument uploadedCaseDocument = d.getValue();
                 return uploadedCaseDocument.getCaseDocuments() != null
                     && uploadedCaseDocument.getCaseDocumentParty() != null
-                    && uploadedCaseDocument.getCaseDocumentParty().getValue().equals(party);
+                    && CaseDocumentParty.forValue(party).equals(uploadedCaseDocument.getCaseDocumentParty());
             })
             .filter(d -> d.getValue().getCaseDocumentType() != null
                 && isDocumentTypeValid(d.getValue().getCaseDocumentType()))

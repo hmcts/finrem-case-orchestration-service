@@ -20,8 +20,8 @@ public class StatementExhibitsHandler extends PartyDocumentHandler {
 
     @Override
     protected boolean isDocumentTypeValid(CaseDocumentType caseDocumentType) {
-        return caseDocumentType.equals(CaseDocumentType.STATEMENT_AFFIDAVIT)
-            || caseDocumentType.equals(CaseDocumentType.WITNESS_STATEMENT_AFFIDAVIT);
+        return CaseDocumentType.STATEMENT_AFFIDAVIT.equals(caseDocumentType)
+            || CaseDocumentType.WITNESS_STATEMENT_AFFIDAVIT.equals(caseDocumentType);
     }
 
     @Override

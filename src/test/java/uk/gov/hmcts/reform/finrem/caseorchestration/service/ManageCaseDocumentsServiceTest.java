@@ -46,7 +46,6 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
 
     @Test
     public void givenCaseData_whenSetApplicantAndRespondentDocumentsCollection_thenApplicantDocumentsUploaded() {
-
         uploadDocumentList.add(createContestedUploadDocumentItem(UUID.randomUUID(), CaseDocumentType.CHRONOLOGY,
             CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
 
@@ -113,13 +112,13 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
 
         UUID someId = UUID.randomUUID();
 
-        chronologyDocs.add(createContestedUploadDocumentItem(someId,CaseDocumentType.CHRONOLOGY, CaseDocumentParty.RESPONDENT, YesOrNo.NO, null));
+        chronologyDocs.add(createContestedUploadDocumentItem(someId, CaseDocumentType.CHRONOLOGY, CaseDocumentParty.RESPONDENT, YesOrNo.NO, null));
 
         List<UploadCaseDocumentCollection> caseDocs = new ArrayList<>();
         caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
         caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
         caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
-        caseDocs.add(createContestedUploadDocumentItem(someId,CaseDocumentType.FORM_H, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
+        caseDocs.add(createContestedUploadDocumentItem(someId, CaseDocumentType.FORM_H, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
 
         caseDetails.getCaseData().getUploadCaseDocumentWrapper().setManageCaseDocumentCollection(caseDocs);
         caseDetails.getCaseData().getUploadCaseDocumentWrapper().setRespChronologiesCollection(chronologyDocs);
@@ -128,7 +127,7 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
 
         assertThat(caseData.getUploadCaseDocumentWrapper().getRespChronologiesCollection(), hasSize(0));
         assertThat(caseData.getUploadCaseDocumentWrapper().getAppChronologiesCollection(), hasSize(3));
-        assertThat(caseData.getUploadCaseDocumentWrapper().getRespFormsHCollection(), hasSize(1));
+        assertThat(caseData.getUploadCaseDocumentWrapper().getAppFormsHCollection(), hasSize(1));
     }
 
     @Test
@@ -138,16 +137,16 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
 
         UUID someId = UUID.randomUUID();
 
-        formH.add(createContestedUploadDocumentItem(someId,CaseDocumentType.FORM_H, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
+        formH.add(createContestedUploadDocumentItem(someId, CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
 
         List<UploadCaseDocumentCollection> caseDocs = new ArrayList<>();
         caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(), CaseDocumentType.FORM_H, CaseDocumentParty.RESPONDENT,
             YesOrNo.NO, null));
-        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.FORM_H, CaseDocumentParty.RESPONDENT,
+        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(), CaseDocumentType.FORM_H, CaseDocumentParty.RESPONDENT,
             YesOrNo.NO, null));
-        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.FORM_H, CaseDocumentParty.RESPONDENT,
+        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(), CaseDocumentType.FORM_H, CaseDocumentParty.RESPONDENT,
             YesOrNo.NO, null));
-        caseDocs.add(createContestedUploadDocumentItem(someId,CaseDocumentType.CHRONOLOGY, CaseDocumentParty.RESPONDENT, YesOrNo.NO, null));
+        caseDocs.add(createContestedUploadDocumentItem(someId, CaseDocumentType.CHRONOLOGY, CaseDocumentParty.RESPONDENT, YesOrNo.NO, null));
 
         caseDetails.getCaseData().getUploadCaseDocumentWrapper().setManageCaseDocumentCollection(caseDocs);
         caseDetails.getCaseData().getUploadCaseDocumentWrapper().setAppFormsHCollection(formH);
@@ -167,7 +166,7 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
 
         UUID someId = UUID.randomUUID();
 
-        formH.add(createContestedUploadDocumentItem(someId,CaseDocumentType.FORM_H, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
+        formH.add(createContestedUploadDocumentItem(someId, CaseDocumentType.FORM_H, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
 
         List<UploadCaseDocumentCollection> caseDocuments = new ArrayList<>();
         caseDocuments.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.FORM_H, CaseDocumentParty.RESPONDENT,
@@ -204,7 +203,7 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
             YesOrNo.NO, null));
         caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT,
             YesOrNo.NO, null));
-        caseDocs.add(createContestedUploadDocumentItem(someId,CaseDocumentType.FORM_H, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
+        caseDocs.add(createContestedUploadDocumentItem(someId, CaseDocumentType.FORM_H, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
 
         caseDetails.getCaseData().getUploadCaseDocumentWrapper().setManageCaseDocumentCollection(caseDocs);
         caseDetails.getCaseData().getUploadCaseDocumentWrapper().setFdrCaseDocumentCollection(formHFdrDocs);

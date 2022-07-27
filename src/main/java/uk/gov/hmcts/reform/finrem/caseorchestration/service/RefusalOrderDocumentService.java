@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.UploadOrderDocumentType;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -64,7 +66,7 @@ public class RefusalOrderDocumentService {
 
         Optional.ofNullable(caseData.getUploadOrder()).ifPresentOrElse(
             collection -> collection.add(consentOrderData),
-            () -> caseData.setUploadOrder(List.of(consentOrderData)));
+            () -> caseData.setUploadOrder(Lists.newArrayList(consentOrderData)));
 
 
         if (caseData.isConsentedInContestedCase()) {
@@ -72,7 +74,7 @@ public class RefusalOrderDocumentService {
 
             Optional.ofNullable(caseData.getConsentOrderWrapper().getConsentedNotApprovedOrders()).ifPresentOrElse(
                 collection -> collection.add(consentOrder),
-                () -> caseData.getConsentOrderWrapper().setConsentedNotApprovedOrders(List.of(consentOrder)));
+                () -> caseData.getConsentOrderWrapper().setConsentedNotApprovedOrders(Lists.newArrayList(consentOrder)));
         }
 
         return caseData;

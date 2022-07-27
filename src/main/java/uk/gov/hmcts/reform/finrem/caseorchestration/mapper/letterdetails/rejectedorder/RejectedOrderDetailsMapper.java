@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.reject
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.DocumentTemplateDetails;
@@ -11,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetai
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.OrderRefusalCollection;
+import uk.gov.hmcts.reform.finrem.ccd.domain.OrderRefusalOption;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.CourtListWrapper;
 
 import java.util.ArrayList;
@@ -41,7 +43,7 @@ public class RejectedOrderDetailsMapper extends AbstractLetterDetailsMapper {
     @Override
     public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtListWrapper courtList) {
         FinremCaseData caseData = caseDetails.getCaseData();
-        FrcCourtDetails courtDetails = courtDetailsMapper.getCourtDetails(courtList);
+        FrcCourtDetails courtDetails = getFrcCourtDetails(caseData, courtList);
         return RejectedOrderDetails.builder()
             .applicantName(caseData.getFullApplicantName())
             .respondentName(caseData.getRespondentFullName())
@@ -49,14 +51,20 @@ public class RejectedOrderDetailsMapper extends AbstractLetterDetailsMapper {
             .divorceCaseNumber(caseData.getDivorceCaseNumber())
             .refusalOrderHeader(REFUSAL_ORDER_HEADER)
             .courtDetails(courtDetails)
-            .courtName(getCourtName(caseData))
+            .courtName(getCourtName(caseData, courtDetails))
             .orderRefusalCollectionNew(getTranslatedRefusalOrderCollection(caseData))
             .build();
     }
 
-    private String getCourtName(FinremCaseData caseData) {
+    private FrcCourtDetails getFrcCourtDetails(FinremCaseData caseData, CourtListWrapper courtList) {
+        return caseData.isConsentedApplication()
+            ? getConsentedFrcCourtDetails()
+            : courtDetailsMapper.getCourtDetails(courtList);
+    }
+
+    private String getCourtName(FinremCaseData caseData, FrcCourtDetails courtDetails) {
         return caseData.isContestedApplication()
-            ? CONTESTED_COURT_NAME
+            ? CONTESTED_COURT_NAME + courtDetails.getCourtName()
             : CONSENTED_COURT_NAME;
     }
 
@@ -79,8 +87,23 @@ public class RejectedOrderDetailsMapper extends AbstractLetterDetailsMapper {
     }
 
     private List<String> getReasonsAsStringAndTranslate(OrderRefusalCollection refusalOrder) {
-        return refusalOrder.getValue().getOrderRefusal().stream()
-            .map(s -> REFUSAL_KEYS.getOrDefault(s.getId(), s.getId()))
-            .collect(toList());
+        List<String> orderRefusalStrings = refusalOrder.getValue().getOrderRefusal().stream()
+            .map(OrderRefusalOption::getId).collect(toList());
+
+        if (orderRefusalStrings.contains("Transferred to Applicant’s home Court")) {
+            orderRefusalStrings.addAll(List.of("Transferred to Applicant home Court - A",
+                "Transferred to Applicant home Court - B"));
+            orderRefusalStrings.remove("Transferred to Applicant’s home Court");
+        }
+        return orderRefusalStrings;
+    }
+
+    private FrcCourtDetails getConsentedFrcCourtDetails() {
+        return FrcCourtDetails.builder()
+            .courtName(OrchestrationConstants.CTSC_COURT_NAME)
+            .courtAddress(OrchestrationConstants.CTSC_COURT_ADDRESS)
+            .phoneNumber(OrchestrationConstants.CTSC_PHONE_NUMBER)
+            .email((OrchestrationConstants.CTSC_EMAIL_ADDRESS))
+            .build();
     }
 }

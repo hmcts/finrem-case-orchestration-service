@@ -6,7 +6,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.Chrono
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.UploadCaseDocumentCollection;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class ApplicantChronologiesStatementHandler extends ChronologiesStatementsHandler {
@@ -18,7 +20,7 @@ public class ApplicantChronologiesStatementHandler extends ChronologiesStatement
 
     @Override
     protected List<UploadCaseDocumentCollection> getDocumentCollection(FinremCaseData caseData) {
-        return caseData.getUploadCaseDocumentWrapper().getAppChronologiesCollection();
+        return Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getAppChronologiesCollection()).orElse(new ArrayList<>());
     }
 
     @Override

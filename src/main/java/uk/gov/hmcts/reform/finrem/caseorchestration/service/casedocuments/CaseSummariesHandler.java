@@ -21,9 +21,9 @@ public class CaseSummariesHandler extends PartyDocumentHandler {
 
     @Override
     protected boolean isDocumentTypeValid(CaseDocumentType caseDocumentType) {
-        return caseDocumentType.equals(CaseDocumentType.POSITION_STATEMENT)
-            || caseDocumentType.equals(CaseDocumentType.SKELETON_ARGUMENT)
-            || caseDocumentType.equals(CaseDocumentType.CASE_SUMMARY);
+        return CaseDocumentType.POSITION_STATEMENT.equals(caseDocumentType)
+            || CaseDocumentType.SKELETON_ARGUMENT.equals(caseDocumentType)
+            || CaseDocumentType.CASE_SUMMARY.equals(caseDocumentType);
     }
 
     @Override

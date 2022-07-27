@@ -19,7 +19,7 @@ public class HearingBundleHandler extends PartyDocumentHandler {
 
     @Override
     protected boolean isDocumentTypeValid(CaseDocumentType caseDocumentType) {
-        return caseDocumentType.equals(CaseDocumentType.TRIAL_BUNDLE);
+        return CaseDocumentType.TRIAL_BUNDLE.equals(caseDocumentType);
     }
 
     @Override

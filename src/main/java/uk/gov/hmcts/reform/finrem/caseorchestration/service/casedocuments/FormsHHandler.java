@@ -19,7 +19,7 @@ public class FormsHHandler extends PartyDocumentHandler {
 
     @Override
     protected boolean isDocumentTypeValid(CaseDocumentType caseDocumentType) {
-        return caseDocumentType.equals(CaseDocumentType.FORM_H);
+        return CaseDocumentType.FORM_H.equals(caseDocumentType);
     }
 
     @Override

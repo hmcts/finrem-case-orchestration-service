@@ -23,11 +23,11 @@ public class OtherDocumentsHandler extends PartyDocumentHandler {
 
     @Override
     protected boolean isDocumentTypeValid(CaseDocumentType caseDocumentType) {
-        return caseDocumentType.equals(CaseDocumentType.OTHER)
-            || caseDocumentType.equals(CaseDocumentType.FORM_B)
-            || caseDocumentType.equals(CaseDocumentType.FORM_F)
-            || caseDocumentType.equals(CaseDocumentType.CARE_PLAN)
-            || caseDocumentType.equals(CaseDocumentType.PENSION_PLAN);
+        return CaseDocumentType.OTHER.equals(caseDocumentType)
+            || CaseDocumentType.FORM_B.equals(caseDocumentType)
+            || CaseDocumentType.FORM_F.equals(caseDocumentType)
+            || CaseDocumentType.CARE_PLAN.equals(caseDocumentType)
+            || CaseDocumentType.PENSION_PLAN.equals(caseDocumentType);
     }
 
     @Override

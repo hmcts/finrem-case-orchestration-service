@@ -7,8 +7,12 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
+import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.frcupateinfo.UpdateFrcInfoLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.generators.UpdateFrcInfoLetterDetailsGenerator;
@@ -17,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -30,12 +35,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.generators.UpdateFrcInfoLetterDetailsGenerator.LETTER_DATE_FORMAT;
 
 @RunWith(MockitoJUnitRunner.class)
-public class UpdateFrcInfoLetterDetailsGeneratorTest {
+public class UpdateFrcInfoLetterDetailsGeneratorTest extends BaseServiceTest {
     @Mock
     private DocumentHelper documentHelper;
-
     @Mock
-    private CaseDataService caseDataService;
+    private CourtDetailsMapper courtDetailsMapper;
+    @Autowired
+    private ObjectMapper mapper;
 
     @InjectMocks
     UpdateFrcInfoLetterDetailsGenerator updateFrcInfoLetterDetailsGenerator;
@@ -50,11 +56,12 @@ public class UpdateFrcInfoLetterDetailsGeneratorTest {
     protected static final String RESP_FORMATTED_ADDRESS = "respFormattedAddress";
 
     @Before
-    public void setUp() {
+    public void setUp() throws IOException {
         when(documentHelper.getApplicantFullName(any())).thenReturn(APPLICANT_FULL_NAME);
         when(documentHelper.getRespondentFullNameContested(any())).thenReturn(RESPONDENT_FULL_NAME_CONTESTED);
+        when(courtDetailsMapper.getCourtDetails(any())).thenReturn(FrcCourtDetails.builder().build());
         caseDetails = finremCaseDetailsFromResource(
-            "/fixtures/contested/generate-frc-info-letter-details.json",
+            getResource("/fixtures/contested/generate-frc-info-letter-details.json"),
             new ObjectMapper());
     }
 

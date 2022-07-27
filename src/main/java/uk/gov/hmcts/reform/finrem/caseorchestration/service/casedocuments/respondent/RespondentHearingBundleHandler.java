@@ -6,7 +6,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.Hearin
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.UploadCaseDocumentCollection;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class RespondentHearingBundleHandler extends HearingBundleHandler {
@@ -18,7 +20,8 @@ public class RespondentHearingBundleHandler extends HearingBundleHandler {
 
     @Override
     protected List<UploadCaseDocumentCollection> getDocumentCollection(FinremCaseData caseData) {
-        return caseData.getUploadCaseDocumentWrapper().getRespHearingBundlesCollection();
+        return Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getRespHearingBundlesCollection())
+            .orElse(new ArrayList<>());
     }
 
     @Override

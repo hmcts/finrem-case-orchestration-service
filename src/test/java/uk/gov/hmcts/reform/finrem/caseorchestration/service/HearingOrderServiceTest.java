@@ -40,7 +40,7 @@ public class HearingOrderServiceTest extends BaseServiceTest {
 
     @Test
     public void convertPdfDocument() {
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(eq(newDocument()), eq(AUTH_TOKEN))).thenReturn(newDocument());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(isA(Document.class), eq(AUTH_TOKEN))).thenReturn(newDocument());
         when(genericDocumentService.stampDocument(isA(Document.class), eq(AUTH_TOKEN))).thenReturn(newDocument());
 
         FinremCaseData caseData = prepareCaseData(makeDraftDirectionOrderCollectionWithOneElement());

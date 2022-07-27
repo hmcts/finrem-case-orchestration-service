@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandler;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
@@ -22,19 +22,20 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ManageCaseDocumentsService {
 
-    private final List<CaseDocumentHandler<ContestedUploadedDocumentData>> caseDocumentHandlers;
+    private final List<CaseDocumentHandler<UploadCaseDocumentCollection>> caseDocumentHandlers;
+    private final List<Field> contestedUploadCaseFilesCollectionFields = Arrays.stream(ContestedUploadCaseFilesCollectionType.values())
+        .map(ContestedUploadCaseFilesCollectionType::getManageCaseDocumentCollectionField)
+        .collect(Collectors.toList());
 
     public FinremCaseData setApplicantAndRespondentDocumentsCollection(FinremCaseDetails caseDetails) {
         try {
             Map<String, Field> idToCollectionData = findCollectionNameOfDocument(caseDetails.getCaseData());
-
+            idToCollectionData.forEach((key, value) -> value.setAccessible(true));
             findAndRemoveMovedDocumentFromCollections(caseDetails.getCaseData(), idToCollectionData);
 
             caseDetails.getCaseData().getUploadCaseDocumentWrapper()
@@ -69,27 +70,32 @@ public class ManageCaseDocumentsService {
 
         Set<String> findRemainingApplicantAndRespondentDocumentIds =
             caseData.getUploadCaseDocumentWrapper().getManageCaseDocumentCollection().stream()
-            .map(UploadCaseDocumentCollection::getId)
-            .map(UUID::toString).collect(Collectors.toSet());
+                .map(UploadCaseDocumentCollection::getId)
+                .map(UUID::toString).collect(Collectors.toSet());
 
-        Arrays.stream(UploadCaseDocumentWrapper.class.getDeclaredFields()).forEach(collection -> {
+        contestedUploadCaseFilesCollectionFields.forEach(collection -> {
             collection.setAccessible(true);
-            if (collection.getName().contains(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION)) {
-                return;
-            }
-            try {
-                Optional.ofNullable(collection.get(caseData.getUploadCaseDocumentWrapper()))
-                    .ifPresent(value -> addToCaseData(caseData, findRemainingApplicantAndRespondentDocumentIds,
-                            collection, (List<UploadCaseDocumentCollection>) value));
-            } catch (IllegalAccessException e) {
-                throw new IllegalStateException("Illegal access has occurred, could not manage case documents");
-            }});
+            performDeleteOperation(caseData, findRemainingApplicantAndRespondentDocumentIds, collection);
+        });
     }
 
-    private void addToCaseData(FinremCaseData caseData, Set<String> findRemainingApplicantAndRespondentDocumentIds,
-                               Field collection, List<UploadCaseDocumentCollection> value) {
+    private void performDeleteOperation(FinremCaseData caseData,
+                                        Set<String> findRemainingApplicantAndRespondentDocumentIds,
+                                        Field collection) {
         try {
-            collection.set(caseData.getUploadCaseDocumentWrapper(), filterRemainingDocuments(findRemainingApplicantAndRespondentDocumentIds, value));
+            Optional.ofNullable(collection.get(caseData.getUploadCaseDocumentWrapper()))
+                .ifPresent(value -> replaceCollectionWithValue(caseData, findRemainingApplicantAndRespondentDocumentIds,
+                    collection, (List<UploadCaseDocumentCollection>) value));
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException("Illegal access has occurred, could not manage case documents");
+        }
+    }
+
+    private void replaceCollectionWithValue(FinremCaseData caseData, Set<String> findRemainingApplicantAndRespondentDocumentIds,
+                                            Field collection, List<UploadCaseDocumentCollection> value) {
+        try {
+            collection.set(caseData.getUploadCaseDocumentWrapper(),
+                filterRemainingDocuments(findRemainingApplicantAndRespondentDocumentIds, value));
         } catch (IllegalAccessException e) {
             throw new IllegalStateException("Illegal access has occurred, could not manage case documents");
         }
@@ -108,9 +114,8 @@ public class ManageCaseDocumentsService {
         List<UploadCaseDocumentCollection> allDocuments = new ArrayList<>();
         UploadCaseDocumentWrapper uploadCaseDocumentData = caseData.getUploadCaseDocumentWrapper();
 
-        Field[] collectionTypes = caseData.getUploadCaseDocumentWrapper().getClass().getDeclaredFields();
-
-        for (Field collectionType : collectionTypes) {
+        for (Field collectionType : contestedUploadCaseFilesCollectionFields) {
+            collectionType.setAccessible(true);
             Optional.ofNullable(collectionType.get(uploadCaseDocumentData))
                 .ifPresent(value -> allDocuments.addAll((List<UploadCaseDocumentCollection>) value));
         }
@@ -120,10 +125,8 @@ public class ManageCaseDocumentsService {
 
     private void findAndRemoveMovedDocumentFromCollections(FinremCaseData caseData, Map<String, Field> documentIdsAndCollection) {
 
-        List<UploadCaseDocumentCollection> caseDocumentsCollection =
-            caseData.getUploadCaseDocumentWrapper().getManageCaseDocumentCollection();
+        List<UploadCaseDocumentCollection> caseDocumentsCollection = getManageDocumentCollection(caseData);
         UploadCaseDocumentWrapper uploadCaseDocumentData = caseData.getUploadCaseDocumentWrapper();
-
 
         documentIdsAndCollection.forEach((documentId, collection) -> {
             try {
@@ -132,6 +135,7 @@ public class ManageCaseDocumentsService {
 
                 allDocumentsInCollection.forEach(document -> {
                     try {
+                        collection.setAccessible(true);
                         collection.set(uploadCaseDocumentData, findIfDocumentExistInCollectionAfterMove(
                             caseData, allDocumentsInCollection, document, caseDocumentsCollection));
                     } catch (IllegalAccessException e) {
@@ -144,9 +148,9 @@ public class ManageCaseDocumentsService {
     }
 
     private List<UploadCaseDocumentCollection> findIfDocumentExistInCollectionAfterMove(FinremCaseData caseData,
-                                                                                         List<UploadCaseDocumentCollection> collection,
-                                                                                         UploadCaseDocumentCollection documentToCheck,
-                                                                                         List<UploadCaseDocumentCollection> caseDocumentCollection) {
+                                                                                        List<UploadCaseDocumentCollection> collection,
+                                                                                        UploadCaseDocumentCollection documentToCheck,
+                                                                                        List<UploadCaseDocumentCollection> caseDocumentCollection) {
         for (Iterator<UploadCaseDocumentCollection> it = caseDocumentCollection.iterator(); it.hasNext(); ) {
             UploadCaseDocumentCollection document = it.next();
 
@@ -165,34 +169,32 @@ public class ManageCaseDocumentsService {
 
     private Map<String, Field> findCollectionNameOfDocument(FinremCaseData caseData) throws IllegalAccessException {
 
-        Map<String, Field> documentIdToCollection = new HashMap<>();
-        List<String> caseDocumentsCollection = getCaseDocumentsCollection(caseData);
+        Map<String, Field> documentIdToFieldMap = new HashMap<>();
+        List<UUID> manageCaseDocumentsCollectionIds = getManageCaseDocumentsCollectionIds(caseData);
 
-        List<Field> uploadCaseFilesCollections = List.of(UploadCaseDocumentWrapper.class.getDeclaredFields());
-
-        for (Field collectionType : uploadCaseFilesCollections) {
-
+        for (Field collectionType : contestedUploadCaseFilesCollectionFields) {
+            collectionType.setAccessible(true);
             List<UploadCaseDocumentCollection> docsInCollection =
                 getAllDocumentsInCollection(caseData.getUploadCaseDocumentWrapper(), collectionType);
 
-            if (!docsInCollection.isEmpty() && !collectionType.getName().contains(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION)) {
-                for (UploadCaseDocumentCollection document : docsInCollection) {
-                    for (String caseDocument : caseDocumentsCollection) {
-                        if (caseDocument.equals(document.getId().toString())) {
-                            documentIdToCollection.put(caseDocument, collectionType);
+            if (!docsInCollection.isEmpty()) {
+                for (UploadCaseDocumentCollection selectedCollectionDocument : docsInCollection) {
+                    for (UUID documentId : manageCaseDocumentsCollectionIds) {
+                        if (documentId.equals(selectedCollectionDocument.getId())) {
+                            documentIdToFieldMap.put(documentId.toString(), collectionType);
                         }
                     }
                 }
             }
         }
 
-        return documentIdToCollection;
+        return documentIdToFieldMap;
     }
 
-    private List<String> getCaseDocumentsCollection(FinremCaseData caseData) {
-        return caseData.getUploadCaseDocumentWrapper().getManageCaseDocumentCollection()
+    private List<UUID> getManageCaseDocumentsCollectionIds(FinremCaseData caseData) {
+        return Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getManageCaseDocumentCollection()).orElse(new ArrayList<>())
             .stream()
-            .map(document -> document.getId().toString()).collect(Collectors.toList());
+            .map(UploadCaseDocumentCollection::getId).collect(Collectors.toList());
     }
 
     private List<UploadCaseDocumentCollection> getAllDocumentsInCollection(UploadCaseDocumentWrapper data,
@@ -201,5 +203,9 @@ public class ManageCaseDocumentsService {
         List<UploadCaseDocumentCollection> uploadedDocuments = (List<UploadCaseDocumentCollection>) collection.get(data);
 
         return Optional.ofNullable(uploadedDocuments).orElse(new ArrayList<>());
+    }
+
+    private List<UploadCaseDocumentCollection> getManageDocumentCollection(FinremCaseData caseData) {
+        return Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getManageCaseDocumentCollection()).orElse(new ArrayList<>());
     }
 }

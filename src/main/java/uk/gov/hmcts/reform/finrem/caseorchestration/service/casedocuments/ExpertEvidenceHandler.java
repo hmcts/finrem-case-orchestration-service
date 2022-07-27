@@ -20,8 +20,8 @@ public class ExpertEvidenceHandler extends PartyDocumentHandler {
 
     @Override
     protected boolean isDocumentTypeValid(CaseDocumentType caseDocumentType) {
-        return caseDocumentType.equals(CaseDocumentType.VALUATION_REPORT)
-            || caseDocumentType.equals(CaseDocumentType.EXPERT_EVIDENCE);
+        return CaseDocumentType.VALUATION_REPORT.equals(caseDocumentType)
+            || CaseDocumentType.EXPERT_EVIDENCE.equals(caseDocumentType);
     }
 
     @Override

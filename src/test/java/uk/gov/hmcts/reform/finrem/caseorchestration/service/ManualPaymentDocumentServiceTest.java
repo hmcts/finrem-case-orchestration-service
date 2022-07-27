@@ -12,12 +12,9 @@ import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -29,6 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finremCaseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ADDRESSEE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
@@ -37,7 +35,6 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
 
     @Autowired private ManualPaymentDocumentService manualPaymentDocumentService;
     @Autowired private ObjectMapper mapper;
-    @Autowired private FinremCallbackRequestDeserializer deserializer;
 
     @MockBean private GenericDocumentService genericDocumentService;
 
@@ -56,7 +53,7 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
     @Test
     public void shouldGenerateManualPaymentLetterForApplicantSolicitor() throws Exception {
         caseDetails = contestedPaperCaseDetails();
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(newDocument());
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any())).thenReturn(newDocument());
 
         Document generatedManualPaymentLetter
             = manualPaymentDocumentService.generateManualPaymentLetter(caseDetails, AUTH_TOKEN, APPLICANT);
@@ -66,9 +63,10 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
         verify(genericDocumentService, times(1)).generateDocumentFromPlaceholdersMap(any(),
             placeholdersMapCaptor.capture(), any(), any());
 
-        Map<String, Object> caseData = placeholdersMapCaptor.getValue();
+        Map<String, Object> caseData = getDataFromCaptor(placeholdersMapCaptor);
 
-        Addressee addressee = (Addressee) caseData.get(ADDRESSEE);
+        Addressee addressee = mapper.convertValue(caseData.get(ADDRESSEE), Addressee.class);
+        System.out.println(addressee);
         assertThat(addressee.getName(), is("Applicant Solicitor Firm"));
         assertThat(addressee.getFormattedAddress(), is("67 Pears Road\nNear Roundabout\nMiddlesex\nHounslow\nTW3 1SS"));
 
@@ -83,7 +81,7 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
     @Test
     public void shouldGenerateManualPaymentLetterForApplicant() throws Exception {
         caseDetails = contestedPaperCaseDetailsWithoutSolicitors();
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(newDocument());
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any())).thenReturn(newDocument());
 
         Document generatedManualPaymentLetter
             = manualPaymentDocumentService.generateManualPaymentLetter(caseDetails, AUTH_TOKEN, APPLICANT);
@@ -94,9 +92,10 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
             .generateDocumentFromPlaceholdersMap(any(),
             placeholdersMapCaptor.capture(), any(), any());
 
-        Map<String, Object> caseData = placeholdersMapCaptor.getValue();
+        Map<String, Object> caseData = getDataFromCaptor(placeholdersMapCaptor);
 
-        Addressee addressee = (Addressee) caseData.get(ADDRESSEE);
+        Addressee addressee = mapper.convertValue(caseData.get(ADDRESSEE), Addressee.class);
+        System.out.println(addressee);
         assertThat(addressee.getName(), is("Applicant Name"));
         assertThat(addressee.getFormattedAddress(), is("Buckingham Palace\nLondon\nSW1A 1AA"));
 
@@ -109,13 +108,11 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
     }
 
     private FinremCaseDetails contestedPaperCaseDetails() throws Exception {
-        return deserializer.deserialize(new String(Files.readAllBytes(Paths.get("/fixtures/contested/paper-case.json"))))
-            .getCaseDetails();
+        return finremCaseDetailsFromResource(getResource("/fixtures/contested/paper-case.json"), mapper);
     }
 
     private FinremCaseDetails contestedPaperCaseDetailsWithoutSolicitors() throws Exception {
-        return deserializer.deserialize(new String(Files.readAllBytes(Paths.get("/fixtures/contested/paper-case-no-solicitors.json"))))
-            .getCaseDetails();
+        return finremCaseDetailsFromResource(getResource("/fixtures/contested/paper-case-no-solicitors.json"), mapper);
     }
 
     private FrcCourtDetails convertToCourtDetails(Object object) {

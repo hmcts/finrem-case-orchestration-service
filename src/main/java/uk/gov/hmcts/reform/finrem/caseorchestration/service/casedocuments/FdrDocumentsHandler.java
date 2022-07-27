@@ -8,8 +8,12 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.ccd.domain.UploadCaseDocumentCollection;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo.isYes;
 
 @Component
 @Slf4j
@@ -23,7 +27,8 @@ public class FdrDocumentsHandler extends CaseDocumentHandler<UploadCaseDocumentC
 
     @Override
     protected List<UploadCaseDocumentCollection> getDocumentCollection(FinremCaseData caseData) {
-        return caseData.getUploadCaseDocumentWrapper().getFdrCaseDocumentCollection();
+        return Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getFdrCaseDocumentCollection())
+            .orElse(new ArrayList<>());
     }
 
     @Override
@@ -35,7 +40,7 @@ public class FdrDocumentsHandler extends CaseDocumentHandler<UploadCaseDocumentC
                 return uploadedCaseDocument.getCaseDocuments() != null
                     && uploadedCaseDocument.getCaseDocumentType() != null
                     && uploadedCaseDocument.getCaseDocumentFdr() != null
-                    && uploadedCaseDocument.getCaseDocumentFdr().isYes();
+                    && isYes(uploadedCaseDocument.getCaseDocumentFdr());
             })
             .collect(Collectors.toList());
 

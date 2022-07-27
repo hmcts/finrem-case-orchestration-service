@@ -21,9 +21,9 @@ public class ChronologiesStatementsHandler extends PartyDocumentHandler {
 
     @Override
     protected boolean isDocumentTypeValid(CaseDocumentType caseDocumentType) {
-        return caseDocumentType.equals(CaseDocumentType.STATEMENT_OF_ISSUES)
-            || caseDocumentType.equals(CaseDocumentType.CHRONOLOGY)
-            || caseDocumentType.equals(CaseDocumentType.FORM_G);
+        return CaseDocumentType.STATEMENT_OF_ISSUES.equals(caseDocumentType)
+            || CaseDocumentType.CHRONOLOGY.equals(caseDocumentType)
+            || CaseDocumentType.FORM_G.equals(caseDocumentType);
     }
 
     @Override

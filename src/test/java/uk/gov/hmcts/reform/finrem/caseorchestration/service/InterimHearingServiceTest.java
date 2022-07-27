@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
@@ -58,7 +59,7 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
         FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource(BEFORE_MIGRATION_TEST_JSON), mapper);
         FinremCaseDetails caseDetailsBefore = finremCaseDetailsFromResource(getResource(MODIFIED_DURING_MIGRATION_TEST_JSON), mapper);
 
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(newDocument());
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any())).thenReturn(newDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(isA(Document.class), any())).thenReturn(newDocument());
 
         interimHearingService.submitInterimHearing(caseDetails,caseDetailsBefore, AUTH_TOKEN);
@@ -84,7 +85,7 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
         FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource(ONE_MIGRATED_AND_ONE_ADDED_HEARING_JSON), mapper);
         FinremCaseDetails caseDetailsBefore = finremCaseDetailsFromResource(getResource(ONE_MIGRATED_MODIFIED_AND_ONE_ADDED_HEARING_JSON), mapper);
 
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(newDocument());
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any())).thenReturn(newDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(isA(Document.class), any())).thenReturn(newDocument());
 
         interimHearingService.submitInterimHearing(caseDetails,caseDetailsBefore, AUTH_TOKEN);
@@ -110,7 +111,7 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
         FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource(ONE_MIGRATED_AND_ONE_ADDED_HEARING_JSON), mapper);
         FinremCaseDetails caseDetailsBefore = finremCaseDetailsFromResource(getResource(ONE_MIGRATED_AND_ONE_ADDED_HEARING_JSON), mapper);
 
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(newDocument());
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any())).thenReturn(newDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(isA(Document.class), any())).thenReturn(newDocument());
 
         interimHearingService.submitInterimHearing(caseDetails,caseDetailsBefore, AUTH_TOKEN);
@@ -132,7 +133,7 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
         FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource(TEST_NEW_JSON), mapper);
         FinremCaseDetails caseDetailsBefore = finremCaseDetailsFromResource(getResource(TEST_NEW_JSON), mapper);
 
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(newDocument());
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any())).thenReturn(newDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(isA(Document.class), any())).thenReturn(newDocument());
 
         interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
@@ -160,7 +161,7 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
         caseDetails.getCaseData().getContactDetailsWrapper().setApplicantSolicitorConsentForEmails(YesOrNo.NO);
         caseDetails.getCaseData().getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.NO);
 
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(newDocument());
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any())).thenReturn(newDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(isA(Document.class), any())).thenReturn(newDocument());
 
         FinremCaseDetails caseDetailsBefore = finremCaseDetailsFromResource(getResource(TEST_NEW_JSON), mapper);
@@ -178,7 +179,7 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
 
 
     @Test
-    public void givenContestedPaperCase_WhenPaperCase_ThenItShouldNotSendNotificaton() throws IOException {
+    public void givenContestedPaperCase_WhenSendNotification_ThenItShouldNotSendNotification() throws IOException {
         FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource(TEST_NEW_JSON), mapper);
         FinremCaseDetails caseDetailsBefore = finremCaseDetailsFromResource(getResource(TEST_NEW_JSON), mapper);
 

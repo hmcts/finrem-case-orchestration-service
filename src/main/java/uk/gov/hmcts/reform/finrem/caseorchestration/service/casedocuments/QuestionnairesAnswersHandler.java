@@ -21,8 +21,8 @@ public class QuestionnairesAnswersHandler extends PartyDocumentHandler {
 
     @Override
     protected boolean isDocumentTypeValid(CaseDocumentType caseDocumentType) {
-        return caseDocumentType.equals(CaseDocumentType.QUESTIONNAIRE)
-            || caseDocumentType.equals(CaseDocumentType.REPLY_TO_QUESTIONNAIRE);
+        return CaseDocumentType.QUESTIONNAIRE.equals(caseDocumentType)
+            || CaseDocumentType.REPLY_TO_QUESTIONNAIRE.equals(caseDocumentType);
     }
 
     @Override

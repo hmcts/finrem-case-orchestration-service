@@ -38,23 +38,26 @@ public class ValidateHearingService {
 
     public List<String> validateHearingWarnings(FinremCaseDetails caseDetails) {
         FinremCaseData caseData = caseDetails.getCaseData();
-        String issueDate = nullToEmpty(caseData.getIssueDate());
-        String hearingDate = nullToEmpty(caseData.getHearingDate());
-
-        LocalDate issueLocalDate = LocalDate.parse(issueDate);
-        LocalDate hearingLocalDate = LocalDate.parse(hearingDate);
+        LocalDate issueLocalDate = caseData.getIssueDate();
+        LocalDate hearingLocalDate = caseData.getHearingDate();
 
         boolean fastTrackApplication = isFastTrackApplication.apply(caseData);
         if (fastTrackApplication) {
-            if (!isDateInBetweenIncludingEndPoints(issueLocalDate.plusWeeks(6), issueLocalDate.plusWeeks(10),
-                hearingLocalDate)) {
+            if (isNotValidHearingDate(issueLocalDate, hearingLocalDate, 6, 10)) {
                 return ImmutableList.of(DATE_BETWEEN_6_AND_10_WEEKS);
             }
-        } else if (!isDateInBetweenIncludingEndPoints(issueLocalDate.plusWeeks(12), issueLocalDate.plusWeeks(16),
-            hearingLocalDate)) {
+        } else if (isNotValidHearingDate(issueLocalDate, hearingLocalDate, 12, 16)) {
             return ImmutableList.of(DATE_BETWEEN_12_AND_16_WEEKS);
         }
         return ImmutableList.of();
+    }
+
+    private boolean isNotValidHearingDate(LocalDate issueLocalDate, LocalDate hearingLocalDate,
+                                          int minWeeksToAdd, int maxWeeksToAdd) {
+        return issueLocalDate == null
+            || hearingLocalDate == null
+            || !isDateInBetweenIncludingEndPoints(issueLocalDate.plusWeeks(minWeeksToAdd),
+            issueLocalDate.plusWeeks(maxWeeksToAdd), hearingLocalDate);
     }
 
     private static boolean isDateInBetweenIncludingEndPoints(final LocalDate min, final LocalDate max,

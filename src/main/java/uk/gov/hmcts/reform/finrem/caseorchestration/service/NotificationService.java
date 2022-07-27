@@ -11,7 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
@@ -51,6 +53,7 @@ public class NotificationService {
     private final CaseDataService caseDataService;
     private final CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
     private final CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
+    private final CourtDetailsMapper courtDetailsMapper;
 
     private static final String DEFAULT_EMAIL = "fr_applicant_solicitor1@mailinator.com";
 
@@ -480,13 +483,12 @@ public class NotificationService {
             nullToEmpty(caseDetails.getCaseData().getApplicantSolicitorName()));
     }
 
-    private String getRecipientEmail(FinremCaseDetails caseDetails) throws JsonProcessingException {
+    private String getRecipientEmail(FinremCaseDetails caseDetails) {
         if (featureToggleService.isSendToFRCEnabled()) {
             FinremCaseData caseData = caseDetails.getCaseData();
-            Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
-            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(caseData.getSelectedCourt());
+            FrcCourtDetails courtDetails = courtDetailsMapper.getCourtDetails(caseData.getRegionWrapper().getDefaultCourtList());
 
-            return (String) courtDetails.get(COURT_DETAILS_EMAIL_KEY);
+            return courtDetails.getEmail();
         }
 
         return DEFAULT_EMAIL;

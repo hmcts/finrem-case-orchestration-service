@@ -20,8 +20,8 @@ public class CorrespondenceHandler extends PartyDocumentHandler {
 
     @Override
     protected boolean isDocumentTypeValid(CaseDocumentType caseDocumentType) {
-        return caseDocumentType.equals(CaseDocumentType.OFFERS)
-            || caseDocumentType.equals(CaseDocumentType.LETTER_FROM_APPLICANT);
+        return CaseDocumentType.OFFERS.equals(caseDocumentType)
+            || CaseDocumentType.LETTER_FROM_APPLICANT.equals(caseDocumentType);
     }
 
     @Override

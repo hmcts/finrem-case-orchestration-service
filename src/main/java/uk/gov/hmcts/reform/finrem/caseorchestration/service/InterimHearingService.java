@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -9,7 +7,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.interimhearing.GeneralApplicationInterimHearingNoticeDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
@@ -18,7 +15,6 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.InterimHearingBulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.ccd.domain.InterimHearingBulkPrintDocumentsData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.InterimHearingCollection;
 import uk.gov.hmcts.reform.finrem.ccd.domain.InterimHearingCollectionItemData;
-import uk.gov.hmcts.reform.finrem.ccd.domain.InterimHearingItem;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -29,9 +25,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_PROMPT_FOR_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_UPLOADED_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
+import static uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo.isYes;
 
 @Service
 @RequiredArgsConstructor
@@ -43,7 +38,6 @@ public class InterimHearingService {
     private final GenericDocumentService genericDocumentService;
     private final NotificationService notificationService;
     private final DocumentHelper documentHelper;
-    private final ObjectMapper objectMapper;
     private final GeneralApplicationInterimHearingNoticeDetailsMapper generalApplicationInterimHearingNoticeDetailsMapper;
 
     public void submitInterimHearing(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore, String authorisationToken) {
@@ -99,18 +93,18 @@ public class InterimHearingService {
     private void addUploadedDocumentsToBulkPrintList(List<InterimHearingCollection> interimHearingList,
                                                      List<BulkPrintDocument> documents,
                                                      String authorisationToken) {
-        List<Map<String, Object>> interimCaseData = convertInterimHearingCollectionDataToMap(interimHearingList);
-        interimCaseData.forEach(interimData -> addToBulkPrintList(interimData, documents, authorisationToken));
+        interimHearingList.forEach(interimData -> addToBulkPrintList(interimData, documents, authorisationToken));
     }
 
-    private void addToBulkPrintList(Map<String, Object> interimData,
-                                      List<BulkPrintDocument> documents,String authorisationToken) {
-        String isDocUploaded = nullToEmpty(interimData.get(INTERIM_HEARING_PROMPT_FOR_DOCUMENT));
-        if ("Yes".equalsIgnoreCase(isDocUploaded)) {
+    private void addToBulkPrintList(InterimHearingCollection interimData,
+                                      List<BulkPrintDocument> documents,
+                                    String authorisationToken) {
+        String isDocUploaded = interimData.getValue().getInterimPromptForAnyDocument();
+        if (isYes(isDocUploaded)) {
             log.warn("Additional uploaded interim document found for printing for case");
-            CaseDocument caseDocument = documentHelper.convertToCaseDocument(interimData.get(INTERIM_HEARING_UPLOADED_DOCUMENT));
-            CaseDocument additionalUploadedDocuments = genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken);
-            documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(additionalUploadedDocuments));
+            Document caseDocument = interimData.getValue().getInterimUploadAdditionalDocument();
+            Document additionalUploadedDocuments = genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken);
+            documents.add(documentHelper.getDocumentAsBulkPrintDocument(additionalUploadedDocuments).orElse(null));
         }
     }
 
@@ -132,14 +126,6 @@ public class InterimHearingService {
         return interimHearingList.stream()
             .map(data -> generateCaseDocument(caseDetails, data, authorisationToken))
             .collect(Collectors.toList());
-    }
-
-    public List<Map<String, Object>> convertInterimHearingCollectionDataToMap(List<InterimHearingCollection> interimHearingList) {
-        List<InterimHearingItem> interimHearingItems
-            = interimHearingList.stream().map(InterimHearingCollection::getValue).collect(Collectors.toList());
-        return interimHearingItems.stream()
-            .map(obj -> objectMapper.convertValue(obj, new TypeReference<Map<String, Object>>() {
-            })).collect(Collectors.toList());
     }
 
     private Document generateCaseDocument(FinremCaseDetails caseDetails, InterimHearingCollection hearingItem,
