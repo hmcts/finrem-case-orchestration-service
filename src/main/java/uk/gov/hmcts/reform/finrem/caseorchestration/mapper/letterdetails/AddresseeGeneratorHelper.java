@@ -36,8 +36,8 @@ public class AddresseeGeneratorHelper {
 
     private static Addressee getApplicantAddressee(FinremCaseData caseData) {
         return Addressee.builder()
-            .formattedAddress(formatAddressForLetterPrinting(getAppAddress(caseData)))
             .name(getAppName(caseData))
+            .formattedAddress(formatAddressForLetterPrinting(getAppAddress(caseData)))
             .build();
     }
 
@@ -57,8 +57,8 @@ public class AddresseeGeneratorHelper {
 
     private static Addressee getRespondentAddressee(FinremCaseData caseData) {
         return Addressee.builder()
-            .formattedAddress(formatAddressForLetterPrinting(getRespAddress(caseData)))
             .name(getRespName(caseData))
+            .formattedAddress(formatAddressForLetterPrinting(getRespAddress(caseData)))
             .build();
     }
 

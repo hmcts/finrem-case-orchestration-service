@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLett
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
 
+import java.io.IOException;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -24,9 +26,9 @@ public class SolicitorAddedLetterDetailsGeneratorTest extends AbstractLetterDeta
     private SolicitorAddedLetterDetailsGenerator solicitorAddedLetterDetailsGenerator;
 
     @Before
-    public void setUpTest() {
+    public void setUpTest() throws IOException {
         super.setUpTest();
-        when(documentHelper.getRespondentFullNameContested(any(CaseDetails.class))).thenReturn(RESPONDENT_FULL_NAME_CONTESTED);
+        when(courtDetailsMapper.getCourtDetails(any())).thenReturn(getContestedFrcCourtDetails());
     }
 
     @Test
@@ -70,6 +72,4 @@ public class SolicitorAddedLetterDetailsGeneratorTest extends AbstractLetterDeta
             is("Your notice of change has been completed successfully. You can now view your client's case."));
 
     }
-
-
 }

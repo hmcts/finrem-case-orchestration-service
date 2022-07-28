@@ -28,27 +28,27 @@ public class UpdateFrcInfoRespondentServiceTest extends BaseUpdateFrcInfoDocumen
     @Test
     public void givenRespondentRequiresLetterNotification_whenGetUpdateFrcInfoLetter_thenReturnRespondentLetter() {
         setUpLitigantMockContext();
-        Optional<Document> applicantLetter = updateFrcInfoRespondentDocumentService
+        Optional<Document> respondentLetter = updateFrcInfoRespondentDocumentService
             .getUpdateFrcInfoLetter(caseDetails, AUTH_TOKEN);
 
-        assertTrue(applicantLetter.isPresent());
+        assertTrue(respondentLetter.isPresent());
         assertPlaceHoldersMap(updateFrcInfoLetterDetailsCaptor.getValue());
-        assertAndVerifyDocumentIsGenerated(applicantLetter.get());
-        assertEquals(applicantLetter.get().getFilename(), LIT_DOC_FILENAME);
-        assertEquals(applicantLetter.get().getUrl(), RESP_LITIGANT_URL);
+        assertAndVerifyDocumentIsGenerated(respondentLetter.get());
+        assertEquals(respondentLetter.get().getFilename(), LIT_DOC_FILENAME);
+        assertEquals(respondentLetter.get().getUrl(), RESP_LITIGANT_URL);
     }
 
     @Test
     public void givenRespSolicitorRequiresLetterNotification_whenGetUpdateFrcInfoLetter_thenReturnRespSolLetter() {
         setUpSolicitorMockContext();
-        Optional<Document> appSolLetter = updateFrcInfoRespondentDocumentService
+        Optional<Document> respondentSolicitorLetter = updateFrcInfoRespondentDocumentService
             .getUpdateFrcInfoLetter(caseDetails, AUTH_TOKEN);
 
-        assertTrue(appSolLetter.isPresent());
+        assertTrue(respondentSolicitorLetter.isPresent());
         assertPlaceHoldersMap(updateFrcInfoLetterDetailsCaptor.getValue());
-        assertAndVerifyDocumentIsGenerated(appSolLetter.get());
-        assertEquals(appSolLetter.get().getFilename(), SOL_DOC_FILENAME);
-        assertEquals(appSolLetter.get().getUrl(), RESP_SOLICITOR_URL);
+        assertAndVerifyDocumentIsGenerated(respondentSolicitorLetter.get());
+        assertEquals(respondentSolicitorLetter.get().getFilename(), SOL_DOC_FILENAME);
+        assertEquals(respondentSolicitorLetter.get().getUrl(), RESP_SOLICITOR_URL);
     }
 
     @Test
@@ -69,7 +69,7 @@ public class UpdateFrcInfoRespondentServiceTest extends BaseUpdateFrcInfoDocumen
             updateFrcInfoLetterDetailsCaptor.capture(),
             eq(LIT_DOC_TEMPLATE),
             eq(LIT_DOC_FILENAME)))
-            .thenReturn(new Document(RESP_LITIGANT_URL, LIT_DOC_FILENAME, null));
+            .thenReturn(new Document(RESP_LITIGANT_URL, null, LIT_DOC_FILENAME));
         when(updateFrcInfoLetterDetailsGenerator.generate(any(), any())).thenReturn(updateFrcInfoLetterDetails);
     }
 
@@ -83,7 +83,7 @@ public class UpdateFrcInfoRespondentServiceTest extends BaseUpdateFrcInfoDocumen
             updateFrcInfoLetterDetailsCaptor.capture(),
             eq(SOL_DOC_TEMPLATE),
             eq(SOL_DOC_FILENAME)))
-            .thenReturn(new Document(RESP_SOLICITOR_URL, SOL_DOC_FILENAME, null));
+            .thenReturn(new Document(RESP_SOLICITOR_URL, null, SOL_DOC_FILENAME));
         when(updateFrcInfoLetterDetailsGenerator.generate(any(), any())).thenReturn(updateFrcInfoLetterDetails);
     }
 

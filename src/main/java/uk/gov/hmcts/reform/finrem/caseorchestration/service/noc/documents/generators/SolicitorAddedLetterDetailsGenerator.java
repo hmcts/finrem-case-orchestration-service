@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -15,8 +16,9 @@ public class SolicitorAddedLetterDetailsGenerator extends AbstractLetterDetailsG
     @Autowired
     public SolicitorAddedLetterDetailsGenerator(
         AddresseeGeneratorService addresseeGeneratorService,
-        CourtDetailsMapper courtDetailsMapper) {
-        super(addresseeGeneratorService, courtDetailsMapper);
+        CourtDetailsMapper courtDetailsMapper,
+        ObjectMapper mapper) {
+        super(addresseeGeneratorService, courtDetailsMapper, mapper);
     }
 
     @Override

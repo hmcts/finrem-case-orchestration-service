@@ -4,11 +4,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Address;
 import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.ChangedRepresentative;
@@ -26,16 +23,11 @@ public class RespondentAddresseeGeneratorTest {
     protected static final String CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME_VALUE = "Contested Respondent first middle name";
     protected static final String CONTESTED_RESPONDENT_LAST_NAME_VALUE = "Contested Respondent last name";
     protected static final Address RESPONDENT_ADDRESS_VALUE = Address.builder().addressLine1("Consented address line 1").build();
-    protected static final String FORMATTED_ADDRESS = "formattedAddress";
+    protected static final String FORMATTED_ADDRESS = "Consented address line 1";
     protected static final String CONTESTED_FULL_NAME = CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME_VALUE + " "
         + CONTESTED_RESPONDENT_LAST_NAME_VALUE;
     protected static final String CONSENTED_FULL_NAME = CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME_VALUE + " "
         + CONSENTED_RESPONDENT_LAST_NAME_VALUE;
-
-    @Mock
-    private CaseDataService caseDataService;
-    @Mock
-    private DocumentHelper documentHelper;
 
     @InjectMocks
     RespondentAddresseeGenerator respondentAddresseeGenerator;
@@ -45,6 +37,7 @@ public class RespondentAddresseeGeneratorTest {
 
     @Before
     public void setUpData() {
+        caseData = FinremCaseData.builder().build();
         caseData.getContactDetailsWrapper().setAppRespondentFmName(CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME_VALUE);
         caseData.getContactDetailsWrapper().setAppRespondentLName(CONSENTED_RESPONDENT_LAST_NAME_VALUE);
         caseData.getContactDetailsWrapper().setRespondentFmName(CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME_VALUE);
@@ -55,7 +48,6 @@ public class RespondentAddresseeGeneratorTest {
 
     @Test
     public void whenConsentedCaseShouldBuildContestedRespondentAddressee() {
-
         caseData.setCcdCaseType(CaseType.CONTESTED);
 
         Addressee addressee = respondentAddresseeGenerator.generate(caseDetails,
@@ -68,7 +60,6 @@ public class RespondentAddresseeGeneratorTest {
 
     @Test
     public void whenContestedCaseShouldBuildContestedRespondentAddressee() {
-
         caseData.setCcdCaseType(CaseType.CONSENTED);
 
         Addressee addressee = respondentAddresseeGenerator.generate(caseDetails,

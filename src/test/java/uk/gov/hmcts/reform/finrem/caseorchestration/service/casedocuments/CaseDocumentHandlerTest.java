@@ -40,8 +40,7 @@ public abstract class CaseDocumentHandlerTest {
                                                                              YesOrNo isConfidential, YesOrNo isFdr,
                                                                              String other) {
         return UploadCaseDocumentCollection.builder()
-            .value(UploadCaseDocument
-                .builder()
+            .value(UploadCaseDocument.builder()
                 .caseDocuments(new Document())
                 .caseDocumentType(CaseDocumentType.getCaseDocumentType(type))
                 .caseDocumentParty(CaseDocumentParty.forValue(party))

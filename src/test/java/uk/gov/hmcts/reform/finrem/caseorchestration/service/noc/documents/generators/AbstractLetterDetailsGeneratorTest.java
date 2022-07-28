@@ -5,7 +5,11 @@ import org.junit.Before;
 import org.mockito.Mock;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
@@ -15,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Organisation;
 import uk.gov.hmcts.reform.finrem.ccd.domain.RepresentationUpdate;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -29,12 +34,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_NAME_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_PHONE_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildConsentedFrcCourtDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.AbstractLetterDetailsGenerator.LETTER_DATE_FORMAT;
 
-public class AbstractLetterDetailsGeneratorTest {
+public class AbstractLetterDetailsGeneratorTest extends BaseServiceTest {
 
-    protected static final String APPLICANT_FULL_NAME = "applicantFullName";
-    protected static final String RESPONDENT_FULL_NAME_CONTESTED = "respondentFullNameContested";
+    protected static final String APPLICANT_FULL_NAME = "Poor Guy";
+    protected static final String RESPONDENT_FULL_NAME_CONTESTED = "Mr Respondent Respondent";
     protected static final String RESPONDENT_FULL_NAME_CONSENTED = "respondentFullNameConsented";
     protected static final String FORMATTED_ADDRESS = "formattedAddress";
     protected static final String ADDRESSEE_NAME = "addresseeName";
@@ -50,6 +56,10 @@ public class AbstractLetterDetailsGeneratorTest {
     protected DocumentHelper documentHelper;
     @Mock
     protected CaseDataService caseDataService;
+    @Mock
+    protected CourtDetailsMapper courtDetailsMapper;
+    @Mock
+    protected ObjectMapper mapper;
 
     protected FinremCaseDetails caseDetails;
     protected FinremCaseDetails caseDetailsBefore;
@@ -58,13 +68,12 @@ public class AbstractLetterDetailsGeneratorTest {
     protected ChangedRepresentative changedRepresentativeAdded;
 
     @Before
-    public void setUpTest() {
-        caseDetails = finremCaseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke.json",
+    public void setUpTest() throws IOException {
+        caseDetails = finremCaseDetailsFromResource(getResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke.json"),
             new ObjectMapper());
         caseDetailsBefore = finremCaseDetailsFromResource(
-            "/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke-before.json",
+            getResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke-before.json"),
             new ObjectMapper());
-        when(documentHelper.getApplicantFullName(any(CaseDetails.class))).thenReturn(APPLICANT_FULL_NAME);
 
         representationUpdate = buildChangeOfRepresentation();
     }
@@ -131,5 +140,23 @@ public class AbstractLetterDetailsGeneratorTest {
             .date(LocalDateTime.now())
             .added(changedRepresentativeAdded)
             .removed(changedRepresentativeRemoved).build();
+    }
+
+    protected FrcCourtDetails getContestedFrcCourtDetails() {
+        return FrcCourtDetails.builder()
+            .courtName("Central Family Court")
+            .courtAddress("Central Family Court, First Avenue House, 42-49 High Holborn, London WC1V 6NP")
+            .phoneNumber("0300 303 0642")
+            .email("contactFinancialRemedy@justice.gov.uk")
+            .build();
+    }
+
+    protected FrcCourtDetails getConsentedFrcCourtDetails() {
+        return FrcCourtDetails.builder()
+            .courtName(OrchestrationConstants.CTSC_COURT_NAME)
+            .courtAddress(OrchestrationConstants.CTSC_COURT_ADDRESS)
+            .phoneNumber(OrchestrationConstants.CTSC_PHONE_NUMBER)
+            .email((OrchestrationConstants.CTSC_EMAIL_ADDRESS))
+            .build();
     }
 }

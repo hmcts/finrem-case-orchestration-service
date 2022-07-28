@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.generators;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.CourtListWrapper;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
@@ -44,7 +45,8 @@ public class UpdateFrcInfoLetterDetailsGenerator {
 
     private Map<String, Object> getCourtDetailsAsMap(FinremCaseDetails caseDetails) {
         CourtListWrapper courtList = caseDetails.getCaseData().getRegionWrapper().getDefaultCourtList();
-        return objectMapper.convertValue(courtDetailsMapper.getCourtDetails(courtList), new TypeReference<>() {});
+        return objectMapper.convertValue(courtDetailsMapper.getCourtDetails(courtList),
+            TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, Object.class));
     }
 
     private String getSolicitorReference(FinremCaseDetails caseDetails,

@@ -23,9 +23,9 @@
       "dateOfSepration": "1111-01-01",
       "propertyAddress": "test",
       "respondentEmail": null,
-      "respondentLName": "test",
+      "respondentLName": "Respondent",
       "respondentPhone": null,
-      "respondentFMName": "test",
+      "respondentFMName": "Mr Respondent",
       "divorceCaseNumber": "DD12D12345",
       "fastTrackDecision": "Yes",
       "applicantAddress": {

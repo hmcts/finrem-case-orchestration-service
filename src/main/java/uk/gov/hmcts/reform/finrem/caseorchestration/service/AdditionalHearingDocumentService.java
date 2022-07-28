@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Collections.singletonList;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
 
 @Service
 @Slf4j
@@ -116,8 +115,8 @@ public class AdditionalHearingDocumentService {
     }
 
     private void bulkPrintAdditionalHearingDocuments(FinremCaseDetails caseDetails, String authorisationToken) {
-        List<AdditionalHearingDocumentCollection> additionalHearingDocumentData = caseDetails.getCaseData()
-            .getAdditionalHearingDocuments();
+        List<AdditionalHearingDocumentCollection> additionalHearingDocumentData = Optional.ofNullable(caseDetails.getCaseData()
+            .getAdditionalHearingDocuments()).orElse(new ArrayList<>());
 
         AdditionalHearingDocumentCollection additionalHearingDocument =
             additionalHearingDocumentData.get(additionalHearingDocumentData.size() - 1);

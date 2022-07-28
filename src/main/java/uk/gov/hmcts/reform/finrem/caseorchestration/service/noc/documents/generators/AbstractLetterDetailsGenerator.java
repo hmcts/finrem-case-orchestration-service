@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -11,9 +13,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.genera
 import uk.gov.hmcts.reform.finrem.ccd.domain.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.RepresentationUpdate;
+import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.CourtListWrapper;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -30,6 +34,7 @@ public abstract class AbstractLetterDetailsGenerator {
     public static final String COR_APPLICANT = "applicant";
     private final AddresseeGeneratorService addresseeGeneratorService;
     private final CourtDetailsMapper courtDetailsMapper;
+    private final ObjectMapper mapper;
 
     public NoticeOfChangeLetterDetails generate(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore,
                                                 RepresentationUpdate representationUpdate,
@@ -91,10 +96,11 @@ public abstract class AbstractLetterDetailsGenerator {
         return representationUpdate.getParty().equalsIgnoreCase(COR_APPLICANT);
     }
 
-    private Map getCourtDetails(FinremCaseDetails caseDetails) {
+    private Map<String, Object> getCourtDetails(FinremCaseDetails caseDetails) {
+        CourtListWrapper courtList = caseDetails.getCaseData().getRegionWrapper().getDefaultCourtList();
         return caseDetails.getCaseData().isConsentedApplication()
             ? buildConsentedFrcCourtDetails()
-            : (Map) courtDetailsMapper.getCourtDetails(caseDetails.getCaseData().getRegionWrapper().getDefaultCourtList());
+            : mapper.convertValue(courtDetailsMapper.getCourtDetails(courtList),
+            TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, Object.class));
     }
-
 }

@@ -88,6 +88,7 @@ public class UpdateFrcInfoApplicantDocumentServiceTest extends BaseUpdateFrcInfo
     }
 
     private void setUpNoLetterMockContext() {
+        caseDetails.getCaseData().setCcdCaseType(CaseType.CONTESTED);
         caseDetails.getCaseData().getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
         caseDetails.getCaseData().getContactDetailsWrapper().setApplicantSolicitorConsentForEmails(YesOrNo.YES);
     }

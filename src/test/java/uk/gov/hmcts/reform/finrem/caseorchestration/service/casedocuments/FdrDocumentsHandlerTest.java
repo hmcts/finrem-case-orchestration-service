@@ -12,7 +12,7 @@ public class FdrDocumentsHandlerTest extends CaseDocumentHandlerTest {
 
     @Test
     public void shouldFilterFdrDocuments() {
-        uploadDocumentList.add(createContestedUploadDocumentItem("Other", "respondent", YesOrNo.NO, YesOrNo.YES, "Other Example"));
+        uploadDocumentList.add(createContestedUploadDocumentItem("other", "respondent", YesOrNo.NO, YesOrNo.YES, "Other Example"));
         caseDetails.getCaseData().getUploadCaseDocumentWrapper().setUploadCaseDocument(uploadDocumentList);
 
         fdrDocumentsHandler.handle(uploadDocumentList, caseData);

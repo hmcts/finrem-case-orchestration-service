@@ -19,7 +19,7 @@ public class ConfidentialDocumentsHandlerTest extends CaseDocumentHandlerTest {
 
     @Test
     public void respondentConfidentialDocumentsFiltered() {
-        uploadDocumentList.add(createContestedUploadDocumentItem("Other", "respondent", YesOrNo.YES, YesOrNo.NO, "Other Example"));
+        uploadDocumentList.add(createContestedUploadDocumentItem("other", "respondent", YesOrNo.YES, YesOrNo.NO, "Other Example"));
         caseDetails.getCaseData().getUploadCaseDocumentWrapper().setUploadCaseDocument(uploadDocumentList);
 
         confidentialDocumentsHandler.handle(uploadDocumentList, caseData);
