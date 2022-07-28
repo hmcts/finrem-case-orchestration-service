@@ -904,6 +904,20 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void shouldEmailRespondentSolicitorWhenNullEmailConsent() {
+        when(caseDataService.isPaperApplication(any())).thenReturn(false);
+        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
+        when(caseDataService.isNotEmpty(any(), any())).thenReturn(true);
+
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, null);
+
+        boolean isRespondentCommunicationEnabled = notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData);
+
+        assertTrue(isRespondentCommunicationEnabled);
+    }
+
+    @Test
     public void shouldEmailContestedAppSolicitor() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(CONTESTED_SOLICITOR_EMAIL, TEST_USER_EMAIL);
@@ -1163,7 +1177,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void givenAppIsContestedAndApplicantSolicitorIsNotRegisteredOrAcceptingEmails_shouldSendLettersApplicantSolicitor() {
-        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
         when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(false);
         when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(false);
 
@@ -1191,9 +1205,8 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void isContestedAndRespondentSolicitorIsNotRegisteredOrAcceptingEmails() {
-        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
         when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(true);
-        when(caseDataService.isPaperApplication(any())).thenReturn(true);
         when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
 
         Map<String, Object> caseData = new HashMap<>();
