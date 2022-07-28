@@ -40,5 +40,4 @@ public class SolicitorAddedApplicantLetterHandlerTest extends LetterHandlerTestB
     public AbstractLetterHandler getLetterHandler() {
         return solicitorAddedApplicantLetterHandler;
     }
-
 }

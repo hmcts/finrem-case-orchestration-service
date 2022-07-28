@@ -54,7 +54,7 @@ public abstract class LetterHandlerTestBase {
     }
 
     protected FinremCaseDetails getCaseDetails(String resourcePath) {
-        return finremCaseDetailsFromResource(resourcePath, new ObjectMapper());
+        return finremCaseDetailsFromResource(getResource(resourcePath), new ObjectMapper());
     }
 
     protected void shouldSendLetter(String caseDetailsPath, String caseDetailsBeforePath) {

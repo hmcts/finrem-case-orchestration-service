@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.junit.Before;
 import org.mockito.Mock;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
@@ -23,12 +24,14 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_PHONE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finremCaseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_ADDRESS_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
@@ -41,7 +44,7 @@ public class AbstractLetterDetailsGeneratorTest extends BaseServiceTest {
 
     protected static final String APPLICANT_FULL_NAME = "Poor Guy";
     protected static final String RESPONDENT_FULL_NAME_CONTESTED = "Mr Respondent Respondent";
-    protected static final String RESPONDENT_FULL_NAME_CONSENTED = "respondentFullNameConsented";
+    protected static final String RESPONDENT_FULL_NAME_CONSENTED = "respondent FullNameConsented";
     protected static final String FORMATTED_ADDRESS = "formattedAddress";
     protected static final String ADDRESSEE_NAME = "addresseeName";
 
@@ -99,7 +102,7 @@ public class AbstractLetterDetailsGeneratorTest extends BaseServiceTest {
         assertThat(courtDetails.get(COURT_DETAILS_NAME_KEY), is("Central Family Court"));
         assertThat(courtDetails.get(COURT_DETAILS_ADDRESS_KEY),
             is("Central Family Court, First Avenue House, 42-49 High Holborn, London WC1V 6NP"));
-        assertThat(courtDetails.get(COURT_DETAILS_PHONE_KEY), is("0207 421 8594"));
+        assertThat(courtDetails.get(COURT_DETAILS_PHONE_KEY), is(CTSC_PHONE_NUMBER));
         assertThat(courtDetails.get(COURT_DETAILS_EMAIL_KEY), is("cfc.fru@justice.gov.uk"));
     }
 
@@ -147,16 +150,12 @@ public class AbstractLetterDetailsGeneratorTest extends BaseServiceTest {
             .courtName("Central Family Court")
             .courtAddress("Central Family Court, First Avenue House, 42-49 High Holborn, London WC1V 6NP")
             .phoneNumber("0300 303 0642")
-            .email("contactFinancialRemedy@justice.gov.uk")
+            .email("cfc.fru@justice.gov.uk")
             .build();
     }
 
-    protected FrcCourtDetails getConsentedFrcCourtDetails() {
-        return FrcCourtDetails.builder()
-            .courtName(OrchestrationConstants.CTSC_COURT_NAME)
-            .courtAddress(OrchestrationConstants.CTSC_COURT_ADDRESS)
-            .phoneNumber(OrchestrationConstants.CTSC_PHONE_NUMBER)
-            .email((OrchestrationConstants.CTSC_EMAIL_ADDRESS))
-            .build();
+    protected HashMap<String, Object> getContestedFrcCourtDetailsAsMap() {
+        return new ObjectMapper().convertValue(getContestedFrcCourtDetails(),
+            TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, Object.class));
     }
 }
