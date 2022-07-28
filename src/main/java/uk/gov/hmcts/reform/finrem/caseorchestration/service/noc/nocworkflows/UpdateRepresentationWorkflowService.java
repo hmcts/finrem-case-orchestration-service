@@ -61,7 +61,7 @@ public class UpdateRepresentationWorkflowService {
     }
 
     private boolean isNoOrganisationsToAddOrRemove(CaseDetails caseDetails) {
-        ChangeOrganisationRequest changeRequest =  new ObjectMapper().registerModule(new JavaTimeModule())
+        ChangeOrganisationRequest changeRequest = new ObjectMapper().registerModule(new JavaTimeModule())
             .convertValue(caseDetails.getData().get(CHANGE_ORGANISATION_REQUEST), ChangeOrganisationRequest.class);
 
         return isOrganisationsEmpty(changeRequest);
@@ -92,7 +92,7 @@ public class UpdateRepresentationWorkflowService {
     }
 
     private void persistDefaultOrganisationPolicy(CaseDetails caseDetails) {
-        final boolean isApplicant = ((String)caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
+        final boolean isApplicant = ((String) caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
 
         if (isApplicant) {
             persistDefaultApplicantOrganisationPolicy(caseDetails);

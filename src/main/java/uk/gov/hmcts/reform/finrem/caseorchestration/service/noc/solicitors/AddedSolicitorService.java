@@ -37,7 +37,7 @@ public class AddedSolicitorService {
     private final CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
 
     public ChangedRepresentative getAddedSolicitorAsSolicitor(UserDetails solicitorToAdd,
-                                                    ChangeOrganisationRequest changeRequest) {
+                                                              ChangeOrganisationRequest changeRequest) {
         return ChangedRepresentative.builder()
             .name(solicitorToAdd.getFullName())
             .email(solicitorToAdd.getEmail())
@@ -94,8 +94,8 @@ public class AddedSolicitorService {
     }
 
     private ChangedRepresentative getAddedSolicitor(CaseDetails caseDetails,
-                                                           boolean isApplicant,
-                                                           Organisation organisation) {
+                                                    boolean isApplicant,
+                                                    Organisation organisation) {
         return ChangedRepresentative.builder()
             .name(getSolicitorName(caseDetails, isApplicant))
             .email(getSolicitorEmail(caseDetails, isApplicant))

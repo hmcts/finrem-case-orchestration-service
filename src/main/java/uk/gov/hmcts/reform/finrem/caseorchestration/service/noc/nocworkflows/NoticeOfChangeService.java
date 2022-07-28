@@ -72,7 +72,7 @@ public class NoticeOfChangeService {
                                                     CaseDetails originalCaseDetails) {
         log.info("About to start updating representation as caseworker for caseID {}", caseDetails.getId());
 
-        Map<String,Object> caseData = updateRepresentationUpdateHistory(caseDetails, authorizationToken, originalCaseDetails);
+        Map<String, Object> caseData = updateRepresentationUpdateHistory(caseDetails, authorizationToken, originalCaseDetails);
         final ChangeOrganisationRequest changeRequest = generateChangeOrganisationRequest(caseDetails, originalCaseDetails);
         caseData.put(CHANGE_ORGANISATION_REQUEST, changeRequest);
 
@@ -80,8 +80,8 @@ public class NoticeOfChangeService {
     }
 
     private Map<String, Object> updateRepresentationUpdateHistory(CaseDetails caseDetails,
-                                                              String authToken,
-                                                              CaseDetails originalDetails) {
+                                                                  String authToken,
+                                                                  CaseDetails originalDetails) {
         Map<String, Object> caseData = caseDetails.getData();
         RepresentationUpdateHistory current = buildCurrentUpdateHistory(caseData);
 
@@ -144,7 +144,8 @@ public class NoticeOfChangeService {
     private RepresentationUpdateHistory buildCurrentUpdateHistory(Map<String, Object> caseData) {
         return RepresentationUpdateHistory.builder()
             .representationUpdateHistory(objectMapper.convertValue(caseData.get(REPRESENTATION_UPDATE_HISTORY),
-                new TypeReference<>() {}))
+                new TypeReference<>() {
+                }))
             .build();
     }
 
@@ -152,7 +153,7 @@ public class NoticeOfChangeService {
     // so we need to revert the org policies to their value before the event started
     public CaseDetails persistOriginalOrgPoliciesWhenRevokingAccess(CaseDetails caseDetails,
                                                                     CaseDetails originalCaseDetails) {
-        final boolean isApplicant = ((String)caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
+        final boolean isApplicant = ((String) caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
         final String litigantOrgPolicy = isApplicant ? APPLICANT_ORGANISATION_POLICY : RESPONDENT_ORGANISATION_POLICY;
 
         if (hasInvalidOrgPolicy(caseDetails, isApplicant)) {
@@ -169,7 +170,7 @@ public class NoticeOfChangeService {
         return orgPolicy.isEmpty()
             || orgPolicy.get().getOrgPolicyCaseAssignedRole() == null
             || !orgPolicy.get().getOrgPolicyCaseAssignedRole().equalsIgnoreCase(
-                isApplicant ? APP_SOLICITOR_POLICY : RESP_SOLICITOR_POLICY);
+            isApplicant ? APP_SOLICITOR_POLICY : RESP_SOLICITOR_POLICY);
     }
 
     private DynamicList generateCaseRoleIdAsDynamicList(String role) {

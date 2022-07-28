@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -55,7 +55,7 @@ public class CaseDataController extends BaseController {
     private final FeatureToggleService featureToggleService;
 
     @PostMapping(path = "/consented/set-defaults", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Set default values for consented journey")
+    @Operation(description = "Set default values for consented journey")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setConsentedDefaultValues(
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken,
         @RequestBody final CallbackRequest callbackRequest) {
@@ -65,7 +65,7 @@ public class CaseDataController extends BaseController {
     }
 
     @PostMapping(path = "/contested/set-defaults", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Set default values for contested journey")
+    @Operation(description = "Set default values for contested journey")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setContestedDefaultValues(
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken,
         @RequestBody final CallbackRequest callbackRequest) {
@@ -85,7 +85,7 @@ public class CaseDataController extends BaseController {
     @PostMapping(path = "/contested/set-frc-details",
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Set Financial Remedies Court details")
+    @Operation(description = "Set Financial Remedies Court details")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setFinancialRemediesCourtDetails(
         @RequestBody final CallbackRequest callbackRequest) {
         log.info("Setting Financial Remedies Court details.");
@@ -96,7 +96,7 @@ public class CaseDataController extends BaseController {
     @PostMapping(path = "/contested/set-paper-case-defaults",
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Set default values for contested paper case journey")
+    @Operation(description = "Set default values for contested paper case journey")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setContestedPaperCaseDefaultValues(
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken,
         @RequestBody final CallbackRequest callbackRequest) {
@@ -111,7 +111,7 @@ public class CaseDataController extends BaseController {
     @PostMapping(path = "/contested/set-paper-case-org-policy",
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Set default values for contested paper case journey")
+    @Operation(description = "Set default values for contested paper case journey")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setContestedPaperCaseOrganisationPolicy(
         @RequestBody final CallbackRequest callbackRequest) {
         log.info("Setting default values for contested paper case journey.");
@@ -137,7 +137,7 @@ public class CaseDataController extends BaseController {
 
     @PostMapping(path = "/org-policies", consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Add empty org policies for both parties")
+    @Operation(description = "Add empty org policies for both parties")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setOrgPolicies(
         @RequestBody CallbackRequest callbackRequest
     ) {
@@ -194,7 +194,7 @@ public class CaseDataController extends BaseController {
     }
 
     private void setOrganisationPolicy(CaseDetails caseDetails) {
-        if  (caseDataService.isContestedApplication(caseDetails) || caseDataService.isConsentedApplication(caseDetails)) {
+        if (caseDataService.isContestedApplication(caseDetails) || caseDataService.isConsentedApplication(caseDetails)) {
             Map<String, Object> appSolPolicy = buildOrganisationPolicy(APP_SOLICITOR_POLICY);
             caseDetails.getData().put(ORGANISATION_POLICY_APPLICANT, appSolPolicy);
 
@@ -203,7 +203,7 @@ public class CaseDataController extends BaseController {
     }
 
     private void setOrganisationPolicyForNewPaperCase(CaseDetails caseDetails) {
-        if  (caseDataService.isContestedApplication(caseDetails) || caseDataService.isConsentedApplication(caseDetails)) {
+        if (caseDataService.isContestedApplication(caseDetails) || caseDataService.isConsentedApplication(caseDetails)) {
             setOrganisationPolicy(caseDetails);
 
             Map<String, Object> appRespPolicy = buildOrganisationPolicy(RESP_SOLICITOR_POLICY);
