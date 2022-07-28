@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_OPENING_HOURS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
@@ -37,16 +38,24 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class NotificationRequestMapper {
 
     protected static final String EMPTY_STRING = "";
-    private final CaseDataService caseDataService;
-    private final ObjectMapper objectMapper;
-
     private static final String RESPONDENT = "Respondent";
     private static final String CONSENTED = "consented";
     private static final String CONTESTED = "contested";
+    private final CaseDataService caseDataService;
+    private final ObjectMapper objectMapper;
 
+    public NotificationRequest getNotificationRequestForRespondentSolicitor(CaseDetails caseDetails,
+                                                                            Map<String, Object> interimHearingData) {
+        return buildNotificationRequest(caseDetails, getCaseDataKeysForRespondentSolicitor(), interimHearingData);
+    }
 
     public NotificationRequest getNotificationRequestForRespondentSolicitor(CaseDetails caseDetails) {
         return buildNotificationRequest(caseDetails, getCaseDataKeysForRespondentSolicitor());
+    }
+
+    public NotificationRequest getNotificationRequestForApplicantSolicitor(CaseDetails caseDetails,
+                                                                           Map<String, Object> interimHearingData) {
+        return buildNotificationRequest(caseDetails, getContestedCaseDataKeysForApplicantSolicitor(), interimHearingData);
     }
 
     public NotificationRequest getNotificationRequestForApplicantSolicitor(CaseDetails caseDetails) {
@@ -92,7 +101,8 @@ public class NotificationRequestMapper {
     private RepresentationUpdate getLastRepresentationUpdate(CaseDetails caseDetails) {
 
         List<Element<RepresentationUpdate>> representationUpdates = objectMapper
-            .convertValue(caseDetails.getData().get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {});
+            .convertValue(caseDetails.getData().get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {
+            });
 
         return Collections.max(representationUpdates, Comparator.comparing(c -> c.getValue().getDate())).getValue();
     }
@@ -109,6 +119,33 @@ public class NotificationRequestMapper {
 
     private NotificationRequest buildNotificationRequest(CaseDetails caseDetails,
                                                          SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
+        NotificationRequest notificationRequest = getNotificationCoreData(caseDetails, solicitorCaseDataKeysWrapper);
+
+        if (caseDataService.isContestedApplication(caseDetails)) {
+            String selectedCourt = ContestedCourtHelper.getSelectedFrc(caseDetails);
+            notificationRequest.setSelectedCourt(selectedCourt);
+
+            log.info("selectedCourt is {} for case ID: {}", selectedCourt, notificationRequest.getCaseReferenceNumber());
+        }
+
+        return notificationRequest;
+    }
+
+    private NotificationRequest buildNotificationRequest(CaseDetails caseDetails,
+                                                         SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper,
+                                                         Map<String, Object> interimHearingData) {
+
+        NotificationRequest notificationRequest = getNotificationCoreData(caseDetails, solicitorCaseDataKeysWrapper);
+
+        String selectedCourt = ContestedCourtHelper.getSelectedInterimHearingFrc(interimHearingData);
+        notificationRequest.setSelectedCourt(selectedCourt);
+
+        log.info("selectedCourt is {} for case ID: {}", selectedCourt, notificationRequest.getCaseReferenceNumber());
+
+        return notificationRequest;
+    }
+
+    private NotificationRequest getNotificationCoreData(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
         NotificationRequest notificationRequest = new NotificationRequest();
         Map<String, Object> mapOfCaseData = caseDetails.getData();
 
@@ -120,13 +157,7 @@ public class NotificationRequestMapper {
         notificationRequest.setNotificationEmail(Objects.toString(mapOfCaseData.get(solicitorCaseDataKeysWrapper.getSolicitorEmailKey())));
         notificationRequest.setGeneralEmailBody(Objects.toString(mapOfCaseData.get(GENERAL_EMAIL_BODY)));
         notificationRequest.setCaseType(getCaseType(caseDetails));
-
-        if (caseDataService.isContestedApplication(caseDetails)) {
-            String selectedCourt = ContestedCourtHelper.getSelectedFrc(caseDetails);
-            notificationRequest.setSelectedCourt(selectedCourt);
-
-            log.info("selectedCourt is {} for case ID: {}", selectedCourt, notificationRequest.getCaseReferenceNumber());
-        }
+        notificationRequest.setPhoneOpeningHours(CTSC_OPENING_HOURS);
 
         return notificationRequest;
     }

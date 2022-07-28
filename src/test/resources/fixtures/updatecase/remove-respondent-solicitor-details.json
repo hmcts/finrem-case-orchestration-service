@@ -69,6 +69,7 @@
         "document_filename": "file1",
         "document_binary_url": "http://file1.binary"
       },
+      "currentUserCaseRole": "[RESPSOLICITOR]",
       "solicitorAddress": {
         "County": "essex",
         "Country": "UK",

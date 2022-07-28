@@ -3,10 +3,12 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +25,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCo
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 
 import javax.validation.constraints.NotNull;
 
@@ -50,18 +54,20 @@ public class HearingDocumentController extends BaseController {
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
     private final ValidateHearingService validateHearingService;
     private final CaseDataService caseDataService;
+    private final NotificationService notificationService;
     private final ObjectMapper objectMapper;
+    private final CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
 
     @PostMapping(path = "/documents/hearing", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Handles Form C and G generation. Serves as a callback from CCD")
+    @Operation(summary = "Handles Form C and G generation. Serves as a callback from CCD")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
-            response = AboutToStartOrSubmitCallbackResponse.class),
-        @ApiResponse(code = 400, message = "Bad Request"),
-        @ApiResponse(code = 500, message = "Internal Server Error")})
+        @ApiResponse(responseCode = "200", description = "Callback was processed successfully or in case of an error message is attached to the case",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateHearingDocument(
-            @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-            @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) throws IOException {
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
+        @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callbackRequest) throws IOException {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request for validating a hearing for Case ID: {}", caseDetails.getId());
@@ -84,19 +90,30 @@ public class HearingDocumentController extends BaseController {
         }
 
         List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
+
+        if (notificationService.isContestedApplicationAndApplicantOrRespondentSolicitorsIsNotRegisteredOrAcceptingEmails(caseDetails)) {
+            CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+            if (caseDetailsBefore != null && hearingDocumentService.alreadyHadFirstHearing(caseDetailsBefore)) {
+                log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
+                additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, caseDetails);
+            } else {
+                log.info("Sending Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
+                hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, authorisationToken);
+            }
+        }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).warnings(warnings).build());
     }
 
     @PostMapping(path = "/contested-upload-direction-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Handles direction order generation. Serves as a callback from CCD")
+    @Operation(summary = "Handles direction order generation. Serves as a callback from CCD")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
-            response = AboutToStartOrSubmitCallbackResponse.class),
-        @ApiResponse(code = 400, message = "Bad Request"),
-        @ApiResponse(code = 500, message = "Internal Server Error")})
+        @ApiResponse(responseCode = "200", description = "Callback was processed successfully or in case of an error message is attached to the case",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateHearingDocumentDirectionOrder(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+        @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callback) {
         CaseDetails caseDetails = callback.getCaseDetails();
         validateCaseData(callback);
         Map<String, Object> caseData = caseDetails.getData();
@@ -122,10 +139,10 @@ public class HearingDocumentController extends BaseController {
         List<DirectionDetailsCollectionData> directionDetailsCollectionList = Optional.ofNullable(caseData.get(DIRECTION_DETAILS_COLLECTION_CT))
             .map(this::convertToDirectionDetailsDataList).orElse(Collections.emptyList());
 
-        if (! directionDetailsCollectionList.isEmpty()) {
+        if (!directionDetailsCollectionList.isEmpty()) {
             List<DirectionDetailsCollectionData> sortedDirectionDetailsCollectionList = directionDetailsCollectionList
                 .stream()
-                .filter(e -> (e.getDirectionDetailsCollection() != null &&  e.getDirectionDetailsCollection().getDateOfHearing() != null))
+                .filter(e -> (e.getDirectionDetailsCollection() != null && e.getDirectionDetailsCollection().getDateOfHearing() != null))
                 .sorted(Comparator.comparing(e -> e.getDirectionDetailsCollection().getDateOfHearing()))
                 .collect(Collectors.toList());
             caseData.put(DIRECTION_DETAILS_COLLECTION_CT, sortedDirectionDetailsCollectionList);

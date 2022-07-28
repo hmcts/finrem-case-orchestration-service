@@ -37,7 +37,7 @@ public class CftLibConfig implements CFTLibConfigurer {
             "caseworker-divorce-bulkscan",
             "caseworker-divorce-financialremedy",
             "caseworker-caa",
-            "IDAM_SUPER_USER"
+            "caseworker-divorce-financialremedy-superuser"
         );
     }
 
