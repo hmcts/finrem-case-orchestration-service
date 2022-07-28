@@ -408,4 +408,8 @@ public class DocumentHelper {
     public enum PaperNotificationRecipient {
         APPLICANT, RESPONDENT, SOLICITOR
     }
+
+    public enum PaperNotificationRecipient {
+        APPLICANT, RESPONDENT, SOLICITOR
+    }
 }
