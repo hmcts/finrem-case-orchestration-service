@@ -84,15 +84,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFu
 @Slf4j
 public class DocumentHelper {
 
-    public enum PaperNotificationRecipient { APPLICANT, RESPONDENT, SOLICITOR }
-
     public static final String DOCUMENT_URL = "document_url";
     public static final String DOCUMENT_FILENAME = "document_filename";
     public static final String DOCUMENT_BINARY_URL = "document_binary_url";
     public static final String ADDRESSEE = "addressee";
     public static final String CTSC_CONTACT_DETAILS = "ctscContactDetails";
     public static final String CASE_NUMBER = "caseNumber";
-
     private final ObjectMapper objectMapper;
     private final CaseDataService caseDataService;
 
@@ -413,5 +410,9 @@ public class DocumentHelper {
         return objectMapper.convertValue(caseData.get(HEARING_NOTICES_COLLECTION),
             new TypeReference<>() {
             });
+    }
+
+    public enum PaperNotificationRecipient {
+        APPLICANT, RESPONDENT, SOLICITOR
     }
 }

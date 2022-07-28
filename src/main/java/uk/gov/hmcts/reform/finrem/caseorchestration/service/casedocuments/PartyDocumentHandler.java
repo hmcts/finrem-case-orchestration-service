@@ -19,6 +19,7 @@ public abstract class PartyDocumentHandler extends CaseDocumentHandler<Contested
     protected static final String RESPONDENT = "respondent";
     private final String collectionName;
     private final String party;
+    private final ObjectMapper mapper;
 
     public PartyDocumentHandler(String collectionName, String party, ObjectMapper mapper) {
         super(mapper);

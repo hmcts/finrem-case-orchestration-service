@@ -26,9 +26,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
@@ -60,7 +60,7 @@ public class ConsentOrderApprovedController extends BaseController {
     private final NotificationService notificationService;
     private final DocumentHelper documentHelper;
     private final ObjectMapper mapper;
-    private final FeatureToggleService featureToggleService;
+    private final CaseDataService caseDataService;
 
     @PostMapping(path = "/documents/consent-order-approved", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(summary = "'Consent Order Approved' callback handler. Generates relevant Consent Order Approved documents")
@@ -187,13 +187,12 @@ public class ConsentOrderApprovedController extends BaseController {
                 caseData.put(STATE, CONSENT_ORDER_MADE.toString());
                 notificationService.sendConsentOrderAvailableCtscEmail(caseDetails);
 
-                if (notificationService.shouldEmailApplicantSolicitor(caseDetails)) {
+                if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
                     log.info("case - {}: Sending email notification for to Applicant Solicitor for 'Consent Order Available'", caseDetails.getId());
                     notificationService.sendConsentOrderAvailableEmailToApplicantSolicitor(caseDetails);
                 }
 
-                if (featureToggleService.isRespondentJourneyEnabled()
-                    && notificationService.shouldEmailRespondentSolicitor(caseData)) {
+                if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData)) {
                     log.info("case - {}: Sending email notification to Respondent Solicitor for 'Consent Order Available'", caseDetails.getId());
                     notificationService.sendConsentOrderAvailableEmailToRespondentSolicitor(caseDetails);
                 }

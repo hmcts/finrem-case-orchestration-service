@@ -32,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -65,6 +66,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
 
     @MockBean GenericDocumentService genericDocumentService;
     @MockBean BulkPrintService bulkPrintService;
+    @MockBean NotificationService notificationService;
 
     @Before
     public void setUp() {
@@ -405,5 +407,65 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         hearingOrderCollectionList.add(hearingOrderCollectionData);
 
         return hearingOrderCollectionList;
+    }
+
+    @Test
+    public void printAdditionalHearingDocuments_forBothSolicitors() throws JsonProcessingException {
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
+        additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
+
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
+        when(notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
+        additionalHearingDocumentService.bulkPrintAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
+
+        verify(bulkPrintService, timeout(100).times(1))
+            .printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService, timeout(100).times(1))
+            .printApplicantDocuments(any(), any(), any());
+    }
+
+    @Test
+    public void printAdditionalHearingDocuments_forNeitherSolicitor() throws JsonProcessingException {
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
+        additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
+
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
+        when(notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
+        additionalHearingDocumentService.bulkPrintAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
+
+        verify(bulkPrintService, timeout(100).times(0))
+            .printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService, timeout(100).times(0))
+            .printApplicantDocuments(any(), any(), any());
+    }
+
+    @Test
+    public void printAdditionalHearingDocuments_forRespondentSolicitor() throws JsonProcessingException {
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
+        additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
+
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
+        when(notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
+        additionalHearingDocumentService.bulkPrintAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
+
+        verify(bulkPrintService, timeout(100).times(1))
+            .printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService, timeout(100).times(0))
+            .printApplicantDocuments(any(), any(), any());
+    }
+
+    @Test
+    public void printAdditionalHearingDocuments_forContestedAppSolicitor() throws JsonProcessingException {
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
+        additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
+
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
+        when(notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
+        additionalHearingDocumentService.bulkPrintAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
+
+        verify(bulkPrintService, timeout(100).times(0))
+            .printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService, timeout(100).times(1))
+            .printApplicantDocuments(any(), any(), any());
     }
 }
