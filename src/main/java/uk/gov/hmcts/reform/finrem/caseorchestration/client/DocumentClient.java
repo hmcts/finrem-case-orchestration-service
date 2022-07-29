@@ -25,7 +25,7 @@ public interface DocumentClient {
         path = "/version/1/generate-pdf",
         headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
     )
-    Document generatePdf(
+    Document storeDocument(
         @RequestBody DocumentGenerationRequest generateDocumentRequest,
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
 

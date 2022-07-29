@@ -4,11 +4,9 @@ import com.google.common.io.Files;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 
 import java.util.Collections;
 import java.util.Map;
@@ -20,7 +18,9 @@ public class GenericDocumentService {
 
     private static final String DOCUMENT_CASE_DETAILS_JSON_KEY = "caseDetails";
 
-    private final DocumentClient documentClient;
+    private final DocumentManagementService documentManagementService;
+
+    private final BulkPrintService bulkPrintService;
 
     public CaseDocument generateDocument(String authorisationToken, CaseDetails caseDetails,
                                          String template, String fileName) {
@@ -31,20 +31,18 @@ public class GenericDocumentService {
 
     public CaseDocument generateDocumentFromPlaceholdersMap(String authorisationToken, Map placeholders,
                                                             String template, String fileName) {
-        Document generatedPdf = documentClient.generatePdf(
-            DocumentGenerationRequest.builder().template(template).fileName(fileName).values(placeholders).build(),
-            authorisationToken
-        );
-        return toCaseDocument(generatedPdf);
+        return toCaseDocument(documentManagementService.storeDocument(template, fileName,
+            placeholders,
+            authorisationToken));
     }
 
 
     public UUID bulkPrint(BulkPrintRequest bulkPrintRequest) {
-        return documentClient.bulkPrint(bulkPrintRequest);
+        return bulkPrintService.bulkPrint(bulkPrintRequest);
     }
 
     public void deleteDocument(String documentUrl, String authorisationToken) {
-        documentClient.deleteDocument(documentUrl, authorisationToken);
+        documentManagementService.deleteDocument(documentUrl, authorisationToken);
     }
 
     public CaseDocument annexStampDocument(CaseDocument document, String authorisationToken) {
