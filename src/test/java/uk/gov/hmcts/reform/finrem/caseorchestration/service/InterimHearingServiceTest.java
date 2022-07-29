@@ -93,7 +93,7 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
         CaseDetails caseDetails = buildCaseDetails(BEFORE_MIGRATION_TEST_JSON);
         CaseDetails caseDetailsBefore = buildCaseDetails(MODIFIED_DURING_MIGRATION_TEST_JSON);
 
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any())).thenReturn(caseDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
 
         interimHearingService.submitInterimHearing(caseDetails,caseDetailsBefore, AUTH_TOKEN);
@@ -119,7 +119,7 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
         CaseDetails caseDetails = buildCaseDetails(ONE_MIGRATED_AND_ONE_ADDED_HEARING_JSON);
         CaseDetails caseDetailsBefore = buildCaseDetails(ONE_MIGRATED_MODIFIED_AND_ONE_ADDED_HEARING_JSON);
 
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any())).thenReturn(caseDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
 
         interimHearingService.submitInterimHearing(caseDetails,caseDetailsBefore, AUTH_TOKEN);
@@ -145,7 +145,7 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
         CaseDetails caseDetails = buildCaseDetails(ONE_MIGRATED_AND_ONE_ADDED_HEARING_JSON);
         CaseDetails caseDetailsBefore = buildCaseDetails(ONE_MIGRATED_AND_ONE_ADDED_HEARING_JSON);
 
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any())).thenReturn(caseDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
 
         interimHearingService.submitInterimHearing(caseDetails,caseDetailsBefore, AUTH_TOKEN);
@@ -167,7 +167,7 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
         CaseDetails caseDetails = buildCaseDetails(TEST_NEW_JSON);
         CaseDetails caseDetailsBefore = buildCaseDetails(TEST_NEW_JSON);
 
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any())).thenReturn(caseDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
 
         interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
@@ -195,7 +195,7 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
         caseDetails.getData().put("applicantSolicitorConsentForEmails", "No");
         caseDetails.getData().put("respondentRepresented", "No");
 
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any())).thenReturn(caseDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
 
         CaseDetails caseDetailsBefore = buildCaseDetails(TEST_NEW_JSON);
@@ -254,14 +254,6 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
     private CaseDetails buildCaseDetails(String path)  {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(path)) {
             return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private CaseDetails buildCaseDetailsBefore(String path)  {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(path)) {
-            return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetailsBefore();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
