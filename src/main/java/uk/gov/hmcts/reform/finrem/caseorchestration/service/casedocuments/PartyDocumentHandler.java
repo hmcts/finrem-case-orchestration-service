@@ -28,6 +28,7 @@ public abstract class PartyDocumentHandler extends CaseDocumentHandler<Contested
 
     public void handle(List<ContestedUploadedDocumentData> uploadedDocuments,
                        Map<String, Object> caseData) {
+        CaseDocumentHandler.setDocumentUploadDate(uploadedDocuments);
         List<ContestedUploadedDocumentData> documentsFiltered = uploadedDocuments.stream()
             .filter(d -> {
                 ContestedUploadedDocument uploadedCaseDocument = d.getUploadedCaseDocument();
@@ -39,7 +40,7 @@ public abstract class PartyDocumentHandler extends CaseDocumentHandler<Contested
                 && isDocumentTypeValid(d.getUploadedCaseDocument().getCaseDocumentType()))
             .collect(Collectors.toList());
 
-        CaseDocumentHandler.setDocumentUploadDate(documentsFiltered);
+
 
         List<ContestedUploadedDocumentData> documentCollection = getDocumentCollection(caseData, collectionName);
         documentCollection.addAll(documentsFiltered);
