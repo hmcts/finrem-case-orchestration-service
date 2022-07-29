@@ -4,24 +4,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.SolicitorNocDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.SolicitorRemovedLetterDetailsGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler.representative.SolicitorRemovedRepresentativeLetterHandler;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
 @RunWith(MockitoJUnitRunner.class)
 public class SolicitorRemovedRepresentativeLetterHandlerTest extends LetterHandlerTestBase {
-
-    @Mock
-    CaseDataService caseDataService;
 
     @InjectMocks
     SolicitorRemovedRepresentativeLetterHandler solicitorRemovedRepresentativeLetterHandler;
@@ -33,7 +25,6 @@ public class SolicitorRemovedRepresentativeLetterHandlerTest extends LetterHandl
 
     @Before
     public void setUpTest() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(Boolean.FALSE);
     }
 
     @Test

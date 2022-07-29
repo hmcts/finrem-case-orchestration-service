@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.springframework.util.ResourceUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -14,6 +15,9 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.RepresentationUpdate;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -54,7 +58,16 @@ public abstract class LetterHandlerTestBase {
     }
 
     protected FinremCaseDetails getCaseDetails(String resourcePath) {
-        return finremCaseDetailsFromResource(getResource(resourcePath), new ObjectMapper());
+        try {
+            return finremCaseDetailsFromResource(getResource(resourcePath), new ObjectMapper());
+        } catch (IOException ioe) {
+            return null;
+        }
+    }
+
+    protected String getResource(String resourcePath) throws IOException {
+        File file = ResourceUtils.getFile(this.getClass().getResource(resourcePath));
+        return new String(Files.readAllBytes(file.toPath()));
     }
 
     protected void shouldSendLetter(String caseDetailsPath, String caseDetailsBeforePath) {

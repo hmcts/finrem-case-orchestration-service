@@ -174,17 +174,13 @@ public class ManageCaseDocumentsService {
 
         for (Field collectionType : contestedUploadCaseFilesCollectionFields) {
             collectionType.setAccessible(true);
-            List<UploadCaseDocumentCollection> docsInCollection =
-                getAllDocumentsInCollection(caseData.getUploadCaseDocumentWrapper(), collectionType);
+            List<UploadCaseDocumentCollection> docsInCollection = getAllDocumentsInCollection(caseData.getUploadCaseDocumentWrapper(), collectionType);
 
             if (!docsInCollection.isEmpty()) {
-                for (UploadCaseDocumentCollection selectedCollectionDocument : docsInCollection) {
-                    for (UUID documentId : manageCaseDocumentsCollectionIds) {
-                        if (documentId.equals(selectedCollectionDocument.getId())) {
-                            documentIdToFieldMap.put(documentId.toString(), collectionType);
-                        }
-                    }
-                }
+                docsInCollection.stream()
+                    .filter(document -> manageCaseDocumentsCollectionIds.stream().anyMatch(id -> document.getId().equals(id)))
+                    .collect(Collectors.toList())
+                    .forEach(matchingDocument -> documentIdToFieldMap.put(matchingDocument.getId().toString(), collectionType));
             }
         }
 
@@ -194,7 +190,8 @@ public class ManageCaseDocumentsService {
     private List<UUID> getManageCaseDocumentsCollectionIds(FinremCaseData caseData) {
         return Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getManageCaseDocumentCollection()).orElse(new ArrayList<>())
             .stream()
-            .map(UploadCaseDocumentCollection::getId).collect(Collectors.toList());
+            .map(UploadCaseDocumentCollection::getId)
+            .collect(Collectors.toList());
     }
 
     private List<UploadCaseDocumentCollection> getAllDocumentsInCollection(UploadCaseDocumentWrapper data,

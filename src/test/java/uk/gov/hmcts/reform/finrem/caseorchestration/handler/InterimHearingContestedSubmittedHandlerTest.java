@@ -64,7 +64,7 @@ public class InterimHearingContestedSubmittedHandlerTest extends BaseHandlerTest
     }
 
     @Test
-    public void givenContestedCase_WhenPartiesNeedToNotify_ThenItShouldSendNotificaiton() {
+    public void givenContestedCase_WhenPartiesNeedToNotify_ThenItShouldSendNotification() {
         CallbackRequest callbackRequest = getCallbackRequestFromResource(TEST_JSON);
         AboutToStartOrSubmitCallbackResponse handle =
             interimHearingContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
