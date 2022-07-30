@@ -93,7 +93,7 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
         CaseDetails caseDetails = buildCaseDetails(BEFORE_MIGRATION_TEST_JSON);
         CaseDetails caseDetailsBefore = buildCaseDetails(MODIFIED_DURING_MIGRATION_TEST_JSON);
 
-        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
 
         interimHearingService.submitInterimHearing(caseDetails,caseDetailsBefore, AUTH_TOKEN);
@@ -119,7 +119,7 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
         CaseDetails caseDetails = buildCaseDetails(ONE_MIGRATED_AND_ONE_ADDED_HEARING_JSON);
         CaseDetails caseDetailsBefore = buildCaseDetails(ONE_MIGRATED_MODIFIED_AND_ONE_ADDED_HEARING_JSON);
 
-        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
 
         interimHearingService.submitInterimHearing(caseDetails,caseDetailsBefore, AUTH_TOKEN);
@@ -145,7 +145,7 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
         CaseDetails caseDetails = buildCaseDetails(ONE_MIGRATED_AND_ONE_ADDED_HEARING_JSON);
         CaseDetails caseDetailsBefore = buildCaseDetails(ONE_MIGRATED_AND_ONE_ADDED_HEARING_JSON);
 
-        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
 
         interimHearingService.submitInterimHearing(caseDetails,caseDetailsBefore, AUTH_TOKEN);
@@ -167,7 +167,7 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
         CaseDetails caseDetails = buildCaseDetails(TEST_NEW_JSON);
         CaseDetails caseDetailsBefore = buildCaseDetails(TEST_NEW_JSON);
 
-        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
 
         interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
@@ -195,7 +195,7 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
         caseDetails.getData().put("applicantSolicitorConsentForEmails", "No");
         caseDetails.getData().put("respondentRepresented", "No");
 
-        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
 
         CaseDetails caseDetailsBefore = buildCaseDetails(TEST_NEW_JSON);
