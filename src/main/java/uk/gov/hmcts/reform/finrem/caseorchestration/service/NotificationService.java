@@ -480,7 +480,7 @@ public class NotificationService {
     private boolean isApplicantNoticeOfChangeRequest(NotificationRequest notificationRequest,
                                                      FinremCaseDetails caseDetails) {
         return notificationRequest.getName().equalsIgnoreCase(
-            nullToEmpty(caseDetails.getCaseData().getApplicantSolicitorName()));
+            nullToEmpty(caseDetails.getCaseData().getAppSolicitorName()));
     }
 
     private String getRecipientEmail(FinremCaseDetails caseDetails) {

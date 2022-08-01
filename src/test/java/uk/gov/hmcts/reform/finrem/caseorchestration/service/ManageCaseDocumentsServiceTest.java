@@ -105,59 +105,59 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
         assertThat(caseData.getUploadCaseDocumentWrapper().getRespChronologiesCollection(), hasSize(4));
     }
 
-//    @Test
-//    public void givenCaseDataManageCaseDocuments_whenDocumentInWrongCollection_thenMoveItToRightCollectionFormH() {
-//
-//        List<UploadCaseDocumentCollection> chronologyDocs = new ArrayList<>();
-//
-//        UUID someId = UUID.randomUUID();
-//
-//        chronologyDocs.add(createContestedUploadDocumentItem(someId, CaseDocumentType.CHRONOLOGY, CaseDocumentParty.RESPONDENT, YesOrNo.NO, null));
-//
-//        List<UploadCaseDocumentCollection> caseDocs = new ArrayList<>();
-//        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
-//        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
-//        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
-//        caseDocs.add(createContestedUploadDocumentItem(someId, CaseDocumentType.FORM_H, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
-//
-//        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setManageCaseDocumentCollection(caseDocs);
-//        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setRespChronologiesCollection(chronologyDocs);
-//
-//        manageCaseDocumentsService.manageCaseDocuments(caseDetails.getCaseData());
-//
-//        assertThat(caseData.getUploadCaseDocumentWrapper().getRespChronologiesCollection(), hasSize(0));
-//        assertThat(caseData.getUploadCaseDocumentWrapper().getAppChronologiesCollection(), hasSize(3));
-//        assertThat(caseData.getUploadCaseDocumentWrapper().getAppFormsHCollection(), hasSize(1));
-//    }
+    @Test
+    public void givenCaseDataManageCaseDocuments_whenDocumentInWrongCollection_thenMoveItToRightCollectionFormH() {
 
-//    @Test
-//    public void givenCaseDataManageCaseDocuments_whenDocumentInWrongCollection_thenMoveItToAppChronologiesCollection() {
-//
-//        List<UploadCaseDocumentCollection> formH = new ArrayList<>();
-//
-//        UUID someId = UUID.randomUUID();
-//
-//        formH.add(createContestedUploadDocumentItem(someId, CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
-//
-//        List<UploadCaseDocumentCollection> caseDocs = new ArrayList<>();
-//        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(), CaseDocumentType.FORM_H, CaseDocumentParty.RESPONDENT,
-//            YesOrNo.NO, null));
-//        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(), CaseDocumentType.FORM_H, CaseDocumentParty.RESPONDENT,
-//            YesOrNo.NO, null));
-//        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(), CaseDocumentType.FORM_H, CaseDocumentParty.RESPONDENT,
-//            YesOrNo.NO, null));
-//        caseDocs.add(createContestedUploadDocumentItem(someId, CaseDocumentType.CHRONOLOGY, CaseDocumentParty.RESPONDENT, YesOrNo.NO, null));
-//
-//        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setManageCaseDocumentCollection(caseDocs);
-//        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setAppFormsHCollection(formH);
-//
-//
-//        manageCaseDocumentsService.manageCaseDocuments(caseDetails.getCaseData());
-//
-//        assertThat(caseData.getUploadCaseDocumentWrapper().getAppFormsHCollection(), hasSize(0));
-//        assertThat(caseData.getUploadCaseDocumentWrapper().getRespFormsHCollection(), hasSize(3));
-//        assertThat(caseData.getUploadCaseDocumentWrapper().getRespChronologiesCollection(), hasSize(1));
-//    }
+        List<UploadCaseDocumentCollection> chronologyDocs = new ArrayList<>();
+
+        UUID someId = UUID.randomUUID();
+
+        chronologyDocs.add(createContestedUploadDocumentItem(someId, CaseDocumentType.CHRONOLOGY, CaseDocumentParty.RESPONDENT, YesOrNo.NO, null));
+
+        List<UploadCaseDocumentCollection> caseDocs = new ArrayList<>();
+        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
+        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
+        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
+        caseDocs.add(createContestedUploadDocumentItem(someId, CaseDocumentType.FORM_H, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
+
+        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setManageCaseDocumentCollection(caseDocs);
+        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setRespChronologiesCollection(chronologyDocs);
+
+        manageCaseDocumentsService.manageCaseDocuments(caseDetails.getCaseData());
+
+        assertThat(caseData.getUploadCaseDocumentWrapper().getRespChronologiesCollection(), hasSize(0));
+        assertThat(caseData.getUploadCaseDocumentWrapper().getAppChronologiesCollection(), hasSize(3));
+        assertThat(caseData.getUploadCaseDocumentWrapper().getAppFormsHCollection(), hasSize(1));
+    }
+
+    @Test
+    public void givenCaseDataManageCaseDocuments_whenDocumentInWrongCollection_thenMoveItToAppChronologiesCollection() {
+
+        List<UploadCaseDocumentCollection> formH = new ArrayList<>();
+
+        UUID someId = UUID.randomUUID();
+
+        formH.add(createContestedUploadDocumentItem(someId, CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
+
+        List<UploadCaseDocumentCollection> caseDocs = new ArrayList<>();
+        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(), CaseDocumentType.FORM_H, CaseDocumentParty.RESPONDENT,
+            YesOrNo.NO, null));
+        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(), CaseDocumentType.FORM_H, CaseDocumentParty.RESPONDENT,
+            YesOrNo.NO, null));
+        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(), CaseDocumentType.FORM_H, CaseDocumentParty.RESPONDENT,
+            YesOrNo.NO, null));
+        caseDocs.add(createContestedUploadDocumentItem(someId, CaseDocumentType.CHRONOLOGY, CaseDocumentParty.RESPONDENT, YesOrNo.NO, null));
+
+        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setManageCaseDocumentCollection(caseDocs);
+        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setAppFormsHCollection(formH);
+
+
+        manageCaseDocumentsService.manageCaseDocuments(caseDetails.getCaseData());
+
+        assertThat(caseData.getUploadCaseDocumentWrapper().getAppFormsHCollection(), hasSize(0));
+        assertThat(caseData.getUploadCaseDocumentWrapper().getRespFormsHCollection(), hasSize(3));
+        assertThat(caseData.getUploadCaseDocumentWrapper().getRespChronologiesCollection(), hasSize(1));
+    }
 
     @Test
     public void givenCaseDataManageCaseDocuments_whenDocumentStaysInCollection_thenRemoveItFromCaseCollection() {
@@ -187,32 +187,32 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
         assertThat(caseData.getUploadCaseDocumentWrapper().getRespFormsHCollection(), hasSize(3));
     }
 
-//    @Test
-//    public void givenCaseDataManageCaseDocuments_whenDocumentIsNotFdrDocument_thenMoveItToRightCollectionFromFdr() {
-//
-//        List<UploadCaseDocumentCollection> formHFdrDocs = new ArrayList<>();
-//
-//        UUID someId = UUID.randomUUID();
-//
-//        formHFdrDocs.add(createContestedUploadDocumentItem(someId,CaseDocumentType.FORM_H, null, YesOrNo.NO, null));
-//
-//        List<UploadCaseDocumentCollection> caseDocs = new ArrayList<>();
-//        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT,
-//            YesOrNo.NO, null));
-//        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT,
-//            YesOrNo.NO, null));
-//        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT,
-//            YesOrNo.NO, null));
-//        caseDocs.add(createContestedUploadDocumentItem(someId, CaseDocumentType.FORM_H, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
-//
-//        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setManageCaseDocumentCollection(caseDocs);
-//        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setFdrCaseDocumentCollection(formHFdrDocs);
-//
-//        manageCaseDocumentsService.manageCaseDocuments(caseDetails.getCaseData());
-//
-//        assertThat(caseData.getUploadCaseDocumentWrapper().getAppChronologiesCollection(), hasSize(3));
-//        assertThat(caseData.getUploadCaseDocumentWrapper().getFdrCaseDocumentCollection(), hasSize(0));
-//    }
+    @Test
+    public void givenCaseDataManageCaseDocuments_whenDocumentIsNotFdrDocument_thenMoveItToRightCollectionFromFdr() {
+
+        List<UploadCaseDocumentCollection> formHFdrDocs = new ArrayList<>();
+
+        UUID someId = UUID.randomUUID();
+
+        formHFdrDocs.add(createContestedUploadDocumentItem(someId,CaseDocumentType.FORM_H, null, YesOrNo.NO, null));
+
+        List<UploadCaseDocumentCollection> caseDocs = new ArrayList<>();
+        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT,
+            YesOrNo.NO, null));
+        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT,
+            YesOrNo.NO, null));
+        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT,
+            YesOrNo.NO, null));
+        caseDocs.add(createContestedUploadDocumentItem(someId, CaseDocumentType.FORM_H, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
+
+        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setManageCaseDocumentCollection(caseDocs);
+        caseDetails.getCaseData().getUploadCaseDocumentWrapper().setFdrCaseDocumentCollection(formHFdrDocs);
+
+        manageCaseDocumentsService.manageCaseDocuments(caseDetails.getCaseData());
+
+        assertThat(caseData.getUploadCaseDocumentWrapper().getAppChronologiesCollection(), hasSize(3));
+        assertThat(caseData.getUploadCaseDocumentWrapper().getFdrCaseDocumentCollection(), hasSize(0));
+    }
 
     private FinremCaseDetails populateCaseData() {
 

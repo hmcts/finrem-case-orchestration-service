@@ -3,11 +3,11 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.gener
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.junit.Before;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.springframework.util.ResourceUtils;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
@@ -20,7 +20,9 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Organisation;
 import uk.gov.hmcts.reform.finrem.ccd.domain.RepresentationUpdate;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -29,18 +31,15 @@ import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_PHONE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finremCaseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_ADDRESS_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_NAME_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_PHONE_KEY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildConsentedFrcCourtDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.AbstractLetterDetailsGenerator.LETTER_DATE_FORMAT;
 
-public class AbstractLetterDetailsGeneratorTest extends BaseServiceTest {
+public class AbstractLetterDetailsGeneratorTest {
 
     protected static final String APPLICANT_FULL_NAME = "Poor Guy";
     protected static final String RESPONDENT_FULL_NAME_CONTESTED = "Mr Respondent Respondent";
@@ -72,15 +71,15 @@ public class AbstractLetterDetailsGeneratorTest extends BaseServiceTest {
 
     @Before
     public void setUpTest() throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
         caseDetails = finremCaseDetailsFromResource(getResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke.json"),
-            new ObjectMapper());
+            objectMapper);
         caseDetailsBefore = finremCaseDetailsFromResource(
             getResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke-before.json"),
-            new ObjectMapper());
+            objectMapper);
 
         representationUpdate = buildChangeOfRepresentation();
     }
-
 
     protected void assertLetterDetails(NoticeOfChangeLetterDetails noticeOfChangeLetterDetails,
                                        NoticeType noticeType, boolean isConsented) {
@@ -157,5 +156,10 @@ public class AbstractLetterDetailsGeneratorTest extends BaseServiceTest {
     protected HashMap<String, Object> getContestedFrcCourtDetailsAsMap() {
         return new ObjectMapper().convertValue(getContestedFrcCourtDetails(),
             TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, Object.class));
+    }
+
+    protected String getResource(String resourcePath) throws IOException {
+        File file = ResourceUtils.getFile(this.getClass().getResource(resourcePath));
+        return new String(Files.readAllBytes(file.toPath()));
     }
 }

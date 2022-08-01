@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Address;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
@@ -53,6 +54,8 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
     @Test
     public void shouldGenerateManualPaymentLetterForApplicantSolicitor() throws Exception {
         caseDetails = contestedPaperCaseDetails();
+        caseDetails.getCaseData().getContactDetailsWrapper().setApplicantSolicitorName("Applicant Solicitor Firm");
+        caseDetails.getCaseData().getContactDetailsWrapper().setApplicantSolicitorAddress(getApplicantSolicitorAddress());
         when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any())).thenReturn(newDocument());
 
         Document generatedManualPaymentLetter
@@ -66,7 +69,6 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
         Map<String, Object> caseData = getDataFromCaptor(placeholdersMapCaptor);
 
         Addressee addressee = mapper.convertValue(caseData.get(ADDRESSEE), Addressee.class);
-        System.out.println(addressee);
         assertThat(addressee.getName(), is("Applicant Solicitor Firm"));
         assertThat(addressee.getFormattedAddress(), is("67 Pears Road\nNear Roundabout\nMiddlesex\nHounslow\nTW3 1SS"));
 
@@ -118,5 +120,15 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
     private FrcCourtDetails convertToCourtDetails(Object object) {
         return mapper.convertValue(object, new TypeReference<>() {
         });
+    }
+
+    private Address getApplicantSolicitorAddress() {
+        return Address.builder()
+            .addressLine1("67 Pears Road")
+            .addressLine2("Near Roundabout")
+            .county("Middlesex")
+            .postTown("Hounslow")
+            .postCode("TW3 1SS")
+            .build();
     }
 }

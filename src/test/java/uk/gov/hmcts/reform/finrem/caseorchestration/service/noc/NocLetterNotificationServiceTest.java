@@ -6,17 +6,19 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler.litigant.respondent.SolicitorAddedRespondentLetterHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler.litigant.respondent.SolicitorRemovedRespondentLetterHandler;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finremCaseDetailsFromResource;
 
 @RunWith(MockitoJUnitRunner.class)
-public class NocLetterNotificationServiceTest {
+public class NocLetterNotificationServiceTest extends BaseServiceTest {
 
     protected static final String AUTH_TOKEN = "authToken";
     NocLetterNotificationService noticeOfChangeLetterNotificationService;
@@ -37,12 +39,12 @@ public class NocLetterNotificationServiceTest {
     }
 
     @Test
-    public void shouldCallLetterHandlersCorrectly() {
+    public void shouldCallLetterHandlersCorrectly() throws IOException {
 
-        caseDetails = finremCaseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke.json",
+        caseDetails = finremCaseDetailsFromResource(getResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke.json"),
             new ObjectMapper());
         caseDetailsBefore =
-            finremCaseDetailsFromResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke-before.json",
+            finremCaseDetailsFromResource(getResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke-before.json"),
                 new ObjectMapper());
 
         noticeOfChangeLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, caseDetailsBefore, AUTH_TOKEN);

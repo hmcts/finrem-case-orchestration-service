@@ -123,7 +123,7 @@
         }
       ],
       "uao_regionList": "southeast",
-      "uao_southEastFRCList": "kentfrc",
+      "uao_southEastFRCList": "kent",
       "uao_kentSurreyCourtList": "FR_kent_surrey_hc_list_9",
       "anyOtherListingInstructions": "Yes, many",
       "anotherHearingYN": "No",
@@ -139,7 +139,7 @@
           "value": {
             "localCourt": {
               "region": "southeast",
-              "southEastList": "kentfrc",
+              "southEastList": "kent",
               "kentSurreyCourtList": "FR_kent_surrey_hc_list_9"
             },
             "hearingTime": "1pm",
@@ -157,7 +157,7 @@
           "value": {
             "localCourt": {
               "region": "southeast",
-              "southEastList": "kentfrc",
+              "southEastList": "kent",
               "kentSurreyCourtList": "FR_kent_surrey_hc_list_9"
             },
             "hearingTime": "1pm",

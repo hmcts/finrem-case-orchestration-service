@@ -65,7 +65,7 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
             .applicantEmail(contactDetails.getApplicantEmail())
             .applicantAddressConfidential(getYesOrNo(contactDetails.getApplicantAddressHiddenFromRespondent()))
             .applicantRepresented(getYesOrNo(contactDetails.getApplicantRepresented()))
-            .applicantSolicitorName(caseData.getApplicantSolicitorName())
+            .applicantSolicitorName(caseData.getAppSolicitorName())
             .applicantSolicitorAddress(contactDetails.getApplicantSolicitorAddress())
             .applicantSolicitorFirm(contactDetails.getApplicantSolicitorFirm())
             .solicitorReference(contactDetails.getSolicitorReference());

@@ -10,11 +10,14 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.HearingDirectionDetail;
 import uk.gov.hmcts.reform.finrem.ccd.domain.HearingDirectionDetailsCollection;
+import uk.gov.hmcts.reform.finrem.ccd.domain.HearingTypeDirection;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.CourtListWrapper;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
 @Component
 public class ApprovedOrderNoticeOfHearingDetailsMapper extends AbstractLetterDetailsMapper {
@@ -26,12 +29,14 @@ public class ApprovedOrderNoticeOfHearingDetailsMapper extends AbstractLetterDet
     public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtListWrapper courtList) {
         FinremCaseData caseData = caseDetails.getCaseData();
         HearingDirectionDetail hearingDirectionDetail = getHearingDirectionDetail(caseDetails);
-        FrcCourtDetails selectedFRCDetails = courtDetailsMapper.getCourtDetails(hearingDirectionDetail.getLocalCourt());
+        FrcCourtDetails selectedFRCDetails = courtDetailsMapper
+            .getCourtDetails(hearingDirectionDetail.getLocalCourt().getDefaultCourtListWrapper());
 
         return ApprovedOrderNoticeOfHearingDetails.builder()
-            .hearingType(hearingDirectionDetail.getTypeOfHearing().getId())
-            .hearingDate(hearingDirectionDetail.getDateOfHearing().toString())
+            .hearingType(getHearingType(hearingDirectionDetail))
+            .hearingDate(nullToEmpty(hearingDirectionDetail.getDateOfHearing()))
             .hearingTime(hearingDirectionDetail.getHearingTime())
+            .hearingVenue(selectedFRCDetails.getCourtContactDetailsAsOneLineAddressString())
             .hearingLength(hearingDirectionDetail.getTimeEstimate())
             .additionalHearingDated(String.valueOf(new Date()))
             .courtName(selectedFRCDetails.getCourtName())
@@ -43,6 +48,10 @@ public class ApprovedOrderNoticeOfHearingDetailsMapper extends AbstractLetterDet
             .ccdCaseNumber(caseDetails.getId())
             .divorceCaseNumber(caseData.getDivorceCaseNumber())
             .build();
+    }
+
+    private String getHearingType(HearingDirectionDetail hearingDirectionDetail) {
+        return Optional.ofNullable(hearingDirectionDetail.getTypeOfHearing()).map(HearingTypeDirection::getId).orElse(null);
     }
 
     private Optional<HearingDirectionDetail> getLatestAdditionalHearingDirections(FinremCaseDetails caseDetails) {

@@ -197,7 +197,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void whenPreparingApplicantLetterPack() throws Exception {
+    public void whenPreparingApplicantLetterPack() {
         FinremCaseDetails caseDetailsTemp = documentHelper.deepCopy(caseDetails, FinremCaseDetails.class);
         addConsentOrderApprovedDataToCaseDetails(caseDetailsTemp);
 
@@ -210,7 +210,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void whenPreparingApplicantLetterPack_paperApplication() throws Exception {
+    public void whenPreparingApplicantLetterPack_paperApplication() {
         FinremCaseDetails caseDetailsTemp = documentHelper.deepCopy(caseDetails, FinremCaseDetails.class);
         caseDetailsTemp.getCaseData().setPaperApplication(YesOrNo.YES);
         caseDetailsTemp.getCaseData().setCcdCaseType(CaseType.CONSENTED);
@@ -248,7 +248,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         assertThat(documents, hasSize(3));
     }
 
-    private void addConsentOrderApprovedDataToCaseDetails(FinremCaseDetails caseDetails) throws Exception {
+    private void addConsentOrderApprovedDataToCaseDetails(FinremCaseDetails caseDetails) {
         PensionTypeCollection pensionData = pensionTypeCollection();
         pensionData.getValue().getUploadedDocument().setBinaryUrl(PENSION_DOCUMENT_URL);
 

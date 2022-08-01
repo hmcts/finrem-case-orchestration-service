@@ -96,8 +96,8 @@ public class NotificationRequestMapper {
 
     private SolicitorCaseDataKeysWrapper getApplicantSolicitorCaseData(FinremCaseData caseData) {
         return SolicitorCaseDataKeysWrapper.builder()
-            .solicitorEmailKey(caseData.getApplicantSolicitorEmail())
-            .solicitorNameKey(caseData.getApplicantSolicitorName())
+            .solicitorEmailKey(caseData.getAppSolicitorEmail())
+            .solicitorNameKey(caseData.getAppSolicitorName())
             .solicitorReferenceKey(caseData.getContactDetailsWrapper().getSolicitorReference())
             .build();
     }

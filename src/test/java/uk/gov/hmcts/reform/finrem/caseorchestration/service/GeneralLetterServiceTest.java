@@ -12,6 +12,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Address;
 import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
@@ -89,7 +90,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
             + "Second Address Line\n"
             + "Greater London\n"
             + "London\n"
-            + "SW1V 4FG"));
+            + "SE12 9SE"));
         assertThat(data.get("applicantFullName"), is("Poor Guy"));
         assertThat(data.get("respondentFullName"), is("test Korivi"));
     }
@@ -98,6 +99,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
     public void generateContestedGeneralLetter() throws IOException {
         FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource(GENERAL_LETTER_CONTESTED_JSON), mapper);
         caseDetails.getCaseData().setCcdCaseType(CaseType.CONTESTED);
+        caseDetails.getCaseData().getContactDetailsWrapper().setApplicantSolicitorAddress(getApplicantSolicitorAddress());
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
 
         List<GeneralLetterCollection> generalLetterData = caseDetails.getCaseData().getGeneralLetterWrapper().getGeneralLetterCollection();
@@ -215,5 +217,15 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         assertThat(result.getFilename(), is(FILE_NAME));
         assertThat(result.getUrl(), is(DOC_URL));
         assertThat(result.getBinaryUrl(), is(BINARY_URL));
+    }
+
+    private Address getApplicantSolicitorAddress() {
+        return Address.builder()
+            .addressLine1("50 Applicant Solicitor Street")
+            .addressLine2("Second Address Line")
+            .county("Greater London")
+            .postTown("London")
+            .postCode("SW1V 4FG")
+            .build();
     }
 }

@@ -46,8 +46,8 @@ public class ConsentInContestMiniFormADetailsMapper extends AbstractLetterDetail
             .applicantLName(contactDetails.getApplicantLname())
             .appRespondentFmName(contactDetails.getRespondentFmName())
             .appRespondentLName(contactDetails.getRespondentLname())
-            .solicitorName(caseData.getApplicantSolicitorName())
-            .solicitorAddress(caseData.getApplicantSolicitorAddress())
+            .solicitorName(caseData.getAppSolicitorName())
+            .solicitorAddress(caseData.getAppSolicitorAddress())
             .solicitorFirm(contactDetails.getApplicantSolicitorFirm());
     }
 

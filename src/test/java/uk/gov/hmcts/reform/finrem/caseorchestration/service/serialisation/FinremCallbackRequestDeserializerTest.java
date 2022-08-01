@@ -136,6 +136,7 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.UploadOrderCollection;
 import uk.gov.hmcts.reform.finrem.ccd.domain.UploadOrderDocumentType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.ConsentOrderWrapper;
+import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.MiamWrapper;
 
@@ -251,8 +252,21 @@ public class FinremCallbackRequestDeserializerTest {
         assertUploadDocuments(caseData);
         assertConsentOrderWrapper(caseData);
 
+        assertNotNull(caseData.getContactDetailsWrapper().getRespondentAddress());
         assertNotNull(caseData.getContactDetailsWrapper().getApplicantSolicitorAddress());
         assertEquals(caseData.getContactDetailsWrapper().getApplicantSolicitorAddress().getAddressLine1(), "Line1");
+    }
+
+    @Test
+    public void shouldDeserializeAddresses() throws IOException {
+        setCallbackString("/fixtures/deserialisation/addresses.json");
+        CallbackRequest callbackRequest = callbackRequestDeserializer.deserialize(callback);
+        ContactDetailsWrapper contactDetails = callbackRequest.getCaseDetails().getCaseData().getContactDetailsWrapper();
+
+
+        assertNotNull(contactDetails.getRespondentAddress());
+        assertNotNull(contactDetails.getSolicitorAddress());
+        assertNotNull(contactDetails.getApplicantSolicitorAddress());
     }
 
     private void setCallbackString(String fileName) throws IOException {

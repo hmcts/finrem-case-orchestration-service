@@ -207,7 +207,7 @@ dependencies {
     implementation group: 'io.github.openfeign', name: 'feign-httpclient', version: '11.6'
     implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign'
     implementation group: 'io.github.openfeign.form', name: 'feign-form', version: '3.8.0'
-    implementation 'com.github.hmcts:finrem-common:v1.0.3-RC-DFR-1074_4.83'
+    implementation 'com.github.hmcts:finrem-common:v1.0.3-RC-DFR-1074_4.100'
 
     implementation 'com.github.hmcts:idam-java-client:2.0.1'
 

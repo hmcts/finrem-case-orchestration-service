@@ -90,7 +90,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     @Test
     public void generateFastTrackFormC() {
         Map<String, Object> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, makeItFastTrackDecisionCase());
-        assertCaseDocument((CaseDocument) result.get(FORM_C));
+        assertCaseDocument((Document) result.get(FORM_C));
         verifyAdditionalFastTrackFields();
     }
 

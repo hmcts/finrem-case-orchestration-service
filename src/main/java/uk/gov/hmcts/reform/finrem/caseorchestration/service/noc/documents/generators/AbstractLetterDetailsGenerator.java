@@ -73,7 +73,7 @@ public abstract class AbstractLetterDetailsGenerator {
 
     protected String getSolicitorFirmName(FinremCaseDetails caseDetails, RepresentationUpdate representationUpdate) {
         return isApplicant(representationUpdate)
-            ? nullToEmpty(caseDetails.getCaseData().getApplicantSolicitorFirm())
+            ? nullToEmpty(caseDetails.getCaseData().getAppSolicitorFirm())
             : nullToEmpty(caseDetails.getCaseData().getContactDetailsWrapper().getRespondentSolicitorFirm());
     }
 

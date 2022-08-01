@@ -43,14 +43,14 @@ public class AddresseeGeneratorHelper {
 
     private static String getAppName(FinremCaseData caseData) {
         return caseData.isApplicantRepresentedByASolicitor()
-            ? caseData.getApplicantSolicitorName()
+            ? caseData.getAppSolicitorName()
             : caseData.getFullApplicantName();
 
     }
 
     private static Address getAppAddress(FinremCaseData caseData) {
         return caseData.isApplicantRepresentedByASolicitor()
-            ? caseData.getApplicantSolicitorAddress()
+            ? caseData.getAppSolicitorAddress()
             : caseData.getContactDetailsWrapper().getApplicantAddress();
 
     }
@@ -94,13 +94,13 @@ public class AddresseeGeneratorHelper {
 
     public static Map<String, Map<GeneralLetterAddressToType, ?>> getAddressToCaseDataMapping(FinremCaseData data) {
         Map<GeneralLetterAddressToType, Address> generalLetterAddressToValueToAddress = Map.of(
-            GeneralLetterAddressToType.APPLICANT_SOLICITOR, getAddressOrNew(data.getApplicantSolicitorAddress()),
+            GeneralLetterAddressToType.APPLICANT_SOLICITOR, getAddressOrNew(data.getAppSolicitorAddress()),
             GeneralLetterAddressToType.RESPONDENT_SOLICITOR, getAddressOrNew(data.getContactDetailsWrapper().getRespondentSolicitorAddress()),
             GeneralLetterAddressToType.RESPONDENT, getAddressOrNew(data.getContactDetailsWrapper().getRespondentAddress()),
             GeneralLetterAddressToType.OTHER, getAddressOrNew(data.getGeneralLetterWrapper().getGeneralLetterRecipientAddress()));
 
         Map<GeneralLetterAddressToType, String> generalLetterAddressToName = Map.of(
-            GeneralLetterAddressToType.APPLICANT_SOLICITOR, nullToEmpty(data.getApplicantSolicitorName()),
+            GeneralLetterAddressToType.APPLICANT_SOLICITOR, nullToEmpty(data.getAppSolicitorName()),
             GeneralLetterAddressToType.RESPONDENT_SOLICITOR, nullToEmpty(data.getRespondentSolicitorName()),
             GeneralLetterAddressToType.RESPONDENT, nullToEmpty(data.getRespondentFullName()),
             GeneralLetterAddressToType.OTHER, nullToEmpty(data.getGeneralLetterWrapper().getGeneralLetterRecipient()));

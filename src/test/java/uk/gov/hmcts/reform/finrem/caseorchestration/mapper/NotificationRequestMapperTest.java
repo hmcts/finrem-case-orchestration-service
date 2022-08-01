@@ -174,6 +174,8 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
     public void shouldCreateNotificationRequestForAppSolicitorForContestedJourneyForInterimHearing() throws IOException {
         FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource(TEST_JSON), mapper);
         FinremCaseData caseData = caseDetails.getCaseData();
+        caseData.getContactDetailsWrapper().setApplicantSolicitorName(TEST_SOLICITOR_NAME);
+        caseData.getContactDetailsWrapper().setApplicantSolicitorEmail(TEST_SOLICITOR_EMAIL);
 
         List<InterimHearingCollection> interimHearingList = Optional.ofNullable(
             caseData.getInterimWrapper().getInterimHearings()).orElse(Collections.emptyList());
@@ -184,6 +186,7 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
     private void verifyAppData(FinremCaseDetails caseDetails, InterimHearingCollection item) {
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(
             caseDetails, item);
+        System.out.println(notificationRequest);
 
         assertEquals("123", notificationRequest.getCaseReferenceNumber());
         assertEquals(TEST_SOLICITOR_REFERENCE, notificationRequest.getSolicitorReferenceNumber());
@@ -192,8 +195,8 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         assertEquals(TEST_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
         assertEquals("contested", notificationRequest.getCaseType());
         assertThat("checking in loop", notificationRequest.getSelectedCourt(),
-            anyOf(is("bristol"),
-                is("cfc")));
+            anyOf(is("Gloucester and Cheltenham County and Family Court"),
+                is("Croydon County Court And Family Court")));
     }
 
     @Test
@@ -218,8 +221,8 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         assertEquals(TEST_RESP_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
         assertEquals("contested", notificationRequest.getCaseType());
         assertThat("checking in loop", notificationRequest.getSelectedCourt(),
-            anyOf(is("bristol"),
-            is("cfc")));
+            anyOf(is("Gloucester and Cheltenham County and Family Court"),
+            is("Croydon County Court And Family Court")));
     }
 
 

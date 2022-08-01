@@ -75,7 +75,7 @@ public class RepresentativeLetterHandler extends AbstractLetterHandler {
                                                                     FinremCaseDetails otherCaseDetails,
                                                                     boolean isConsentedApplication) {
         return isConsentedApplication
-            && (!isCaseFieldPopulated(caseDetailsToUse.getCaseData().getApplicantSolicitorEmail())
+            && (!isCaseFieldPopulated(caseDetailsToUse.getCaseData().getAppSolicitorEmail())
             || !isSolicitorDigital(representationUpdate, otherCaseDetails));
     }
 
@@ -84,7 +84,7 @@ public class RepresentativeLetterHandler extends AbstractLetterHandler {
                                                                     FinremCaseDetails otherCaseDetails,
                                                                     boolean isConsentedApplication) {
         return !isConsentedApplication
-            && (!isCaseFieldPopulated(caseDetailsToUse.getCaseData().getApplicantSolicitorEmail())
+            && (!isCaseFieldPopulated(caseDetailsToUse.getCaseData().getAppSolicitorEmail())
             || !isSolicitorDigital(representationUpdate, otherCaseDetails));
     }
 

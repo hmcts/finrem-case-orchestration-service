@@ -76,7 +76,8 @@ public class InterimHearingContestedAboutToStartHandler implements CallbackHandl
 
     private List<InterimHearingCollectionItemData> setTrackingForBulkPrintAndNotification(FinremCaseData caseData,
                                                                                           String collectionId) {
-        List<InterimHearingCollectionItemData> list  = caseData.getInterimWrapper().getInterimHearingCollectionItemIds();
+        List<InterimHearingCollectionItemData> list  = Optional.ofNullable(caseData.getInterimWrapper().getInterimHearingCollectionItemIds())
+            .orElse(new ArrayList<>());
         list.add(getTrackingObject(collectionId));
         return list;
     }
