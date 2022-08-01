@@ -24,6 +24,7 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
@@ -44,6 +45,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFu
 @RequiredArgsConstructor
 public class NotificationService {
 
+    private static final String DEFAULT_EMAIL = "fr_applicant_solicitor1@mailinator.com";
     private final NotificationServiceConfiguration notificationServiceConfiguration;
     private final RestTemplate restTemplate;
     private final FeatureToggleService featureToggleService;
@@ -52,8 +54,6 @@ public class NotificationService {
     private final CaseDataService caseDataService;
     private final CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
     private final CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
-
-    private static final String DEFAULT_EMAIL = "fr_applicant_solicitor1@mailinator.com";
 
     public void sendConsentedHWFSuccessfulConfirmationEmail(CaseDetails caseDetails) {
         URI uri = buildUri(notificationServiceConfiguration.getHwfSuccessful());
@@ -395,7 +395,7 @@ public class NotificationService {
         return !caseDataService.isPaperApplication(caseData)
             && caseDataService.isRespondentRepresentedByASolicitor(caseData)
             && caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData)
-            && YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT)));
+            && !NO_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT)));
     }
 
     public boolean isContestedApplicantSolicitorEmailCommunicationEnabled(Map<String, Object> caseData) {
@@ -416,7 +416,7 @@ public class NotificationService {
     }
 
     public boolean isContestedApplicationAndApplicantOrRespondentSolicitorsIsNotRegisteredOrAcceptingEmails(CaseDetails caseDetails) {
-        return caseDataService.isContestedApplication(caseDetails)
+        return caseDataService.isContestedPaperApplication(caseDetails)
             && (!isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)
             || !isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails));
     }

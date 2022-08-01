@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -44,7 +44,7 @@ public class FeeLookupController extends BaseController {
     private final CaseDataService caseDataService;
 
     @PostMapping(path = "/fee-lookup", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Handles looking up Case Fees")
+    @Operation(summary = "Handles looking up Case Fees")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> feeLookup(
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
         @RequestBody CallbackRequest callbackRequest) {
