@@ -9,7 +9,7 @@ import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finremCaseDetailsFromResource;
 
-public class AbstractLetterDetailsMapperTest extends BaseServiceTest {
+public abstract class AbstractLetterDetailsMapperTest extends BaseServiceTest {
 
     protected FinremCaseDetails caseDetails;
     protected final ObjectMapper mapper = new ObjectMapper();

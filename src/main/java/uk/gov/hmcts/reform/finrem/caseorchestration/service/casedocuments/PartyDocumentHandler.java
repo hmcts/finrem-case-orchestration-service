@@ -24,14 +24,8 @@ public abstract class PartyDocumentHandler extends CaseDocumentHandler<UploadCas
 
     public void handle(List<UploadCaseDocumentCollection> uploadedDocuments, FinremCaseData caseData) {
         List<UploadCaseDocumentCollection> documentsFiltered = uploadedDocuments.stream()
-            .filter(d -> {
-                UploadCaseDocument uploadedCaseDocument = d.getValue();
-                return uploadedCaseDocument.getCaseDocuments() != null
-                    && uploadedCaseDocument.getCaseDocumentParty() != null
-                    && CaseDocumentParty.forValue(party).equals(uploadedCaseDocument.getCaseDocumentParty());
-            })
-            .filter(d -> d.getValue().getCaseDocumentType() != null
-                && isDocumentTypeValid(d.getValue().getCaseDocumentType()))
+            .filter(this::isPartyMatchesCaseDocumentParty)
+            .filter(this::isDocumentTypeValid)
             .collect(Collectors.toList());
 
         List<UploadCaseDocumentCollection> documentCollection = getDocumentCollection(caseData);
@@ -43,6 +37,18 @@ public abstract class PartyDocumentHandler extends CaseDocumentHandler<UploadCas
         if (!documentCollection.isEmpty()) {
             setDocumentCollection(caseData, documentCollection);
         }
+    }
+
+    private boolean isDocumentTypeValid(UploadCaseDocumentCollection d) {
+        return d.getValue().getCaseDocumentType() != null
+            && isDocumentTypeValid(d.getValue().getCaseDocumentType());
+    }
+
+    private boolean isPartyMatchesCaseDocumentParty(UploadCaseDocumentCollection d) {
+        UploadCaseDocument uploadedCaseDocument = d.getValue();
+        return uploadedCaseDocument.getCaseDocuments() != null
+            && uploadedCaseDocument.getCaseDocumentParty() != null
+            && CaseDocumentParty.forValue(party).equals(uploadedCaseDocument.getCaseDocumentParty());
     }
 
     protected abstract boolean isDocumentTypeValid(String caseDocumentType);

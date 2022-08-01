@@ -115,9 +115,9 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
         chronologyDocs.add(createContestedUploadDocumentItem(someId, CaseDocumentType.CHRONOLOGY, CaseDocumentParty.RESPONDENT, YesOrNo.NO, null));
 
         List<UploadCaseDocumentCollection> caseDocs = new ArrayList<>();
-        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
-        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
-        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(),CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
+        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(), CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
+        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(), CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
+        caseDocs.add(createContestedUploadDocumentItem(UUID.randomUUID(), CaseDocumentType.CHRONOLOGY, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
         caseDocs.add(createContestedUploadDocumentItem(someId, CaseDocumentType.FORM_H, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
 
         caseDetails.getCaseData().getUploadCaseDocumentWrapper().setManageCaseDocumentCollection(caseDocs);
@@ -163,7 +163,6 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
     public void givenCaseDataManageCaseDocuments_whenDocumentStaysInCollection_thenRemoveItFromCaseCollection() {
 
         List<UploadCaseDocumentCollection> formH = new ArrayList<>();
-
         UUID someId = UUID.randomUUID();
 
         formH.add(createContestedUploadDocumentItem(someId, CaseDocumentType.FORM_H, CaseDocumentParty.APPLICANT, YesOrNo.NO, null));
@@ -219,9 +218,9 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
         UUID someId = UUID.randomUUID();
         UUID otherId = UUID.randomUUID();
 
-        uploadDocumentList.add(createContestedUploadDocumentItem(someId,CaseDocumentType.CHRONOLOGY, CaseDocumentParty.RESPONDENT,
+        uploadDocumentList.add(createContestedUploadDocumentItem(someId, CaseDocumentType.CHRONOLOGY, CaseDocumentParty.RESPONDENT,
             YesOrNo.NO, null));
-        uploadDocumentList.add(createContestedUploadDocumentItem(otherId,CaseDocumentType.CHRONOLOGY, CaseDocumentParty.RESPONDENT,
+        uploadDocumentList.add(createContestedUploadDocumentItem(otherId, CaseDocumentType.CHRONOLOGY, CaseDocumentParty.RESPONDENT,
             YesOrNo.NO, null));
 
         List<UploadCaseDocumentCollection> caseDocs = new ArrayList<>();

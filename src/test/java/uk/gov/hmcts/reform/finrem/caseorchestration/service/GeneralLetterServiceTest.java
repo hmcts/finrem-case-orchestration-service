@@ -99,7 +99,6 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
     public void generateContestedGeneralLetter() throws IOException {
         FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource(GENERAL_LETTER_CONTESTED_JSON), mapper);
         caseDetails.getCaseData().setCcdCaseType(CaseType.CONTESTED);
-        caseDetails.getCaseData().getContactDetailsWrapper().setApplicantSolicitorAddress(getApplicantSolicitorAddress());
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
 
         List<GeneralLetterCollection> generalLetterData = caseDetails.getCaseData().getGeneralLetterWrapper().getGeneralLetterCollection();
@@ -114,7 +113,6 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         Map<String, Object> data = getDataFromCaptor(documentGenerationRequestCaseDetailsCaptor);
         assertThat(data.get("generalLetterCreatedDate"), is(notNullValue()));
         assertThat(data.get("ccdCaseNumber"), is("1234567890"));
-        System.out.println(data.get(ADDRESSEE));
         assertThat(mapper.convertValue(data.get(ADDRESSEE), Addressee.class).getFormattedAddress(),
             is("50 Applicant Solicitor Street\n"
             + "Second Address Line\n"
@@ -217,15 +215,5 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         assertThat(result.getFilename(), is(FILE_NAME));
         assertThat(result.getUrl(), is(DOC_URL));
         assertThat(result.getBinaryUrl(), is(BINARY_URL));
-    }
-
-    private Address getApplicantSolicitorAddress() {
-        return Address.builder()
-            .addressLine1("50 Applicant Solicitor Street")
-            .addressLine2("Second Address Line")
-            .county("Greater London")
-            .postTown("London")
-            .postCode("SW1V 4FG")
-            .build();
     }
 }
