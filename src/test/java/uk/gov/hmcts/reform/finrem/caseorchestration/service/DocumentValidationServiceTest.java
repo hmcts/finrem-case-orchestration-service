@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
 
 import java.io.InputStream;
@@ -38,7 +37,8 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
     private static final String CONSENT_IN_CONTESTED_NO_PENSION_COLLECTION = "consented-in-consented-no-pension-collection.json";
 
     @Autowired private DocumentValidationService documentValidationService;
-    @Autowired private DocumentClient documentClientMock;
+
+    @Autowired private DocumentGeneratorValidationService documentGeneratorValidationServiceMock;
     @Autowired private ObjectMapper objectMapper;
 
     private CallbackRequest callbackRequest;
@@ -57,7 +57,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
             .mimeType(APPLICATION_PDF)
             .build();
 
-        when(documentClientMock.checkUploadedFileType(AUTH_TOKEN, "http://file1.binary"))
+        when(documentGeneratorValidationServiceMock.validateFileType("http://file1.binary"))
             .thenReturn(documentValidationResponse);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
             CONSENT_ORDER, AUTH_TOKEN);
@@ -71,7 +71,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
             .errors(singletonList("Invalid file type"))
             .build();
 
-        when(documentClientMock.checkUploadedFileType(AUTH_TOKEN, "http://file1.binary"))
+        when(documentGeneratorValidationServiceMock.validateFileType("http://file1.binary"))
             .thenReturn(documentValidationResponse);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
             CONSENT_ORDER, AUTH_TOKEN);
@@ -83,7 +83,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
         setUpCaseDetails("amend-consent-order-by-caseworker.json");
         DocumentValidationResponse documentValidationResponse = builder().mimeType(APPLICATION_PDF).build();
 
-        when(documentClientMock.checkUploadedFileType(AUTH_TOKEN,
+        when(documentGeneratorValidationServiceMock.validateFileType(
             "http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary"))
             .thenReturn(documentValidationResponse);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
@@ -98,7 +98,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
             .errors(singletonList("Invalid file type"))
             .build();
 
-        when(documentClientMock.checkUploadedFileType(AUTH_TOKEN,
+        when(documentGeneratorValidationServiceMock.validateFileType(
             "http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary"))
             .thenReturn(documentValidationResponse);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
@@ -111,10 +111,10 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
         setUpCaseDetails(VALIDATE_PENSION_COLLECTION_JSON);
         DocumentValidationResponse documentValidationResponse = builder().mimeType(APPLICATION_PDF).build();
 
-        when(documentClientMock.checkUploadedFileType(AUTH_TOKEN,
+        when(documentGeneratorValidationServiceMock.validateFileType(
             "http://file1.binary"))
             .thenReturn(documentValidationResponse);
-        when(documentClientMock.checkUploadedFileType(AUTH_TOKEN,
+        when(documentGeneratorValidationServiceMock.validateFileType(
             "http://file2.binary"))
             .thenReturn(documentValidationResponse);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
@@ -129,10 +129,10 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
         DocumentValidationResponse documentValidationResponse2 = builder()
             .errors(singletonList("Invalid file type")).build();
 
-        when(documentClientMock.checkUploadedFileType(AUTH_TOKEN,
+        when(documentGeneratorValidationServiceMock.validateFileType(
             "http://file1.binary"))
             .thenReturn(documentValidationResponse1);
-        when(documentClientMock.checkUploadedFileType(AUTH_TOKEN,
+        when(documentGeneratorValidationServiceMock.validateFileType(
             "http://file2.binary"))
             .thenReturn(documentValidationResponse2);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
@@ -153,7 +153,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
     public void shouldReturnSuccessWhenFileTypeValidationForRespondToOrderCollection() throws Exception {
         setUpCaseDetails(RESPOND_TO_ORDER_SOL_JSON);
         DocumentValidationResponse documentValidationResponse = builder().mimeType(APPLICATION_PDF).build();
-        when(documentClientMock.checkUploadedFileType(AUTH_TOKEN,
+        when(documentGeneratorValidationServiceMock.validateFileType(
             "http://doc2/binary"))
             .thenReturn(documentValidationResponse);
 
@@ -182,7 +182,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
     public void shouldValidateConsentInContestedConsentOrder() throws Exception {
         setUpCaseDetails(CONSENT_IN_CONTESTED);
         DocumentValidationResponse documentValidationResponse1 = builder().mimeType(APPLICATION_PDF).build();
-        when(documentClientMock.checkUploadedFileType(AUTH_TOKEN,
+        when(documentGeneratorValidationServiceMock.validateFileType(
             "http://file1.binary"))
             .thenReturn(documentValidationResponse1);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
@@ -195,7 +195,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
         setUpCaseDetails(CONSENT_IN_CONTESTED);
         DocumentValidationResponse documentValidationResponse1 = builder()
             .errors(singletonList("Invalid file type")).build();
-        when(documentClientMock.checkUploadedFileType(AUTH_TOKEN,
+        when(documentGeneratorValidationServiceMock.validateFileType(
             "http://file1.binary"))
             .thenReturn(documentValidationResponse1);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
@@ -208,7 +208,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
         setUpCaseDetails(CONSENT_IN_CONTESTED);
 
         DocumentValidationResponse documentValidationResponse1 = builder().mimeType(APPLICATION_PDF).build();
-        when(documentClientMock.checkUploadedFileType(AUTH_TOKEN,
+        when(documentGeneratorValidationServiceMock.validateFileType(
             "http://file1.binary"))
             .thenReturn(documentValidationResponse1);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
@@ -223,10 +223,10 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
             .errors(singletonList("Invalid file type")).build();
         DocumentValidationResponse documentValidationResponse2 = builder().mimeType(APPLICATION_PDF).build();
 
-        when(documentClientMock.checkUploadedFileType(AUTH_TOKEN,
+        when(documentGeneratorValidationServiceMock.validateFileType(
             "http://file1.binary"))
             .thenReturn(documentValidationResponse1);
-        when(documentClientMock.checkUploadedFileType(AUTH_TOKEN,
+        when(documentGeneratorValidationServiceMock.validateFileType(
             "http://file2.binary"))
             .thenReturn(documentValidationResponse2);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
