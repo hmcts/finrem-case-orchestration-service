@@ -6,6 +6,7 @@
     "state": "applicationDrafted",
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
+      "paperApplication": "Yes",
       "PBANumber": "PBA123",
       "PBAreference": "ABCD",
       "consentOrder": {

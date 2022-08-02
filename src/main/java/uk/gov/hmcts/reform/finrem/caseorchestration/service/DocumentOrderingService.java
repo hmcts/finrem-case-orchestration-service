@@ -63,7 +63,6 @@ public class DocumentOrderingService {
         String approvedOrderCollectionFieldName = caseDataService.isConsentedInContestedCase(caseDetails)
             ? CONTESTED_CONSENT_ORDER_COLLECTION : APPROVED_ORDER_COLLECTION;
 
-        return objectMapper.convertValue(caseDetails.getData().get(approvedOrderCollectionFieldName), new TypeReference<>() {
-        });
+        return objectMapper.convertValue(caseDetails.getData().get(approvedOrderCollectionFieldName), new TypeReference<>() {});
     }
 }
