@@ -43,6 +43,7 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
@@ -117,8 +118,8 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, AUTH_TOKEN);
 
-        when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(false);
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(true);
+        when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(isA(FinremCaseDetails.class))).thenReturn(false);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(isA(FinremCaseDetails.class))).thenReturn(true);
 
         verify(bulkPrintService).printApplicantDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
         verify(bulkPrintService).printRespondentDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
@@ -136,8 +137,8 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, AUTH_TOKEN);
 
-        when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(false);
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(true);
+        when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(isA(FinremCaseDetails.class))).thenReturn(false);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(isA(FinremCaseDetails.class))).thenReturn(true);
 
         verify(bulkPrintService).printApplicantDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
 

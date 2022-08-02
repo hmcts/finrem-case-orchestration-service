@@ -100,6 +100,7 @@ public abstract class BaseControllerTest extends BaseTest {
         caseData.setPaperApplication(YesOrNo.NO);
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().caseType(CaseType.CONTESTED)
             .id(123L).caseData(caseData).build();
+
         return objectMapper.writeValueAsString(
             uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest.builder()
                 .eventType(EventType.PREPARE_FOR_HEARING)

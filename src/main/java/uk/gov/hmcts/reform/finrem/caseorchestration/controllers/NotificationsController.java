@@ -18,9 +18,11 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
@@ -52,6 +54,8 @@ public class NotificationsController extends BaseController {
     private final FeatureToggleService featureToggleService;
     private final NocLetterNotificationService nocLetterNotificationService;
     private final FinremCallbackRequestDeserializer finremCallbackRequestDeserializer;
+    private final HearingDocumentService hearingDocumentService;
+    private final AdditionalHearingDocumentService additionalHearingDocumentService;
     private final CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
     private final CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
 
@@ -95,7 +99,8 @@ public class NotificationsController extends BaseController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200",
             description = "Case assigned to Judge notification sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation =  uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
+            content = {@Content(mediaType = "application/json",
+                schema = @Schema(implementation =  uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
     public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendAssignToJudgeConfirmationNotification(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @RequestBody String source) {
@@ -351,8 +356,8 @@ public class NotificationsController extends BaseController {
     @PostMapping(value = "/prepare-for-hearing", consumes = APPLICATION_JSON_VALUE)
     @Operation(summary = "send e-mail for 'Prepare for Hearing'.")
     @ApiResponses(value = {
-        @ApiResponse(code = 204, message = "'Prepare for Hearing' e-mail sent successfully",
-            response = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class)})
+        @ApiResponse(responseCode = "204", description = "'Prepare for Hearing' e-mail sent successfully",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
     public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendPrepareForHearingEmail(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @RequestBody String source) {
@@ -363,6 +368,8 @@ public class NotificationsController extends BaseController {
 
         log.info("Received request to send email for 'Prepare for Hearing' for Case ID: {}", callbackRequest.getCaseDetails().getId());
 
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+
         if (notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
             log.info("Sending email notification to Applicant Solicitor for 'Prepare for Hearing'");
             notificationService.sendPrepareForHearingEmailApplicant(caseDetails);
@@ -370,17 +377,6 @@ public class NotificationsController extends BaseController {
         if (notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
             log.info("Sending email notification to Respondent Solicitor for 'Prepare for Hearing'");
             notificationService.sendPrepareForHearingEmailRespondent(caseDetails);
-        }
-
-        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        if (caseDetails.getCaseData().isContestedPaperApplication()) {
-            if (hearingDocumentService.alreadyHadFirstHearing(caseDetailsBefore)) {
-                log.info("Sending Additional Hearing Document to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
-                additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, caseDetails);
-            } else {
-                log.info("Sending Forms A, C, G to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
-                hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, authorisationToken);
-            }
         }
 
         return ResponseEntity.ok(uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.builder()

@@ -12,6 +12,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -72,14 +73,13 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
     protected static final String CASE_DETAILS = "caseDetails";
     protected static final String CASE_DATA = "case_data";
 
-    private static final String GENERATE_DOCUMENT_CONTEXT_PATH = "/version/1/generate-pdf";
-    private static final String GENERATE_BULK_PRINT_CONTEXT_PATH = "/version/1/bulk-print";
     private static final String API_URL = "/case-orchestration/documents/hearing";
     private static final String JSON_CONTENT_PATH = "/fixtures/contested/validate-hearing-withoutfastTrackDecision.json";
 
     @Autowired protected ObjectMapper objectMapper;
     @Autowired protected MockMvc webClient;
     @Autowired protected DocumentConfiguration config;
+    @Qualifier("finremCallbackRequestDeserializer")
     @Autowired protected FinremCallbackRequestDeserializer deserializer;
 
     @MockBean
@@ -194,6 +194,8 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
             eq(config.getFormCNonFastTrackTemplate()), eq(config.getFormCFileName()))).thenReturn(newDocument());
         when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(),
             eq(config.getFormGTemplate()), eq(config.getFormGFileName()))).thenReturn(newDocument());
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(),
+            eq(config.getBulkPrintTemplate()), eq(config.getBulkPrintFileName()))).thenReturn(newDocument());
     }
 
     private void setUpErrorMockContext() {
@@ -210,10 +212,6 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
             eq(config.getFormGTemplate()), eq(config.getFormGFileName()));
     }
 
-    private DocumentGenerationRequest coverSheetDocumentRequest() {
-        return documentRequest(config.getBulkPrintTemplate(), config.getBulkPrintFileName());
-    }
-
     private String expectedErrorData() throws JsonProcessingException {
         return objectMapper.writeValueAsString(
             AboutToStartOrSubmitCallbackResponse.builder()
@@ -225,8 +223,8 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         FinremCaseDetails caseDetails = request.getCaseDetails();
         caseDetails.getCaseData().setFormC(newDocument());
         caseDetails.getCaseData().setFormG(newDocument());
-        caseDetails.getData().put("bulkPrintCoverSheetApp", caseDocument());
-        caseDetails.getData().put("bulkPrintCoverSheetRes", caseDocument());
+        caseDetails.getCaseData().setBulkPrintCoverSheetApp(newDocument());
+        caseDetails.getCaseData().setBulkPrintCoverSheetRes(newDocument());
 
         return objectMapper.writeValueAsString(
             AboutToStartOrSubmitCallbackResponse.builder()
@@ -245,63 +243,5 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         FrcCourtDetails courtDetails = objectMapper.convertValue(placeholdersMap.get("courtDetails"), FrcCourtDetails.class);
         assertEquals("Bristol Civil and Family Justice Centre", courtDetails.getCourtName());
         assertEquals("2 Redcliff Street, Bristol, BS1 6GR", courtDetails.getCourtAddress());
-    }
-
-    private DocumentGenerationRequest documentRequest(String template, String fileName) {
-        return DocumentGenerationRequest.builder()
-            .template(template)
-            .fileName(fileName)
-            .values(Collections.singletonMap("caseDetails", request.getCaseDetails()))
-            .build();
-    }
-
-    protected BulkPrintRequest bulkPrintRequest() {
-        List<BulkPrintDocument> caseDocuments = new ArrayList<>();
-        caseDocuments.add(BulkPrintDocument.builder().binaryFileUrl("http://dm-store/lhjbyuivu87y989hijbb/binary").build());
-        return BulkPrintRequest.builder()
-            .caseId("123")
-            .letterType("FINANCIAL_REMEDY_PACK")
-            .bulkPrintDocuments(caseDocuments)
-            .build();
-    }
-
-    private void generateDocumentServiceSuccessStub(DocumentGenerationRequest documentRequest) throws JsonProcessingException {
-        documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
-            .withRequestBody(equalToJson(objectMapper.writeValueAsString(coverSheetDocumentRequest()), true, true))
-            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
-            .withHeader(CONTENT_TYPE, equalTo("application/json"))
-            .willReturn(aResponse()
-                .withStatus(HttpStatus.OK.value())
-                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                .withBody(objectMapper.writeValueAsString(document()))));
-
-        documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
-            .withRequestBody(equalToJson(objectMapper.writeValueAsString(documentRequest),
-                true, true))
-            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
-            .withHeader(CONTENT_TYPE, equalTo("application/json"))
-            .willReturn(aResponse()
-                .withStatus(HttpStatus.OK.value())
-                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                .withBody(objectMapper.writeValueAsString(document()))));
-
-        documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_BULK_PRINT_CONTEXT_PATH))
-            .withRequestBody(equalToJson(objectMapper.writeValueAsString(bulkPrintRequest()), true, true))
-            .withHeader(CONTENT_TYPE, equalTo("application/json"))
-            .willReturn(aResponse()
-                .withStatus(HttpStatus.OK.value())
-                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                .withBody(objectMapper.writeValueAsString(UUID.randomUUID()))));
-    }
-
-    private void generateDocumentServiceErrorStub(DocumentGenerationRequest documentRequest) throws JsonProcessingException {
-        documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
-            .withRequestBody(equalToJson(objectMapper.writeValueAsString(documentRequest),
-                true, true))
-            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
-            .withHeader(CONTENT_TYPE, equalTo("application/json"))
-            .willReturn(aResponse()
-                .withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)));
     }
 }

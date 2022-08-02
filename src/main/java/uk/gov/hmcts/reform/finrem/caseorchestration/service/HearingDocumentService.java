@@ -15,22 +15,15 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.addFastTrackFields;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.addNonFastTrackFields;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.isFastTrackApplication;
 
 @Service
 @Slf4j
@@ -94,8 +87,7 @@ public class HearingDocumentService {
     }
 
     public void sendFormCAndGForBulkPrint(FinremCaseDetails caseDetails, String authorisationToken) {
-        String caseId = caseDetails.getId() == null ? "noId" : caseDetails.getId().toString();
-        List<BulkPrintDocument> caseDocuments = getHearingCaseDocuments(caseDetails.getCaseData(), caseId);
+        List<BulkPrintDocument> caseDocuments = getHearingCaseDocuments(caseDetails.getCaseData());
 
         if (!notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
             bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, caseDocuments);
@@ -121,24 +113,26 @@ public class HearingDocumentService {
         return Optional.ofNullable(caseDetails.getCaseData().getFormC()).isPresent();
     }
 
-    private List<BulkPrintDocument> getHearingCaseDocuments(FinremCaseData caseData, String caseId) {
+    private List<BulkPrintDocument> getHearingCaseDocuments(FinremCaseData caseData) {
         List<BulkPrintDocument> caseDocuments = new ArrayList<>();
 
         log.info("Fetching Contested Paper Case bulk print document from Case Data: {}", caseData);
 
         documentHelper.getDocumentAsBulkPrintDocument(caseData.getFormC()).ifPresent(caseDocuments::add);
         documentHelper.getDocumentAsBulkPrintDocument(caseData.getFormG()).ifPresent(caseDocuments::add);
-        documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, MINI_FORM_A).ifPresent(caseDocuments::add);
+        documentHelper.getDocumentAsBulkPrintDocument(caseData.getMiniFormA()).ifPresent(caseDocuments::add);
 
-        List<Document> formADocuments = caseData.getCopyOfPaperFormA().stream()
-            .map(collectionElement -> collectionElement.getValue().getUploadedDocument()).collect(Collectors.toList());
+        List<Document> formADocuments = Optional.ofNullable(caseData.getCopyOfPaperFormA().stream()
+            .map(collectionElement -> collectionElement.getValue().getUploadedDocument()).toList())
+            .orElse(new ArrayList<>());
 
         caseDocuments.addAll(formADocuments.stream()
             .map(documentHelper::getDocumentAsBulkPrintDocument)
             .flatMap(Optional::stream)
-            .collect(Collectors.toList()));
+            .toList());
 
-        log.info("Sending Contested Paper Case bulk print documents for {} from Case Data: {}", caseId, caseData);
+        log.info("Sending Contested Paper Case bulk print documents for {} from Case Data: {}",
+            caseData.getCcdCaseId(), caseData);
 
         return caseDocuments;
     }

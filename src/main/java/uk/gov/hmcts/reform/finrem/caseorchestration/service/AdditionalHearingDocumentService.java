@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.collect.Iterables;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -35,9 +36,7 @@ public class AdditionalHearingDocumentService {
     private final DocumentHelper documentHelper;
     private final BulkPrintService bulkPrintService;
     private final AdditionalHearingDetailsMapper additionalHearingDetailsMapper;
-    private final CaseDataService caseDataService;
     private final NotificationService notificationService;
-
 
     public void createAdditionalHearingDocuments(String authorisationToken, FinremCaseDetails caseDetails) {
         FinremCaseData caseData = caseDetails.getCaseData();
@@ -122,17 +121,16 @@ public class AdditionalHearingDocumentService {
         List<AdditionalHearingDocumentCollection> additionalHearingDocumentData = Optional.ofNullable(caseDetails.getCaseData()
             .getAdditionalHearingDocuments()).orElse(new ArrayList<>());
 
-        AdditionalHearingDocumentCollection additionalHearingDocument =
-            additionalHearingDocumentData.get(additionalHearingDocumentData.size() - 1);
+        AdditionalHearingDocumentCollection additionalHearingDocument = Iterables.getLast(additionalHearingDocumentData, null);
 
         List<BulkPrintDocument> document = singletonList(documentHelper.getDocumentAsBulkPrintDocument(
             additionalHearingDocument.getValue().getAdditionalHearingDocument()).orElseThrow());
 
-        if (!notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
+        if (!notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(caseDetails.getCaseData())) {
             CompletableFuture.runAsync(() ->
                 bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, document));
         }
-        if (!notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
+        if (!notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getCaseData())) {
             CompletableFuture.runAsync(() ->
                 bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, document));
         }

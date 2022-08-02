@@ -7,6 +7,18 @@
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
       "paperApplication": "Yes",
+      "copyOfPaperFormA": [
+        {
+          "value": {
+            "typeOfDocument": "Copy of paper form A",
+            "uploadedDocument": {
+              "document_url": "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336",
+              "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+              "document_binary_url": "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336/binary"
+            }
+          }
+        }
+      ],
       "PBANumber": "PBA123",
       "PBAreference": "ABCD",
       "consentOrder": {

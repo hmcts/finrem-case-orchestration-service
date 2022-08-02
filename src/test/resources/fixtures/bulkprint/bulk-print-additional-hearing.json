@@ -63,6 +63,17 @@
           }
         }
       ],
+      "additionalHearingDocuments": [
+        {
+          "value": {
+            "additionalHearingDocument": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b1532b0a-3759-4d45-8c66-d1a8e5f3273b",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b1532b0a-3759-4d45-8c66-d1a8e5f3273b/binary"
+            }
+          }
+        }
+      ],
       "applicantSolicitorConsentForEmails": "Yes",
       "applicantSolicitorDXnumber": null,
       "isAdmin": "Yes",

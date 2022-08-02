@@ -907,7 +907,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         when(caseDataService.isPaperApplication(any())).thenReturn(true);
         when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
 
-        assertFalse(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any()));
+        assertFalse(notificationService.isRespondentSolicitorEmailCommunicationEnabled(new HashMap<>()));
     }
 
     @Test
@@ -942,7 +942,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         when(caseDataService.isPaperApplication(any())).thenReturn(true);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
 
-        assertFalse(notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(any()));
+        assertFalse(notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(new HashMap<>()));
     }
 
     @Test
@@ -1136,23 +1136,25 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldEmailApplicantSolicitorWhenApplicantSolicitorIsRegisteredAndAcceptingEmails() {
-        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(true);
+        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(isA(CaseDetails.class))).thenReturn(true);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
 
-        assertTrue(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(any()));
+        assertTrue(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(
+            CaseDetails.builder().build()));
     }
 
     @Test
     public void shouldNotEmailApplicantSolicitorWhenApplicantSolicitorIsNotRegisteredButIsAcceptingEmails() {
-        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(false);
+        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(isA(CaseDetails.class))).thenReturn(false);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
 
-        assertFalse(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(any()));
+        assertFalse(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(
+            CaseDetails.builder().build()));
     }
 
     @Test
     public void shouldEmailRespondentSolicitorWhenRespondentSolicitorIsRegisteredAndAcceptingEmails() {
-        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(true);
+        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(isA(CaseDetails.class))).thenReturn(true);
 
         Map<String, Object> caseData = new HashMap<>();
 
@@ -1168,7 +1170,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldNotEmailRespondentSolicitorWhenRespondentSolicitorIsNotRegisteredAndAcceptingEmails() {
-        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(false);
+        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(isA(CaseDetails.class))).thenReturn(false);
 
         Map<String, Object> caseData = new HashMap<>();
 
@@ -1185,22 +1187,23 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void givenAppIsContestedAndApplicantSolicitorIsNotRegisteredOrAcceptingEmails_shouldSendLettersApplicantSolicitor() {
         when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(false);
-        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(false);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(isA(CaseDetails.class))).thenReturn(false);
+        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(isA(CaseDetails.class))).thenReturn(false);
 
-        assertTrue(notificationService.isContestedApplicationAndApplicantOrRespondentSolicitorsIsNotRegisteredOrAcceptingEmails(any()));
+        assertTrue(notificationService.isContestedApplicationAndApplicantOrRespondentSolicitorsIsNotRegisteredOrAcceptingEmails(
+            CaseDetails.builder().build()));
     }
 
     @Test
     public void givenAppIsNotContestedAndApplicantSolicitorIsRegisteredAndAcceptingEmails_shouldNotSendLetters() {
         when(caseDataService.isContestedApplication(any())).thenReturn(false);
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(true);
-        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(isA(CaseDetails.class))).thenReturn(true);
+        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(isA(CaseDetails.class))).thenReturn(true);
 
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, YES_VALUE);
 
-        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(true);
+        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(isA(CaseDetails.class))).thenReturn(true);
         when(caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData)).thenReturn(true);
         when(caseDataService.isPaperApplication(any())).thenReturn(false);
         when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
@@ -1213,7 +1216,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void isContestedAndRespondentSolicitorIsNotRegisteredOrAcceptingEmails() {
         when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
-        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(true);
+        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(isA(CaseDetails.class))).thenReturn(true);
         when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
 
         Map<String, Object> caseData = new HashMap<>();

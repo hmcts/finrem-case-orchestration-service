@@ -12,9 +12,11 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
@@ -32,6 +34,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.Check
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -65,6 +68,8 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @MockBean private FinremCallbackRequestDeserializer deserializer;
     @MockBean private CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
     @MockBean private CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
+    @MockBean private HearingDocumentService hearingDocumentService;
+    @MockBean private AdditionalHearingDocumentService additionalHearingDocumentService;
 
     @Test
     public void sendHwfSuccessfulConfirmationEmailIfDigitalCase() throws JsonProcessingException {
@@ -112,17 +117,21 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldSendAssignToJudgeConfirmationEmailIfRespondentSolicitorIsAcceptingEmail() {
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
+    public void shouldSendAssignToJudgeConfirmationEmailIfRespondentSolicitorIsAcceptingEmail() throws JsonProcessingException {
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(isA(FinremCaseData.class))).thenReturn(true);
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(buildNewCallbackRequestString()));
 
-        notificationsController.sendAssignToJudgeConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
+        notificationsController.sendAssignToJudgeConfirmationNotification(AUTH_TOKEN, buildNewCallbackRequestString());
 
         verify(notificationService).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(any());
     }
 
     @Test
-    public void shouldNotSendAssignToJudgeConfirmationEmailIfRespondentSolicitorIsAcceptingEmail() {
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
+    public void shouldNotSendAssignToJudgeConfirmationEmailIfRespondentSolicitorIsAcceptingEmail() throws JsonProcessingException {
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(isA(FinremCaseData.class))).thenReturn(false);
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(buildNewCallbackRequestString()));
+
+        notificationsController.sendAssignToJudgeConfirmationNotification(AUTH_TOKEN, buildNewCallbackRequestString());
 
         verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(any());
     }
@@ -237,20 +246,19 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void givenApplicantSolicitorIsRegisteredAndAgreedToEmails_shouldSendPrepareForHearingEmail() {
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(true);
+    public void givenApplicantSolicitorIsRegisteredAndAgreedToEmails_shouldSendPrepareForHearingEmail() throws JsonProcessingException {
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(isA(FinremCaseDetails.class))).thenReturn(true);
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(buildNewCallbackRequestString()));
 
-        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
+        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildNewCallbackRequestString());
 
         verify(notificationService).sendPrepareForHearingEmailApplicant(any());
     }
 
     @Test
     public void givenSolAgreedToEmails_and_noPreviousHearing_shouldSendPrepareForHearingEmail_and_PrintHearingDocuments() throws JsonProcessingException {
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
-        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(isA(FinremCaseData.class))).thenReturn(true);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(isA(FinremCaseDetails.class))).thenReturn(true);
+        when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(isA(FinremCaseDetails.class))).thenReturn(true);
         when(hearingDocumentService.alreadyHadFirstHearing(isA(FinremCaseDetails.class))).thenReturn(false);
         when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(buildCallbackRequestWithBeforeCaseDetailsStringPaper()));
 
@@ -258,29 +266,18 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         verify(notificationService).sendPrepareForHearingEmailApplicant(any());
         verify(notificationService).sendPrepareForHearingEmailRespondent(any());
-        verify(hearingDocumentService).sendFormCAndGForBulkPrint(any(), eq(AUTH_TOKEN));
     }
 
     @Test
     public void shouldNotSendPrepareForHearingEmailToApplicantSolicitorWhenNotAgreed() throws JsonProcessingException {
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
-        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(isA(FinremCaseData.class))).thenReturn(false);
+        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(isA(FinremCaseDetails.class))).thenReturn(false);
         when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(buildNewCallbackRequestStringContestedNoAgree()));
 
         notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequestString());
 
         verify(notificationService, never()).sendPrepareForHearingEmailApplicant(any());
         verify(notificationService, never()).sendPrepareForHearingEmailRespondent(any());
-    }
-
-    @Test
-    public void givenHadPreviousHearing_whenNotifyHearingInvoked_thenPrintAdditionalHearingDocuments() throws JsonProcessingException {
-        when(hearingDocumentService.alreadyHadFirstHearing(isA(FinremCaseDetails.class))).thenReturn(true);
-        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(buildNewCallbackRequestStringContestedPaper()));
-
-        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequestString());
-
-        verify(additionalHearingDocumentService).sendAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
     }
 
     @Test
@@ -294,20 +291,24 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldSendPrepareForHearingOrderSentEmailWhenRespondentIsRegisteredAndAgreedToEmails() {
+    public void shouldSendPrepareForHearingOrderSentEmailWhenRespondentIsRegisteredAndAgreedToEmails() throws JsonProcessingException {
         when(caseDataService.isConsentedApplication(any())).thenReturn(false);
-        when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(true);
-        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
+        when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(isA(FinremCaseDetails.class))).thenReturn(true);
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(buildNewCallbackRequestString()));
+
+        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildNewCallbackRequestString());
 
         verify(notificationService).sendPrepareForHearingEmailRespondent(any());
     }
 
     @Test
-    public void shouldNotSendPrepareForHearingOrderSentEmailWhenRespondentAgreedButNotRegistered() {
+    public void shouldNotSendPrepareForHearingOrderSentEmailWhenRespondentAgreedButNotRegistered() throws JsonProcessingException {
         when(caseDataService.isConsentedApplication(any())).thenReturn(false);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
-        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(false);
-        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(isA(FinremCaseData.class))).thenReturn(true);
+        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(isA(FinremCaseDetails.class))).thenReturn(false);
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(buildNewCallbackRequestString()));
+
+        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildNewCallbackRequestString());
 
         verify(notificationService, never()).sendPrepareForHearingEmailApplicant(any());
         verify(notificationService, never()).sendPrepareForHearingEmailRespondent(any());
@@ -334,7 +335,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void sendPrepareForHearingOrderSentEmail_shouldNotSendRespondentEmail() {
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(isA(HashMap.class))).thenReturn(false);
 
         notificationsController.sendPrepareForHearingOrderSentEmail(buildCallbackRequest());
 
@@ -545,7 +546,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldNotSendContestedConsentOrderApprovedEmailToRespondentSolicitorWhenRespSolShouldNotReceiveEmail() {
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(isA(HashMap.class))).thenReturn(false);
 
         notificationsController.sendContestedConsentOrderApprovedEmail(buildCallbackRequest());
 
@@ -601,8 +602,9 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldNotSendEmailToRespSolicitor() {
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
+    public void shouldNotSendEmailToRespSolicitor() throws JsonProcessingException {
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(isA(FinremCaseData.class))).thenReturn(false);
+        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(buildNewCallbackRequestString()));
 
         notificationsController.sendAssignToJudgeConfirmationNotification(AUTH_TOKEN, buildCallbackRequestString());
 
@@ -708,7 +710,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     public void doesNotSendConsentOrderMadeEmailToRespSolicitor() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         callbackRequest.getCaseDetails().setCaseTypeId(CASE_TYPE_ID_CONSENTED);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(isA(FinremCaseData.class))).thenReturn(false);
         notificationsController.sendConsentOrderMadeConfirmationEmail(callbackRequest);
         verify(notificationService, never()).sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
     }
@@ -727,7 +729,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @Test
     public void whenConsentOrderApprovedAndSolicitorEmailsNotEnabled_thenDoNotEmailSolicitors() {
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(isA(FinremCaseData.class))).thenReturn(false);
 
         notificationsController.sendConsentOrderNotApprovedSentEmail(buildCallbackRequest());
 
@@ -825,7 +827,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @Test
     public void givenUpdateFrc_whenSendEmail_thenNotificationServiceCalledThreeTimes() throws JsonProcessingException {
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class))).thenReturn(true);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(isA(FinremCaseData.class))).thenReturn(true);
         when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(buildNewCallbackRequestString()));
 
         notificationsController.sendUpdateFrcNotifications(AUTH_TOKEN, buildNewCallbackRequestString());
@@ -838,7 +840,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @Test
     public void givenUpdateFrc_whenAppSolNotAgreeToReceiveEmails_thenNotificationServiceCalledTwice() throws JsonProcessingException {
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class))).thenReturn(false);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(isA(FinremCaseData.class))).thenReturn(true);
         when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(buildNewCallbackRequestStringContestedNoAgree()));
 
         notificationsController.sendUpdateFrcNotifications(AUTH_TOKEN, buildNewCallbackRequestStringNoAppSolConsent());
@@ -851,7 +853,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @Test
     public void givenUpdateFrc_whenRespSolNotAgreeToReceiveEmails_thenNotificationServiceCalledTwice() throws JsonProcessingException {
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class))).thenReturn(true);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(isA(FinremCaseData.class))).thenReturn(false);
         when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(buildNewCallbackRequestString()));
 
         notificationsController.sendUpdateFrcNotifications(AUTH_TOKEN, buildNewCallbackRequestString());

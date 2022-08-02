@@ -247,22 +247,6 @@ public final class CaseHearingFunctions {
         }
     }
 
-    public static Map<String, Object> buildInterimFrcCourtDetails(Map<String, Object> data) {
-        try {
-            Map<String, Object> courtDetailsMap = new ObjectMapper().readValue(getCourtDetailsString(), HashMap.class);
-            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(data.get(getSelectedCourtIH(data)));
-
-            return new ObjectMapper().convertValue(FrcCourtDetails.builder()
-                .courtName((String) courtDetails.get(COURT_DETAILS_NAME_KEY))
-                .courtAddress((String) courtDetails.get(COURT_DETAILS_ADDRESS_KEY))
-                .phoneNumber((String) courtDetails.get(COURT_DETAILS_PHONE_KEY))
-                .email((String) courtDetails.get(COURT_DETAILS_EMAIL_KEY))
-                .build(), Map.class);
-        } catch (IOException | NullPointerException e) {
-            return null;
-        }
-    }
-
     public static Map<String, Object> buildConsentedFrcCourtDetails() {
         return new ObjectMapper().convertValue(FrcCourtDetails.builder()
             .courtName(OrchestrationConstants.CTSC_COURT_NAME)

@@ -32,9 +32,7 @@ import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_RECIPIENT;
@@ -44,6 +42,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TRANSFER_COURTS_INSTRUCTIONS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
+import static uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo.isNo;
+import static uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo.isYes;
 
 @Service
 @Slf4j
@@ -412,13 +412,14 @@ public class NotificationService {
             && !NO_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT)));
     }
 
-    public boolean shouldEmailRespondentSolicitor(FinremCaseData caseData) {
+    public boolean isRespondentSolicitorEmailCommunicationEnabled(FinremCaseData caseData) {
         return !caseData.isPaperCase()
             && caseData.isRespondentRepresentedByASolicitor()
             && !nullToEmpty(caseData.getContactDetailsWrapper().getRespondentSolicitorEmail()).isEmpty()
-            && caseData.isRespondentSolicitorAgreeToReceiveEmails();
+            && !isNo(caseData.getRespSolNotificationsEmailConsent());
     }
 
+    @Deprecated
     public boolean isContestedApplicantSolicitorEmailCommunicationEnabled(Map<String, Object> caseData) {
         return !caseDataService.isPaperApplication(caseData)
             && caseDataService.isApplicantRepresentedByASolicitor(caseData)
@@ -426,13 +427,33 @@ public class NotificationService {
             && YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED)));
     }
 
+    public boolean isContestedApplicantSolicitorEmailCommunicationEnabled(FinremCaseData caseData) {
+        return !caseData.isPaperCase()
+            && caseData.isApplicantRepresentedByASolicitor()
+            && !nullToEmpty(caseData.getContactDetailsWrapper().getApplicantSolicitorEmail()).isEmpty()
+            && isYes(caseData.getContactDetailsWrapper().getApplicantSolicitorConsentForEmails());
+    }
+
+
+    @Deprecated
     public boolean isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(CaseDetails caseDetails) {
         return caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)
             && checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails);
     }
 
+    public boolean isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(FinremCaseDetails caseDetails) {
+        return caseDetails.getCaseData().isApplicantSolicitorAgreeToReceiveEmails()
+            && checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails);
+    }
+
+    @Deprecated
     public boolean isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(CaseDetails caseDetails) {
         return isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())
+            && checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails);
+    }
+
+    public boolean isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(FinremCaseDetails caseDetails) {
+        return isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getCaseData())
             && checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails);
     }
 

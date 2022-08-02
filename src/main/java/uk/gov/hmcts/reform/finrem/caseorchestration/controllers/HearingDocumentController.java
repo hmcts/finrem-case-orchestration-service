@@ -77,15 +77,25 @@ public class HearingDocumentController extends BaseController {
         log.info("Received request for validating a hearing for Case ID: {}", caseDetails.getId());
 
         List<String> errors = validateHearingService.validateHearingErrors(caseDetails);
+
         if (!errors.isEmpty()) {
             return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().errors(errors).build());
         }
 
-        generateHearingDocuments(authorisationToken, caseDetails);
+        if (hearingDocumentService.alreadyHadFirstHearing(caseDetails)) {
+            if (caseDetails.getCaseData().isContestedPaperApplication()) {
+                additionalHearingDocumentService.createAdditionalHearingDocuments(authorisationToken, caseDetails);
+            }
+        } else {
+            Map<String, Object> documents = hearingDocumentService.generateHearingDocuments(authorisationToken, caseDetails);
+            caseDetails.getCaseData().setFormC((Document) documents.get(FORM_C));
+            caseDetails.getCaseData().setFormG((Document) documents.get(FORM_G));
+        }
+
         List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
 
-if (caseDataService.isContestedPaperApplication(caseDetails)) {
-            CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        if (caseDetails.getCaseData().isContestedPaperApplication()) {
+            FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
             if (caseDetailsBefore != null && hearingDocumentService.alreadyHadFirstHearing(caseDetailsBefore)) {
                 log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
                 additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, caseDetails);
@@ -93,7 +103,9 @@ if (caseDataService.isContestedPaperApplication(caseDetails)) {
                 log.info("Sending Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
                 hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, authorisationToken);
             }
-        }        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
+        }
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDetails.getCaseData())
             .warnings(warnings).build());
     }
