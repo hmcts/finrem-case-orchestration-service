@@ -175,7 +175,9 @@ sonarqube {
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/model/**',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/error/**',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/ccd/datamigration/model/**',
-                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/CaseOrchestrationApplication']
+                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/CaseOrchestrationApplication',
+                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/service/payments/config/**',
+                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/service/payments/model/**']
 
     properties {
         property "sonar.projectKey", "finrem-case-orchestration"
@@ -193,9 +195,7 @@ pitest {
                          'uk.gov.hmcts.reform.finrem.caseorchestration.model.*',
                          'uk.gov.hmcts.reform.finrem.caseorchestration.config.*',
                          'uk.gov.hmcts.reform.finrem.caseorchestration.controllers.PaymentByAccountStub',
-                         'uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService',
-                         'uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.config.*',
-                         'uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.model.*'])
+                         'uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService'])
     threads.set(4)
     outputFormats.set(['XML', 'HTML'])
     timestampedReports.set(false)
