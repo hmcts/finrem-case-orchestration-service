@@ -11,6 +11,7 @@ public enum EventType {
     PREPARE_FOR_HEARING("FR_prepareForHearing"),
     UPLOAD_CASE_FILES("FR_uploadCaseFiles"),
     INTERIM_HEARING("FR_listForInterimHearing"),
+    GENERAL_APPLICATION("createGeneralApplication"),
     CLOSE("FR_close"),
     MANAGE_CASE_DOCUMENTS("FR_manageCaseDocuments"),
     UPLOAD_APPROVED_ORDER("FR_uploadApprovedOrder"),

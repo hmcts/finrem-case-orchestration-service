@@ -1,0 +1,231 @@
+{
+  "event_id": "createGeneralApplication",
+  "case_details": {
+    "id": "123",
+    "jurisdiction": "DIVORCE",
+    "state": "applicationDrafted",
+    "case_type_id": "FinancialRemedyContested",
+    "case_data": {
+      "divorceUploadEvidence1": null,
+      "divorceUploadEvidence2": null,
+      "newportCourtList": null,
+      "divorceStageReached": "Petition Issued",
+      "southEastFRCList": "thamesvalley",
+      "otherReasonForComplexity": null,
+      "applicantFMName": "Calvin Downs",
+      "fastTrackDecision": "No",
+      "dorsetCourtList": null,
+      "potentialAllegationChecklist": [
+        "notApplicable"
+      ],
+      "lancashireCourtList": null,
+      "applicantSolicitorAddress": {},
+      "nameOfCourtDivorceCentre": "Evelyn Dillon",
+      "RespondentOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": null,
+          "OrganisationName": null
+        },
+        "OrgPolicyReference": null,
+        "PreviousOrganisations": [],
+        "OrgPolicyCaseAssignedRole": "[RESPSOLICITOR]",
+        "PrepopulateToUsersOrganisation": null
+      },
+      "rSolicitorDXnumber": null,
+      "netValueOfHome": "12345",
+      "dateOfSepration": "1995-11-25",
+      "promptForAnyDocument": "No",
+      "claimingExemptionMIAM": null,
+      "nottinghamCourtList": null,
+      "bristolCourtList": null,
+      "southWestFRCList": null,
+      "applicantSolicitorConsentForEmails": null,
+      "isAdmin": "Yes",
+      "northWestFRCList": null,
+      "applicantSolicitorName": null,
+      "walesFRCList": null,
+      "familyMediatorServiceName": "Colin Vega",
+      "specificArrangementsRequired": "Voluptatum et corpor",
+      "respondentRepresented": "No",
+      "miniFormA": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4b4461b4-014a-4f8a-bfae-9c8381ed72fe",
+        "document_filename": "OnlineForm.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4b4461b4-014a-4f8a-bfae-9c8381ed72fe/binary"
+      },
+      "northEastFRCList": null,
+      "cfcCourtList": null,
+      "familyMediatorMIAM": null,
+      "applicantRepresented": "No",
+      "consentOrderFRCAddress": "351 Silbury Boulevard, Witon Gate East, Central Milton Keynes, MK9 2DT",
+      "applicantAttendedMIAM": "Yes",
+      "specialAssistanceRequired": "Quia laborum Doloru",
+      "consentOrderFRCPhone": "01865 264 200",
+      "respondentPhone": null,
+      "isApplicantsHomeCourt": "No",
+      "fastTrackDecisionReason": [],
+      "copyOfPaperFormA": [
+        {
+          "id": "87ec1cca-608e-4321-931b-efc5ba983e17",
+          "value": {
+            "typeOfDocument": "Copy of paper form A",
+            "uploadedDocument": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b1183c44-4645-4be6-874d-b896f693512d",
+              "document_filename": "test.docx",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b1183c44-4645-4be6-874d-b896f693512d/binary"
+            }
+          }
+        }
+      ],
+      "applicantAddress": {
+        "County": "",
+        "Country": "United Kingdom",
+        "PostCode": "SW10 0XE",
+        "PostTown": "London",
+        "AddressLine1": "Design Club, Unit 308-310",
+        "AddressLine2": "Chelsea Harbour",
+        "AddressLine3": "Chelsea Harbour Design Centre"
+      },
+      "divorceCaseNumber": "EM18D84321",
+      "thamesvalleyCourtList": "FR_thamesvalleyList_3",
+      "consentOrderFRCName": "Milton Keynes County Court and Family Court",
+      "estimatedAssetsChecklist": [
+        "estimatedAssetsChecklist_5"
+      ],
+      "londonFRCList": null,
+      "generalApplications": [
+        {
+          "id": "87dbe1f1-9615-4eb0-b401-7cf5e2f02160",
+          "value": {
+            "generalApplicationDocument": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/61fa795e-ae02-4fca-b98a-24f2e9a77b86",
+              "document_filename": "InterimHearingNotice.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/61fa795e-ae02-4fca-b98a-24f2e9a77b86/binary"
+            },
+            "generalApplicationCreatedBy": "Est nulla non quae",
+            "generalApplicationDraftOrder": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b11260db-3bd7-4b49-be90-92c7547234c9",
+              "document_filename": "InterimHearingNotice.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b11260db-3bd7-4b49-be90-92c7547234c9/binary"
+            },
+            "generalApplicationReceivedFrom": "applicant",
+            "generalApplicationTimeEstimate": "Quia similique autem",
+            "generalApplicationHearingRequired": "No",
+            "generalApplicationSpecialMeasures": "Quia eos doloribus q"
+          }
+        },
+        {
+          "id": "976b1321-1d37-4411-8dfc-b16cb1d1e36e",
+          "value": {
+            "generalApplicationDocument": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/5b7ea126-0aec-44ca-ab99-b7e22f4ac1e6",
+              "document_filename": "InterimHearingNotice.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/5b7ea126-0aec-44ca-ab99-b7e22f4ac1e6/binary"
+            },
+            "generalApplicationCreatedBy": "Debitis inventore au",
+            "generalApplicationDraftOrder": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/399dbdf4-ea53-4e21-a6b9-5834a2f2b1e2",
+              "document_filename": "InterimHearingNotice.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/399dbdf4-ea53-4e21-a6b9-5834a2f2b1e2/binary"
+            },
+            "generalApplicationReceivedFrom": "applicant",
+            "generalApplicationTimeEstimate": "Pariatur Deserunt n",
+            "generalApplicationHearingRequired": "Yes",
+            "generalApplicationSpecialMeasures": "Deleniti ea ut duis"
+          }
+        },
+        {
+          "id": "156471b0-3389-405b-b83e-3df9086fee1d",
+          "value": {
+            "generalApplicationDocument": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/5061cbc5-7a83-4ee5-a5fa-e2c4104fbf68",
+              "document_filename": "InterimHearingNotice.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/5061cbc5-7a83-4ee5-a5fa-e2c4104fbf68/binary"
+            },
+            "generalApplicationCreatedBy": "RIshi",
+            "generalApplicationDraftOrder": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/0f08e005-cb42-42a5-8a8a-9104f80e3952",
+              "document_filename": "InterimHearingNotice.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/0f08e005-cb42-42a5-8a8a-9104f80e3952/binary"
+            },
+            "generalApplicationReceivedFrom": "respondent",
+            "generalApplicationTimeEstimate": null,
+            "generalApplicationHearingRequired": "No",
+            "generalApplicationSpecialMeasures": null
+          }
+        }
+      ],
+      "applicantPhone": null,
+      "rSolicitorAddress": {},
+      "divorcePetitionIssuedDate": "2001-04-05",
+      "rSolicitorName": null,
+      "divorceDecreeNisiDate": null,
+      "otherReasonForComplexityText": null,
+      "uploadAdditionalDocument": [],
+      "applicantSolicitorFirm": null,
+      "bedfordshireCourtList": null,
+      "applicantLName": "Rivers",
+      "rSolicitorEmail": null,
+      "respondentAddress": {
+        "County": "",
+        "Country": "United Kingdom",
+        "PostCode": "SW10 0XE",
+        "PostTown": "London",
+        "AddressLine1": "Altfield, Unit 222",
+        "AddressLine2": "Chelsea Harbour",
+        "AddressLine3": "Chelsea Harbour Design Centre"
+      },
+      "natureOfApplicationChecklist": [
+        "Maintenance Pending Suit"
+      ],
+      "northWalesCourtList": null,
+      "applicantSolicitorDXnumber": null,
+      "manchesterCourtList": null,
+      "applicantSolicitorEmail": null,
+      "devonCourtList": null,
+      "swanseaCourtList": null,
+      "ApplicantOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": null,
+          "OrganisationName": null
+        },
+        "OrgPolicyReference": null,
+        "PreviousOrganisations": [],
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]",
+        "PrepopulateToUsersOrganisation": null
+      },
+      "respondentLName": "Pacheco",
+      "midlandsFRCList": null,
+      "kentSurreyCourtList": null,
+      "reasonForLocalCourt": null,
+      "rSolicitorPhone": null,
+      "birminghamCourtList": null,
+      "rSolicitorReference": null,
+      "cleavelandCourtList": null,
+      "rSolicitorFirm": null,
+      "applicantSolicitorPhone": null,
+      "solicitorReference": null,
+      "soleTraderName": "Dahlia Owen",
+      "nwyorkshireCourtList": null,
+      "divorceUploadPetition": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/872a69ec-7794-4e42-8617-db45c74e9e62",
+        "document_filename": "InterimHearingNotice.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/872a69ec-7794-4e42-8617-db45c74e9e62/binary"
+      },
+      "issueDate": "1984-04-28",
+      "liverpoolCourtList": null,
+      "mediatorRegistrationNumber": "729",
+      "reasonForFRCLocation": "Id accusantium non",
+      "detailPotentialAllegation": null,
+      "regionList": "southeast",
+      "dateOfMarriage": "1980-10-28",
+      "applicantEmail": null,
+      "divorceDecreeAbsoluteDate": null,
+      "civilPartnership": "No",
+      "humberCourtList": null,
+      "respondentEmail": null,
+      "respondentFMName": "Constance Moore",
+      "consentOrderFRCEmail": "FRCThamesValley@justice.gov.uk",
+      "addToComplexityListOfCourts": "trueDontKnow"
+    }
+  }
+}
