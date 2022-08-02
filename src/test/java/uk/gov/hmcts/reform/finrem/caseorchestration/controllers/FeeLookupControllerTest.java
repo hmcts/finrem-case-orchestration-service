@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.client.FeeClient;
 
 import java.io.File;
 import java.io.IOException;
