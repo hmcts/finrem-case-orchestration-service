@@ -39,7 +39,7 @@ public abstract class BaseUpdateFrcInfoDocumentService {
     public abstract Optional<Document> getUpdateFrcInfoLetter(FinremCaseDetails caseDetails, String authToken);
 
     protected Document generateSolicitorUpdateFrcInfoLetter(FinremCaseDetails caseDetails, String authToken,
-                                                      DocumentHelper.PaperNotificationRecipient recipient) {
+                                                                DocumentHelper.PaperNotificationRecipient recipient) {
         log.info("Generating Update FRC Info Letter for {} SOLICITOR for caseId {}", recipient, caseDetails.getId());
         String template = documentConfiguration.getUpdateFRCInformationSolicitorTemplate();
         String fileName = documentConfiguration.getUpdateFRCInformationSolicitorFilename();
@@ -48,8 +48,8 @@ public abstract class BaseUpdateFrcInfoDocumentService {
     }
 
     protected Document generateLitigantUpdateFrcInfoLetter(FinremCaseDetails caseDetails,
-                                                     String authToken,
-                                                     DocumentHelper.PaperNotificationRecipient recipient) {
+                                                               String authToken,
+                                                               DocumentHelper.PaperNotificationRecipient recipient) {
         log.info("Generating Update FRC Info Letter for {} for caseId {}", recipient, caseDetails.getId());
         String template = documentConfiguration.getUpdateFRCInformationLitigantTemplate();
         String filename = documentConfiguration.getUpdateFRCInformationLitigantFilename();

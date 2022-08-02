@@ -13,11 +13,10 @@ import java.util.Map;
 @Slf4j
 public abstract class NocDocumentService {
 
-    private final GenericDocumentService genericDocumentService;
-    private final ObjectMapper objectMapper;
-
     static final String CASE_DETAILS = "caseDetails";
     static final String CASE_DATA = "case_data";
+    private final GenericDocumentService genericDocumentService;
+    private final ObjectMapper objectMapper;
 
     public NocDocumentService(GenericDocumentService genericDocumentService,
                               ObjectMapper objectMapper) {
@@ -33,7 +32,6 @@ public abstract class NocDocumentService {
             convertNoticeOfChangeLetterDetailsToMap(noticeOfChangeLetterDetails),
             getNocDocumentTemplate().getTemplateName(),
             getNocDocumentTemplate().getDocumentFileName());
-        return caseDocument;
     }
 
     private Map convertNoticeOfChangeLetterDetailsToMap(NoticeOfChangeLetterDetails noticeOfChangeLetterDetails) {

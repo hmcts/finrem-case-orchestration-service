@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import static java.util.Collections.singletonList;
 
@@ -34,6 +35,9 @@ public class AdditionalHearingDocumentService {
     private final DocumentHelper documentHelper;
     private final BulkPrintService bulkPrintService;
     private final AdditionalHearingDetailsMapper additionalHearingDetailsMapper;
+    private final CaseDataService caseDataService;
+    private final NotificationService notificationService;
+
 
     public void createAdditionalHearingDocuments(String authorisationToken, FinremCaseDetails caseDetails) {
         FinremCaseData caseData = caseDetails.getCaseData();
@@ -66,7 +70,7 @@ public class AdditionalHearingDocumentService {
             .getDirectionDetailsCollection();
 
         //check that the list contains one or more values for the court hearing information
-        if (! directionDetailsCollectionList.isEmpty()) {
+        if (!directionDetailsCollectionList.isEmpty()) {
             DirectionDetail latestDirectionDetailsCollectionItem =
                 directionDetailsCollectionList.get(directionDetailsCollectionList.size() - 1).getValue();
 
@@ -114,7 +118,7 @@ public class AdditionalHearingDocumentService {
         caseData.setAdditionalHearingDocuments(additionalHearingDocumentDataList);
     }
 
-    private void bulkPrintAdditionalHearingDocuments(FinremCaseDetails caseDetails, String authorisationToken) {
+    public void bulkPrintAdditionalHearingDocuments(FinremCaseDetails caseDetails, String authorisationToken) {
         List<AdditionalHearingDocumentCollection> additionalHearingDocumentData = Optional.ofNullable(caseDetails.getCaseData()
             .getAdditionalHearingDocuments()).orElse(new ArrayList<>());
 
@@ -122,10 +126,16 @@ public class AdditionalHearingDocumentService {
             additionalHearingDocumentData.get(additionalHearingDocumentData.size() - 1);
 
         List<BulkPrintDocument> document = singletonList(documentHelper.getDocumentAsBulkPrintDocument(
-                additionalHearingDocument.getValue().getAdditionalHearingDocument()).orElseThrow());
+            additionalHearingDocument.getValue().getAdditionalHearingDocument()).orElseThrow());
 
-        bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, document);
-        bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, document);
+        if (!notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
+            CompletableFuture.runAsync(() ->
+                bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, document));
+        }
+        if (!notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
+            CompletableFuture.runAsync(() ->
+                bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, document));
+        }
     }
 
     private FinremCaseDetails getLatestHearingCaseDetailsVersion(FinremCaseDetails caseDetails,

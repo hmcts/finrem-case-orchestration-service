@@ -45,6 +45,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 @Category(IntegrationTest.class)
 public abstract class AbstractDocumentTest extends BaseTest {
 
+    protected static final String GENERATE_DOCUMENT_CONTEXT_PATH = "/version/1/generate-pdf";
     private static final String TEMP_URL = "http://doc1";
     private static final String DELETE_DOCUMENT_CONTEXT_PATH = "/version/1/delete-pdf-document";
     private static final String IDAM_SERVICE_CONTEXT_PATH = "/details";

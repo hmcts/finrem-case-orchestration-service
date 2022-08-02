@@ -26,6 +26,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
@@ -35,7 +37,10 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Map;
+import java.util.List;
+import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -67,6 +72,8 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
     protected static final String CASE_DETAILS = "caseDetails";
     protected static final String CASE_DATA = "case_data";
 
+    private static final String GENERATE_DOCUMENT_CONTEXT_PATH = "/version/1/generate-pdf";
+    private static final String GENERATE_BULK_PRINT_CONTEXT_PATH = "/version/1/bulk-print";
     private static final String API_URL = "/case-orchestration/documents/hearing";
     private static final String JSON_CONTENT_PATH = "/fixtures/contested/validate-hearing-withoutfastTrackDecision.json";
 
@@ -203,6 +210,10 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
             eq(config.getFormGTemplate()), eq(config.getFormGFileName()));
     }
 
+    private DocumentGenerationRequest coverSheetDocumentRequest() {
+        return documentRequest(config.getBulkPrintTemplate(), config.getBulkPrintFileName());
+    }
+
     private String expectedErrorData() throws JsonProcessingException {
         return objectMapper.writeValueAsString(
             AboutToStartOrSubmitCallbackResponse.builder()
@@ -214,6 +225,8 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         FinremCaseDetails caseDetails = request.getCaseDetails();
         caseDetails.getCaseData().setFormC(newDocument());
         caseDetails.getCaseData().setFormG(newDocument());
+        caseDetails.getData().put("bulkPrintCoverSheetApp", caseDocument());
+        caseDetails.getData().put("bulkPrintCoverSheetRes", caseDocument());
 
         return objectMapper.writeValueAsString(
             AboutToStartOrSubmitCallbackResponse.builder()
@@ -232,5 +245,63 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         FrcCourtDetails courtDetails = objectMapper.convertValue(placeholdersMap.get("courtDetails"), FrcCourtDetails.class);
         assertEquals("Bristol Civil and Family Justice Centre", courtDetails.getCourtName());
         assertEquals("2 Redcliff Street, Bristol, BS1 6GR", courtDetails.getCourtAddress());
+    }
+
+    private DocumentGenerationRequest documentRequest(String template, String fileName) {
+        return DocumentGenerationRequest.builder()
+            .template(template)
+            .fileName(fileName)
+            .values(Collections.singletonMap("caseDetails", request.getCaseDetails()))
+            .build();
+    }
+
+    protected BulkPrintRequest bulkPrintRequest() {
+        List<BulkPrintDocument> caseDocuments = new ArrayList<>();
+        caseDocuments.add(BulkPrintDocument.builder().binaryFileUrl("http://dm-store/lhjbyuivu87y989hijbb/binary").build());
+        return BulkPrintRequest.builder()
+            .caseId("123")
+            .letterType("FINANCIAL_REMEDY_PACK")
+            .bulkPrintDocuments(caseDocuments)
+            .build();
+    }
+
+    private void generateDocumentServiceSuccessStub(DocumentGenerationRequest documentRequest) throws JsonProcessingException {
+        documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
+            .withRequestBody(equalToJson(objectMapper.writeValueAsString(coverSheetDocumentRequest()), true, true))
+            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
+            .withHeader(CONTENT_TYPE, equalTo("application/json"))
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withBody(objectMapper.writeValueAsString(document()))));
+
+        documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
+            .withRequestBody(equalToJson(objectMapper.writeValueAsString(documentRequest),
+                true, true))
+            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
+            .withHeader(CONTENT_TYPE, equalTo("application/json"))
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withBody(objectMapper.writeValueAsString(document()))));
+
+        documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_BULK_PRINT_CONTEXT_PATH))
+            .withRequestBody(equalToJson(objectMapper.writeValueAsString(bulkPrintRequest()), true, true))
+            .withHeader(CONTENT_TYPE, equalTo("application/json"))
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withBody(objectMapper.writeValueAsString(UUID.randomUUID()))));
+    }
+
+    private void generateDocumentServiceErrorStub(DocumentGenerationRequest documentRequest) throws JsonProcessingException {
+        documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
+            .withRequestBody(equalToJson(objectMapper.writeValueAsString(documentRequest),
+                true, true))
+            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
+            .withHeader(CONTENT_TYPE, equalTo("application/json"))
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)));
     }
 }

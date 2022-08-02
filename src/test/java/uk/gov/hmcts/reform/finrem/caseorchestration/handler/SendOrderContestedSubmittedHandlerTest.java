@@ -128,8 +128,7 @@ public class SendOrderContestedSubmittedHandlerTest {
 
     @Test
     public void givenRespAgreedToReceiveEmails_WhenHandle_ThenSendContestOrderApprovedEmailToRespondent() {
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(isA(FinremCaseData.class))).thenReturn(true);
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(isA(FinremCaseData.class))).thenReturn(true);
 
         sendOrderContestedSubmittedHandler.handle(createCallbackRequestWithFinalOrder(), AUTH_TOKEN);
 
@@ -137,18 +136,8 @@ public class SendOrderContestedSubmittedHandlerTest {
     }
 
     @Test
-    public void givenToggleOff_WhenHandle_ThenDoNotSendEmail() {
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
-
-        sendOrderContestedSubmittedHandler.handle(createCallbackRequestWithFinalOrder(), AUTH_TOKEN);
-
-        verify(notificationService, never()).sendContestOrderApprovedEmailRespondent(any());
-    }
-
-    @Test
     public void givenRespNotAgreedToReceiveEmails_WhenHandle_ThenDoNotSendContestOrderApprovedEmailToRespondent() {
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(notificationService.shouldEmailRespondentSolicitor(isA(FinremCaseData.class))).thenReturn(false);
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(isA(FinremCaseData.class))).thenReturn(false);
 
         sendOrderContestedSubmittedHandler.handle(createCallbackRequestWithFinalOrder(), AUTH_TOKEN);
 

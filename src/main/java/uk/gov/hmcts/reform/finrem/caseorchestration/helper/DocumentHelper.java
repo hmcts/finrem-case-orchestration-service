@@ -94,7 +94,6 @@ public class DocumentHelper {
     public static final String ADDRESSEE = "addressee";
     public static final String CTSC_CONTACT_DETAILS = "ctscContactDetails";
     public static final String CASE_NUMBER = "caseNumber";
-
     private final ObjectMapper objectMapper;
     private final CaseDataService caseDataService;
 

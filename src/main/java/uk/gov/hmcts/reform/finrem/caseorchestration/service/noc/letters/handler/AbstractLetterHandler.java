@@ -26,14 +26,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 @Slf4j
 public abstract class AbstractLetterHandler implements LetterHandler {
 
+    public static final String COR_APPLICANT = "Applicant";
+    public static final String COR_RESPONDENT = "Respondent";
     protected final AbstractLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator;
     protected final NocDocumentService nocDocumentService;
     protected final BulkPrintService bulkPrintService;
-
     private final NoticeType noticeType;
     private final DocumentHelper.PaperNotificationRecipient recipient;
-    public static final String COR_APPLICANT = "Applicant";
-    public static final String COR_RESPONDENT = "Respondent";
 
     public AbstractLetterHandler(
         AbstractLetterDetailsGenerator noticeOfChangeLetterDetailsGenerator, NocDocumentService nocDocumentService,
@@ -81,7 +80,7 @@ public abstract class AbstractLetterHandler implements LetterHandler {
     protected RepresentationUpdate getLatestRepresentationUpdate(FinremCaseDetails caseDetails) {
         log.info("Get the latest Representation Update");
         return Collections.max(caseDetails.getCaseData().getRepresentationUpdateHistory(), Comparator.comparing(
-            representationUpdate -> representationUpdate.getValue().getDate()))
+                representationUpdate -> representationUpdate.getValue().getDate()))
             .getValue();
     }
 

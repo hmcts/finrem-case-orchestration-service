@@ -125,4 +125,114 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
     }
+
+    @Test
+    public void latestConsentOrderIsMissing() throws Exception {
+        doMissingLatestConsentOrder();
+        whenServiceGeneratesDocument().thenReturn(caseDocument());
+        whenServiceGeneratesNotificationLetter().thenReturn(caseDocument());
+        whenAnnexStampingDocument().thenReturn(caseDocument());
+        whenStampingDocument().thenReturn(caseDocument());
+        whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
+
+        ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE));
+
+        result.andExpect(status().isOk());
+        result.andExpect(jsonPath("$.data", not(hasKey(LATEST_CONSENT_ORDER))));
+    }
+
+    @Test
+    public void consentOrderApprovedSuccess() throws Exception {
+        doValidCaseDataSetUp();
+        whenServiceGeneratesDocument().thenReturn(caseDocument());
+        whenServiceGeneratesNotificationLetter().thenReturn(caseDocument());
+        whenAnnexStampingDocument().thenReturn(caseDocument());
+        whenStampingDocument().thenReturn(caseDocument());
+        whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
+        when(documentHelper.getPensionDocumentsData(any())).thenReturn(singletonList(caseDocument()));
+
+        ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE));
+
+        result.andExpect(status().isOk());
+        assertLetter(result);
+        assertConsentOrder(result);
+        assertPensionDocs(result);
+    }
+
+    @Test
+    public void consentOrderApprovedSuccessForPaperApplication() throws Exception {
+        doValidCaseDataSetUpForPaperApplication();
+        whenServiceGeneratesDocument().thenReturn(caseDocument());
+        whenServiceGeneratesNotificationLetter().thenReturn(caseDocument());
+        whenAnnexStampingDocument().thenReturn(caseDocument());
+        whenStampingDocument().thenReturn(caseDocument());
+        whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
+        when(documentHelper.getPensionDocumentsData(any())).thenReturn(singletonList(caseDocument()));
+
+        ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE));
+
+        result.andExpect(status().isOk());
+        assertLetter(result);
+        assertConsentOrder(result);
+        assertPensionDocs(result);
+    }
+
+    @Test
+    public void shouldUpdateStateToConsentOrderMadeAndBulkPrint() throws Exception {
+        doValidCaseDataSetUpNoPensionCollection();
+        whenServiceGeneratesDocument().thenReturn(caseDocument());
+        whenServiceGeneratesNotificationLetter().thenReturn(caseDocument());
+        whenAnnexStampingDocument().thenReturn(caseDocument());
+        whenStampingDocument().thenReturn(caseDocument());
+        whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+
+        ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE));
+
+        result.andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.state", is(CONSENT_ORDER_MADE.toString())));
+
+        verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), any());
+        verify(notificationService).sendConsentOrderAvailableCtscEmail(any());
+        verify(notificationService).sendConsentOrderAvailableEmailToApplicantSolicitor(any());
+        verify(notificationService).sendConsentOrderAvailableEmailToRespondentSolicitor(any());
+    }
+
+    @Test
+    public void shouldUpdateStateToConsentOrderMadeAndBulkPrint_noEmails() throws Exception {
+        doValidCaseDataSetUpNoPensionCollection();
+        whenServiceGeneratesDocument().thenReturn(caseDocument());
+        whenServiceGeneratesNotificationLetter().thenReturn(caseDocument());
+        whenAnnexStampingDocument().thenReturn(caseDocument());
+        whenStampingDocument().thenReturn(caseDocument());
+        whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+
+        ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE));
+
+        result.andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.state", is(CONSENT_ORDER_MADE.toString())));
+
+        verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), any());
+        verify(notificationService).sendConsentOrderAvailableCtscEmail(any());
+        verify(notificationService, never()).sendConsentOrderAvailableEmailToApplicantSolicitor(any());
+        verify(notificationService, never()).sendConsentOrderAvailableEmailToRespondentSolicitor(any());
+    }
 }

@@ -57,9 +57,9 @@ public class RepresentativeLetterHandler extends AbstractLetterHandler {
                                                                            FinremCaseDetails otherCaseDetails) {
         return (representationUpdate.getParty().equalsIgnoreCase(COR_APPLICANT))
             && (isConsentedAndSolicitorNonDigitalOrWithoutEmail(representationUpdate,
-                caseDetailsToUse, otherCaseDetails, isConsentedApplication)
+            caseDetailsToUse, otherCaseDetails, isConsentedApplication)
             || isContestedAndSolicitorNonDigitalOrWithoutEmail(representationUpdate,
-                caseDetailsToUse, otherCaseDetails, isConsentedApplication));
+            caseDetailsToUse, otherCaseDetails, isConsentedApplication));
     }
 
     private boolean isRespondentChangeOfRepresentativeWithoutSolcitorEmail(RepresentationUpdate representationUpdate,

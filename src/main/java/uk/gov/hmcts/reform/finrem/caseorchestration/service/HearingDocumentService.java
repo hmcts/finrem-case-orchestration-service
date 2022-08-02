@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,11 @@ import java.util.stream.Collectors;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.addFastTrackFields;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.addNonFastTrackFields;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.isFastTrackApplication;
 
 @Service
 @Slf4j
@@ -37,6 +43,8 @@ public class HearingDocumentService {
     private final BulkPrintService bulkPrintService;
     private final FormCLetterDetailsMapper formCLetterDetailsMapper;
     private final FormGLetterDetailsMapper formGLetterDetailsMapper;
+    private final NotificationService notificationService;
+
 
     public Map<String, Object> generateHearingDocuments(String authorisationToken, FinremCaseDetails caseDetails) {
         return Optional.of(Pair.of(caseDetails, authorisationToken))
@@ -86,9 +94,15 @@ public class HearingDocumentService {
     }
 
     public void sendFormCAndGForBulkPrint(FinremCaseDetails caseDetails, String authorisationToken) {
-        List<BulkPrintDocument> caseDocuments = getHearingCaseDocuments(caseDetails.getCaseData());
-        bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, caseDocuments);
-        bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, caseDocuments);
+        String caseId = caseDetails.getId() == null ? "noId" : caseDetails.getId().toString();
+        List<BulkPrintDocument> caseDocuments = getHearingCaseDocuments(caseDetails.getCaseData(), caseId);
+
+        if (!notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
+            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, caseDocuments);
+        }
+        if (!notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
+            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, caseDocuments);
+        }
     }
 
     /**
@@ -107,13 +121,14 @@ public class HearingDocumentService {
         return Optional.ofNullable(caseDetails.getCaseData().getFormC()).isPresent();
     }
 
-    private List<BulkPrintDocument> getHearingCaseDocuments(FinremCaseData caseData) {
+    private List<BulkPrintDocument> getHearingCaseDocuments(FinremCaseData caseData, String caseId) {
         List<BulkPrintDocument> caseDocuments = new ArrayList<>();
 
         log.info("Fetching Contested Paper Case bulk print document from Case Data: {}", caseData);
 
         documentHelper.getDocumentAsBulkPrintDocument(caseData.getFormC()).ifPresent(caseDocuments::add);
         documentHelper.getDocumentAsBulkPrintDocument(caseData.getFormG()).ifPresent(caseDocuments::add);
+        documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, MINI_FORM_A).ifPresent(caseDocuments::add);
 
         List<Document> formADocuments = caseData.getCopyOfPaperFormA().stream()
             .map(collectionElement -> collectionElement.getValue().getUploadedDocument()).collect(Collectors.toList());
@@ -123,7 +138,7 @@ public class HearingDocumentService {
             .flatMap(Optional::stream)
             .collect(Collectors.toList()));
 
-        log.info("Sending Contested Paper Case bulk print documents: {}", caseDocuments);
+        log.info("Sending Contested Paper Case bulk print documents for {} from Case Data: {}", caseId, caseData);
 
         return caseDocuments;
     }

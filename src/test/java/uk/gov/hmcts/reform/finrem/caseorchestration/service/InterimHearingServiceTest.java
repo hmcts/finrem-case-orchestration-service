@@ -189,7 +189,7 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
 
         verify(caseDataService, never()).isApplicantSolicitorAgreeToReceiveEmails(any());
 
-        verify(notificationService, never()).shouldEmailRespondentSolicitor(isA(FinremCaseData.class));
+        verify(notificationService, never()).isRespondentSolicitorEmailCommunicationEnabled(isA(FinremCaseData.class));
         verify(notificationService, never()).sendInterimHearingNotificationEmailToApplicantSolicitor(any(),
             isA(InterimHearingCollection.class));
         verify(notificationService, never()).sendInterimHearingNotificationEmailToRespondentSolicitor(any(),
@@ -202,12 +202,12 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
         caseDetails.getCaseData().setPaperApplication(YesOrNo.NO);
         caseDetails.getCaseData().getContactDetailsWrapper().setApplicantSolicitorConsentForEmails(YesOrNo.YES);
 
-        when(notificationService.shouldEmailRespondentSolicitor(isA(FinremCaseData.class))).thenReturn(true);
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(isA(FinremCaseData.class))).thenReturn(true);
 
         FinremCaseDetails caseDetailsBefore = finremCaseDetailsFromResource(getResource(TEST_NEW_JSON), mapper);
         interimHearingService.sendNotification(caseDetails, caseDetailsBefore);
 
-        verify(notificationService, times(3)).shouldEmailRespondentSolicitor(isA(FinremCaseData.class));
+        verify(notificationService, times(3)).isRespondentSolicitorEmailCommunicationEnabled(isA(FinremCaseData.class));
         verify(notificationService, times(3)).sendInterimHearingNotificationEmailToApplicantSolicitor(any(),
             isA(InterimHearingCollection.class));
         verify(notificationService,times(3)).sendInterimHearingNotificationEmailToRespondentSolicitor(any(),
