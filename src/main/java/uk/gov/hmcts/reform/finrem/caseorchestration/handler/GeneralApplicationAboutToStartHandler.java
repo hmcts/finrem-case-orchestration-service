@@ -23,14 +23,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class GeneralApplicationMidHandler implements CallbackHandler {
+public class GeneralApplicationAboutToStartHandler implements CallbackHandler {
 
     private final IdamService idamService;
     private final GeneralApplicationHelper helper;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.MID_EVENT.equals(callbackType)
+        return CallbackType.ABOUT_TO_START.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
             && EventType.GENERAL_APPLICATION.equals(eventType);
     }

@@ -27,9 +27,9 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GeneralApplicationMidHandlerTest {
+public class GeneralApplicationAboutToStartHandlerTest {
 
-    private GeneralApplicationMidHandler handler;
+    private GeneralApplicationAboutToStartHandler handler;
     @Mock
     private IdamService idamService;
     private ObjectMapper objectMapper;
@@ -43,27 +43,27 @@ public class GeneralApplicationMidHandlerTest {
     public void setup() {
         objectMapper = new ObjectMapper();
         helper = new GeneralApplicationHelper(objectMapper);
-        handler  = new GeneralApplicationMidHandler(idamService, helper);
+        handler  = new GeneralApplicationAboutToStartHandler(idamService, helper);
     }
 
     @Test
     public void canHandle() {
         assertThat(handler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.GENERAL_APPLICATION),
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.GENERAL_APPLICATION),
             is(true));
     }
 
     @Test
     public void canNotHandle() {
         assertThat(handler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.GENERAL_APPLICATION),
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.GENERAL_APPLICATION),
             is(false));
     }
 
     @Test
     public void canNotHandleWrongEventType() {
         assertThat(handler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.CLOSE),
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.CLOSE),
             is(false));
     }
 
