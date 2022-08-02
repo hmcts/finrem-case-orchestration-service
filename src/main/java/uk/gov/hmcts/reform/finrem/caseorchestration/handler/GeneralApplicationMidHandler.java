@@ -44,9 +44,9 @@ public class GeneralApplicationMidHandler implements CallbackHandler {
 
         List<GeneralApplicationCollectionData> existingGeneralApplications = helper.getExistingGeneralApplications(caseData);
 
-        GeneralApplicationCollectionData data = GeneralApplicationCollectionData.builder().
-            generalApplicationItems(GeneralApplicationItems.builder().
-                generalApplicationCreatedBy(idamService.getIdamFullName(userAuthorisation)).build()).build();
+        GeneralApplicationCollectionData data = GeneralApplicationCollectionData.builder()
+                .generalApplicationItems(GeneralApplicationItems.builder()
+                    .generalApplicationCreatedBy(idamService.getIdamFullName(userAuthorisation)).build()).build();
 
         if (existingGeneralApplications.isEmpty()) {
             List<GeneralApplicationCollectionData> dataList = new ArrayList<>();
