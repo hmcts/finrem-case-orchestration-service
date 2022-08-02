@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.health;
 
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.health.FeesServiceHealthCheck;
 
 public class FeesServiceHealthCheckTest extends AbstractServiceHealthCheckTest {
 
