@@ -26,8 +26,6 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
 import java.util.List;
 
-import static org.assertj.core.internal.bytebuddy.matcher.ElementMatchers.is;
-import static org.assertj.core.internal.bytebuddy.matcher.ElementMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;

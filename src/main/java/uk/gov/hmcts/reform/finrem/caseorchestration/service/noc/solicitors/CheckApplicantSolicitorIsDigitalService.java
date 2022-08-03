@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
+import static uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo.isYes;
 
 @Service
 @Slf4j
@@ -48,8 +49,8 @@ public class CheckApplicantSolicitorIsDigitalService extends CheckSolicitorIsDig
                 caseDetails.getId()));
         }
 
-        return !isOrganisationEmpty(applicantPolicy) &&
-            caseData.getContactDetailsWrapper().getApplicantRepresented().isYes();
+        return !isOrganisationEmpty(applicantPolicy)
+            && isYes(caseData.getContactDetailsWrapper().getApplicantRepresented());
     }
 
     private OrganisationPolicy getApplicantOrganisationPolicy(Map<String, Object> caseData) {

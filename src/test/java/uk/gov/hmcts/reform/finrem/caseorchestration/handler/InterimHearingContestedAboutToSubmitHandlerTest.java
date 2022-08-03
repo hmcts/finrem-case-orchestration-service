@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.InterimHearingCollection;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.InterimRegionWrapper;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.InterimWrapper;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

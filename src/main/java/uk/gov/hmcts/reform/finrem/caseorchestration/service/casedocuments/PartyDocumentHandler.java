@@ -39,16 +39,16 @@ public abstract class PartyDocumentHandler extends CaseDocumentHandler<UploadCas
         }
     }
 
-    private boolean isDocumentTypeValid(UploadCaseDocumentCollection d) {
-        return d.getValue().getCaseDocumentType() != null
-            && isDocumentTypeValid(d.getValue().getCaseDocumentType());
-    }
-
     private boolean isPartyMatchesCaseDocumentParty(UploadCaseDocumentCollection d) {
         UploadCaseDocument uploadedCaseDocument = d.getValue();
         return uploadedCaseDocument.getCaseDocuments() != null
             && uploadedCaseDocument.getCaseDocumentParty() != null
             && CaseDocumentParty.forValue(party).equals(uploadedCaseDocument.getCaseDocumentParty());
+    }
+
+    private boolean isDocumentTypeValid(UploadCaseDocumentCollection d) {
+        return d.getValue().getCaseDocumentType() != null
+            && isDocumentTypeValid(d.getValue().getCaseDocumentType());
     }
 
     protected abstract boolean isDocumentTypeValid(String caseDocumentType);

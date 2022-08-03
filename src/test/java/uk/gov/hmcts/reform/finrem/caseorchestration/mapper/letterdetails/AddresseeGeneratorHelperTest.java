@@ -97,12 +97,15 @@ public class AddresseeGeneratorHelperTest {
     @Test
     public void givenAddress_whenFormatForLetterPrinting_thenFormat() {
         Address toFormat = Address.builder()
-            .addressLine1("line1")
-            .addressLine2("line2")
-            .county("county")
+            .addressLine1("Line1")
+            .addressLine2("Line2")
+            .county("County")
             .build();
 
-        String expectedFormattedAddress = "line1\nline2\ncounty";
+        String expectedFormattedAddress = """
+            Line1
+            Line2
+            County""";
 
         assertEquals(expectedFormattedAddress, AddresseeGeneratorHelper.formatAddressForLetterPrinting(toFormat));
     }

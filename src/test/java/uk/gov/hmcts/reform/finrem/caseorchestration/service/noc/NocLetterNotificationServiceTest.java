@@ -41,10 +41,12 @@ public class NocLetterNotificationServiceTest extends BaseServiceTest {
     @Test
     public void shouldCallLetterHandlersCorrectly() throws IOException {
 
-        caseDetails = finremCaseDetailsFromResource(getResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke.json"),
+        caseDetails = finremCaseDetailsFromResource(
+            getResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke.json"),
             new ObjectMapper());
         caseDetailsBefore =
-            finremCaseDetailsFromResource(getResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke-before.json"),
+            finremCaseDetailsFromResource(
+                getResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke-before.json"),
                 new ObjectMapper());
 
         noticeOfChangeLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, caseDetailsBefore, AUTH_TOKEN);

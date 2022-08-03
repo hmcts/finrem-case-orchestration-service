@@ -1,9 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.consentorderapproved;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapper;
@@ -14,8 +11,6 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.JudgeType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.PensionProvider;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.CourtListWrapper;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;

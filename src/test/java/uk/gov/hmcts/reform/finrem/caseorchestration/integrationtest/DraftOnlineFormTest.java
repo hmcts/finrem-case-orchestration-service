@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest;
 
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.ccd.domain.MiamDomesticViolence;
 
 import java.util.List;

@@ -38,8 +38,10 @@ import static org.mockito.Mockito.when;
 @ContextConfiguration(classes = {NocTestConfig.class, DocumentConfiguration.class})
 public class NocLettersNotificationsControllerTest extends BaseControllerTest {
 
-    private static final String DIGITAL_CALLBACK = "/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke.json";
-    private static final String NON_DIGITAL_CALLBACK = "/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke-non-digital.json";
+    private static final String DIGITAL_CALLBACK
+        = "/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke.json";
+    private static final String NON_DIGITAL_CALLBACK
+        = "/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke-non-digital.json";
 
     @Autowired
     private NocLetterNotificationService nocLetterNotificationService;

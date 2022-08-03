@@ -60,13 +60,13 @@ public class GenericDocumentService {
             ? convertDocumentToPdf(document, authorisationToken) : document;
     }
 
-    public CaseDocument convertDocumentToPdf(CaseDocument document, String authorisationToken) {
-        return toCaseDocument(documentClient.convertDocumentToPdf(authorisationToken, toDocument(document)));
-    }
-
     public Document convertDocumentIfNotPdfAlready(Document document, String authorisationToken) {
         return !Files.getFileExtension(document.getFilename()).equalsIgnoreCase("pdf")
             ? convertDocumentToPdf(document, authorisationToken) : document;
+    }
+
+    public CaseDocument convertDocumentToPdf(CaseDocument document, String authorisationToken) {
+        return toCaseDocument(documentClient.convertDocumentToPdf(authorisationToken, toDocument(document)));
     }
 
     public Document convertDocumentToPdf(Document document, String authorisationToken) {

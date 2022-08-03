@@ -27,11 +27,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 
 import java.io.IOException;
 import java.util.Map;
@@ -64,7 +64,8 @@ public class NotificationsController extends BaseController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200",
             description = "HWFSuccessful notification sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
+            content = {@Content(mediaType = "application/json",
+                schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
     public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendHwfSuccessfulConfirmationNotification(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @RequestBody String source) {
@@ -136,8 +137,10 @@ public class NotificationsController extends BaseController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200",
             description = "Case assigned to Judge notification sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendConsentInContestedAssignToJudgeConfirmationPaperNotification(
+            content = {@Content(mediaType = "application/json",
+                schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
+    public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse>
+        sendConsentInContestedAssignToJudgeConfirmationPaperNotification(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @RequestBody String source) {
 
@@ -326,7 +329,8 @@ public class NotificationsController extends BaseController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200",
             description = "Consent order available e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
+            content = {@Content(mediaType = "application/json",
+                schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
     public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendConsentOrderAvailableEmail(
         @RequestBody String source) {
 
@@ -357,7 +361,8 @@ public class NotificationsController extends BaseController {
     @Operation(summary = "send e-mail for 'Prepare for Hearing'.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204", description = "'Prepare for Hearing' e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
+            content = {@Content(mediaType = "application/json",
+                schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
     public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendPrepareForHearingEmail(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @RequestBody String source) {
@@ -497,7 +502,8 @@ public class NotificationsController extends BaseController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200",
             description = "Manual Payment letter sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
+            content = {@Content(mediaType = "application/json",
+                schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
     public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendManualPaymentPaperNotification(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @RequestBody String source) {
@@ -631,7 +637,8 @@ public class NotificationsController extends BaseController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200",
             description = "Notice of change e-mail and letter sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
+            content = {@Content(mediaType = "application/json",
+                schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
     public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendNoticeOfChangeNotifications(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @RequestBody String source) {
@@ -656,7 +663,8 @@ public class NotificationsController extends BaseController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200",
             description = "Notice of change e-mail and letter sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
+            content = {@Content(mediaType = "application/json",
+                schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
     public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendNoticeOfChangeNotificationsCaseworker(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @RequestBody String source) {
@@ -685,7 +693,8 @@ public class NotificationsController extends BaseController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204",
             description = "Update FRC information notificatons sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
+            content = {@Content(mediaType = "application/json",
+                schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
     ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendUpdateFrcNotifications(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @RequestBody String source) throws JsonProcessingException {

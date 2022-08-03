@@ -8,9 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapperTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
-import uk.gov.hmcts.reform.finrem.ccd.domain.BristolCourt;
 import uk.gov.hmcts.reform.finrem.ccd.domain.CfcCourt;
-import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.DefaultCourtListWrapper;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.GeneralApplicationCourtListWrapper;
 
 import java.time.LocalDate;
@@ -50,7 +48,6 @@ public class GeneralApplicationLetterDetailsMapperTest extends AbstractLetterDet
         GeneralApplicationLetterDetails expected = getExpectedGeneralApplicationLetterDetails();
 
         Map<String, Object> actualData = getCaseData(placeholdersMap);
-        Map<String, Object> courtDetails = (Map<String, Object>) actualData.get("courtDetails");
 
         assertThat(actualData.get("applicantName"), is("Poor Guy"));
         assertThat(actualData.get("hearingVenue"), is(expected.getHearingVenue()));
@@ -58,6 +55,7 @@ public class GeneralApplicationLetterDetailsMapperTest extends AbstractLetterDet
         assertThat(actualData.get("generalApplicationDirectionsHearingDate"),
             is(expected.getGeneralApplicationDirectionsHearingDate()));
 
+        Map<String, Object> courtDetails = (Map<String, Object>) actualData.get("courtDetails");
         assertThat(courtDetails.get("courtName"), is(expected.getCourtDetails().getCourtName()));
         assertThat(courtDetails.get("courtAddress"), is(expected.getCourtDetails().getCourtAddress()));
     }

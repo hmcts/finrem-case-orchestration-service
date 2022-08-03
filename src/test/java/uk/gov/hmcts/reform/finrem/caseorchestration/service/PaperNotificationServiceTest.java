@@ -54,8 +54,10 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
             .thenReturn(respondentDocumentUnderTest);
         paperNotificationService.printAssignToJudgeNotification(caseDetails, AUTH_TOKEN);
 
-        verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(any(FinremCaseDetails.class), eq(AUTH_TOKEN), eq(APPLICANT));
-        verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(any(FinremCaseDetails.class), eq(AUTH_TOKEN), eq(RESPONDENT));
+        verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(any(FinremCaseDetails.class),
+            eq(AUTH_TOKEN), eq(APPLICANT));
+        verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(any(FinremCaseDetails.class),
+            eq(AUTH_TOKEN), eq(RESPONDENT));
         verify(bulkPrintService, times(1)).sendDocumentForPrint(eq(applicantDocumentUnderTest), any());
         verify(bulkPrintService, times(1)).sendDocumentForPrint(eq(respondentDocumentUnderTest), any());
     }

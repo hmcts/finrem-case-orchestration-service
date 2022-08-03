@@ -4,11 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.noc.NoticeOfChangeLetterDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.address.AddresseeGeneratorService;
 import uk.gov.hmcts.reform.finrem.ccd.domain.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
@@ -19,13 +17,9 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildConsentedFrcCourtDetails;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
 
 @RequiredArgsConstructor
 public abstract class AbstractLetterDetailsGenerator {
@@ -58,7 +52,9 @@ public abstract class AbstractLetterDetailsGenerator {
 
     abstract String getNoticeOfChangeText();
 
-    abstract String getSolicitorReference(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore, RepresentationUpdate representationUpdate);
+    abstract String getSolicitorReference(FinremCaseDetails caseDetails,
+                                          FinremCaseDetails caseDetailsBefore,
+                                          RepresentationUpdate representationUpdate);
 
     protected String getSolicitorReference(FinremCaseDetails caseDetails, RepresentationUpdate representationUpdate) {
         return isApplicant(representationUpdate)

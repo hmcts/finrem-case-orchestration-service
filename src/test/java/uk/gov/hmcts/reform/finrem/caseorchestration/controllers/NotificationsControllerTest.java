@@ -22,15 +22,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
 import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.EventType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
-
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -256,11 +255,15 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void givenSolAgreedToEmails_and_noPreviousHearing_shouldSendPrepareForHearingEmail_and_PrintHearingDocuments() throws JsonProcessingException {
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(isA(FinremCaseDetails.class))).thenReturn(true);
-        when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(isA(FinremCaseDetails.class))).thenReturn(true);
+    public void givenSolAgreedToEmails_and_noPreviousHearing_shouldSendPrepareForHearingEmail_and_PrintHearingDocuments()
+        throws JsonProcessingException {
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(isA(FinremCaseDetails.class)))
+            .thenReturn(true);
+        when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(isA(FinremCaseDetails.class)))
+            .thenReturn(true);
         when(hearingDocumentService.alreadyHadFirstHearing(isA(FinremCaseDetails.class))).thenReturn(false);
-        when(deserializer.deserialize(any())).thenReturn(getCallbackRequest(buildCallbackRequestWithBeforeCaseDetailsStringPaper()));
+        when(deserializer.deserialize(any()))
+            .thenReturn(getCallbackRequest(buildCallbackRequestWithBeforeCaseDetailsStringPaper()));
 
         notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequestString());
 
@@ -885,8 +888,8 @@ public class NotificationsControllerTest extends BaseControllerTest {
         caseData.getContactDetailsWrapper().setApplicantSolicitorConsentForEmails(YesOrNo.NO);
         caseData.getContactDetailsWrapper().setSolicitorAgreeToReceiveEmails(YesOrNo.NO);
         caseData.setPaperApplication(YesOrNo.NO);
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder().caseType(CaseType.CONSENTED).id(123L).
-            caseData(caseData).build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().caseType(CaseType.CONSENTED).id(123L)
+                .caseData(caseData).build();
         return objectMapper.writeValueAsString(
             uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest.builder()
                 .eventType(EventType.PREPARE_FOR_HEARING)
@@ -900,8 +903,8 @@ public class NotificationsControllerTest extends BaseControllerTest {
         caseData.getContactDetailsWrapper().setApplicantSolicitorConsentForEmails(YesOrNo.YES);
         caseData.getContactDetailsWrapper().setSolicitorAgreeToReceiveEmails(YesOrNo.YES);
         caseData.setPaperApplication(YesOrNo.YES);
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder().caseType(CaseType.CONSENTED).id(123L).
-            caseData(caseData).build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().caseType(CaseType.CONSENTED).id(123L)
+                .caseData(caseData).build();
         return objectMapper.writeValueAsString(
             uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest.builder()
                 .eventType(EventType.PREPARE_FOR_HEARING)
@@ -915,8 +918,8 @@ public class NotificationsControllerTest extends BaseControllerTest {
         caseData.getContactDetailsWrapper().setApplicantSolicitorConsentForEmails(YesOrNo.NO);
         caseData.getContactDetailsWrapper().setSolicitorAgreeToReceiveEmails(YesOrNo.NO);
         caseData.setPaperApplication(YesOrNo.YES);
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder().caseType(CaseType.CONTESTED).id(123L).
-            caseData(caseData).build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().caseType(CaseType.CONTESTED).id(123L)
+                .caseData(caseData).build();
         return objectMapper.writeValueAsString(
             uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest.builder()
                 .eventType(EventType.PREPARE_FOR_HEARING)
@@ -931,8 +934,8 @@ public class NotificationsControllerTest extends BaseControllerTest {
         caseData.getContactDetailsWrapper().setApplicantSolicitorConsentForEmails(YesOrNo.NO);
         caseData.getContactDetailsWrapper().setSolicitorAgreeToReceiveEmails(YesOrNo.NO);
         caseData.setPaperApplication(YesOrNo.NO);
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder().caseType(CaseType.CONTESTED).id(123L).
-            caseData(caseData).build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().caseType(CaseType.CONTESTED).id(123L)
+                .caseData(caseData).build();
         return objectMapper.writeValueAsString(
             uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest.builder()
                 .eventType(EventType.PREPARE_FOR_HEARING)

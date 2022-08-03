@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.Address;
 import uk.gov.hmcts.reform.finrem.ccd.domain.PropertyAdjustmentOrderCollection;
 
 import java.util.List;
-import java.util.Map;
 
 @Data
 @Builder(toBuilder = true)
@@ -32,7 +31,8 @@ public class ContestedMiniFormADetails implements DocumentTemplateDetails {
     private Address applicantAddress;
     private String applicantPhone;
     private String applicantEmail;
-    private String respondentFMName;
+    @JsonProperty("respondentFMName")
+    private String respondentFmName;
     private String respondentLName;
     private String respondentRepresented;
     private String respondentAddressConfidential;

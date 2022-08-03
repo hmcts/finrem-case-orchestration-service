@@ -94,8 +94,7 @@ public class GeneralLetterDetailsMapperTest extends AbstractLetterDetailsMapperT
                         throw new IllegalStateException();
                     }
                 }
-            }
-        );
+            });
     }
 
     private GeneralLetterDetails getExpectedGeneralLetterDetails(GeneralLetterAddressToType recipient) {
@@ -110,18 +109,18 @@ public class GeneralLetterDetailsMapperTest extends AbstractLetterDetailsMapperT
     }
 
     private Addressee getAddressee(GeneralLetterAddressToType recipient) {
-        switch(recipient) {
+        switch (recipient) {
             case APPLICANT_SOLICITOR -> {
-                return getAddressee(APP_SOLICITOR_NAME, "50 Applicant Solicitor Street");
+                return buildAddressee(APP_SOLICITOR_NAME, "50 Applicant Solicitor Street");
             }
             case RESPONDENT_SOLICITOR -> {
-                return getAddressee(RESPONDENT_SOLICITOR_NAME, "50 Respondent Solicitor Street");
+                return buildAddressee(RESPONDENT_SOLICITOR_NAME, "50 Respondent Solicitor Street");
             }
             case RESPONDENT -> {
-                return getAddressee(RESPONDENT_FULL_NAME, "50 Respondent Street");
+                return buildAddressee(RESPONDENT_FULL_NAME, "50 Respondent Street");
             }
             case OTHER -> {
-                return getAddressee(OTHER_NAME, "50 Applicant Solicitor Street");
+                return buildAddressee(OTHER_NAME, "50 Applicant Solicitor Street");
             }
             default -> throw new IllegalStateException();
         }
@@ -142,7 +141,7 @@ public class GeneralLetterDetailsMapperTest extends AbstractLetterDetailsMapperT
         }
     }
 
-    private Addressee getAddressee(String name, String addressLine1) {
+    private Addressee buildAddressee(String name, String addressLine1) {
         return Addressee.builder()
             .name(name)
             .formattedAddress(formatAddressForLetterPrinting(getAddress(addressLine1)))

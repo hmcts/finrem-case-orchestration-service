@@ -78,7 +78,7 @@ public class HearingOrderControllerTest extends BaseControllerTest {
         when(deserializer.deserialize(any())).thenReturn(callbackRequest);
 
         ResponseEntity<AboutToStartOrSubmitCallbackResponse> response = hearingOrderController.startHearingOrderApproval(AUTH_TOKEN,
-           objectMapper.writeValueAsString(callbackRequest));
+            objectMapper.writeValueAsString(callbackRequest));
 
         assertThat(response.getBody().getData().getDraftDirectionWrapper().getLatestDraftDirectionOrder(), is(nullValue()));
     }

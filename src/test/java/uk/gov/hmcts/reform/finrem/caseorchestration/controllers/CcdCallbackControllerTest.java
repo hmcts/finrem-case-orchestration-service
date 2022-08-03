@@ -11,9 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CallbackDispatchServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
 import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.ccd.domain.EventType;
-import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import java.io.File;
 

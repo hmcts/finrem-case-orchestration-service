@@ -26,7 +26,6 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INCLUDES_REPRESENTATIVE_UPDATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
@@ -86,6 +85,14 @@ public abstract class BaseControllerTest extends BaseTest {
         return new FinremCallbackRequestDeserializer(objectMapper).deserialize(source);
     }
 
+    protected uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest getCallbackRequest() {
+        return uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest.builder()
+            .caseDetails(FinremCaseDetails.builder().caseData(FinremCaseData.builder().build()).build())
+            .eventType(EventType.ALLOCATE_TO_JUDGE)
+            .caseDetailsBefore(FinremCaseDetails.builder().caseData(FinremCaseData.builder().build()).build())
+            .build();
+    }
+
     protected CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
         CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CaseType.CONSENTED.getCcdType()).id(Long.valueOf(123)).data(caseData).build();
@@ -114,8 +121,8 @@ public abstract class BaseControllerTest extends BaseTest {
         caseData.getContactDetailsWrapper().setApplicantSolicitorConsentForEmails(YesOrNo.YES);
         caseData.getContactDetailsWrapper().setSolicitorAgreeToReceiveEmails(YesOrNo.YES);
         caseData.setPaperApplication(YesOrNo.NO);
-        FinremCaseDetails caseDetails = FinremCaseDetails.builder().caseType(CaseType.CONSENTED).id(123L).
-            caseData(caseData).build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().caseType(CaseType.CONSENTED).id(123L)
+            .caseData(caseData).build();
         return objectMapper.writeValueAsString(
             uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest.builder()
                 .eventType(EventType.PREPARE_FOR_HEARING)
@@ -246,14 +253,6 @@ public abstract class BaseControllerTest extends BaseTest {
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
-    }
-
-    protected uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest getCallbackRequest() {
-        return uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest.builder()
-            .caseDetails(FinremCaseDetails.builder().caseData(FinremCaseData.builder().build()).build())
-            .eventType(EventType.ALLOCATE_TO_JUDGE)
-            .caseDetailsBefore(FinremCaseDetails.builder().caseData(FinremCaseData.builder().build()).build())
-            .build();
     }
 
     protected uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest getCallbackRequestEmptyCaseData() {

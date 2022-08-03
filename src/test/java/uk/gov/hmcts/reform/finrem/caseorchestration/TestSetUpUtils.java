@@ -6,7 +6,6 @@ import feign.FeignException;
 import feign.Request;
 import feign.Response;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.ResourceUtils;
 import org.springframework.web.client.HttpServerErrorException;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -39,11 +38,8 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.UploadOrder;
 import uk.gov.hmcts.reform.finrem.ccd.domain.UploadOrderCollection;
 import uk.gov.hmcts.reform.finrem.ccd.domain.UploadOrderDocumentType;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.nio.file.Files;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -170,16 +166,6 @@ public class TestSetUpUtils {
         caseDocument.setDocumentBinaryUrl(binaryUrl);
 
         return caseDocument;
-    }
-
-    public static uk.gov.hmcts.reform.finrem.ccd.domain.Document newDocument(String documentName,
-                                                                             String filename,
-                                                                             String binaryUrl) {
-        return uk.gov.hmcts.reform.finrem.ccd.domain.Document.builder()
-            .filename(filename)
-            .url(documentName)
-            .binaryUrl(binaryUrl)
-            .build();
     }
 
     public static TypedCaseDocument pensionDocument() {
@@ -449,6 +435,16 @@ public class TestSetUpUtils {
             }
         });
         return caseData;
+    }
+
+    public static uk.gov.hmcts.reform.finrem.ccd.domain.Document newDocument(String documentName,
+                                                                             String filename,
+                                                                             String binaryUrl) {
+        return uk.gov.hmcts.reform.finrem.ccd.domain.Document.builder()
+            .filename(filename)
+            .url(documentName)
+            .binaryUrl(binaryUrl)
+            .build();
     }
 
     public static uk.gov.hmcts.reform.finrem.ccd.domain.Document newDocument() {

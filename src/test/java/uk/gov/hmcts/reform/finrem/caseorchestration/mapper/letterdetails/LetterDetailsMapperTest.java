@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;

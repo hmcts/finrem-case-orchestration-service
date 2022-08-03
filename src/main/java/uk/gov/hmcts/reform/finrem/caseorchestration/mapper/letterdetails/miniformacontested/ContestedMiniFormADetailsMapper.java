@@ -37,7 +37,6 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
     @Override
     public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtListWrapper courtList) {
         ContactDetailsWrapper contactDetails = caseDetails.getCaseData().getContactDetailsWrapper();
-        MiamWrapper miamDetails = caseDetails.getCaseData().getMiamWrapper();
         FinremCaseData caseData = caseDetails.getCaseData();
 
         ContestedMiniFormADetails.ContestedMiniFormADetailsBuilder builder =
@@ -46,7 +45,7 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
         builder = setRespondentDetails(builder, contactDetails, caseData);
         builder = setNatureApplicationDetails(builder, caseData);
         builder = setCoreCaseData(builder, caseData, contactDetails);
-        builder = setMiamDetails(builder, caseData, miamDetails);
+        builder = setMiamDetails(builder, caseData, caseDetails.getCaseData().getMiamWrapper());
 
         return builder.build();
     }
@@ -76,7 +75,7 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
         FinremCaseData caseData) {
 
         return builder
-            .respondentFMName(contactDetails.getRespondentFmName())
+            .respondentFmName(contactDetails.getRespondentFmName())
             .respondentLName(contactDetails.getRespondentLname())
             .respondentAddress(contactDetails.getRespondentAddress())
             .respondentPhone(contactDetails.getRespondentPhone())

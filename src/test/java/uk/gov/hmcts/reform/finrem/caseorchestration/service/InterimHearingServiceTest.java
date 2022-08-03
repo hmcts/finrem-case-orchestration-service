@@ -4,7 +4,6 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
@@ -55,9 +54,11 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
 
 
     @Test
-    public void givenContestedPaperCaseWithBeforeMigrationToHearingCollection_WhenModifiedDuringMigration_ThenItShouldSendToBulkPrint() throws IOException {
+    public void givenContestedPaperCaseWithBeforeMigrationToHearingCollection_WhenModifiedDuringMigration_ThenItShouldSendToBulkPrint()
+        throws IOException {
         FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource(BEFORE_MIGRATION_TEST_JSON), mapper);
-        FinremCaseDetails caseDetailsBefore = finremCaseDetailsFromResource(getResource(MODIFIED_DURING_MIGRATION_TEST_JSON), mapper);
+        FinremCaseDetails caseDetailsBefore = finremCaseDetailsFromResource(
+            getResource(MODIFIED_DURING_MIGRATION_TEST_JSON), mapper);
 
         when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any())).thenReturn(newDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(isA(Document.class), any())).thenReturn(newDocument());
@@ -216,7 +217,10 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
 
     private void verifyNonCollectionData(FinremCaseData data) {
         InterimWrapper interimData = data.getInterimWrapper();
+
         InterimRegionWrapper interimRegionData = data.getRegionWrapper().getInterimRegionWrapper();
+        assertEquals(interimRegionData, new InterimRegionWrapper());
+
         assertNull(interimData.getInterimHearingType());
         assertNull(interimData.getInterimHearingDate());
         assertNull(interimData.getInterimHearingTime());
@@ -225,6 +229,5 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
         assertNull(interimData.getInterimUploadAdditionalDocument());
         assertNull(interimData.getInterimPromptForAnyDocument());
         assertNull(interimData.getInterimHearingDirectionsDocument());
-        assertEquals(interimRegionData, new InterimRegionWrapper());
     }
 }

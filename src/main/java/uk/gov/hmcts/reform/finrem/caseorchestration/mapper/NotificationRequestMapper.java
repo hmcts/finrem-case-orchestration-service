@@ -137,16 +137,6 @@ public class NotificationRequestMapper {
         return Collections.max(representationUpdates, Comparator.comparing(c -> c.getValue().getDate())).getValue();
     }
 
-    private String getCaseType(CaseDetails caseDetails) {
-        String caseType;
-        if (caseDataService.isConsentedApplication(caseDetails)) {
-            caseType = CONSENTED;
-        } else {
-            caseType = CONTESTED;
-        }
-        return caseType;
-    }
-
     @Deprecated
     private NotificationRequest buildNotificationRequest(CaseDetails caseDetails,
                                                          SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
@@ -174,6 +164,28 @@ public class NotificationRequestMapper {
         notificationRequest.setSelectedCourt(selectedCourt);
 
         log.info("selectedCourt is {} for case ID: {}", selectedCourt, notificationRequest.getCaseReferenceNumber());
+
+        return notificationRequest;
+    }
+
+    private NotificationRequest buildNotificationRequest(FinremCaseDetails caseDetails,
+                                                         SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
+        NotificationRequest notificationRequest = new NotificationRequest();
+        FinremCaseData caseData = caseDetails.getCaseData();
+        notificationRequest.setCaseReferenceNumber(String.valueOf(caseDetails.getId()));
+        notificationRequest.setSolicitorReferenceNumber(solicitorCaseDataKeysWrapper.getSolicitorReferenceKey());
+        notificationRequest.setDivorceCaseNumber(caseData.getDivorceCaseNumber());
+        notificationRequest.setName(solicitorCaseDataKeysWrapper.getSolicitorNameKey());
+        notificationRequest.setNotificationEmail(solicitorCaseDataKeysWrapper.getSolicitorEmailKey());
+        notificationRequest.setCaseType(getCaseType(caseDetails));
+
+        if (caseData.isContestedApplication()) {
+            FrcCourtDetails courtDetails = courtDetailsMapper.getCourtDetails(caseData.getRegionWrapper().getDefaultCourtList());
+            notificationRequest.setSelectedCourt(courtDetails.getCourtName());
+
+            log.info("selectedCourt is {} for case ID: {}", courtDetails.getCourtName(),
+                notificationRequest.getCaseReferenceNumber());
+        }
 
         return notificationRequest;
     }
@@ -212,29 +224,17 @@ public class NotificationRequestMapper {
         return notificationRequest;
     }
 
-    private NotificationRequest buildNotificationRequest(FinremCaseDetails caseDetails,
-                                                         SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
-        NotificationRequest notificationRequest = new NotificationRequest();
-        FinremCaseData caseData = caseDetails.getCaseData();
-        notificationRequest.setCaseReferenceNumber(String.valueOf(caseDetails.getId()));
-        notificationRequest.setSolicitorReferenceNumber(solicitorCaseDataKeysWrapper.getSolicitorReferenceKey());
-        notificationRequest.setDivorceCaseNumber(caseData.getDivorceCaseNumber());
-        notificationRequest.setName(solicitorCaseDataKeysWrapper.getSolicitorNameKey());
-        notificationRequest.setNotificationEmail(solicitorCaseDataKeysWrapper.getSolicitorEmailKey());
-        notificationRequest.setCaseType(getCaseType(caseDetails));
-
-        if (caseData.isContestedApplication()) {
-            FrcCourtDetails courtDetails = courtDetailsMapper.getCourtDetails(caseData.getRegionWrapper().getDefaultCourtList());
-            notificationRequest.setSelectedCourt(courtDetails.getCourtName());
-
-            log.info("selectedCourt is {} for case ID: {}", courtDetails.getCourtName(),
-                notificationRequest.getCaseReferenceNumber());
-        }
-
-        return notificationRequest;
-    }
-
     private String getCaseType(FinremCaseDetails caseDetails) {
         return caseDetails.getCaseType().equals(CaseType.CONSENTED) ? CONSENTED : CONTESTED;
+    }
+
+    private String getCaseType(CaseDetails caseDetails) {
+        String caseType;
+        if (caseDataService.isConsentedApplication(caseDetails)) {
+            caseType = CONSENTED;
+        } else {
+            caseType = CONTESTED;
+        }
+        return caseType;
     }
 }

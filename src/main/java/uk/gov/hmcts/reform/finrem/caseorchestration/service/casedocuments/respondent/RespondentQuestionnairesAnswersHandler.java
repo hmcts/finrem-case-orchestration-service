@@ -15,7 +15,8 @@ public class RespondentQuestionnairesAnswersHandler extends QuestionnairesAnswer
 
     @Autowired
     public RespondentQuestionnairesAnswersHandler() {
-        super(RESPONDENT);    }
+        super(RESPONDENT);
+    }
 
     @Override
     protected List<UploadCaseDocumentCollection> getDocumentCollection(FinremCaseData caseData) {

@@ -3,11 +3,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.gener
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.junit.Before;
-import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.util.ResourceUtils;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
-import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
@@ -72,7 +70,8 @@ public class AbstractLetterDetailsGeneratorTest {
     @Before
     public void setUpTest() throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
-        caseDetails = finremCaseDetailsFromResource(getResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke.json"),
+        caseDetails = finremCaseDetailsFromResource(
+            getResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke.json"),
             objectMapper);
         caseDetailsBefore = finremCaseDetailsFromResource(
             getResource("/fixtures/noticeOfChange/contested/noc/noc-letter-notifications-add-and-revoke-before.json"),

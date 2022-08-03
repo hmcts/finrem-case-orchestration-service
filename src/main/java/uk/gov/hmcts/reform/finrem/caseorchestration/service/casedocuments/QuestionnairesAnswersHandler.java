@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.hmcts.reform.finrem.ccd.domain.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.UploadCaseDocumentCollection;

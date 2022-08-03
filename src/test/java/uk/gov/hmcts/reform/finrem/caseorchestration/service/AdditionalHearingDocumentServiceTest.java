@@ -298,6 +298,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
 
         assertThat(capturedDetails.getCaseData().getLatestDraftHearingOrder(), is(nullValue()));
     }
+
     @Test
     public void givenAdditionalDocumentsToBeStored_whenCreateAndStoreAdditionalHearingDocumentsFromApprovedOrder_thenStore() {
         Document expectedDocument = Document.builder().binaryUrl("docBin").filename("docFilename")

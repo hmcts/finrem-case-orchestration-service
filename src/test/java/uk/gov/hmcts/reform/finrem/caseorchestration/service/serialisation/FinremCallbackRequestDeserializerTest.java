@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.util.ResourceUtils;
@@ -142,13 +141,11 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.MiamWrapper;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -286,8 +283,8 @@ public class FinremCallbackRequestDeserializerTest {
         List<AmendedConsentOrderCollection> expected = List.of(
             AmendedConsentOrderCollection.builder()
             .value(AmendedConsentOrder.builder()
-                .amendedConsentOrder(getTestDocument()).
-                amendedConsentOrderDate(LocalDate.of(2020, 1, 2))
+                .amendedConsentOrder(getTestDocument())
+                .amendedConsentOrderDate(LocalDate.of(2020, 1, 2))
                 .build())
                 .build());
         assertNotNull(caseData.getAmendedConsentOrderCollection());

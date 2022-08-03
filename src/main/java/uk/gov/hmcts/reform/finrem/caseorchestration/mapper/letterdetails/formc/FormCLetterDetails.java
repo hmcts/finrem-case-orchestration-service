@@ -8,8 +8,6 @@ import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 
-import java.time.LocalDate;
-
 @Data
 @Builder
 @AllArgsConstructor

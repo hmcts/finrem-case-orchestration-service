@@ -15,7 +15,8 @@ public class RespondentChronologiesStatementHandler extends ChronologiesStatemen
 
     @Autowired
     public RespondentChronologiesStatementHandler() {
-        super(RESPONDENT);    }
+        super(RESPONDENT);
+    }
 
     @Override
     protected List<UploadCaseDocumentCollection> getDocumentCollection(FinremCaseData caseData) {

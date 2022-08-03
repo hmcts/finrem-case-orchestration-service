@@ -110,7 +110,8 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateAndPopulateApprovedConsentOrderLetterForConsentInContested() throws IOException {
-        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(getResource("/fixtures/contested/consent-in-contested-application-approved.json"), mapper);
+        FinremCaseDetails caseDetails = finremCaseDetailsFromResource(
+            getResource("/fixtures/contested/consent-in-contested-application-approved.json"), mapper);
         consentOrderApprovedDocumentService.generateAndPopulateConsentOrderLetter(caseDetails, AUTH_TOKEN);
         List<ConsentOrderCollection> approvedOrders = caseDetails.getCaseData().getConsentOrderWrapper()
             .getContestedConsentedApprovedOrders();
@@ -146,6 +147,11 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateApprovedConsentOrderCoverLetterForApplicantSolicitor() {
+        FinremCaseData caseData = caseDetails.getCaseData();
+        caseData.setCcdCaseType(CaseType.CONSENTED);
+        caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
+        caseData.getContactDetailsWrapper().setSolicitorName(TEST_SOLICITOR_NAME);
+        caseData.getContactDetailsWrapper().setSolicitorReference(TEST_SOLICITOR_REFERENCE);
         Address solicitorAddress = Address.builder()
             .addressLine1("123 Applicant Solicitor Street")
             .addressLine2("Second Address Line")
@@ -155,12 +161,6 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
             .postTown("London")
             .postCode("SE1")
             .build();
-
-        FinremCaseData caseData = caseDetails.getCaseData();
-        caseData.setCcdCaseType(CaseType.CONSENTED);
-        caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
-        caseData.getContactDetailsWrapper().setSolicitorName(TEST_SOLICITOR_NAME);
-        caseData.getContactDetailsWrapper().setSolicitorReference(TEST_SOLICITOR_REFERENCE);
         caseData.getContactDetailsWrapper().setSolicitorAddress(solicitorAddress);
 
         Document generatedApprovedConsentOrderNotificationLetter =

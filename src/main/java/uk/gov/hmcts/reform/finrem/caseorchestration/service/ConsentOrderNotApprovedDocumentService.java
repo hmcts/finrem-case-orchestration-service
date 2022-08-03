@@ -60,9 +60,11 @@ public class ConsentOrderNotApprovedDocumentService {
 
         if (useNotApprovedOrder) {
             existingList.addAll(documentHelper.getDocumentsAsBulkPrintDocuments(notApprovedOrderDocuments));
-        } else
-            generalOrder.ifPresent(document ->
-                existingList.add(documentHelper.getDocumentAsBulkPrintDocument(document).orElse(null)));
+            return;
+        }
+
+        generalOrder.ifPresent(document -> existingList.add(documentHelper.getDocumentAsBulkPrintDocument(document)
+            .orElse(null)));
     }
 
     private BulkPrintDocument coverLetter(FinremCaseDetails caseDetails, String authorisationToken) {

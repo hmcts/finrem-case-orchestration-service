@@ -68,7 +68,7 @@ public class ContestedMiniFormADetailsMapperTest extends AbstractLetterDetailsMa
             .applicantSolicitorFirm("SolicitorFirm")
             .solicitorReference("SolicitorReference")
             .applicantSolicitorAddress(getAddress("50 ApplicantSolicitor Street"))
-            .respondentFMName("Respondent")
+            .respondentFmName("Respondent")
             .respondentLName("Name")
             .respondentPhone("12345")
             .respondentEmail("respondent@gmail.com")

@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.ccd.domain.CaseDocumentType;
@@ -16,11 +15,8 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 
 public abstract class CaseDocumentHandlerTest {
 

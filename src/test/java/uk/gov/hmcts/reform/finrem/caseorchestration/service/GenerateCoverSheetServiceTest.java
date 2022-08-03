@@ -131,7 +131,7 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
 
     private void assertAddresseeName(int invocation, String name) {
         verify(genericDocumentService, times(invocation)).generateDocumentFromPlaceholdersMap(any(),
-        generateDocumentCaseDetailsCaptor.capture(),
+            generateDocumentCaseDetailsCaptor.capture(),
             any(), any());
         Map<String, Object> data = getDataFromCaptor(generateDocumentCaseDetailsCaptor);
         Addressee addressee = mapper.convertValue(data.get(ADDRESSEE), Addressee.class);
