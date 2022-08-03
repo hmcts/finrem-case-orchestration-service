@@ -1,7 +1,9 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.google.common.collect.Iterables;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
@@ -77,8 +79,8 @@ public class UploadApprovedOrderService {
     }
 
     private boolean isAnotherHearingToBeListed(FinremCaseDetails caseDetails) {
-        Optional<HearingDirectionDetail> latestHearingDirections =
-            getLatestAdditionalHearingDirections(caseDetails);
+        Optional<HearingDirectionDetail> latestHearingDirections = getLatestAdditionalHearingDirections(caseDetails);
+
         return latestHearingDirections.isPresent() && isYes(latestHearingDirections.get().getIsAnotherHearingYN());
     }
 
@@ -86,15 +88,14 @@ public class UploadApprovedOrderService {
         List<HearingDirectionDetailsCollection> additionalHearingDetailsCollection
             = caseDetails.getCaseData().getHearingDirectionDetailsCollection();
 
-        return additionalHearingDetailsCollection != null
-            && !additionalHearingDetailsCollection.isEmpty()
-            ? Optional.of(additionalHearingDetailsCollection.get(additionalHearingDetailsCollection.size() - 1).getValue())
+        return !CollectionUtils.isEmpty(additionalHearingDetailsCollection)
+            ? Optional.of(Iterables.getLast(additionalHearingDetailsCollection).getValue())
             : Optional.empty();
     }
 
     private Optional<DirectionOrderCollection> getLatestHearingOrder(List<DirectionOrderCollection> directionOrders) {
-        return directionOrders.isEmpty()
-            ? Optional.empty()
-            : Optional.of(directionOrders.get(directionOrders.size() - 1));
+        return !CollectionUtils.isEmpty(directionOrders)
+            ? Optional.of(Iterables.getLast(directionOrders))
+            : Optional.empty();
     }
 }

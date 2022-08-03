@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.google.common.collect.Iterables;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -78,7 +79,7 @@ public class HearingOrderService {
 
         return draftDirectionOrders.isEmpty()
             ? Optional.empty()
-            : Optional.of(draftDirectionOrders.get(draftDirectionOrders.size() - 1).getValue());
+            : Optional.of(Iterables.getLast(draftDirectionOrders).getValue());
     }
 
     private Optional<DraftDirectionOrder> getJudgeApprovedHearingOrder(FinremCaseDetails caseDetails) {

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.google.common.collect.Iterables;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -82,7 +83,7 @@ public class ContestedDraftOrderNotApprovedService {
         List<RefusalOrderCollection> refusalOrderList = Optional.ofNullable(
             caseDetails.getCaseData().getRefusalOrderCollection()).orElse(new ArrayList<>());
 
-        return Optional.of(refusalOrderList.get(refusalOrderList.size() - 1)
+        return Optional.of(Iterables.getLast(refusalOrderList)
             .getValue()
             .getRefusalOrderAdditionalDocument());
     }

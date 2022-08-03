@@ -20,6 +20,7 @@ public class FormCLetterDetailsMapper extends AbstractLetterDetailsMapper {
     @Override
     public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtListWrapper courtList) {
         FinremCaseData caseData = caseDetails.getCaseData();
+        LocalDate hearingDate = caseData.getHearingDate();
         return FormCLetterDetails.builder()
             .applicantFmName(caseData.getContactDetailsWrapper().getApplicantFmName())
             .applicantLName(caseData.getContactDetailsWrapper().getApplicantLname())
@@ -27,9 +28,9 @@ public class FormCLetterDetailsMapper extends AbstractLetterDetailsMapper {
             .respondentLName(caseData.getContactDetailsWrapper().getRespondentLname())
             .divorceCaseNumber(caseData.getDivorceCaseNumber())
             .courtDetails(courtDetailsMapper.getCourtDetails(courtList))
-            .hearingDate(String.valueOf(caseData.getHearingDate()))
-            .hearingDateLess35Days(String.valueOf(caseData.getHearingDate().minusDays(35)))
-            .hearingDateLess14Days(String.valueOf(caseData.getHearingDate().minusDays(14)))
+            .hearingDate(String.valueOf(hearingDate))
+            .hearingDateLess35Days(String.valueOf(hearingDate.minusDays(35)))
+            .hearingDateLess14Days(String.valueOf(hearingDate.minusDays(14)))
             .solicitorReference(caseData.getContactDetailsWrapper().getSolicitorReference())
             .respondentSolicitorReference(caseData.getContactDetailsWrapper().getRespondentSolicitorReference())
             .additionalInformationAboutHearing(caseData.getAdditionalInformationAboutHearing())

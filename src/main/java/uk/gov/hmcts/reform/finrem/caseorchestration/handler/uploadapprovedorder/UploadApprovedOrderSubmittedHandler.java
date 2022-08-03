@@ -1,7 +1,9 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.uploadapprovedorder;
 
+import com.google.common.collect.Iterables;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ApprovedOrderNoticeOfHearingService;
@@ -52,8 +54,8 @@ public class UploadApprovedOrderSubmittedHandler implements CallbackHandler {
         List<HearingDirectionDetailsCollection> additionalHearingDetailsCollection = caseDetails.getCaseData()
             .getHearingDirectionDetailsCollection();
 
-        return additionalHearingDetailsCollection != null && !additionalHearingDetailsCollection.isEmpty()
-            ? Optional.of(additionalHearingDetailsCollection.get(additionalHearingDetailsCollection.size() - 1).getValue())
+        return !CollectionUtils.isEmpty(additionalHearingDetailsCollection)
+            ? Optional.of(Iterables.getLast(additionalHearingDetailsCollection).getValue())
             : Optional.empty();
     }
 }

@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.DocumentTemplateDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 
 import java.util.List;
@@ -23,7 +22,7 @@ public class RejectedOrderDetails implements DocumentTemplateDetails {
     @JsonProperty("RespondentName")
     private String respondentName;
     private String civilPartnership;
-    private List<Element<TranslatedOrderRefusalDocument>> orderRefusalCollectionNew;
+    private List<TranslatedOrderRefusalDocumentCollection> orderRefusalCollectionNew;
     @JsonProperty("CourtName")
     private String courtName;
     private FrcCourtDetails courtDetails;

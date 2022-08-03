@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.DocumentTemplateDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.JudgeType;
@@ -27,12 +28,13 @@ public class GeneralApplicationOrderDetailsMapper extends AbstractLetterDetailsM
     public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails, CourtListWrapper courtList) {
         FinremCaseData caseData = caseDetails.getCaseData();
         final GeneralApplicationWrapper generalApplication = caseData.getGeneralApplicationWrapper();
+        final FrcCourtDetails courtDetails = courtDetailsMapper.getCourtDetails(courtList);
 
         return GeneralApplicationOrderDetails.builder()
             .divorceCaseNumber(caseData.getDivorceCaseNumber())
             .applicantName(caseDetails.getCaseData().getFullApplicantName())
             .respondentName(caseDetails.getCaseData().getRespondentFullName())
-            .courtDetails(courtDetailsMapper.getCourtDetails(courtList))
+            .courtDetails(courtDetails)
             .letterDate(String.valueOf(LocalDate.now()))
             .civilPartnership(getYesOrNo(caseData.getCivilPartnership()))
             .generalApplicationDirectionsCourtOrderDate(String.valueOf(generalApplication.getGeneralApplicationDirectionsCourtOrderDate()))
@@ -44,6 +46,6 @@ public class GeneralApplicationOrderDetailsMapper extends AbstractLetterDetailsM
 
     private String getJudgeType(GeneralApplicationWrapper generalApplication) {
         return Optional.ofNullable(generalApplication.getGeneralApplicationDirectionsJudgeType())
-            .map(JudgeType::getValue).orElse(null);
+            .map(JudgeType::getValue).orElse("");
     }
 }

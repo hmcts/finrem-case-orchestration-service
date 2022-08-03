@@ -2,14 +2,11 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.CourtListWrapper;
@@ -27,6 +24,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_SERVICE_CENTRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_TOWN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper.generateAddressee;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
 @Component
 @RequiredArgsConstructor
@@ -70,8 +68,8 @@ public class LetterDetailsMapper {
     private String getReference(FinremCaseData caseData, DocumentHelper.PaperNotificationRecipient recipient) {
         return recipient == DocumentHelper.PaperNotificationRecipient.APPLICANT
             || recipient == DocumentHelper.PaperNotificationRecipient.APP_SOLICITOR
-            ? caseData.getContactDetailsWrapper().getSolicitorReference()
-            : caseData.getContactDetailsWrapper().getRespondentSolicitorReference();
+            ? nullToEmpty(caseData.getContactDetailsWrapper().getSolicitorReference())
+            : nullToEmpty(caseData.getContactDetailsWrapper().getRespondentSolicitorReference());
     }
 
     private CtscContactDetails getCtscContactDetails() {

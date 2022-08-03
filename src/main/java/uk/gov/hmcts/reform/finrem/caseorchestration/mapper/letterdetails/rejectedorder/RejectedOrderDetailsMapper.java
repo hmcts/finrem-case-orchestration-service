@@ -11,8 +11,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.JudgeType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.OrderRefusalCollection;
 import uk.gov.hmcts.reform.finrem.ccd.domain.OrderRefusalOption;
+import uk.gov.hmcts.reform.finrem.ccd.domain.RefusalOrderCollection;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.CourtListWrapper;
 
 import java.util.ArrayList;
@@ -68,21 +70,22 @@ public class RejectedOrderDetailsMapper extends AbstractLetterDetailsMapper {
             : CONSENTED_COURT_NAME;
     }
 
-    private List<Element<TranslatedOrderRefusalDocument>> getTranslatedRefusalOrderCollection(FinremCaseData caseData) {
+    private List<TranslatedOrderRefusalDocumentCollection> getTranslatedRefusalOrderCollection(FinremCaseData caseData) {
 
         return Optional.ofNullable(caseData.getOrderRefusalCollectionNew()).orElse(new ArrayList<>())
             .stream()
-            .map(refusalOrder -> element(UUID.randomUUID(),
-                TranslatedOrderRefusalDocument.builder()
-                    .orderRefusal(getReasonsAsStringAndTranslate(refusalOrder))
-                    .orderRefusalAddComments(refusalOrder.getValue().getOrderRefusalAddComments())
-                    .orderRefusalAfterText(refusalOrder.getValue().getOrderRefusalAfterText())
-                    .orderRefusalDate(refusalOrder.getValue().getOrderRefusalDate())
-                    .orderRefusalJudge(refusalOrder.getValue().getOrderRefusalJudge())
-                    .orderRefusalJudgeName(refusalOrder.getValue().getOrderRefusalJudgeName())
-                    .orderRefusalDocs(refusalOrder.getValue().getOrderRefusalDocs())
-                    .orderRefusalOther(refusalOrder.getValue().getOrderRefusalOther())
-                    .build())
+            .map(refusalOrder -> TranslatedOrderRefusalDocumentCollection.builder()
+                    .value(TranslatedOrderRefusalDocument.builder()
+                        .orderRefusal(getReasonsAsStringAndTranslate(refusalOrder))
+                        .orderRefusalAddComments(refusalOrder.getValue().getOrderRefusalAddComments())
+                        .orderRefusalAfterText(refusalOrder.getValue().getOrderRefusalAfterText())
+                        .orderRefusalDate(String.valueOf(refusalOrder.getValue().getOrderRefusalDate()))
+                        .orderRefusalJudge(getOrderRefusalJudge(refusalOrder))
+                        .orderRefusalJudgeName(refusalOrder.getValue().getOrderRefusalJudgeName())
+                        .orderRefusalDocs(refusalOrder.getValue().getOrderRefusalDocs())
+                        .orderRefusalOther(refusalOrder.getValue().getOrderRefusalOther())
+                        .build())
+                .build()
         ).collect(toList());
     }
 
@@ -96,6 +99,11 @@ public class RejectedOrderDetailsMapper extends AbstractLetterDetailsMapper {
             orderRefusalStrings.remove("Transferred to Applicant’s home Court");
         }
         return orderRefusalStrings;
+    }
+
+    private String getOrderRefusalJudge(OrderRefusalCollection refusalOrder) {
+        return Optional.ofNullable(refusalOrder.getValue().getOrderRefusalJudge()).map(JudgeType::getValue)
+            .orElse("");
     }
 
     private FrcCourtDetails getConsentedFrcCourtDetails() {

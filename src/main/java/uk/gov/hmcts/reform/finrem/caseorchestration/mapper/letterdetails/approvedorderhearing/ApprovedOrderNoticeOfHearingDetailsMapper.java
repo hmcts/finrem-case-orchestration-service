@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.approvedorderhearing;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Iterables;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapper;
@@ -58,8 +60,8 @@ public class ApprovedOrderNoticeOfHearingDetailsMapper extends AbstractLetterDet
         List<HearingDirectionDetailsCollection> additionalHearingDetailsCollection =
             caseDetails.getCaseData().getHearingDirectionDetailsCollection();
 
-        return additionalHearingDetailsCollection != null && !additionalHearingDetailsCollection.isEmpty()
-            ? Optional.of(additionalHearingDetailsCollection.get(additionalHearingDetailsCollection.size() - 1).getValue())
+        return !CollectionUtils.isEmpty(additionalHearingDetailsCollection)
+            ? Optional.of(Iterables.getLast(additionalHearingDetailsCollection).getValue())
             : Optional.empty();
     }
 

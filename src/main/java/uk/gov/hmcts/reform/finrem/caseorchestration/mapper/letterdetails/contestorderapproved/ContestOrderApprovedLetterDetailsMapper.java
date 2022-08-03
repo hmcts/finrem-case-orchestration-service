@@ -9,6 +9,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.Documen
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.CourtListWrapper;
 
+import java.time.LocalDate;
+
+import static uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo.getYesOrNo;
+
 @Component
 public class ContestOrderApprovedLetterDetailsMapper extends AbstractLetterDetailsMapper {
 
@@ -23,6 +27,10 @@ public class ContestOrderApprovedLetterDetailsMapper extends AbstractLetterDetai
             .respondentName(caseDetails.getCaseData().getRespondentFullName())
             .court(courtDetailsMapper.getCourtDetails(courtList).getCourtName())
             .judgeDetails(getJudgeDetails(caseDetails))
+            .divorceCaseNumber(caseDetails.getCaseData().getDivorceCaseNumber())
+            .orderApprovedDate(String.valueOf(caseDetails.getCaseData().getOrderApprovedDate()))
+            .civilPartnership(getYesOrNo(caseDetails.getCaseData().getCivilPartnership()))
+            .letterDate(String.valueOf(LocalDate.now()))
             .build();
     }
 

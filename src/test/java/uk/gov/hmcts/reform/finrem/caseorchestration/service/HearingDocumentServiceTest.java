@@ -72,10 +72,11 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
     @MockBean private GenericDocumentService genericDocumentService;
     @MockBean BulkPrintService bulkPrintService;
+    @MockBean private NotificationService notificationService;
+
 
     @Captor private ArgumentCaptor<List<BulkPrintDocument>> bulkPrintDocumentsCaptor;
     @Captor private ArgumentCaptor<Map<String,Object>> placeholdersCaptor;
-    @MockBean private NotificationService notificationService;
 
     @Before
     public void setUp() {

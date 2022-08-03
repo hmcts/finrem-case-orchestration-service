@@ -22,4 +22,7 @@ public class ContestOrderApprovedLetterDetails implements DocumentTemplateDetail
     private String judgeDetails;
     @JsonProperty("letterDate")
     private String letterDate;
+    private String civilPartnership;
+    private String divorceCaseNumber;
+    private String orderApprovedDate;
 }

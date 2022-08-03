@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
@@ -39,6 +40,8 @@ public class InterimHearingService {
     private final NotificationService notificationService;
     private final DocumentHelper documentHelper;
     private final GeneralApplicationInterimHearingNoticeDetailsMapper generalApplicationInterimHearingNoticeDetailsMapper;
+    private final BiPredicate<String, List<String>> hasMatchInDataToProcessList = (itemId, dataToProcessList) ->
+        dataToProcessList.stream().anyMatch(id -> id.equals(itemId));
 
     public void submitInterimHearing(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore, String authorisationToken) {
         log.info("In submitInterimHearing for case id {}", caseDetails.getId());
@@ -158,12 +161,11 @@ public class InterimHearingService {
 
         List<String> dataToProcessList = compareCaseData(caseData, caseDataBefore);
 
-
         log.info("filterInterimHearingToProcess :: trackingList {}", trackingList.size());
         List<String> alreadyProcessedIds = trackingList.stream()
-            .map(existingCollectionId -> existingCollectionId.getValue().getIhItemIds()).collect(Collectors.toList());
-
-        alreadyProcessedIds.removeAll(dataToProcessList);
+            .map(existingCollectionId -> existingCollectionId.getValue().getIhItemIds())
+            .filter(itemId -> hasMatchInDataToProcessList.negate().test(itemId, dataToProcessList))
+            .toList();
 
         return sortedInterimHearingList.stream()
             .filter(collectionId -> !alreadyProcessedIds.contains(collectionId.getId().toString()))
@@ -183,8 +185,7 @@ public class InterimHearingService {
         String beforeMigrationHearingDate = nullToEmpty(caseData.getInterimWrapper().getInterimHearingDate());
         String beforeMigrationHearingTime = nullToEmpty(caseData.getInterimWrapper().getInterimHearingTime());
 
-        if (!currentInterimHearingList.isEmpty() && (!beforeInterimHearingList.isEmpty()
-            || !beforeMigrationHearingDate.isEmpty())) {
+        if (!currentInterimHearingList.isEmpty() && (!beforeInterimHearingList.isEmpty() || !beforeMigrationHearingDate.isEmpty())) {
             currentInterimHearingList.forEach(data -> currentMap.put(String.valueOf(data.getId()), String.join("#",
                 data.getValue().getInterimHearingDate(), data.getValue().getInterimHearingTime())));
 

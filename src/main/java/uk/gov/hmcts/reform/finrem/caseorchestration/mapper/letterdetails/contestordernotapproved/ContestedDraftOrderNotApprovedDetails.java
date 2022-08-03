@@ -23,4 +23,7 @@ public class ContestedDraftOrderNotApprovedDetails implements DocumentTemplateDe
     private String judgeDetails;
     @JsonProperty("ContestOrderNotApprovedRefusalReasonsFormatted")
     private String contestOrderNotApprovedRefusalReasons;
+    private String divorceCaseNumber;
+    private String civilPartnership;
+    private String refusalOrderDate;
 }

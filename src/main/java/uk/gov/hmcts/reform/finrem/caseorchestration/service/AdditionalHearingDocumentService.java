@@ -5,6 +5,7 @@ import com.google.common.collect.Iterables;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -59,10 +60,10 @@ public class AdditionalHearingDocumentService {
 
         if (hearingOrderCollectionData != null
             && !hearingOrderCollectionData.isEmpty()
-            && hearingOrderCollectionData.get(hearingOrderCollectionData.size() - 1).getValue() != null) {
+            && Iterables.getLast(hearingOrderCollectionData).getValue() != null) {
 
-            caseDetails.getCaseData().setLatestDraftHearingOrder(hearingOrderCollectionData.get(
-                hearingOrderCollectionData.size() - 1).getValue().getUploadDraftDocument());
+            caseDetails.getCaseData().setLatestDraftHearingOrder(
+                Iterables.getLast(hearingOrderCollectionData).getValue().getUploadDraftDocument());
         }
 
         List<DirectionDetailCollection> directionDetailsCollectionList = caseDetails.getCaseData()
@@ -70,8 +71,7 @@ public class AdditionalHearingDocumentService {
 
         //check that the list contains one or more values for the court hearing information
         if (!directionDetailsCollectionList.isEmpty()) {
-            DirectionDetail latestDirectionDetailsCollectionItem =
-                directionDetailsCollectionList.get(directionDetailsCollectionList.size() - 1).getValue();
+            DirectionDetail latestDirectionDetailsCollectionItem = Iterables.getLast(directionDetailsCollectionList).getValue();
 
             //if the latest court hearing has specified another hearing as No, dont create an additional hearing document
             if (latestDirectionDetailsCollectionItem.getIsAnotherHearingYN().isNoOrNull()) {
@@ -163,9 +163,8 @@ public class AdditionalHearingDocumentService {
     }
 
     private boolean hearingOrderCollectionHasEntries(List<DirectionOrderCollection> hearingOrderCollectionData) {
-        return hearingOrderCollectionData != null
-            && !hearingOrderCollectionData.isEmpty()
-            && hearingOrderCollectionData.get(hearingOrderCollectionData.size() - 1).getValue() != null;
+        return !CollectionUtils.isEmpty(hearingOrderCollectionData)
+            && Iterables.getLast(hearingOrderCollectionData).getValue() != null;
     }
 
     private void populateLatestDraftHearingOrderWithLatestEntry(FinremCaseDetails caseDetails,
@@ -173,7 +172,6 @@ public class AdditionalHearingDocumentService {
                                                                 String authorisationToken) {
         hearingOrderCollectionData.forEach(element -> convertHearingOrderCollectionDocumentsToPdf(element, authorisationToken));
         caseDetails.getCaseData().setUploadHearingOrder(hearingOrderCollectionData);
-        caseDetails.getCaseData().setLatestDraftHearingOrder(hearingOrderCollectionData.get(hearingOrderCollectionData.size() - 1)
-            .getValue().getUploadDraftDocument());
+        caseDetails.getCaseData().setLatestDraftHearingOrder(Iterables.getLast(hearingOrderCollectionData).getValue().getUploadDraftDocument());
     }
 }

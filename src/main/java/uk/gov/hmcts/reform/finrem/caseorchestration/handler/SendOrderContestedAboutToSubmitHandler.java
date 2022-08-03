@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
+import com.google.common.collect.Iterables;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -68,8 +69,7 @@ public class SendOrderContestedAboutToSubmitHandler implements CallbackHandler {
         List<DirectionOrderCollection> hearingOrderCollectionData = caseData.getUploadHearingOrder();
 
         if (hearingOrderCollectionData != null && !hearingOrderCollectionData.isEmpty()) {
-            Document latestHearingOrder = hearingOrderCollectionData
-                .get(hearingOrderCollectionData.size() - 1)
+            Document latestHearingOrder = Iterables.getLast(hearingOrderCollectionData)
                 .getValue().getUploadDraftDocument();
 
             log.info("Received request to stampFinalOrder called with Case ID = {}, latestHearingOrder = {}", caseDetails.getId(),

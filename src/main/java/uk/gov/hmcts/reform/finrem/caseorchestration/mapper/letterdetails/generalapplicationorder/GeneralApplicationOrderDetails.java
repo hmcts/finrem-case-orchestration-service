@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetai
 @AllArgsConstructor
 @NoArgsConstructor
 public class GeneralApplicationOrderDetails implements DocumentTemplateDetails {
-    @JsonProperty("courtDetails")
     private FrcCourtDetails courtDetails;
     @JsonProperty("applicantName")
     private String applicantName;

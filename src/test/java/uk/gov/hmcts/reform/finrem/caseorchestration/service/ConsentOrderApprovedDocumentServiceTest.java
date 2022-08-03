@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Iterables;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -114,7 +115,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         List<ConsentOrderCollection> approvedOrders = caseDetails.getCaseData().getConsentOrderWrapper()
             .getContestedConsentedApprovedOrders();
 
-        assertCaseDocument(approvedOrders.get(approvedOrders.size() - 1).getValue().getOrderLetter());
+        assertCaseDocument(Iterables.getLast(approvedOrders).getValue().getOrderLetter());
         verify(documentClientMock, atLeastOnce()).generatePdf(
             matchDocumentGenerationRequestTemplateAndFilename(documentApprovedConsentOrderTemplate, documentApprovedConsentOrderFileName),
             anyString());

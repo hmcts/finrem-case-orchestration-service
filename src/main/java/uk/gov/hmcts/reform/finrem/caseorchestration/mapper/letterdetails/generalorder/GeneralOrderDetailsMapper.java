@@ -14,7 +14,7 @@ public class GeneralOrderDetailsMapper extends AbstractLetterDetailsMapper {
 
     private static final String GENERAL_ORDER_COURT_CONSENTED = "SITTING in private";
     private static final String GENERAL_ORDER_COURT_SITTING = "SITTING AT the Family Court at the ";
-    private static final String GENERAL_ORDER_HEADER_ONE = "In the Family Court";
+    private static final String GENERAL_ORDER_HEADER_ONE_CONTESTED = "In the Family Court";
     private static final String GENERAL_ORDER_HEADER_ONE_CONSENTED = "Sitting in the Family Court";
     private static final String GENERAL_ORDER_HEADER_TWO = "sitting in the";
 
@@ -42,7 +42,7 @@ public class GeneralOrderDetailsMapper extends AbstractLetterDetailsMapper {
     private String getHeaderOne(FinremCaseDetails caseDetails) {
         return caseDetails.getCaseData().isConsentedApplication()
             ? GENERAL_ORDER_HEADER_ONE_CONSENTED
-            : GENERAL_ORDER_HEADER_ONE;
+            : GENERAL_ORDER_HEADER_ONE_CONTESTED;
     }
 
     private String getGeneralOrderCourt(FinremCaseDetails caseDetails, CourtListWrapper courtList) {

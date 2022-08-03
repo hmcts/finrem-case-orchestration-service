@@ -23,7 +23,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Slf4j
 @Service
@@ -32,8 +31,7 @@ public class ManageCaseDocumentsService {
 
     private final List<CaseDocumentHandler<UploadCaseDocumentCollection>> caseDocumentHandlers;
     private final List<Field> contestedUploadCaseFilesCollectionFields = Arrays.stream(ContestedUploadCaseFilesCollectionType.values())
-        .map(ContestedUploadCaseFilesCollectionType::getManageCaseDocumentCollectionField)
-        .collect(Collectors.toList());
+        .map(ContestedUploadCaseFilesCollectionType::getManageCaseDocumentCollectionField).toList();
 
     public FinremCaseData setApplicantAndRespondentDocumentsCollection(FinremCaseDetails caseDetails) {
         try {
@@ -187,7 +185,7 @@ public class ManageCaseDocumentsService {
             if (!docsInCollection.isEmpty()) {
                 docsInCollection.stream()
                     .filter(document -> manageCaseDocumentsCollectionIds.stream().anyMatch(id -> document.getId().equals(id)))
-                    .collect(Collectors.toList())
+                    .toList()
                     .forEach(matchingDocument -> documentIdToFieldMap.put(matchingDocument.getId().toString(), collectionType));
             }
         }

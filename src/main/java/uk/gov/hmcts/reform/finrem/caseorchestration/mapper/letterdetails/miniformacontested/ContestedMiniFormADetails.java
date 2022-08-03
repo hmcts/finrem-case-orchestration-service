@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Address;
+import uk.gov.hmcts.reform.finrem.ccd.domain.PropertyAdjustmentOrderCollection;
 
 import java.util.List;
 import java.util.Map;
@@ -53,7 +54,7 @@ public class ContestedMiniFormADetails implements DocumentTemplateDetails {
     private List<String> natureOfApplicationChecklist;
     private String propertyAddress;
     private String mortgageDetail;
-    List<Map<String, Object>> propertyAdjustmentOrderDetail;
+    List<PropertyAdjustmentOrderCollection> propertyAdjustmentOrderDetail;
     private String paymentForChildrenDecision;
     private String benefitForChildrenDecision;
     private List<String> benefitPaymentChecklist;

@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.DocumentTemplateDetails;
-import uk.gov.hmcts.reform.finrem.ccd.domain.ChildrenOrder;
 import uk.gov.hmcts.reform.finrem.ccd.domain.ConsentNatureOfApplication;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
@@ -44,10 +43,9 @@ public class ConsentInContestMiniFormADetailsMapper extends AbstractLetterDetail
         return builder
             .applicantFmName(contactDetails.getApplicantFmName())
             .applicantLName(contactDetails.getApplicantLname())
-            .appRespondentFmName(contactDetails.getRespondentFmName())
-            .appRespondentLName(contactDetails.getRespondentLname())
             .solicitorName(caseData.getAppSolicitorName())
             .solicitorAddress(caseData.getAppSolicitorAddress())
+            .solicitorReference(caseData.getContactDetailsWrapper().getSolicitorReference())
             .solicitorFirm(contactDetails.getApplicantSolicitorFirm());
     }
 
@@ -56,6 +54,8 @@ public class ConsentInContestMiniFormADetailsMapper extends AbstractLetterDetail
         ContactDetailsWrapper contactDetails = caseDetails.getCaseData().getContactDetailsWrapper();
         FinremCaseData caseData = caseDetails.getCaseData();
         return builder
+            .appRespondentFmName(contactDetails.getRespondentFmName())
+            .appRespondentLName(contactDetails.getRespondentLname())
             .respondentSolicitorAddress(contactDetails.getRespondentSolicitorAddress())
             .respondentSolicitorEmail(contactDetails.getRespondentSolicitorEmail())
             .respondentSolicitorName(caseData.getRespondentSolicitorName())

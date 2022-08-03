@@ -1,7 +1,9 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.google.common.collect.Iterables;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.generalletter.GeneralLetterDetailsMapper;
@@ -101,8 +103,8 @@ public class GeneralLetterService {
         FinremCaseData caseData = caseDetails.getCaseData();
         List<GeneralLetterCollection> generalLetterCollection = caseData.getGeneralLetterWrapper().getGeneralLetterCollection();
 
-        if (!generalLetterCollection.isEmpty()) {
-            Document generalLetter = generalLetterCollection.get(generalLetterCollection.size() - 1).getValue().getGeneratedLetter();
+        if (!CollectionUtils.isEmpty(generalLetterCollection)) {
+            Document generalLetter = Iterables.getLast(generalLetterCollection).getValue().getGeneratedLetter();
             return bulkPrintService.sendDocumentForPrint(generalLetter, caseDetails);
         }
 

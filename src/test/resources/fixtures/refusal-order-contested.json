@@ -75,6 +75,7 @@
       "regionList": "midlands",
       "midlandsFRCList": "nottingham",
       "nottinghamCourtList": "FR_s_NottinghamList_1",
+      "civilPartnership": "No",
       "solicitorDXnumber": null,
       "appRespondentLName": "Korivi",
       "solicitorReference": "LL01",
@@ -110,6 +111,29 @@
         "urgency",
         "previousMIAMattendance",
         "other"
+      ],
+      "orderRefusalCollectionNew": [
+        {
+          "value": {
+            "orderRefusalAfterText": "testAfterText",
+            "orderRefusal": [
+              "Transferred to Applicant’s home Court",
+              "Insufficient information provided – A",
+              "Insufficient information provided – C",
+              "Order does not appear fair"
+            ],
+            "orderRefusalOther": "testOther",
+            "orderRefusalDocs": {
+              "document_url": "http://doc1",
+              "document_filename": "doc1",
+              "document_binary_url": "http://doc1.binary"
+            },
+            "orderRefusalJudge": "His Honour Judge",
+            "orderRefusalJudgeName": "Contested",
+            "orderRefusalDate": "2022-01-01",
+            "orderRefusalAddComments": "testComment"
+          }
+        }
       ],
       "refusalOrderCollection": [
         {

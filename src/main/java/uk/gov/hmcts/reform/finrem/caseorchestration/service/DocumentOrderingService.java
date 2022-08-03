@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.google.common.collect.Iterables;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -40,10 +41,10 @@ public class DocumentOrderingService {
     public boolean isOrderApprovedCollectionModifiedLaterThanNotApprovedCollection(FinremCaseDetails caseDetails, String authorisationToken) {
         FinremCaseData caseData = caseDetails.getCaseData();
         List<ConsentOrderCollection> orderNotApprovedOrders = caseData.getConsentOrderWrapper().getConsentedNotApprovedOrders();
-        Document latestOrderNotApproved = orderNotApprovedOrders.get(orderNotApprovedOrders.size() - 1).getValue().getConsentOrder();
+        Document latestOrderNotApproved = Iterables.getLast(orderNotApprovedOrders).getValue().getConsentOrder();
 
         List<ConsentOrderCollection> approvedOrders = getApprovedOrders(caseDetails.getCaseData());
-        Document latestOrderApproved = approvedOrders.get(approvedOrders.size() - 1).getValue().getConsentOrder();
+        Document latestOrderApproved = Iterables.getLast(approvedOrders).getValue().getConsentOrder();
 
         return isDocumentModifiedLater(latestOrderApproved, latestOrderNotApproved, authorisationToken);
     }

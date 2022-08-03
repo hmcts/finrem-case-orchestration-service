@@ -50,11 +50,11 @@ public class GeneralApplicationInterimHearingNoticeDetailsMapper extends Abstrac
     }
 
     public DocumentTemplateDetails buildDocumentTemplateDetails(FinremCaseDetails caseDetails,
-                                                                CourtListWrapper courtList,
                                                                 InterimHearingCollection collectionItem) {
         FinremCaseData caseData = caseDetails.getCaseData();
 
-        final FrcCourtDetails courtDetails = courtDetailsMapper.getCourtDetails(courtList);
+        final FrcCourtDetails courtDetails = courtDetailsMapper
+            .getCourtDetails(collectionItem.getValue().getInterimRegionWrapper().getCourtListWrapper());
         return GeneralApplicationInterimHearingNoticeDetails.builder()
             .ccdCaseNumber(caseDetails.getId())
             .divorceCaseNumber(caseData.getDivorceCaseNumber())
@@ -74,8 +74,7 @@ public class GeneralApplicationInterimHearingNoticeDetailsMapper extends Abstrac
     public Map<String, Object> getDocumentTemplateDetailsFromCollectionItem(FinremCaseDetails caseDetails,
                                                                             InterimHearingCollection collectionItem) {
         Map<String, Object> documentTemplateDetails =
-            objectMapper.convertValue(buildDocumentTemplateDetails(caseDetails,
-                    collectionItem.getValue().getInterimRegionWrapper().getCourtListWrapper(), collectionItem),
+            objectMapper.convertValue(buildDocumentTemplateDetails(caseDetails, collectionItem),
                 TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, Object.class));
 
         Map<String, Object> caseDetailsMap = Map.of(

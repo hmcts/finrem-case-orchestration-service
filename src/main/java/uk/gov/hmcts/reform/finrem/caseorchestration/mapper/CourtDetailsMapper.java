@@ -21,9 +21,10 @@ import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
 
-@RequiredArgsConstructor
+
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class CourtDetailsMapper {
 
     private final ObjectMapper objectMapper;

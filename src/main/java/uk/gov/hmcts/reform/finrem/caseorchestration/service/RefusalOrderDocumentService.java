@@ -45,7 +45,6 @@ public class RefusalOrderDocumentService {
         UploadOrderCollection consentOrderData = createConsentOrderData.apply(refusalOrder);
         FinremCaseData caseData = populateConsentOrderData(consentOrderData, caseDetails);
 
-
         return copyToOrderRefusalCollection(caseData);
     }
 

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.google.common.collect.Iterables;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -81,7 +82,7 @@ public class ConsentOrderNotApprovedDocumentService {
         if (caseData.isContestedApplication()) {
             List<ConsentOrderCollection> consentOrders = getConsentOrderInContestedNotApprovedCollection(caseData);
             if (!consentOrders.isEmpty()) {
-                ConsentOrderCollection contestedConsentOrderData = consentOrders.get(consentOrders.size() - 1);
+                ConsentOrderCollection contestedConsentOrderData = Iterables.getLast(consentOrders);
                 return singletonList(contestedConsentOrderData.getValue().getConsentOrder());
             }
         } else {

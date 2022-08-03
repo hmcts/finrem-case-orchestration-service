@@ -1,7 +1,9 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.google.common.collect.Iterables;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -102,8 +104,8 @@ public class ConsentOrderApprovedDocumentService {
         FinremCaseData caseData = caseDetails.getCaseData();
         Document orderLetter = generateApprovedConsentOrderLetter(caseDetails, authToken);
         List<ConsentOrderCollection> approvedOrders = caseData.getConsentOrderWrapper().getContestedConsentedApprovedOrders();
-        if (approvedOrders != null && !approvedOrders.isEmpty()) {
-            ConsentOrder approvedOrder = approvedOrders.get(approvedOrders.size() - 1).getValue();
+        if (!CollectionUtils.isEmpty(approvedOrders)) {
+            ConsentOrder approvedOrder = Iterables.getLast(approvedOrders).getValue();
             approvedOrder.setOrderLetter(orderLetter);
             caseData.getConsentOrderWrapper().setContestedConsentedApprovedOrders(approvedOrders);
         }
@@ -140,14 +142,13 @@ public class ConsentOrderApprovedDocumentService {
         List<Document> documents = new ArrayList<>();
         List<ConsentOrderCollection> approvedOrders = getApprovedOrders(caseData);
 
-        if (!approvedOrders.isEmpty()) {
+        if (!CollectionUtils.isEmpty(approvedOrders)) {
             log.info("Extracting approved orders from case data for bulk print, case {}", caseDetails.getId());
-            ConsentOrder lastApprovedOrder = approvedOrders.get(approvedOrders.size() - 1).getValue();
+            ConsentOrder lastApprovedOrder = Iterables.getLast(approvedOrders).getValue();
             Optional.ofNullable(lastApprovedOrder.getOrderLetter()).ifPresent(documents::add);
             Optional.ofNullable(lastApprovedOrder.getConsentOrder()).ifPresent(documents::add);
             documents.addAll(lastApprovedOrder.getPensionDocuments().stream()
-                .map(pensionCollectionElement -> pensionCollectionElement.getValue().getUploadedDocument())
-                .collect(toList()));
+                .map(pensionCollectionElement -> pensionCollectionElement.getValue().getUploadedDocument()).toList());
         } else {
             log.info("Failed to extract approved orders from case data for bulk print as document list was empty, case {}",
                 caseDetails.getId());

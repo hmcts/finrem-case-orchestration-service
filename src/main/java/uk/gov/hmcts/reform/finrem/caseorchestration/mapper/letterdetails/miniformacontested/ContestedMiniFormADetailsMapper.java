@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.miniformacontested;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
@@ -15,13 +14,13 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.MiamOtherGrounds;
 import uk.gov.hmcts.reform.finrem.ccd.domain.MiamPreviousAttendance;
 import uk.gov.hmcts.reform.finrem.ccd.domain.MiamUrgencyReason;
 import uk.gov.hmcts.reform.finrem.ccd.domain.NatureApplication;
+import uk.gov.hmcts.reform.finrem.ccd.domain.PropertyAdjustmentOrderCollection;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.CourtListWrapper;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.MiamWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -88,6 +87,7 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
             .respondentSolicitorAddress(contactDetails.getRespondentSolicitorAddress())
             .respondentSolicitorFirm(contactDetails.getRespondentSolicitorFirm())
             .respondentSolicitorReference(contactDetails.getRespondentSolicitorReference())
+            .respondentSolicitorPhone(contactDetails.getRespondentSolicitorPhone())
             .respondentSolicitorEmail(contactDetails.getRespondentSolicitorEmail());
     }
 
@@ -99,7 +99,7 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
             .natureOfApplication7(caseData.getNatureApplicationWrapper().getNatureOfApplication7())
             .mortgageDetail(caseData.getMortgageDetail())
             .propertyAddress(caseData.getPropertyAddress())
-            .propertyAdjustmentOrderDetail(getPropertyAdjustmentOrderDetailCollectionAsMapList(caseData))
+            .propertyAdjustmentOrderDetail(getPropertyAdjustmentOrderDetailCollection(caseData))
             .paymentForChildrenDecision(getYesOrNo(caseData.getPaymentForChildrenDecision()))
             .benefitForChildrenDecision(getYesOrNo(caseData.getBenefitForChildrenDecision()))
             .benefitPaymentChecklist(getBenefitPaymentChecklist(caseData));
@@ -187,9 +187,7 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
             .collect(Collectors.toList());
     }
 
-    private List<Map<String, Object>> getPropertyAdjustmentOrderDetailCollectionAsMapList(FinremCaseData caseData) {
-        return Optional.ofNullable(caseData.getPropertyAdjustmentOrderDetail()).orElse(new ArrayList<>()).stream()
-            .map(detail -> objectMapper.convertValue(detail, new TypeReference<Map<String, Object>>() {}))
-            .collect(Collectors.toList());
+    private List<PropertyAdjustmentOrderCollection> getPropertyAdjustmentOrderDetailCollection(FinremCaseData caseData) {
+        return Optional.ofNullable(caseData.getPropertyAdjustmentOrderDetail()).orElse(new ArrayList<>());
     }
 }
