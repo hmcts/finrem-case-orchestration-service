@@ -24,6 +24,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -54,6 +55,23 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
     @Test
     public void generateConsentOrderNotApproved() throws Exception {
         CaseDetails caseDetails = caseDetails("/fixtures/model/case-details.json");
+
+        Map<String, Object> caseData = refusalOrderDocumentService.generateConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
+        ConsentOrderData consentOrderData = consentOrderData(caseData);
+
+        assertThat(consentOrderData.getId(), is(notNullValue()));
+        assertThat(consentOrderData.getConsentOrder().getDocumentType(), is(REJECTED_ORDER_TYPE));
+        assertThat(consentOrderData.getConsentOrder().getDocumentDateAdded(), is(notNullValue()));
+        assertThat(consentOrderData.getConsentOrder().getDocumentComment(), is(equalTo("System Generated")));
+
+        assertCaseDataExtraFields();
+        assertConsentedCaseDataExtraFields();
+        assertCaseDocument(consentOrderData.getConsentOrder().getDocumentLink());
+    }
+
+    @Test
+    public void generateVariationOrderNotApproved() throws Exception {
+        CaseDetails caseDetails = caseDetails("/fixtures/model/variation-order.json");
 
         Map<String, Object> caseData = refusalOrderDocumentService.generateConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
         ConsentOrderData consentOrderData = consentOrderData(caseData);
@@ -132,6 +150,13 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
         assertThat(caseData.get("ApplicantName"), is("Poor Guy"));
         assertThat(caseData.get("RespondentName"), is("john smith"));
         assertThat(caseData.get("RefusalOrderHeader"), is("Sitting in the Family Court"));
+        List<String> list  = (List<String>) caseData.get("natureOfApplication2");
+        assertNotNull(list);
+        if (list.contains("Variation Order")) {
+            assertThat(caseData.get("orderType"), is("variation"));
+        } else {
+            assertThat(caseData.get("orderType"), is("consent"));
+        }
 
     }
 

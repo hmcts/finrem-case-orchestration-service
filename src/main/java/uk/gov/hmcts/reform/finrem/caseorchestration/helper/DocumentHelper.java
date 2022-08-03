@@ -90,6 +90,10 @@ public class DocumentHelper {
     public static final String ADDRESSEE = "addressee";
     public static final String CTSC_CONTACT_DETAILS = "ctscContactDetails";
     public static final String CASE_NUMBER = "caseNumber";
+    public static final String ORDER_TYPE = "orderType";
+    public static final String VARIATION = "variation";
+    public static final String CONSENT = "consent";
+
     private final ObjectMapper objectMapper;
     private final CaseDataService caseDataService;
 
