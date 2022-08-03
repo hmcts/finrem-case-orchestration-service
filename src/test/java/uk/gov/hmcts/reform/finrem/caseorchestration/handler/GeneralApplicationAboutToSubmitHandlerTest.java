@@ -12,15 +12,28 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DRAFT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_HEARING_REQUIRED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_RECEIVED_FROM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_SPECIAL_MEASURES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_TIME_ESTIMATE;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GeneralApplicationAboutToSubmitHandlerTest {
@@ -71,11 +84,25 @@ public class GeneralApplicationAboutToSubmitHandlerTest {
     @Test
     public void givenCase_whenExistingGeneApp_thenSetcreatedBy() {
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(buildCaseDetails()).caseDetailsBefore(buildCaseDetails()).build();
+        List<GeneralApplicationCollectionData> existingGeneralApplication = new ArrayList<>();
+        existingGeneralApplication.add(migrateExistingGeneralApplication(callbackRequest.getCaseDetails().getData()));
+        callbackRequest.getCaseDetails().getData().put(GENERAL_APPLICATION_COLLECTION,existingGeneralApplication);
         AboutToStartOrSubmitCallbackResponse handle = handler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = handle.getData();
         List<GeneralApplicationCollectionData> generalApplicationList = helper.getGeneralApplicationList(caseData);
-        assertEquals(0, generalApplicationList.size());
+        assertEquals(1, generalApplicationList.size());
+        assertExistingGeneralApplication(caseData);
+    }
+
+    private void assertExistingGeneralApplication(Map<String, Object> caseData) {
+        assertNull(caseData.get(GENERAL_APPLICATION_RECEIVED_FROM));
+        assertNull(caseData.get(GENERAL_APPLICATION_CREATED_BY));
+        assertNull(caseData.get(GENERAL_APPLICATION_HEARING_REQUIRED));
+        assertNull(caseData.get(GENERAL_APPLICATION_TIME_ESTIMATE));
+        assertNull(caseData.get(GENERAL_APPLICATION_SPECIAL_MEASURES));
+        assertNull(caseData.get(GENERAL_APPLICATION_DOCUMENT));
+        assertNull(caseData.get(GENERAL_APPLICATION_DRAFT_ORDER));
     }
 
     private CaseDetails buildCaseDetails()  {
@@ -85,5 +112,26 @@ public class GeneralApplicationAboutToSubmitHandlerTest {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private GeneralApplicationCollectionData migrateExistingGeneralApplication(Map<String, Object> caseData) {
+        return GeneralApplicationCollectionData.builder()
+            .id(UUID.randomUUID().toString())
+            .generalApplicationItems(getApplicationItems(caseData))
+            .build();
+    }
+
+    private GeneralApplicationItems getApplicationItems(Map<String,Object> caseData) {
+        GeneralApplicationItems.GeneralApplicationItemsBuilder builder =
+            GeneralApplicationItems.builder();
+        builder.generalApplicationReceivedFrom(helper.objectToString(caseData.get(GENERAL_APPLICATION_RECEIVED_FROM)));
+        builder.generalApplicationCreatedBy("helper.objectToString(caseData.get(GENERAL_APPLICATION_CREATED_BY))");
+        builder.generalApplicationHearingRequired(helper.objectToString(caseData.get(GENERAL_APPLICATION_HEARING_REQUIRED)));
+        builder.generalApplicationTimeEstimate(helper.objectToString(caseData.get(GENERAL_APPLICATION_TIME_ESTIMATE)));
+        builder.generalApplicationSpecialMeasures(helper.objectToString(caseData.get(GENERAL_APPLICATION_SPECIAL_MEASURES)));
+        builder.generalApplicationDocument(helper.convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DOCUMENT)));
+        CaseDocument draftDocument = helper.convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DRAFT_ORDER));
+        builder.generalApplicationDraftOrder(draftDocument);
+        return builder.build();
     }
 }

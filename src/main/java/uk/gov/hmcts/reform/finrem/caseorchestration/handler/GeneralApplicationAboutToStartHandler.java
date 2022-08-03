@@ -55,20 +55,9 @@ public class GeneralApplicationAboutToStartHandler implements CallbackHandler {
             log.info("data ={}=", data);
             existingGeneralApplication.add(data);
             caseData.put(GENERAL_APPLICATION_COLLECTION,existingGeneralApplication);
-            deleteNonCollectionGeneralApplication(caseData);
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
-    }
-
-    private void deleteNonCollectionGeneralApplication(Map<String, Object> caseData) {
-        caseData.remove(GENERAL_APPLICATION_RECEIVED_FROM);
-        caseData.remove(GENERAL_APPLICATION_CREATED_BY);
-        caseData.remove(GENERAL_APPLICATION_HEARING_REQUIRED);
-        caseData.remove(GENERAL_APPLICATION_TIME_ESTIMATE);
-        caseData.remove(GENERAL_APPLICATION_SPECIAL_MEASURES);
-        caseData.remove(GENERAL_APPLICATION_DOCUMENT);
-        caseData.remove(GENERAL_APPLICATION_DRAFT_ORDER);
     }
 
     private GeneralApplicationCollectionData migrateExistingGeneralApplication(Map<String, Object> caseData) {

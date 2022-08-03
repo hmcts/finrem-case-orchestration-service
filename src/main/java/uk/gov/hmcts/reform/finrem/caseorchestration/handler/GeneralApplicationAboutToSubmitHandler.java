@@ -13,6 +13,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 
 import java.util.List;
+import java.util.Map;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DRAFT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_HEARING_REQUIRED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_RECEIVED_FROM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_SPECIAL_MEASURES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_TIME_ESTIMATE;
 
 @Slf4j
 @Service
@@ -32,6 +41,9 @@ public class GeneralApplicationAboutToSubmitHandler implements CallbackHandler {
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
                                                        String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
+
+        deleteNonCollectionGeneralApplication(caseDetails.getData());
+
         CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         log.info("Received request to start general application for Case ID: {}", caseDetails.getId());
 
@@ -42,5 +54,17 @@ public class GeneralApplicationAboutToSubmitHandler implements CallbackHandler {
         log.info("generalApplicationList : {}", generalApplicationList.size());
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build();
+    }
+
+    private void deleteNonCollectionGeneralApplication(Map<String, Object> caseData) {
+        if (caseData.get(GENERAL_APPLICATION_CREATED_BY) != null) {
+            caseData.remove(GENERAL_APPLICATION_RECEIVED_FROM);
+            caseData.remove(GENERAL_APPLICATION_CREATED_BY);
+            caseData.remove(GENERAL_APPLICATION_HEARING_REQUIRED);
+            caseData.remove(GENERAL_APPLICATION_TIME_ESTIMATE);
+            caseData.remove(GENERAL_APPLICATION_SPECIAL_MEASURES);
+            caseData.remove(GENERAL_APPLICATION_DOCUMENT);
+            caseData.remove(GENERAL_APPLICATION_DRAFT_ORDER);
+        }
     }
 }
