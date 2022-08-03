@@ -32,8 +32,7 @@ public class RejectedOrderDocumentTest extends IntegrationTestBase {
     private ObjectMapper objectMapper = new ObjectMapper();
     private CallbackRequest callbackRequest = null;
 
-    private final String contestedDir = "/json/contested/";
-    private final String consentedDir = "/json/consented/";
+    private static final String consentedDir = "/json/consented/";
 
     @Value("${cos.preview.consentOrder.not.approved}")
     private String previewConsentOrderNotApprovedEndPoint;
@@ -44,7 +43,7 @@ public class RejectedOrderDocumentTest extends IntegrationTestBase {
     @Test
     public void verifyPreviewConsentOrderNotApproved() {
 
-        InputStream resourceAsStream = getClass().getResourceAsStream(consentedDir + "approved-consent-order.json");
+        InputStream resourceAsStream = getClass().getResourceAsStream(consentedDir + "rejected-consent-order.json");
         DocumentContext documentContext = JsonPath.parse(resourceAsStream);
 
         HashMap<String, Object> caseDetails = documentContext.read("$.case_details.case_data");
@@ -53,7 +52,7 @@ public class RejectedOrderDocumentTest extends IntegrationTestBase {
         try {
             callbackRequest = objectMapper.readValue(documentContext.jsonString(), CallbackRequest.class);
         } catch (IOException e) {
-            throw new RuntimeException("Error generating CallbackRequest from approved-consent-order.json ");
+            throw new RuntimeException("Error generating CallbackRequest from rejected-consent-order.json ");
         }
 
         Response response = functionalTestUtils.getResponseData(previewConsentOrderNotApprovedEndPoint, callbackRequest);
@@ -61,20 +60,20 @@ public class RejectedOrderDocumentTest extends IntegrationTestBase {
         List<Object> orderRefusalPreviewDocuments = JsonPath.parse(response.asString())
             .read("$.data[?(@.orderRefusalPreviewDocument)]");
         assertEquals("Request failed " + response.getStatusCode(), 200, response.getStatusCode());
-        assertTrue("Order Refusal Preview Document not found ", orderRefusalPreviewDocuments.size() > 0);
+        assertTrue("Order Refusal Preview Document not found ", !orderRefusalPreviewDocuments.isEmpty());
     }
 
     @Test
     public void verifyConsentOrderNotApproved() {
 
-        InputStream resourceAsStream = getClass().getResourceAsStream(consentedDir + "approved-consent-order.json");
+        InputStream resourceAsStream = getClass().getResourceAsStream(consentedDir + "rejected-consent-order.json");
         DocumentContext documentContext = JsonPath.parse(resourceAsStream);
         int uploadOrdersBeforeCount = ((List) documentContext.read("$.case_details.case_data.uploadOrder")).size();
 
         try {
             callbackRequest = objectMapper.readValue(documentContext.jsonString(), CallbackRequest.class);
         } catch (IOException e) {
-            throw new RuntimeException("Error generating CallbackRequest from approved-consent-order.json ");
+            throw new RuntimeException("Error generating CallbackRequest from rejected-consent-order.json ");
         }
 
         Response response = functionalTestUtils.getResponseData(consentOrderNotApprovedEndPoint, callbackRequest);
