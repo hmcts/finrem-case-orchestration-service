@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.RefusalOrderDocumentService;
 
 import java.util.Map;
@@ -31,6 +32,31 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 public class RejectedOrderDocumentController {
 
     private final RefusalOrderDocumentService refusalOrderDocumentService;
+
+    @PostMapping(path = "/documents/consent-order-not-approved", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @Operation(summary = "Handles Consent Order Not Approved Order Generation. Serves as a callback from CCD")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback was processed successfully or in case of an error message is attached to the case",
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateConsentOrderNotApproved(
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
+        @RequestBody @Parameter(description = "CaseData") CallbackRequest request) {
+
+        CaseDetails caseDetails = request.getCaseDetails();
+        log.info("Received request to generate 'Consent Order Not Approved' for Case ID: {}", caseDetails.getId());
+
+        Map<String, Object> caseData = refusalOrderDocumentService.generateConsentOrderNotApproved(authorisationToken, caseDetails);
+
+        return ResponseEntity.ok(
+            AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseData)
+                .errors(ImmutableList.of())
+                .warnings(ImmutableList.of())
+                .build()
+        );
+    }
 
     @PostMapping(path = "/documents/preview-consent-order-not-approved", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(summary = "Handles preview Consent Order Not Approved Order Generation. Serves as a callback from CCD")
