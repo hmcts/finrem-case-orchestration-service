@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -36,6 +37,8 @@ public abstract class PartyDocumentHandler extends CaseDocumentHandler<Contested
             })
             .filter(d -> d.getUploadedCaseDocument().getCaseDocumentType() != null
                 && isDocumentTypeValid(d.getUploadedCaseDocument().getCaseDocumentType()))
+            .sorted(Comparator.nullsLast((e1, e2) -> e2.getUploadedCaseDocument().getUploadDateTime()
+                .compareTo(e1.getUploadedCaseDocument().getUploadDateTime())))
             .collect(Collectors.toList());
 
         List<ContestedUploadedDocumentData> documentCollection = getDocumentCollection(caseData, collectionName);

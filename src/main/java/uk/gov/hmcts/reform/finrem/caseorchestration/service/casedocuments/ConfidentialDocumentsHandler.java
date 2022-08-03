@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUpload
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -34,6 +35,8 @@ public class ConfidentialDocumentsHandler extends CaseDocumentHandler<Confidenti
                 && d.getUploadedCaseDocument().getCaseDocumentType() != null
                 && d.getUploadedCaseDocument().getCaseDocumentConfidential() != null
                 && d.getUploadedCaseDocument().getCaseDocumentConfidential().equalsIgnoreCase("Yes"))
+            .sorted(Comparator.nullsLast((e1, e2) -> e2.getUploadedCaseDocument().getUploadDateTime()
+                .compareTo(e1.getUploadedCaseDocument().getUploadDateTime())))
             .collect(Collectors.toList());
 
 

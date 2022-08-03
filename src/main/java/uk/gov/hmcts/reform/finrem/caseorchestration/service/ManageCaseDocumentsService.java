@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandler;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -45,6 +46,10 @@ public class ManageCaseDocumentsService {
     }
 
     public Map<String, Object> manageCaseDocuments(Map<String, Object> caseData) {
+        List<ContestedUploadedDocumentData> newDocuments = mapper.convertValue(
+            caseData.get(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION), new TypeReference<>() {});
+
+        newDocuments.forEach(document -> document.getUploadedCaseDocument().setUploadDateTime(LocalDateTime.now()));
 
         removeDeletedFilesFromCaseData(caseData);
 
