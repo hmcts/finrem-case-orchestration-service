@@ -54,8 +54,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler implements Callbac
             return new ArrayList<>();
         }
 
-                return objectMapper.registerModule(new JavaTimeModule()).convertValue(caseData.get(collection), new TypeReference<>() {
-        });
+        return objectMapper.registerModule(new JavaTimeModule()).convertValue(caseData.get(collection), new TypeReference<>() {});
     }
 
 }
