@@ -22,18 +22,28 @@ public class GeneralApplicationHelper {
 
     private final ObjectMapper objectMapper;
 
-    public List<GeneralApplicationCollectionData> getExistingGeneralApplications(Map<String, Object> caseData) {
+    public List<GeneralApplicationCollectionData> getGeneralApplicationList(Map<String, Object> caseData) {
         return Optional.ofNullable(caseData.get(GENERAL_APPLICATION_COLLECTION))
-            .map(this::generalApplicationList).orElse(new ArrayList<>());
+            .map(this::covertToGeneralApplicationData).orElse(new ArrayList<>());
 
     }
 
-    public List<GeneralApplicationCollectionData> generalApplicationList(Object object) {
+    public List<GeneralApplicationCollectionData> covertToGeneralApplicationData(Object object) {
         return objectMapper.convertValue(object, new TypeReference<>() {
         });
     }
 
     public CaseDocument convertToCaseDocument(Object object) {
-        return objectMapper.convertValue(object, CaseDocument.class);
+        if (object != null) {
+            return objectMapper.convertValue(object, CaseDocument.class);
+        }
+        return null;
+    }
+
+    public String objectToString(Object object) {
+        if (object != null) {
+            return objectMapper.convertValue(object, String.class);
+        }
+        return null;
     }
 }
