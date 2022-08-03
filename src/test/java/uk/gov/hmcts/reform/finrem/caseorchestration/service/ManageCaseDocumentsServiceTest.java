@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -226,6 +227,7 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
                 .caseDocumentOther(other)
                 .caseDocumentFdr("no")
                 .hearingDetails("hearingDetails")
+                .uploadDateTime(LocalDateTime.now())
                 .build())
             .build();
     }
