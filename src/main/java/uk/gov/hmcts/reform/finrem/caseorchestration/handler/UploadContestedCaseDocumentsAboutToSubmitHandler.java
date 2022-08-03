@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -53,7 +54,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler implements Callbac
             return new ArrayList<>();
         }
 
-        return objectMapper.convertValue(caseData.get(collection), new TypeReference<>() {
+                return objectMapper.registerModule(new JavaTimeModule()).convertValue(caseData.get(collection), new TypeReference<>() {
         });
     }
 
