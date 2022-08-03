@@ -48,16 +48,27 @@ public class GeneralApplicationAboutToStartHandler implements CallbackHandler {
         log.info("Received request to start general application for Case ID: {}", caseDetails.getId());
         Map<String, Object> caseData = caseDetails.getData();
 
-        List<GeneralApplicationCollectionData> existingGeneralApplications = helper.getGeneralApplicationList(caseData);
+        List<GeneralApplicationCollectionData> existingGeneralApplication = helper.getGeneralApplicationList(caseData);
         GeneralApplicationCollectionData data = migrateExistingGeneralApplication(caseData);
 
         if (data != null) {
             log.info("data ={}=", data);
-            existingGeneralApplications.add(data);
-            caseData.put(GENERAL_APPLICATION_COLLECTION,existingGeneralApplications);
+            existingGeneralApplication.add(data);
+            caseData.put(GENERAL_APPLICATION_COLLECTION,existingGeneralApplication);
+            deleteNonCollectionGeneralApplication(caseData);
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
+    }
+
+    private void deleteNonCollectionGeneralApplication(Map<String, Object> caseData) {
+        caseData.remove(GENERAL_APPLICATION_RECEIVED_FROM);
+        caseData.remove(GENERAL_APPLICATION_CREATED_BY);
+        caseData.remove(GENERAL_APPLICATION_HEARING_REQUIRED);
+        caseData.remove(GENERAL_APPLICATION_TIME_ESTIMATE);
+        caseData.remove(GENERAL_APPLICATION_SPECIAL_MEASURES);
+        caseData.remove(GENERAL_APPLICATION_DOCUMENT);
+        caseData.remove(GENERAL_APPLICATION_DRAFT_ORDER);
     }
 
     private GeneralApplicationCollectionData migrateExistingGeneralApplication(Map<String, Object> caseData) {

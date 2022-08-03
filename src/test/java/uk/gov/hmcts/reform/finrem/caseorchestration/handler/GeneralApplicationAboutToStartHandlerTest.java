@@ -25,6 +25,13 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DRAFT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_HEARING_REQUIRED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_RECEIVED_FROM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_SPECIAL_MEASURES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_TIME_ESTIMATE;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GeneralApplicationAboutToStartHandlerTest {
@@ -80,6 +87,17 @@ public class GeneralApplicationAboutToStartHandlerTest {
         Map<String, Object> caseData = handle.getData();
         List<GeneralApplicationCollectionData> generalApplicationList = helper.getGeneralApplicationList(caseData);
         assertData(generalApplicationList.get(0).getGeneralApplicationItems());
+        assertExistingGeneralApplication(caseData);
+    }
+
+    private void assertExistingGeneralApplication(Map<String, Object> caseData) {
+        assertNull(caseData.get(GENERAL_APPLICATION_RECEIVED_FROM));
+        assertNull(caseData.get(GENERAL_APPLICATION_CREATED_BY));
+        assertNull(caseData.get(GENERAL_APPLICATION_HEARING_REQUIRED));
+        assertNull(caseData.get(GENERAL_APPLICATION_TIME_ESTIMATE));
+        assertNull(caseData.get(GENERAL_APPLICATION_SPECIAL_MEASURES));
+        assertNull(caseData.get(GENERAL_APPLICATION_DOCUMENT));
+        assertNull(caseData.get(GENERAL_APPLICATION_DRAFT_ORDER));
     }
 
     private void assertData(GeneralApplicationItems generalApplicationItems) {
