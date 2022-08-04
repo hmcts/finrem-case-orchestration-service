@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
@@ -34,6 +35,7 @@ public class LetterDetailsMapper {
 
     private final ObjectMapper objectMapper;
     private final CourtDetailsMapper courtDetailsMapper;
+    private final ConsentedApplicationHelper consentedApplicationHelper;
 
     public BasicLetterDetails buildLetterDetails(FinremCaseDetails caseDetails,
                                                  DocumentHelper.PaperNotificationRecipient recipient,
@@ -48,6 +50,7 @@ public class LetterDetailsMapper {
             .caseNumber(String.valueOf(caseDetails.getId()))
             .ctscContactDetails(getCtscContactDetails())
             .divorceCaseNumber(caseDetails.getCaseData().getDivorceCaseNumber())
+            .orderType(consentedApplicationHelper.getOrderType(caseDetails.getCaseData()))
             .build();
     }
 

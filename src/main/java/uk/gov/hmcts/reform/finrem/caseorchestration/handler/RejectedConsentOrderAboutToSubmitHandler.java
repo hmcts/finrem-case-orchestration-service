@@ -3,15 +3,14 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.RefusalOrderDocumentService;
-
-import java.util.Map;
+import uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.EventType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 @Slf4j
 @Service
@@ -25,16 +24,17 @@ public class RejectedConsentOrderAboutToSubmitHandler implements CallbackHandler
                              final EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && EventType.REJECT_ORDER.equals(eventType);
+            && EventType.ORDER_REFUSAL.equals(eventType);
     }
 
     @Override
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
                                                        String userAuthorisation) {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request to generate 'Consent Order Not Approved' for Case ID: {}", caseDetails.getId());
 
-        Map<String, Object> caseData = refusalOrderDocumentService.generateConsentOrderNotApproved(userAuthorisation, caseDetails);
+        FinremCaseData caseData =
+            refusalOrderDocumentService.generateConsentOrderNotApproved(userAuthorisation, caseDetails);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
     }

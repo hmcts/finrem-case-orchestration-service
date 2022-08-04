@@ -145,15 +145,13 @@ public class SendOrderContestedAboutToSubmitHandler implements CallbackHandler {
         if (!isEmpty(latestHearingOrder)) {
             Document stampedDocs = genericDocumentService.stampDocument(latestHearingOrder, authToken);
             log.info("Stamped Documents = {}", stampedDocs);
-            List<DirectionOrderCollection> finalOrderCollection = Optional
-                .ofNullable(caseData.getFinalOrderCollection()).orElse(new ArrayList<>());
+            List<DirectionOrderCollection> finalOrderCollection = Optional.ofNullable(caseData.getFinalOrderCollection())
+                .orElse(new ArrayList<>());
 
             log.info("Existing final order collection = {}", finalOrderCollection);
 
             finalOrderCollection.add(DirectionOrderCollection.builder()
-                    .value(DirectionOrder.builder()
-                        .uploadDraftDocument(stampedDocs)
-                        .build())
+                    .value(DirectionOrder.builder().uploadDraftDocument(stampedDocs).build())
                 .build());
             log.info("Newly built final order collection = {}", finalOrderCollection);
             caseData.setFinalOrderCollection(finalOrderCollection);

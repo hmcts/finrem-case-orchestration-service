@@ -26,4 +26,5 @@ public class BasicLetterDetails {
     private CtscContactDetails ctscContactDetails;
     private String divorceCaseNumber;
     private String courtContactDetails;
+    private String orderType;
 }

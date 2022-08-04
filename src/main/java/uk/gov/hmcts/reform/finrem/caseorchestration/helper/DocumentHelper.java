@@ -208,7 +208,8 @@ public class DocumentHelper {
     }
 
     public Optional<CaseDocument> getLatestRespondToOrderDocuments(Map<String, Object> caseData) {
-        Optional<RespondToOrderData> respondToOrderData = ofNullable(caseData.get(RESPOND_TO_ORDER_DOCUMENTS))
+        Optional<RespondToOrderData> respondToOrderData =
+            ofNullable(caseData.get(RESPOND_TO_ORDER_DOCUMENTS))
             .map(this::convertToRespondToOrderDataList)
             .orElse(emptyList())
             .stream()

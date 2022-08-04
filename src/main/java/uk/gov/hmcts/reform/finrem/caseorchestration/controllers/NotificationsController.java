@@ -164,17 +164,21 @@ public class NotificationsController extends BaseController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200",
             description = "Consent order made e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendConsentOrderMadeConfirmationEmail(
-        @RequestBody CallbackRequest callbackRequest) {
+            content = {@Content(mediaType = "application/json",
+                schema = @Schema(implementation =  uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
+    public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendConsentOrderMadeConfirmationEmail(
+        @RequestBody String source) {
+
+        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest
+            = finremCallbackRequestDeserializer.deserialize(source);
 
         log.info("Received request to send email for 'Consent Order Made' for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData caseData = caseDetails.getCaseData();
 
-        if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)
-            && caseDataService.isConsentedApplication(caseDetails)) {
+        if (notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)
+            && caseData.isConsentedApplication()) {
             log.info("Sending email notification to Applicant Solicitor for 'Consent Order Made'");
             notificationService.sendConsentOrderMadeConfirmationEmailToApplicantSolicitor(caseDetails);
         }
@@ -184,7 +188,9 @@ public class NotificationsController extends BaseController {
             notificationService.sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(caseDetails);
         }
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        return ResponseEntity.ok(uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseData)
+            .build());
     }
 
     @PostMapping(value = "/order-not-approved", consumes = APPLICATION_JSON_VALUE)
@@ -192,16 +198,19 @@ public class NotificationsController extends BaseController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200",
             description = "Consent/Contest order not approved e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendConsentOrderNotApprovedEmail(
-        @RequestBody CallbackRequest callbackRequest) {
+            content = {@Content(mediaType = "application/json",
+                schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
+    public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendConsentOrderNotApprovedEmail(
+        @RequestBody String source) {
+
+        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest = finremCallbackRequestDeserializer.deserialize(source);
         log.info("Received request to send email for 'Consent/Contest Order Not Approved' for Case ID: {}", callbackRequest.getCaseDetails().getId());
 
         validateCaseData(callbackRequest);
 
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-            if (caseDataService.isConsentedApplication(caseDetails)) {
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        if (notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
+            if (caseDetails.getCaseData().isConsentedApplication()) {
                 log.info("Sending email notification to Applicant Solicitor for 'Consent Order Not Approved'");
                 notificationService.sendConsentOrderNotApprovedEmailToApplicantSolicitor(caseDetails);
             } else {
@@ -210,9 +219,9 @@ public class NotificationsController extends BaseController {
             }
         }
 
-        Map<String, Object> caseData = caseDetails.getData();
+        FinremCaseData caseData = caseDetails.getCaseData();
         if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData)) {
-            if (caseDataService.isConsentedApplication(caseDetails)) {
+            if (caseData.isConsentedApplication()) {
                 log.info("Sending email notification to Respondent Solicitor for 'Consent Order Not Approved'");
                 notificationService.sendConsentOrderNotApprovedEmailToRespondentSolicitor(caseDetails);
             } else {
@@ -221,7 +230,9 @@ public class NotificationsController extends BaseController {
             }
         }
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        return ResponseEntity.ok(uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseData)
+            .build());
     }
 
     @PostMapping(value = "/contested-consent-order-approved", consumes = APPLICATION_JSON_VALUE)

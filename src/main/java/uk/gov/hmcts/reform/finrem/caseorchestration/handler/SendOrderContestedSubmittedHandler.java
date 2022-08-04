@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
@@ -22,7 +21,6 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class SendOrderContestedSubmittedHandler implements CallbackHandler {
 
-    private final FeatureToggleService featureToggleService;
     private final NotificationService notificationService;
     private final CcdService ccdService;
 

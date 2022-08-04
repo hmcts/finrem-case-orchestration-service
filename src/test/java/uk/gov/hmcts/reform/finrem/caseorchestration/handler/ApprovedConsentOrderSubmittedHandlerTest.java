@@ -5,17 +5,18 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.EventType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.NatureApplication;
+import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -23,8 +24,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_NAME;
@@ -32,16 +31,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RE
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ApprovedConsentOrderSubmittedHandlerTest {
@@ -60,21 +49,21 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
     @Test
     public void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanHandle() {
         assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.APPROVE_ORDER),
+                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.APPROVE_APPLICATION),
             is(true));
     }
 
     @Test
     public void givenACcdCallbackConsentedCase_WhenAnAboutToSubmitCallback_thenHandlerCanNotHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.APPROVE_ORDER),
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.APPROVE_APPLICATION),
             is(false));
     }
 
     @Test
     public void givenACcdCallbackConsentedCase_WhenContestedCaseType_thenHandlerCanNotHandle() {
         assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.APPROVE_ORDER),
+                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.APPROVE_APPLICATION),
             is(false));
     }
 
@@ -88,9 +77,8 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
     @Test
     public void givenConsentOrderCase_WhenAppAndRespConsentToEmail_ThenSendNotification() {
         CallbackRequest callbackRequest = getConsentedCallbackRequestForConsentOrder();
-        when(caseDataService.isConsentedApplication(callbackRequest.getCaseDetails())).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(callbackRequest.getCaseDetails())).thenReturn(true);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(callbackRequest.getCaseDetails().getData())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(callbackRequest.getCaseDetails())).thenReturn(true);
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(callbackRequest.getCaseDetails().getCaseData())).thenReturn(true);
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -102,8 +90,8 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
     public void givenConsentOrderCase_WhenNoConsentToEmail_ThenNoNotificationSent() {
         CallbackRequest callbackRequest = getConsentedCallbackRequestForConsentOrder();
 
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(callbackRequest.getCaseDetails())).thenReturn(false);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(callbackRequest.getCaseDetails().getData())).thenReturn(false);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(callbackRequest.getCaseDetails())).thenReturn(false);
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(callbackRequest.getCaseDetails().getCaseData())).thenReturn(false);
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -114,9 +102,8 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
     @Test
     public void givenVariationOrderCase_WhenAppAndRespConsentToEmail_ThenSendNotification() {
         CallbackRequest callbackRequest = getConsentedCallbackRequestForVariationOrder();
-        when(caseDataService.isConsentedApplication(callbackRequest.getCaseDetails())).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(callbackRequest.getCaseDetails())).thenReturn(true);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(callbackRequest.getCaseDetails().getData())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(callbackRequest.getCaseDetails())).thenReturn(true);
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(callbackRequest.getCaseDetails().getCaseData())).thenReturn(true);
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -127,8 +114,8 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
     @Test
     public void givenVariationOrderCase_WhenNoConsentToEmail_ThenNoNotificationSent() {
         CallbackRequest callbackRequest = getConsentedCallbackRequestForVariationOrder();
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(callbackRequest.getCaseDetails())).thenReturn(false);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(callbackRequest.getCaseDetails().getData())).thenReturn(false);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(callbackRequest.getCaseDetails())).thenReturn(false);
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(callbackRequest.getCaseDetails().getCaseData())).thenReturn(false);
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -137,60 +124,69 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
     }
 
     protected CallbackRequest getConsentedCallbackRequestForConsentOrder() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(SOLICITOR_EMAIL, TEST_SOLICITOR_EMAIL);
-        caseData.put(CONSENTED_SOLICITOR_NAME, TEST_SOLICITOR_NAME);
-        caseData.put(SOLICITOR_REFERENCE, TEST_SOLICITOR_REFERENCE);
-        caseData.put(RESP_SOLICITOR_EMAIL, TEST_RESP_SOLICITOR_EMAIL);
-        caseData.put(RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_NAME);
-        caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED, YES_VALUE);
-        caseData.put(RESP_SOLICITOR_REFERENCE, TEST_RESP_SOLICITOR_REFERENCE);
-        caseData.put(CONSENTED_RESPONDENT_REPRESENTED, YES_VALUE);
-        caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, YES_VALUE);
+        FinremCaseData caseData = new FinremCaseData();
+        caseData.getContactDetailsWrapper().setSolicitorEmail(TEST_SOLICITOR_EMAIL);
+        caseData.getContactDetailsWrapper().setSolicitorName(TEST_SOLICITOR_NAME);
+        caseData.getContactDetailsWrapper().setSolicitorReference(TEST_SOLICITOR_REFERENCE);
 
-        caseData.put(DIVORCE_CASE_NUMBER, TEST_DIVORCE_CASE_NUMBER);
-        List<String> natureOfApplication =  List.of("Lump Sum Order",
-            "Periodical Payment Order",
-            "Pension Sharing Order",
-            "Pension Attachment Order",
-            "Pension Compensation Sharing Order",
-            "Pension Compensation Attachment Order",
-            "A settlement or a transfer of property",
-            "Property Adjustment Order");
-        caseData.put("natureOfApplication2", natureOfApplication);
+        caseData.getContactDetailsWrapper().setRespondentSolicitorEmail(TEST_RESP_SOLICITOR_EMAIL);
+        caseData.getContactDetailsWrapper().setRespondentSolicitorName(TEST_RESP_SOLICITOR_NAME);
+        caseData.getContactDetailsWrapper().setSolicitorAgreeToReceiveEmails(YesOrNo.YES);
+        caseData.getContactDetailsWrapper().setRespondentSolicitorReference(TEST_RESP_SOLICITOR_REFERENCE);
+        caseData.getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.YES);
+        caseData.setRespSolNotificationsEmailConsent(YesOrNo.YES);
+
+        caseData.setDivorceCaseNumber(TEST_DIVORCE_CASE_NUMBER);
+        caseData.setCcdCaseType(CaseType.CONSENTED);
+
+        caseData.getNatureApplicationWrapper().setNatureOfApplication2(List.of(
+            NatureApplication.LUMP_SUM_ORDER,
+            NatureApplication.PERIODICAL_PAYMENT_ORDER,
+            NatureApplication.PENSION_SHARING_ORDER,
+            NatureApplication.PENSION_ATTACHMENT_ORDER,
+            NatureApplication.PENSION_COMPENSATION_SHARING_ORDER,
+            NatureApplication.PENSION_COMPENSATION_ATTACHMENT_ORDER,
+            NatureApplication.A_SETTLEMENT_OR_A_TRANSFER_OF_PROPERTY,
+            NatureApplication.PROPERTY_ADJUSTMENT_ORDER
+        ));
+
         return CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder()
-                .caseTypeId(CASE_TYPE_ID_CONSENTED)
+            .caseDetails(FinremCaseDetails.builder()
+                .caseType(CaseType.CONSENTED)
                 .id(12345L)
-                .data(caseData)
+                .caseData(caseData)
                 .build())
             .build();
     }
 
     protected CallbackRequest getConsentedCallbackRequestForVariationOrder() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(SOLICITOR_EMAIL, TEST_SOLICITOR_EMAIL);
-        caseData.put(CONSENTED_SOLICITOR_NAME, TEST_SOLICITOR_NAME);
-        caseData.put(SOLICITOR_REFERENCE, TEST_SOLICITOR_REFERENCE);
-        caseData.put(RESP_SOLICITOR_EMAIL, TEST_RESP_SOLICITOR_EMAIL);
-        caseData.put(RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_NAME);
-        caseData.put(RESP_SOLICITOR_REFERENCE, TEST_RESP_SOLICITOR_REFERENCE);
-        caseData.put(DIVORCE_CASE_NUMBER, TEST_DIVORCE_CASE_NUMBER);
-        List<String> natureOfApplication =  List.of("Lump Sum Order",
-            "Periodical Payment Order",
-            "Pension Sharing Order",
-            "Pension Attachment Order",
-            "Pension Compensation Sharing Order",
-            "Pension Compensation Attachment Order",
-            "A settlement or a transfer of property",
-            "Variation Order",
-            "Property Adjustment Order");
-        caseData.put("natureOfApplication2", natureOfApplication);
+        FinremCaseData caseData = new FinremCaseData();
+        caseData.getContactDetailsWrapper().setSolicitorEmail(TEST_SOLICITOR_EMAIL);
+        caseData.getContactDetailsWrapper().setSolicitorName(TEST_SOLICITOR_NAME);
+        caseData.getContactDetailsWrapper().setSolicitorReference(TEST_SOLICITOR_REFERENCE);
+        caseData.getContactDetailsWrapper().setRespondentSolicitorEmail(TEST_RESP_SOLICITOR_EMAIL);
+        caseData.getContactDetailsWrapper().setRespondentSolicitorName(TEST_RESP_SOLICITOR_NAME);
+        caseData.getContactDetailsWrapper().setRespondentSolicitorReference(TEST_RESP_SOLICITOR_REFERENCE);
+        caseData.setDivorceCaseNumber(TEST_DIVORCE_CASE_NUMBER);
+        caseData.setCcdCaseType(CaseType.CONSENTED);
+
+        caseData.getNatureApplicationWrapper().setNatureOfApplication2(List.of(
+            NatureApplication.LUMP_SUM_ORDER,
+            NatureApplication.PERIODICAL_PAYMENT_ORDER,
+            NatureApplication.PENSION_SHARING_ORDER,
+            NatureApplication.PENSION_ATTACHMENT_ORDER,
+            NatureApplication.PENSION_COMPENSATION_SHARING_ORDER,
+            NatureApplication.PENSION_COMPENSATION_ATTACHMENT_ORDER,
+            NatureApplication.A_SETTLEMENT_OR_A_TRANSFER_OF_PROPERTY,
+            NatureApplication.VARIATION_ORDER,
+            NatureApplication.PROPERTY_ADJUSTMENT_ORDER
+        ));
+
         return CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder()
-                .caseTypeId(CASE_TYPE_ID_CONSENTED)
+            .caseDetails(FinremCaseDetails.builder()
+                .caseType(CaseType.CONSENTED)
                 .id(12345L)
-                .data(caseData)
+                .caseData(caseData)
                 .build())
             .build();
     }

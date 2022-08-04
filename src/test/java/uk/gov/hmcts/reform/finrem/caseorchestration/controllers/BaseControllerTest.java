@@ -144,6 +144,7 @@ public abstract class BaseControllerTest extends BaseTest {
 
     protected uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest buildNewCallbackRequest() {
         FinremCaseData caseData = new FinremCaseData();
+        caseData.setCcdCaseType(CaseType.CONTESTED);
         FinremCaseDetails caseDetails = new FinremCaseDetails(123, "x", State.APPLICATION_ISSUED,
             LocalDateTime.now(), 2, "200", LocalDateTime.now(),
             Classification.PUBLIC, caseData, CaseType.CONTESTED, 1);
@@ -153,6 +154,7 @@ public abstract class BaseControllerTest extends BaseTest {
 
     protected uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest buildNewCallbackRequestConsented() {
         FinremCaseData caseData = new FinremCaseData();
+        caseData.setCcdCaseType(CaseType.CONSENTED);
         FinremCaseDetails caseDetails = new FinremCaseDetails(123, "x", State.APPLICATION_ISSUED,
             LocalDateTime.now(), 2, "200", LocalDateTime.now(),
             Classification.PUBLIC, caseData, CaseType.CONSENTED, 1);

@@ -24,13 +24,7 @@ import java.util.Optional;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CONSENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ORDER_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.VARIATION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
 
 @Service
 @RequiredArgsConstructor
@@ -79,14 +73,8 @@ public class ConsentOrderNotApprovedDocumentService {
         Map<String, Object> placeholdersMap = letterDetailsMapper.getLetterDetailsAsMap(caseDetails, APPLICANT,
             caseDetails.getCaseData().getRegionWrapper().getDefaultCourtList());
 
-        String notApprovedOrderNotificationFileName;
-        if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(caseDetails.getCaseData()))) {
-            notApprovedOrderNotificationFileName = documentConfiguration.getVariationOrderNotApprovedCoverLetterFileName();
-            caseDetails.getCaseData().put(ORDER_TYPE, VARIATION);
-        } else {
-            notApprovedOrderNotificationFileName = documentConfiguration.getConsentOrderNotApprovedCoverLetterFileName();
-            caseDetails.getCaseData().put(ORDER_TYPE, CONSENT);
-        }
+        String notApprovedOrderNotificationFileName =
+            consentedApplicationHelper.getNotApprovedOrderNotificationFileName(caseDetails.getCaseData());
 
         Document coverLetter = genericDocumentService.generateDocumentFromPlaceholdersMap(
             authorisationToken,

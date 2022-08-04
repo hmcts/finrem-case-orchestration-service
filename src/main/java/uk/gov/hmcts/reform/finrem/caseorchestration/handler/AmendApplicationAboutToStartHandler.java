@@ -3,57 +3,56 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.EventType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Intention;
+import uk.gov.hmcts.reform.finrem.ccd.domain.NatureApplication;
+import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.APPLICANT_INTENDS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.VARIATION_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_NATURE_OF_APPLICATION;
+import java.util.Optional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class AmendApplicationAboutToStartHandler implements CallbackHandler {
 
-    private final ConsentedApplicationHelper helper;
-
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_START.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && (EventType.AMEND_APP_DETAILS.equals(eventType));
+            && (EventType.AMEND_APPLICATION_DETAILS.equals(eventType));
     }
 
     @Override
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
                                                        String userAuthorisation) {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request to set nature of application for consented case with Case ID: {}", caseDetails.getId());
 
-        Map<String, Object> caseData = caseDetails.getData();
+        FinremCaseData caseData = caseDetails.getCaseData();
         log.info("caseData ={}= for case id {}", caseData, caseDetails.getId());
-        final String intends = Objects.toString(caseData.get(APPLICANT_INTENDS), "");
-        log.info("Applicant intends to {} for case id: {}",intends, caseDetails.getId());
+        final Intention intention = caseData.getApplicantIntendsTo();
+        log.info("Applicant intends to {} for case id: {}", intention, caseDetails.getId());
 
-        if (intends.equalsIgnoreCase("ApplyToVary"))  {
-            log.info("Add applicant intends to {} to nature of application",intends);
-            List<String> natureOfApplicationList = helper.getNatureOfApplicationList(caseData);
-            natureOfApplicationList.add(VARIATION_ORDER);
-            caseData.put(CONSENTED_NATURE_OF_APPLICATION,natureOfApplicationList);
+        if (Intention.APPLY_TO_VARY.equals(intention))  {
+            log.info("Add applicant intends to {} to nature of application", intention.getValue());
+            List<NatureApplication> natureApplicationList =
+                Optional.ofNullable(caseData.getNatureApplicationWrapper().getNatureOfApplication2()).orElse(new ArrayList<>());
+            natureApplicationList.add(NatureApplication.VARIATION_ORDER);
+            caseData.getNatureApplicationWrapper().setNatureOfApplication2(natureApplicationList);
             log.info("paper case {} marked as variation order",caseDetails.getId());
         }
-        caseData.putIfAbsent(CIVIL_PARTNERSHIP, NO_VALUE);
+
+        if (caseData.getCivilPartnership() == null) {
+            caseData.setCivilPartnership(YesOrNo.NO);
+        }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
     }
 }

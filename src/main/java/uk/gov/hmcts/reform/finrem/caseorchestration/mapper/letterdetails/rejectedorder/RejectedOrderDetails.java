@@ -28,4 +28,5 @@ public class RejectedOrderDetails implements DocumentTemplateDetails {
     private FrcCourtDetails courtDetails;
     @JsonProperty("RefusalOrderHeader")
     private String refusalOrderHeader;
+    private String orderType;
 }

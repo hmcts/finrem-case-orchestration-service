@@ -36,4 +36,5 @@ public class ConsentOrderApprovedLetterDetails implements DocumentTemplateDetail
     private String servePensionProvider;
     @JsonProperty("servePensionProviderOther")
     private String servePensionProviderOther;
+    private String orderType;
 }

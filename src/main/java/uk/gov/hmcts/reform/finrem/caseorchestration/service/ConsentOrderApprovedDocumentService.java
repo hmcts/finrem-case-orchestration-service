@@ -41,30 +41,18 @@ public class ConsentOrderApprovedDocumentService {
     private final ConsentedApplicationHelper consentedApplicationHelper;
 
     public Document generateApprovedConsentOrderLetter(FinremCaseDetails caseDetails, String authToken) {
-        String fileName;
         FinremCaseData caseData = caseDetails.getCaseData();
+        String fileName = consentedApplicationHelper.getOrderApprovedFileName(caseData);
 
-        if (caseData.isConsentedApplication()
-        && Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(caseDetails.getCaseData()))) {
-            fileName = documentConfiguration.getApprovedVariationOrderFileName();
-            caseData.setOrderType(VARIATON);
-        } else {
-            fileName = documentConfiguration.getApprovedConsentOrderFileName();
-            caseData.setOrderType(CONSENT);
-        }
         log.info("Generating Approved {} Order Letter {} from {} for bulk print, case: {}",
-            caseData.getOrderType(), fileName,
+            consentedApplicationHelper.getOrderType(caseData), fileName,
             documentConfiguration.getApprovedConsentOrderTemplate(),
             caseDetails.getId());
 
         Map<String, Object> placeholdersMap = consentOrderApprovedLetterDetailsMapper
             .getDocumentTemplateDetailsAsMap(caseDetails, caseDetails.getCaseData().getRegionWrapper().getDefaultCourtList());
 
-
-        return genericDocumentService.generateDocumentFromPlaceholdersMap(authToken,
-            caseData.isContestedApplication()
-                ? prepareCaseDetailsCopyForDocumentGeneratorWithContestedFields(caseDetails)
-                : placeholdersMap,
+        return genericDocumentService.generateDocumentFromPlaceholdersMap(authToken, placeholdersMap,
             documentConfiguration.getApprovedConsentOrderTemplate(),
             fileName);
     }
@@ -73,15 +61,8 @@ public class ConsentOrderApprovedDocumentService {
         Map<String, Object> letterDetailsMap = letterDetailsMapper.getLetterDetailsAsMap(caseDetails, APPLICANT,
             caseDetails.getCaseData().getRegionWrapper().getDefaultCourtList());
 
-        String approvedOrderNotificationFileName;
-
-        if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(caseDetails.getCaseData()))) {
-            approvedOrderNotificationFileName = documentConfiguration.getApprovedVariationOrderNotificationFileName();
-            caseDetails.getCaseData().setOrderType(VARIATION);
-        } else {
-            approvedOrderNotificationFileName = documentConfiguration.getApprovedConsentOrderNotificationFileName();
-            caseDetails.getCaseData().setOrderType(CONSENT);
-        }
+        String approvedOrderNotificationFileName =
+            consentedApplicationHelper.getOrderApprovedNotificationFileName(caseDetails.getCaseData());
 
         Document generatedApprovedConsentOrderNotificationLetter = genericDocumentService.generateDocumentFromPlaceholdersMap(
             authToken, letterDetailsMap,

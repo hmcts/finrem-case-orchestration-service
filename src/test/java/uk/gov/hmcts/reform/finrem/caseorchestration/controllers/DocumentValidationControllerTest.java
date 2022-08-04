@@ -18,10 +18,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentValidationSe
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -63,7 +65,7 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors").doesNotExist());
-        verify(helper).setConsentVariationOrderLabelField(any());
+        verify(helper).setConsentVariationOrderLabelField(isA(HashMap.class));
     }
 
     @Test

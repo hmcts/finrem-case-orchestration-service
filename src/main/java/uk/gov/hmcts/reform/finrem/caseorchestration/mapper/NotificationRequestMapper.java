@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -48,7 +47,6 @@ public class NotificationRequestMapper {
     private static final String CONTESTED = "contested";
     private final CaseDataService caseDataService;
     private final ConsentedApplicationHelper consentedApplicationHelper;
-    private final ObjectMapper objectMapper;
     private final CourtDetailsMapper courtDetailsMapper;
 
 
@@ -205,6 +203,17 @@ public class NotificationRequestMapper {
         notificationRequest.setGeneralEmailBody(caseData.getGeneralEmailBody());
         notificationRequest.setCaseType(getCaseType(caseDetails));
         notificationRequest.setPhoneOpeningHours(CTSC_OPENING_HOURS);
+        if (caseData.isConsentedApplication()) {
+            if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(caseData))) {
+                notificationRequest.setCaseOrderType("variation");
+                notificationRequest.setCamelCaseOrderType("Variation");
+            } else {
+                notificationRequest.setCaseOrderType("consent");
+                notificationRequest.setCamelCaseOrderType("Consent");
+            }
+            log.info("caseOrder Type is {} for case ID: {}", notificationRequest.getCaseOrderType(),
+                notificationRequest.getCaseReferenceNumber());
+        }
 
         return notificationRequest;
     }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.DocumentTemplateDetails;
@@ -30,12 +31,13 @@ public class RejectedOrderDetailsMapper extends AbstractLetterDetailsMapper {
     public static final String CONTESTED_COURT_NAME = "SITTING AT the Family Court at the ";
     public static final String CONSENTED_COURT_NAME = "SITTING in private";
 
-    private static final Map<String, String> REFUSAL_KEYS =
-        ImmutableMap.of("Transferred to Applicant’s home Court", "Transferred to Applicant home Court - A",
-            "Transferred to Applicant's home Court", "Transferred to Applicant home Court - B");
+    private final ConsentedApplicationHelper consentedApplicationHelper;
 
-    public RejectedOrderDetailsMapper(CourtDetailsMapper courtDetailsMapper, ObjectMapper objectMapper) {
+    public RejectedOrderDetailsMapper(CourtDetailsMapper courtDetailsMapper,
+                                      ObjectMapper objectMapper,
+                                      ConsentedApplicationHelper consentedApplicationHelper) {
         super(courtDetailsMapper, objectMapper);
+        this.consentedApplicationHelper = consentedApplicationHelper;
     }
 
     @Override
@@ -51,6 +53,7 @@ public class RejectedOrderDetailsMapper extends AbstractLetterDetailsMapper {
             .courtDetails(courtDetails)
             .courtName(getCourtName(caseData, courtDetails))
             .orderRefusalCollectionNew(getTranslatedRefusalOrderCollection(caseData))
+            .orderType(consentedApplicationHelper.getOrderType(caseData))
             .build();
     }
 

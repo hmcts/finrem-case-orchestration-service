@@ -3,16 +3,13 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-
-import java.util.Map;
-
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
+import uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.EventType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
 @Slf4j
 @Service
@@ -25,14 +22,16 @@ public class DefaultValueAboutToStartHandler implements CallbackHandler {
             && (CaseType.CONSENTED.equals(caseType) || CaseType.CONTESTED.equals(caseType))
             && (EventType.SOLICITOR_CREATE.equals(eventType)
             || EventType.AMEND_CASE.equals(eventType)
-            || EventType.AMEND_CONTESTED_APP_DETAILS.equals(eventType));
+            || EventType.AMEND_APPLICATION.equals(eventType));
     }
 
     @Override
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
                                                        String userAuthorisation) {
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        caseData.putIfAbsent(CIVIL_PARTNERSHIP, NO_VALUE);
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getCaseData();
+        if (caseData.getCivilPartnership() == null) {
+            caseData.setCivilPartnership(YesOrNo.NO);
+        }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
     }
 }

@@ -26,6 +26,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.Check
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
 import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.DirectionOrder;
+import uk.gov.hmcts.reform.finrem.ccd.domain.DirectionOrderCollection;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 import uk.gov.hmcts.reform.finrem.ccd.domain.EventType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
@@ -45,8 +48,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 
@@ -136,64 +137,69 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void whenIsConsentedAndSolicitorAgreedToEmail_sendConsentOrderMadeConfirmationEmail() {
+    public void whenIsConsentedAndSolicitorAgreedToEmail_sendConsentOrderMadeConfirmationEmail() throws JsonProcessingException {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(isA(FinremCaseDetails.class))).thenReturn(true);
+        when(deserializer.deserialize(any())).thenReturn(buildNewCallbackRequestConsented());
 
-        notificationsController.sendConsentOrderMadeConfirmationEmail(buildCallbackRequest());
+        notificationsController.sendConsentOrderMadeConfirmationEmail(buildNewCallbackRequestStringConsented());
 
         verify(notificationService).sendConsentOrderMadeConfirmationEmailToApplicantSolicitor(any());
     }
 
     @Test
-    public void whenIsConsentedAndSolicitorNotAgreedToEmail_shouldNotSendConsentOrderMadeConfirmationEmail() {
+    public void whenIsConsentedAndSolicitorNotAgreedToEmail_shouldNotSendConsentOrderMadeConfirmationEmail() throws JsonProcessingException {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+        when(deserializer.deserialize(any())).thenReturn(buildNewCallbackRequestConsented());
 
-        notificationsController.sendConsentOrderMadeConfirmationEmail(buildCallbackRequest());
-
-        verify(notificationService, never()).sendConsentOrderMadeConfirmationEmailToApplicantSolicitor(any());
-        verify(notificationService, never()).sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(any());
-    }
-
-    @Test
-    public void whenIsNotConsentedAndSolicitorAgreedToEmail_sendConsentOrderMadeConfirmationEmail() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
-
-        notificationsController.sendConsentOrderMadeConfirmationEmail(buildCallbackRequest());
+        notificationsController.sendConsentOrderMadeConfirmationEmail(buildNewCallbackRequestStringConsented());
 
         verify(notificationService, never()).sendConsentOrderMadeConfirmationEmailToApplicantSolicitor(any());
         verify(notificationService, never()).sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(any());
     }
 
     @Test
-    public void whenIsNotConsentedAndSolicitorNotAgreedToEmail_shouldNotSendConsentOrderMadeConfirmationEmail() {
+    public void whenIsNotConsentedAndSolicitorAgreedToEmail_sendConsentOrderMadeConfirmationEmail() throws JsonProcessingException {
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(isA(FinremCaseDetails.class))).thenReturn(true);
+        when(deserializer.deserialize(any())).thenReturn(buildNewCallbackRequest());
+
+        notificationsController.sendConsentOrderMadeConfirmationEmail(buildNewCallbackRequestString());
+
+        verify(notificationService, never()).sendConsentOrderMadeConfirmationEmailToApplicantSolicitor(any());
+        verify(notificationService, never()).sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(any());
+    }
+
+    @Test
+    public void whenIsNotConsentedAndSolicitorNotAgreedToEmail_shouldNotSendConsentOrderMadeConfirmationEmail() throws JsonProcessingException {
         when(caseDataService.isConsentedApplication(any())).thenReturn(false);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+        when(deserializer.deserialize(any())).thenReturn(buildNewCallbackRequest());
 
-        notificationsController.sendConsentOrderMadeConfirmationEmail(buildCallbackRequest());
+        notificationsController.sendConsentOrderMadeConfirmationEmail(buildNewCallbackRequestString());
 
         verify(notificationService, never()).sendConsentOrderMadeConfirmationEmailToApplicantSolicitor(any());
         verify(notificationService, never()).sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(any());
     }
 
     @Test
-    public void sendConsentOrderNotApprovedEmail() {
+    public void sendConsentOrderNotApprovedEmail() throws JsonProcessingException {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(isA(FinremCaseDetails.class))).thenReturn(true);
+        when(deserializer.deserialize(any())).thenReturn(buildNewCallbackRequestConsented());
 
-        notificationsController.sendConsentOrderNotApprovedEmail(buildCallbackRequest());
+        notificationsController.sendConsentOrderNotApprovedEmail(buildNewCallbackRequestStringConsented());
 
         verify(notificationService).sendConsentOrderNotApprovedEmailToApplicantSolicitor(any());
     }
 
     @Test
-    public void shouldNotSendConsentOrderNotApprovedEmail() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+    public void shouldNotSendConsentOrderNotApprovedEmail() throws JsonProcessingException {
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(isA(FinremCaseDetails.class)))
+            .thenReturn(false);
+        when(deserializer.deserialize(any())).thenReturn(buildNewCallbackRequestConsented());
 
-        notificationsController.sendConsentOrderNotApprovedEmail(buildCallbackRequest());
+        notificationsController.sendConsentOrderNotApprovedEmail(buildNewCallbackRequestStringConsented());
 
         verify(notificationService, never()).sendConsentOrderNotApprovedEmailToApplicantSolicitor(any());
         verify(notificationService, never()).sendContestOrderNotApprovedEmailApplicant(any());
@@ -465,21 +471,24 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void sendContestOrderNotApprovedEmail() {
+    public void sendContestOrderNotApprovedEmail() throws JsonProcessingException {
         when(caseDataService.isConsentedApplication(any())).thenReturn(false);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(isA(FinremCaseDetails.class))).thenReturn(true);
+        when(deserializer.deserialize(any())).thenReturn(createNewCallbackRequestWithFinalOrder());
 
-        notificationsController.sendConsentOrderNotApprovedEmail(createCallbackRequestWithFinalOrder());
+        notificationsController.sendConsentOrderNotApprovedEmail(createCallbackRequestWithFinalOrderString());
 
         verify(notificationService).sendContestOrderNotApprovedEmailApplicant(any());
     }
 
     @Test
-    public void shouldNotSendContestOrderNotApprovedEmail() {
+    public void shouldNotSendContestOrderNotApprovedEmail() throws JsonProcessingException {
         when(caseDataService.isConsentedApplication(any())).thenReturn(false);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(isA(FinremCaseDetails.class)))
+            .thenReturn(false);
+        when(deserializer.deserialize(any())).thenReturn(createNewCallbackRequestWithFinalOrder());
 
-        notificationsController.sendConsentOrderNotApprovedEmail(createCallbackRequestWithFinalOrder());
+        notificationsController.sendConsentOrderNotApprovedEmail(createCallbackRequestWithFinalOrderString());
 
         verify(notificationService, never()).sendConsentOrderNotApprovedEmailToApplicantSolicitor(any());
         verify(notificationService, never()).sendContestOrderNotApprovedEmailApplicant(any());
@@ -504,35 +513,35 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void givenContestedCase_whenShouldSendRespondentNotification_thenShouldTriggerRespondentEmail() {
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(isA(Map.class))).thenReturn(true);
+    public void givenContestedCase_whenShouldSendRespondentNotification_thenShouldTriggerRespondentEmail() throws JsonProcessingException {
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(isA(FinremCaseData.class))).thenReturn(true);
+        when(deserializer.deserialize(any())).thenReturn(buildNewCallbackRequest());
 
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        callbackRequest.getCaseDetails().setCaseTypeId(CASE_TYPE_ID_CONTESTED);
-        notificationsController.sendConsentOrderNotApprovedEmail(callbackRequest);
+
+        notificationsController.sendConsentOrderNotApprovedEmail(buildNewCallbackRequestString());
 
         verify(notificationService).sendContestOrderNotApprovedEmailRespondent(any());
         verify(notificationService, never()).sendConsentOrderNotApprovedEmailToRespondentSolicitor(any());
     }
 
     @Test
-    public void givenConsentedCase_whenShouldSendRespondentNotification_thenShouldNotTriggerContestedRespondentEmail() {
+    public void givenConsentedCase_whenShouldSendRespondentNotification_thenShouldNotTriggerContestedRespondentEmail() throws JsonProcessingException {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(isA(Map.class))).thenReturn(true);
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(isA(FinremCaseData.class))).thenReturn(true);
+        when(deserializer.deserialize(any())).thenReturn(buildNewCallbackRequestConsented());
 
-        notificationsController.sendConsentOrderNotApprovedEmail(buildCallbackRequest());
+        notificationsController.sendConsentOrderNotApprovedEmail(buildNewCallbackRequestString());
 
         verify(notificationService, never()).sendContestOrderNotApprovedEmailRespondent(any());
     }
 
     @Test
-    public void givenConsentedCase_whenSendConsentOrderNotApproved_thenShouldTriggerConsentedRespondentEmail() {
+    public void givenConsentedCase_whenSendConsentOrderNotApproved_thenShouldTriggerConsentedRespondentEmail() throws JsonProcessingException {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(isA(Map.class))).thenReturn(true);
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(isA(FinremCaseData.class))).thenReturn(true);
+        when(deserializer.deserialize(any())).thenReturn(buildNewCallbackRequestConsented());
 
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        callbackRequest.getCaseDetails().setCaseTypeId(CASE_TYPE_ID_CONSENTED);
-        notificationsController.sendConsentOrderNotApprovedEmail(callbackRequest);
+        notificationsController.sendConsentOrderNotApprovedEmail(buildNewCallbackRequestStringConsented());
 
         verify(notificationService).sendConsentOrderNotApprovedEmailToRespondentSolicitor(any());
     }
@@ -702,20 +711,19 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void sendConsentOrderMadeEmailToRespSolicitor() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(isA(Map.class))).thenReturn(true);
-        notificationsController.sendConsentOrderMadeConfirmationEmail(callbackRequest);
-        verify(notificationService).sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
+    public void sendConsentOrderMadeEmailToRespSolicitor() throws JsonProcessingException {
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(isA(FinremCaseData.class))).thenReturn(true);
+        when(deserializer.deserialize(any())).thenReturn(buildNewCallbackRequest());
+        notificationsController.sendConsentOrderMadeConfirmationEmail(buildNewCallbackRequestString());
+        verify(notificationService).sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(isA(FinremCaseDetails.class));
     }
 
     @Test
-    public void doesNotSendConsentOrderMadeEmailToRespSolicitor() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        callbackRequest.getCaseDetails().setCaseTypeId(CASE_TYPE_ID_CONSENTED);
+    public void doesNotSendConsentOrderMadeEmailToRespSolicitor() throws JsonProcessingException {
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(isA(FinremCaseData.class))).thenReturn(false);
-        notificationsController.sendConsentOrderMadeConfirmationEmail(callbackRequest);
-        verify(notificationService, never()).sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
+        when(deserializer.deserialize(any())).thenReturn(buildNewCallbackRequestConsented());
+        notificationsController.sendConsentOrderMadeConfirmationEmail(buildNewCallbackRequestStringConsented());
+        verify(notificationService, never()).sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(isA(FinremCaseDetails.class));
     }
 
     @Test
@@ -866,6 +874,21 @@ public class NotificationsControllerTest extends BaseControllerTest {
         verify(paperNotificationService, times(1)).printUpdateFrcInformationNotification(any(), any());
     }
 
+    private uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest createNewCallbackRequestWithFinalOrder() {
+        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest = buildNewCallbackRequest();
+
+        ArrayList<DirectionOrderCollection> finalOrderCollection = new ArrayList<>();
+        finalOrderCollection.add(DirectionOrderCollection.builder()
+            .value(DirectionOrder.builder()
+                .uploadDraftDocument(new Document())
+                .build())
+            .build());
+
+        callbackRequest.getCaseDetails().getCaseData().setFinalOrderCollection(finalOrderCollection);
+
+        return callbackRequest;
+    }
+
     private CallbackRequest createCallbackRequestWithFinalOrder() {
         CallbackRequest callbackRequest = buildCallbackRequest();
 
@@ -880,6 +903,10 @@ public class NotificationsControllerTest extends BaseControllerTest {
         callbackRequest.getCaseDetails().getData().put(FINAL_ORDER_COLLECTION, finalOrderCollection);
 
         return callbackRequest;
+    }
+
+    private String createCallbackRequestWithFinalOrderString() throws JsonProcessingException {
+        return objectMapper.writeValueAsString(createCallbackRequestWithFinalOrder());
     }
 
     protected String buildNewCallbackRequestStringConsentedNoAgreeEmails() throws JsonProcessingException {

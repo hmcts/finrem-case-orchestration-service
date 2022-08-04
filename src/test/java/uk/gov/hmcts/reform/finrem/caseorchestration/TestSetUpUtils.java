@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.BristolCourt;
 import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.NatureApplication;
 import uk.gov.hmcts.reform.finrem.ccd.domain.NottinghamCourt;
 import uk.gov.hmcts.reform.finrem.ccd.domain.PaymentDocument;
 import uk.gov.hmcts.reform.finrem.ccd.domain.PaymentDocumentCollection;
@@ -151,10 +152,10 @@ public class TestSetUpUtils {
         return document;
     }
 
-    public static Document variationDocument() {
-        Document document = new Document();
+    public static uk.gov.hmcts.reform.finrem.ccd.domain.Document variationDocument() {
+        uk.gov.hmcts.reform.finrem.ccd.domain.Document document = new uk.gov.hmcts.reform.finrem.ccd.domain.Document();
         document.setBinaryUrl(BINARY_URL);
-        document.setFileName(VARIATION_FILE_NAME);
+        document.setFilename(VARIATION_FILE_NAME);
         document.setUrl(DOC_URL);
         return document;
     }
@@ -261,25 +262,25 @@ public class TestSetUpUtils {
             .build();
     }
 
-    public static CaseDetails defaultConsentedCaseDetailsForVariationOrder() {
-        Map<String, Object> caseData = new HashMap<>();
-        List<String> natureOfApplication =  List.of("Lump Sum Order",
-            "Periodical Payment Order",
-            "Pension Sharing Order",
-            "Pension Attachment Order",
-            "Pension Compensation Sharing Order",
-            "Pension Compensation Attachment Order",
-            "A settlement or a transfer of property",
-            "Variation Order",
-            "Property Adjustment Order");
-        caseData.put("natureOfApplication2", natureOfApplication);
+    public static FinremCaseDetails defaultConsentedCaseDetailsForVariationOrder() {
+        FinremCaseData caseData = new FinremCaseData();
+        List<NatureApplication> natureOfApplication =  List.of(NatureApplication.LUMP_SUM_ORDER,
+            NatureApplication.PERIODICAL_PAYMENT_ORDER,
+            NatureApplication.PENSION_SHARING_ORDER,
+            NatureApplication.PENSION_ATTACHMENT_ORDER,
+            NatureApplication.PENSION_COMPENSATION_SHARING_ORDER,
+            NatureApplication.PENSION_COMPENSATION_ATTACHMENT_ORDER,
+            NatureApplication.A_SETTLEMENT_OR_A_TRANSFER_OF_PROPERTY,
+            NatureApplication.VARIATION_ORDER,
+            NatureApplication.PROPERTY_ADJUSTMENT_ORDER);
+        caseData.getNatureApplicationWrapper().setNatureOfApplication2(natureOfApplication);
         populateApplicantNameAndAddress(caseData);
         populateRespondentNameAndAddressConsented(caseData);
 
-        return CaseDetails.builder()
-            .caseTypeId(CASE_TYPE_ID_CONSENTED)
+        return FinremCaseDetails.builder()
+            .caseType(CaseType.CONSENTED)
             .id(123456789L)
-            .data(caseData)
+            .caseData(caseData)
             .build();
     }
 

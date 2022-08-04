@@ -6,14 +6,15 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
+import uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.EventType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
 import java.io.InputStream;
 
@@ -23,11 +24,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SolicitorCreateConsentedAboutToSubmitHandlerTest {
@@ -61,7 +60,7 @@ public class SolicitorCreateConsentedAboutToSubmitHandlerTest {
     @Test
     public void given_case_whenEvent_type_is_amend_consent_order_thenCanHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.AMEND_CONSENT_ORDER),
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.AMENDED_CONSENT_ORDER),
             is(true));
     }
 
@@ -95,10 +94,10 @@ public class SolicitorCreateConsentedAboutToSubmitHandlerTest {
 
         AboutToStartOrSubmitCallbackResponse response = handler.handle(callbackRequest, AUTH_TOKEN);
 
-        assertNotNull(response.getData().get(LATEST_CONSENT_ORDER));
-        assertEquals(YES_VALUE, response.getData().get(APPLICANT_REPRESENTED));
+        assertNotNull(response.getData().getLatestConsentOrder());
+        assertEquals(YesOrNo.YES, response.getData().getContactDetailsWrapper().getApplicantRepresented());
         verify(idamService).isUserRoleAdmin(any());
-        verify(consentOrderService).getLatestConsentOrderData(any());
+        verify(consentOrderService).getLatestConsentOrderData(isA(CallbackRequest.class));
     }
 
 
@@ -110,10 +109,10 @@ public class SolicitorCreateConsentedAboutToSubmitHandlerTest {
 
         AboutToStartOrSubmitCallbackResponse response = handler.handle(callbackRequest, AUTH_TOKEN);
 
-        assertNotNull(response.getData().get(LATEST_CONSENT_ORDER));
-        assertNull(response.getData().get(APPLICANT_REPRESENTED));
+        assertNotNull(response.getData().getLatestConsentOrder());
+        assertNull(response.getData().getContactDetailsWrapper().getApplicantRepresented());
         verify(idamService).isUserRoleAdmin(any());
-        verify(consentOrderService).getLatestConsentOrderData(any());
+        verify(consentOrderService).getLatestConsentOrderData(isA(CallbackRequest.class));
     }
 
     private CallbackRequest doValidCaseDataSetUp()  {
@@ -124,11 +123,11 @@ public class SolicitorCreateConsentedAboutToSubmitHandlerTest {
         }
     }
 
-    private CaseDocument getCaseDocument() {
-        CaseDocument caseDocument = new CaseDocument();
-        caseDocument.setDocumentUrl("http://doc1");
-        caseDocument.setDocumentBinaryUrl("http://doc1/binary");
-        caseDocument.setDocumentFilename("doc1");
+    private Document getCaseDocument() {
+        Document caseDocument = new Document();
+        caseDocument.setUrl("http://doc1");
+        caseDocument.setBinaryUrl("http://doc1/binary");
+        caseDocument.setFilename("doc1");
         return caseDocument;
     }
 }

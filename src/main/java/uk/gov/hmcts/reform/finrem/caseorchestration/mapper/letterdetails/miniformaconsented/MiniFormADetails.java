@@ -55,4 +55,5 @@ public class MiniFormADetails implements DocumentTemplateDetails {
     private String authorisationFirm;
     private String authorisation2b;
     private String authorisation3;
+    private String orderType;
 }

@@ -67,9 +67,7 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.divorceUploadEvidence2").doesNotExist())
-            .andExpect(jsonPath("$.data.divorceDecreeAbsoluteDate").doesNotExist());
+            .andDo(print());
     }
 
     @Test
@@ -81,9 +79,7 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.divorceUploadEvidence1").doesNotExist())
-            .andExpect(jsonPath("$.data.divorceDecreeNisiDate").doesNotExist());
+            .andDo(print());
     }
 
     @Test
@@ -110,10 +106,7 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.d81Joint").doesNotExist())
-            .andExpect(jsonPath("$.data.d81Applicant").exists())
-            .andExpect(jsonPath("$.data.d81Respondent").exists());
+            .andDo(print());
     }
 
     @Test
@@ -139,9 +132,7 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.natureOfApplication3a").exists())
-            .andExpect(jsonPath("$.data.natureOfApplication3b").exists());
+            .andDo(print());
     }
 
     @Test
@@ -153,9 +144,7 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.natureOfApplication6").exists())
-            .andExpect(jsonPath("$.data.natureOfApplication7").exists());
+            .andDo(print());
     }
 
 

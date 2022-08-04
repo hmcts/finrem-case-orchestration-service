@@ -3,20 +3,16 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
-
-import java.util.Map;
-
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
+import uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.EventType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
 @Slf4j
 @Service
@@ -31,7 +27,7 @@ public class SolicitorCreateConsentedAboutToSubmitHandler implements CallbackHan
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
             && (EventType.SOLICITOR_CREATE.equals(eventType)
-            || EventType.AMEND_CONSENT_ORDER.equals(eventType)
+            || EventType.AMENDED_CONSENT_ORDER.equals(eventType)
             || EventType.RESPOND_TO_ORDER.equals(eventType));
     }
 
@@ -39,12 +35,12 @@ public class SolicitorCreateConsentedAboutToSubmitHandler implements CallbackHan
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
                                                        String userAuthorisation) {
         log.info("Received request to update latest Consent Order with Case ID : {}", callbackRequest.getCaseDetails().getId());
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        CaseDocument caseDocument = consentOrderService.getLatestConsentOrderData(callbackRequest);
-        caseData.put(LATEST_CONSENT_ORDER, caseDocument);
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getCaseData();
+        Document caseDocument = consentOrderService.getLatestConsentOrderData(callbackRequest);
+        caseData.setLatestConsentOrder(caseDocument);
 
         if (!idamService.isUserRoleAdmin(userAuthorisation)) {
-            caseData.put(APPLICANT_REPRESENTED, YES_VALUE);
+            caseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
     }

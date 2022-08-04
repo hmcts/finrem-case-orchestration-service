@@ -1,8 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 
+import org.junit.Before;
 import org.junit.Test;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,12 +25,18 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class ConsentedApplicationHelperTest {
 
+    private ConsentedApplicationHelper helper;
+
+    @Before
+    public void setUp() {
+        helper = new ConsentedApplicationHelper(new DocumentConfiguration());
+    }
+
     @Test
     public void isVariationOrder() {
         CallbackRequest callbackRequest =  callbackRequest();
         callbackRequest.getCaseDetails().getData()
             .put(CONSENTED_NATURE_OF_APPLICATION, List.of("Variation Order","Pension document","Lump sum"));
-        ConsentedApplicationHelper helper = new ConsentedApplicationHelper();
         assertTrue(helper.isVariationOrder(callbackRequest.getCaseDetails().getData()));
     }
 
@@ -38,7 +46,6 @@ public class ConsentedApplicationHelperTest {
         Map<String, Object> data = callbackRequest.getCaseDetails().getData();
         data.put(CONSENTED_NATURE_OF_APPLICATION, List.of("Variation Order","Pension document","Lump sum"));
 
-        ConsentedApplicationHelper helper = new ConsentedApplicationHelper();
         helper.setConsentVariationOrderLabelField(callbackRequest.getCaseDetails().getData());
 
         assertEquals(VARIATION_ORDER_CAMELCASE_LABEL_VALUE, data.get(CV_ORDER_CAMELCASE_LABEL_FIELD));
@@ -51,7 +58,6 @@ public class ConsentedApplicationHelperTest {
         CallbackRequest callbackRequest =  callbackRequest();
         Map<String, Object> data = callbackRequest.getCaseDetails().getData();
 
-        ConsentedApplicationHelper helper = new ConsentedApplicationHelper();
         helper.setConsentVariationOrderLabelField(callbackRequest.getCaseDetails().getData());
 
         assertEquals(CONSENT_ORDER_CAMELCASE_LABEL_VALUE, data.get(CV_ORDER_CAMELCASE_LABEL_FIELD));
