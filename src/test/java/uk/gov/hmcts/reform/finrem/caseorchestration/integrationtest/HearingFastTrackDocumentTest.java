@@ -24,15 +24,12 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OUT_OF_FAMILY_COURT_RESOLUTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.DATE_BETWEEN_6_AND_10_WEEKS;
 
 public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
 
     private static final String API_URL = "/case-orchestration/documents/hearing";
-    private static final String GENERATE_BULK_PRINT_CONTEXT_PATH = "/version/1/bulk-print";
 
     @MockBean
     protected GenericDocumentService genericDocumentServiceMock;
@@ -69,6 +66,9 @@ public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
         when(genericDocumentServiceMock.generateDocumentFromPlaceholdersMap(any(), any(),
             eq(documentConfiguration.getFormCFastTrackTemplate()),
             eq(documentConfiguration.getFormCFileName()))).thenReturn(newDocument());
+        when(genericDocumentServiceMock.generateDocumentFromPlaceholdersMap(any(), any(),
+            eq(documentConfiguration.getOutOfFamilyCourtResolutionTemplate()),
+                eq(documentConfiguration.getOutOfFamilyCourtResolutionName()))).thenReturn(newDocument());
     }
 
     protected void verifyDocumentServiceInteraction() {
@@ -80,7 +80,7 @@ public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
     private Map<String, Object> expectedCaseData() {
         FinremCaseDetails caseDetails = newRequest.getCaseDetails();
         caseDetails.getCaseData().setFormC(newDocument());
-        caseDetails.getData().put(OUT_OF_FAMILY_COURT_RESOLUTION, caseDocument());
+        caseDetails.getCaseData().setOutOfFamilyCourtResolution(newDocument());
 
         return objectMapper.convertValue(
             uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.builder()

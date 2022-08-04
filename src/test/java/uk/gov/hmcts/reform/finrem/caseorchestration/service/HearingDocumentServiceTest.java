@@ -53,7 +53,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.paymentDocumentData;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_ADDRESS_KEY;
@@ -62,10 +61,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_PHONE_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OUT_OF_FAMILY_COURT_RESOLUTION;
 
 public class HearingDocumentServiceTest extends BaseServiceTest {
 
-    private static final LocalDate DATE_OF_HEARING = LocalDate.of(2019, 01, 01);
+    private static final LocalDate DATE_OF_HEARING = LocalDate.of(2019, 1, 1);
 
     @Autowired private HearingDocumentService hearingDocumentService;
     @Autowired private DocumentConfiguration documentConfiguration;
@@ -100,7 +100,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void generateJudiciaryBasedFastTrackFormCAndOutOfFamilyCourtResolution() {
-        final Map<String, Document> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN,
+        final Map<String, Object> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN,
             makeItJudiciaryFastTrackDecisionCase());
         assertCaseDocument((Document) result.get(FORM_C));
         assertCaseDocument((Document) result.get(OUT_OF_FAMILY_COURT_RESOLUTION));
@@ -110,7 +110,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void generateNonFastTrackFormCAndFormG() {
-        Map<String, Document> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, makeItNonFastTrackDecisionCase());
+        Map<String, Object> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, makeItNonFastTrackDecisionCase());
         assertCaseDocument((Document) result.get(FORM_C));
         assertCaseDocument((Document) result.get(FORM_G));
         assertCaseDocument((Document) result.get(OUT_OF_FAMILY_COURT_RESOLUTION));
@@ -373,8 +373,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         caseData.getRegionWrapper().getDefaultCourtList().setBristolCourtList(BristolCourt.FR_bristolList_1);
         caseData.setFormC(newDocument());
         caseData.setFormG(newDocument());
-        caseData.put(OUT_OF_FAMILY_COURT_RESOLUTION, caseDocument());
-
+        caseData.setOutOfFamilyCourtResolution(newDocument());
 
         return FinremCaseDetails.builder().caseData(caseData).build();
     }

@@ -43,6 +43,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OUT_OF_FAMILY_COURT_RESOLUTION;
 
 @RestController
 @RequiredArgsConstructor
@@ -88,6 +89,7 @@ public class HearingDocumentController extends BaseController {
             Map<String, Object> documents = hearingDocumentService.generateHearingDocuments(authorisationToken, caseDetails);
             caseDetails.getCaseData().setFormC((Document) documents.get(FORM_C));
             caseDetails.getCaseData().setFormG((Document) documents.get(FORM_G));
+            caseDetails.getCaseData().setOutOfFamilyCourtResolution((Document) documents.get(OUT_OF_FAMILY_COURT_RESOLUTION));
         }
 
         List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
@@ -140,22 +142,6 @@ public class HearingDocumentController extends BaseController {
             .data(caseData)
             .errors(errors)
             .build());
-    }
-
-    private void generateHearingDocuments(String authorisationToken, FinremCaseDetails caseDetails) {
-        if (hearingDocumentService.alreadyHadFirstHearing(caseDetails)) {
-            if (caseDetails.getCaseData().isContestedPaperApplication()) {
-                additionalHearingDocumentService.createAdditionalHearingDocuments(authorisationToken, caseDetails);
-            }
-        } else {
-            Map<String, Object> forms = hearingDocumentService.generateHearingDocuments(authorisationToken, caseDetails);
-            if (forms.containsKey(FORM_C)) {
-                caseDetails.getCaseData().setFormC((Document) forms.get(FORM_C));
-            }
-            if (forms.containsKey(FORM_G)) {
-                caseDetails.getCaseData().setFormG((Document) forms.get(FORM_G));
-            }
-        }
     }
 
     private void sortDirectionDetailsCollection(FinremCaseData caseData) {

@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
@@ -14,7 +14,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocu
 import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,6 +25,7 @@ import java.util.concurrent.CompletableFuture;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OUT_OF_FAMILY_COURT_RESOLUTION;
 
 @Service
 @Slf4j
@@ -46,12 +49,12 @@ public class HearingDocumentService {
     }
 
     private Map<String, Object> courtCoverSheetDocuments(Pair<FinremCaseDetails, String> pair) {
-        return Optional.of(pair)
+        Map<String, Object> documentMap =  Optional.of(pair)
             .filter(detailsPair -> pair.getLeft().getCaseData().isFastTrackApplication())
             .map(this::generateFastTrackFormC)
             .orElseGet(() -> generateFormCAndG(pair));
-        objectMap.put(OUT_OF_FAMILY_COURT_RESOLUTION, generatOutOfFamilyCourtResolutionDocument(pair));
-        return objectMap;
+        documentMap.put(OUT_OF_FAMILY_COURT_RESOLUTION, generateOutOfFamilyCourtResolutionDocument(pair));
+        return documentMap;
     }
 
     private Map<String, Object> generateFormCAndG(Pair<FinremCaseDetails, String> pair) {
@@ -75,17 +78,20 @@ public class HearingDocumentService {
     }
 
     private Map<String, Object> createDocumentMap(Document formC, Document formG) {
-        return ImmutableMap.of(FORM_C, formC, FORM_G, formG);
+        return Maps.newHashMap(Map.of(FORM_C, formC, FORM_G, formG));
     }
 
     private Map<String, Object> generateFastTrackFormC(Pair<FinremCaseDetails, String> pair) {
-        return ImmutableMap.of(FORM_C,
-            genericDocumentService.generateDocument(pair.getRight(), addFastTrackFields.apply(pair.getLeft()),
-                documentConfiguration.getFormCFastTrackTemplate(), documentConfiguration.getFormCFileName()));
+        Map<String, Object> formCDetailsMap = formCLetterDetailsMapper.getDocumentTemplateDetailsAsMap(pair.getLeft(),
+            pair.getLeft().getCaseData().getRegionWrapper().getDefaultCourtList());
+
+        return Maps.newHashMap(Map.of(FORM_C,
+            genericDocumentService.generateDocumentFromPlaceholdersMap(pair.getRight(), formCDetailsMap,
+                documentConfiguration.getFormCFastTrackTemplate(), documentConfiguration.getFormCFileName())));
     }
 
-    private Document generatOutOfFamilyCourtResolutionDocument(Pair<CaseDetails, String> pair) {
-        return genericDocumentService.generateDocument(pair.getRight(), addFastTrackFields.apply(pair.getLeft()),
+    private Document generateOutOfFamilyCourtResolutionDocument(Pair<FinremCaseDetails, String> pair) {
+        return genericDocumentService.generateDocumentFromPlaceholdersMap(pair.getRight(), new HashMap<>(),
             documentConfiguration.getOutOfFamilyCourtResolutionTemplate(),
             documentConfiguration.getOutOfFamilyCourtResolutionName());
     }
@@ -125,7 +131,7 @@ public class HearingDocumentService {
         documentHelper.getDocumentAsBulkPrintDocument(caseData.getFormC()).ifPresent(caseDocuments::add);
         documentHelper.getDocumentAsBulkPrintDocument(caseData.getFormG()).ifPresent(caseDocuments::add);
         documentHelper.getDocumentAsBulkPrintDocument(caseData.getMiniFormA()).ifPresent(caseDocuments::add);
-        documentHelper.getDocumentAsBulkPrintDocument(caseData.getFamilyCourtResolution()).ifPresent(caseDocuments::add);
+        documentHelper.getDocumentAsBulkPrintDocument(caseData.getOutOfFamilyCourtResolution()).ifPresent(caseDocuments::add);
 
         List<Document> formADocuments = Optional.ofNullable(caseData.getCopyOfPaperFormA().stream()
             .map(collectionElement -> collectionElement.getValue().getUploadedDocument()).toList())

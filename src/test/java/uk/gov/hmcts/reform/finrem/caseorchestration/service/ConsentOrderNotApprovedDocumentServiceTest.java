@@ -71,6 +71,7 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
                     .build())
                 .build()
         ));
+
         caseData.getGeneralOrderWrapper().setGeneralOrderCollection(List.of(GeneralOrderCollection.builder()
             .value(GeneralOrder.builder()
                 .generalOrderDocumentUpload(newDocument())

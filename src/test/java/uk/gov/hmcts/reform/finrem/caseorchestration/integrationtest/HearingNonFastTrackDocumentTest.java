@@ -51,7 +51,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.DATE_BETWEEN_12_AND_16_WEEKS;
@@ -86,6 +85,9 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
 
     @Captor
     ArgumentCaptor<Map<String, Object>> formGPlaceholdersMapCaptor;
+
+    @Captor
+    ArgumentCaptor<Map<String, Object>> emptyMapCaptor;
 
     private static String requestJson;
     protected CallbackRequest request;
@@ -191,7 +193,8 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(),
             eq(config.getFormGTemplate()), eq(config.getFormGFileName()))).thenReturn(newDocument());
         when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(),
-            eq(config.getOutOfFamilyCourtResolutionTemplate()), eq(config.getOutOfFamilyCourtResolutionName())).thenReturn(newDocument()));
+            eq(config.getOutOfFamilyCourtResolutionTemplate()), eq(config.getOutOfFamilyCourtResolutionName())))
+            .thenReturn(newDocument());
         when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(),
             eq(config.getBulkPrintTemplate()), eq(config.getBulkPrintFileName()))).thenReturn(newDocument());
     }
@@ -208,7 +211,7 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
             eq(config.getFormCNonFastTrackTemplate()),  eq(config.getFormCFileName()));
         verify(genericDocumentService, atLeastOnce()).generateDocumentFromPlaceholdersMap(any(), formGPlaceholdersMapCaptor.capture(),
             eq(config.getFormGTemplate()), eq(config.getFormGFileName()));
-        verify(genericDocumentService, atLeastOnce()).generateDocumentFromPlaceholdersMap(any(), newPlaceholdersMapCaptor.capture(),
+        verify(genericDocumentService, atLeastOnce()).generateDocumentFromPlaceholdersMap(any(), emptyMapCaptor.capture(),
             eq(config.getOutOfFamilyCourtResolutionTemplate()), eq(config.getOutOfFamilyCourtResolutionName()));
 
     }
@@ -224,7 +227,7 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         FinremCaseDetails caseDetails = request.getCaseDetails();
         caseDetails.getCaseData().setFormC(newDocument());
         caseDetails.getCaseData().setFormG(newDocument());
-        caseDetails.getData().put(OUT_OF_FAMILY_COURT_RESOLUTION, caseDocument());
+        caseDetails.getCaseData().setOutOfFamilyCourtResolution(newDocument());
         caseDetails.getCaseData().setBulkPrintCoverSheetApp(newDocument());
         caseDetails.getCaseData().setBulkPrintCoverSheetRes(newDocument());
 
