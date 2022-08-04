@@ -15,8 +15,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import java.util.List;
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_HEARING_REQUIRED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_RECEIVED_FROM;
@@ -51,6 +53,12 @@ public class GeneralApplicationAboutToSubmitHandler implements CallbackHandler {
         log.info("generalApplicationListBefore : {}", generalApplicationListBefore.size());
 
         List<GeneralApplicationCollectionData> generalApplicationList = helper.getGeneralApplicationList(caseDetails.getData());
+
+        List<GeneralApplicationCollectionData> applicationCollectionDataList = generalApplicationList.stream()
+            .sorted((e1, e2) -> e2.getGeneralApplicationItems().getGeneralApplicationCreatedDate()
+                .compareTo(e1.getGeneralApplicationItems().getGeneralApplicationCreatedDate()))
+            .toList();
+        caseDetails.getData().put(GENERAL_APPLICATION_COLLECTION, applicationCollectionDataList);
         log.info("generalApplicationList : {}", generalApplicationList.size());
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build();
@@ -65,6 +73,7 @@ public class GeneralApplicationAboutToSubmitHandler implements CallbackHandler {
             caseData.remove(GENERAL_APPLICATION_SPECIAL_MEASURES);
             caseData.remove(GENERAL_APPLICATION_DOCUMENT);
             caseData.remove(GENERAL_APPLICATION_DRAFT_ORDER);
+            caseData.remove(GENERAL_APPLICATION_DOCUMENT_LATEST_DATE);
         }
     }
 }

@@ -2,12 +2,14 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +31,7 @@ public class GeneralApplicationHelper {
     }
 
     public List<GeneralApplicationCollectionData> covertToGeneralApplicationData(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<>() {
+        return objectMapper.registerModule(new JavaTimeModule()).convertValue(object, new TypeReference<>() {
         });
     }
 
@@ -43,6 +45,13 @@ public class GeneralApplicationHelper {
     public String objectToString(Object object) {
         if (object != null) {
             return objectMapper.convertValue(object, String.class);
+        }
+        return null;
+    }
+
+    public LocalDate objectToDateTime(Object object) {
+        if (object != null) {
+            return objectMapper.convertValue(object, LocalDate.class);
         }
         return null;
     }

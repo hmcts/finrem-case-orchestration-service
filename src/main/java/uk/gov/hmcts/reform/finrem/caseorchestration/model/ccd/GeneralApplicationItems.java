@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Builder
 @Getter
 @NoArgsConstructor
@@ -25,4 +27,6 @@ public class GeneralApplicationItems {
     private String generalApplicationHearingRequired;
     @JsonProperty("generalApplicationSpecialMeasures")
     private String generalApplicationSpecialMeasures;
+    @JsonProperty("generalApplicationCreatedDate")
+    private LocalDate generalApplicationCreatedDate;
 }

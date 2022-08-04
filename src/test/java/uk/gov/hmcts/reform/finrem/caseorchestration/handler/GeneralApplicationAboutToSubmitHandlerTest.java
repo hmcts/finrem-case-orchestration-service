@@ -29,6 +29,7 @@ import static org.junit.Assert.assertNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_HEARING_REQUIRED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_RECEIVED_FROM;
@@ -44,6 +45,7 @@ public class GeneralApplicationAboutToSubmitHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
     private static final String GA_JSON = "/fixtures/contested/general-application.json";
+    private static final String GA_SORTED_JSON = "/fixtures/contested/general-application-sorted.json";
 
 
     @Before
@@ -95,6 +97,18 @@ public class GeneralApplicationAboutToSubmitHandlerTest {
         assertExistingGeneralApplication(caseData);
     }
 
+    @Test
+    public void sortGeneralApplicationListByLatestDate() {
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(buildCaseDetailsWtihPath(GA_SORTED_JSON))
+            .caseDetailsBefore(buildCaseDetailsWtihPath(GA_SORTED_JSON)).build();
+
+        AboutToStartOrSubmitCallbackResponse handle = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        Map<String, Object> caseData = handle.getData();
+        List<GeneralApplicationCollectionData> generalApplicationList = helper.getGeneralApplicationList(caseData);
+        assertEquals(2, generalApplicationList.size());
+    }
+
     private void assertExistingGeneralApplication(Map<String, Object> caseData) {
         assertNull(caseData.get(GENERAL_APPLICATION_RECEIVED_FROM));
         assertNull(caseData.get(GENERAL_APPLICATION_CREATED_BY));
@@ -103,10 +117,20 @@ public class GeneralApplicationAboutToSubmitHandlerTest {
         assertNull(caseData.get(GENERAL_APPLICATION_SPECIAL_MEASURES));
         assertNull(caseData.get(GENERAL_APPLICATION_DOCUMENT));
         assertNull(caseData.get(GENERAL_APPLICATION_DRAFT_ORDER));
+        assertNull(caseData.get(GENERAL_APPLICATION_DOCUMENT_LATEST_DATE));
     }
 
     private CaseDetails buildCaseDetails()  {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(GA_JSON)) {
+            CaseDetails caseDetails = objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+            return CallbackRequest.builder().caseDetails(caseDetails).build().getCaseDetails();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private CaseDetails buildCaseDetailsWtihPath(String path)  {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(path)) {
             CaseDetails caseDetails = objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
             return CallbackRequest.builder().caseDetails(caseDetails).build().getCaseDetails();
         } catch (Exception e) {
@@ -131,6 +155,7 @@ public class GeneralApplicationAboutToSubmitHandlerTest {
         builder.generalApplicationSpecialMeasures(helper.objectToString(caseData.get(GENERAL_APPLICATION_SPECIAL_MEASURES)));
         builder.generalApplicationDocument(helper.convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DOCUMENT)));
         CaseDocument draftDocument = helper.convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DRAFT_ORDER));
+        builder.generalApplicationCreatedDate(helper.objectToDateTime(caseData.get(GENERAL_APPLICATION_DOCUMENT_LATEST_DATE)));
         builder.generalApplicationDraftOrder(draftDocument);
         return builder.build();
     }
