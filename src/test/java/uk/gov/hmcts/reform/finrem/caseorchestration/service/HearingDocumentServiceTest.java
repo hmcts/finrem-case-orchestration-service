@@ -73,6 +73,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NWYORKSHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NWYORKSHIRE_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OUT_OF_FAMILY_COURT_RESOLUTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST_FRC_LIST;
@@ -107,25 +108,31 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void generateFastTrackFormC() {
-        Map<String, Object> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, makeItFastTrackDecisionCase());
-        assertCaseDocument((CaseDocument) result.get(FORM_C));
+    public void generateFastTrackFormCAndOutOfFamilyCourtResolution() {
+        Map<String, CaseDocument> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, makeItFastTrackDecisionCase());
+
+        assertCaseDocument(result.get(FORM_C));
+        assertCaseDocument(result.get(OUT_OF_FAMILY_COURT_RESOLUTION));
         verifyAdditionalFastTrackFields();
     }
 
     @Test
-    public void generateJudiciaryBasedFastTrackFormC() {
-        Map<String, Object> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN,
+    public void generateJudiciaryBasedFastTrackFormCAndOutOfFamilyCourtResolution() {
+        final Map<String, CaseDocument> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN,
             makeItJudiciaryFastTrackDecisionCase());
-        assertCaseDocument((CaseDocument) result.get(FORM_C));
+
+        assertCaseDocument(result.get(FORM_C));
+        assertCaseDocument(result.get(OUT_OF_FAMILY_COURT_RESOLUTION));
         verifyAdditionalFastTrackFields();
     }
 
     @Test
-    public void generateNonFastTrackFormCAndFormG() {
-        Map<String, Object> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, makeItNonFastTrackDecisionCase());
-        assertCaseDocument((CaseDocument) result.get(FORM_C));
-        assertCaseDocument((CaseDocument) result.get(FORM_G));
+    public void generateNonFastTrackFormCAndFormGAndOutOfFamilyCourtResolution() {
+        final Map<String, CaseDocument> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, makeItNonFastTrackDecisionCase());
+
+        assertCaseDocument(result.get(FORM_C));
+        assertCaseDocument(result.get(FORM_G));
+        assertCaseDocument(result.get(OUT_OF_FAMILY_COURT_RESOLUTION));
         verifyAdditionalNonFastTrackFields();
     }
 
@@ -135,16 +142,14 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, AUTH_TOKEN);
 
-        when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(false);
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(true);
-
         verify(bulkPrintService).printApplicantDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
         verify(bulkPrintService).printRespondentDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
 
-        assertThat(bulkPrintDocumentsCaptor.getValue().size(), is(3));
+        assertThat(bulkPrintDocumentsCaptor.getValue().size(), is(4));
         assertThat(bulkPrintDocumentsCaptor.getValue().get(0).getBinaryFileUrl(), is(BINARY_URL));
         assertThat(bulkPrintDocumentsCaptor.getValue().get(1).getBinaryFileUrl(), is(BINARY_URL));
         assertThat(bulkPrintDocumentsCaptor.getValue().get(2).getBinaryFileUrl(), is(BINARY_URL));
+        assertThat(bulkPrintDocumentsCaptor.getValue().get(3).getBinaryFileUrl(), is(BINARY_URL));
     }
 
     @Test
@@ -160,12 +165,13 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verify(bulkPrintService).printApplicantDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
 
-        assertThat(bulkPrintDocumentsCaptor.getValue().size(), is(5));
+        assertThat(bulkPrintDocumentsCaptor.getValue().size(), is(6));
         assertThat(bulkPrintDocumentsCaptor.getValue().get(0).getBinaryFileUrl(), is(BINARY_URL));
         assertThat(bulkPrintDocumentsCaptor.getValue().get(1).getBinaryFileUrl(), is(BINARY_URL));
         assertThat(bulkPrintDocumentsCaptor.getValue().get(2).getBinaryFileUrl(), is(BINARY_URL));
         assertThat(bulkPrintDocumentsCaptor.getValue().get(3).getBinaryFileUrl(), is(BINARY_URL));
         assertThat(bulkPrintDocumentsCaptor.getValue().get(4).getBinaryFileUrl(), is(BINARY_URL));
+        assertThat(bulkPrintDocumentsCaptor.getValue().get(5).getBinaryFileUrl(), is(BINARY_URL));
     }
 
     @Test
@@ -412,6 +418,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         caseData.put(FORM_A_COLLECTION, singletonList(pensionDocumentData()));
         caseData.put(FORM_C, caseDocument());
         caseData.put(FORM_G, caseDocument());
+        caseData.put(OUT_OF_FAMILY_COURT_RESOLUTION, caseDocument());
 
         return CaseDetails.builder().data(caseData).build();
     }
