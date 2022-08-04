@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.LetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.consentorderapproved.ConsentOrderApprovedLetterDetailsMapper;
@@ -23,6 +24,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CONSENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ORDER_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 
 @Service
@@ -35,29 +38,55 @@ public class ConsentOrderApprovedDocumentService {
     private final DocumentHelper documentHelper;
     private final ConsentOrderApprovedLetterDetailsMapper consentOrderApprovedLetterDetailsMapper;
     private final LetterDetailsMapper letterDetailsMapper;
+    private final ConsentedApplicationHelper consentedApplicationHelper;
 
     public Document generateApprovedConsentOrderLetter(FinremCaseDetails caseDetails, String authToken) {
-        log.info("Generating Approved Consent Order Letter {} from {} for bulk print, case: {}",
-            documentConfiguration.getApprovedConsentOrderFileName(),
+        String fileName;
+        FinremCaseData caseData = caseDetails.getCaseData();
+
+        if (caseData.isConsentedApplication()
+        && Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(caseDetails.getCaseData()))) {
+            fileName = documentConfiguration.getApprovedVariationOrderFileName();
+            caseData.setOrderType(VARIATON);
+        } else {
+            fileName = documentConfiguration.getApprovedConsentOrderFileName();
+            caseData.setOrderType(CONSENT);
+        }
+        log.info("Generating Approved {} Order Letter {} from {} for bulk print, case: {}",
+            caseData.getOrderType(), fileName,
             documentConfiguration.getApprovedConsentOrderTemplate(),
             caseDetails.getId());
 
         Map<String, Object> placeholdersMap = consentOrderApprovedLetterDetailsMapper
             .getDocumentTemplateDetailsAsMap(caseDetails, caseDetails.getCaseData().getRegionWrapper().getDefaultCourtList());
 
-        return genericDocumentService.generateDocumentFromPlaceholdersMap(authToken, placeholdersMap,
+
+        return genericDocumentService.generateDocumentFromPlaceholdersMap(authToken,
+            caseData.isContestedApplication()
+                ? prepareCaseDetailsCopyForDocumentGeneratorWithContestedFields(caseDetails)
+                : placeholdersMap,
             documentConfiguration.getApprovedConsentOrderTemplate(),
-            documentConfiguration.getApprovedConsentOrderFileName());
+            fileName);
     }
 
     public Document generateApprovedConsentOrderCoverLetter(FinremCaseDetails caseDetails, String authToken) {
         Map<String, Object> letterDetailsMap = letterDetailsMapper.getLetterDetailsAsMap(caseDetails, APPLICANT,
             caseDetails.getCaseData().getRegionWrapper().getDefaultCourtList());
 
+        String approvedOrderNotificationFileName;
+
+        if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(caseDetails.getCaseData()))) {
+            approvedOrderNotificationFileName = documentConfiguration.getApprovedVariationOrderNotificationFileName();
+            caseDetails.getCaseData().setOrderType(VARIATION);
+        } else {
+            approvedOrderNotificationFileName = documentConfiguration.getApprovedConsentOrderNotificationFileName();
+            caseDetails.getCaseData().setOrderType(CONSENT);
+        }
+
         Document generatedApprovedConsentOrderNotificationLetter = genericDocumentService.generateDocumentFromPlaceholdersMap(
             authToken, letterDetailsMap,
             documentConfiguration.getApprovedConsentOrderNotificationTemplate(),
-            documentConfiguration.getApprovedConsentOrderNotificationFileName());
+            approvedOrderNotificationFileName);
 
         log.info("Generated Approved Consent Order cover Letter: {}", generatedApprovedConsentOrderNotificationLetter);
 

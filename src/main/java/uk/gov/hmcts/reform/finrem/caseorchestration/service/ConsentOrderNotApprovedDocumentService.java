@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.LetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
@@ -23,7 +24,13 @@ import java.util.Optional;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CONSENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ORDER_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.VARIATION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +42,7 @@ public class ConsentOrderNotApprovedDocumentService {
     private final DocumentConfiguration documentConfiguration;
     private final DocumentOrderingService documentOrderingService;
     private final LetterDetailsMapper letterDetailsMapper;
+    private final ConsentedApplicationHelper consentedApplicationHelper;
 
     public List<BulkPrintDocument> prepareApplicantLetterPack(FinremCaseDetails caseDetails, String authorisationToken) {
         log.info("Generating consent order not approved documents for applicant, case ID {}", caseDetails.getId());
@@ -70,11 +78,21 @@ public class ConsentOrderNotApprovedDocumentService {
     private BulkPrintDocument coverLetter(FinremCaseDetails caseDetails, String authorisationToken) {
         Map<String, Object> placeholdersMap = letterDetailsMapper.getLetterDetailsAsMap(caseDetails, APPLICANT,
             caseDetails.getCaseData().getRegionWrapper().getDefaultCourtList());
+
+        String notApprovedOrderNotificationFileName;
+        if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(caseDetails.getCaseData()))) {
+            notApprovedOrderNotificationFileName = documentConfiguration.getVariationOrderNotApprovedCoverLetterFileName();
+            caseDetails.getCaseData().put(ORDER_TYPE, VARIATION);
+        } else {
+            notApprovedOrderNotificationFileName = documentConfiguration.getConsentOrderNotApprovedCoverLetterFileName();
+            caseDetails.getCaseData().put(ORDER_TYPE, CONSENT);
+        }
+
         Document coverLetter = genericDocumentService.generateDocumentFromPlaceholdersMap(
             authorisationToken,
             placeholdersMap,
             documentConfiguration.getConsentOrderNotApprovedCoverLetterTemplate(),
-            documentConfiguration.getConsentOrderNotApprovedCoverLetterFileName());
+            notApprovedOrderNotificationFileName);
         return documentHelper.getDocumentAsBulkPrintDocument(coverLetter).orElse(null);
     }
 

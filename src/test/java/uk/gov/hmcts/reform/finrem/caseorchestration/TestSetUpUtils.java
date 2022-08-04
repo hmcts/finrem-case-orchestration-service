@@ -74,6 +74,7 @@ public class TestSetUpUtils {
     public static final String DOC_URL = "http://dm-store/lhjbyuivu87y989hijbb";
     public static final String BINARY_URL = DOC_URL + "/binary";
     public static final String FILE_NAME = "app_docs.pdf";
+    public static final String VARIATION_FILE_NAME = "ApprovedVariationOrderLetter.pdf";
     public static final String INTE_DOC_URL = "http://dm-store/documents/e9ca7c4a-1f75-4b46-b0dc-744abc2dc0d3";
     public static final String INTE_BINARY_URL = INTE_DOC_URL + "/binary";
     public static final String INTE_FILE_NAME = "dummy1.pdf";
@@ -147,6 +148,14 @@ public class TestSetUpUtils {
         document.setFileName(FILE_NAME);
         document.setUrl(DOC_URL);
 
+        return document;
+    }
+
+    public static Document variationDocument() {
+        Document document = new Document();
+        document.setBinaryUrl(BINARY_URL);
+        document.setFileName(VARIATION_FILE_NAME);
+        document.setUrl(DOC_URL);
         return document;
     }
 
@@ -233,6 +242,37 @@ public class TestSetUpUtils {
     @Deprecated
     public static CaseDetails defaultConsentedCaseDetails() {
         Map<String, Object> caseData = new HashMap<>();
+        List<String> natureOfApplication =  List.of("Lump Sum Order",
+            "Periodical Payment Order",
+            "Pension Sharing Order",
+            "Pension Attachment Order",
+            "Pension Compensation Sharing Order",
+            "Pension Compensation Attachment Order",
+            "A settlement or a transfer of property",
+            "Property Adjustment Order");
+        caseData.put("natureOfApplication2", natureOfApplication);
+        populateApplicantNameAndAddress(caseData);
+        populateRespondentNameAndAddressConsented(caseData);
+
+        return CaseDetails.builder()
+            .caseTypeId(CASE_TYPE_ID_CONSENTED)
+            .id(123456789L)
+            .data(caseData)
+            .build();
+    }
+
+    public static CaseDetails defaultConsentedCaseDetailsForVariationOrder() {
+        Map<String, Object> caseData = new HashMap<>();
+        List<String> natureOfApplication =  List.of("Lump Sum Order",
+            "Periodical Payment Order",
+            "Pension Sharing Order",
+            "Pension Attachment Order",
+            "Pension Compensation Sharing Order",
+            "Pension Compensation Attachment Order",
+            "A settlement or a transfer of property",
+            "Variation Order",
+            "Property Adjustment Order");
+        caseData.put("natureOfApplication2", natureOfApplication);
         populateApplicantNameAndAddress(caseData);
         populateRespondentNameAndAddressConsented(caseData);
 
@@ -260,6 +300,15 @@ public class TestSetUpUtils {
 
     public static CaseDetails defaultContestedCaseDetails() {
         Map<String, Object> caseData = new HashMap<>();
+        List<String> natureOfApplication =  List.of("Lump Sum Order",
+            "Periodical Payment Order",
+            "Pension Sharing Order",
+            "Pension Attachment Order",
+            "Pension Compensation Sharing Order",
+            "Pension Compensation Attachment Order",
+            "A settlement or a transfer of property",
+            "Property Adjustment Order");
+        caseData.put("natureOfApplication2", natureOfApplication);
         populateApplicantNameAndAddress(caseData);
         populateRespondentNameAndAddressContested(caseData);
         populateCourtDetails(caseData);

@@ -58,6 +58,10 @@
     "authorisationFirm": "test",
     "authorisationName": "test",
     "divorceCaseNumber": "DD12D12345",
+    "natureOfApplication2": [
+      "item1",
+      "item2"
+    ],
     "respondentAddress": {
       "County": "Essex",
       "Country": "United Kingdom",

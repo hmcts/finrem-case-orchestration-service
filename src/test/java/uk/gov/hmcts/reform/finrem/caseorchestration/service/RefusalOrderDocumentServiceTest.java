@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -126,6 +127,14 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
         assertThat(caseData.get("ApplicantName"), is("Poor Guy"));
         assertThat(caseData.get("RespondentName"), is("john smith"));
         assertThat(caseData.get("RefusalOrderHeader"), is("Sitting in the Family Court"));
+        List<String> list  = (List<String>) caseData.get("natureOfApplication2");
+        assertNotNull(list);
+        if (list.contains("Variation Order")) {
+            assertThat(caseData.get("orderType"), is("variation"));
+        } else {
+            assertThat(caseData.get("orderType"), is("consent"));
+        }
+
     }
 
     private void assertConsentedCaseDataExtraFields() {

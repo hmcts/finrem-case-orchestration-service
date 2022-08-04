@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
@@ -46,6 +47,7 @@ public class NotificationRequestMapper {
     private static final String CONSENTED = "consented";
     private static final String CONTESTED = "contested";
     private final CaseDataService caseDataService;
+    private final ConsentedApplicationHelper consentedApplicationHelper;
     private final ObjectMapper objectMapper;
     private final CourtDetailsMapper courtDetailsMapper;
 
@@ -220,6 +222,17 @@ public class NotificationRequestMapper {
         notificationRequest.setGeneralEmailBody(Objects.toString(mapOfCaseData.get(GENERAL_EMAIL_BODY)));
         notificationRequest.setCaseType(getCaseType(caseDetails));
         notificationRequest.setPhoneOpeningHours(CTSC_OPENING_HOURS);
+        if (caseDataService.isConsentedApplication(caseDetails)) {
+            if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(mapOfCaseData))) {
+                notificationRequest.setCaseOrderType("variation");
+                notificationRequest.setCamelCaseOrderType("Variation");
+            } else {
+                notificationRequest.setCaseOrderType("consent");
+                notificationRequest.setCamelCaseOrderType("Consent");
+            }
+            log.info("caseOrder Type is {} for case ID: {}", notificationRequest.getCaseOrderType(),
+                notificationRequest.getCaseReferenceNumber());
+        }
 
         return notificationRequest;
     }

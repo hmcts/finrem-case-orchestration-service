@@ -175,6 +175,9 @@ sonarqube {
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/model/**',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/error/**',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/ccd/datamigration/model/**',
+                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/handler/AmendApplicationAboutToSubmitHandler.java',
+                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/handler/ApprovedConsentOrderAboutToSubmitHandler.java',
+                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/handler/RejectedConsentOrderSubmittedHandler.java',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/CaseOrchestrationApplication']
 
     properties {

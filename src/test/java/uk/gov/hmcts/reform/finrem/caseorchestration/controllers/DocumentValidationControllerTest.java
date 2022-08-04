@@ -11,6 +11,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentValidationService;
 
@@ -21,6 +22,7 @@ import java.net.URISyntaxException;
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -42,6 +44,9 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
     @MockBean
     private DocumentValidationService documentValidationService;
 
+    @MockBean
+    private ConsentedApplicationHelper helper;
+
     @Test
     public void shouldReturnSuccessWhenFileUploadCheck() throws Exception {
         doRequestSetUp();
@@ -58,6 +63,7 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors").doesNotExist());
+        verify(helper).setConsentVariationOrderLabelField(any());
     }
 
     @Test

@@ -40,6 +40,9 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.VARIATION_FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedFinremCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finremCaseDetailsFromResource;
@@ -70,6 +73,9 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     private String documentApprovedConsentOrderTemplate;
     @Value("${document.approvedConsentOrderFileName}")
     private String documentApprovedConsentOrderFileName;
+
+    @Value("${document.approvedVariationOrderFileName}")
+    private String approvedVariationOrderFileName;
 
     @Value("${document.approvedConsentOrderNotificationTemplate}")
     private String documentApprovedConsentOrderNotificationTemplate;
@@ -105,6 +111,22 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         assertCaseDocument(caseDocument);
         verify(documentClientMock, atLeastOnce()).generatePdf(
             matchDocumentGenerationRequestTemplateAndFilename(documentApprovedConsentOrderTemplate, documentApprovedConsentOrderFileName),
+            anyString());
+    }
+
+    @Test
+    public void shouldGenerateApprovedVariationOrderLetterForConsented() {
+        caseDetails = defaultConsentedCaseDetailsForVariationOrder();
+        when(documentClientMock.generatePdf(matchDocumentGenerationRequestTemplateAndFilename(documentApprovedConsentOrderTemplate,
+            approvedVariationOrderFileName), anyString())).thenReturn(variationDocument());
+        Document caseDocument = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, AUTH_TOKEN);
+
+        assertThat(caseDocument.getFilename(), is(VARIATION_FILE_NAME));
+        assertThat(caseDocument.getUrl(), is(DOC_URL));
+        assertThat(caseDocument.getBinaryUrl(), is(BINARY_URL));
+
+        verify(documentClientMock, atLeastOnce()).generatePdf(
+            matchDocumentGenerationRequestTemplateAndFilename(documentApprovedConsentOrderTemplate, approvedVariationOrderFileName),
             anyString());
     }
 

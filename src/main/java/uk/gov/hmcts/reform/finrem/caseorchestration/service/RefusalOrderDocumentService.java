@@ -4,7 +4,9 @@ import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.rejectedorder.RejectedOrderDetailsMapper;
 import uk.gov.hmcts.reform.finrem.ccd.domain.ConsentOrder;
 import uk.gov.hmcts.reform.finrem.ccd.domain.ConsentOrderCollection;
@@ -15,6 +17,14 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.OrderRefusalCollection;
 import uk.gov.hmcts.reform.finrem.ccd.domain.UploadOrder;
 import uk.gov.hmcts.reform.finrem.ccd.domain.UploadOrderCollection;
 import uk.gov.hmcts.reform.finrem.ccd.domain.UploadOrderDocumentType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -24,6 +34,8 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import static java.util.Objects.nonNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildConsentedFrcCourtDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +48,7 @@ public class RefusalOrderDocumentService {
     private final RejectedOrderDetailsMapper rejectedOrderDetailsMapper;
 
     private final Function<Pair<FinremCaseDetails, String>, Document> generateDocument = this::applyGenerateRefusalOrder;
+    private final ConsentedApplicationHelper consentedApplicationHelper;
     private final Function<Document, UploadOrderCollection> createConsentOrderData = this::applyCreateConsentOrderCollection;
 
     public FinremCaseData generateConsentOrderNotApproved(String authorisationToken, final FinremCaseDetails caseDetails) {
@@ -89,9 +102,16 @@ public class RefusalOrderDocumentService {
         Map<String, Object> refusalOrderDetailsMap = rejectedOrderDetailsMapper.getDocumentTemplateDetailsAsMap(data.getLeft(),
                 data.getLeft().getCaseData().getRegionWrapper().getDefaultCourtList());
 
+        String rejectOrderFileName;
+        if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(data.getLeft().getCaseData()))) {
+            rejectOrderFileName = documentConfiguration.getRejectedVariationOrderFileName();
+        } else {
+            rejectOrderFileName = documentConfiguration.getRejectedOrderFileName();
+        }
+
         return genericDocumentService.generateDocumentFromPlaceholdersMap(data.getRight(), refusalOrderDetailsMap,
             documentConfiguration.getRejectedOrderTemplate(),
-            documentConfiguration.getRejectedOrderFileName());
+            rejectOrderFileName);
     }
 
 
@@ -118,5 +138,28 @@ public class RefusalOrderDocumentService {
         }
 
         return caseData;
+    }
+
+    private CaseDetails applyAddExtraFields(CaseDetails caseDetails) {
+        Map<String, Object> caseData = caseDetails.getData();
+
+        caseData.put("ApplicantName", documentHelper.getApplicantFullName(caseDetails));
+        caseData.put("RefusalOrderHeader", "Sitting in the Family Court");
+        if (caseDataService.isConsentedApplication(caseDetails)) {
+            caseData.put("RespondentName", documentHelper.getRespondentFullNameConsented(caseDetails));
+            caseData.put("CourtName", "SITTING in private");
+            caseData.put("courtDetails", buildConsentedFrcCourtDetails());
+        } else {
+            caseData.put("RespondentName", documentHelper.getRespondentFullNameContested(caseDetails));
+            caseData.put("CourtName", "SITTING AT the Family Court at the "
+                + ContestedCourtHelper.getSelectedCourt(caseDetails));
+            caseData.put("courtDetails", buildFrcCourtDetails(caseData));
+        }
+        if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(caseData))) {
+            caseData.put("orderType", "variation");
+        } else {
+            caseData.put("orderType", "consent");
+        }
+        return caseDetails;
     }
 }
