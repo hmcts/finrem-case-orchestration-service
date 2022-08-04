@@ -16,15 +16,13 @@ public abstract class CaseDocumentHandler<T> {
 
     public CaseDocumentHandler(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
-
-        this.objectMapper.registerModule(new JavaTimeModule());
     }
 
     protected List<T> getDocumentCollection(Map<String, Object> caseData, String collection) {
         if (StringUtils.isEmpty(caseData.get(collection))) {
             return new ArrayList<>();
         }
-        return objectMapper.convertValue(caseData.get(collection), new TypeReference<>() {
+        return objectMapper.registerModule(new JavaTimeModule()).convertValue(caseData.get(collection), new TypeReference<>() {
         });
     }
 
