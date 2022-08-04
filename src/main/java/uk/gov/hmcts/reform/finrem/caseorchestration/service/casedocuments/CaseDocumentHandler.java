@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 
@@ -21,7 +22,7 @@ public abstract class CaseDocumentHandler<T> {
         if (StringUtils.isEmpty(caseData.get(collection))) {
             return new ArrayList<>();
         }
-        return objectMapper.convertValue(caseData.get(collection), new TypeReference<>() {
+        return objectMapper.registerModule(new JavaTimeModule()).convertValue(caseData.get(collection), new TypeReference<>() {
         });
     }
 
