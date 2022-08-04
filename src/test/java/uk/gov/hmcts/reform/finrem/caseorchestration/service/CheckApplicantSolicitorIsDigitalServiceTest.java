@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,7 +42,7 @@ public class CheckApplicantSolicitorIsDigitalServiceTest {
         caseData.put(APPLICANT_REPRESENTED, YES_VALUE);
         caseData.put(APPLICANT_ORGANISATION_POLICY, OrganisationPolicy.builder()
             .orgPolicyCaseAssignedRole(APP_SOLICITOR_POLICY)
-            .organisation(Organisation.builder().organisationID("TestID").organisationName("TestName").build())
+            .organisation(Organisation.builder().organisationID("ORG1234").organisationName("TestName").build())
             .build());
         caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONTESTED).id(123L).data(caseData).build();
     }
@@ -74,5 +75,89 @@ public class CheckApplicantSolicitorIsDigitalServiceTest {
 
         boolean isSolicitorDigital = checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails);
         assertFalse(isSolicitorDigital);
+    }
+
+    @Test
+    public void givenOrganisationIsEmpty_whenIsOrganisationIdEmpty_thenReturnTrue() {
+        OrganisationPolicy organisationPolicy = getOrganisationPolicy();
+        Organisation organisation = new Organisation();
+
+        organisation.setOrganisationID(null);
+        organisationPolicy.setOrganisation(organisation);
+
+        boolean isOrganisationEmpty = checkApplicantSolicitorIsDigitalService.isOrganisationEmpty(organisationPolicy);
+
+        assertTrue(isOrganisationEmpty);
+    }
+
+    @Test
+    public void givenOrganisationIsEmpty_whenIsOrganisationNameEmpty_thenReturnTrue() {
+        OrganisationPolicy organisationPolicy = getOrganisationPolicy();
+        Organisation organisation = new Organisation();
+
+        organisation.setOrganisationName(null);
+        organisationPolicy.setOrganisation(organisation);
+
+        boolean isOrganisationEmpty = checkApplicantSolicitorIsDigitalService.isOrganisationEmpty(organisationPolicy);
+
+        assertTrue(isOrganisationEmpty);
+    }
+
+
+    @Test
+    public void givenOrganisationIsNotEmpty_whenIsOrganisationEmpty_thenReturnFalse() {
+        OrganisationPolicy organisationPolicy = getOrganisationPolicy();
+
+        boolean isOrganisationEmpty = checkApplicantSolicitorIsDigitalService.isOrganisationEmpty(organisationPolicy);
+
+        assertFalse(isOrganisationEmpty);
+    }
+
+    @Test
+    public void givenOrganisationIdIsNull_whenIsOrganisationIdValid_thenReturnFalse() {
+        OrganisationPolicy organisationPolicy = getOrganisationPolicy();
+
+        organisationPolicy.getOrganisation().setOrganisationID(null);
+
+        boolean isValidOrganisationId = checkApplicantSolicitorIsDigitalService.isOrganisationIdRegistered(organisationPolicy);
+
+        assertFalse(isValidOrganisationId);
+    }
+
+    @Test
+    public void givenOrganisationIdIsEmpty_whenIsOrganisationIdValid_thenReturnFalse() {
+        OrganisationPolicy organisationPolicy = getOrganisationPolicy();
+
+        organisationPolicy.getOrganisation().setOrganisationID("");
+
+        boolean isValidOrganisationId = checkApplicantSolicitorIsDigitalService.isOrganisationIdRegistered(organisationPolicy);
+
+        assertFalse(isValidOrganisationId);
+    }
+
+    @Test
+    public void givenOrganisationIdIsInvalid_whenIsOrganisationIdValid_thenReturnFalse() {
+        OrganisationPolicy organisationPolicy = getOrganisationPolicy();
+
+        organisationPolicy.getOrganisation().setOrganisationID("abcd123");
+
+        boolean isValidOrganisationId = checkApplicantSolicitorIsDigitalService.isOrganisationIdRegistered(organisationPolicy);
+
+        assertFalse(isValidOrganisationId);
+    }
+
+    @Test
+    public void givenOrganisationIdIsValid_whenIsOrganisationIdValid_thenReturnTrue() {
+        OrganisationPolicy organisationPolicy = getOrganisationPolicy();
+
+        boolean isValidOrganisationId = checkApplicantSolicitorIsDigitalService.isOrganisationIdRegistered(organisationPolicy);
+
+        assertTrue(isValidOrganisationId);
+    }
+
+    public OrganisationPolicy getOrganisationPolicy() {
+        Map<String, Object> caseData = caseDetails.getData();
+        return new ObjectMapper().convertValue(caseData.get(APPLICANT_ORGANISATION_POLICY),
+            OrganisationPolicy.class);
     }
 }
