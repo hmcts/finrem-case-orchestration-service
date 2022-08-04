@@ -23,8 +23,9 @@ public class RejectedConsentOrderAboutToSubmitHandler implements CallbackHandler
     public boolean canHandle(final CallbackType callbackType, final CaseType caseType,
                              final EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
-            && CaseType.CONSENTED.equals(caseType)
-            && EventType.ORDER_REFUSAL.equals(eventType);
+            && (CaseType.CONTESTED.equals(caseType) || CaseType.CONSENTED.equals(caseType))
+            && (EventType.ORDER_REFUSAL.equals(eventType)
+            || EventType.CONSENT_ORDER_NOT_APPROVED.equals(eventType));
     }
 
     @Override

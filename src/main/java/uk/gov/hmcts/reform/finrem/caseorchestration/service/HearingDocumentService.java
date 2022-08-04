@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocu
 import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +50,8 @@ public class HearingDocumentService {
             .filter(detailsPair -> pair.getLeft().getCaseData().isFastTrackApplication())
             .map(this::generateFastTrackFormC)
             .orElseGet(() -> generateFormCAndG(pair));
+        objectMap.put(OUT_OF_FAMILY_COURT_RESOLUTION, generatOutOfFamilyCourtResolutionDocument(pair));
+        return objectMap;
     }
 
     private Map<String, Object> generateFormCAndG(Pair<FinremCaseDetails, String> pair) {
@@ -78,12 +79,15 @@ public class HearingDocumentService {
     }
 
     private Map<String, Object> generateFastTrackFormC(Pair<FinremCaseDetails, String> pair) {
-        Map<String, Object> formCDetailsMap = formCLetterDetailsMapper.getDocumentTemplateDetailsAsMap(pair.getLeft(),
-            pair.getLeft().getCaseData().getRegionWrapper().getDefaultCourtList());
-
         return ImmutableMap.of(FORM_C,
-            genericDocumentService.generateDocumentFromPlaceholdersMap(pair.getRight(), formCDetailsMap,
+            genericDocumentService.generateDocument(pair.getRight(), addFastTrackFields.apply(pair.getLeft()),
                 documentConfiguration.getFormCFastTrackTemplate(), documentConfiguration.getFormCFileName()));
+    }
+
+    private Document generatOutOfFamilyCourtResolutionDocument(Pair<CaseDetails, String> pair) {
+        return genericDocumentService.generateDocument(pair.getRight(), addFastTrackFields.apply(pair.getLeft()),
+            documentConfiguration.getOutOfFamilyCourtResolutionTemplate(),
+            documentConfiguration.getOutOfFamilyCourtResolutionName());
     }
 
     public void sendFormCAndGForBulkPrint(FinremCaseDetails caseDetails, String authorisationToken) {
@@ -121,6 +125,7 @@ public class HearingDocumentService {
         documentHelper.getDocumentAsBulkPrintDocument(caseData.getFormC()).ifPresent(caseDocuments::add);
         documentHelper.getDocumentAsBulkPrintDocument(caseData.getFormG()).ifPresent(caseDocuments::add);
         documentHelper.getDocumentAsBulkPrintDocument(caseData.getMiniFormA()).ifPresent(caseDocuments::add);
+        documentHelper.getDocumentAsBulkPrintDocument(caseData.getFamilyCourtResolution()).ifPresent(caseDocuments::add);
 
         List<Document> formADocuments = Optional.ofNullable(caseData.getCopyOfPaperFormA().stream()
             .map(collectionElement -> collectionElement.getValue().getUploadedDocument()).toList())
