@@ -122,20 +122,6 @@ public class NotificationsTest extends BaseTest {
     }
 
     @Test
-    public void notifyConsentOrderMade() throws Exception {
-        stubForNotification(NOTIFY_CONSENT_ORDER_MADE_CONTEXT_PATH, HttpStatus.OK.value());
-        webClient.perform(MockMvcRequestBuilders.post(CONSENT_ORDER_MADE_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(content().json(expectedCaseData()));
-        verify(postRequestedFor(urlEqualTo(NOTIFY_CONSENT_ORDER_MADE_CONTEXT_PATH))
-            .withHeader(CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE)));
-    }
-
-    @Test
     public void notifyConsentOrderAvailable() throws Exception {
         stubForNotification(NOTIFY_CONSENT_ORDER_AVAILABLE_CONTEXT_PATH, HttpStatus.OK.value());
         webClient.perform(MockMvcRequestBuilders.post(CONSENT_ORDER_AVAILABLE_URL)
@@ -146,20 +132,6 @@ public class NotificationsTest extends BaseTest {
             .andDo(print())
             .andExpect(content().json(expectedFinremCaseData()));
         verify(postRequestedFor(urlEqualTo(NOTIFY_CONSENT_ORDER_AVAILABLE_CONTEXT_PATH))
-            .withHeader(CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE)));
-    }
-
-    @Test
-    public void notifyConsentOrderNotApproved() throws Exception {
-        stubForNotification(NOTIFY_CONSENT_ORDER_NOT_APPROVED_CONTEXT_PATH, HttpStatus.OK.value());
-        webClient.perform(MockMvcRequestBuilders.post(CONSENT_ORDER_NOT_APPROVED_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(content().json(expectedCaseData()));
-        verify(postRequestedFor(urlEqualTo(NOTIFY_CONSENT_ORDER_NOT_APPROVED_CONTEXT_PATH))
             .withHeader(CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE)));
     }
 

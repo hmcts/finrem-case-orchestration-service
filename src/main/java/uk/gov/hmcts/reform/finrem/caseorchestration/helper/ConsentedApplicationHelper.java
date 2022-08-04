@@ -69,7 +69,7 @@ public class ConsentedApplicationHelper {
     public Boolean isVariationOrder(final Map<String, Object> caseData) {
         List<String> natureOfApplicationList = getNatureOfApplicationList(caseData);
         log.info("Nature list {}", natureOfApplicationList);
-        return (!org.springframework.util.CollectionUtils.isEmpty(natureOfApplicationList) && natureOfApplicationList.contains(VARIATION_ORDER));
+        return (!CollectionUtils.isEmpty(natureOfApplicationList) && natureOfApplicationList.contains(VARIATION_ORDER));
     }
 
     public List<String> getNatureOfApplicationList(final Map<String, Object> caseData) {
@@ -100,7 +100,17 @@ public class ConsentedApplicationHelper {
             : documentConfiguration.getConsentOrderNotApprovedCoverLetterFileName();
     }
 
+    public String getRejectedOrderFileName(FinremCaseData caseData) {
+        return isVariationOrder(caseData)
+            ? documentConfiguration.getRejectedVariationOrderFileName()
+            : documentConfiguration.getRejectedOrderFileName();
+    }
+
     public String getOrderType(FinremCaseData caseData) {
+        if (caseData.isContestedApplication()) {
+            return CONSENT;
+        }
+
         return Boolean.TRUE.equals(isVariationOrder(caseData))
             ? VARIATION
             : CONSENT;

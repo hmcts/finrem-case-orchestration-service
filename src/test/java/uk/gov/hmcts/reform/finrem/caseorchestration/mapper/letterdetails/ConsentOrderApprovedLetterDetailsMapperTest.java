@@ -91,6 +91,7 @@ public class ConsentOrderApprovedLetterDetailsMapperTest extends AbstractLetterD
             .servePensionProvider("Yes")
             .orderDirectionDate("2022-07-01")
             .civilPartnership("No")
+            .orderType("consent")
             .build();
     }
 }

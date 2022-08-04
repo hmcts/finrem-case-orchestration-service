@@ -81,6 +81,7 @@ public class ConsentInContestMiniFormADetailsMapperTest extends AbstractLetterDe
             .authorisationName("testAuthName")
             .authorisation2b("testAuth2b")
             .authorisation3("2022-05-05")
+            .orderType("consent")
             .build();
     }
 

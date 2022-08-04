@@ -20,16 +20,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RejectedConsentOrderAboutToSubmitHandlerTest {
+public class RejectedConsentOrderAboutToSubmitHandlerTest extends BaseHandlerTest {
 
     @InjectMocks
     private RejectedConsentOrderAboutToSubmitHandler handler;
     @Mock
     private RefusalOrderDocumentService refusalOrderDocumentService;
-
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
 
     private static final String AUTH_TOKEN = "4d73f8d4-2a8d-48e2-af91-11cbaa642345";
     private static final String REJECT_ORDER_VALID_JSON = "/fixtures/fee-lookup.json";
@@ -72,8 +68,8 @@ public class RejectedConsentOrderAboutToSubmitHandlerTest {
     }
 
     private CallbackRequest doValidCaseDataSetUp()  {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(REJECT_ORDER_VALID_JSON)) {
-            return objectMapper.readValue(resourceAsStream, CallbackRequest.class);
+        try {
+            return getCallbackRequestFromResource(REJECT_ORDER_VALID_JSON);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

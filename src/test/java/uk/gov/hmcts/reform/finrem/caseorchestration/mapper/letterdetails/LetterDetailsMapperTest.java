@@ -141,6 +141,7 @@ public class LetterDetailsMapperTest extends AbstractLetterDetailsMapperTest {
             .letterDate(String.valueOf(LocalDate.now()))
             .reference(getReference(recipient))
             .caseNumber("1596638099618923")
+            .orderType("consent")
             .build();
     }
 

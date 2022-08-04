@@ -16,8 +16,6 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 import uk.gov.hmcts.reform.finrem.ccd.domain.EventType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
-import java.io.InputStream;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
@@ -29,7 +27,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SolicitorCreateConsentedAboutToSubmitHandlerTest {
+public class SolicitorCreateConsentedAboutToSubmitHandlerTest extends BaseHandlerTest {
 
     private static final String AUTH_TOKEN = "4d73f8d4-2a8d-48e2-af91-11cbaa642345";
     private static final String APPROVE_ORDER_VALID_JSON = "/fixtures/pba-validate.json";
@@ -116,8 +114,8 @@ public class SolicitorCreateConsentedAboutToSubmitHandlerTest {
     }
 
     private CallbackRequest doValidCaseDataSetUp()  {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(APPROVE_ORDER_VALID_JSON)) {
-            return objectMapper.readValue(resourceAsStream, CallbackRequest.class);
+        try {
+            return getCallbackRequestFromResource(APPROVE_ORDER_VALID_JSON);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

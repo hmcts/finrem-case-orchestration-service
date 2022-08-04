@@ -91,12 +91,7 @@ public class RefusalOrderDocumentService {
         Map<String, Object> refusalOrderDetailsMap = rejectedOrderDetailsMapper.getDocumentTemplateDetailsAsMap(data.getLeft(),
                 data.getLeft().getCaseData().getRegionWrapper().getDefaultCourtList());
 
-        String rejectOrderFileName;
-        if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(data.getLeft().getCaseData()))) {
-            rejectOrderFileName = documentConfiguration.getRejectedVariationOrderFileName();
-        } else {
-            rejectOrderFileName = documentConfiguration.getRejectedOrderFileName();
-        }
+        String rejectOrderFileName = consentedApplicationHelper.getRejectedOrderFileName(data.getLeft().getCaseData());
 
         return genericDocumentService.generateDocumentFromPlaceholdersMap(data.getRight(), refusalOrderDetailsMap,
             documentConfiguration.getRejectedOrderTemplate(),

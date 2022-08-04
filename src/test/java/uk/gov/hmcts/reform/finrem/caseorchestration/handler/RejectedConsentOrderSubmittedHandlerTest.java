@@ -125,6 +125,7 @@ public class RejectedConsentOrderSubmittedHandlerTest {
     @Test
     public void givenContestCase_WhenAppSolAgreeToSendEmail_ThenSendConsentOrderNotApprovedEmail() {
         CallbackRequest callbackRequest = getConsentedCallbackRequestForConsentOrder();
+        callbackRequest.getCaseDetails().getCaseData().setCcdCaseType(CaseType.CONTESTED);
         when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(callbackRequest.getCaseDetails())).thenReturn(true);
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(callbackRequest.getCaseDetails().getCaseData())).thenReturn(true);
 

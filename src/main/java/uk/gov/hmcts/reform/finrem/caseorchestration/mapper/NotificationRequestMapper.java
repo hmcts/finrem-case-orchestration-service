@@ -187,6 +187,10 @@ public class NotificationRequestMapper {
                 notificationRequest.getCaseReferenceNumber());
         }
 
+        if (caseData.isConsentedApplication()) {
+            setCaseOrderType(notificationRequest, caseData);
+        }
+
         return notificationRequest;
     }
 
@@ -204,18 +208,22 @@ public class NotificationRequestMapper {
         notificationRequest.setCaseType(getCaseType(caseDetails));
         notificationRequest.setPhoneOpeningHours(CTSC_OPENING_HOURS);
         if (caseData.isConsentedApplication()) {
-            if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(caseData))) {
-                notificationRequest.setCaseOrderType("variation");
-                notificationRequest.setCamelCaseOrderType("Variation");
-            } else {
-                notificationRequest.setCaseOrderType("consent");
-                notificationRequest.setCamelCaseOrderType("Consent");
-            }
-            log.info("caseOrder Type is {} for case ID: {}", notificationRequest.getCaseOrderType(),
-                notificationRequest.getCaseReferenceNumber());
+            setCaseOrderType(notificationRequest, caseData);
         }
 
         return notificationRequest;
+    }
+
+    private void setCaseOrderType(NotificationRequest notificationRequest, FinremCaseData caseData) {
+        if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(caseData))) {
+            notificationRequest.setCaseOrderType("variation");
+            notificationRequest.setCamelCaseOrderType("Variation");
+        } else {
+            notificationRequest.setCaseOrderType("consent");
+            notificationRequest.setCamelCaseOrderType("Consent");
+        }
+        log.info("caseOrder Type is {} for case ID: {}", notificationRequest.getCaseOrderType(),
+            notificationRequest.getCaseReferenceNumber());
     }
 
     private NotificationRequest getNotificationCoreData(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {

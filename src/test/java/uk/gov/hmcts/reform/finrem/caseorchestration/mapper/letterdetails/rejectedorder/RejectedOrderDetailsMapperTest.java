@@ -101,6 +101,7 @@ public class RejectedOrderDetailsMapperTest extends AbstractLetterDetailsMapperT
             .courtDetails(getCourtDetails())
             .orderRefusalCollectionNew(getOrderRefusalCollectionNew())
             .civilPartnership("No")
+            .orderType("consent")
             .build();
     }
 
@@ -114,6 +115,7 @@ public class RejectedOrderDetailsMapperTest extends AbstractLetterDetailsMapperT
             .courtDetails(buildConsentedFrcCourtDetailsObject())
             .orderRefusalCollectionNew(getOrderRefusalCollectionNew())
             .civilPartnership("No")
+            .orderType("consent")
             .build();
     }
 

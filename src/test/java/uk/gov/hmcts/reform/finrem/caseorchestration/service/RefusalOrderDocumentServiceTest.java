@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -10,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.NatureApplication;
 import uk.gov.hmcts.reform.finrem.ccd.domain.OrderRefusalCollection;
 import uk.gov.hmcts.reform.finrem.ccd.domain.UploadOrderCollection;
 import uk.gov.hmcts.reform.finrem.ccd.domain.UploadOrderDocumentType;
@@ -60,7 +62,7 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
         assertThat(consentOrderData.getValue().getDocumentDateAdded(), is(notNullValue()));
         assertThat(consentOrderData.getValue().getDocumentComment(), is(equalTo("System Generated")));
 
-        assertCaseDataExtraFields();
+        assertCaseDataExtraFields(caseData);
         assertConsentedCaseDataExtraFields();
         assertCaseDocument(consentOrderData.getValue().getDocumentLink());
     }
@@ -73,7 +75,7 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
         FinremCaseData caseData = refusalOrderDocumentService.generateConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
         assertThat(caseData.getConsentOrderWrapper().getConsentedNotApprovedOrders(), hasSize(1));
 
-        assertCaseDataExtraFields();
+        assertCaseDataExtraFields(caseData);
         assertContestedCaseDataExtraFields("Birmingham Civil And Family Justice Centre");
     }
 
@@ -113,12 +115,12 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
         FinremCaseData caseData = refusalOrderDocumentService.previewConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
         Document caseDocument = caseData.getOrderRefusalPreviewDocument();
 
-        assertCaseDataExtraFields();
+        assertCaseDataExtraFields(caseData);
         assertConsentedCaseDataExtraFields();
         assertCaseDocument(caseDocument);
     }
 
-    private void assertCaseDataExtraFields() {
+    private void assertCaseDataExtraFields(FinremCaseData finremCaseData) {
         verify(genericDocumentService, times(1)).generateDocumentFromPlaceholdersMap(any(),
             placeholdersMapCaptor.capture(),
             any(), any());
@@ -127,9 +129,9 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
         assertThat(caseData.get("ApplicantName"), is("Poor Guy"));
         assertThat(caseData.get("RespondentName"), is("john smith"));
         assertThat(caseData.get("RefusalOrderHeader"), is("Sitting in the Family Court"));
-        List<String> list  = (List<String>) caseData.get("natureOfApplication2");
-        assertNotNull(list);
-        if (list.contains("Variation Order")) {
+        List<NatureApplication> natureOfApplication2List = finremCaseData.getNatureApplicationWrapper().getNatureOfApplication2();
+
+        if (!CollectionUtils.isEmpty(natureOfApplication2List) && natureOfApplication2List.contains(NatureApplication.VARIATION_ORDER)) {
             assertThat(caseData.get("orderType"), is("variation"));
         } else {
             assertThat(caseData.get("orderType"), is("consent"));
