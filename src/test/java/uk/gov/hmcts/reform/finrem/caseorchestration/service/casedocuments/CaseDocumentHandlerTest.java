@@ -42,6 +42,7 @@ public abstract class CaseDocumentHandlerTest {
                 .caseDocumentConfidential(isConfidential)
                 .caseDocumentOther(other)
                 .caseDocumentFdr(isFdr)
+                .hearingDetails(null)
                 .uploadDateTime(LocalDateTime.now())
                 .build())
             .build();
