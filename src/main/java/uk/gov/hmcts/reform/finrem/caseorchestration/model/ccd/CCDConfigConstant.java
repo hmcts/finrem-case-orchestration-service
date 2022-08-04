@@ -269,6 +269,7 @@ public class CCDConfigConstant {
     public static final String FORM_A_COLLECTION = "copyOfPaperFormA";
     public static final String FORM_C = "formC";
     public static final String FORM_G = "formG";
+    public static final String OUT_OF_FAMILY_COURT_RESOLUTION = "outOfFamilyCourtResolution";
     public static final String OTHER_DOCS_COLLECTION = "otherCollection";
     public static final String GENERAL_LETTER = "generalLetterCollection";
     public static final String GENERAL_LETTER_BODY = "generalLetterBody";
