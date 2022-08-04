@@ -50,7 +50,7 @@ public class ManageCaseDocumentsService {
             caseData.get(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION), new TypeReference<>() {});
 
         newDocuments.forEach(document -> document.getUploadedCaseDocument().setUploadDateTime(LocalDateTime.now()));
-        caseData.put(CONTESTED_UPLOADED_DOCUMENTS, newDocuments);
+        caseData.put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, newDocuments);
 
         removeDeletedFilesFromCaseData(caseData);
 
