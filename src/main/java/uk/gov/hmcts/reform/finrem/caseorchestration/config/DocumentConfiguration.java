@@ -22,6 +22,8 @@ public class DocumentConfiguration {
     private String formCFileName;
     private String formGTemplate;
     private String formGFileName;
+    private String outOfFamilyCourtResolutionTemplate;
+    private String outOfFamilyCourtResolutionName;
     private String contestedMiniFormTemplate;
     private String contestedMiniFormFileName;
     private String contestedDraftMiniFormTemplate;

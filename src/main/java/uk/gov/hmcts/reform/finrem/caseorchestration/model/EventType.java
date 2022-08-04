@@ -21,6 +21,7 @@ public enum EventType {
     AMEND_CASE("FR_amendCase"),
     APPROVE_ORDER("FR_approveApplication"),
     REJECT_ORDER("FR_orderRefusal"),
+    CONSENT_ORDER_NOT_APPROVED("FR_consentOrderNotApproved"),
     CLOSE("FR_close"),
     MANAGE_CASE_DOCUMENTS("FR_manageCaseDocuments"),
     UPLOAD_APPROVED_ORDER("FR_uploadApprovedOrder"),
