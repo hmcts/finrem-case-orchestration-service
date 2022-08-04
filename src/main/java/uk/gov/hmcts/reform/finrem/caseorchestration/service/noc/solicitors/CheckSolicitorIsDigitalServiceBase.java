@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Slf4j
 public abstract class CheckSolicitorIsDigitalServiceBase {
@@ -14,14 +15,24 @@ public abstract class CheckSolicitorIsDigitalServiceBase {
     @Autowired
     protected final CaseDataService caseDataService;
 
-    public CheckSolicitorIsDigitalServiceBase(CaseDataService caseDataService) {
+    protected CheckSolicitorIsDigitalServiceBase(CaseDataService caseDataService) {
         this.caseDataService = caseDataService;
     }
 
-    protected boolean isOrganisationEmpty(OrganisationPolicy organisationPolicy) {
+    public boolean isOrganisationEmpty(OrganisationPolicy organisationPolicy) {
         return Optional.ofNullable(organisationPolicy.getOrganisation()).isEmpty()
             || organisationPolicy.getOrganisation().getOrganisationID() == null;
     }
 
     public abstract boolean isSolicitorDigital(CaseDetails caseDetails);
+
+    public final boolean isOrganisationIdRegistered(OrganisationPolicy organisationPolicy) {
+        String myHmctsRegex = "^[A-Z0-9]{7}$";
+
+        if (!isOrganisationEmpty(organisationPolicy)) {
+            String organisationId = organisationPolicy.getOrganisation().getOrganisationID();
+            return Pattern.matches(myHmctsRegex, organisationId);
+        }
+        return false;
+    }
 }
