@@ -32,7 +32,7 @@ public class CheckApplicantSolicitorIsDigitalService extends CheckSolicitorIsDig
                 caseDetails.getId()));
         }
 
-        return !isOrganisationEmpty(applicantPolicy) && isApplicantRepresented;
+        return isApplicantRepresented && isOrganisationIdRegistered(applicantPolicy);
     }
 
     private OrganisationPolicy getApplicantOrganisationPolicy(Map<String, Object> caseData) {

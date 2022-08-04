@@ -32,7 +32,7 @@ public class CheckRespondentSolicitorIsDigitalService extends CheckSolicitorIsDi
                 caseDetails.getId()));
         }
 
-        return !isOrganisationEmpty(respondentPolicy) && isRespondentRepresented;
+        return isRespondentRepresented && isOrganisationIdRegistered(respondentPolicy);
     }
 
     private OrganisationPolicy getRespondentOrganisationPolicy(Map<String, Object> caseData) {
