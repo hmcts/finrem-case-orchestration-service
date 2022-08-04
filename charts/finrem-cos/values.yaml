@@ -16,7 +16,7 @@ java:
     CCD_DATA_STORE_API_BASEURL: "http://ccd-data-store-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     IDAM_API_REDIRECT_URL: "https://finrem-frontend-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal/oauth2/callback"
   autoscaling:
-    enabled: true
+    enabled: false
     maxReplicas: 4
     minReplicas: 2
     targetCPUUtilizationPercentage: 80 # Default is 80% target CPU utilization
