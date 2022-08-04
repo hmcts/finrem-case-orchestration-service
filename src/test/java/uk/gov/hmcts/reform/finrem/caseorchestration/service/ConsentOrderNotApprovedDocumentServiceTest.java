@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.UploadOrder;
 import uk.gov.hmcts.reform.finrem.ccd.domain.UploadOrderCollection;
 import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 

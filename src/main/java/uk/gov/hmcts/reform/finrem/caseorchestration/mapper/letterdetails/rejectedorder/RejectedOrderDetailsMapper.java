@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.rejectedorder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
@@ -18,7 +17,6 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.CourtListWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;

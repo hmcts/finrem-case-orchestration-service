@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultValueAboutToStartHandlerTest {

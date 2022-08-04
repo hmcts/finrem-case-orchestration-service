@@ -214,18 +214,6 @@ public class NotificationRequestMapper {
         return notificationRequest;
     }
 
-    private void setCaseOrderType(NotificationRequest notificationRequest, FinremCaseData caseData) {
-        if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(caseData))) {
-            notificationRequest.setCaseOrderType("variation");
-            notificationRequest.setCamelCaseOrderType("Variation");
-        } else {
-            notificationRequest.setCaseOrderType("consent");
-            notificationRequest.setCamelCaseOrderType("Consent");
-        }
-        log.info("caseOrder Type is {} for case ID: {}", notificationRequest.getCaseOrderType(),
-            notificationRequest.getCaseReferenceNumber());
-    }
-
     private NotificationRequest getNotificationCoreData(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
         NotificationRequest notificationRequest = new NotificationRequest();
         Map<String, Object> mapOfCaseData = caseDetails.getData();
@@ -252,6 +240,18 @@ public class NotificationRequestMapper {
         }
 
         return notificationRequest;
+    }
+
+    private void setCaseOrderType(NotificationRequest notificationRequest, FinremCaseData caseData) {
+        if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(caseData))) {
+            notificationRequest.setCaseOrderType("variation");
+            notificationRequest.setCamelCaseOrderType("Variation");
+        } else {
+            notificationRequest.setCaseOrderType("consent");
+            notificationRequest.setCamelCaseOrderType("Consent");
+        }
+        log.info("caseOrder Type is {} for case ID: {}", notificationRequest.getCaseOrderType(),
+            notificationRequest.getCaseReferenceNumber());
     }
 
     private String getCaseType(FinremCaseDetails caseDetails) {
