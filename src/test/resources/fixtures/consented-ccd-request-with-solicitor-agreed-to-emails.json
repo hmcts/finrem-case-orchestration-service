@@ -22,7 +22,7 @@
       },
       "ApplicantOrganisationPolicy": {
         "Organisation": {
-          "OrganisationID": "testID",
+          "OrganisationID": "TESTID1",
           "OrganisationName": "testName"
         },
         "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
