@@ -10,6 +10,7 @@ import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedDocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
@@ -28,6 +29,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler implements Callbac
 
     private final List<CaseDocumentHandler> caseDocumentHandlers;
     private final ObjectMapper objectMapper;
+    private final UploadedDocumentHelper uploadedDocumentHelper;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -39,7 +41,9 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler implements Callbac
     @Override
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest, String userAuthorisation) {
 
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        Map<String, Object> caseData = uploadedDocumentHelper.addUploadDateToNewDocuments(
+            callbackRequest.getCaseDetails().getData(),
+            callbackRequest.getCaseDetailsBefore().getData(), CONTESTED_UPLOADED_DOCUMENTS);
         List<ContestedUploadedDocumentData> uploadedDocuments = getDocumentCollection(caseData, CONTESTED_UPLOADED_DOCUMENTS);
         caseDocumentHandlers.stream().forEach(h -> h.handle(uploadedDocuments, caseData));
         caseData.put(CONTESTED_UPLOADED_DOCUMENTS, uploadedDocuments);

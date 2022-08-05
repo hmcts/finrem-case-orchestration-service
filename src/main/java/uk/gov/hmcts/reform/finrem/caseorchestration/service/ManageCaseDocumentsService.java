@@ -46,12 +46,6 @@ public class ManageCaseDocumentsService {
     }
 
     public Map<String, Object> manageCaseDocuments(Map<String, Object> caseData) {
-        List<ContestedUploadedDocumentData> newDocuments = mapper.convertValue(
-            caseData.get(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION), new TypeReference<>() {});
-
-        newDocuments.forEach(document -> document.getUploadedCaseDocument().setUploadDateTime(LocalDateTime.now()));
-        caseData.put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, newDocuments);
-
         removeDeletedFilesFromCaseData(caseData);
 
         Map<String, String> idToCollectionData = findCollectionNameOfDocument(caseData);
