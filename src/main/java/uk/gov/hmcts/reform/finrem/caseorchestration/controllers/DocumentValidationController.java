@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse.AboutToStartOrSubmitCallbackResponseBuilder;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentValidationService;
@@ -28,10 +29,12 @@ import javax.validation.constraints.NotNull;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.google.common.base.Strings.nullToEmpty;
 import static java.util.Objects.nonNull;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse.builder;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -60,7 +63,9 @@ public class DocumentValidationController extends BaseController {
         log.info("Received request for checkUploadedFileType for Case ID: {}", caseId);
 
         validateCaseData(callbackRequest);
-        helper.setConsentVariationOrderLabelField(callbackRequest.getCaseDetails().getData());
+        if (Boolean.TRUE.equals(isConsentedApplication(callbackRequest.getCaseDetails()))) {
+            helper.setConsentVariationOrderLabelField(callbackRequest.getCaseDetails().getData());
+        }
         return ResponseEntity.ok(response(callbackRequest, field, authorisationToken));
     }
 
@@ -72,5 +77,9 @@ public class DocumentValidationController extends BaseController {
             return builder.errors(response.getErrors()).build();
         }
         return builder.build();
+    }
+
+    public Boolean isConsentedApplication(CaseDetails caseDetails) {
+        return CASE_TYPE_ID_CONSENTED.equalsIgnoreCase(nullToEmpty(caseDetails.getCaseTypeId()));
     }
 }
