@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ManageCaseDocumentsService {
 
-    public static final String ILLEGAL_ACCESS_MESSAGE = "Illegal access has occurred, could not manage case documents";
+    public static final String ILLEGAL_ACCESS_MESSAGE = "Illegal access has occurred, could not manage case documents, reason: ";
     private final List<CaseDocumentHandler<UploadCaseDocumentCollection>> caseDocumentHandlers;
     private final List<Field> contestedUploadCaseFilesCollectionFields = Arrays.stream(ContestedUploadCaseFilesCollectionType.values())
         .map(ContestedUploadCaseFilesCollectionType::getManageCaseDocumentCollectionField).toList();
@@ -89,7 +89,7 @@ public class ManageCaseDocumentsService {
                 .ifPresent(value -> replaceCollectionWithValue(caseData, findRemainingApplicantAndRespondentDocumentIds,
                     collection, (List<UploadCaseDocumentCollection>) value));
         } catch (IllegalAccessException e) {
-            throw new IllegalStateException(ILLEGAL_ACCESS_MESSAGE);
+            throw new IllegalStateException(ILLEGAL_ACCESS_MESSAGE + e.getMessage());
         }
     }
 
@@ -99,7 +99,7 @@ public class ManageCaseDocumentsService {
             collection.set(caseData.getUploadCaseDocumentWrapper(),
                 filterRemainingDocuments(findRemainingApplicantAndRespondentDocumentIds, value));
         } catch (IllegalAccessException e) {
-            throw new IllegalStateException(ILLEGAL_ACCESS_MESSAGE);
+            throw new IllegalStateException(ILLEGAL_ACCESS_MESSAGE + e.getMessage());
         }
     }
 
@@ -134,7 +134,7 @@ public class ManageCaseDocumentsService {
             try {
                 removeDocumentFromCollection(caseData, caseDocumentsCollection, uploadCaseDocumentData, collection);
             } catch (IllegalAccessException e) {
-                e.printStackTrace();
+                throw new IllegalStateException(ILLEGAL_ACCESS_MESSAGE + e.getMessage());
             }
         });
     }

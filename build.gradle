@@ -257,8 +257,6 @@ static def getCheckedOutGitCommitHash() {
     'git rev-parse --verify --short HEAD'.execute().text.trim()
 }
 
-tasks.withType(Jar) { duplicatesStrategy = DuplicatesStrategy.INHERIT }
-
 task fortifyScan(type: JavaExec) {
     mainClass.set("uk.gov.hmcts.fortifyclient.FortifyClientMainApp")
     classpath += sourceSets.test.runtimeClasspath
@@ -382,10 +380,6 @@ tasks.withType(Tar){
 }
 
 tasks.withType(Zip){
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-}
-
-tasks.withType(War){
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
