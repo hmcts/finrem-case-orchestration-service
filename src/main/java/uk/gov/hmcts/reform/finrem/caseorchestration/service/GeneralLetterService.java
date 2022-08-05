@@ -46,7 +46,6 @@ public class GeneralLetterService {
             field.setAccessible(true);
             return !nullToEmpty(field.get(address)).isEmpty();
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
             return false;
         }
     };
