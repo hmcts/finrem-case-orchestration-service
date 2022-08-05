@@ -79,7 +79,7 @@ public class DocumentValidationController extends BaseController {
         return builder.build();
     }
 
-    public Boolean isConsentedApplication(CaseDetails caseDetails) {
+    private Boolean isConsentedApplication(CaseDetails caseDetails) {
         return CASE_TYPE_ID_CONSENTED.equalsIgnoreCase(nullToEmpty(caseDetails.getCaseTypeId()));
     }
 }
