@@ -1,18 +1,17 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.formc;
+package uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class FormCLetterDetails implements DocumentTemplateDetails {
+public class FormGLetterDetails implements DocumentTemplateDetails {
     private String divorceCaseNumber;
     private FrcCourtDetails courtDetails;
     @JsonProperty("applicantFMName")
@@ -24,12 +23,6 @@ public class FormCLetterDetails implements DocumentTemplateDetails {
     private String solicitorReference;
     @JsonProperty("rSolicitorReference")
     private String respondentSolicitorReference;
-    private String hearingDateLess35Days;
-    private String hearingDateLess14Days;
     private String hearingDate;
     private String hearingTime;
-    private String timeEstimate;
-    private String additionalInformationAboutHearing;
-    private String formCCreatedDate;
-    private String eventDatePlus21Days;
 }

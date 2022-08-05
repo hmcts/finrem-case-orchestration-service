@@ -42,14 +42,13 @@ public class CheckRespondentSolicitorIsDigitalService extends CheckSolicitorIsDi
         FinremCaseData caseData = caseDetails.getCaseData();
         uk.gov.hmcts.reform.finrem.ccd.domain.OrganisationPolicy respondentPolicy =
             caseData.getRespondentOrganisationPolicy();
-        boolean isRespondentRepresented = getRespondentIsRepresented(caseData);
 
         if (respondentPolicy == null) {
             throw new IllegalStateException(String.format("Respondent Organisation Policy is null for caseId %s",
                 caseDetails.getId()));
         }
 
-        return !isOrganisationEmpty(respondentPolicy) && isRespondentRepresented;
+        return !isOrganisationEmpty(respondentPolicy) && caseData.isRespondentRepresentedByASolicitor();
     }
 
     @Deprecated
@@ -60,11 +59,6 @@ public class CheckRespondentSolicitorIsDigitalService extends CheckSolicitorIsDi
 
     private boolean getRespondentIsRepresented(Map<String, Object> caseData) {
         return caseDataService.isRespondentRepresentedByASolicitor(caseData);
-    }
-
-    private boolean getRespondentIsRepresented(FinremCaseData caseData) {
-        return caseData.getContactDetailsWrapper().getConsentedRespondentRepresented().isYes()
-            || caseData.getContactDetailsWrapper().getContestedRespondentRepresented().isYes();
     }
 }
 

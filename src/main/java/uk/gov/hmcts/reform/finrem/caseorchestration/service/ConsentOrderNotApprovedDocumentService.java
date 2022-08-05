@@ -97,7 +97,7 @@ public class ConsentOrderNotApprovedDocumentService {
             log.info("Extracting 'uploadOrder' from case data for bulk print.");
             List<UploadOrderCollection> documentList = ofNullable(caseData.getUploadOrder()).orElse(emptyList());
             if (!documentList.isEmpty()) {
-                UploadOrderCollection element = documentList.stream().reduce((first, second) -> second).get();
+                UploadOrderCollection element = Iterables.getLast(documentList);
                 Optional<Document> generalOrder = ofNullable(element.getValue().getDocumentLink());
                 if (generalOrder.isPresent()) {
                     log.info("Sending general order ({}) for bulk print.", generalOrder.get().getFilename());

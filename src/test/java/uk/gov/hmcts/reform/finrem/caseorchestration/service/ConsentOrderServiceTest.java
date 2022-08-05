@@ -6,11 +6,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.ccd.domain.AmendedConsentOrder;
+import uk.gov.hmcts.reform.finrem.ccd.domain.AmendedConsentOrderCollection;
+import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
+import uk.gov.hmcts.reform.finrem.ccd.domain.EventType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.RespondToOrderDocument;
+import uk.gov.hmcts.reform.finrem.ccd.domain.RespondToOrderDocumentCollection;
+import uk.gov.hmcts.reform.finrem.ccd.domain.RespondToOrderDocumentType;
 
 import java.io.InputStream;
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class ConsentOrderServiceTest extends BaseServiceTest {
 
@@ -66,5 +76,83 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
         assertThat(latestConsentOrderData.getDocumentUrl(), is("http://doc2"));
         assertThat(latestConsentOrderData.getDocumentFilename(), is("doc2"));
         assertThat(latestConsentOrderData.getDocumentBinaryUrl(), is("http://doc2/binary"));
+    }
+
+    @Test
+    public void givenValidCaseDataAndRespondToOrderEvent_whenGetLatestConsentOrder_thenReturnLatestOrder() {
+        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callback = setUpCallbackRequest(EventType.RESPOND_TO_ORDER);
+
+        Document latestConsentOrderData = consentOrderService.getLatestConsentOrderData(callback);
+
+        assertThat(latestConsentOrderData.getFilename(), is("testFilename"));
+    }
+
+    @Test
+    public void givenRespondToOrderEventAndNoRespondToOrderDocCollection_whenGetLatestConsentOrder_thenReturnLatestOrder() {
+        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callback = setUpCallbackRequest(EventType.RESPOND_TO_ORDER);
+        callback.getCaseDetails().getCaseData().setRespondToOrderDocuments(null);
+        callback.getCaseDetails().getCaseData().setLatestConsentOrder(Document.builder().filename("latestOrder").build());
+
+        Document latestConsentOrderData = consentOrderService.getLatestConsentOrderData(callback);
+
+        assertThat(latestConsentOrderData.getFilename(), is("latestOrder"));
+    }
+
+    @Test
+    public void givenAmendedConsentOrderEvent_whenGetLatestConsentOrderData_thenReturnLatestOrder() {
+        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callback = setUpCallbackRequest(EventType.AMENDED_CONSENT_ORDER);
+        callback.getCaseDetails().getCaseData().setAmendedConsentOrderCollection(getAmendedConsentOrderCollection());
+
+        Document latestConsentOrderData = consentOrderService.getLatestConsentOrderData(callback);
+
+        assertThat(latestConsentOrderData.getFilename(), is("amendedConsentOrderLatest"));
+    }
+
+    @Test
+    public void givenAmendedConsentOrderEventAndNoAmendedConsentOrders_whenGetLatestConsentOrderData_thenReturnLatestOrder() {
+        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callback = setUpCallbackRequest(EventType.AMENDED_CONSENT_ORDER);
+        callback.getCaseDetails().getCaseData().setLatestConsentOrder(Document.builder().filename("latestConsentOrder").build());
+
+        Document latestConsentOrderData = consentOrderService.getLatestConsentOrderData(callback);
+
+        assertThat(latestConsentOrderData.getFilename(), is("latestConsentOrder"));
+    }
+
+    private List<AmendedConsentOrderCollection> getAmendedConsentOrderCollection() {
+        return List.of(
+            AmendedConsentOrderCollection.builder()
+                .value(AmendedConsentOrder.builder()
+                    .amendedConsentOrder(Document.builder().filename("amendedConsentOrder").build())
+                    .build())
+                .build(),
+            AmendedConsentOrderCollection.builder()
+                .value(AmendedConsentOrder.builder()
+                    .amendedConsentOrder(Document.builder().filename("amendedConsentOrderLatest").build())
+                    .build())
+                .build()
+        );
+    }
+
+    private uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest setUpCallbackRequest(EventType eventType) {
+        FinremCaseData caseData = new FinremCaseData();
+        caseData.setRespondToOrderDocuments(List.of(
+                RespondToOrderDocumentCollection.builder()
+                    .value(RespondToOrderDocument.builder()
+                        .documentType(RespondToOrderDocumentType.AMENDED_CONSENT_ORDER)
+                        .documentLink(Document.builder().filename("testFilename").build())
+                        .build())
+                    .build(),
+            RespondToOrderDocumentCollection.builder()
+                .value(RespondToOrderDocument.builder()
+                    .documentType(RespondToOrderDocumentType.OTHER)
+                    .documentLink(Document.builder().filename("otherFilename").build())
+                    .build())
+                .build()
+        ));
+
+        return uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest.builder()
+            .eventType(eventType)
+            .caseDetails(FinremCaseDetails.builder().caseData(caseData).build())
+            .build();
     }
 }

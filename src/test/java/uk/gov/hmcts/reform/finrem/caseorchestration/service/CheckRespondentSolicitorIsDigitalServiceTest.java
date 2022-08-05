@@ -10,6 +10,10 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +39,7 @@ public class CheckRespondentSolicitorIsDigitalServiceTest {
     CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
 
     private CaseDetails caseDetails;
+    private FinremCaseDetails finremCaseDetails;
 
     @Before
     public void setUp() {
@@ -45,6 +50,15 @@ public class CheckRespondentSolicitorIsDigitalServiceTest {
             .organisation(Organisation.builder().organisationID("TestIdResp").organisationName("TestName").build())
             .build());
         caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONTESTED).id(123L).data(caseData).build();
+
+        FinremCaseData finremCaseData = new FinremCaseData();
+        finremCaseData.setCcdCaseType(CaseType.CONTESTED);
+        finremCaseData.getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.YES);
+        finremCaseData.setRespondentOrganisationPolicy(uk.gov.hmcts.reform.finrem.ccd.domain.OrganisationPolicy.builder()
+            .organisation(uk.gov.hmcts.reform.finrem.ccd.domain.Organisation.builder().organisationID("TestID")
+                .organisationName("TestName").build())
+            .build());
+        finremCaseDetails = FinremCaseDetails.builder().caseType(CaseType.CONTESTED).caseData(finremCaseData).build();
     }
 
     @Test
@@ -77,5 +91,16 @@ public class CheckRespondentSolicitorIsDigitalServiceTest {
 
         boolean isSolicitorDigital = checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails);
         assertFalse(isSolicitorDigital);
+    }
+
+    @Test
+    public void givenContestedCaseAndOrganisationPresent_whenCheckSolIsDigitalFinremCaseData_thenReturnTrue() {
+        assertTrue(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(finremCaseDetails));
+    }
+
+    @Test
+    public void givenContestedCaseAndNoOrganisationPresent_whenCheckSolIsDigitalFinremCaseData_thenReturnFalse() {
+        finremCaseDetails.getCaseData().getContactDetailsWrapper().setContestedRespondentRepresented(YesOrNo.NO);
+        assertFalse(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(finremCaseDetails));
     }
 }

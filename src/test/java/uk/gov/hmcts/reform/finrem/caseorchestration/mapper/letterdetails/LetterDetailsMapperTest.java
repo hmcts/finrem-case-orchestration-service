@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.BasicLetterDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Address;
 import uk.gov.hmcts.reform.finrem.ccd.domain.BristolCourt;
 import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;

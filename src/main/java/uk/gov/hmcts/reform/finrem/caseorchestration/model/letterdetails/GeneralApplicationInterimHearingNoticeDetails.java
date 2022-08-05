@@ -1,10 +1,9 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.interimhearing;
+package uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 
 @Data

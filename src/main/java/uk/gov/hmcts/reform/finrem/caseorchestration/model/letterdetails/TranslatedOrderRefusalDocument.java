@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.rejectedorder;
+package uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;

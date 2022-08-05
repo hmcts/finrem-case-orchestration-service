@@ -3,8 +3,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.approvedorderhearing.ApprovedOrderNoticeOfHearingDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.approvedorderhearing.ApprovedOrderNoticeOfHearingDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.ApprovedOrderNoticeOfHearingDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 
 import java.util.Date;
 import java.util.Map;

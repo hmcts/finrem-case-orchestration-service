@@ -4,7 +4,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.genera
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapperTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.DocumentTemplateDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.GeneralOrderDetails;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

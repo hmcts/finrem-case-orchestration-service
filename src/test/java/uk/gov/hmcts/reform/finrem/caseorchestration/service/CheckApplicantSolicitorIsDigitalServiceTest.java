@@ -10,6 +10,10 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
+import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,6 +38,7 @@ public class CheckApplicantSolicitorIsDigitalServiceTest {
     CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
 
     private CaseDetails caseDetails;
+    private FinremCaseDetails finremCaseDetails;
 
     @Before
     public void setUp() {
@@ -44,6 +49,15 @@ public class CheckApplicantSolicitorIsDigitalServiceTest {
             .organisation(Organisation.builder().organisationID("TestID").organisationName("TestName").build())
             .build());
         caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONTESTED).id(123L).data(caseData).build();
+
+        FinremCaseData finremCaseData = new FinremCaseData();
+        finremCaseData.setCcdCaseType(CaseType.CONTESTED);
+        finremCaseData.getContactDetailsWrapper().setApplicantRepresented(YesOrNo.YES);
+        finremCaseData.setApplicantOrganisationPolicy(uk.gov.hmcts.reform.finrem.ccd.domain.OrganisationPolicy.builder()
+            .organisation(uk.gov.hmcts.reform.finrem.ccd.domain.Organisation.builder().organisationID("TestID")
+                .organisationName("TestName").build())
+            .build());
+        finremCaseDetails = FinremCaseDetails.builder().caseType(CaseType.CONTESTED).caseData(finremCaseData).build();
     }
 
     @Test
@@ -74,5 +88,16 @@ public class CheckApplicantSolicitorIsDigitalServiceTest {
 
         boolean isSolicitorDigital = checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails);
         assertFalse(isSolicitorDigital);
+    }
+
+    @Test
+    public void givenContestedCaseAndOrganisationPresent_whenCheckSolIsDigitalFinremCaseData_thenReturnTrue() {
+        assertTrue(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(finremCaseDetails));
+    }
+
+    @Test
+    public void givenContestedCaseAndNoOrgPresent_whenCheckSolIsDigitalFinremCaseData_thenReturnTrue() {
+        finremCaseDetails.getCaseData().getContactDetailsWrapper().setApplicantRepresented(YesOrNo.NO);
+        assertFalse(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(finremCaseDetails));
     }
 }

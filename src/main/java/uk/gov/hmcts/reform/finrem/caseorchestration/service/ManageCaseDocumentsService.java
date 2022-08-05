@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ManageCaseDocumentsService {
 
+    public static final String ILLEGAL_ACCESS_MESSAGE = "Illegal access has occurred, could not manage case documents";
     private final List<CaseDocumentHandler<UploadCaseDocumentCollection>> caseDocumentHandlers;
     private final List<Field> contestedUploadCaseFilesCollectionFields = Arrays.stream(ContestedUploadCaseFilesCollectionType.values())
         .map(ContestedUploadCaseFilesCollectionType::getManageCaseDocumentCollectionField).toList();
@@ -44,7 +45,7 @@ public class ManageCaseDocumentsService {
             return caseDetails.getCaseData();
         } catch (IllegalAccessException e) {
             log.error("Illegal access has occurred {}, : message: {}", e.getCause(), e.getMessage());
-            throw new IllegalStateException("Illegal access has occurred, could not manage case documents");
+            throw new IllegalStateException(ILLEGAL_ACCESS_MESSAGE);
         }
     }
 
@@ -63,7 +64,7 @@ public class ManageCaseDocumentsService {
             return caseData;
         } catch (IllegalAccessException e) {
             log.error("Illegal access has occurred {}, : message: {}", e.getCause(), e.getMessage());
-            throw new IllegalStateException("Illegal access has occurred, could not manage case documents");
+            throw new IllegalStateException(ILLEGAL_ACCESS_MESSAGE);
         }
     }
 
@@ -88,7 +89,7 @@ public class ManageCaseDocumentsService {
                 .ifPresent(value -> replaceCollectionWithValue(caseData, findRemainingApplicantAndRespondentDocumentIds,
                     collection, (List<UploadCaseDocumentCollection>) value));
         } catch (IllegalAccessException e) {
-            throw new IllegalStateException("Illegal access has occurred, could not manage case documents");
+            throw new IllegalStateException(ILLEGAL_ACCESS_MESSAGE);
         }
     }
 
@@ -98,7 +99,7 @@ public class ManageCaseDocumentsService {
             collection.set(caseData.getUploadCaseDocumentWrapper(),
                 filterRemainingDocuments(findRemainingApplicantAndRespondentDocumentIds, value));
         } catch (IllegalAccessException e) {
-            throw new IllegalStateException("Illegal access has occurred, could not manage case documents");
+            throw new IllegalStateException(ILLEGAL_ACCESS_MESSAGE);
         }
     }
 
@@ -147,8 +148,8 @@ public class ManageCaseDocumentsService {
 
         for (ListIterator<UploadCaseDocumentCollection> docCollectionIterator = allDocumentsInCollection.listIterator();
              docCollectionIterator.hasNext();) {
-
             UploadCaseDocumentCollection document = docCollectionIterator.next();
+
             collection.set(uploadCaseDocumentData, findIfDocumentExistInCollectionAfterMove(
                 caseData, docCollectionIterator, document, caseDocumentsCollection));
         }
@@ -197,7 +198,7 @@ public class ManageCaseDocumentsService {
         return Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getManageCaseDocumentCollection()).orElse(new ArrayList<>())
             .stream()
             .map(UploadCaseDocumentCollection::getId)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private List<UploadCaseDocumentCollection> getAllDocumentsInCollection(UploadCaseDocumentWrapper data,

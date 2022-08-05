@@ -1,11 +1,11 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.miniformaconsented;
+package uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.DocumentTemplateDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Address;
 
 import java.util.List;

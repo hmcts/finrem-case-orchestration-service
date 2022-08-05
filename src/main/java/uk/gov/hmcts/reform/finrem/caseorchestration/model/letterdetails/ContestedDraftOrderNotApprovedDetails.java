@@ -1,17 +1,17 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.contestorderapproved;
+package uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.DocumentTemplateDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ContestOrderApprovedLetterDetails implements DocumentTemplateDetails {
+public class ContestedDraftOrderNotApprovedDetails implements DocumentTemplateDetails {
     @JsonProperty("ApplicantName")
     private String applicantName;
     @JsonProperty("RespondentName")
@@ -20,9 +20,9 @@ public class ContestOrderApprovedLetterDetails implements DocumentTemplateDetail
     private String court;
     @JsonProperty("JudgeDetails")
     private String judgeDetails;
-    @JsonProperty("letterDate")
-    private String letterDate;
-    private String civilPartnership;
+    @JsonProperty("ContestOrderNotApprovedRefusalReasonsFormatted")
+    private String contestOrderNotApprovedRefusalReasons;
     private String divorceCaseNumber;
-    private String orderApprovedDate;
+    private String civilPartnership;
+    private String refusalOrderDate;
 }

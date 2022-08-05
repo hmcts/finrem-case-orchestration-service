@@ -14,13 +14,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.Finrem
 import uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.ccd.domain.DraftDirectionOrder;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.JudgeType;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -104,5 +108,24 @@ public class HearingOrderControllerTest extends BaseControllerTest {
         hearingOrderController.storeApprovedHearingOrder(AUTH_TOKEN, buildCallbackRequestString());
 
         verify(hearingOrderService, never()).appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(any());
+    }
+
+    @Test
+    public void givenValidData_whenHearingOrderStart_thenRemoveFields() throws JsonProcessingException {
+        CallbackRequest callbackRequest = getCallbackRequest(buildCallbackRequestString());
+        callbackRequest.getCaseDetails().getCaseData().setOrderApprovedJudgeType(JudgeType.DISTRICT_JUDGE);
+        callbackRequest.getCaseDetails().getCaseData().setOrderApprovedDate(LocalDate.now());
+        when(idamService.getIdamFullName(eq(AUTH_TOKEN))).thenReturn("Test Judge Name");
+        when(deserializer.deserialize(any())).thenReturn(callbackRequest);
+
+        ResponseEntity<AboutToStartOrSubmitCallbackResponse> response =
+            hearingOrderController.startHearingOrder(AUTH_TOKEN, buildCallbackRequestString());
+
+        assertNotNull(response.getBody());
+        FinremCaseData caseData = response.getBody().getData();
+
+        assertThat(caseData.getOrderApprovedJudgeType(), is(nullValue()));
+        assertThat(caseData.getOrderApprovedDate(), is(nullValue()));
+        assertThat(caseData.getOrderApprovedJudgeName(), is("Test Judge Name"));
     }
 }

@@ -98,10 +98,10 @@ public class ConsentOrderPrintService {
             Document generalOrder = caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument();
 
             if (orderDocuments.isEmpty()) {
-                bulkPrintDocuments.add(documentHelper.getDocumentAsBulkPrintDocument(generalOrder).get());
+                bulkPrintDocuments.add(documentHelper.getDocumentAsBulkPrintDocument(generalOrder).orElse(null));
             } else {
                 if (documentOrderingService.isDocumentModifiedLater(generalOrder, orderDocuments.get(0), authorisationToken)) {
-                    bulkPrintDocuments.add(documentHelper.getDocumentAsBulkPrintDocument(generalOrder).get());
+                    bulkPrintDocuments.add(documentHelper.getDocumentAsBulkPrintDocument(generalOrder).orElse(null));
                 } else {
                     bulkPrintDocuments.addAll(documentHelper.getDocumentsAsBulkPrintDocuments(orderDocuments));
                 }
