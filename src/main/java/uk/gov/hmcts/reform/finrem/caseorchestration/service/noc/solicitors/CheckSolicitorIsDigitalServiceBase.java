@@ -27,11 +27,11 @@ public abstract class CheckSolicitorIsDigitalServiceBase {
     public abstract boolean isSolicitorDigital(CaseDetails caseDetails);
 
     public final boolean isOrganisationIdRegistered(OrganisationPolicy organisationPolicy) {
-        String myHmctsRegex = "^[A-Z0-9]{7}$";
+        String validOrganisationIdRegex = "^[A-Z0-9]{7}$";
 
         if (!isOrganisationEmpty(organisationPolicy)) {
             String organisationId = organisationPolicy.getOrganisation().getOrganisationID();
-            return Pattern.matches(myHmctsRegex, organisationId);
+            return Pattern.matches(validOrganisationIdRegex, organisationId);
         }
         return false;
     }
