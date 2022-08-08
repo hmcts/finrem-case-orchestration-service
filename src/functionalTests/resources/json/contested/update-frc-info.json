@@ -1,6 +1,6 @@
 {
   "token": "token_test",
-  "event_id": "some_event_id",
+  "event_id": "FR_assignToJudge",
   "case_details": {
     "id": 1234567890,
     "jurisdiction": "DIVORCE",
@@ -61,6 +61,7 @@
       "orderForChildrenQuestion1": "Yes",
       "applicantSolicitorConsentForEmails": "Yes",
       "RespSolNotificationsEmailConsent": "Yes",
+      "swanseaCourtList": "FR_swansea_hc_list_6",
       "allocatedCourtList": {
         "regionList": "wales",
         "walesList": "swansea",

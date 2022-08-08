@@ -60,7 +60,7 @@
         {
           "id": "1",
           "value": {
-            "typeOfDocument": "pdf",
+            "typeOfDocument": "ScheduleOfAssets",
             "uploadedDocument": {
               "document_url": "http://file1",
               "document_filename": "file1",
@@ -81,7 +81,7 @@
         {
           "id": "1",
           "value": {
-            "typeOfDocument": "pdf",
+            "typeOfDocument": "Form P1",
             "uploadedDocument": {
               "document_url": "http://dm-store:8080/documents/ff08dbe1-dd16-4ec5-8b72-4c5379e0455f",
               "document_filename": "sample.pdf",
@@ -107,15 +107,24 @@
       "divorceStageReached": "Decree Nisi",
       "helpWithFeesQuestion": "No",
       "natureOfApplication2": [
-        "item1",
-        "item2"
+        "Lump Sum Order",
+        "periodicalPaymentOrder",
+        "Pension Sharing Order",
+        "Pension Attachment Order",
+        "Pension Compensation Sharing Order",
+        "Pension Compensation Attachment Order",
+        "A settlement or a transfer of property",
+        "propertyAdjustmentOrder"
       ],
       "natureOfApplication3a": "test",
       "natureOfApplication3b": "test",
       "natureOfApplication5": "No",
       "natureOfApplication6": [
-        "item1",
-        "item2"
+        "Step Child or Step Children",
+        "disability expenses",
+        "In addition to child support",
+        "training",
+        "When not habitually resident"
       ],
       "natureOfApplication7": "test",
       "divorceUploadEvidence1": {
@@ -131,7 +140,7 @@
       },
       "divorceDecreeAbsoluteDate": "2010-01-01",
       "orderForChildrenQuestion1": "Yes",
-      "orderDirection": "test",
+      "orderDirection": "Order Accepted as drafted",
       "orderDirectionOpt1": {
         "document_url": "http://file1",
         "document_filename": "file1",
@@ -142,15 +151,15 @@
         "document_filename": "ApprovedConsentOrderLetter.pdf",
         "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/d9e63738-f2ff-4cca-adbe-e2a983cdbd8b"
       },
-      "orderDirectionAbsolute": "test",
-      "orderDirectionJudge": "test",
+      "orderDirectionAbsolute": "Yes",
+      "orderDirectionJudge": "District Judge",
       "orderDirectionJudgeName": "test",
       "orderDirectionDate": "2010-01-01",
       "dueDate": "2010-01-01",
       "issueDate": "2010-01-01",
       "orderDirectionAddComments": "test",
       "orderDirectionOpt2": "test",
-      "assignedToJudgeReason": "test",
+      "assignedToJudgeReason": "Resubmitted draft consent order",
       "assignedToJudge": "judge1",
       "referToJudgeDate": "2010-01-01",
       "referToJudgeText": "test",
@@ -171,7 +180,7 @@
           "id": "1",
           "value": {
             "orderRefusal": [
-              "Other"
+              "Other (please specify)"
             ],
             "orderRefusalDate": "2003-02-01",
             "orderRefusalDocs": {
@@ -198,7 +207,7 @@
         {
           "id": "1",
           "value": {
-            "DocumentType": "pdf",
+            "DocumentType": "consentOrder",
             "DocumentLink": {
               "document_url": "http://doc1",
               "document_filename": "doc1",
@@ -215,7 +224,7 @@
         {
           "id": "1",
           "value": {
-            "DocumentType": "pdf",
+            "DocumentType": "generalOrder",
             "DocumentLink": {
               "document_url": "http://doc1",
               "document_filename": "doc1",
@@ -232,7 +241,7 @@
         {
           "id": "1",
           "value": {
-            "DocumentType": "pdf",
+            "DocumentType": "Final order",
             "DocumentLink": {
               "document_url": "http://doc1",
               "document_filename": "doc1",
@@ -255,7 +264,7 @@
               "document_filename": "doc1",
               "document_binary_url": "http://doc1.binary"
             },
-            "generalOrder_judgeList": "district judge",
+            "generalOrder_judgeList": "District Judge",
             "generalOrder_judgeName": "judge1",
             "generalOrder_dateOfOrder": "2010-01-02",
             "generalOrder_comments": "comment1"

@@ -1,9 +1,9 @@
 {
-  "event_id": "some_event_id",
+  "event_id": "FR_assignToJudge",
   "case_details": {
     "id": "17878767",
     "jurisdiction": "DIVORCE",
-    "state": "applicationDrafted",
+    "state": "caseAdded",
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
       "helpWithFeesQuestion": "No",
@@ -77,9 +77,9 @@
       },
       "divorceUploadEvidence2": null,
       "MIAMExemptionsChecklist": [
-        "domesticViolence ",
+        "domesticViolence",
         "urgency",
-        "previousMIAMattendance ",
+        "previousMIAMattendance",
         "other"
       ],
       "applicantSolicitorEmail": "padmaja.ramisetti001@gmail.com",

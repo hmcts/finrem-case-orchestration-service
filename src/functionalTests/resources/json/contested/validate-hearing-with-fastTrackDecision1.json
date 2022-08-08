@@ -1,9 +1,9 @@
 {
-  "event_id": "some_event_id",
+  "event_id": "FR_assignToJudge",
   "case_details": {
     "id": "123",
     "jurisdiction": "DIVORCE",
-    "state": "applicationDrafted",
+    "state": "caseAdded",
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
       "PBANumber": "PBA123",
@@ -48,6 +48,7 @@
       "respondentEmail": null,
       "respondentPhone": "9963472494",
       "appRespondentRep": "No",
+      "cfcCourtList": "FR_s_CFCList_2",
       "consentOrderText": {
         "document_url": "http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69",
         "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
@@ -67,7 +68,7 @@
       "divorceCaseNumber": "DD12D12345",
       "issueDate": "2019-03-04",
       "hearingDate": "2019-06-24",
-      "fastTrackDecision": "yes",
+      "fastTrackDecision": "Yes",
       "pensionCollection": [
         {
           "id": "ad403dd7-75da-4ca6-8cf6-24a5e42f5bf4",
@@ -107,13 +108,13 @@
       "helpWithFeesQuestion": "No",
       "natureOfApplication2": [
         "Lump Sum Order",
-        "Periodical Payment Order",
+        "periodicalPaymentOrder",
         "Pension Sharing Order",
         "Pension Attachment Order",
         "Pension Compensation Sharing Order",
         "Pension Compensation Attachment Order",
         "A settlement or a transfer of property",
-        "Property Adjustment Order"
+        "propertyAdjustmentOrder"
       ],
       "natureOfApplication5": "No",
       "natureOfApplication6": [

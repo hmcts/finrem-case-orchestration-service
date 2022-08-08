@@ -1,6 +1,6 @@
 {
   "token": "test_token",
-  "event_id": "event1",
+  "event_id": "FR_assignToJudge",
   "case_details": {
     "case_data": {
       "HWFNumber": "HWF123",
@@ -27,7 +27,7 @@
       "applicantFMName": "Thomas",
       "applicantLName": "Berdict",
       "assignedToJudge": "Judge Judy",
-      "assignedToJudgeReason": "Testing",
+      "assignedToJudgeReason": "Resubmitted draft consent order",
       "authorisation2b": "test",
       "authorisation3": "2020-01-01",
       "authorisationFirm": "test",
@@ -72,7 +72,7 @@
         "document_filename": "file2",
         "document_binary_url": "http://file2.binary"
       },
-      "dueDate": "2019-03-21T09:53:03.013Z",
+      "dueDate": "2019-03-21",
       "generalOrderCollection": [
         {
           "id": "1",
@@ -83,14 +83,14 @@
               "document_filename": "doc1",
               "document_binary_url": "http://doc1.binary"
             },
-            "generalOrder_judgeList": "district judge",
+            "generalOrder_judgeList": "District Judge",
             "generalOrder_judgeName": "judge1",
             "generalOrder_dateOfOrder": "2010-01-02",
             "generalOrder_comments": "comment1"
           }
         }
       ],
-      "helpWithFeesQuestion": "NO",
+      "helpWithFeesQuestion": "No",
       "issueDate": "2019-02-21",
       "miniFormA": {
         "document_url": "http://doc1",
@@ -98,21 +98,31 @@
         "document_binary_url": "http://doc1.binary"
       },
       "natureOfApplication2": [
-        "item1",
-        "item2"
+        "Lump Sum Order",
+        "periodicalPaymentOrder",
+        "Pension Sharing Order",
+        "Pension Attachment Order",
+        "Pension Compensation Sharing Order",
+        "Pension Compensation Attachment Order",
+        "A settlement or a transfer of property",
+        "propertyAdjustmentOrder"
       ],
       "natureOfApplication3a": "test",
       "natureOfApplication3b": "test",
-      "natureOfApplication5": "test",
+      "natureOfApplication5": "No",
       "natureOfApplication6": [
-        "test"
+        "Step Child or Step Children",
+        "disability expenses",
+        "In addition to child support",
+        "training",
+        "When not habitually resident"
       ],
       "natureOfApplication7": "test",
-      "orderDirection": "test",
-      "orderDirectionAbsolute": "test",
+      "orderDirection": "Order Accepted as drafted",
+      "orderDirectionAbsolute": "Yes",
       "orderDirectionAddComments": "test",
       "orderDirectionDate": "2019-02-21",
-      "orderDirectionJudge": "test",
+      "orderDirectionJudge": "District Judge",
       "orderDirectionJudgeName": "test",
       "orderDirectionOpt1": {
         "document_url": "http://file1",
@@ -120,13 +130,13 @@
         "document_binary_url": "http://file1.binary"
       },
       "orderDirectionOpt2": "test",
-      "orderForChildrenQuestion1": "test",
+      "orderForChildrenQuestion1": "Yes",
       "orderRefusalCollection": [
         {
           "id": "1",
           "value": {
             "orderRefusal": [
-              "Other"
+              "Other (please specify)"
             ],
             "orderRefusalDate": "2003-02-01",
             "orderRefusalDocs": {
@@ -167,7 +177,7 @@
         {
           "id": "1",
           "value": {
-            "typeOfDocument": "pdf",
+            "typeOfDocument": "ScheduleOfAssets",
             "uploadedDocument": {
               "document_url": "http://file1",
               "document_filename": "file1",
@@ -180,7 +190,7 @@
         {
           "id": "1",
           "value": {
-            "typeOfDocument": "pdf",
+            "typeOfDocument": "Form P1",
             "uploadedDocument": {
               "document_url": "http://file1",
               "document_filename": "file1",
@@ -222,7 +232,7 @@
         {
           "id": "1",
           "value": {
-            "DocumentType": "pdf",
+            "DocumentType": "ApplicantLetterEmail",
             "DocumentLink": {
               "document_url": "http://doc1",
               "document_filename": "doc1",
@@ -253,7 +263,7 @@
         "AddressLine2": "line2",
         "AddressLine3": "line3"
       },
-      "solicitorAgreeToReceiveEmails": "yes",
+      "solicitorAgreeToReceiveEmails": "Yes",
       "solicitorDXnumber": "string",
       "solicitorEmail": "email@@hmcts.net",
       "solicitorFirm": "FirmA",
@@ -265,7 +275,7 @@
         {
           "id": "1",
           "value": {
-            "DocumentType": "pdf",
+            "DocumentType": "consentOrder",
             "DocumentLink": {
               "document_url": "http://doc1",
               "document_filename": "doc1",
@@ -282,7 +292,7 @@
         {
           "id": "1",
           "value": {
-            "DocumentType": "pdf",
+            "DocumentType": "Final order",
             "DocumentLink": {
               "document_url": "http://doc1",
               "document_filename": "doc1",
@@ -299,7 +309,7 @@
         {
           "id": "1",
           "value": {
-            "DocumentType": "pdf",
+            "DocumentType": "generalOrder",
             "DocumentLink": {
               "document_url": "http://doc1",
               "document_filename": "doc1",
@@ -315,7 +325,7 @@
     },
     "id": "12345678",
     "jurisdiction": "divorce",
-    "state": "created",
+    "state": "caseAdded",
     "case_type_id": "FinancialRemedyMVP2"
   }
 }

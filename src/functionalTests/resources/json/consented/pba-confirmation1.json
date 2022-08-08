@@ -25,7 +25,7 @@
       "applicantFMName": "string",
       "applicantLName": "string",
       "assignedToJudge": "string",
-      "assignedToJudgeReason": "string",
+      "assignedToJudgeReason": "Resubmitted draft consent order",
       "authorisation2b": "string",
       "authorisation3": "2019-02-20T17:10:23.973Z",
       "authorisationFirm": "string",
@@ -96,20 +96,31 @@
         "document_url": "string"
       },
       "natureOfApplication2": [
-        "string"
+        "Lump Sum Order",
+        "periodicalPaymentOrder",
+        "Pension Sharing Order",
+        "Pension Attachment Order",
+        "Pension Compensation Sharing Order",
+        "Pension Compensation Attachment Order",
+        "A settlement or a transfer of property",
+        "propertyAdjustmentOrder"
       ],
       "natureOfApplication3a": "string",
       "natureOfApplication3b": "string",
-      "natureOfApplication5": "string",
+      "natureOfApplication5": "No",
       "natureOfApplication6": [
-        "string"
+        "Step Child or Step Children",
+        "disability expenses",
+        "In addition to child support",
+        "training",
+        "When not habitually resident"
       ],
       "natureOfApplication7": "string",
-      "orderDirection": "string",
-      "orderDirectionAbsolute": "string",
+      "orderDirection": "Order Accepted as drafted",
+      "orderDirectionAbsolute": "Yes",
       "orderDirectionAddComments": "string",
       "orderDirectionDate": "2019-02-20T17:10:23.973Z",
-      "orderDirectionJudge": "string",
+      "orderDirectionJudge": "District Judge",
       "orderDirectionJudgeName": "string",
       "orderDirectionOpt1": {
         "document_binary_url": "string",
@@ -117,14 +128,14 @@
         "document_url": "string"
       },
       "orderDirectionOpt2": "string",
-      "orderForChildrenQuestion1": "string",
+      "orderForChildrenQuestion1": "Yes",
       "orderRefusalCollection": [
         {
           "id": "string",
           "value": {
             "estimateLengthOfHearing": "string",
             "orderRefusal": [
-              "string"
+              "Other (please specify)"
             ],
             "orderRefusalAddComments": "string",
             "orderRefusalDate": "2019-02-20T17:10:23.973Z",
@@ -164,7 +175,7 @@
         {
           "id": "string",
           "value": {
-            "typeOfDocument": "string",
+            "typeOfDocument": "ScheduleOfAssets",
             "uploadedDocument": {
               "document_binary_url": "string",
               "document_filename": "string",
@@ -177,7 +188,7 @@
         {
           "id": "string",
           "value": {
-            "typeOfDocument": "string",
+            "typeOfDocument": "Form P1",
             "uploadedDocument": {
               "document_binary_url": "string",
               "document_filename": "string",
@@ -226,7 +237,7 @@
               "document_filename": "string",
               "document_url": "string"
             },
-            "DocumentType": "string"
+            "DocumentType": "ApplicantLetterEmail"
           }
         }
       ],
@@ -271,7 +282,7 @@
               "document_filename": "string",
               "document_url": "string"
             },
-            "DocumentType": "string"
+            "DocumentType": "consentOrder"
           }
         }
       ],
@@ -288,7 +299,7 @@
               "document_filename": "string",
               "document_url": "string"
             },
-            "DocumentType": "string"
+            "DocumentType": "Final order"
           }
         }
       ],
@@ -305,16 +316,16 @@
               "document_filename": "string",
               "document_url": "string"
             },
-            "DocumentType": "string"
+            "DocumentType": "generalOrder"
           }
         }
       ]
     },
-    "id": "string",
-    "jurisdiction": "string",
-    "state": "string",
+    "id": "123",
+    "jurisdiction": "divorce",
+    "state": "caseAdded",
     "case_type_id": "FinancialRemedyMVP2"
   },
-  "event_id": "string",
+  "event_id": "FR_assignToJudge",
   "token": "string"
 }

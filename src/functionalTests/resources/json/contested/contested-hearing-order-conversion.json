@@ -1,5 +1,5 @@
 {
-  "event_id": "someEventid",
+  "event_id": "FR_assignToJudge",
   "case_details": {
     "id": "123",
     "jurisdiction": "DIVORCE",
@@ -87,12 +87,12 @@
       "fastTrackDecisionReason": null,
       "MIAMOtherGroundsChecklist": null,
       "solicitorResponsibleForDraftingOrder": "applicantSolicitor",
-      "attendingCourtWithArrangement": "no",
+      "attendingCourtWithArrangement": "No",
       "divorceCaseNumber": "EM18D33333",
       "additionalPropertyOrderDecision": "No",
       "estimatedAssetsChecklist": null,
       "latestDraftDirectionOrder": {
-        "purposeOfDocument": "Draft order",
+        "purposeOfDocument": "Draft order ",
         "uploadDraftDocument": {
           "document_url": "http://document-management-store:8080/documents/0fa425c8-7603-4687-adfe-b4c97c69fdb7",
           "document_binary_url": "http://document-management-store:8080/documents/0fa425c8-7603-4687-adfe-b4c97c69fdb7/binary",
@@ -104,7 +104,7 @@
         {
           "id": null,
           "value": {
-            "purposeOfDocument": "Draft order",
+            "purposeOfDocument": "Draft order ",
             "uploadDraftDocument": {
               "document_url": "http://document-management-store:8080/documents/a9958f9f-997d-47aa-8c02-fb34f4703209",
               "document_filename": "AdditionalHearingDocument.pdf",
@@ -151,7 +151,7 @@
       "applicantSolicitorDXnumber": "776890",
       "applicantSolicitorEmail": "fr_applicant_sol@sharklasers.com",
       "paymentForChildrenDecision": "No",
-      "attendingCourtWithAssistance": "no",
+      "attendingCourtWithAssistance": "No",
       "mortgageDetail": "Halifax mortgage",
       "familyMediatorServiceName1": null,
       "respondentLName": "Whisper",

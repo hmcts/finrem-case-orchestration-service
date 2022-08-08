@@ -1,7 +1,7 @@
 {
   "id": "12345678",
   "jurisdiction": "divorce",
-  "state": "created",
+  "state": "caseAdded",
   "case_type_id": "FinancialRemedyContested",
   "case_data": {
     "MIAMExemptionsChecklist": [
@@ -25,13 +25,13 @@
       "There is a significant risk that in the period necessary to schedule and attend a MIAM, proceedings relating to the dispute will be brought in another state in which a valid claim to jurisdiction may exist, such that a court in that ... cont"
     ],
     "natureOfApplicationChecklist": [
-      "Periodical Payment Order",
+      "periodicalPaymentOrder",
       "Lump Sum Order",
       "Pension Sharing Order",
       "Pension Attachment Order",
       "Pension Compensation Sharing Order",
       "Pension Compensation Attachment Order",
-      "Property Adjustment Order"
+      "propertyAdjustmentOrder"
     ],
     "potentialAllegationChecklist": [
       "Pre- or post-nuptial agreements",

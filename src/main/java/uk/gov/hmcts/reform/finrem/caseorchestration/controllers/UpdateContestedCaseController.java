@@ -27,7 +27,6 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.MiamExemption;
 import uk.gov.hmcts.reform.finrem.ccd.domain.NatureApplication;
 import uk.gov.hmcts.reform.finrem.ccd.domain.StageReached;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -234,7 +233,7 @@ public class UpdateContestedCaseController extends BaseController {
 
     private void removeBenefitsDetails(FinremCaseData caseData) {
         caseData.setBenefitForChildrenDecision(null);
-        caseData.setBenefitPaymentChecklist(new ArrayList<>());
+        caseData.setBenefitPaymentChecklist(null);
     }
 
     private void removeContestedPeriodicalPaymentOrderDetails(FinremCaseData caseData) {

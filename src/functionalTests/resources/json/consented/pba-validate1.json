@@ -1,9 +1,9 @@
 {
-  "event_id": "some_event_id",
+  "event_id": "FR_assignToJudge",
   "case_details": {
     "id": "95959595",
     "jurisdiction": "DIVORCE",
-    "state": "applicationDrafted",
+    "state": "caseAdded",
     "case_type_id": "FinancialRemedyMVP2",
     "case_data": {
       "PBANumber": "PBA222",
@@ -62,6 +62,7 @@
         "AddressLine2": "Srikalahasti, Chittor District",
         "AddressLine3": "test"
       },
+      "cfcCourtList": "FR_s_CFCList_2",
       "authorisationFirm": "test",
       "authorisationName": "test",
       "divorceCaseNumber": "ED12D67898",
@@ -95,13 +96,13 @@
       "helpWithFeesQuestion": "No",
       "natureOfApplication2": [
         "Lump Sum Order",
-        "Periodical Payment Order",
+        "periodicalPaymentOrder",
         "Pension Sharing Order",
         "Pension Attachment Order",
         "Pension Compensation Sharing Order",
         "Pension Compensation Attachment Order",
         "A settlement or a transfer of property",
-        "Property Adjustment Order"
+        "propertyAdjustmentOrder"
       ],
       "natureOfApplication5": "No",
       "natureOfApplication6": [

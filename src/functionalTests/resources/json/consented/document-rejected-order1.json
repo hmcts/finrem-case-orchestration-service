@@ -3,7 +3,7 @@
   "event_id": "FR_orderRefusal",
   "case_details": {
     "jurisdiction": "DIVORCE",
-    "state": "applicationDrafted",
+    "state": "caseAdded",
     "case_type_id": "FinancialRemedyMVP2",
     "case_data": {
       "PBANumber": "PBA123456",
@@ -95,13 +95,13 @@
       "helpWithFeesQuestion": "No",
       "natureOfApplication2": [
         "Lump Sum Order",
-        "Periodical Payment Order",
+        "periodicalPaymentOrder",
         "Pension Sharing Order",
         "Pension Attachment Order",
         "Pension Compensation Sharing Order",
         "Pension Compensation Attachment Order",
         "A settlement or a transfer of property",
-        "Property Adjustment Order"
+        "propertyAdjustmentOrder"
       ],
       "natureOfApplication5": "No",
       "natureOfApplication6": [
@@ -129,8 +129,7 @@
               "Insufficient information provided – A",
               "Insufficient information provided – B",
               "Transferred to Applicant’s home Court",
-              "Transferred to Applicant's home Court",
-              "Other"
+              "Other (please specify)"
             ],
             "orderRefusalDate": "2003-02-01",
             "orderRefusalDocs": {
@@ -161,8 +160,7 @@
               "Insufficient information provided – A",
               "Insufficient information provided – B",
               "Transferred to Applicant’s home Court",
-              "Transferred to Applicant's home Court",
-              "Other"
+              "Other (please specify)"
             ],
             "orderRefusalDate": "2003-02-01",
             "orderRefusalDocs": {

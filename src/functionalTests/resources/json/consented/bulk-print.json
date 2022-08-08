@@ -3,7 +3,7 @@
   "case_details": {
     "id": "123",
     "jurisdiction": "DIVORCE",
-    "state": "applicationDrafted",
+    "state": "caseAdded",
     "case_type_id": "FinancialRemedyMVP2",
     "case_data": {
       "PBANumber": "PBA123",
@@ -93,7 +93,7 @@
       "divorceCaseNumber": "DD12D12345",
       "issueDate": "2019-03-04",
       "hearingDate": "2019-06-24",
-      "fastTrackDecision": "yes",
+      "fastTrackDecision": "Yes",
       "respondentAddress": {
         "County": "Essex",
         "Country": "United Kingdom",
@@ -111,13 +111,13 @@
       "helpWithFeesQuestion": "No",
       "natureOfApplication2": [
         "Lump Sum Order",
-        "Periodical Payment Order",
+        "periodicalPaymentOrder",
         "Pension Sharing Order",
         "Pension Attachment Order",
         "Pension Compensation Sharing Order",
         "Pension Compensation Attachment Order",
         "A settlement or a transfer of property",
-        "Property Adjustment Order"
+        "propertyAdjustmentOrder"
       ],
       "natureOfApplication5": "No",
       "natureOfApplication6": [
@@ -158,7 +158,6 @@
         "FR_ms_MIAMDomesticViolenceChecklist_Value_8",
         "FR_ms_MIAMDomesticViolenceChecklist_Value_13",
         "FR_ms_MIAMDomesticViolenceChecklist_Value_15",
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_23",
         "FR_ms_MIAMDomesticViolenceChecklist_Value_22",
         "FR_ms_MIAMDomesticViolenceChecklist_Value_20",
         "FR_ms_MIAMDomesticViolenceChecklist_Value_19",

@@ -1,9 +1,9 @@
 {
   "token": "token_test",
-  "event_id": "some_event_id",
+  "event_id": "FR_assignToJudge",
   "case_details": {
     "jurisdiction": "DIVORCE",
-    "state": "applicationDrafted",
+    "state": "caseAdded",
     "case_type_id": "FinancialRemedyMVP2",
     "case_data": {
       "PBANumber": "PBA123456",
@@ -95,13 +95,13 @@
       "helpWithFeesQuestion": "No",
       "natureOfApplication2": [
         "Lump Sum Order",
-        "Periodical Payment Order",
+        "periodicalPaymentOrder",
         "Pension Sharing Order",
         "Pension Attachment Order",
         "Pension Compensation Sharing Order",
         "Pension Compensation Attachment Order",
         "A settlement or a transfer of property",
-        "Property Adjustment Order"
+        "propertyAdjustmentOrder"
       ],
       "natureOfApplication5": "No",
       "natureOfApplication6": [
