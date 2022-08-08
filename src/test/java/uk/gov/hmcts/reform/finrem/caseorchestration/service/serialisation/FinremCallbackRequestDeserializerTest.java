@@ -883,6 +883,7 @@ public class FinremCallbackRequestDeserializerTest {
     private void assertUploadOrder(FinremCaseData caseData) {
         List<UploadOrderCollection> expected = List.of(
             UploadOrderCollection.builder()
+                .id("1")
                 .value(UploadOrder.builder()
                     .documentComment("doc-comment")
                     .documentDateAdded(LocalDate.of(2010, 1, 2))
