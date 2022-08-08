@@ -43,8 +43,6 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
     private static final String AMEND_CONTESTED_CONSENT_ORDER_BY_SOL_JSON
         = "/fixtures/latestConsentedConsentOrder/amend-consent-order-by-solicitor-contested.json";
 
-
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -70,7 +68,7 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors").doesNotExist());
-        verify(helper, never()).setConsentVariationOrderLabelField(any());
+        verify(helper, never()).setConsentVariationOrderLabelField(isA(HashMap.class));
     }
 
     @Test
