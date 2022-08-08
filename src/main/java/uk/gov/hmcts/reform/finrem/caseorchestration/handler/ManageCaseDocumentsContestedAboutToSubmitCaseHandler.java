@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ManageCaseDocumentsS
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 
 @Slf4j
 @Service
