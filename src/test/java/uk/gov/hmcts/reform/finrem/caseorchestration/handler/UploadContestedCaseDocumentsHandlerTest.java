@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,7 +40,7 @@ public class UploadContestedCaseDocumentsHandlerTest extends CaseDocumentHandler
     @Mock
     ApplicantChronologiesStatementHandler applicantChronologiesStatementHandler;
 
-    ObjectMapper objectMapper = new ObjectMapper();
+    ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
     private UploadContestedCaseDocumentsAboutToSubmitHandler uploadContestedCaseDocumentsHandler;
 
     private final List<ContestedUploadedDocumentData> uploadDocumentList = new ArrayList<>();
@@ -71,8 +72,10 @@ public class UploadContestedCaseDocumentsHandlerTest extends CaseDocumentHandler
     public void givenUploadCaseDocument_When_IsValid_ThenExecuteHandlers() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         uploadDocumentList.add(createContestedUploadDocumentItem("Other", "applicant", "yes", "no", "Other Example"));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+        caseDetailsBefore.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
         uploadContestedCaseDocumentsHandler.handle(callbackRequest, AUTH_TOKEN);
 
 
@@ -83,6 +86,7 @@ public class UploadContestedCaseDocumentsHandlerTest extends CaseDocumentHandler
     private CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
         CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
-        return CallbackRequest.builder().eventId(EventType.UPLOAD_CASE_FILES.getCcdType()).caseDetails(caseDetails).build();
+        CaseDetails caseDetailsBefore = CaseDetails.builder().id(123L).data(caseData).build();
+        return CallbackRequest.builder().eventId(EventType.UPLOAD_CASE_FILES.getCcdType()).caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
     }
 }

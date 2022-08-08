@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 
@@ -33,7 +34,19 @@ public abstract class CaseDocumentHandlerTest {
 
     protected ContestedUploadedDocumentData createContestedUploadDocumentItem(String type, String party,
                                                                               String isConfidential, String isFdr, String other) {
+        int leftLimit = 48;
+        int rightLimit = 122;
+        int targetStringLength = 10;
+        Random random = new Random();
+
+        String documentId = random.ints(leftLimit, rightLimit + 1)
+            .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
+            .limit(targetStringLength)
+            .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+            .toString();
+
         return ContestedUploadedDocumentData.builder()
+            .id(documentId)
             .uploadedCaseDocument(ContestedUploadedDocument
                 .builder()
                 .caseDocuments(new CaseDocument())
