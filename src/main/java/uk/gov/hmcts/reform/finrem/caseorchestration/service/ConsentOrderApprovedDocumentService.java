@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -22,7 +23,10 @@ import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CONSENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ORDER_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.VARIATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_DIRECTION_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_DIRECTION_JUDGE_NAME;
@@ -51,27 +55,50 @@ public class ConsentOrderApprovedDocumentService {
     private final DocumentHelper documentHelper;
     private final ObjectMapper mapper;
     private final CaseDataService caseDataService;
+    private final ConsentedApplicationHelper consentedApplicationHelper;
 
     public CaseDocument generateApprovedConsentOrderLetter(CaseDetails caseDetails, String authToken) {
-        log.info("Generating Approved Consent Order Letter {} from {} for bulk print, case: {}",
-            documentConfiguration.getApprovedConsentOrderFileName(),
+        String fileName;
+        CaseDetails detailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
+        Map<String, Object> caseData = detailsCopy.getData();
+
+        if (caseDataService.isConsentedApplication(caseDetails)
+            && Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(caseDetails.getData()))) {
+            fileName = documentConfiguration.getApprovedVariationOrderFileName();
+            caseData.put(ORDER_TYPE, VARIATION);
+        } else {
+            fileName = documentConfiguration.getApprovedConsentOrderFileName();
+            caseData.put(ORDER_TYPE, CONSENT);
+        }
+
+        log.info("Generating Approved {} Order Letter {} from {} for bulk print, case: {}",
+            caseData.get(ORDER_TYPE),
+            fileName,
             documentConfiguration.getApprovedConsentOrderTemplate(),
-            caseDetails.getId());
+            detailsCopy.getId());
 
         return genericDocumentService.generateDocument(authToken,
             caseDataService.isContestedApplication(caseDetails)
                 ? prepareCaseDetailsCopyForDocumentGeneratorWithContestedFields(caseDetails)
-                : caseDetails,
+                : detailsCopy,
             documentConfiguration.getApprovedConsentOrderTemplate(),
-            documentConfiguration.getApprovedConsentOrderFileName());
+            fileName);
     }
 
     public CaseDocument generateApprovedConsentOrderCoverLetter(CaseDetails caseDetails, String authToken) {
         CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterTemplateData(caseDetails, APPLICANT);
-
-        CaseDocument generatedApprovedConsentOrderNotificationLetter = genericDocumentService.generateDocument(authToken, caseDetailsForBulkPrint,
+        String approvedOrderNotificationFileName;
+        if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(caseDetails.getData()))) {
+            approvedOrderNotificationFileName = documentConfiguration.getApprovedVariationOrderNotificationFileName();
+            caseDetailsForBulkPrint.getData().put(ORDER_TYPE, VARIATION);
+        } else {
+            approvedOrderNotificationFileName = documentConfiguration.getApprovedConsentOrderNotificationFileName();
+            caseDetailsForBulkPrint.getData().put(ORDER_TYPE, CONSENT);
+        }
+        CaseDocument generatedApprovedConsentOrderNotificationLetter = genericDocumentService
+            .generateDocument(authToken, caseDetailsForBulkPrint,
             documentConfiguration.getApprovedConsentOrderNotificationTemplate(),
-            documentConfiguration.getApprovedConsentOrderNotificationFileName());
+            approvedOrderNotificationFileName);
 
         log.info("Generated Approved Consent Order cover Letter: {}", generatedApprovedConsentOrderNotificationLetter);
 

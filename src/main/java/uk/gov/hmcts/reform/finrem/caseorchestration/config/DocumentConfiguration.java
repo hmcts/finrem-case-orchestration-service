@@ -14,6 +14,7 @@ public class DocumentConfiguration {
     private String miniFormFileName;
     private String rejectedOrderTemplate;
     private String rejectedOrderFileName;
+    private String rejectedVariationOrderFileName;
     private String coversheetFileName;
     private String rejectedOrderDocType;
     private String formCFastTrackTemplate;
@@ -21,6 +22,8 @@ public class DocumentConfiguration {
     private String formCFileName;
     private String formGTemplate;
     private String formGFileName;
+    private String outOfFamilyCourtResolutionTemplate;
+    private String outOfFamilyCourtResolutionName;
     private String contestedMiniFormTemplate;
     private String contestedMiniFormFileName;
     private String contestedDraftMiniFormTemplate;
@@ -29,8 +32,10 @@ public class DocumentConfiguration {
     private String generalLetterFileName;
     private String approvedConsentOrderTemplate;
     private String approvedConsentOrderFileName;
+    private String approvedVariationOrderFileName;
     private String approvedConsentOrderNotificationTemplate;
     private String approvedConsentOrderNotificationFileName;
+    private String approvedVariationOrderNotificationFileName;
     private String assignedToJudgeNotificationTemplate;
     private String assignedToJudgeNotificationFileName;
     private String consentInContestedAssignedToJudgeNotificationTemplate;
@@ -39,6 +44,7 @@ public class DocumentConfiguration {
     private String helpWithFeesSuccessfulNotificationFileName;
     private String consentOrderNotApprovedCoverLetterTemplate;
     private String consentOrderNotApprovedCoverLetterFileName;
+    private String variationOrderNotApprovedCoverLetterFileName;
     private String consentOrderNotApprovedReplyCoversheetTemplate;
     private String consentOrderNotApprovedReplyCoversheetFileName;
     private String generalOrderTemplate;
