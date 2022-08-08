@@ -87,6 +87,7 @@ public class UploadContestedCaseDocumentsHandlerTest extends CaseDocumentHandler
         Map<String, Object> caseData = new HashMap<>();
         CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
         CaseDetails caseDetailsBefore = CaseDetails.builder().id(123L).data(caseData).build();
-        return CallbackRequest.builder().eventId(EventType.UPLOAD_CASE_FILES.getCcdType()).caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
+        return CallbackRequest.builder().eventId(EventType.UPLOAD_CASE_FILES.getCcdType())
+            .caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
     }
 }
