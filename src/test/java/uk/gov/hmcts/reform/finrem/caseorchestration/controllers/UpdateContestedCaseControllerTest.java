@@ -191,7 +191,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .andDo(print())
             .andExpect(jsonPath("$.data.paymentForChildrenDecision").doesNotExist())
             .andExpect(jsonPath("$.data.benefitForChildrenDecision").doesNotExist())
-            .andExpect(jsonPath("$.data.benefitPaymentChecklist", is(Matchers.empty())));
+            .andExpect(jsonPath("$.data.benefitPaymentChecklist").doesNotExist());
     }
 
     @Test
@@ -208,7 +208,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.benefitForChildrenDecision").doesNotExist())
-            .andExpect(jsonPath("$.data.benefitPaymentChecklist", is(Matchers.empty())));
+            .andExpect(jsonPath("$.data.benefitPaymentChecklist").doesNotExist());
     }
 
     @Test
