@@ -9,6 +9,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedDocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
@@ -43,10 +44,12 @@ public class UploadContestedCaseDocumentsHandlerTest extends CaseDocumentHandler
 
     private final List<ContestedUploadedDocumentData> uploadDocumentList = new ArrayList<>();
 
+    private final UploadedDocumentHelper uploadedDocumentHelper = new UploadedDocumentHelper(objectMapper);
+
     @Before
     public void setUpTest() {
         uploadContestedCaseDocumentsHandler = new UploadContestedCaseDocumentsAboutToSubmitHandler(
-            Arrays.asList(applicantCaseSummariesHandler, applicantChronologiesStatementHandler), objectMapper);
+            Arrays.asList(applicantCaseSummariesHandler, applicantChronologiesStatementHandler), objectMapper, uploadedDocumentHelper);
     }
 
     @Test
