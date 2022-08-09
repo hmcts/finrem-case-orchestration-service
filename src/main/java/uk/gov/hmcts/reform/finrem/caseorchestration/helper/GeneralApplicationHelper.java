@@ -113,4 +113,15 @@ public class GeneralApplicationHelper {
         builder.generalApplicationCreatedDate(objectToDateTime(caseData.get(GENERAL_APPLICATION_DOCUMENT_LATEST_DATE)));
         return builder.build();
     }
+
+    public int getCompareTo(GeneralApplicationCollectionData e1, GeneralApplicationCollectionData e2) {
+        if (e2 == null || e2.getGeneralApplicationItems() == null
+            || e2.getGeneralApplicationItems().getGeneralApplicationCreatedDate() == null
+            || e1 == null || e1.getGeneralApplicationItems() == null
+            || e1.getGeneralApplicationItems().getGeneralApplicationCreatedDate() == null) {
+            return 0;
+        }
+        return e2.getGeneralApplicationItems().getGeneralApplicationCreatedDate()
+            .compareTo(e1.getGeneralApplicationItems().getGeneralApplicationCreatedDate());
+    }
 }

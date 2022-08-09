@@ -102,7 +102,7 @@ public class GeneralApplicationService {
         log.info("After processing generalApplicationCollectionDataList  : {}", generalApplicationCollectionDataList.size());
         log.info("sorting generalApplicationCollectionDataList");
         List<GeneralApplicationCollectionData> applicationCollectionDataList = generalApplicationCollectionDataList.stream()
-            .sorted(this::getCompareTo)
+            .sorted(helper::getCompareTo)
             .toList();
 
         caseData.put(GENERAL_APPLICATION_COLLECTION, applicationCollectionDataList);
@@ -110,16 +110,7 @@ public class GeneralApplicationService {
         return caseData;
     }
 
-    private int getCompareTo(GeneralApplicationCollectionData e1, GeneralApplicationCollectionData e2) {
-        if (e2 == null || e2.getGeneralApplicationItems() == null
-            || e2.getGeneralApplicationItems().getGeneralApplicationCreatedDate() == null
-            || e1 == null || e1.getGeneralApplicationItems() == null
-            || e1.getGeneralApplicationItems().getGeneralApplicationCreatedDate() == null) {
-            return 0;
-        }
-        return e2.getGeneralApplicationItems().getGeneralApplicationCreatedDate()
-            .compareTo(e1.getGeneralApplicationItems().getGeneralApplicationCreatedDate());
-    }
+
 
     private GeneralApplicationCollectionData setUserAndDate(GeneralApplicationCollectionData items, String userAuthorisation) {
 

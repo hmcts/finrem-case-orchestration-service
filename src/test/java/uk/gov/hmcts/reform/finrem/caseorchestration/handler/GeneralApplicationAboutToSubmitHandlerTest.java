@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +29,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT;
@@ -49,8 +51,7 @@ public class GeneralApplicationAboutToSubmitHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
     private static final String GA_JSON = "/fixtures/contested/general-application.json";
-    private static final String GA_SORTED_JSON = "/fixtures/contested/general-application-sorted.json";
-
+    private static final String GA_UNSORTED_JSON = "/fixtures/contested/general-application-unsorted.json";
 
     @Before
     public void setup() {
@@ -88,12 +89,16 @@ public class GeneralApplicationAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void givenCase_whenExistingGeneApp_thenSetcreatedBy() {
+    public void givenCase_whenExistingGeneApp_thenSetCreatedBy() {
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(buildCaseDetailsWtihPath(GA_JSON))
             .caseDetailsBefore(buildCaseDetailsWtihPath(GA_JSON)).build();
+
         List<GeneralApplicationCollectionData> existingGeneralApplication = new ArrayList<>();
         existingGeneralApplication.add(migrateExistingGeneralApplication(callbackRequest.getCaseDetails().getData()));
         callbackRequest.getCaseDetails().getData().put(GENERAL_APPLICATION_COLLECTION,existingGeneralApplication);
+
+        when(service.updateGeneralApplications(callbackRequest, AUTH_TOKEN)).thenReturn(callbackRequest.getCaseDetails().getData());
+
         AboutToStartOrSubmitCallbackResponse handle = handler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = handle.getData();
@@ -104,8 +109,21 @@ public class GeneralApplicationAboutToSubmitHandlerTest {
 
     @Test
     public void sortGeneralApplicationListByLatestDate() {
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(buildCaseDetailsWtihPath(GA_SORTED_JSON))
-            .caseDetailsBefore(buildCaseDetailsWtihPath(GA_SORTED_JSON)).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(buildCaseDetailsWtihPath(GA_UNSORTED_JSON))
+            .caseDetailsBefore(buildCaseDetailsWtihPath(GA_UNSORTED_JSON)).build();
+
+        CaseDetails caseDetailsCopy = deepCopy(callbackRequest.getCaseDetails(), CaseDetails.class);
+        List<GeneralApplicationCollectionData> unsortedList =
+            helper.getGeneralApplicationList(caseDetailsCopy.getData());
+
+        List<GeneralApplicationCollectionData> applicationCollectionDataList = unsortedList.stream()
+            .sorted(helper::getCompareTo)
+            .toList();
+
+        Map<String, Object> data = caseDetailsCopy.getData();
+        data.put(GENERAL_APPLICATION_COLLECTION, applicationCollectionDataList);
+
+        when(service.updateGeneralApplications(callbackRequest, AUTH_TOKEN)).thenReturn(data);
 
         AboutToStartOrSubmitCallbackResponse handle = handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -154,5 +172,13 @@ public class GeneralApplicationAboutToSubmitHandlerTest {
         builder.generalApplicationCreatedDate(helper.objectToDateTime(caseData.get(GENERAL_APPLICATION_DOCUMENT_LATEST_DATE)));
         builder.generalApplicationDraftOrder(draftDocument);
         return builder.build();
+    }
+
+    private <T> T deepCopy(T object, Class<T> objectClass) {
+        try {
+            return objectMapper.readValue(objectMapper.writeValueAsString(object), objectClass);
+        } catch (IOException e) {
+            throw new IllegalStateException();
+        }
     }
 }
