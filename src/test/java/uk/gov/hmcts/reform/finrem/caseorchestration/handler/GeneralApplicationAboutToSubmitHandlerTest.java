@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -42,6 +44,8 @@ public class GeneralApplicationAboutToSubmitHandlerTest {
     private GeneralApplicationAboutToSubmitHandler handler;
     private ObjectMapper objectMapper;
     private GeneralApplicationHelper helper;
+    @Mock
+    private GeneralApplicationService service;
 
     public static final String AUTH_TOKEN = "tokien:)";
     private static final String GA_JSON = "/fixtures/contested/general-application.json";
@@ -52,7 +56,7 @@ public class GeneralApplicationAboutToSubmitHandlerTest {
     public void setup() {
         objectMapper = new ObjectMapper();
         helper = new GeneralApplicationHelper(objectMapper);
-        handler  = new GeneralApplicationAboutToSubmitHandler(helper);
+        handler  = new GeneralApplicationAboutToSubmitHandler(service,helper);
     }
 
     @Test
@@ -85,7 +89,8 @@ public class GeneralApplicationAboutToSubmitHandlerTest {
 
     @Test
     public void givenCase_whenExistingGeneApp_thenSetcreatedBy() {
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(buildCaseDetails()).caseDetailsBefore(buildCaseDetails()).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(buildCaseDetailsWtihPath(GA_JSON))
+            .caseDetailsBefore(buildCaseDetailsWtihPath(GA_JSON)).build();
         List<GeneralApplicationCollectionData> existingGeneralApplication = new ArrayList<>();
         existingGeneralApplication.add(migrateExistingGeneralApplication(callbackRequest.getCaseDetails().getData()));
         callbackRequest.getCaseDetails().getData().put(GENERAL_APPLICATION_COLLECTION,existingGeneralApplication);
@@ -118,15 +123,6 @@ public class GeneralApplicationAboutToSubmitHandlerTest {
         assertNull(caseData.get(GENERAL_APPLICATION_DOCUMENT));
         assertNull(caseData.get(GENERAL_APPLICATION_DRAFT_ORDER));
         assertNull(caseData.get(GENERAL_APPLICATION_DOCUMENT_LATEST_DATE));
-    }
-
-    private CaseDetails buildCaseDetails()  {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(GA_JSON)) {
-            CaseDetails caseDetails = objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-            return CallbackRequest.builder().caseDetails(caseDetails).build().getCaseDetails();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private CaseDetails buildCaseDetailsWtihPath(String path)  {

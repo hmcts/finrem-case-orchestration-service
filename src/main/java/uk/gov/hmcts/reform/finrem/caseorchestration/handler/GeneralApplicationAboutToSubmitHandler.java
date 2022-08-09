@@ -10,26 +10,32 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_HEARING_REQUIRED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_RECEIVED_FROM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_SPECIAL_MEASURES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_TIME_ESTIMATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_TRACKING;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class GeneralApplicationAboutToSubmitHandler implements CallbackHandler {
 
+    private final GeneralApplicationService service;
     private final GeneralApplicationHelper helper;
 
     @Override
@@ -43,25 +49,15 @@ public class GeneralApplicationAboutToSubmitHandler implements CallbackHandler {
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
                                                        String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        log.info("Received request to submit general application from Handler for Case ID: {}", caseDetails.getId());
 
-        deleteNonCollectionGeneralApplication(caseDetails.getData());
+        Map<String, Object> caseData
+            = service.updateGeneralApplications(callbackRequest, userAuthorisation);
 
-        CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        log.info("Received request to start general application for Case ID: {}", caseDetails.getId());
+        log.info("Delete non collection general application casedata for Case ID: {}", caseDetails.getId());
+        deleteNonCollectionGeneralApplication(caseData);
 
-        List<GeneralApplicationCollectionData> generalApplicationListBefore = helper.getGeneralApplicationList(caseDetailsBefore.getData());
-        log.info("generalApplicationListBefore : {}", generalApplicationListBefore.size());
-
-        List<GeneralApplicationCollectionData> generalApplicationList = helper.getGeneralApplicationList(caseDetails.getData());
-
-        List<GeneralApplicationCollectionData> applicationCollectionDataList = generalApplicationList.stream()
-            .sorted((e1, e2) -> e2.getGeneralApplicationItems().getGeneralApplicationCreatedDate()
-                .compareTo(e1.getGeneralApplicationItems().getGeneralApplicationCreatedDate()))
-            .toList();
-        caseDetails.getData().put(GENERAL_APPLICATION_COLLECTION, applicationCollectionDataList);
-        log.info("generalApplicationList : {}", generalApplicationList.size());
-
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build();
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
     }
 
     private void deleteNonCollectionGeneralApplication(Map<String, Object> caseData) {
@@ -73,7 +69,19 @@ public class GeneralApplicationAboutToSubmitHandler implements CallbackHandler {
             caseData.remove(GENERAL_APPLICATION_SPECIAL_MEASURES);
             caseData.remove(GENERAL_APPLICATION_DOCUMENT);
             caseData.remove(GENERAL_APPLICATION_DRAFT_ORDER);
-            caseData.remove(GENERAL_APPLICATION_DOCUMENT_LATEST_DATE);
+            caseData.remove(GENERAL_APPLICATION_TRACKING);
+
+            List<GeneralApplicationData> generalApplicationList
+                = Optional.ofNullable(caseData.get(GENERAL_APPLICATION_DOCUMENT_COLLECTION))
+                .map(helper::convertToGeneralApplicationDataList)
+                .orElse(new ArrayList<>());
+
+            if (generalApplicationList.size() == 1) {
+                caseData.remove(GENERAL_APPLICATION_DOCUMENT_COLLECTION);
+                caseData.remove(GENERAL_APPLICATION_DOCUMENT_LATEST_DATE);
+                caseData.remove(GENERAL_APPLICATION_DOCUMENT_LATEST);
+            }
         }
     }
+
 }

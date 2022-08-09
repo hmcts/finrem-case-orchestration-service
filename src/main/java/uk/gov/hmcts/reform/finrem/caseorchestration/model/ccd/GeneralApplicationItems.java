@@ -5,11 +5,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Builder
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class GeneralApplicationItems {
@@ -29,4 +32,6 @@ public class GeneralApplicationItems {
     private String generalApplicationSpecialMeasures;
     @JsonProperty("generalApplicationCreatedDate")
     private LocalDate generalApplicationCreatedDate;
+    @JsonProperty("gaSupportDocuments")
+    private List<GeneralApplicationSupportingDocumentData> gaSupportDocuments;
 }

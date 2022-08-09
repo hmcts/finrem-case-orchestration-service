@@ -327,6 +327,7 @@ public class CCDConfigConstant {
     public static final String GENERAL_EMAIL_BODY = "generalEmailBody";
 
     // General application
+    public static final String GENERAL_APPLICATION_TRACKING = "generalApplicationTracking";
     public static final String GENERAL_APPLICATION_COLLECTION = "generalApplications";
     public static final String GENERAL_APPLICATION_DOCUMENT_LATEST = "generalApplicationLatestDocument";
     public static final String GENERAL_APPLICATION_DOCUMENT = "generalApplicationDocument";
