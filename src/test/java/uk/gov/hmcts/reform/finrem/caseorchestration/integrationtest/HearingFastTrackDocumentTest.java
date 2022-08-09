@@ -32,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OUT_OF_FAMILY_COURT_RESOLUTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.DATE_BETWEEN_6_AND_10_WEEKS;
 
 public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
@@ -52,6 +53,14 @@ public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
         return DocumentGenerationRequest.builder()
             .template(documentConfiguration.getBulkPrintTemplate())
             .fileName(documentConfiguration.getBulkPrintFileName())
+            .values(Collections.singletonMap("caseDetails", request.getCaseDetails()))
+            .build();
+    }
+
+    protected DocumentGenerationRequest documentOfcrRequest() {
+        return DocumentGenerationRequest.builder()
+            .template(documentConfiguration.getOutOfFamilyCourtResolutionTemplate())
+            .fileName(documentConfiguration.getOutOfFamilyCourtResolutionName())
             .values(Collections.singletonMap("caseDetails", request.getCaseDetails()))
             .build();
     }
@@ -106,6 +115,15 @@ public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .withBody(objectMapper.writeValueAsString(UUID.randomUUID()))));
+
+        documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
+            .withRequestBody(equalToJson(objectMapper.writeValueAsString(documentOfcrRequest()), true, true))
+            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
+            .withHeader(CONTENT_TYPE, equalTo("application/json"))
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withBody(objectMapper.writeValueAsString(document()))));
     }
 
     @Test
@@ -124,6 +142,7 @@ public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
     private String expectedCaseData() throws JsonProcessingException {
         CaseDetails caseDetails = request.getCaseDetails();
         caseDetails.getData().put("formC", caseDocument());
+        caseDetails.getData().put(OUT_OF_FAMILY_COURT_RESOLUTION, caseDocument());
 
         return objectMapper.writeValueAsString(
             AboutToStartOrSubmitCallbackResponse.builder()

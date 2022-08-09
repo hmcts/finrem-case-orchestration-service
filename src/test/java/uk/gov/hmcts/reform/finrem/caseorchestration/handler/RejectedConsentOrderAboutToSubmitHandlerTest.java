@@ -42,16 +42,16 @@ public class RejectedConsentOrderAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void given_case_when_wrong_callback_then_case_can_not_handle() {
+    public void given_contested_case_whenEventConsentOrderNotApproved_thenCanHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.REJECT_ORDER),
-            is(false));
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.CONSENT_ORDER_NOT_APPROVED),
+            is(true));
     }
 
     @Test
-    public void given_case_when_wrong_casetype_then_case_can_not_handle() {
+    public void given_case_when_wrong_callback_then_case_can_not_handle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.REJECT_ORDER),
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.REJECT_ORDER),
             is(false));
     }
 
