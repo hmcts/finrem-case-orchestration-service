@@ -10,13 +10,8 @@ import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
@@ -28,7 +23,6 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -37,7 +31,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
-import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_CARE_OF;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_EMAIL_ADDRESS;
@@ -50,7 +43,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENT_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMENDED_CONSENT_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
@@ -64,11 +56,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_A_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NOTICES_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
@@ -77,7 +65,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
 
@@ -88,13 +75,10 @@ public class DocumentHelper {
 
     public enum PaperNotificationRecipient { APPLICANT, RESPONDENT, SOLICITOR, APP_SOLICITOR, RESP_SOLICITOR }
 
-    public static final String DOCUMENT_URL = "document_url";
-    public static final String DOCUMENT_FILENAME = "document_filename";
     public static final String DOCUMENT_BINARY_URL = "document_binary_url";
     public static final String ADDRESSEE = "addressee";
     public static final String CTSC_CONTACT_DETAILS = "ctscContactDetails";
     public static final String CASE_NUMBER = "caseNumber";
-    public static final String ORDER_TYPE = "orderType";
     public static final String VARIATION = "variation";
     public static final String CONSENT = "consent";
 
@@ -115,11 +99,13 @@ public class DocumentHelper {
     }
 
     public CaseDocument getLatestAmendedConsentOrder(Map<String, Object> caseData) {
+        log.info("{}", caseData.get(AMENDED_CONSENT_ORDER_COLLECTION));
         Optional<AmendedConsentOrderData> reduce = ofNullable(caseData.get(AMENDED_CONSENT_ORDER_COLLECTION))
             .map(this::convertToAmendedConsentOrderDataList)
             .orElse(emptyList())
             .stream()
             .reduce((first, second) -> second);
+        log.info("{}", reduce);
         return reduce
             .map(consentOrderData -> consentOrderData.getConsentOrder().getAmendedConsentOrder())
             .orElseGet(() -> convertToCaseDocument(caseData.get(LATEST_CONSENT_ORDER)));
@@ -164,15 +150,6 @@ public class DocumentHelper {
             nullToEmpty(caseData.getDirectionDetailsCollection().get(0).getValue().getIsAnotherHearingYN()));
     }
 
-    public CaseDocument getLatestGeneralOrder(Map<String, Object> caseData) {
-        if (isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
-            log.warn("Latest general order not found for printing for case");
-            return null;
-        }
-
-        return convertToCaseDocument(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT));
-    }
-
     public CaseDocument convertToCaseDocument(Object object) {
         return objectMapper.convertValue(object, CaseDocument.class);
     }
@@ -192,21 +169,6 @@ public class DocumentHelper {
         });
     }
 
-    public List<GeneralLetterData> convertToGeneralLetterData(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<>() {
-        });
-    }
-
-    public List<DirectionDetailsCollectionData> convertToDirectionDetailsCollectionData(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<>() {
-        });
-    }
-
-    public List<AdditionalHearingDocumentData> convertToAdditionalHearingDocumentData(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<>() {
-        });
-    }
-
     public Optional<CaseDocument> getLatestRespondToOrderDocuments(Map<String, Object> caseData) {
         Optional<RespondToOrderData> respondToOrderData =
             ofNullable(caseData.get(RESPOND_TO_ORDER_DOCUMENTS))
@@ -220,20 +182,6 @@ public class DocumentHelper {
                 .map(respondToOrderData1 -> respondToOrderData.get().getRespondToOrder().getDocumentLink());
         }
 
-        return Optional.empty();
-    }
-
-    public Optional<CaseDocument> getLatestAdditionalHearingDocument(Map<String, Object> caseData) {
-        Optional<AdditionalHearingDocumentData> additionalHearingDocumentData =
-            ofNullable(caseData.get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION))
-                .map(this::convertToAdditionalHearingDocumentData)
-                .orElse(emptyList())
-                .stream()
-                .reduce((first, second) -> second);
-        if (additionalHearingDocumentData.isPresent()) {
-            return additionalHearingDocumentData
-                .map(additionalHearingDocumentDataCopy -> additionalHearingDocumentData.get().getAdditionalHearingDocument().getDocument());
-        }
         return Optional.empty();
     }
 
@@ -336,24 +284,6 @@ public class DocumentHelper {
         return "";
     }
 
-    public BulkPrintDocument getCaseDocumentAsBulkPrintDocument(CaseDocument caseDocument) {
-        return BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl()).build();
-    }
-
-    public List<BulkPrintDocument> getCaseDocumentsAsBulkPrintDocuments(List<CaseDocument> caseDocuments) {
-        return caseDocuments.stream()
-            .map(caseDocument -> BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl()).build())
-            .collect(Collectors.toList());
-    }
-
-    public Optional<BulkPrintDocument> getDocumentLinkAsBulkPrintDocument(Map<String, Object> data, String documentName) {
-        Map<String, String> documentLink = (Map<String, String>) data.get(documentName);
-
-        return documentLink != null
-            ? Optional.of(BulkPrintDocument.builder().binaryFileUrl(documentLink.get(DOCUMENT_BINARY_URL)).build())
-            : Optional.empty();
-    }
-
     public Optional<BulkPrintDocument> getDocumentAsBulkPrintDocument(Document document) {
         return document != null
             ? Optional.of(BulkPrintDocument.builder().binaryFileUrl(document.getBinaryUrl()).build())
@@ -368,39 +298,6 @@ public class DocumentHelper {
                 .binaryFileUrl(document.getBinaryUrl())
                 .build())
             .collect(Collectors.toList());
-    }
-
-    public List<BulkPrintDocument> getCollectionOfDocumentLinksAsBulkPrintDocuments(Map<String, Object> data, String collectionName) {
-        return getCaseDocumentsAsBulkPrintDocuments(getDocumentLinksFromCustomCollectionAsCaseDocuments(data, collectionName, null));
-    }
-
-    public List<CaseDocument> getDocumentLinksFromCustomCollectionAsCaseDocuments(Map<String, Object> data, String collectionName,
-                                                                                  String documentName) {
-        List<CaseDocument> documents = new ArrayList<>();
-
-        List<Map<String, Object>> documentList = ofNullable(data.get(collectionName))
-            .map(i -> (List<Map<String, Object>>) i)
-            .orElse(new ArrayList<>());
-
-        for (Map<String, Object> document : documentList) {
-            Map<String, Object> value = (Map<String, Object>) document.get(VALUE);
-            getDocumentLinkAsCaseDocument(value, documentName).ifPresent(documents::add);
-        }
-        return documents;
-    }
-
-    public Optional<CaseDocument> getDocumentLinkAsCaseDocument(Map<String, Object> data, String documentName) {
-        Map<String, Object> documentLink = documentName != null
-            ? (Map<String, Object>) data.get(documentName)
-            : data;
-
-        return documentLink != null
-            ? Optional.of(CaseDocument.builder()
-            .documentUrl(documentLink.get(DOCUMENT_URL).toString())
-            .documentFilename(documentLink.get(DOCUMENT_FILENAME).toString())
-            .documentBinaryUrl(documentLink.get(DOCUMENT_BINARY_URL).toString())
-            .build())
-            : Optional.empty();
     }
 
     public String getApplicantFullName(CaseDetails caseDetails) {
@@ -420,29 +317,7 @@ public class DocumentHelper {
         return caseDataService.buildFullName(caseDetails.getData(), CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME, CONTESTED_RESPONDENT_LAST_NAME);
     }
 
-    public List<ContestedConsentOrderData> convertToContestedConsentOrderData(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<>() {
-        });
-    }
-
-    public List<HearingOrderCollectionData> getFinalOrderDocuments(Map<String, Object> caseData) {
-        return objectMapper.convertValue(caseData.get(FINAL_ORDER_COLLECTION), new TypeReference<>() {
-        });
-    }
-
-    public List<HearingOrderCollectionData> getHearingOrderDocuments(Map<String, Object> caseData) {
-        return objectMapper.convertValue(caseData.get(HEARING_ORDER_COLLECTION),
-            new TypeReference<>() {
-            });
-    }
-
     public BulkPrintDocument getBulkPrintDocumentFromCaseDocument(CaseDocument caseDocument) {
         return BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl()).build();
-    }
-
-    public List<CaseDocument> getHearingNoticeDocuments(Map<String, Object> caseData) {
-        return objectMapper.convertValue(caseData.get(HEARING_NOTICES_COLLECTION),
-            new TypeReference<>() {
-            });
     }
 }

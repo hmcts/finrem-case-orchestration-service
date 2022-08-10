@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentClientDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 
@@ -31,11 +32,15 @@ public class GenericDocumentService {
 
     public Document generateDocumentFromPlaceholdersMap(String authorisationToken, Map placeholders,
                                                             String template, String fileName) {
-        return documentClient.generatePdf(
-            DocumentGenerationRequest.builder().template(template).fileName(fileName).values(placeholders).build(),
-            authorisationToken);
+        return toDocumentFromClientResponse(
+            documentClient.generatePdf(
+                DocumentGenerationRequest.builder()
+                    .template(template)
+                    .fileName(fileName)
+                    .values(placeholders).build(),
+                authorisationToken)
+        );
     }
-
 
     public UUID bulkPrint(BulkPrintRequest bulkPrintRequest) {
         return documentClient.bulkPrint(bulkPrintRequest);
@@ -47,14 +52,16 @@ public class GenericDocumentService {
 
     @Deprecated
     public CaseDocument annexStampDocument(CaseDocument document, String authorisationToken) {
-        Document stampedDocument = documentClient.annexStampDocument(toDocument(document), authorisationToken);
-        return toCaseDocument(stampedDocument);
+        DocumentClientDocument stampedDocument = documentClient.annexStampDocument(toDocumentClientDocument(document), authorisationToken);
+        return toCaseDocumentFromClientResponse(stampedDocument);
     }
 
     public Document annexStampDocument(Document document, String authorisationToken) {
-        return documentClient.annexStampDocument(document, authorisationToken);
+        return toDocumentFromClientResponse(
+            documentClient.annexStampDocument(toDocumentClientDocument(document), authorisationToken));
     }
 
+    @Deprecated
     public CaseDocument convertDocumentIfNotPdfAlready(CaseDocument document, String authorisationToken) {
         return !Files.getFileExtension(document.getDocumentFilename()).equalsIgnoreCase("pdf")
             ? convertDocumentToPdf(document, authorisationToken) : document;
@@ -65,22 +72,26 @@ public class GenericDocumentService {
             ? convertDocumentToPdf(document, authorisationToken) : document;
     }
 
+    @Deprecated
     public CaseDocument convertDocumentToPdf(CaseDocument document, String authorisationToken) {
-        return toCaseDocument(documentClient.convertDocumentToPdf(authorisationToken, toDocument(document)));
+        return toCaseDocumentFromClientResponse(
+            documentClient.convertDocumentToPdf(authorisationToken, toDocumentClientDocument(document)));
     }
 
     public Document convertDocumentToPdf(Document document, String authorisationToken) {
-        return documentClient.convertDocumentToPdf(authorisationToken, document);
+        return toDocumentFromClientResponse(
+            documentClient.convertDocumentToPdf(authorisationToken, toDocumentClientDocument(document)));
     }
 
 
     public CaseDocument stampDocument(CaseDocument document, String authorisationToken) {
-        Document stampedDocument = documentClient.stampDocument(toDocument(document), authorisationToken);
-        return toCaseDocument(stampedDocument);
+        DocumentClientDocument stampedDocument = documentClient.stampDocument(toDocumentClientDocument(document), authorisationToken);
+        return toCaseDocumentFromClientResponse(stampedDocument);
     }
 
     public Document stampDocument(Document document, String authorisationToken) {
-        return documentClient.stampDocument(document, authorisationToken);
+        return toDocumentFromClientResponse(
+            documentClient.stampDocument(toDocumentClientDocument(document), authorisationToken));
     }
 
     public CaseDocument toCaseDocument(Document document) {
@@ -91,11 +102,35 @@ public class GenericDocumentService {
         return caseDocument;
     }
 
-    public Document toDocument(CaseDocument caseDocument) {
-        Document document = new Document();
-        document.setBinaryUrl(caseDocument.getDocumentBinaryUrl());
-        document.setFilename(caseDocument.getDocumentFilename());
-        document.setUrl(caseDocument.getDocumentUrl());
-        return document;
+    public static Document toDocumentFromClientResponse(DocumentClientDocument documentClientDocument) {
+        return Document.builder()
+            .url(documentClientDocument.getUrl())
+            .filename(documentClientDocument.getFileName())
+            .binaryUrl(documentClientDocument.getBinaryUrl())
+            .build();
+    }
+
+    public static CaseDocument toCaseDocumentFromClientResponse(DocumentClientDocument document) {
+        return CaseDocument.builder()
+            .documentUrl(document.getUrl())
+            .documentBinaryUrl(document.getBinaryUrl())
+            .documentFilename(document.getFileName())
+            .build();
+    }
+
+    public static DocumentClientDocument toDocumentClientDocument(Document document) {
+        return DocumentClientDocument.builder()
+            .binaryUrl(document.getBinaryUrl())
+            .url(document.getUrl())
+            .fileName(document.getFilename())
+            .build();
+    }
+
+    public static DocumentClientDocument toDocumentClientDocument(CaseDocument document) {
+        return DocumentClientDocument.builder()
+            .binaryUrl(document.getDocumentBinaryUrl())
+            .fileName(document.getDocumentFilename())
+            .url(document.getDocumentUrl())
+            .build();
     }
 }

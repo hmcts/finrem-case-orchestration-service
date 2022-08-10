@@ -9,6 +9,9 @@
       "PBANumber": "PBA123",
       "d81Question": "No",
       "PBAreference": "ABCD",
+      "ApplicantOrganisationPolicy": {
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
+      },
       "approvedOrderCollection": [
         {
           "id": "00ffa155-e60f-499a-9295-77b598bf16d1",
@@ -79,6 +82,7 @@
       },
       "applicantRepresented": "Yes",
       "appRespondentRep": "No",
+      "bristolCourtList": "FR_bristolList_1",
       "solicitorAddress": {
         "County": "test",
         "Country": "United Kingdom",

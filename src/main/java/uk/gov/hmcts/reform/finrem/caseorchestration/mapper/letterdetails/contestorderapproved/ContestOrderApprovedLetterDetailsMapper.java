@@ -8,9 +8,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.Abstrac
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.ContestOrderApprovedLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.ccd.domain.JudgeType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.CourtListWrapper;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo.getYesOrNo;
 
@@ -37,7 +39,12 @@ public class ContestOrderApprovedLetterDetailsMapper extends AbstractLetterDetai
 
     private String getJudgeDetails(FinremCaseDetails caseDetails) {
         return StringUtils.joinWith(" ",
-            caseDetails.getCaseData().getOrderApprovedJudgeType().getValue(),
+            getOrderApprovedJudgeType(caseDetails),
             caseDetails.getCaseData().getOrderApprovedJudgeName());
+    }
+
+    private String getOrderApprovedJudgeType(FinremCaseDetails caseDetails) {
+        return Optional.ofNullable(caseDetails.getCaseData().getOrderApprovedJudgeType()).map(JudgeType::getValue)
+            .orElse("");
     }
 }

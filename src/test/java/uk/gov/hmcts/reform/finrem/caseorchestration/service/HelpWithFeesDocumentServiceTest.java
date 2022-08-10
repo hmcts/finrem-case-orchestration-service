@@ -23,7 +23,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedFinremCaseDetails;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocumentClientDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 
 @ActiveProfiles("test-mock-feign-clients")
@@ -47,7 +47,7 @@ public class HelpWithFeesDocumentServiceTest extends BaseServiceTest {
     @Test
     public void shouldGenerateHwfSuccessfulNotificationLetterForApplicant() {
 
-        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(newDocument());
+        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(newDocumentClientDocument());
 
         Document generatedHwfSuccessfulNotificationLetter = helpWithFeesDocumentService.generateHwfSuccessfulNotificationLetter(
             caseDetails, AUTH_TOKEN, APPLICANT);
@@ -58,7 +58,7 @@ public class HelpWithFeesDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateHwfSuccessfulNotificationLetterForApplicantSolicitor() {
-        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(newDocument());
+        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(newDocumentClientDocument());
 
         Address solicitorAddress = Address.builder()
             .addressLine1("123 Applicant Solicitor Street")

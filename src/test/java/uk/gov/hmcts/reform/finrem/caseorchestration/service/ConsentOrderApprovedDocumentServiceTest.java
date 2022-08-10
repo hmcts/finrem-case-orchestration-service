@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentClientDocument;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Address;
 import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.ConsentOrder;
@@ -49,8 +50,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaul
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finremCaseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.matchDocumentGenerationRequestTemplateAndFilename;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocumentClientDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.pensionTypeCollection;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.variationDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.variationDocumentClientDocument;
 
 @ActiveProfiles("test-mock-feign-clients")
 public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
@@ -90,20 +92,20 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     public void setUp() {
         caseDetails = defaultConsentedFinremCaseDetails();
 
-        Document defaultCoversheet = newDocument();
-        defaultCoversheet.setBinaryUrl(DEFAULT_COVERSHEET_URL);
+        DocumentClientDocument defaultCoversheetResponse = newDocumentClientDocument();
+        defaultCoversheetResponse.setBinaryUrl(DEFAULT_COVERSHEET_URL);
 
         when(documentClientMock.generatePdf(matchDocumentGenerationRequestTemplateAndFilename(documentBulkPrintTemplate,
-            documentBulkPrintFileName), anyString())).thenReturn(defaultCoversheet);
+            documentBulkPrintFileName), anyString())).thenReturn(defaultCoversheetResponse);
 
         when(documentClientMock.generatePdf(matchDocumentGenerationRequestTemplateAndFilename(documentApprovedConsentOrderTemplate,
-            documentApprovedConsentOrderFileName), anyString())).thenReturn(newDocument());
+            documentApprovedConsentOrderFileName), anyString())).thenReturn(newDocumentClientDocument());
 
-        Document consentOrderApprovedCoverLetter = newDocument();
-        consentOrderApprovedCoverLetter.setBinaryUrl(CONSENT_ORDER_APPROVED_COVER_LETTER_URL);
+        DocumentClientDocument consentOrderApprovedCoverLetterResponse = newDocumentClientDocument();
+        consentOrderApprovedCoverLetterResponse.setBinaryUrl(CONSENT_ORDER_APPROVED_COVER_LETTER_URL);
 
         when(documentClientMock.generatePdf(matchDocumentGenerationRequestTemplateAndFilename(documentApprovedConsentOrderNotificationTemplate,
-            documentApprovedConsentOrderNotificationFileName), anyString())).thenReturn(consentOrderApprovedCoverLetter);
+            documentApprovedConsentOrderNotificationFileName), anyString())).thenReturn(consentOrderApprovedCoverLetterResponse);
     }
 
     @Test
@@ -120,7 +122,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     public void shouldGenerateApprovedVariationOrderLetterForConsented() {
         caseDetails = defaultConsentedCaseDetailsForVariationOrder();
         when(documentClientMock.generatePdf(matchDocumentGenerationRequestTemplateAndFilename(documentApprovedConsentOrderTemplate,
-            approvedVariationOrderFileName), anyString())).thenReturn(variationDocument());
+            approvedVariationOrderFileName), anyString())).thenReturn(variationDocumentClientDocument());
         Document caseDocument = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, AUTH_TOKEN);
 
         assertThat(caseDocument.getFilename(), is(VARIATION_FILE_NAME));
@@ -196,7 +198,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     @Test
     public void shouldStampPensionDocuments() {
         Mockito.reset(documentClientMock);
-        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(newDocument());
+        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(newDocumentClientDocument());
 
         List<PensionTypeCollection> pensionDocuments = asList(pensionTypeCollection(), pensionTypeCollection());
         List<PensionTypeCollection> stampPensionDocuments = consentOrderApprovedDocumentService.stampPensionDocuments(pensionDocuments, AUTH_TOKEN);
@@ -208,7 +210,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     @Test
     public void givenNullDocumentInPensionDocuments_whenStampingDocuments_thenTheNullValueIsIgnored() {
         Mockito.reset(documentClientMock);
-        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(newDocument());
+        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(newDocumentClientDocument());
 
         PensionTypeCollection pensionCollectionDataWithNullDocument = pensionTypeCollection();
         pensionCollectionDataWithNullDocument.getValue().setUploadedDocument(null);
@@ -252,8 +254,8 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void stampsAndPopulatesCaseDataForContestedConsentOrder() {
-        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(newDocument());
-        when(documentClientMock.annexStampDocument(any(), anyString())).thenReturn(newDocument());
+        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(newDocumentClientDocument());
+        when(documentClientMock.annexStampDocument(any(), anyString())).thenReturn(newDocumentClientDocument());
 
         FinremCaseDetails caseDetails = defaultConsentedFinremCaseDetails();
         FinremCaseData caseData = caseDetails.getCaseData();

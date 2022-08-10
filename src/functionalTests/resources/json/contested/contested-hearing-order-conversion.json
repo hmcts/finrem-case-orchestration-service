@@ -12,6 +12,9 @@
         "document_filename": "fileupload.txt",
         "document_binary_url": "http://document-management-store:8080/documents/a8ae8d4d-8f7a-4e13-8884-2b18724dc905/binary"
       },
+      "ApplicantOrganisationPolicy": {
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
+      },
       "divorceUploadEvidence2": null,
       "hearingDate": "2020-01-01",
       "divorceStageReached": "Decree Nisi",

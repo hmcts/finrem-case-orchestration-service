@@ -45,18 +45,6 @@ public class CcdCallbackControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void givenEmptyCcdCallback_WhenAboutToSubmit_ThenCallDispatcher() throws Exception {
-        doEmptyCaseDataSetUp();
-        whenDeserialize().thenReturn(getCallbackRequestEmptyCaseData());
-
-        mvc.perform(post(COS_ABOUT_TO_START_ENDPOINT)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isBadRequest());
-    }
-
-    @Test
     public void givenCcdCallback_WhenAboutToSubmit_ThenCallDispatcher() throws Exception {
         whenDeserialize().thenReturn(getCallbackRequest());
 
@@ -119,6 +107,4 @@ public class CcdCallbackControllerTest extends BaseControllerTest {
     private OngoingStubbing<CallbackRequest> whenDeserialize() {
         return when(finremCallbackRequestDeserializer.deserialize(any()));
     }
-
-
 }

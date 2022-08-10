@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentClientDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.ccd.domain.ConsentOrder;
 import uk.gov.hmcts.reform.finrem.ccd.domain.ConsentOrderCollection;
@@ -34,6 +35,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedFinremCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultContestedFinremCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocumentClientDocument;
 
 @ActiveProfiles("test-mock-feign-clients")
 public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest {
@@ -48,10 +50,11 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
 
     @Before
     public void setupDocumentGenerationMocks() {
-        Document generatedDocument = newDocument();
+        DocumentClientDocument generatedDocument = newDocumentClientDocument();
         generatedDocument.setBinaryUrl(COVER_LETTER_URL);
 
-        when(documentClientMock.generatePdf(any(DocumentGenerationRequest.class), eq(AUTH_TOKEN))).thenReturn(generatedDocument);
+        when(documentClientMock.generatePdf(any(DocumentGenerationRequest.class), eq(AUTH_TOKEN)))
+            .thenReturn(generatedDocument);
     }
 
     public void setupContestedCase() {

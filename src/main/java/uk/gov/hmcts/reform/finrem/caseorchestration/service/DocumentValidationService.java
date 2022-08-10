@@ -127,7 +127,9 @@ public class DocumentValidationService {
     }
 
     private DocumentValidationResponse validateLatestConsentOrderDocument(String authToken, Map<String, Object> caseData) {
+        log.info("{}", caseData);
         CaseDocument caseDocument = documentHelper.getLatestAmendedConsentOrder(caseData);
+        log.info("{}", caseDocument);
         return documentClient.checkUploadedFileType(authToken, caseDocument.getDocumentBinaryUrl());
     }
 

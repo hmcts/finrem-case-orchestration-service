@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentClientDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
@@ -156,6 +157,14 @@ public class TestSetUpUtils {
         uk.gov.hmcts.reform.finrem.ccd.domain.Document document = new uk.gov.hmcts.reform.finrem.ccd.domain.Document();
         document.setBinaryUrl(BINARY_URL);
         document.setFilename(VARIATION_FILE_NAME);
+        document.setUrl(DOC_URL);
+        return document;
+    }
+
+    public static DocumentClientDocument variationDocumentClientDocument() {
+        DocumentClientDocument document = new DocumentClientDocument();
+        document.setBinaryUrl(BINARY_URL);
+        document.setFileName(VARIATION_FILE_NAME);
         document.setUrl(DOC_URL);
         return document;
     }
@@ -507,6 +516,16 @@ public class TestSetUpUtils {
         return caseDocument;
     }
 
+    public static DocumentClientDocument newDocumentClientDocument() {
+        DocumentClientDocument caseDocument =
+            new DocumentClientDocument();
+        caseDocument.setUrl(DOC_URL);
+        caseDocument.setFileName(FILE_NAME);
+        caseDocument.setBinaryUrl(BINARY_URL);
+
+        return caseDocument;
+    }
+
     public static uk.gov.hmcts.reform.finrem.ccd.domain.Document wordDoc() {
         uk.gov.hmcts.reform.finrem.ccd.domain.Document caseDocument =
             new uk.gov.hmcts.reform.finrem.ccd.domain.Document();
@@ -515,5 +534,13 @@ public class TestSetUpUtils {
         caseDocument.setBinaryUrl(BINARY_URL);
 
         return caseDocument;
+    }
+
+    public static DocumentClientDocument docClientWordDocument() {
+        return DocumentClientDocument.builder()
+            .url(DOC_URL)
+            .fileName("doc.docx")
+            .binaryUrl(BINARY_URL)
+            .build();
     }
 }

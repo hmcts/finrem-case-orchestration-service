@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CallbackDispatchService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
 import uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse;
@@ -23,7 +22,6 @@ import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackType;
 
 import javax.validation.constraints.NotNull;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.ccd.callback.CallbackType.ABOUT_TO_START;
@@ -60,8 +58,6 @@ public class CcdCallbackController {
             callbackRequest.getEventType(),
             callbackRequest.getCaseDetails().getId());
 
-        validateCaseData(callbackRequest);
-
         return performRequest(ABOUT_TO_START, callbackRequest, authorisationToken);
     }
 
@@ -82,8 +78,6 @@ public class CcdCallbackController {
         log.info("About to submit Financial Remedy case callback `{}` received for Case ID `{}`",
             callbackRequest.getEventType(),
             callbackRequest.getCaseDetails().getId());
-
-        validateCaseData(callbackRequest);
 
         return performRequest(ABOUT_TO_SUBMIT, callbackRequest, authorisationToken);
     }
@@ -106,8 +100,6 @@ public class CcdCallbackController {
             callbackRequest.getEventType(),
             callbackRequest.getCaseDetails().getId());
 
-        validateCaseData(callbackRequest);
-
         return performRequest(MID_EVENT, callbackRequest, authorisationToken);
     }
 
@@ -129,17 +121,7 @@ public class CcdCallbackController {
             callbackRequest.getEventType(),
             callbackRequest.getCaseDetails().getId());
 
-        validateCaseData(callbackRequest);
-
         return performRequest(SUBMITTED, callbackRequest, authorisationToken);
-    }
-
-    private void validateCaseData(CallbackRequest callbackRequest) {
-        if (callbackRequest == null
-            || callbackRequest.getCaseDetails() == null
-            || callbackRequest.getCaseDetails().getCaseData() == null) {
-            throw new InvalidCaseDataException(BAD_REQUEST.value(), "Missing data from CallbackRequest.");
-        }
     }
 
     private ResponseEntity<AboutToStartOrSubmitCallbackResponse> performRequest(CallbackType callbackType,

@@ -7,10 +7,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
 
 import java.io.IOException;
 import java.util.Optional;
+
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +28,7 @@ public class FinremCallbackRequestDeserializer implements Deserializer<CallbackR
 
         try {
             CallbackRequest callbackRequest = mapper.readValue(source, new TypeReference<>() {});
+            validateCaseData(callbackRequest);
             callbackRequest.getCaseDetails().getCaseData().setCcdCaseType(callbackRequest.getCaseDetails().getCaseType());
             callbackRequest.getCaseDetails().getCaseData().setCcdCaseId(String.valueOf(callbackRequest.getCaseDetails().getId()));
 
@@ -35,6 +39,14 @@ public class FinremCallbackRequestDeserializer implements Deserializer<CallbackR
             return callbackRequest;
         } catch (IOException e) {
             throw new IllegalArgumentException(String.format("Could not deserialize callback %s", e.getMessage()), e);
+        }
+    }
+
+    private void validateCaseData(CallbackRequest callbackRequest) {
+        if (callbackRequest == null
+            || callbackRequest.getCaseDetails() == null
+            || callbackRequest.getCaseDetails().getCaseData() == null) {
+            throw new InvalidCaseDataException(BAD_REQUEST.value(), "Missing data from callbackRequest.");
         }
     }
 }

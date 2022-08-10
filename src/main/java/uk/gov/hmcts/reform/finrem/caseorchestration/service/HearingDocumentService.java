@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -91,7 +90,10 @@ public class HearingDocumentService {
     }
 
     private Document generateOutOfFamilyCourtResolutionDocument(Pair<FinremCaseDetails, String> pair) {
-        return genericDocumentService.generateDocumentFromPlaceholdersMap(pair.getRight(), new HashMap<>(),
+        final Map<String, Object> documentTemplateDetailsAsMap = formCLetterDetailsMapper.getDocumentTemplateDetailsAsMap(
+            pair.getLeft(), pair.getLeft().getCaseData().getRegionWrapper().getDefaultCourtList());
+        return genericDocumentService.generateDocumentFromPlaceholdersMap(pair.getRight(),
+            documentTemplateDetailsAsMap,
             documentConfiguration.getOutOfFamilyCourtResolutionTemplate(),
             documentConfiguration.getOutOfFamilyCourtResolutionName());
     }

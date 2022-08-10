@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentClientDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 
@@ -29,8 +30,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultContestedCaseDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.docClientWordDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.newDocumentClientDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.wordDoc;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService.toDocumentClientDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService.toDocumentFromClientResponse;
 
 @ActiveProfiles("test-mock-feign-clients")
 @DirtiesContext
@@ -46,7 +51,7 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldStampDocument() {
-        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(newDocument());
+        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(newDocumentClientDocument());
 
         CaseDocument stampDocument = genericDocumentService.stampDocument(caseDocument(), AUTH_TOKEN);
 
@@ -56,7 +61,7 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldAnnexStampDocument() {
-        when(documentClientMock.annexStampDocument(any(), anyString())).thenReturn(newDocument());
+        when(documentClientMock.annexStampDocument(any(), anyString())).thenReturn(newDocumentClientDocument());
 
         Document stampDocument = genericDocumentService.annexStampDocument(newDocument(), AUTH_TOKEN);
 
@@ -69,7 +74,7 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
         final String templateName = "template name";
         final String fileName = "file name";
 
-        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(newDocument());
+        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(newDocumentClientDocument());
 
         Document document = genericDocumentService.generateDocument(AUTH_TOKEN, defaultContestedCaseDetails(), templateName, fileName);
 
@@ -97,28 +102,28 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void givenDocument_whenConvertToPdf_thenConvertToPdf() {
-        Document pdf = newDocument();
-        pdf.setFilename(PDF_DOCUMENT_NAME);
-        when(documentClientMock.convertDocumentToPdf(any(), isA(Document.class))).thenReturn(pdf);
+        DocumentClientDocument pdf = newDocumentClientDocument();
+        pdf.setFileName(PDF_DOCUMENT_NAME);
+        when(documentClientMock.convertDocumentToPdf(any(), isA(DocumentClientDocument.class))).thenReturn(pdf);
 
         Document actual = genericDocumentService.convertDocumentToPdf(wordDoc(), AUTH_TOKEN);
 
-        verify(documentClientMock).convertDocumentToPdf(eq(AUTH_TOKEN), eq(wordDoc()));
+        verify(documentClientMock).convertDocumentToPdf(eq(AUTH_TOKEN), eq(docClientWordDocument()));
 
-        assertEquals(pdf, actual);
+        assertEquals(toDocumentFromClientResponse(pdf), actual);
     }
 
     @Test
     public void givenWordDocument_whenConvertToPdfIfNotAlready_thenConvertToPdf() {
-        Document pdf = newDocument();
-        pdf.setFilename(PDF_DOCUMENT_NAME);
-        when(documentClientMock.convertDocumentToPdf(any(), isA(Document.class))).thenReturn(pdf);
+        DocumentClientDocument pdf = newDocumentClientDocument();
+        pdf.setFileName(PDF_DOCUMENT_NAME);
+        when(documentClientMock.convertDocumentToPdf(any(), isA(DocumentClientDocument.class))).thenReturn(pdf);
 
         Document actual = genericDocumentService.convertDocumentIfNotPdfAlready(wordDoc(), AUTH_TOKEN);
 
-        verify(documentClientMock, atLeastOnce()).convertDocumentToPdf(eq(AUTH_TOKEN), eq(wordDoc()));
+        verify(documentClientMock, atLeastOnce()).convertDocumentToPdf(eq(AUTH_TOKEN), eq(docClientWordDocument()));
 
-        assertEquals(pdf, actual);
+        assertEquals(toDocumentFromClientResponse(pdf), actual);
     }
 
     @Test
@@ -128,6 +133,6 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
 
         genericDocumentService.convertDocumentIfNotPdfAlready(pdf, AUTH_TOKEN);
 
-        verify(documentClientMock, never()).convertDocumentToPdf(eq(AUTH_TOKEN), eq(pdf));
+        verify(documentClientMock, never()).convertDocumentToPdf(eq(AUTH_TOKEN), eq(toDocumentClientDocument(pdf)));
     }
 }

@@ -117,7 +117,7 @@ public class NoCSolicitorDetailsHelper {
         caseData.getContactDetailsWrapper().setRespondentSolicitorAddress(null);
         caseData.getContactDetailsWrapper().setRespondentSolicitorPhone(null);
         caseData.getContactDetailsWrapper().setRespondentSolicitorEmail(null);
-        caseData.getContactDetailsWrapper().setSolicitorDxNumber(null);
+        caseData.getContactDetailsWrapper().setRespondentSolicitorDxNumber(null);
         caseData.setRespSolNotificationsEmailConsent(null);
     }
 }

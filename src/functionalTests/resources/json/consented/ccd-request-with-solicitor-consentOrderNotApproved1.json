@@ -22,6 +22,9 @@
       ],
       "amountToPay": "1000",
       "appRespondentFMName": "John",
+      "ApplicantOrganisationPolicy": {
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
+      },
       "appRespondentLName": "Smith",
       "appRespondentRep": "No",
       "applicantFMName": "Thomas",
