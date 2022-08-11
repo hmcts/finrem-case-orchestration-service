@@ -39,6 +39,8 @@ public class ApprovedOrderNoticeOfHearingService {
         List<Document> hearingNoticesToAdd = new ArrayList<>();
 
         Document noticeOfHearingDocument = prepareHearingRequiredNoticeDocumentComplexType(caseDetails, authToken);
+        log.info("Notice of hearing document generated: Filename = {}, url = {}, binUrl = {}",
+            noticeOfHearingDocument.getFilename(), noticeOfHearingDocument.getUrl(), noticeOfHearingDocument.getBinaryUrl());
         hearingNoticesToAdd.add(noticeOfHearingDocument);
         List<Document> hearingNoticeDocuments = addHearingNoticeToHearingDocumentCollection(noticeOfHearingDocument, caseDetails);
         hearingNoticeDocuments.forEach(document ->

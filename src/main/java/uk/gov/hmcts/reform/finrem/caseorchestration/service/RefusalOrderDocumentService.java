@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
@@ -28,6 +29,7 @@ import static java.util.Objects.nonNull;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RefusalOrderDocumentService {
 
     private static final String DOCUMENT_COMMENT = "System Generated";
@@ -43,6 +45,8 @@ public class RefusalOrderDocumentService {
     public FinremCaseData generateConsentOrderNotApproved(String authorisationToken, final FinremCaseDetails caseDetails) {
 
         Document refusalOrder = generateDocument.apply(Pair.of(caseDetails, authorisationToken));
+        log.info("Refusal order Generated: filename={}, url={}, binUrl={}",
+            refusalOrder.getFilename(), refusalOrder.getUrl(), refusalOrder.getBinaryUrl());
         UploadOrderCollection consentOrderData = createConsentOrderData.apply(refusalOrder);
         FinremCaseData caseData = populateConsentOrderData(consentOrderData, caseDetails);
 
@@ -52,6 +56,8 @@ public class RefusalOrderDocumentService {
     public FinremCaseData previewConsentOrderNotApproved(String authorisationToken, FinremCaseDetails caseDetails) {
 
         Document refusalOrder = generateDocument.apply(Pair.of(caseDetails, authorisationToken));
+        log.info("Refusal order Generated: filename={}, url={}, binUrl={}",
+            refusalOrder.getFilename(), refusalOrder.getUrl(), refusalOrder.getBinaryUrl());
         return populateConsentOrderNotApproved(refusalOrder, caseDetails);
     }
 

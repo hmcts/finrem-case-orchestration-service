@@ -75,6 +75,8 @@ public class GeneralApplicationDirectionsService {
         FinremCaseData caseData = caseDetails.getCaseData();
         List<BulkPrintDocument> documents = new ArrayList<>();
         Document interimDocument = prepareInterimHearingRequiredNoticeDocument(caseDetails, authorisationToken);
+        log.info("Interim Hearing Document generated: filename={}, url={}, binUrl={}",
+            interimDocument.getFilename(), interimDocument.getUrl(), interimDocument.getBinaryUrl());
         documents.add(documentHelper.getDocumentAsBulkPrintDocument(interimDocument).orElse(null));
 
         if (!isNull(caseData.getInterimWrapper().getInterimUploadAdditionalDocument())) {
@@ -111,6 +113,9 @@ public class GeneralApplicationDirectionsService {
             isYes(caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsHearingRequired())
                 ? prepareHearingRequiredNoticeDocument(caseDetails, authorisationToken)
                 : prepareGeneralApplicationDirectionsOrderDocument(caseDetails, authorisationToken);
+        log.info("Hearing required was {}, generated general application document: filename={}, url={}, binUrl={}",
+            caseData.getGeneralApplicationWrapper().getGeneralApplicationDirectionsHearingRequired(),
+            directionsDocument.getFilename(), directionsDocument.getUrl(), directionsDocument.getBinaryUrl());
 
         documents.add(documentHelper.getDocumentAsBulkPrintDocument(directionsDocument).orElse(null));
         caseData.getGeneralApplicationWrapper().setGeneralApplicationDirectionsDocument(directionsDocument);

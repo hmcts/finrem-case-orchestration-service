@@ -21,7 +21,7 @@ import static uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo.getYesOrNo;
 @Component
 public class ConsentOrderApprovedLetterDetailsMapper extends AbstractLetterDetailsMapper {
 
-    private ConsentedApplicationHelper consentedApplicationHelper;
+    private final ConsentedApplicationHelper consentedApplicationHelper;
 
     public ConsentOrderApprovedLetterDetailsMapper(CourtDetailsMapper courtDetailsMapper,
                                                    ObjectMapper objectMapper,

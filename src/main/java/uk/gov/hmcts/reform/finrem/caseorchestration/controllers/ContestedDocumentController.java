@@ -53,6 +53,8 @@ public class ContestedDocumentController extends BaseController {
 
         FinremCaseData caseData = callback.getCaseDetails().getCaseData();
         Document miniFormA = service.generateContestedMiniFormA(authorisationToken, callback.getCaseDetails());
+        log.info("MiniForm A Generated: filename={}, url={}, binUrl={}",
+            miniFormA.getFilename(), miniFormA.getUrl(), miniFormA.getBinaryUrl());
         caseData.setMiniFormA(miniFormA);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }

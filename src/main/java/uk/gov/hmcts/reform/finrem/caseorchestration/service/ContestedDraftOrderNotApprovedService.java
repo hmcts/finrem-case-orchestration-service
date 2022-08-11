@@ -37,6 +37,8 @@ public class ContestedDraftOrderNotApprovedService {
         log.info("Generating General Order for Case ID: {}", caseDetails.getId());
 
         Document contestedDraftOrderNotApproved = generateDocument.apply(caseDetails, authorisationToken);
+        log.info("Contest draft order not approved document generated: Filename = {}, url = {}, binUrl = {}",
+            contestedDraftOrderNotApproved.getFilename(), contestedDraftOrderNotApproved.getUrl(), contestedDraftOrderNotApproved.getBinaryUrl());
         caseDetails.getCaseData().setRefusalOrderPreviewDocument(contestedDraftOrderNotApproved);
     }
 

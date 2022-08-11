@@ -99,13 +99,11 @@ public class DocumentHelper {
     }
 
     public CaseDocument getLatestAmendedConsentOrder(Map<String, Object> caseData) {
-        log.info("{}", caseData.get(AMENDED_CONSENT_ORDER_COLLECTION));
         Optional<AmendedConsentOrderData> reduce = ofNullable(caseData.get(AMENDED_CONSENT_ORDER_COLLECTION))
             .map(this::convertToAmendedConsentOrderDataList)
             .orElse(emptyList())
             .stream()
             .reduce((first, second) -> second);
-        log.info("{}", reduce);
         return reduce
             .map(consentOrderData -> consentOrderData.getConsentOrder().getAmendedConsentOrder())
             .orElseGet(() -> convertToCaseDocument(caseData.get(LATEST_CONSENT_ORDER)));

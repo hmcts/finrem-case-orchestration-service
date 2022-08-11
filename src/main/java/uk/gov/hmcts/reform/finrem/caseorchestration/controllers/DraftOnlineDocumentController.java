@@ -58,6 +58,8 @@ public class DraftOnlineDocumentController extends BaseController {
 
         FinremCaseData caseData = callback.getCaseDetails().getCaseData();
         Document miniFormA = service.generateDraftContestedMiniFormA(authorisationToken, callback.getCaseDetails());
+        log.info("Draft MiniForm A Generated: filename={}, url={}, binUrl={}",
+            miniFormA.getFilename(), miniFormA.getUrl(), miniFormA.getBinaryUrl());
         caseData.setMiniFormA(miniFormA);
         if (!idamService.isUserRoleAdmin(authorisationToken)) {
             log.info("other users.");

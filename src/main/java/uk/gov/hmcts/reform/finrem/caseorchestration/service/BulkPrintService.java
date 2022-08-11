@@ -38,13 +38,6 @@ public class BulkPrintService {
         return bulkPrintDocuments(caseDetails.getId(), FINANCIAL_REMEDY_GENERAL_LETTER, bulkPrintDocument);
     }
 
-    public UUID sendDocumentForPrint(final CaseDocument document, FinremCaseDetails caseDetails) {
-        List<BulkPrintDocument> bulkPrintDocument = Collections.singletonList(
-            BulkPrintDocument.builder().binaryFileUrl(document.getDocumentBinaryUrl()).build());
-
-        return bulkPrintDocuments(caseDetails.getId(), FINANCIAL_REMEDY_GENERAL_LETTER, bulkPrintDocument);
-    }
-
     public UUID sendDocumentForPrint(final Document document, FinremCaseDetails caseDetails) {
         List<BulkPrintDocument> bulkPrintDocument = Collections.singletonList(
             BulkPrintDocument.builder().binaryFileUrl(document.getBinaryUrl()).build());
@@ -89,6 +82,8 @@ public class BulkPrintService {
 
     private BulkPrintDocument generateApplicantCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
         Document applicantCoverSheet = coverSheetService.generateApplicantCoverSheet(caseDetails, authorisationToken);
+        log.info("Applicant cover sheet generated: Filename = {}, url = {}, binUrl = {}",
+            applicantCoverSheet.getFilename(), applicantCoverSheet.getUrl(), applicantCoverSheet.getBinaryUrl());
 
         if (isYes(caseDetails.getCaseData().getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent())) {
             log.info("Case {}, has been marked as confidential. Adding coversheet to confidential field", caseDetails.getId());
@@ -104,6 +99,8 @@ public class BulkPrintService {
 
     private BulkPrintDocument generateRespondentCoverSheet(FinremCaseDetails caseDetails, String authorisationToken) {
         Document respondentCoverSheet = coverSheetService.generateRespondentCoverSheet(caseDetails, authorisationToken);
+        log.info("Respondent cover sheet generated: Filename = {}, url = {}, binUrl = {}",
+            respondentCoverSheet.getFilename(), respondentCoverSheet.getUrl(), respondentCoverSheet.getBinaryUrl());
 
         if (isYes(caseDetails.getCaseData().getContactDetailsWrapper().getRespondentAddressHiddenFromApplicant())) {
             log.info("Case {}, has been marked as confidential. Adding coversheet to confidential field", caseDetails.getId());

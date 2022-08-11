@@ -18,7 +18,6 @@ public class HelpWithFeesDocumentService {
 
     private final GenericDocumentService genericDocumentService;
     private final DocumentConfiguration documentConfiguration;
-    private final DocumentHelper documentHelper;
     private final LetterDetailsMapper letterDetailsMapper;
 
     public Document generateHwfSuccessfulNotificationLetter(FinremCaseDetails caseDetails, String authToken,

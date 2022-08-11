@@ -11,7 +11,9 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.CourtListWrapper;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo.getYesOrNo;
 
@@ -44,8 +46,11 @@ public class ContestedDraftOrderNotApprovedDetailsMapper extends AbstractLetterD
 
     private String getFormattedRefusalReasons(FinremCaseDetails caseDetails) {
         FinremCaseData caseData = caseDetails.getCaseData();
-        List<String> refusalReasons = caseData.getJudgeNotApprovedReasons().stream()
-            .map(reason -> reason.getValue().getJudgeNotApprovedReasons()).toList();
+        List<String> refusalReasons = Optional.ofNullable(caseData.getJudgeNotApprovedReasons())
+            .orElse(new ArrayList<>())
+            .stream()
+            .map(reason -> reason.getValue().getJudgeNotApprovedReasons())
+            .toList();
 
         StringBuilder formattedRefusalReasons = new StringBuilder();
         refusalReasons.forEach(reason -> {

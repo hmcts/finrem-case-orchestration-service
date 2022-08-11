@@ -71,6 +71,8 @@ public class UpdateContestedCaseController extends BaseController {
         cleanupAdditionalDocuments(caseData);
 
         Document miniFormA = onlineFormDocumentService.generateDraftContestedMiniFormA(authToken, ccdRequest.getCaseDetails());
+        log.info("Draft MiniForm A Generated: filename={}, url={}, binUrl={}",
+            miniFormA.getFilename(), miniFormA.getUrl(), miniFormA.getBinaryUrl());
         caseData.setMiniFormA(miniFormA);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }

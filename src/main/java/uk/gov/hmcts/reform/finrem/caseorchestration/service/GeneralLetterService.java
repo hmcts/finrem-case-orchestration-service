@@ -26,7 +26,6 @@ import java.util.function.BiPredicate;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper.ADDRESS_MAP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper.getAddressToCaseDataMapping;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
@@ -53,12 +52,16 @@ public class GeneralLetterService {
     public void previewGeneralLetter(String authorisationToken, FinremCaseDetails caseDetails) {
         log.info("Generating General letter preview for Case ID: {}", caseDetails.getId());
         Document generalLetterDocument = generateGeneralLetterDocument(caseDetails, authorisationToken);
+        log.info("General letter Generated: filename={}, url={}, binUrl={}",
+            generalLetterDocument.getFilename(), generalLetterDocument.getUrl(), generalLetterDocument.getBinaryUrl());
         caseDetails.getCaseData().getGeneralLetterWrapper().setGeneralLetterPreview(generalLetterDocument);
     }
 
     public void createGeneralLetter(String authorisationToken, FinremCaseDetails caseDetails) {
         log.info("Generating General letter for Case ID: {}", caseDetails.getId());
         Document document = generateGeneralLetterDocument(caseDetails, authorisationToken);
+        log.info("General letter Generated: filename={}, url={}, binUrl={}",
+            document.getFilename(), document.getUrl(), document.getBinaryUrl());
         addGeneralLetterToCaseData(caseDetails, document);
         printLatestGeneralLetter(caseDetails);
     }
@@ -117,7 +120,7 @@ public class GeneralLetterService {
 
         return Stream.of(Address.class.getDeclaredFields())
             .filter(field -> isAddressFieldEmpty.test(field, address))
-            .collect(toList())
+            .toList()
             .size() == 0;
     }
 }

@@ -67,11 +67,15 @@ public class  MiniFormAController extends BaseController {
 
         if (!caseData.isConsentedInContestedCase()) {
             Document miniFormA = service.generateMiniFormA(authorisationToken, caseDetails);
+            log.info("MiniForm A Generated: filename={}, url={}, binUrl={}",
+                miniFormA.getFilename(), miniFormA.getUrl(), miniFormA.getBinaryUrl());
             caseData.setMiniFormA(miniFormA);
 
             log.info("Defaulting AssignedToJudge fields for Case ID: {}", callback.getCaseDetails().getId());
         } else {
             Document consentMiniFormA = service.generateConsentedInContestedMiniFormA(callback.getCaseDetails(), authorisationToken);
+            log.info("consent in contest MiniForm A Generated: filename={}, url={}, binUrl={}",
+                consentMiniFormA.getFilename(), consentMiniFormA.getUrl(), consentMiniFormA.getBinaryUrl());
             caseData.getConsentOrderWrapper().setConsentMiniFormA(consentMiniFormA);
         }
 

@@ -81,6 +81,8 @@ public class ConsentOrderNotApprovedDocumentService {
             placeholdersMap,
             documentConfiguration.getConsentOrderNotApprovedCoverLetterTemplate(),
             notApprovedOrderNotificationFileName);
+        log.info("Order Not approved cover letter Generated: filename={}, url={}, binUrl={}",
+            coverLetter.getFilename(), coverLetter.getUrl(), coverLetter.getBinaryUrl());
         return documentHelper.getDocumentAsBulkPrintDocument(coverLetter).orElse(null);
     }
 

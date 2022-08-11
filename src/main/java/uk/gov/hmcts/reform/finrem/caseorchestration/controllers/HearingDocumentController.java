@@ -90,6 +90,7 @@ public class HearingDocumentController extends BaseController {
             caseDetails.getCaseData().setFormC((Document) documents.get(FORM_C));
             caseDetails.getCaseData().setFormG((Document) documents.get(FORM_G));
             caseDetails.getCaseData().setOutOfFamilyCourtResolution((Document) documents.get(OUT_OF_FAMILY_COURT_RESOLUTION));
+            logDocumentsGenerated(caseDetails.getCaseData());
         }
 
         List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
@@ -157,5 +158,29 @@ public class HearingDocumentController extends BaseController {
 
             caseData.setDirectionDetailsCollection(sortedDirectionDetailsCollectionList);
         }
+    }
+
+    private void logDocumentsGenerated(FinremCaseData caseData) {
+        Optional<Document> formC = Optional.ofNullable(caseData.getFormC());
+        formC.ifPresent(document ->
+            log.info("Form C generated: Filename = {}, url = {}, binUrl = {}",
+                document.getFilename(),
+                document.getUrl(),
+                document.getBinaryUrl()));
+
+        Optional<Document> formG = Optional.ofNullable(caseData.getFormG());
+        formG.ifPresent(document ->
+            log.info("Form G generated: Filename = {}, url = {}, binUrl = {}",
+                document.getFilename(),
+                document.getUrl(),
+                document.getBinaryUrl()));
+
+        Optional<Document> familyCourtResolution = Optional.ofNullable(caseData.getOutOfFamilyCourtResolution());
+        familyCourtResolution.ifPresent(document ->
+            log.info("Out of court Family Resolution generated: Filename = {}, url = {}, binUrl = {}",
+                document.getFilename(),
+                document.getUrl(),
+                document.getBinaryUrl()));
+
     }
 }

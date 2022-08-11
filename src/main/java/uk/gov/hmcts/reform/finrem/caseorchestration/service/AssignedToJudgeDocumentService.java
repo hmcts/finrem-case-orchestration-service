@@ -18,7 +18,6 @@ public class AssignedToJudgeDocumentService {
 
     private final GenericDocumentService genericDocumentService;
     private final DocumentConfiguration documentConfiguration;
-    private final DocumentHelper documentHelper;
     private final LetterDetailsMapper letterDetailsMapper;
 
     public Document generateAssignedToJudgeNotificationLetter(FinremCaseDetails caseDetails, String authToken,

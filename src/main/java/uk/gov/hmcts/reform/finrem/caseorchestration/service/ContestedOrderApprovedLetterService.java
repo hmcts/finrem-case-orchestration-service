@@ -28,6 +28,8 @@ public class ContestedOrderApprovedLetterService {
             letterDetailsMap,
             documentConfiguration.getContestedOrderApprovedCoverLetterTemplate(),
             documentConfiguration.getContestedOrderApprovedCoverLetterFileName());
+        log.info("Approved order cover letter generated: Filename = {}, url = {}, binUrl = {}",
+            approvedOrderCoverLetter.getFilename(), approvedOrderCoverLetter.getUrl(), approvedOrderCoverLetter.getBinaryUrl());
 
         caseDetails.getCaseData().setOrderApprovedCoverLetter(approvedOrderCoverLetter);
     }

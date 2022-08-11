@@ -37,6 +37,8 @@ public class GeneralOrderService {
         log.info("Generating General Order for Case ID: {}", caseDetails.getId());
 
         Document generalOrderData = generateDocument.apply(caseDetails, authorisationToken);
+        log.info("General order Generated: filename={}, url={}, binUrl={}",
+            generalOrderData.getFilename(), generalOrderData.getUrl(), generalOrderData.getBinaryUrl());
         caseDetails.getCaseData().getGeneralOrderWrapper().setGeneralOrderPreviewDocument(generalOrderData);
     }
 
