@@ -72,8 +72,9 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
         FinremCaseData caseData = caseDetails.getCaseData();
 
         Document approvedConsentOrderLetter = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, authToken);
-        log.info("Approved consent order letter generated: Filename = {}, url = {}, binUrl = {}",
-            approvedConsentOrderLetter.getFilename(), approvedConsentOrderLetter.getUrl(), approvedConsentOrderLetter.getBinaryUrl());
+        Optional.ofNullable(approvedConsentOrderLetter).ifPresent(letter ->
+            log.info("Approved consent order letter generated: Filename = {}, url = {}, binUrl = {}",
+                letter.getFilename(), letter.getUrl(), letter.getBinaryUrl()));
         Document consentOrderAnnexStamped = genericDocumentService.annexStampDocument(latestConsentOrder, authToken);
 
         ConsentOrder approvedOrder = ConsentOrder.builder()

@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.NatureApplication;
 import uk.gov.hmcts.reform.finrem.ccd.domain.StageReached;
 
 import java.util.List;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.NoCSolicitorDetailsHelper.removeSolicitorAddress;
@@ -71,8 +72,10 @@ public class UpdateContestedCaseController extends BaseController {
         cleanupAdditionalDocuments(caseData);
 
         Document miniFormA = onlineFormDocumentService.generateDraftContestedMiniFormA(authToken, ccdRequest.getCaseDetails());
-        log.info("Draft MiniForm A Generated: filename={}, url={}, binUrl={}",
-            miniFormA.getFilename(), miniFormA.getUrl(), miniFormA.getBinaryUrl());
+        Optional.ofNullable(miniFormA).ifPresent(
+            document -> log.info("Draft MiniForm A Generated: filename={}, url={}, binUrl={}",
+                document.getFilename(), document.getUrl(), document.getBinaryUrl()));
+
         caseData.setMiniFormA(miniFormA);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }

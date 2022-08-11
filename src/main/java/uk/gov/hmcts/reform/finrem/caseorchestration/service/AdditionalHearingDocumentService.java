@@ -46,8 +46,9 @@ public class AdditionalHearingDocumentService {
             .getDocumentTemplateDetailsAsMap(caseDetails, caseData.getRegionWrapper().getDefaultCourtList());
 
         Document document = generateAdditionalHearingDocument(additionalHearingPlaceholdersMap, authorisationToken);
-        log.info("Additional Hearing Document generated: Filename = {}, Url = {}, binUrl = {}",
-            document.getFilename(), document.getUrl(), document.getBinaryUrl());
+        Optional.ofNullable(document).ifPresent(doc ->
+            log.info("Additional Hearing Document generated: Filename = {}, Url = {}, binUrl = {}",
+            doc.getFilename(), doc.getUrl(), doc.getBinaryUrl()));
         addAdditionalHearingDocumentToCaseData(caseDetails, document);
     }
 
@@ -88,8 +89,9 @@ public class AdditionalHearingDocumentService {
                 .getDocumentTemplateDetailsAsMap(caseDetailsCopy, latestDirectionDetailsCollectionItem.getLocalCourt());
 
             Document document = generateAdditionalHearingDocument(additionalHearingPlaceholdersMap, authorisationToken);
-            log.info("Additional Hearing Document generated: Filename = {}, Url = {}, binUrl = {}",
-                document.getFilename(), document.getUrl(), document.getBinaryUrl());
+            Optional.ofNullable(document).ifPresent(doc ->
+                log.info("Additional Hearing Document generated: Filename = {}, Url = {}, binUrl = {}",
+                doc.getFilename(), doc.getUrl(), doc.getBinaryUrl()));
             addAdditionalHearingDocumentToCaseData(caseDetails, document);
         } else {
             log.info("Additional hearing document not required for case: {}", caseDetails.getId());
