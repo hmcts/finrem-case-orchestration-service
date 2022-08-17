@@ -23,6 +23,7 @@ public enum EventType {
     REJECT_ORDER("FR_orderRefusal"),
     CONSENT_ORDER_NOT_APPROVED("FR_consentOrderNotApproved"),
     GENERAL_APPLICATION("createGeneralApplication"),
+    REJECT_GENERAL_APPLICATION("rejectGeneralApplication"),
     CLOSE("FR_close"),
     MANAGE_CASE_DOCUMENTS("FR_manageCaseDocuments"),
     UPLOAD_APPROVED_ORDER("FR_uploadApprovedOrder"),

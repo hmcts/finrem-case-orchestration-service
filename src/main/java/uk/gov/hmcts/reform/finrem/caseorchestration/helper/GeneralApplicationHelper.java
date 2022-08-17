@@ -6,11 +6,15 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
 
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +25,8 @@ import java.util.UUID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_HEARING_REQUIRED;
@@ -96,8 +102,7 @@ public class GeneralApplicationHelper {
         return null;
     }
 
-    private GeneralApplicationItems getApplicationItems(Map<String,Object> caseData) {
-
+    public GeneralApplicationItems getApplicationItems(Map<String,Object> caseData) {
         GeneralApplicationItems.GeneralApplicationItemsBuilder builder =
             GeneralApplicationItems.builder();
         builder.generalApplicationReceivedFrom(objectToString(caseData.get(GENERAL_APPLICATION_RECEIVED_FROM)));
@@ -123,5 +128,47 @@ public class GeneralApplicationHelper {
         }
         return e2.getGeneralApplicationItems().getGeneralApplicationCreatedDate()
             .compareTo(e1.getGeneralApplicationItems().getGeneralApplicationCreatedDate());
+    }
+
+    public DynamicList objectToDynamicList(Object object) {
+        if (object != null) {
+            return objectMapper.registerModule(new JavaTimeModule()).convertValue(object, DynamicList.class);
+        }
+        return null;
+    }
+
+
+    public CallbackRequest buildCallbackRequest(String path)  {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(path)) {
+            CaseDetails caseDetails = objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+            return CallbackRequest.builder().caseDetails(caseDetails).build();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    public void deleteNonCollectionGeneralApplication(Map<String, Object> caseData) {
+        if (caseData.get(GENERAL_APPLICATION_CREATED_BY) != null) {
+            caseData.remove(GENERAL_APPLICATION_RECEIVED_FROM);
+            caseData.remove(GENERAL_APPLICATION_CREATED_BY);
+            caseData.remove(GENERAL_APPLICATION_HEARING_REQUIRED);
+            caseData.remove(GENERAL_APPLICATION_TIME_ESTIMATE);
+            caseData.remove(GENERAL_APPLICATION_SPECIAL_MEASURES);
+            caseData.remove(GENERAL_APPLICATION_DOCUMENT);
+            caseData.remove(GENERAL_APPLICATION_DRAFT_ORDER);
+            caseData.remove(GENERAL_APPLICATION_TRACKING);
+
+            List<GeneralApplicationData> generalApplicationList
+                = Optional.ofNullable(caseData.get(GENERAL_APPLICATION_DOCUMENT_COLLECTION))
+                .map(this::convertToGeneralApplicationDataList)
+                .orElse(new ArrayList<>());
+
+            if (generalApplicationList.size() == 1) {
+                caseData.remove(GENERAL_APPLICATION_DOCUMENT_COLLECTION);
+                caseData.remove(GENERAL_APPLICATION_DOCUMENT_LATEST_DATE);
+                caseData.remove(GENERAL_APPLICATION_DOCUMENT_LATEST);
+            }
+        }
     }
 }
