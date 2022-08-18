@@ -46,6 +46,10 @@ public class RejectGeneralApplicationAboutToSubmitHandler implements CallbackHan
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_LIST));
         String valueCode = dynamicList.getValueCode();
         log.info("selected dynamic list code : {}", valueCode);
+        if (valueCode.equals("-")) {
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseData)
+                .errors(List.of("There is general application to reject.")).build();
+        }
 
         if (existingList.isEmpty() && caseData.get(GENERAL_APPLICATION_CREATED_BY) != null) {
             helper.deleteNonCollectionGeneralApplication(caseData);

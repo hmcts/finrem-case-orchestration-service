@@ -29,6 +29,7 @@ public class RejectGeneralApplicationAboutToStartHandlerTest {
     private GeneralApplicationHelper helper;
 
     public static final String AUTH_TOKEN = "tokien:)";
+    private static final String NO_GA_JSON = "/fixtures/contested/no-general-application.json";
     private static final String GA_JSON = "/fixtures/contested/general-application-double.json";
     private static final String GA_NON_COLL_JSON = "/fixtures/contested/general-application.json";
 
@@ -92,4 +93,16 @@ public class RejectGeneralApplicationAboutToStartHandlerTest {
         assertNull(caseData.get(GENERAL_APPLICATION_REJECT_REASON));
     }
 
+
+    @Test
+    public void givenCase_whenNoExistingGeneApp_thenHandle() {
+        CallbackRequest callbackRequest = helper.buildCallbackRequest(NO_GA_JSON);
+        AboutToStartOrSubmitCallbackResponse handle = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        Map<String, Object> caseData = handle.getData();
+        DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_LIST));
+
+        assertEquals(1, dynamicList.getListItems().size());
+        assertNull(caseData.get(GENERAL_APPLICATION_REJECT_REASON));
+    }
 }

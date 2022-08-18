@@ -94,6 +94,13 @@ public class RejectGeneralApplicationAboutToStartHandler implements CallbackHand
     }
 
     private DynamicList generateAvailableGeneralApplicationAsDynamicList(List<DynamicListElement> dynamicListElement) {
+        if (dynamicListElement.isEmpty()) {
+            DynamicListElement elements = DynamicListElement.builder().code("-").label("-").build();
+            return DynamicList.builder()
+                .value(elements)
+                .listItems(List.of(elements))
+                .build();
+        }
         return DynamicList.builder()
             .value(dynamicListElement.get(0))
             .listItems(dynamicListElement)
