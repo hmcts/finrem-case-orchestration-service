@@ -76,7 +76,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.help
 public class FormAValidator extends BulkScanFormValidator {
 
     private static final String HWF_NUMBER_6_DIGITS_REGEX = "\\d{6}";
-    private static final String DIVORCE_CASE_NUMBER_REGEX = "^([A-Z|a-z][A-Z|a-z])\\d{2}[D|d]\\d{5}$";
+    private static final String DIVORCE_CASE_NUMBER_REGEX
+        = "^([A-Z|a-z][A-Z|a-z])\\d{2}[D|d|J|j|N|n]\\d{5}$|\\b\\d{4}[ -]\\d{4}[ -]\\d{4}[ -]\\d{4}\\b|\\b\\d{4}\\d{4}\\d{4}\\d{4}\\b";
 
     private static final List<String> MANDATORY_FIELDS = asList(
         DIVORCE_CASE_NUMBER,
