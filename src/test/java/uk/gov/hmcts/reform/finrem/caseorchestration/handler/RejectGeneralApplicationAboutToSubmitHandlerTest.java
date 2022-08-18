@@ -110,7 +110,7 @@ public class RejectGeneralApplicationAboutToSubmitHandlerTest {
 
         Map<String, Object> caseData = startHandle.getData();
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_LIST));
-        assertEquals(1, dynamicList.getListItems().size());
+        assertNull(dynamicList);
         assertNull(caseData.get(GENERAL_APPLICATION_REJECT_REASON));
 
         AboutToStartOrSubmitCallbackResponse submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);

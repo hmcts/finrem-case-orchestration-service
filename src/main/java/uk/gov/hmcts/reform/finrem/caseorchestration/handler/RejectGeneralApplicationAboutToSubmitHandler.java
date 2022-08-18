@@ -44,9 +44,7 @@ public class RejectGeneralApplicationAboutToSubmitHandler implements CallbackHan
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(caseData);
 
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_LIST));
-        String valueCode = dynamicList.getValueCode();
-        log.info("selected dynamic list code : {}", valueCode);
-        if (valueCode.equals("-")) {
+        if (dynamicList == null) {
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseData)
                 .errors(List.of("There is no general application available to reject.")).build();
         }
@@ -54,7 +52,8 @@ public class RejectGeneralApplicationAboutToSubmitHandler implements CallbackHan
         if (existingList.isEmpty() && caseData.get(GENERAL_APPLICATION_CREATED_BY) != null) {
             helper.deleteNonCollectionGeneralApplication(caseData);
         } else {
-
+            final String valueCode = dynamicList.getValueCode();
+            log.info("selected dynamic list code : {}", valueCode);
             final List<GeneralApplicationCollectionData> applicationCollectionDataList
                 = existingList.stream().filter(ga -> !ga.getId().equals(valueCode)).sorted(helper::getCompareTo).toList();
             log.info("applicationCollectionDataList : {}", applicationCollectionDataList.size());

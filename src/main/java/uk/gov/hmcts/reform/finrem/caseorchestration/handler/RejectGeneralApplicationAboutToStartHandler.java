@@ -47,7 +47,6 @@ public class RejectGeneralApplicationAboutToStartHandler implements CallbackHand
 
         List<GeneralApplicationCollectionData> existingGeneralApplicationList = helper.getGeneralApplicationList(caseData);
         AtomicInteger index = new AtomicInteger(0);
-
         if (existingGeneralApplicationList.isEmpty() && caseData.get(GENERAL_APPLICATION_CREATED_BY) != null) {
             GeneralApplicationItems applicationItems = helper.getApplicationItems(caseData);
             DynamicListElement dynamicListElements
@@ -63,6 +62,11 @@ public class RejectGeneralApplicationAboutToStartHandler implements CallbackHand
             List<DynamicListElement> dynamicListElements = existingGeneralApplicationList.stream()
                 .map(ga -> getDynamicListElements(ga.getId(), getLabel(ga.getGeneralApplicationItems(), index.incrementAndGet())))
                 .toList();
+
+            if (dynamicListElements.isEmpty()) {
+                return AboutToStartOrSubmitCallbackResponse.builder().data(caseData)
+                    .errors(List.of("There is no general application available to reject.")).build();
+            }
 
             DynamicList dynamicList = generateAvailableGeneralApplicationAsDynamicList(dynamicListElements);
             log.info("collection dynamicList {} for case id {}", dynamicList, caseDetails.getId());
@@ -94,14 +98,6 @@ public class RejectGeneralApplicationAboutToStartHandler implements CallbackHand
     }
 
     private DynamicList generateAvailableGeneralApplicationAsDynamicList(List<DynamicListElement> dynamicListElement) {
-        if (dynamicListElement.isEmpty()) {
-            DynamicListElement elements =
-                DynamicListElement.builder().code("-").label("There is no general application available to reject.").build();
-            return DynamicList.builder()
-                .value(elements)
-                .listItems(List.of(elements))
-                .build();
-        }
         return DynamicList.builder()
             .value(dynamicListElement.get(0))
             .listItems(dynamicListElement)
