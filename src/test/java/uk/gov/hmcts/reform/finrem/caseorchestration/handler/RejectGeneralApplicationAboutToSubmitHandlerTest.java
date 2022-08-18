@@ -114,7 +114,7 @@ public class RejectGeneralApplicationAboutToSubmitHandlerTest {
         assertNull(caseData.get(GENERAL_APPLICATION_REJECT_REASON));
 
         AboutToStartOrSubmitCallbackResponse submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
-        assertThat(submitHandle.getErrors(), CoreMatchers.hasItem("There is general application to reject."));
+        assertThat(submitHandle.getErrors(), CoreMatchers.hasItem("There is no general application available to reject."));
 
     }
 

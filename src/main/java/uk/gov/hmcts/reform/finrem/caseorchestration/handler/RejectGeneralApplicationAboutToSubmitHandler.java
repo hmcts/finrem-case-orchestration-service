@@ -48,7 +48,7 @@ public class RejectGeneralApplicationAboutToSubmitHandler implements CallbackHan
         log.info("selected dynamic list code : {}", valueCode);
         if (valueCode.equals("-")) {
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseData)
-                .errors(List.of("There is general application to reject.")).build();
+                .errors(List.of("There is no general application available to reject.")).build();
         }
 
         if (existingList.isEmpty() && caseData.get(GENERAL_APPLICATION_CREATED_BY) != null) {
