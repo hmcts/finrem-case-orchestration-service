@@ -207,10 +207,6 @@ public class FinremCallbackRequestDeserializerTest {
         setCallbackString(SOL_CONTEST_CALLBACK_REQUEST);
         CallbackRequest callbackRequest = callbackRequestDeserializer.deserialize(callback);
         FinremCaseData caseData = callbackRequest.getCaseDetails().getCaseData();
-        System.out.println(callback);
-        System.out.println();
-        System.out.println();
-        System.out.println(caseData);
         assertMiam(caseData);
         assertNotNull(callbackRequest);
         assertAmendedConsentOrderCollection(caseData);
@@ -264,6 +260,18 @@ public class FinremCallbackRequestDeserializerTest {
         assertNotNull(contactDetails.getRespondentAddress());
         assertNotNull(contactDetails.getSolicitorAddress());
         assertNotNull(contactDetails.getApplicantSolicitorAddress());
+    }
+
+    @Test
+    public void shouldDeserializeConsentedCourtLists() throws IOException {
+        setCallbackString("/fixtures/deserialisation/consented-courts.json");
+        CallbackRequest callbackRequest = callbackRequestDeserializer.deserialize(callback);
+        DefaultCourtListWrapper defaultCourtListWrapper = callbackRequest.getCaseDetails().getCaseData().getRegionWrapper()
+            .getDefaultCourtList();
+
+        assertEquals(defaultCourtListWrapper.getKentSurreyCourtList().getId(), "FR_kent_surreyList_1");
+        assertEquals(defaultCourtListWrapper.getSwanseaCourtList().getId(), "FR_swanseaList_6");
+        assertEquals(defaultCourtListWrapper.getHumberCourt().getId(), "FR_humberList_2");
     }
 
     private void setCallbackString(String fileName) throws IOException {
