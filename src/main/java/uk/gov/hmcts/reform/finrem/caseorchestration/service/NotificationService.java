@@ -379,6 +379,19 @@ public class NotificationService {
         sendNotificationEmail(notificationRequest, uri);
     }
 
+    public void sendGeneralApplicationRejectionEmailToAppSolicitor(CaseDetails caseDetails) {
+        sendGeneralApplicationRejectionEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
+    }
+
+    public void sendGeneralApplicationRejectionEmailToRepSolicitor(CaseDetails caseDetails) {
+        sendGeneralApplicationRejectionEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
+    }
+
+    public void sendGeneralApplicationRejectionEmail (NotificationRequest notificationRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getGeneralApplicationRejection());
+        sendNotificationEmail(notificationRequest, uri);
+    }
+
     private void sendNotificationEmail(NotificationRequest notificationRequest, URI uri) {
         HttpEntity<NotificationRequest> request = new HttpEntity<>(notificationRequest, buildHeaders());
         try {
