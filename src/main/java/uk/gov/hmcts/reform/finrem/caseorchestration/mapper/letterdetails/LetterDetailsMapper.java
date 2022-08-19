@@ -46,10 +46,10 @@ public class LetterDetailsMapper {
             .respondentName(caseDetails.getCaseData().getRespondentFullName())
             .addressee(generateAddressee(caseDetails, recipient))
             .courtDetails(courtDetailsMapper.getCourtDetails(courtList))
+            .ctscContactDetails(getCtscContactDetails())
             .letterDate(String.valueOf(LocalDate.now()))
             .reference(getReference(caseDetails.getCaseData(), recipient))
             .caseNumber(String.valueOf(caseDetails.getId()))
-            .ctscContactDetails(getCtscContactDetails())
             .divorceCaseNumber(caseDetails.getCaseData().getDivorceCaseNumber())
             .orderType(consentedApplicationHelper.getOrderType(caseDetails.getCaseData()))
             .build();

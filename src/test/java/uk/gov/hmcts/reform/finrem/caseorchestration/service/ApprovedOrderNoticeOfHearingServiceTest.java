@@ -121,6 +121,7 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
         caseDetails.getCaseData().setHearingNoticeDocumentPack(buildHearingNoticePack());
         when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(false);
         when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(false);
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getCaseData())).thenReturn(true);
         caseDetails.getCaseData().getContactDetailsWrapper().setApplicantSolicitorConsentForEmails(YesOrNo.YES);
         caseDetails.getCaseData().setRespSolNotificationsEmailConsent(YesOrNo.YES);
         when(documentHelper.getDocumentsAsBulkPrintDocuments(any())).thenReturn(List.of(BulkPrintDocument
@@ -152,6 +153,7 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
 
         when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(true);
         when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(true);
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getCaseData())).thenReturn(true);
         caseDetails.getCaseData().getContactDetailsWrapper().setApplicantSolicitorConsentForEmails(YesOrNo.YES);
         caseDetails.getCaseData().setRespSolNotificationsEmailConsent(YesOrNo.YES);
         approvedOrderNoticeOfHearingService.printHearingNoticePackAndSendToApplicantAndRespondent(caseDetails, AUTH_TOKEN);

@@ -70,8 +70,12 @@ public class CourtDetailsMapper {
             TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, Object.class));
 
         CourtList selectedCourtField = (CourtList) initialisedCourtField.get(0).get(courtListWrapper);
-        Object courtDetailsObject = courtDetailsMap.get(nullToEmpty(selectedCourtField.getSelectedCourtId()));
+        Object selectedCourtDetailsObject = courtDetailsMap.get(nullToEmpty(selectedCourtField.getSelectedCourtId()));
 
-        return objectMapper.convertValue(courtDetailsObject, new TypeReference<>() {});
+        if (selectedCourtDetailsObject == null) {
+            return FrcCourtDetails.builder().courtName("").courtAddress("").phoneNumber("").email("").build();
+        }
+
+        return objectMapper.convertValue(selectedCourtDetailsObject, new TypeReference<>() {});
     }
 }

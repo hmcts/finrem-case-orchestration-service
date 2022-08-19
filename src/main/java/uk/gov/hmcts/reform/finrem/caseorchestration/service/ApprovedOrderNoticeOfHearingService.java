@@ -82,7 +82,7 @@ public class ApprovedOrderNoticeOfHearingService {
 
     private void notifyRespondent(FinremCaseDetails caseDetails, String authorisationToken, List<BulkPrintDocument> documentsToPrint) {
         if (checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)
-            && caseDetails.getCaseData().isRespondentSolicitorAgreeToReceiveEmails()) {
+            && notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getCaseData())) {
             notificationService.sendPrepareForHearingEmailRespondent(caseDetails);
         } else {
             bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documentsToPrint);

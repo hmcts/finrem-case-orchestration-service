@@ -69,8 +69,8 @@ public class AdditionalHearingDocumentService {
                 Iterables.getLast(hearingOrderCollectionData).getValue().getUploadDraftDocument());
         }
 
-        List<DirectionDetailCollection> directionDetailsCollectionList = caseDetails.getCaseData()
-            .getDirectionDetailsCollection();
+        List<DirectionDetailCollection> directionDetailsCollectionList = Optional.ofNullable(caseDetails.getCaseData()
+            .getDirectionDetailsCollection()).orElse(new ArrayList<>());
 
         //check that the list contains one or more values for the court hearing information
         if (!directionDetailsCollectionList.isEmpty()) {
