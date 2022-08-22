@@ -41,5 +41,5 @@ public class ContestedUploadedDocument {
     private String hearingDetails;
 
     @JsonSerialize(using = LocalDateTimeSerializer.class)
-    private LocalDateTime uploadDateTime;
+    private LocalDateTime caseDocumentUploadDateTime;
 }

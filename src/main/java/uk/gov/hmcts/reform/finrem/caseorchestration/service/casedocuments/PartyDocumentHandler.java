@@ -37,8 +37,8 @@ public abstract class PartyDocumentHandler extends CaseDocumentHandler<Contested
             })
             .filter(d -> d.getUploadedCaseDocument().getCaseDocumentType() != null
                 && isDocumentTypeValid(d.getUploadedCaseDocument().getCaseDocumentType()))
-            .sorted(Comparator.nullsLast((e1, e2) -> e2.getUploadedCaseDocument().getUploadDateTime()
-                .compareTo(e1.getUploadedCaseDocument().getUploadDateTime())))
+            .sorted(Comparator.nullsLast((e1, e2) -> e2.getUploadedCaseDocument().getCaseDocumentUploadDateTime()
+                .compareTo(e1.getUploadedCaseDocument().getCaseDocumentUploadDateTime())))
             .collect(Collectors.toList());
 
         List<ContestedUploadedDocumentData> documentCollection = getDocumentCollection(caseData, collectionName);

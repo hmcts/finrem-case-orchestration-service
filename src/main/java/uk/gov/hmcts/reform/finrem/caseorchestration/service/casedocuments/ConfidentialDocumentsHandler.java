@@ -35,8 +35,8 @@ public class ConfidentialDocumentsHandler extends CaseDocumentHandler<Confidenti
                 && d.getUploadedCaseDocument().getCaseDocumentType() != null
                 && d.getUploadedCaseDocument().getCaseDocumentConfidential() != null
                 && d.getUploadedCaseDocument().getCaseDocumentConfidential().equalsIgnoreCase("Yes"))
-            .sorted(Comparator.nullsLast((e1, e2) -> e2.getUploadedCaseDocument().getUploadDateTime()
-                .compareTo(e1.getUploadedCaseDocument().getUploadDateTime())))
+            .sorted(Comparator.nullsLast((e1, e2) -> e2.getUploadedCaseDocument().getCaseDocumentUploadDateTime()
+                .compareTo(e1.getUploadedCaseDocument().getCaseDocumentUploadDateTime())))
             .collect(Collectors.toList());
 
 

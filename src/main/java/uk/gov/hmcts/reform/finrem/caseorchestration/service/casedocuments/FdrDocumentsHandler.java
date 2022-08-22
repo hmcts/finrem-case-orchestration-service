@@ -36,8 +36,8 @@ public class FdrDocumentsHandler extends CaseDocumentHandler<ContestedUploadedDo
                     && uploadedCaseDocument.getCaseDocumentFdr() != null
                     && uploadedCaseDocument.getCaseDocumentFdr().equalsIgnoreCase("Yes");
             })
-            .sorted(Comparator.nullsLast((e1, e2) -> e2.getUploadedCaseDocument().getUploadDateTime()
-                .compareTo(e1.getUploadedCaseDocument().getUploadDateTime())))
+            .sorted(Comparator.nullsLast((e1, e2) -> e2.getUploadedCaseDocument().getCaseDocumentUploadDateTime()
+                .compareTo(e1.getUploadedCaseDocument().getCaseDocumentUploadDateTime())))
             .collect(Collectors.toList());
 
         List<ContestedUploadedDocumentData> fdrDocsCollection = getDocumentCollection(caseData, FDR_DOCS_COLLECTION);
