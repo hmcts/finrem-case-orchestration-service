@@ -56,7 +56,7 @@ public abstract class CaseDocumentHandlerTest {
                 .caseDocumentOther(other)
                 .caseDocumentFdr(isFdr)
                 .hearingDetails(null)
-                .uploadDateTime(LocalDateTime.now())
+                .caseDocumentUploadDateTime(LocalDateTime.now())
                 .build())
             .build();
     }

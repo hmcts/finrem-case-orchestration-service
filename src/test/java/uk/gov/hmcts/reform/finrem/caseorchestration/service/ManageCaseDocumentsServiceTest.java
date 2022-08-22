@@ -227,7 +227,7 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
                 .caseDocumentOther(other)
                 .caseDocumentFdr("no")
                 .hearingDetails("hearingDetails")
-                .uploadDateTime(LocalDateTime.now())
+                .caseDocumentUploadDateTime(LocalDateTime.now())
                 .build())
             .build();
     }
