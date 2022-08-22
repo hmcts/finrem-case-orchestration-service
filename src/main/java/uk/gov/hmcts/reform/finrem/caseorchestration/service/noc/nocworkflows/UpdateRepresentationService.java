@@ -95,7 +95,8 @@ public class UpdateRepresentationService {
         RepresentationUpdateHistory current = getCurrentRepresentationUpdateHistory(caseData);
 
         RepresentationUpdateHistory change = changeOfRepresentationService
-            .generateRepresentationUpdateHistory(buildChangeOfRepresentationRequest(caseDetails,
+            .generateRepresentationUpdateHistory(buildChangeOfRepresentationRequest(
+                caseDetails,
                 addedSolicitor,
                 removedSolicitor,
                 current,
