@@ -32,14 +32,19 @@ public class UploadedDocumentHelper {
             caseDataBefore.get(documentCollection), new TypeReference<>() {
             });
 
-        List<ContestedUploadedDocumentData> newDocuments = allDocuments.stream()
-            .filter(document -> isAnyIdMatches.negate().test(document.getId(), oldDocuments))
-            .collect(Collectors.toList());
+        List<ContestedUploadedDocumentData> newDocuments = allDocuments;
+        if (oldDocuments != null) {
+            newDocuments = allDocuments.stream()
+                .filter(document -> isAnyIdMatches.negate().test(document.getId(), oldDocuments))
+                .collect(Collectors.toList());
+        }
+        newDocuments.forEach(document -> document.getUploadedCaseDocument().setCaseDocumentUploadDateTime(LocalDateTime.now()));
 
-        newDocuments.forEach(document -> document.getUploadedCaseDocument().setUploadDateTime(LocalDateTime.now()));
-        oldDocuments.addAll(newDocuments);
-        caseData.put(documentCollection, oldDocuments);
-
+        if (oldDocuments != null) {
+            newDocuments.addAll(oldDocuments);
+        }
+        caseData.put(documentCollection, newDocuments);
+        
         return caseData;
     }
 }
