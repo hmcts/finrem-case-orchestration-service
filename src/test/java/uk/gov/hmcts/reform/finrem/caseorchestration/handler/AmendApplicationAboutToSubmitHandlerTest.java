@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 import uk.gov.hmcts.reform.finrem.ccd.domain.EventType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.ccd.domain.NatureApplication;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -143,6 +144,8 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTest {
     public void givenCase_whenCaseUpdated_thenShouldNotRemovePropertyDetails() {
         CallbackRequest callbackRequest = doValidCaseDataSetUp(PROPERTY_ADJ_JSON);
         whenServiceGeneratesDocument().thenReturn(newDocument(DOC_URL, FILE_NAME, BINARY_URL));
+        callbackRequest.getCaseDetails().getCaseData().getNatureApplicationWrapper().getNatureOfApplication2()
+            .add(NatureApplication.CONSENTED_PROPERTY_ADJUSTMENT_ORDER);
 
         AboutToStartOrSubmitCallbackResponse response = handler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -155,6 +158,8 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTest {
     public void givenCase_whenCaseUpdated_thenShouldDeletePeriodicPaymentDetailsWithOutWrittenAgreement() {
         CallbackRequest callbackRequest =
             doValidCaseDataSetUp(PERIODIC_PAYMENT_JSON);
+        callbackRequest.getCaseDetails().getCaseData().getNatureApplicationWrapper()
+            .getNatureOfApplication2().add(NatureApplication.CONSENTED_PERIODICAL_PAYMENT_ORDER);
         whenServiceGeneratesDocument().thenReturn(newDocument(DOC_URL, FILE_NAME, BINARY_URL));
 
         AboutToStartOrSubmitCallbackResponse response = handler.handle(callbackRequest, AUTH_TOKEN);

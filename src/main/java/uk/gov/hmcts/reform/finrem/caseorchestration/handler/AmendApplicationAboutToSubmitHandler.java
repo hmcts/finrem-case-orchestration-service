@@ -76,7 +76,7 @@ public class AmendApplicationAboutToSubmitHandler implements CallbackHandler {
         List<NatureApplication> natureOfApplication2 =
             Optional.ofNullable(caseData.getNatureApplicationWrapper().getNatureOfApplication2()).orElse(new ArrayList<>());
 
-        if (!natureOfApplication2.contains(NatureApplication.PERIODICAL_PAYMENT_ORDER)) {
+        if (!natureOfApplication2.contains(NatureApplication.CONSENTED_PERIODICAL_PAYMENT_ORDER)) {
             removePeriodicPaymentData(caseData);
         } else {
             // if written agreement for order for children
@@ -91,7 +91,7 @@ public class AmendApplicationAboutToSubmitHandler implements CallbackHandler {
         List<NatureApplication> natureOfApplication2 =
             Optional.ofNullable(caseData.getNatureApplicationWrapper().getNatureOfApplication2()).orElse(new ArrayList<>());
 
-        if (!natureOfApplication2.contains(NatureApplication.PROPERTY_ADJUSTMENT_ORDER)) {
+        if (!natureOfApplication2.contains(NatureApplication.CONSENTED_PROPERTY_ADJUSTMENT_ORDER)) {
             removePropertyAdjustmentDetails(caseData);
         }
     }
