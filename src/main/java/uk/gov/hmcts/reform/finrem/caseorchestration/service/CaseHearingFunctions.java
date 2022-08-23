@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -118,7 +117,7 @@ public final class CaseHearingFunctions {
 
     static UnaryOperator<CaseDetails> addFastTrackFields = caseDetails -> {
         Map<String, Object> data = caseDetails.getData();
-        data.put("formCCreatedDate", new Date());
+        data.put("formCCreatedDate", LocalDate.now());
         data.put("eventDatePlus21Days", LocalDate.now().plusDays(21));
 
         return caseDetails;
@@ -130,7 +129,7 @@ public final class CaseHearingFunctions {
         String hearingDate = Objects.toString(data.get(HEARING_DATE));
         LocalDate hearingLocalDate = LocalDate.parse(hearingDate);
 
-        data.put("formCCreatedDate", new Date());
+        data.put("formCCreatedDate", LocalDate.now());
         data.put("hearingDateLess35Days", hearingLocalDate.minusDays(35));
         data.put("hearingDateLess14Days", hearingLocalDate.minusDays(14));
 
