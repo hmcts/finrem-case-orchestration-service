@@ -20,7 +20,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class DocmosisPdfGenerationService implements PdfGenerationService {
+public class DocmosisPdfGenerationService {
 
     private static final String CASE_DETAILS = "caseDetails";
     private static final String CASE_DATA = "case_data";
@@ -34,7 +34,6 @@ public class DocmosisPdfGenerationService implements PdfGenerationService {
     @Value("${service.pdf-service.accessKey}")
     private String pdfServiceAccessKey;
 
-    @Override
     public byte[] generateDocFrom(String templateName, Map<String, Object> placeholders) {
         checkArgument(!isNullOrEmpty(templateName), "document generation template cannot be empty");
         checkNotNull(placeholders, "placeholders map cannot be null");

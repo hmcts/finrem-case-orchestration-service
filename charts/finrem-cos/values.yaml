@@ -16,7 +16,6 @@ java:
     CCD_DATA_STORE_API_BASEURL: "http://ccd-data-store-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     IDAM_API_REDIRECT_URL: "https://finrem-frontend-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal/oauth2/callback"
     DOCUMENT_MANAGEMENT_STORE_URL: "http://dm-store-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
-    PDF_SERVICE_BASEURL: "https://docmosis.aat.platform.hmcts.net"
   autoscaling:
     enabled: true
     maxReplicas: 4
@@ -37,3 +36,7 @@ java:
           alias: FINREM_SYSTEMUPDATE_PASSWORD
         - name: finrem-idam-client-secret
           alias: FINREM_IDAM_CLIENT_SECRET
+        - name: docmosis-api-key
+          alias: PDF_SERVICE_ACCESS_KEY
+        - name: docmosis-endpoint
+          alias: PDF_SERVICE_BASEURL

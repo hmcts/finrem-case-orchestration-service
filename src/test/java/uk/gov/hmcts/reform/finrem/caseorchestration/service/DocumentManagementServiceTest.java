@@ -30,7 +30,7 @@ public class DocumentManagementServiceTest {
 
     @InjectMocks private DocumentManagementService service;
 
-    @Mock private PdfGenerationService pdfGenerationService;
+    @Mock private DocmosisPdfGenerationService pdfGenerationService;
     @Mock private EvidenceManagementUploadService evidenceManagementUploadService;
     @Mock private EvidenceManagementDeleteService evidenceManagementDeleteService;
 

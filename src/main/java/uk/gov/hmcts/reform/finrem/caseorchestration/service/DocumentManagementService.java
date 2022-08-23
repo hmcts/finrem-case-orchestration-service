@@ -19,7 +19,7 @@ import static java.lang.String.format;
 public class DocumentManagementService {
 
     public static final String CONTENT_TYPE_APPLICATION_PDF = "application/pdf";
-    private final PdfGenerationService pdfGenerationService;
+    private final DocmosisPdfGenerationService pdfGenerationService;
     private final EvidenceManagementUploadService evidenceManagementUploadService;
 
     private final EvidenceManagementDeleteService evidenceManagementDeleteService;
