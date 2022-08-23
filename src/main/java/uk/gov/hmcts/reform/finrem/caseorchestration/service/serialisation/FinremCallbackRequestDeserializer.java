@@ -9,9 +9,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
@@ -20,6 +22,12 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 public class FinremCallbackRequestDeserializer implements Deserializer<CallbackRequest> {
 
     private final ObjectMapper mapper;
+
+    private final BiConsumer<FinremCaseData, CallbackRequest> addExtraDataToCaseDataBefore = (caseData, callbackRequest)
+        -> {
+        caseData.setCcdCaseType(callbackRequest.getCaseDetails().getCaseType());
+        caseData.setCcdCaseId(String.valueOf(callbackRequest.getCaseDetails().getId()));
+    };
 
     @Override
     public CallbackRequest deserialize(String source) {
@@ -34,7 +42,7 @@ public class FinremCallbackRequestDeserializer implements Deserializer<CallbackR
 
             Optional.ofNullable(callbackRequest.getCaseDetailsBefore())
                 .flatMap(caseDetails -> Optional.ofNullable(caseDetails.getCaseData()))
-                .ifPresent(caseData -> caseData.setCcdCaseType(callbackRequest.getCaseDetails().getCaseType()));
+                .ifPresent(caseData -> addExtraDataToCaseDataBefore.accept(caseData, callbackRequest));
 
             return callbackRequest;
         } catch (IOException e) {
