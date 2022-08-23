@@ -165,7 +165,7 @@ public final class CaseHearingFunctions {
             NORTHEAST_FRC_LIST_CT, SOUTHWEST_FRC_LIST_CT, SOUTHEAST_FRC_LIST_CT, WALES_FRC_LIST_CT);
     }
 
-    static String getSelectedCourt(Map<String, Object> mapOfCaseData) {
+    public static String getSelectedCourt(Map<String, Object> mapOfCaseData) {
         return getSelectedCourt(mapOfCaseData, REGION, MIDLANDS_FRC_LIST, LONDON_FRC_LIST, NORTHWEST_FRC_LIST,
             NORTHEAST_FRC_LIST, SOUTHWEST_FRC_LIST, SOUTHEAST_FRC_LIST, WALES_FRC_LIST);
     }

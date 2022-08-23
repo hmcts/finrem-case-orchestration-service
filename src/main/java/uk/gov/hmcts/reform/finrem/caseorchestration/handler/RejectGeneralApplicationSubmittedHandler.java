@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -10,7 +9,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 
@@ -19,7 +17,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationSer
 @RequiredArgsConstructor
 public class RejectGeneralApplicationSubmittedHandler implements CallbackHandler {
 
-    private final CaseDataService caseDataService;
     private final NotificationService notificationService;
     private final PaperNotificationService paperNotificationService;
 
@@ -42,7 +39,7 @@ public class RejectGeneralApplicationSubmittedHandler implements CallbackHandler
         }
 
         if (notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
-            notificationService.sendGeneralApplicationRejectionEmailToRepSolicitor(caseDetails);
+            notificationService.sendGeneralApplicationRejectionEmailToResSolicitor(caseDetails);
         } else {
             paperNotificationService.printRespondentRejectionGeneralApplication(caseDetails, userAuthorisation);
         }

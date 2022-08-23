@@ -383,7 +383,7 @@ public class NotificationService {
         sendGeneralApplicationRejectionEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
 
-    public void sendGeneralApplicationRejectionEmailToRepSolicitor(CaseDetails caseDetails) {
+    public void sendGeneralApplicationRejectionEmailToResSolicitor(CaseDetails caseDetails) {
         sendGeneralApplicationRejectionEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
 

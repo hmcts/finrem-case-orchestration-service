@@ -25,6 +25,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REJECT_REASON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_BODY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REPRESENTATION_UPDATE_HISTORY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
@@ -160,6 +161,7 @@ public class NotificationRequestMapper {
         notificationRequest.setGeneralEmailBody(Objects.toString(mapOfCaseData.get(GENERAL_EMAIL_BODY)));
         notificationRequest.setCaseType(getCaseType(caseDetails));
         notificationRequest.setPhoneOpeningHours(CTSC_OPENING_HOURS);
+        notificationRequest.setGeneralApplicationRejectionReason(getGeneralApplicationRejectionReason(caseDetails));
         if (caseDataService.isConsentedApplication(caseDetails)) {
             if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(mapOfCaseData))) {
                 notificationRequest.setCaseOrderType("variation");
@@ -173,5 +175,12 @@ public class NotificationRequestMapper {
         }
 
         return notificationRequest;
+    }
+
+    private String getGeneralApplicationRejectionReason(CaseDetails caseDetails) {
+        if (caseDetails.getData().get(GENERAL_APPLICATION_REJECT_REASON) == null) {
+            return "";
+        }
+        return (String) caseDetails.getData().get(GENERAL_APPLICATION_REJECT_REASON);
     }
 }

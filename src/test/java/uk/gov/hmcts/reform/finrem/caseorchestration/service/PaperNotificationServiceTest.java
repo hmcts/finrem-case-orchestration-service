@@ -6,6 +6,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.generalapplication.service.RejectGeneralApplicationDocumentService;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -28,6 +30,7 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
     @MockBean private ManualPaymentDocumentService manualPaymentDocumentService;
     @MockBean private BulkPrintService bulkPrintService;
     @MockBean private CaseDataService caseDataService;
+    @MockBean private RejectGeneralApplicationDocumentService rejectGeneralApplicationDocumentService;
 
     @Test
     public void sendAssignToJudgeNotificationLetterIfIsPaperApplication() {
@@ -117,5 +120,33 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
         caseDetails.getData().put("paperApplication", "YES");
 
         assertThat(paperNotificationService.shouldPrintForApplicant(caseDetails), is(true));
+    }
+
+    @Test
+    public void givenValidCaseData_whenPrintApplicantRejection_thenCallBulkPrintService() {
+        final String json
+            = "/fixtures/refusal-order-contested.json";
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
+        caseDetails.getData().put("paperApplication", "YES");
+        CaseDocument caseDocument = CaseDocument.builder().documentFilename("general_application_rejected").build();
+
+        when(rejectGeneralApplicationDocumentService.generateGeneralApplicationRejectionLetter(eq(caseDetails), any(), eq(APPLICANT)))
+            .thenReturn(caseDocument);
+        paperNotificationService.printApplicantRejectionGeneralApplication(caseDetails, AUTH_TOKEN);
+        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails);
+    }
+
+    @Test
+    public void givenValidCaseData_whenPrintRespondentRejection_thenCallBulkPrintService() {
+        final String json
+            = "/fixtures/refusal-order-contested.json";
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
+        caseDetails.getData().put("paperApplication", "YES");
+        CaseDocument caseDocument = CaseDocument.builder().documentFilename("general_application_rejected").build();
+
+        when(rejectGeneralApplicationDocumentService.generateGeneralApplicationRejectionLetter(eq(caseDetails), any(), eq(RESPONDENT)))
+            .thenReturn(caseDocument);
+        paperNotificationService.printRespondentRejectionGeneralApplication(caseDetails, AUTH_TOKEN);
+        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails);
     }
 }

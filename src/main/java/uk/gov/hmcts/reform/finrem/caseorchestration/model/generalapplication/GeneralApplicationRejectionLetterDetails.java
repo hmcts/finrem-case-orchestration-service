@@ -12,9 +12,12 @@ import java.util.Map;
 @Builder(toBuilder = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GeneralApplicationRejectionLetterDetails implements ParentLetterDetails {
+    private Map<String, Object> courtDetails;
     private Addressee addressee;
     private String caseNumber;
     private String divorceCaseNumber;
+    private String reference;
+    private String generalApplicationRejectionReason;
     private String letterDate;
     private String applicantLName;
     private String respondentLName;
