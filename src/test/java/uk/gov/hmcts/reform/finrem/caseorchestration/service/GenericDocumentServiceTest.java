@@ -35,6 +35,9 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
     @Autowired private GenericDocumentService genericDocumentService;
     @Autowired private DocumentClient documentClientMock;
 
+    @Autowired private BulkPrintDocumentGeneratorService bulkPrintDocumentGeneratorService;
+
+    @Autowired private BulkPrintDocumentService bulkPrintDocumentService;
     @Autowired private EvidenceManagementUploadService evidenceManagementUploadService;
 
     @Autowired private IdamAuthService idamAuthService;
@@ -100,6 +103,6 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
     public void shouldBulkPrintDocument() {
         genericDocumentService.bulkPrint(BulkPrintRequest.builder().build());
 
-        verify(documentClientMock, times(1)).bulkPrint(BulkPrintRequest.builder().build());
+        verify(bulkPrintDocumentGeneratorService, times(1)).send(any(), any(), any());
     }
 }

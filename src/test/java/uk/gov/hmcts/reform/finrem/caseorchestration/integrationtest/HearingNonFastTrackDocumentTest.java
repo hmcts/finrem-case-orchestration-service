@@ -35,6 +35,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.PdfDocumentRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
+import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -50,6 +51,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static java.nio.file.Files.readAllBytes;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -79,9 +81,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHeari
 public class HearingNonFastTrackDocumentTest extends BaseTest {
     private static final String IDAM_SERVICE_CONTEXT_PATH = "/details";
     private static final String GENERATE_DOCUMENT_CONTEXT_PATH = "/rs/render";
-    private static final String GENERATE_BULK_PRINT_CONTEXT_PATH = "/version/1/bulk-print";
-
     protected static final String UPLOAD_DOCUMENT_CONTEXT_PATH = "/documents";
+
+    protected static final String SEND_LETTER_CONTEXT_PATH = "/letters";
+
     private static final String API_URL = "/case-orchestration/documents/hearing";
     private static final String JSON_CONTENT_PATH = "/fixtures/contested/validate-hearing-withoutfastTrackDecision.json";
 
@@ -93,7 +96,10 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
     public static WireMockClassRule documentGeneratorServiceClass = new WireMockClassRule(4001);
 
     @ClassRule
-    public static WireMockClassRule evidenceUploadService = new WireMockClassRule(3405);
+    public static WireMockClassRule sendLetterService = new WireMockClassRule(4002);
+
+    @ClassRule
+    public static WireMockClassRule dmStoreService = new WireMockClassRule(3405);
 
     @ClassRule
     public static WireMockClassRule documentGeneratorBulkPrintService = new WireMockClassRule(4009);
@@ -134,6 +140,8 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
     @Test
     public void generateFormCAndFormGSuccess() throws Exception {
         idamServiceStub();
+        generateSendLetterSuccessStub();
+        generateEvidenceDownloadServiceSuccessStub();
         generateEvidenceUploadServiceSuccessStub();
         generateDocumentServiceSuccessStub(pdfGenerationRequest(config.getFormCNonFastTrackTemplate()));
         generateDocumentServiceSuccessStub(pdfGenerationRequest(config.getFormGTemplate()));
@@ -257,13 +265,14 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .withBody(objectMapper.writeValueAsString(document()))));
 
-        documentGeneratorBulkPrintService.stubFor(post(urlPathEqualTo(GENERATE_BULK_PRINT_CONTEXT_PATH))
-            .withRequestBody(equalToJson(objectMapper.writeValueAsString(bulkPrintRequest()), true, true))
-            .withHeader(CONTENT_TYPE, equalTo("application/json"))
+    }
+
+    private void generateEvidenceDownloadServiceSuccessStub() throws JsonProcessingException {
+        dmStoreService.stubFor(get(urlMatching("/([a-z1-9]*)/binary"))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                .withBody(objectMapper.writeValueAsString(UUID.randomUUID()))));
+                .withBody(objectMapper.writeValueAsString(document()))));
     }
 
     private void generateDocumentServiceErrorStub(PdfDocumentRequest documentRequest) throws JsonProcessingException {
@@ -286,11 +295,20 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
     }
 
     void generateEvidenceUploadServiceSuccessStub() throws IOException {
-        evidenceUploadService.stubFor(post(urlPathEqualTo(UPLOAD_DOCUMENT_CONTEXT_PATH))
+        dmStoreService.stubFor(post(urlPathEqualTo(UPLOAD_DOCUMENT_CONTEXT_PATH))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .withBody(objectMapper.writeValueAsString(getResponse()))));
+    }
+
+    void generateSendLetterSuccessStub() throws IOException {
+
+        sendLetterService.stubFor(post(urlPathEqualTo(SEND_LETTER_CONTEXT_PATH))
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withBody(objectMapper.writeValueAsString(new SendLetterResponse(UUID.randomUUID())))));
     }
 
     private ObjectNode getResponse() throws IOException {

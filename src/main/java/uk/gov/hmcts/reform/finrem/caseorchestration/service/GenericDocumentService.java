@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequ
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -22,6 +23,8 @@ public class GenericDocumentService {
     private final DocumentManagementService documentManagementService;
 
     private final DocumentClient documentClient;
+    private final BulkPrintDocumentService bulkPrintDocumentService;
+    private final BulkPrintDocumentGeneratorService bulkPrintDocumentGeneratorService;
 
     public CaseDocument generateDocument(String authorisationToken, CaseDetails caseDetails,
                                          String template, String fileName) {
@@ -37,9 +40,10 @@ public class GenericDocumentService {
         return toCaseDocument(generatedPdf);
     }
 
-
     public UUID bulkPrint(BulkPrintRequest bulkPrintRequest) {
-        return documentClient.bulkPrint(bulkPrintRequest);
+        final List<byte[]> documents = bulkPrintDocumentService.downloadDocuments(bulkPrintRequest);
+        return bulkPrintDocumentGeneratorService.send(bulkPrintRequest.getCaseId(), bulkPrintRequest.getLetterType(),
+            documents);
     }
 
     public void deleteDocument(String documentUrl, String authorisationToken) {
