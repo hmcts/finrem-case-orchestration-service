@@ -11,9 +11,20 @@ public class NotificationRequestTest {
 
     @Test
     public void shouldReturnNotificationRequestData() {
-        underTest = new NotificationRequest("12345", "67890", "D123",
-            "Padmaja", "test@test.com", "nottingham", "consented", "general body",
-            CTSC_OPENING_HOURS);
+        underTest = NotificationRequest.builder()
+            .caseReferenceNumber("12345")
+            .solicitorReferenceNumber("67890")
+            .divorceCaseNumber("D123")
+            .name("Padmaja")
+            .notificationEmail("test@test.com")
+            .selectedCourt("nottingham")
+            .caseType("consented")
+            .generalEmailBody("general body")
+            .phoneOpeningHours(CTSC_OPENING_HOURS)
+            .caseOrderType("consent")
+            .camelCaseOrderType("Consent")
+            .build();
+
         assertEquals("12345", underTest.getCaseReferenceNumber());
         assertEquals("67890", underTest.getSolicitorReferenceNumber());
         assertEquals("D123", underTest.getDivorceCaseNumber());
@@ -23,6 +34,8 @@ public class NotificationRequestTest {
         assertEquals("consented", underTest.getCaseType());
         assertEquals("general body", underTest.getGeneralEmailBody());
         assertEquals(CTSC_OPENING_HOURS, underTest.getPhoneOpeningHours());
+        assertEquals("consent", underTest.getCaseOrderType());
+        assertEquals("Consent", underTest.getCamelCaseOrderType());
     }
 
     @Test

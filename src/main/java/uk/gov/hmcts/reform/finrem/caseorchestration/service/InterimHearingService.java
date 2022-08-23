@@ -174,13 +174,10 @@ public class InterimHearingService {
                                                                      List<InterimHearingData> interimHearingList,
                                                                      String authorisationToken) {
 
-        CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
-        Map<String, Object> caseData = caseDetailsCopy.getData();
-
         List<Map<String, Object>> interimCaseData = convertInterimHearingCollectionDataToMap(interimHearingList);
 
         return interimCaseData.stream()
-            .map(data -> generateCaseDocument(caseData, data, caseDetailsCopy, authorisationToken))
+            .map(interimHearingCaseData -> generateCaseDocument(interimHearingCaseData, caseDetails, authorisationToken))
             .collect(Collectors.toList());
     }
 
@@ -192,9 +189,12 @@ public class InterimHearingService {
             })).collect(Collectors.toList());
     }
 
-    private CaseDocument generateCaseDocument(Map<String, Object> caseData, Map<String, Object> interimHearingCaseData,
-                                    CaseDetails caseDetailsCopy,
+    private CaseDocument generateCaseDocument(Map<String, Object> interimHearingCaseData,
+                                    CaseDetails caseDetails,
                                     String authorisationToken) {
+
+        CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
+        Map<String, Object> caseData = caseDetailsCopy.getData();
 
         caseData.put("ccdCaseNumber", caseDetailsCopy.getId());
         caseData.put("courtDetails", buildInterimHearingFrcCourtDetails(interimHearingCaseData));
@@ -202,14 +202,20 @@ public class InterimHearingService {
         caseData.put("respondentName", documentHelper.getRespondentFullNameContested(caseDetailsCopy));
         addInterimHearingVenueDetails(caseDetailsCopy, interimHearingCaseData);
         caseData.put("letterDate", String.valueOf(LocalDate.now()));
+        caseData.put("interimHearingType", interimHearingCaseData.get("interimHearingType"));
+        caseData.put("interimHearingDate", interimHearingCaseData.get("interimHearingDate"));
+        caseData.put("interimHearingTime", interimHearingCaseData.get("interimHearingTime"));
+        caseData.put("interimTimeEstimate", interimHearingCaseData.get("interimTimeEstimate"));
+        caseData.put("interimAdditionalInformationAboutHearing", interimHearingCaseData.get("interimAdditionalInformationAboutHearing"));
+
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
             documentConfiguration.getGeneralApplicationInterimHearingNoticeTemplate(),
             documentConfiguration.getGeneralApplicationInterimHearingNoticeFileName());
 
     }
 
-    private void addInterimHearingVenueDetails(CaseDetails caseDetails, Map<String, Object> interimHearingCaseData) {
-        Map<String, Object> caseData = caseDetails.getData();
+    private void addInterimHearingVenueDetails(CaseDetails caseDetailsCopy, Map<String, Object> interimHearingCaseData) {
+        Map<String, Object> caseData = caseDetailsCopy.getData();
         try {
             Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), new TypeReference<>() {});
             String selectedCourtIH = getSelectedCourtIH(interimHearingCaseData);

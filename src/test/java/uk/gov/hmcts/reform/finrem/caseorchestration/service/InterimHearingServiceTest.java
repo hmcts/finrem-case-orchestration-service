@@ -259,14 +259,6 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
         }
     }
 
-    private CaseDetails buildCaseDetailsBefore(String path)  {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(path)) {
-            return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetailsBefore();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     private void verifyNonCollectionData(Map<String, Object> data) {
         assertNull(data.get(INTERIM_HEARING_TYPE));
         assertNull(data.get(INTERIM_HEARING_DATE));

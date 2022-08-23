@@ -11,6 +11,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentValidationService;
 
@@ -21,6 +22,8 @@ import java.net.URISyntaxException;
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -35,6 +38,10 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
 
     private static final String AMEND_CONSENT_ORDER_BY_SOL_JSON
         = "/fixtures/latestConsentedConsentOrder/amend-consent-order-by-solicitor.json";
+    private static final String AMEND_CONTESTED_CONSENT_ORDER_BY_SOL_JSON
+        = "/fixtures/latestConsentedConsentOrder/amend-consent-order-by-solicitor-contested.json";
+
+
 
     @Autowired
     private MockMvc mockMvc;
@@ -42,9 +49,31 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
     @MockBean
     private DocumentValidationService documentValidationService;
 
+    @MockBean
+    private ConsentedApplicationHelper helper;
+
     @Test
-    public void shouldReturnSuccessWhenFileUploadCheck() throws Exception {
-        doRequestSetUp();
+    public void whenCaseIsContestedshouldReturnSuccessWhenFileUploadCheckButNotToSetLabelField() throws Exception {
+        doRequestSetUp(AMEND_CONTESTED_CONSENT_ORDER_BY_SOL_JSON);
+        DocumentValidationResponse response = builder()
+            .mimeType("application/pdf").build();
+        when(documentValidationService.validateDocument(any(CallbackRequest.class), anyString(), anyString()))
+            .thenReturn(response);
+        this.mockMvc.perform(MockMvcRequestBuilders
+                .post("/case-orchestration/field/consentOrder/file-upload-check")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors").doesNotExist());
+        verify(helper, never()).setConsentVariationOrderLabelField(any());
+    }
+
+    @Test
+    public void whenCaseIsConsentedshouldReturnSuccessWhenFileUploadCheck() throws Exception {
+        doRequestSetUp(AMEND_CONSENT_ORDER_BY_SOL_JSON);
         DocumentValidationResponse response = builder()
             .mimeType("application/pdf").build();
         when(documentValidationService.validateDocument(any(CallbackRequest.class), anyString(), anyString()))
@@ -58,11 +87,12 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors").doesNotExist());
+        verify(helper).setConsentVariationOrderLabelField(any());
     }
 
     @Test
     public void shouldReturnErrorsWhenFileUploadCheckIsFailed() throws Exception {
-        doRequestSetUp();
+        doRequestSetUp(AMEND_CONSENT_ORDER_BY_SOL_JSON);
         DocumentValidationResponse response = builder()
             .mimeType("application/json")
             .errors(singletonList("Invalid File Type"))
@@ -82,7 +112,7 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldReturnSuccessWhenFileUploadCheckForInvalidField() throws Exception {
-        doRequestSetUp();
+        doRequestSetUp(AMEND_CONSENT_ORDER_BY_SOL_JSON);
         DocumentValidationResponse response = builder()
             .mimeType("application/pdf")
             .build();
@@ -99,9 +129,9 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.errors").doesNotExist());
     }
 
-    private void doRequestSetUp() throws IOException, URISyntaxException {
+    private void doRequestSetUp(String path) throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
-            .getResource(AMEND_CONSENT_ORDER_BY_SOL_JSON).toURI()));
+            .getResource(path).toURI()));
     }
 }
