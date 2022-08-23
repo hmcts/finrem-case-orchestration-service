@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.CourtListWrapper;
 import java.util.Date;
 import java.util.List;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.buildCtscContactDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper.ADDRESS_MAP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper.NAME_MAP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper.formatAddressForLetterPrinting;
@@ -39,6 +40,8 @@ public class GeneralLetterDetailsMapper extends AbstractLetterDetailsMapper {
             .generalLetterCreatedDate(new Date())
             .addressee(getAddressee(caseDetails))
             .solicitorReference(getSolicitorReference(caseData))
+            .ctscContactDetails(buildCtscContactDetails())
+            .generalLetterBody(caseData.getGeneralLetterWrapper().getGeneralLetterBody())
             .build();
     }
 

@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.buildCtscContactDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper.formatAddressForLetterPrinting;
 
 public class GeneralLetterDetailsMapperTest extends AbstractLetterDetailsMapperTest {
@@ -106,6 +107,8 @@ public class GeneralLetterDetailsMapperTest extends AbstractLetterDetailsMapperT
             .ccdCaseNumber(CCD_CASE_NUMBER)
             .generalLetterCreatedDate(new Date())
             .addressee(getAddressee(recipient))
+            .generalLetterBody("Test content for the letter body")
+            .ctscContactDetails(buildCtscContactDetails())
             .build();
     }
 

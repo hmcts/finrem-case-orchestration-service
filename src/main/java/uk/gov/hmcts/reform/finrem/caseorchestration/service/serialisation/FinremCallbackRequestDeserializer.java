@@ -23,10 +23,9 @@ public class FinremCallbackRequestDeserializer implements Deserializer<CallbackR
 
     private final ObjectMapper mapper;
 
-    private final BiConsumer<FinremCaseData, CallbackRequest> addExtraDataToCaseDataBefore = (caseData, callbackRequest)
-        -> {
-        caseData.setCcdCaseType(callbackRequest.getCaseDetails().getCaseType());
-        caseData.setCcdCaseId(String.valueOf(callbackRequest.getCaseDetails().getId()));
+    private final BiConsumer<FinremCaseData, CallbackRequest> addExtraDataToCaseDataBefore = (caseDataBefore, callbackRequest) -> {
+        caseDataBefore.setCcdCaseType(callbackRequest.getCaseDetails().getCaseType());
+        caseDataBefore.setCcdCaseId(String.valueOf(callbackRequest.getCaseDetails().getId()));
     };
 
     @Override
