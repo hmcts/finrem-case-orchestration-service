@@ -10,9 +10,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUpload
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONFIDENTIAL_DOCS_UPLOADED_COLLECTION;
@@ -35,19 +39,19 @@ public class ConfidentialDocumentsHandler extends CaseDocumentHandler<Confidenti
                 && d.getUploadedCaseDocument().getCaseDocumentType() != null
                 && d.getUploadedCaseDocument().getCaseDocumentConfidential() != null
                 && d.getUploadedCaseDocument().getCaseDocumentConfidential().equalsIgnoreCase("Yes"))
-            .sorted(Comparator.nullsLast((e1, e2) -> e2.getUploadedCaseDocument().getCaseDocumentUploadDateTime()
-                .compareTo(e1.getUploadedCaseDocument().getCaseDocumentUploadDateTime())))
             .collect(Collectors.toList());
 
 
         log.info("Adding items: {}, to Confidential Documents Collection", confidentialFiltered);
         uploadedDocuments.removeAll(confidentialFiltered);
 
-        List<ConfidentialUploadedDocumentData> confidentialDocsCollection = getDocumentCollection(caseData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
+        List<ConfidentialUploadedDocumentData> confidentialDocsCollection = getConfidentialDocumentCollection(caseData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
         if (!confidentialFiltered.isEmpty()) {
             List<ConfidentialUploadedDocumentData> confidentialDocs = confidentialFiltered.stream().map(
                 doc -> buildConfidentialDocument(doc)).collect((Collectors.toList()));
             confidentialDocsCollection.addAll(confidentialDocs);
+            Collections.sort(confidentialDocsCollection, Comparator.nullsLast((e1, e2) -> e2.getConfidentialUploadedDocument().getConfidentialDocumentUploadDateTime()
+                .compareTo(e1.getConfidentialUploadedDocument().getConfidentialDocumentUploadDateTime())));
             caseData.put(CONFIDENTIAL_DOCS_UPLOADED_COLLECTION, confidentialDocsCollection);
         }
     }
@@ -65,6 +69,7 @@ public class ConfidentialDocumentsHandler extends CaseDocumentHandler<Confidenti
                 .documentComment(uploadedCaseDocument.getHearingDetails())
                 .documentLink(uploadedCaseDocument.getCaseDocuments())
                 .documentType(uploadedCaseDocument.getCaseDocumentType())
+                .confidentialDocumentUploadDateTime(uploadedCaseDocument.getCaseDocumentUploadDateTime())
                 .build()).build();
     }
 }
