@@ -41,16 +41,13 @@ public class EvidenceManagementUploadService {
     @Value("${document.management.store.upload.url}")
     private String documentManagementStoreUploadUrl;
 
-    public List<FileUploadResponse> upload(@NonNull final List<MultipartFile> files, final String authorizationToken,
-                                           String requestId) {
+    public List<FileUploadResponse> upload(@NonNull final List<MultipartFile> files, final String authorizationToken) {
         UserDetails userDetails = userService.getUserDetails(authorizationToken);
         HttpEntity<MultiValueMap<String, Object>> httpEntity = new HttpEntity<>(param(files), headers(userDetails.getId()));
 
         JsonNode documents = Objects.requireNonNull(template.postForObject(documentManagementStoreUploadUrl, httpEntity, ObjectNode.class))
                 .path("_embedded").path("documents");
 
-        log.info("For Request Id {} and userId {} : File upload response from Evidence Management service is {}",
-            requestId, userDetails.getId(), documents);
 
         return toUploadResponse(documents);
     }

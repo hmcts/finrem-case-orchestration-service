@@ -6,7 +6,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocmosisPdfGenerationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentGeneratorValidationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.EvidenceManagementUploadService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
 
 @Profile("test-mock-feign-clients")
 @Configuration
@@ -24,4 +27,21 @@ public class MockFeignClientsTestConfiguration {
         return Mockito.mock(DocumentGeneratorValidationService.class);
     }
 
+    @Bean
+    @Primary
+    public DocmosisPdfGenerationService pdfGenerationService() {
+        return Mockito.mock(DocmosisPdfGenerationService.class);
+    }
+
+    @Bean
+    @Primary
+    public IdamAuthService getIdamAuthService() {
+        return Mockito.mock(IdamAuthService.class);
+    }
+
+    @Bean
+    @Primary
+    public EvidenceManagementUploadService getEvidenceManagementUploadService() {
+        return Mockito.mock(EvidenceManagementUploadService.class);
+    }
 }

@@ -10,12 +10,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.PdfDocumentRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,27 +40,30 @@ public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
     private static final String GENERATE_BULK_PRINT_CONTEXT_PATH = "/version/1/bulk-print";
 
     @Override
-    protected DocumentGenerationRequest documentRequest() {
-        return DocumentGenerationRequest.builder()
-            .template(documentConfiguration.getFormCFastTrackTemplate())
-            .fileName(documentConfiguration.getFormCFileName())
-            .values(Collections.singletonMap("caseDetails", request.getCaseDetails()))
+    protected PdfDocumentRequest pdfRequest() {
+        return PdfDocumentRequest.builder()
+            .accessKey("TESTPDFACCESS")
+            .outputName("result.pdf")
+            .templateName(documentConfiguration.getFormCFastTrackTemplate())
+            .data(request.getCaseDetails().getData())
             .build();
     }
 
-    protected DocumentGenerationRequest coverSheetRequest() {
-        return DocumentGenerationRequest.builder()
-            .template(documentConfiguration.getBulkPrintTemplate())
-            .fileName(documentConfiguration.getBulkPrintFileName())
-            .values(Collections.singletonMap("caseDetails", request.getCaseDetails()))
+    protected PdfDocumentRequest pdfGenerationCoverSheetRequest() {
+        return PdfDocumentRequest.builder()
+            .accessKey("TESTPDFACCESS")
+            .outputName("result.pdf")
+            .templateName(documentConfiguration.getBulkPrintTemplate())
+            .data(request.getCaseDetails().getData())
             .build();
     }
 
-    protected DocumentGenerationRequest documentOfcrRequest() {
-        return DocumentGenerationRequest.builder()
-            .template(documentConfiguration.getOutOfFamilyCourtResolutionTemplate())
-            .fileName(documentConfiguration.getOutOfFamilyCourtResolutionName())
-            .values(Collections.singletonMap("caseDetails", request.getCaseDetails()))
+    protected PdfDocumentRequest documentOfcrRequest() {
+        return PdfDocumentRequest.builder()
+            .accessKey("TESTPDFACCESS")
+            .outputName("result.pdf")
+            .templateName(documentConfiguration.getOutOfFamilyCourtResolutionTemplate())
+            .data(request.getCaseDetails().getData())
             .build();
     }
 
@@ -91,8 +93,7 @@ public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
     void generateDocumentServiceSuccessStubWithCoverSheet() throws JsonProcessingException {
 
         documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
-            .withRequestBody(equalToJson(objectMapper.writeValueAsString(coverSheetRequest()), true, true))
-            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
+            .withRequestBody(equalToJson(objectMapper.writeValueAsString(pdfGenerationCoverSheetRequest()), true, true))
             .withHeader(CONTENT_TYPE, equalTo("application/json"))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
@@ -100,15 +101,14 @@ public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
                 .withBody(objectMapper.writeValueAsString(document()))));
 
         documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
-            .withRequestBody(equalToJson(objectMapper.writeValueAsString(documentRequest()), true, true))
-            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
+            .withRequestBody(equalToJson(objectMapper.writeValueAsString(pdfRequest()), true, true))
             .withHeader(CONTENT_TYPE, equalTo("application/json"))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .withBody(objectMapper.writeValueAsString(document()))));
 
-        documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_BULK_PRINT_CONTEXT_PATH))
+        documentGeneratorBulkPrintService.stubFor(post(urlPathEqualTo(GENERATE_BULK_PRINT_CONTEXT_PATH))
             .withRequestBody(equalToJson(objectMapper.writeValueAsString(bulkPrintRequest()), true, true))
             .withHeader(CONTENT_TYPE, equalTo("application/json"))
             .willReturn(aResponse()
@@ -118,7 +118,6 @@ public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
 
         documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
             .withRequestBody(equalToJson(objectMapper.writeValueAsString(documentOfcrRequest()), true, true))
-            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
             .withHeader(CONTENT_TYPE, equalTo("application/json"))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
@@ -128,6 +127,8 @@ public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
 
     @Test
     public void generateFormC() throws Exception {
+        idamServiceStub();
+        generateEvidenceUploadServiceSuccessStub();
         generateDocumentServiceSuccessStubWithCoverSheet();
 
         webClient.perform(MockMvcRequestBuilders.post(API_URL)

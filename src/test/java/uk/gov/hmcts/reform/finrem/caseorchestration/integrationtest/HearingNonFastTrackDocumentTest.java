@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
@@ -30,12 +31,14 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.PdfDocumentRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -45,8 +48,10 @@ import java.util.UUID;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static java.nio.file.Files.readAllBytes;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -72,9 +77,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHeari
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @Category(IntegrationTest.class)
 public class HearingNonFastTrackDocumentTest extends BaseTest {
-
-    private static final String GENERATE_DOCUMENT_CONTEXT_PATH = "/version/1/generate-pdf";
+    private static final String IDAM_SERVICE_CONTEXT_PATH = "/details";
+    private static final String GENERATE_DOCUMENT_CONTEXT_PATH = "/rs/render";
     private static final String GENERATE_BULK_PRINT_CONTEXT_PATH = "/version/1/bulk-print";
+
+    protected static final String UPLOAD_DOCUMENT_CONTEXT_PATH = "/documents";
     private static final String API_URL = "/case-orchestration/documents/hearing";
     private static final String JSON_CONTENT_PATH = "/fixtures/contested/validate-hearing-withoutfastTrackDecision.json";
 
@@ -83,7 +90,16 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
     @Autowired protected DocumentConfiguration config;
 
     @ClassRule
-    public static WireMockClassRule documentGeneratorServiceClass = new WireMockClassRule(4009);
+    public static WireMockClassRule documentGeneratorServiceClass = new WireMockClassRule(4001);
+
+    @ClassRule
+    public static WireMockClassRule evidenceUploadService = new WireMockClassRule(3405);
+
+    @ClassRule
+    public static WireMockClassRule documentGeneratorBulkPrintService = new WireMockClassRule(4009);
+
+    @ClassRule
+    public static WireMockClassRule idamService = new WireMockClassRule(4501);
     @Rule
     public WireMockClassRule documentGeneratorService = documentGeneratorServiceClass;
 
@@ -117,9 +133,11 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
 
     @Test
     public void generateFormCAndFormGSuccess() throws Exception {
-        generateDocumentServiceSuccessStub(formCDocumentRequest());
-        generateDocumentServiceSuccessStub(formGDocumentRequest());
-        generateDocumentServiceSuccessStub(formOutOfFaimilyCourtResolutionDocumentRequest());
+        idamServiceStub();
+        generateEvidenceUploadServiceSuccessStub();
+        generateDocumentServiceSuccessStub(pdfGenerationRequest(config.getFormCNonFastTrackTemplate()));
+        generateDocumentServiceSuccessStub(pdfGenerationRequest(config.getFormGTemplate()));
+        generateDocumentServiceSuccessStub(pdfGenerationRequest(config.getOutOfFamilyCourtResolutionTemplate()));
 
         MvcResult mvcResult;
         int requestsMade = 0;
@@ -146,8 +164,10 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
 
     @Test
     public void generateFormCAndFormGServiceError() throws Exception {
-        generateDocumentServiceSuccessStub(formCDocumentRequest());
-        generateDocumentServiceErrorStub(formGDocumentRequest());
+        idamServiceStub();
+        generateEvidenceUploadServiceSuccessStub();
+        generateDocumentServiceSuccessStub(pdfGenerationRequest(config.getFormCNonFastTrackTemplate()));
+        generateDocumentServiceErrorStub(pdfGenerationRequest(config.getFormGTemplate()));
 
         webClient.perform(MockMvcRequestBuilders.post(API_URL)
             .content(objectMapper.writeValueAsString(request))
@@ -170,20 +190,13 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
             .andExpect(content().json(expectedErrorData(), true));
     }
 
-    private DocumentGenerationRequest formOutOfFaimilyCourtResolutionDocumentRequest() {
-        return documentRequest(config.getOutOfFamilyCourtResolutionTemplate(), config.getOutOfFamilyCourtResolutionName());
-    }
-
-    private DocumentGenerationRequest formGDocumentRequest() {
-        return documentRequest(config.getFormGTemplate(), config.getFormGFileName());
-    }
-
-    private DocumentGenerationRequest formCDocumentRequest() {
-        return documentRequest(config.getFormCNonFastTrackTemplate(), config.getFormCFileName());
-    }
-
-    private DocumentGenerationRequest coverSheetDocumentRequest() {
-        return documentRequest(config.getBulkPrintTemplate(), config.getBulkPrintFileName());
+    protected PdfDocumentRequest pdfGenerationRequest(String template) {
+        return PdfDocumentRequest.builder()
+            .accessKey("TESTPDFACCESS")
+            .outputName("result.pdf")
+            .templateName(template)
+            .data(request.getCaseDetails().getData())
+            .build();
     }
 
     private String expectedErrorData() throws JsonProcessingException {
@@ -226,10 +239,9 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
             .build();
     }
 
-    private void generateDocumentServiceSuccessStub(DocumentGenerationRequest documentRequest) throws JsonProcessingException {
+    private void generateDocumentServiceSuccessStub(PdfDocumentRequest documentRequest) throws JsonProcessingException {
         documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
-            .withRequestBody(equalToJson(objectMapper.writeValueAsString(coverSheetDocumentRequest()), true, true))
-            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
+            .withRequestBody(equalToJson(objectMapper.writeValueAsString(pdfGenerationRequest(config.getBulkPrintTemplate())), true, true))
             .withHeader(CONTENT_TYPE, equalTo("application/json"))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
@@ -239,14 +251,13 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
             .withRequestBody(equalToJson(objectMapper.writeValueAsString(documentRequest),
                 true, true))
-            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
             .withHeader(CONTENT_TYPE, equalTo("application/json"))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .withBody(objectMapper.writeValueAsString(document()))));
 
-        documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_BULK_PRINT_CONTEXT_PATH))
+        documentGeneratorBulkPrintService.stubFor(post(urlPathEqualTo(GENERATE_BULK_PRINT_CONTEXT_PATH))
             .withRequestBody(equalToJson(objectMapper.writeValueAsString(bulkPrintRequest()), true, true))
             .withHeader(CONTENT_TYPE, equalTo("application/json"))
             .willReturn(aResponse()
@@ -255,14 +266,35 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
                 .withBody(objectMapper.writeValueAsString(UUID.randomUUID()))));
     }
 
-    private void generateDocumentServiceErrorStub(DocumentGenerationRequest documentRequest) throws JsonProcessingException {
+    private void generateDocumentServiceErrorStub(PdfDocumentRequest documentRequest) throws JsonProcessingException {
         documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
             .withRequestBody(equalToJson(objectMapper.writeValueAsString(documentRequest),
                 true, true))
-            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
             .withHeader(CONTENT_TYPE, equalTo("application/json"))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)));
+    }
+
+    private void idamServiceStub() {
+        idamService.stubFor(get(urlPathEqualTo(IDAM_SERVICE_CONTEXT_PATH))
+            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withBody("{\"roles\": [\"caseworker-divorce-financialremedy-courtadmin\"]}")));
+    }
+
+    void generateEvidenceUploadServiceSuccessStub() throws IOException {
+        evidenceUploadService.stubFor(post(urlPathEqualTo(UPLOAD_DOCUMENT_CONTEXT_PATH))
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withBody(objectMapper.writeValueAsString(getResponse()))));
+    }
+
+    private ObjectNode getResponse() throws IOException {
+        final String response = new String(readAllBytes(Paths.get("src/test/resources/fixtures/fileuploadresponseGenerateMiniFormATest.json")));
+        return (ObjectNode) new ObjectMapper().readTree(response);
     }
 }

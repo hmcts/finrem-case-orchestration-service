@@ -8,7 +8,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 
 import java.util.Collections;
 import java.util.Map;
@@ -19,6 +18,8 @@ import java.util.UUID;
 public class GenericDocumentService {
 
     private static final String DOCUMENT_CASE_DETAILS_JSON_KEY = "caseDetails";
+
+    private final DocumentManagementService documentManagementService;
 
     private final DocumentClient documentClient;
 
@@ -31,10 +32,8 @@ public class GenericDocumentService {
 
     public CaseDocument generateDocumentFromPlaceholdersMap(String authorisationToken, Map placeholders,
                                                             String template, String fileName) {
-        Document generatedPdf = documentClient.generatePdf(
-            DocumentGenerationRequest.builder().template(template).fileName(fileName).values(placeholders).build(),
-            authorisationToken
-        );
+        Document generatedPdf = documentManagementService
+            .storeDocument(template, fileName, placeholders, authorisationToken);
         return toCaseDocument(generatedPdf);
     }
 

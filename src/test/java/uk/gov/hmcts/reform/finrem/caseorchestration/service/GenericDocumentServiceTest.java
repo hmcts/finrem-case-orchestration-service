@@ -9,10 +9,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Map;
+
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -31,8 +35,15 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
     @Autowired private GenericDocumentService genericDocumentService;
     @Autowired private DocumentClient documentClientMock;
 
+    @Autowired private EvidenceManagementUploadService evidenceManagementUploadService;
+
+    @Autowired private IdamAuthService idamAuthService;
+    @Autowired private DocmosisPdfGenerationService docmosisPdfGenerationServiceMock;
+
     @Captor
-    private ArgumentCaptor<DocumentGenerationRequest> documentGenerationRequestCaptor;
+    private ArgumentCaptor<Map> mapCaptor;
+    @Captor
+    private ArgumentCaptor<String> templateNameCaptor;
 
     @Test
     public void shouldStampDocument() {
@@ -59,16 +70,23 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
         final String templateName = "template name";
         final String fileName = "file name";
 
-        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
+        when(evidenceManagementUploadService.upload(any(), any()))
+            .thenReturn(Collections.singletonList(
+                FileUploadResponse.builder()
+                    .fileName("app_docs.pdf")
+                    .fileUrl("http://dm-store/lhjbyuivu87y989hijbb")
+                    .build()));
+        when(docmosisPdfGenerationServiceMock
+            .generateDocFrom(any(), any())).thenReturn("".getBytes(StandardCharsets.UTF_8));
 
         CaseDocument document = genericDocumentService.generateDocument(AUTH_TOKEN, defaultContestedCaseDetails(), templateName, fileName);
 
         assertCaseDocument(document);
-        verify(documentClientMock, times(1)).generatePdf(documentGenerationRequestCaptor.capture(), eq(AUTH_TOKEN));
+        verify(docmosisPdfGenerationServiceMock, times(1))
+            .generateDocFrom(templateNameCaptor.capture(), mapCaptor.capture());
 
-        assertThat(documentGenerationRequestCaptor.getValue().getTemplate(), is(templateName));
-        assertThat(documentGenerationRequestCaptor.getValue().getFileName(), is(fileName));
-        assertThat(documentGenerationRequestCaptor.getValue().getValues().get("caseDetails"), is(defaultContestedCaseDetails()));
+        assertThat(templateNameCaptor.getValue(), is(templateName));
+        assertThat(mapCaptor.getValue().get("caseDetails"), is(defaultContestedCaseDetails()));
     }
 
     @Test

@@ -27,11 +27,9 @@ public class EvidenceManagementClientControllerTest extends BaseControllerTest {
 
     private static final String UPLOADED_FILE_URL = "http://localhost:8080/documents/6";
     private static final String AUTH_TOKEN = "AAAAAAA";
-    private static final String REQUEST_ID = "1234";
     private static final String AUTHORIZATION_TOKEN_HEADER = "Authorization";
     private static final String REQUEST_ID_HEADER = "requestId";
     private static final String CONTENT_TYPE_HEADER = "content-type";
-    private List<MultipartFile> multipartFileList;
     private static final String EM_CLIENT_UPLOAD_URL = "http://localhost/case-orchestration/emclientapi/upload";
 
     @MockBean private EvidenceManagementUploadService emUploadService;
@@ -39,14 +37,13 @@ public class EvidenceManagementClientControllerTest extends BaseControllerTest {
     @Test
     public void shouldUploadFileTokenWhenHandleFileUploadIsInvokedWithValidInputs() throws Exception {
         MockMultipartFile file = jpegMultipartFile();
-        multipartFileList = Collections.singletonList(file);
-        given(emUploadService.upload(any(), any(), any()))
+        List<MultipartFile> multipartFileList = Collections.singletonList(file);
+        given(emUploadService.upload(any(), any()))
             .willReturn(prepareFileUploadResponse());
 
         mvc.perform(multipart(EM_CLIENT_UPLOAD_URL)
                 .file(file)
                 .header(AUTHORIZATION_TOKEN_HEADER, AUTH_TOKEN)
-                .header(REQUEST_ID_HEADER, REQUEST_ID)
                 .header(CONTENT_TYPE_HEADER, MediaType.MULTIPART_FORM_DATA))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].fileUrl", is("http://localhost:8080/documents/6")))
@@ -58,7 +55,7 @@ public class EvidenceManagementClientControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$[0].mimeType", is(MediaType.TEXT_PLAIN_VALUE)))
             .andExpect(jsonPath("$[0].status", is("OK")));
 
-        verify(emUploadService).upload(multipartFileList, AUTH_TOKEN, REQUEST_ID);
+        verify(emUploadService).upload(multipartFileList, AUTH_TOKEN);
     }
 
     private List<FileUploadResponse> prepareFileUploadResponse() {

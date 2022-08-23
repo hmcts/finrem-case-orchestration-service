@@ -59,38 +59,38 @@ public class EvidenceManagementUploadServiceTest {
     @Test
     public void givenAuthKeyParamIsPassed_whenUploadIsCalled_thenExpectUploadToSucceed() {
         List<FileUploadResponse> responses = emUploadService.upload(getMultipartFiles(),
-            authKey(), "ReqId");
+            authKey());
         assertTrue(responses.size() > 0);
     }
 
     @Test
     public void givenAuthKeyParamIsPassed_whenUploadIsCalled_thenExpectEmRequestWith3Headers() {
-        emUploadService.upload(getMultipartFiles(), authKey(), "ReqId");
+        emUploadService.upload(getMultipartFiles(), authKey());
         List<HttpEntity> allValues = httpEntityReqEntity.getAllValues();
         assertEquals(3, allValues.get(0).getHeaders().size());
     }
 
     @Test
     public void givenAuthKeyParamIsPassed_whenUploadIsCalled_thenExpectEmReqToHaveSecurityAuthHeader() {
-        emUploadService.upload(getMultipartFiles(), authKey(), "ReqId");
+        emUploadService.upload(getMultipartFiles(), authKey());
         assertTrue(getEmRequestHeaders().containsKey("ServiceAuthorization"));
     }
 
     @Test
     public void givenAuthKeyParamIsPassed_whenUploadIsCalled_thenExpectEmReqToHaveUserIdHeader() {
-        emUploadService.upload(getMultipartFiles(), authKey(), "ReqId");
+        emUploadService.upload(getMultipartFiles(), authKey());
         assertTrue(getEmRequestHeaders().containsKey("user-id"));
     }
 
     @Test
     public void givenAuthKeyParamIsPassed_whenUploadIsCalled_thenExpectEmReqToHaveValidContentTypeHeader() {
-        emUploadService.upload(getMultipartFiles(), authKey(), "ReqId");
+        emUploadService.upload(getMultipartFiles(), authKey());
         assertEquals("multipart/form-data", getEmRequestHeaders().get("Content-Type").get(0));
     }
 
     @Test
     public void givenAuthKeyParamIsPassed_whenUploadIsCalled_thenExpectAuthKeyIsParsedForUserId() {
-        emUploadService.upload(getMultipartFiles(), authKey(), "ReqId");
+        emUploadService.upload(getMultipartFiles(), authKey());
         assertEquals("19", getEmRequestHeaders().get("user-id").get(0));
     }
 
@@ -98,7 +98,7 @@ public class EvidenceManagementUploadServiceTest {
     public void givenNullFileParamIsPassed_whenUploadIsCalled_thenExpectError() {
         expectedException.expect(NullPointerException.class);
         expectedException.expectMessage("files");
-        emUploadService.upload(null, authKey(), "ReqId");
+        emUploadService.upload(null, authKey());
         httpEntityReqEntity.getAllValues();
     }
 

@@ -39,9 +39,8 @@ public class EvidenceManagementClientController {
     @ResponseBody
     public List<FileUploadResponse> upload(
         @RequestHeader(value = "Authorization", required = false) String authorizationToken,
-        @RequestHeader(value = "requestId", required = false) String requestId,
         @RequestParam("file") List<@EvidenceFile MultipartFile> files) {
 
-        return evidenceManagementUploadService.upload(files, authorizationToken, requestId);
+        return evidenceManagementUploadService.upload(files, authorizationToken);
     }
 }
