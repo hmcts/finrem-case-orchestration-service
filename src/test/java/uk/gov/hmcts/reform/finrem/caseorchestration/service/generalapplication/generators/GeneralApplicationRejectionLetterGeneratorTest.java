@@ -116,6 +116,7 @@ public class GeneralApplicationRejectionLetterGeneratorTest {
         assertThat(letterDetails.getApplicantLName(), is("Guy"));
         assertThat(letterDetails.getRespondentLName(), is("Respondent"));
         assertThat(letterDetails.getCaseNumber(), is("1234567890"));
+        assertThat(letterDetails.getGeneralApplicationRejectionReason(), is("Test rejection reason"));
     }
 
     @Test
