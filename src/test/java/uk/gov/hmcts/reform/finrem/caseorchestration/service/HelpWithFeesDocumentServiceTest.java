@@ -7,7 +7,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
@@ -36,10 +35,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class HelpWithFeesDocumentServiceTest extends BaseServiceTest {
 
     @Autowired private HelpWithFeesDocumentService helpWithFeesDocumentService;
-    @Autowired private DocumentClient documentClientMock;
-
     @Autowired private EvidenceManagementUploadService evidenceManagementUploadService;
-
     @Autowired private DocmosisPdfGenerationService docmosisPdfGenerationServiceMock;
 
     private CaseDetails caseDetails;

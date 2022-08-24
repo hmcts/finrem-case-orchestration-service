@@ -51,6 +51,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public abstract class BaseServiceTest extends BaseTest {
 
     @Autowired protected ObjectMapper mapper;
+
+    public static final byte[] SOME_BYTES = "ainhsdcnoih".getBytes();
     private static final String TEST_JSON = "/fixtures/contested/interim-hearing-two-collection.json";
 
     protected CaseDetails buildCaseDetails() {

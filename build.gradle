@@ -324,6 +324,7 @@ dependencies {
     implementation group: 'org.springframework.hateoas', name: 'spring-hateoas', version: versions.springHateoas
     implementation group: 'org.apache.tika', name: 'tika-core', version: versions.tika
     implementation group: 'com.github.hmcts', name: 'send-letter-client', version: versions.sendLetterClient
+    implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
 
     developmentOnly group: 'org.springframework.boot', name: 'spring-boot-devtools'
 

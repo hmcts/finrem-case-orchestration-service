@@ -6,7 +6,6 @@ import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
@@ -18,8 +17,6 @@ import java.util.Map;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,15 +30,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.docume
 public class GenericDocumentServiceTest extends BaseServiceTest {
 
     @Autowired private GenericDocumentService genericDocumentService;
-    @Autowired private DocumentClient documentClientMock;
-
     @Autowired private BulkPrintDocumentGeneratorService bulkPrintDocumentGeneratorService;
 
     @Autowired private BulkPrintDocumentService bulkPrintDocumentService;
     @Autowired private EvidenceManagementUploadService evidenceManagementUploadService;
+    @Autowired private EvidenceManagementDeleteService evidenceManagementDeleteService;
 
     @Autowired private IdamAuthService idamAuthService;
     @Autowired private DocmosisPdfGenerationService docmosisPdfGenerationServiceMock;
+
+    @Autowired private PdfStampingService pdfStampingServiceMock;
 
     @Captor
     private ArgumentCaptor<Map> mapCaptor;
@@ -49,23 +47,23 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
     private ArgumentCaptor<String> templateNameCaptor;
 
     @Test
-    public void shouldStampDocument() {
-        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(document());
+    public void shouldStampDocument() throws Exception {
+        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, false)).thenReturn(document());
 
         CaseDocument stampDocument = genericDocumentService.stampDocument(caseDocument(), AUTH_TOKEN);
 
         assertCaseDocument(stampDocument);
-        verify(documentClientMock, times(1)).stampDocument(any(), eq(AUTH_TOKEN));
+        verify(pdfStampingServiceMock, times(1)).stampDocument(document(), AUTH_TOKEN, false);
     }
 
     @Test
     public void shouldAnnexStampDocument() {
-        when(documentClientMock.annexStampDocument(any(), anyString())).thenReturn(document());
+        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, true)).thenReturn(document());
 
         CaseDocument stampDocument = genericDocumentService.annexStampDocument(caseDocument(), AUTH_TOKEN);
 
         assertCaseDocument(stampDocument);
-        verify(documentClientMock, times(1)).annexStampDocument(any(), eq(AUTH_TOKEN));
+        verify(pdfStampingServiceMock, times(1)).stampDocument(document(), AUTH_TOKEN, true);
     }
 
     @Test
@@ -96,7 +94,7 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
     public void shouldDeleteDocument() {
         genericDocumentService.deleteDocument(caseDocument().getDocumentUrl(), AUTH_TOKEN);
 
-        verify(documentClientMock, times(1)).deleteDocument(caseDocument().getDocumentUrl(), AUTH_TOKEN);
+        verify(evidenceManagementDeleteService, times(1)).deleteFile(caseDocument().getDocumentUrl(), AUTH_TOKEN);
     }
 
     @Test

@@ -11,9 +11,9 @@ import static java.lang.String.format;
 
 public class TestResource {
 
-    public static final String FILE_URL = "url";
+    public static final String FILE_URL = "http://dm-store/lhjbyuivu87y989hijbb";
     public static final String BINARY_URL = format("%s/binary", FILE_URL);
-    public static final String FILE_NAME = "name";
+    public static final String FILE_NAME = "app_docs.pdf";
     public static final String CREATED_ON = "20th October 2018";
     public static final String MIME_TYPE = "app/pdf";
     public static final String CREATED_BY = "user";

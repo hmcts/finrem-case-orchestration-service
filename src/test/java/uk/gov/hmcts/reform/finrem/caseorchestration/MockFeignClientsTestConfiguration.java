@@ -5,23 +5,18 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentGeneratorService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocmosisPdfGenerationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentGeneratorValidationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.EvidenceManagementUploadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PdfStampingService;
 
 @Profile("test-mock-feign-clients")
 @Configuration
 public class MockFeignClientsTestConfiguration {
-
-    @Bean
-    @Primary
-    public DocumentClient documentClient() {
-        return Mockito.mock(DocumentClient.class);
-    }
 
     @Bean
     @Primary
@@ -49,6 +44,12 @@ public class MockFeignClientsTestConfiguration {
 
     @Bean
     @Primary
+    public PdfStampingService getPdfStampingService() {
+        return Mockito.mock(PdfStampingService.class);
+    }
+
+    @Bean
+    @Primary
     public BulkPrintDocumentGeneratorService getBulkPrintDocumentGeneratorService() {
         return Mockito.mock(BulkPrintDocumentGeneratorService.class);
     }
@@ -58,4 +59,11 @@ public class MockFeignClientsTestConfiguration {
     public BulkPrintDocumentService getBulkPrintDocumentService() {
         return Mockito.mock(BulkPrintDocumentService.class);
     }
+
+    @Bean
+    @Primary
+    public EvidenceManagementDeleteService getEvidenceManagementDeleteService() {
+        return Mockito.mock(EvidenceManagementDeleteService.class);
+    }
+
 }
