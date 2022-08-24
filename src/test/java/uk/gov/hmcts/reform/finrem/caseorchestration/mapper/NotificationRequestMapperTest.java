@@ -57,6 +57,8 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         assertEquals(TEST_SOLICITOR_NAME, notificationRequest.getName());
         assertEquals(TEST_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
         assertEquals("consented", notificationRequest.getCaseType());
+        assertEquals("consent", notificationRequest.getCaseOrderType());
+        assertEquals("Consent", notificationRequest.getCamelCaseOrderType());
     }
 
     @Test
@@ -100,6 +102,24 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         assertEquals(TEST_RESP_SOLICITOR_NAME, notificationRequest.getName());
         assertEquals(TEST_RESP_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
         assertEquals("consented", notificationRequest.getCaseType());
+        assertEquals("consent", notificationRequest.getCaseOrderType());
+        assertEquals("Consent", notificationRequest.getCamelCaseOrderType());
+    }
+
+    @Test
+    public void shouldCreateNotificationRequestForRespSolicitorForConsentedJourneyWithNatureIsVariationOrder() {
+        CallbackRequest callbackRequest = getConsentedCallbackRequestForVariationOrder();
+        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForRespondentSolicitor(
+            callbackRequest.getCaseDetails());
+
+        assertEquals("12345", notificationRequest.getCaseReferenceNumber());
+        assertEquals(TEST_RESP_SOLICITOR_REFERENCE, notificationRequest.getSolicitorReferenceNumber());
+        assertEquals(TEST_DIVORCE_CASE_NUMBER, notificationRequest.getDivorceCaseNumber());
+        assertEquals(TEST_RESP_SOLICITOR_NAME, notificationRequest.getName());
+        assertEquals(TEST_RESP_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
+        assertEquals("consented", notificationRequest.getCaseType());
+        assertEquals("variation", notificationRequest.getCaseOrderType());
+        assertEquals("Variation", notificationRequest.getCamelCaseOrderType());
     }
 
     @Test
@@ -158,6 +178,8 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         assertThat(notificationRequest.getNotificationEmail(), is(TEST_SOLICITOR_EMAIL));
         assertThat(notificationRequest.getName(), is(TEST_SOLICITOR_NAME));
         assertThat(notificationRequest.getCaseType(), is("consented"));
+        assertEquals("consent", notificationRequest.getCaseOrderType());
+        assertEquals("Consent", notificationRequest.getCamelCaseOrderType());
     }
 
     @Test
@@ -172,6 +194,8 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         assertThat(notificationRequest.getNotificationEmail(), is(TEST_RESP_SOLICITOR_EMAIL));
         assertThat(notificationRequest.getName(), is(TEST_RESP_SOLICITOR_NAME));
         assertThat(notificationRequest.getCaseType(), is("consented"));
+        assertEquals("consent", notificationRequest.getCaseOrderType());
+        assertEquals("Consent", notificationRequest.getCamelCaseOrderType());
     }
 
     @Test

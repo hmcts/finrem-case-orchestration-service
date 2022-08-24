@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -141,7 +140,7 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
     private void addConsentedInContestedConsentOrderNotApproved() {
         Map<String, Object> caseData = caseDetails.getData();
 
-        caseData.put(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION, Arrays.asList(ImmutableMap.of(
+        caseData.put(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION, List.of(ImmutableMap.of(
             "id", UUID.randomUUID().toString(),
             "value", ImmutableMap.of(
                 "consentOrder", ImmutableMap.of(
