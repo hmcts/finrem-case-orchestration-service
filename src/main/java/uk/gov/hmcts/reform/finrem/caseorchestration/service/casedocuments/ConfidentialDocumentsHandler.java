@@ -42,12 +42,14 @@ public class ConfidentialDocumentsHandler extends CaseDocumentHandler<Confidenti
         log.info("Adding items: {}, to Confidential Documents Collection", confidentialFiltered);
         uploadedDocuments.removeAll(confidentialFiltered);
 
-        List<ConfidentialUploadedDocumentData> confidentialDocsCollection = getConfidentialDocumentCollection(caseData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
+        List<ConfidentialUploadedDocumentData> confidentialDocsCollection = getConfidentialDocumentCollection(
+            caseData,CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
         if (!confidentialFiltered.isEmpty()) {
             List<ConfidentialUploadedDocumentData> confidentialDocs = confidentialFiltered.stream().map(
                 doc -> buildConfidentialDocument(doc)).collect((Collectors.toList()));
             confidentialDocsCollection.addAll(confidentialDocs);
-            Collections.sort(confidentialDocsCollection, Comparator.nullsLast((e1, e2) -> e2.getConfidentialUploadedDocument().getConfidentialDocumentUploadDateTime()
+            Collections.sort(confidentialDocsCollection, Comparator.nullsLast((e1, e2) -> e2.getConfidentialUploadedDocument()
+                .getConfidentialDocumentUploadDateTime()
                 .compareTo(e1.getConfidentialUploadedDocument().getConfidentialDocumentUploadDateTime())));
             caseData.put(CONFIDENTIAL_DOCS_UPLOADED_COLLECTION, confidentialDocsCollection);
         }
