@@ -118,7 +118,7 @@ public class CaseDataController extends BaseController {
         log.info("Setting default values for contested paper case journey.");
         validateCaseData(callbackRequest);
         setOrganisationPolicyForNewPaperCase(callbackRequest.getCaseDetails());
-        callbackRequest.getCaseDetails().getData().putIfAbsent(CIVIL_PARTNERSHIP, NO_VALUE);
+        callbackRequest.getCaseDetails().getData().put(CIVIL_PARTNERSHIP, NO_VALUE);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build());
     }
 
