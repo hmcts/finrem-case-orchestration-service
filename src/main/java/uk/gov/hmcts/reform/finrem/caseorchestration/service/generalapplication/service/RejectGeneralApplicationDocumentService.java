@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.generalapplication.GeneralApplicationRejectionLetterDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.generalapplication.generators.GeneralApplicationRejectionLetterGenerator;
 
@@ -25,7 +24,6 @@ public class RejectGeneralApplicationDocumentService  {
     private static final String CASE_DETAILS = "caseDetails";
     private static final String CASE_DATA = "case_data";
 
-    private final CaseDataService caseDataService;
     private final GeneralApplicationRejectionLetterGenerator generalApplicationRejectionLetterGenerator;
 
     private final GenericDocumentService genericDocumentService;

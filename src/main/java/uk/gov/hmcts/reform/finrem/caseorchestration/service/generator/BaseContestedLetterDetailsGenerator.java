@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.generator;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -7,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ParentLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
@@ -24,6 +27,11 @@ public abstract class BaseContestedLetterDetailsGenerator {
 
     protected CaseDataService caseDataService;
     protected DocumentHelper documentHelper;
+
+    public BaseContestedLetterDetailsGenerator(CaseDataService caseDataService, DocumentHelper documentHelper) {
+        this.caseDataService = caseDataService;
+        this.documentHelper = documentHelper;
+    }
 
     public abstract ParentLetterDetails generate(CaseDetails caseDetails,
                                                  DocumentHelper.PaperNotificationRecipient recipient);
@@ -61,11 +69,15 @@ public abstract class BaseContestedLetterDetailsGenerator {
     private String getLitigantFormattedAddress(CaseDetails caseDetails,
                                                DocumentHelper.PaperNotificationRecipient recipient) {
         Map<String, Object> caseData = caseDetails.getData();
-        return documentHelper.formatAddressForLetterPrinting((Map) caseData.get(getLitigantAddressKey(recipient)));
+        Map<String, Object> addressMap = new ObjectMapper().convertValue(caseData.get(getLitigantAddressKey(recipient)),
+            TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, Object.class));
+        return documentHelper.formatAddressForLetterPrinting(addressMap);
     }
 
     private String getSolicitorFormattedAddress(CaseDetails caseDetails, String addressKey) {
-        return documentHelper.formatAddressForLetterPrinting((Map) caseDetails.getData().get(addressKey));
+        Map<String, Object> addressMap = new ObjectMapper().convertValue(caseDetails.getData().get(addressKey),
+            TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, Object.class));
+        return documentHelper.formatAddressForLetterPrinting(addressMap);
     }
 
     private boolean isApplicantSolicitor(Map<String, Object> caseData,

@@ -38,7 +38,7 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
 
 
     @Before
-    public void setup(){
+    public void setup() {
         callbackRequest = CallbackRequest.builder().build();
         caseDetails = CaseDetails.builder().build();
         callbackRequest.setCaseDetails(caseDetails);

@@ -1,9 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.generators;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.frcupateinfo.UpdateFrcInfoLetterDetails;
@@ -12,30 +10,24 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.generator.BaseContes
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Map;
 import java.util.Objects;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
 
 @Component
-@RequiredArgsConstructor
 @Slf4j
 public class UpdateFrcInfoLetterDetailsGenerator extends BaseContestedLetterDetailsGenerator {
 
     public static final String LETTER_DATE_FORMAT = "yyyy-MM-dd";
-    private final DocumentHelper documentHelper;
+
+    public UpdateFrcInfoLetterDetailsGenerator(CaseDataService caseDataService, DocumentHelper documentHelper) {
+        super(caseDataService, documentHelper);
+    }
 
     @Override
     public UpdateFrcInfoLetterDetails generate(CaseDetails caseDetails,
@@ -60,5 +52,4 @@ public class UpdateFrcInfoLetterDetailsGenerator extends BaseContestedLetterDeta
     private String getSolicitorReferenceKey(DocumentHelper.PaperNotificationRecipient recipient) {
         return recipient == APPLICANT ? SOLICITOR_REFERENCE : RESP_SOLICITOR_REFERENCE;
     }
-
 }

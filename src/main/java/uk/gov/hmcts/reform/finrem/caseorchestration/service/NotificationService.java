@@ -387,7 +387,7 @@ public class NotificationService {
         sendGeneralApplicationRejectionEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
 
-    public void sendGeneralApplicationRejectionEmail (NotificationRequest notificationRequest) {
+    public void sendGeneralApplicationRejectionEmail(NotificationRequest notificationRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getGeneralApplicationRejection());
         sendNotificationEmail(notificationRequest, uri);
     }
