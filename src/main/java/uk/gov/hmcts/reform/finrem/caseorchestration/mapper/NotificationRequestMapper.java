@@ -161,7 +161,8 @@ public class NotificationRequestMapper {
         notificationRequest.setGeneralEmailBody(Objects.toString(mapOfCaseData.get(GENERAL_EMAIL_BODY)));
         notificationRequest.setCaseType(getCaseType(caseDetails));
         notificationRequest.setPhoneOpeningHours(CTSC_OPENING_HOURS);
-        notificationRequest.setGeneralApplicationRejectionReason(getGeneralApplicationRejectionReason(caseDetails));
+        notificationRequest.setGeneralApplicationRejectionReason(
+            Objects.toString(caseDetails.getData().get(GENERAL_APPLICATION_REJECT_REASON), ""));
         if (caseDataService.isConsentedApplication(caseDetails)) {
             if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(mapOfCaseData))) {
                 notificationRequest.setCaseOrderType("variation");
@@ -175,12 +176,5 @@ public class NotificationRequestMapper {
         }
 
         return notificationRequest;
-    }
-
-    private String getGeneralApplicationRejectionReason(CaseDetails caseDetails) {
-        if (caseDetails.getData().get(GENERAL_APPLICATION_REJECT_REASON) == null) {
-            return "";
-        }
-        return (String) caseDetails.getData().get(GENERAL_APPLICATION_REJECT_REASON);
     }
 }
