@@ -218,8 +218,8 @@ public abstract class BaseServiceTest extends BaseTest {
 
     protected CallbackRequest getContestedCallbackRequestUpdateDetails() {
         Map<String, Object> caseData = new HashMap<>();
-        caseData.put(CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, "David");
-        caseData.put(CONSENTED_RESPONDENT_LAST_NAME, "Goodman");
+        caseData.put(CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME, "David");
+        caseData.put(CONTESTED_RESPONDENT_LAST_NAME, "Goodman");
         caseData.put(APPLICANT_FIRST_MIDDLE_NAME, "Victoria");
         caseData.put(APPLICANT_LAST_NAME, "Goodman");
         caseData.put(CONTESTED_SOLICITOR_EMAIL, TEST_SOLICITOR_EMAIL);
