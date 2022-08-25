@@ -34,6 +34,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentManag
 @Slf4j
 public class PdfStampingService {
 
+    public static final String APPLICATION_PDF_CONTENT_TYPE = "application/pdf";
     private final EvidenceManagementUploadService emUploadService;
 
     private final EvidenceManagementDownloadService emDownloadService;
@@ -44,7 +45,8 @@ public class PdfStampingService {
             byte[] docInBytes = emDownloadService.download(document.getBinaryUrl()).getBody();
             byte[] stampedDoc = stampDocument(docInBytes, isAnnexNeeded);
             MultipartFile multipartFile =
-                FinremMultipartFile.builder().name(document.getFileName()).content(stampedDoc).build();
+                FinremMultipartFile.builder().name(document.getFileName()).content(stampedDoc)
+                    .contentType(APPLICATION_PDF_CONTENT_TYPE).build();
             List<FileUploadResponse> uploadResponse = emUploadService.upload(Collections.singletonList(multipartFile), authToken);
             FileUploadResponse fileSaved = Optional.of(uploadResponse.get(0))
                 .filter(response -> response.getStatus() == HttpStatus.OK)
