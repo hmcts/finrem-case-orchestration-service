@@ -59,6 +59,8 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         assertEquals("consented", notificationRequest.getCaseType());
         assertEquals("consent", notificationRequest.getCaseOrderType());
         assertEquals("Consent", notificationRequest.getCamelCaseOrderType());
+        assertEquals("David Goodman", notificationRequest.getRespondentName());
+        assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
     }
 
     @Test
@@ -72,6 +74,8 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         assertEquals(TEST_SOLICITOR_NAME, notificationRequest.getName());
         assertEquals(TEST_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
         assertEquals("contested", notificationRequest.getCaseType());
+        assertEquals("David Goodman", notificationRequest.getRespondentName());
+        assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
     }
 
     @Test
@@ -88,6 +92,8 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         assertEquals(TEST_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
         assertEquals("contested", notificationRequest.getCaseType());
         assertEquals("nottingham", notificationRequest.getSelectedCourt());
+        assertEquals("David Goodman", notificationRequest.getRespondentName());
+        assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
     }
 
     @Test
@@ -104,6 +110,8 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         assertEquals("consented", notificationRequest.getCaseType());
         assertEquals("consent", notificationRequest.getCaseOrderType());
         assertEquals("Consent", notificationRequest.getCamelCaseOrderType());
+        assertEquals("David Goodman", notificationRequest.getRespondentName());
+        assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
     }
 
     @Test
@@ -120,6 +128,8 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         assertEquals("consented", notificationRequest.getCaseType());
         assertEquals("variation", notificationRequest.getCaseOrderType());
         assertEquals("Variation", notificationRequest.getCamelCaseOrderType());
+        assertEquals("David Goodman", notificationRequest.getRespondentName());
+        assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
     }
 
     @Test
@@ -136,6 +146,8 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         assertEquals(TEST_RESP_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
         assertEquals("contested", notificationRequest.getCaseType());
         assertEquals("nottingham", notificationRequest.getSelectedCourt());
+        assertEquals("David Goodman", notificationRequest.getRespondentName());
+        assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
     }
 
     @Test
@@ -150,6 +162,8 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         assertThat(notificationRequest.getNotificationEmail(), is(TEST_SOLICITOR_EMAIL));
         assertThat(notificationRequest.getName(), is(TEST_SOLICITOR_NAME));
         assertThat(notificationRequest.getCaseType(), is("contested"));
+        assertEquals("David Goodman", notificationRequest.getRespondentName());
+        assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
     }
 
     @Test
@@ -164,6 +178,8 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         assertThat(notificationRequest.getNotificationEmail(), is(TEST_RESP_SOLICITOR_EMAIL));
         assertThat(notificationRequest.getName(), is(TEST_RESP_SOLICITOR_NAME));
         assertThat(notificationRequest.getCaseType(), is("contested"));
+        assertEquals("David Goodman", notificationRequest.getRespondentName());
+        assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
     }
 
     @Test
@@ -180,6 +196,8 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         assertThat(notificationRequest.getCaseType(), is("consented"));
         assertEquals("consent", notificationRequest.getCaseOrderType());
         assertEquals("Consent", notificationRequest.getCamelCaseOrderType());
+        assertEquals("David Goodman", notificationRequest.getRespondentName());
+        assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
     }
 
     @Test
@@ -196,6 +214,8 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         assertThat(notificationRequest.getCaseType(), is("consented"));
         assertEquals("consent", notificationRequest.getCaseOrderType());
         assertEquals("Consent", notificationRequest.getCamelCaseOrderType());
+        assertEquals("David Goodman", notificationRequest.getRespondentName());
+        assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
     }
 
     @Test
@@ -229,6 +249,9 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         assertThat("checking in loop", notificationRequest.getSelectedCourt(),
             anyOf(is("bristol"),
                 is("cfc")));
+
+        assertEquals("respondent test", notificationRequest.getRespondentName());
+        assertEquals("Applicant test", notificationRequest.getApplicantName());
     }
 
     @Test
@@ -261,6 +284,8 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         assertThat("checking in loop", notificationRequest.getSelectedCourt(),
             anyOf(is("bristol"),
             is("cfc")));
+        assertEquals("respondent test", notificationRequest.getRespondentName());
+        assertEquals("Applicant test", notificationRequest.getApplicantName());
     }
 
 

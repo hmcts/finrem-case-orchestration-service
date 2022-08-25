@@ -23,6 +23,8 @@ public class NotificationRequestTest {
             .phoneOpeningHours(CTSC_OPENING_HOURS)
             .caseOrderType("consent")
             .camelCaseOrderType("Consent")
+            .applicantName("Victoria Goodman")
+            .respondentName("Victor Goodman")
             .build();
 
         assertEquals("12345", underTest.getCaseReferenceNumber());
@@ -36,6 +38,8 @@ public class NotificationRequestTest {
         assertEquals(CTSC_OPENING_HOURS, underTest.getPhoneOpeningHours());
         assertEquals("consent", underTest.getCaseOrderType());
         assertEquals("Consent", underTest.getCamelCaseOrderType());
+        assertEquals("Victoria Goodman", underTest.getApplicantName());
+        assertEquals("Victor Goodman", underTest.getRespondentName());
     }
 
     @Test
@@ -63,6 +67,8 @@ public class NotificationRequestTest {
         underTest.setCaseType("consented");
         underTest.setGeneralEmailBody("general body");
         underTest.setPhoneOpeningHours(CTSC_OPENING_HOURS);
+        underTest.setApplicantName("Victoria Goodman");
+        underTest.setRespondentName("Victor Goodman");
         assertEquals("54321", underTest.getCaseReferenceNumber());
         assertEquals("67891", underTest.getSolicitorReferenceNumber());
         assertEquals("D456", underTest.getDivorceCaseNumber());
@@ -72,5 +78,7 @@ public class NotificationRequestTest {
         assertEquals("consented", underTest.getCaseType());
         assertEquals("general body", underTest.getGeneralEmailBody());
         assertEquals(CTSC_OPENING_HOURS, underTest.getPhoneOpeningHours());
+        assertEquals("Victoria Goodman", underTest.getApplicantName());
+        assertEquals("Victor Goodman", underTest.getRespondentName());
     }
 }

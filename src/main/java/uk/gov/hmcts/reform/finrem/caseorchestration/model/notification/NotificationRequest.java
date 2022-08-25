@@ -35,4 +35,8 @@ public class NotificationRequest {
     private String caseOrderType;
     @JsonProperty("camelCaseOrderType")
     private String camelCaseOrderType;
+    @JsonProperty("applicantName")
+    private String applicantName;
+    @JsonProperty("respondentName")
+    private String respondentName;
 }
