@@ -9,7 +9,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedDocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedGeneralDocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -17,12 +16,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralUploadedDocumentData;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_UPLOADED_DOCUMENTS;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -35,7 +32,9 @@ public class UploadGeneralDocumentsHandlerTest {
 
     private final List<GeneralUploadedDocumentData> uploadDocumentList = new ArrayList<>();
     private final List<GeneralUploadedDocumentData> existingDocumentList = new ArrayList<>();
-    private final List<GeneralUploadedDocumentData> combinedDocumentList = new ArrayList<>();
+    private final List<String> expectedDocumentIdList = new ArrayList<>();
+    List<GeneralUploadedDocumentData> handledDocumentList = new ArrayList<>();
+    List<String> handledDocumentIdList = new ArrayList<>();
 
     private final UploadedGeneralDocumentHelper uploadedGeneralDocumentHelper = new UploadedGeneralDocumentHelper(objectMapper);
 
@@ -93,21 +92,32 @@ public class UploadGeneralDocumentsHandlerTest {
 
         // Setup caseDetailsBefore
         CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        existingDocumentList.add(createGeneralUploadDocumentItem("Old", "Old email content", documentLink, "", "Old Example", "oldDocument.filename"));
+        GeneralUploadedDocumentData oldDoc = createGeneralUploadDocumentItem(
+            "Old", "Old email content", documentLink, "", "Old Example", "oldDocument.filename");
+        existingDocumentList.add(oldDoc);
         caseDetailsBefore.getData().put(GENERAL_UPLOADED_DOCUMENTS, existingDocumentList);
 
         // Setup caseDetails
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        uploadDocumentList.add(createGeneralUploadDocumentItem("Old", "Old email content", documentLink, "", "Old Example", "oldDocument.filename"));
-        uploadDocumentList.add(createGeneralUploadDocumentItem("New", "New email content", documentLink, "", "New Example", "newDocument.filename"));
+        GeneralUploadedDocumentData newDoc = createGeneralUploadDocumentItem(
+            "New", "New email content", documentLink, "", "New Example", "newDocument.filename");
+        uploadDocumentList.add(newDoc);
         caseDetails.getData().put(GENERAL_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        // Setup combinedList
-        combinedDocumentList.addAll(uploadDocumentList);
-        combinedDocumentList.addAll(existingDocumentList);
+        // Setup expected document order (newest first)
+        expectedDocumentIdList.add(newDoc.getId());
+        expectedDocumentIdList.add(oldDoc.getId());
 
-        // VALIDATE RESPONSE FROM uploadGeneralDocumentHandler HERE
-        assertThat(uploadGeneralDocumentsAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN).getData().get(GENERAL_UPLOADED_DOCUMENTS).equals(combinedDocumentList), is(true));
+        // Get results from handler
+        handledDocumentList.addAll(
+            (List<GeneralUploadedDocumentData>) uploadGeneralDocumentsAboutToSubmitHandler.handle(
+                callbackRequest, AUTH_TOKEN).getData().get(GENERAL_UPLOADED_DOCUMENTS));
+
+        // Get document ids from handled documents
+        handledDocumentList.forEach(doc -> handledDocumentIdList.add(doc.getId()));
+
+        // Validate results
+        assertThat(handledDocumentIdList.equals(expectedDocumentIdList), is(true));
     }
 
     private CallbackRequest buildCallbackRequest() {
