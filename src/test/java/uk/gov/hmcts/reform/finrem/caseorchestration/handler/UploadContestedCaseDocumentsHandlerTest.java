@@ -75,6 +75,21 @@ public class UploadContestedCaseDocumentsHandlerTest extends CaseDocumentHandler
     @Test
     public void givenUploadCaseDocument_When_IsValid_ThenExecuteHandlers() {
         CallbackRequest callbackRequest = buildCallbackRequest();
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        uploadDocumentList.add(createContestedUploadDocumentItem("Other", "applicant", "yes", "no", "Other Example"));
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+        caseDetailsBefore.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+        uploadContestedCaseDocumentsHandler.handle(callbackRequest, AUTH_TOKEN);
+
+
+        verify(applicantCaseSummariesHandler).handle(uploadDocumentList, caseDetails.getData());
+        verify(applicantChronologiesStatementHandler).handle(uploadDocumentList, caseDetails.getData());
+    }
+
+    @Test
+    public void givenUploadCaseDocument_When_IsValid_ThenExecuteHandler_And_ValidateDocumentOrder() {
+        CallbackRequest callbackRequest = buildCallbackRequest();
 
         // Setup caseDetailsBefore
         CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
@@ -102,9 +117,6 @@ public class UploadContestedCaseDocumentsHandlerTest extends CaseDocumentHandler
 
         // Validate results
         assertThat(handledDocumentIdList.equals(expectedDocumentIdList), is(true));
-
-        verify(applicantCaseSummariesHandler).handle(handledDocumentList, caseDetails.getData());
-        verify(applicantChronologiesStatementHandler).handle(handledDocumentList, caseDetails.getData());
     }
 
     private CallbackRequest buildCallbackRequest() {
