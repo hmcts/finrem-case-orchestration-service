@@ -28,6 +28,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -51,7 +52,7 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
     private PaperNotificationService paperNotificationService;
 
     @Mock
-    GeneralApplicationHelper generalApplicationHelper;
+    private GeneralApplicationHelper generalApplicationHelper;
 
     private CallbackRequest callbackRequest;
     private CaseDetails caseDetails;
@@ -127,13 +128,13 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
     }
 
     @Test
-    public void givenReceivedFromCase_whenHandle_thenSendNotificationsToBothParties() {
+    public void givenReceivedFromCase_whenHandle_thenDoNotSendNotifications() {
         callbackRequest.setCaseDetailsBefore(caseDetailsBefore(CASE));
         when(generalApplicationHelper.objectToDynamicList(any())).thenReturn(generalApplicationDynamicList());
 
         submittedHandler.handle(callbackRequest, AUTH_TOKEN);
-        verify(paperNotificationService).printApplicantRejectionGeneralApplication(caseDetails, AUTH_TOKEN);
-        verify(paperNotificationService).printRespondentRejectionGeneralApplication(caseDetails, AUTH_TOKEN);
+        verify(paperNotificationService, never()).printApplicantRejectionGeneralApplication(caseDetails, AUTH_TOKEN);
+        verify(paperNotificationService, never()).printRespondentRejectionGeneralApplication(caseDetails, AUTH_TOKEN);
 
     }
 

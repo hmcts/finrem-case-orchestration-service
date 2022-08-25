@@ -52,23 +52,15 @@ public class RejectGeneralApplicationSubmittedHandler implements CallbackHandler
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         String receivedFrom = getApplicationReceivedFrom(caseDetails, callbackRequest.getCaseDetailsBefore());
 
-        if (List.of(APPLICANT, CASE).contains(receivedFrom)) {
+        if (APPLICANT.equals(receivedFrom)) {
             sendApplicantNotifications(userAuthorisation, caseDetails);
         }
 
-        if (List.of(RESPONDENT, CASE).contains(receivedFrom)) {
+        if (RESPONDENT.equals(receivedFrom)) {
             sendRespondentNotifications(userAuthorisation, caseDetails);
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build();
-    }
-
-    private void sendRespondentNotifications(String userAuthorisation, CaseDetails caseDetails) {
-        if (notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
-            notificationService.sendGeneralApplicationRejectionEmailToResSolicitor(caseDetails);
-        } else {
-            paperNotificationService.printRespondentRejectionGeneralApplication(caseDetails, userAuthorisation);
-        }
     }
 
     private void sendApplicantNotifications(String userAuthorisation, CaseDetails caseDetails) {
@@ -76,6 +68,14 @@ public class RejectGeneralApplicationSubmittedHandler implements CallbackHandler
             notificationService.sendGeneralApplicationRejectionEmailToAppSolicitor(caseDetails);
         } else {
             paperNotificationService.printApplicantRejectionGeneralApplication(caseDetails, userAuthorisation);
+        }
+    }
+
+    private void sendRespondentNotifications(String userAuthorisation, CaseDetails caseDetails) {
+        if (notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
+            notificationService.sendGeneralApplicationRejectionEmailToResSolicitor(caseDetails);
+        } else {
+            paperNotificationService.printRespondentRejectionGeneralApplication(caseDetails, userAuthorisation);
         }
     }
 
