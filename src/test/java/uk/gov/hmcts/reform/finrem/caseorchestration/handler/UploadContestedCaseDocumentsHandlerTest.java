@@ -44,6 +44,10 @@ public class UploadContestedCaseDocumentsHandlerTest extends CaseDocumentHandler
     private UploadContestedCaseDocumentsAboutToSubmitHandler uploadContestedCaseDocumentsHandler;
 
     private final List<ContestedUploadedDocumentData> uploadDocumentList = new ArrayList<>();
+    private final List<ContestedUploadedDocumentData> existingDocumentList = new ArrayList<>();
+    private final List<String> expectedDocumentIdList = new ArrayList<>();
+    List<ContestedUploadedDocumentData> handledDocumentList = new ArrayList<>();
+    List<String> handledDocumentIdList = new ArrayList<>();
 
     private final UploadedDocumentHelper uploadedDocumentHelper = new UploadedDocumentHelper(objectMapper);
 
@@ -71,22 +75,43 @@ public class UploadContestedCaseDocumentsHandlerTest extends CaseDocumentHandler
     @Test
     public void givenUploadCaseDocument_When_IsValid_ThenExecuteHandlers() {
         CallbackRequest callbackRequest = buildCallbackRequest();
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+
+        // Setup caseDetailsBefore
         CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        uploadDocumentList.add(createContestedUploadDocumentItem("Other", "applicant", "yes", "no", "Other Example"));
+        ContestedUploadedDocumentData oldDoc = createContestedUploadDocumentItem("Other", "applicant", "yes", "no", "Old Document Example");
+        existingDocumentList.add(oldDoc);
+        caseDetailsBefore.getData().put(CONTESTED_UPLOADED_DOCUMENTS, existingDocumentList);
+
+        // Setup caseDetails
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        ContestedUploadedDocumentData newDoc = createContestedUploadDocumentItem("Other", "applicant", "yes", "no", "New Document Example");
+        uploadDocumentList.add(newDoc);
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
-        caseDetailsBefore.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
-        uploadContestedCaseDocumentsHandler.handle(callbackRequest, AUTH_TOKEN);
 
+        // Setup expected document order (newest first)
+        expectedDocumentIdList.add(newDoc.getId());
+        expectedDocumentIdList.add(oldDoc.getId());
 
-        verify(applicantCaseSummariesHandler).handle(uploadDocumentList, caseDetails.getData());
-        verify(applicantChronologiesStatementHandler).handle(uploadDocumentList, caseDetails.getData());
+        // Get results from handler
+        handledDocumentList.addAll(
+            (List<ContestedUploadedDocumentData>) uploadContestedCaseDocumentsHandler.handle(
+                callbackRequest, AUTH_TOKEN).getData().get(CONTESTED_UPLOADED_DOCUMENTS));
+
+        // Get document ids from handled documents
+        handledDocumentList.forEach(doc -> handledDocumentIdList.add(doc.getId()));
+
+        // Validate results
+        assertThat(handledDocumentIdList.equals(expectedDocumentIdList), is(true));
+
+        verify(applicantCaseSummariesHandler).handle(handledDocumentList, caseDetails.getData());
+        verify(applicantChronologiesStatementHandler).handle(handledDocumentList, caseDetails.getData());
     }
 
     private CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
+        Map<String, Object> caseDataBefore = new HashMap<>();
         CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
-        CaseDetails caseDetailsBefore = CaseDetails.builder().id(123L).data(caseData).build();
+        CaseDetails caseDetailsBefore = CaseDetails.builder().id(123L).data(caseDataBefore).build();
         return CallbackRequest.builder().eventId(EventType.UPLOAD_CASE_FILES.getCcdType())
             .caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
     }
