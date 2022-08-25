@@ -13,10 +13,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedGeneralDocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralUploadedDocumentData;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -44,9 +44,10 @@ public class UploadGeneralDocumentsAboutToSubmitHandler implements CallbackHandl
             callbackRequest.getCaseDetails().getData(),
             callbackRequest.getCaseDetailsBefore().getData(), GENERAL_UPLOADED_DOCUMENTS);
         List<GeneralUploadedDocumentData> uploadedDocuments = getGeneralDocumentCollection(caseData, GENERAL_UPLOADED_DOCUMENTS);
-        Collections.sort(uploadedDocuments, Comparator.nullsLast((e1, e2) -> e2.getGeneralUploadedDocument()
-            .getGeneralDocumentUploadDateTime()
-            .compareTo(e1.getGeneralUploadedDocument().getGeneralDocumentUploadDateTime())));
+        uploadedDocuments.sort(Comparator.comparing(
+            GeneralUploadedDocumentData::getGeneralUploadedDocument, Comparator.comparing(
+                GeneralUploadedDocument::getGeneralDocumentUploadDateTime, Comparator.nullsLast(
+                    Comparator.reverseOrder()))));
         caseData.put(GENERAL_UPLOADED_DOCUMENTS, uploadedDocuments);
         return AboutToStartOrSubmitCallbackResponse
             .builder()
