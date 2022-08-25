@@ -19,6 +19,6 @@ public class GeneralApplicationRejectionLetterDetails implements ParentLetterDet
     private String reference;
     private String generalApplicationRejectionReason;
     private String letterDate;
-    private String applicantLName;
-    private String respondentLName;
+    private String applicantName;
+    private String respondentName;
 }

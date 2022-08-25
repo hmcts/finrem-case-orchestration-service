@@ -93,6 +93,9 @@ public class GeneralApplicationRejectionLetterGeneratorTest {
         caseData.put(RESP_SOLICITOR_REFERENCE, "testRespSolReference");
         caseDetails = CaseDetails.builder().id(1234567890L).data(caseData).build();
 
+        when(caseDataService.buildFullApplicantName(caseDetails)).thenReturn("Poor Guy");
+        when(caseDataService.buildFullRespondentName(caseDetails)).thenReturn("Contested Respondent");
+
         generalApplicationRejectionLetterGenerator =
             new GeneralApplicationRejectionLetterGenerator(new ObjectMapper(), caseDataService, documentHelper);
     }
@@ -100,7 +103,6 @@ public class GeneralApplicationRejectionLetterGeneratorTest {
     @Test
     public void givenApplicantRecipient_whenGenerateGeneralApplicationRejectionLetterDetails_thenGenerateCorrectDetails() {
         caseDetails.getData().put(APPLICANT_REPRESENTED, NO_VALUE);
-        when(caseDataService.buildFullApplicantName(caseDetails)).thenReturn("Poor Guy");
         when(documentHelper.formatAddressForLetterPrinting(any())).thenReturn("50 Applicant Street");
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
 
@@ -113,8 +115,8 @@ public class GeneralApplicationRejectionLetterGeneratorTest {
         assertThat(letterDetails.getReference(), is(""));
         assertThat(letterDetails.getCourtDetails().get(COURT_DETAILS_NAME_KEY), is("Central Family Court"));
         assertThat(letterDetails.getDivorceCaseNumber(), is("EZ17D80124"));
-        assertThat(letterDetails.getApplicantLName(), is("Guy"));
-        assertThat(letterDetails.getRespondentLName(), is("Respondent"));
+        assertThat(letterDetails.getApplicantName(), is("Poor Guy"));
+        assertThat(letterDetails.getRespondentName(), is("Contested Respondent"));
         assertThat(letterDetails.getCaseNumber(), is("1234567890"));
         assertThat(letterDetails.getGeneralApplicationRejectionReason(), is("Test rejection reason"));
     }
@@ -139,7 +141,6 @@ public class GeneralApplicationRejectionLetterGeneratorTest {
     public void givenRespondentRecipient_whenGenerateGeneralApplicationRejectionLetterDetails_thenGenerateCorrectDetails() {
         caseDetails.getData().put(CONTESTED_RESPONDENT_REPRESENTED, NO_VALUE);
 
-        when(caseDataService.buildFullRespondentName(caseDetails)).thenReturn("Contested Respondent");
         when(documentHelper.formatAddressForLetterPrinting(any())).thenReturn("50 Respondent Street");
         when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
 

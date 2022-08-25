@@ -18,9 +18,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REJECT_REASON;
@@ -46,8 +44,8 @@ public class GeneralApplicationRejectionLetterGenerator extends BaseContestedLet
         try {
             return GeneralApplicationRejectionLetterDetails.builder()
                 .divorceCaseNumber(Objects.toString(caseDetails.getData().get(DIVORCE_CASE_NUMBER), ""))
-                .applicantLName(caseDetails.getData().get(APPLICANT_LAST_NAME).toString())
-                .respondentLName(caseDetails.getData().get(CONTESTED_RESPONDENT_LAST_NAME).toString())
+                .applicantName(caseDataService.buildFullApplicantName(caseDetails))
+                .respondentName(caseDataService.buildFullRespondentName(caseDetails))
                 .addressee(getAddressee(caseDetails, recipient))
                 .caseNumber(caseDetails.getId().toString())
                 .letterDate(DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()))

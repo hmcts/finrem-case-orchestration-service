@@ -80,9 +80,9 @@ public class RejectGeneralApplicationDocumentServiceTest extends BaseServiceTest
         Map<String, Object> templateMapData = getCaseDataFromCaptor();
 
         assertThat(templateMapData.get("reference"), is("testLetterDetailsReference"));
-        assertThat(templateMapData.get("applicantLName"), is("testAppLastName"));
+        assertThat(templateMapData.get("applicantName"), is("testAppName"));
         assertThat(templateMapData.get("caseNumber"), is("testCaseNumber"));
-        assertThat(templateMapData.get("respondentLName"), is("testRespLastName"));
+        assertThat(templateMapData.get("respondentName"), is("testRespName"));
     }
 
     private CaseDocument expectedCaseDocument() {
@@ -97,8 +97,8 @@ public class RejectGeneralApplicationDocumentServiceTest extends BaseServiceTest
         return GeneralApplicationRejectionLetterDetails.builder()
             .reference("testLetterDetailsReference")
             .caseNumber("testCaseNumber")
-            .applicantLName("testAppLastName")
-            .respondentLName("testRespLastName")
+            .applicantName("testAppName")
+            .respondentName("testRespName")
             .build();
     }
 
