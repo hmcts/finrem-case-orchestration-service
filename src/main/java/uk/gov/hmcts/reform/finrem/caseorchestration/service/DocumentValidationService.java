@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse.DocumentValidationResponseBuilder;
 

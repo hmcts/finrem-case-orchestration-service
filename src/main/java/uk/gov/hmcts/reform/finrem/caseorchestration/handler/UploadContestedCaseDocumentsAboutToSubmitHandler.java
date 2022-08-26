@@ -12,7 +12,9 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.EventType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.UploadCaseDocumentCollection;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -32,7 +34,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler implements Callbac
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest, String userAuthorisation) {
 
         FinremCaseData caseData = callbackRequest.getCaseDetails().getCaseData();
-        List<UploadCaseDocumentCollection> uploadedDocuments = caseData.getUploadCaseDocumentWrapper().getUploadCaseDocument();
+        List<UploadCaseDocumentCollection> uploadedDocuments =
+            Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getUploadCaseDocument()).orElse(new ArrayList<>());
         caseDocumentHandlers.stream().forEach(h -> h.handle(uploadedDocuments, caseData));
         caseData.getUploadCaseDocumentWrapper().setUploadCaseDocument(uploadedDocuments);
         return AboutToStartOrSubmitCallbackResponse

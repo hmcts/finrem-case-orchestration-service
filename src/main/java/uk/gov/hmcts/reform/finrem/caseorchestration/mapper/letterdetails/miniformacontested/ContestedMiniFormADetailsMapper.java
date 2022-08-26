@@ -20,7 +20,7 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.CourtListWrapper;
 import uk.gov.hmcts.reform.finrem.ccd.domain.wrapper.MiamWrapper;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -150,7 +150,7 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
         List<NatureApplication> natureApplicationList = caseData.getNatureApplicationWrapper()
             .getNatureOfApplicationChecklist();
 
-        return Optional.ofNullable(natureApplicationList).orElse(new ArrayList<>()).stream()
+        return Optional.ofNullable(natureApplicationList).orElse(Collections.emptyList()).stream()
             .map(NatureApplication::getText)
             .collect(Collectors.toList());
     }
@@ -158,7 +158,7 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
     private List<String> getBenefitPaymentChecklist(FinremCaseData caseData) {
         List<BenefitPayment> benefitPaymentChecklist = caseData.getBenefitPaymentChecklist();
 
-        return Optional.ofNullable(benefitPaymentChecklist).orElse(new ArrayList<>()).stream()
+        return Optional.ofNullable(benefitPaymentChecklist).orElse(Collections.emptyList()).stream()
             .map(BenefitPayment::getText)
             .collect(Collectors.toList());
     }
@@ -166,7 +166,7 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
     private List<String> getMiamExemptionsChecklist(FinremCaseData caseData) {
         List<MiamExemption> miamExemptions = caseData.getMiamWrapper().getMiamExemptionsChecklist();
 
-        return Optional.ofNullable(miamExemptions).orElse(new ArrayList<>()).stream()
+        return Optional.ofNullable(miamExemptions).orElse(Collections.emptyList()).stream()
             .map(MiamExemption::getText)
             .collect(Collectors.toList());
     }
@@ -174,7 +174,7 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
     private List<String> getMiamDomesticViolenceChecklist(FinremCaseData caseData) {
         List<MiamDomesticViolence> domesticViolenceCheklist = caseData.getMiamWrapper().getMiamDomesticViolenceChecklist();
 
-        return Optional.ofNullable(domesticViolenceCheklist).orElse(new ArrayList<>()).stream()
+        return Optional.ofNullable(domesticViolenceCheklist).orElse(Collections.emptyList()).stream()
             .map(MiamDomesticViolence::getText)
             .collect(Collectors.toList());
     }
@@ -182,12 +182,12 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
     private List<String> getMiamUrgencyReasonsChecklist(FinremCaseData caseData) {
         List<MiamUrgencyReason> miamUrgencyReasons = caseData.getMiamWrapper().getMiamUrgencyReasonChecklist();
 
-        return Optional.ofNullable(miamUrgencyReasons).orElse(new ArrayList<>()).stream()
+        return Optional.ofNullable(miamUrgencyReasons).orElse(Collections.emptyList()).stream()
             .map(MiamUrgencyReason::getText)
             .collect(Collectors.toList());
     }
 
     private List<PropertyAdjustmentOrderCollection> getPropertyAdjustmentOrderDetailCollection(FinremCaseData caseData) {
-        return Optional.ofNullable(caseData.getPropertyAdjustmentOrderDetail()).orElse(new ArrayList<>());
+        return Optional.ofNullable(caseData.getPropertyAdjustmentOrderDetail()).orElse(Collections.emptyList());
     }
 }

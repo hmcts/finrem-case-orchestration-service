@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -124,7 +125,7 @@ public class SendOrderContestedAboutToSubmitHandler implements CallbackHandler {
         }
 
         List<Document> hearingOrderOtherDocs = Optional.ofNullable(caseData.getHearingOrderOtherDocuments())
-            .orElse(new ArrayList<>()).stream()
+            .orElse(Collections.emptyList()).stream()
             .map(DocumentCollection::getValue)
             .collect(Collectors.toList());
 

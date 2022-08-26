@@ -47,7 +47,7 @@ public class CourtDetailsMapper {
         }
 
         try {
-            return convertToFrcCourtDetails(initialisedCourtField, courtListWrapper);
+            return convertToFrcCourtDetails(initialisedCourtField.get(0), courtListWrapper);
         } catch (Exception exception) {
             throw new IllegalStateException("Could not access court list object field");
         }
@@ -64,12 +64,12 @@ public class CourtDetailsMapper {
             .collect(toList());
     }
 
-    private FrcCourtDetails convertToFrcCourtDetails(List<Field> initialisedCourtField,
+    private FrcCourtDetails convertToFrcCourtDetails(Field initialisedCourtField,
                                                      CourtListWrapper courtListWrapper) throws Exception {
         Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(),
             TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, Object.class));
 
-        CourtList selectedCourtField = (CourtList) initialisedCourtField.get(0).get(courtListWrapper);
+        CourtList selectedCourtField = (CourtList) initialisedCourtField.get(courtListWrapper);
         Object selectedCourtDetailsObject = courtDetailsMap.get(nullToEmpty(selectedCourtField.getSelectedCourtId()));
 
         if (selectedCourtDetailsObject == null) {

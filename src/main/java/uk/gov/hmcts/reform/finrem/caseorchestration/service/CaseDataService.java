@@ -55,7 +55,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Service
 @Slf4j
 @RequiredArgsConstructor
-//Todo: If method from this class is required, please check and if needed add to the FinremCaseData object in finrem-common
+//If method from this class is required, please check and if needed add to the FinremCaseData object in finrem-common
 @Deprecated
 public class CaseDataService {
 

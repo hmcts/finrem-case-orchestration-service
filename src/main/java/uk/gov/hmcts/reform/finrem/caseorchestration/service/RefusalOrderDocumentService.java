@@ -19,7 +19,7 @@ import uk.gov.hmcts.reform.finrem.ccd.domain.UploadOrderCollection;
 import uk.gov.hmcts.reform.finrem.ccd.domain.UploadOrderDocumentType;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -124,7 +124,7 @@ public class RefusalOrderDocumentService {
                 collection -> collection.addAll(orderRefusalNew),
                 () -> caseData.setOrderRefusalCollection(orderRefusalNew));
 
-            caseData.setOrderRefusalCollectionNew(new ArrayList<>());
+            caseData.setOrderRefusalCollectionNew(Collections.emptyList());
         }
 
         return caseData;

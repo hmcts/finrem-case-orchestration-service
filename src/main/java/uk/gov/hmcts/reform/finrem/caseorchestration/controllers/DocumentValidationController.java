@@ -31,7 +31,6 @@ import java.util.Optional;
 import static com.google.common.base.Strings.nullToEmpty;
 import static java.util.Objects.nonNull;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
 
