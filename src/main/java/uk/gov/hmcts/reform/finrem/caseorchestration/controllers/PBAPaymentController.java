@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.OldAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
@@ -64,9 +64,9 @@ public class PBAPaymentController extends BaseController {
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/pba-payment", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Handles PBA Payments for Consented and Contested Journeys")
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> pbaPayment(
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> pbaPayment(
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
-        @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callbackRequest) {
+        @NotNull @RequestBody @Parameter(description = "CaseData") OldCallbackRequest callbackRequest) {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request for PBA payment for consented for Case ID: {}", caseDetails.getId());
@@ -92,15 +92,15 @@ public class PBAPaymentController extends BaseController {
             mapOfCaseData.put(STATE, AWAITING_HWF_DECISION.toString());
         }
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(mapOfCaseData).build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().data(mapOfCaseData).build());
     }
 
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/assign-applicant-solicitor", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Handles assign applicant solicitor call")
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> applicantOrganisationCheck(
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> applicantOrganisationCheck(
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
-        @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callbackRequest) {
+        @NotNull @RequestBody @Parameter(description = "CaseData") OldCallbackRequest callbackRequest) {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request for assign applicant solicitor for Case ID: {}", caseDetails.getId());
@@ -146,7 +146,7 @@ public class PBAPaymentController extends BaseController {
 
         mapOfCaseData.put(SUBMIT_CASE_DATE, LocalDate.now());
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(mapOfCaseData).build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().data(mapOfCaseData).build());
     }
 
     private String getApplicantOrgId(CaseDetails caseDetails) {
@@ -162,11 +162,11 @@ public class PBAPaymentController extends BaseController {
         return null;
     }
 
-    private ResponseEntity<AboutToStartOrSubmitCallbackResponse> assignCaseAccessFailure(CaseDetails caseDetails, List<String> errorDetails) {
+    private ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> assignCaseAccessFailure(CaseDetails caseDetails, List<String> errorDetails) {
         log.info("Assigning case access failed for Case ID: {}", caseDetails.getId());
 
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder()
             .errors(ImmutableList.<String>builder()
                 .addAll(errorDetails != null ? errorDetails : emptyList())
                 .add("Failed to assign applicant solicitor to case, please ensure you have selected the correct applicant organisation on case")
@@ -175,18 +175,18 @@ public class PBAPaymentController extends BaseController {
     }
 
     private void feeLookup(@RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
-                           @RequestBody CallbackRequest callbackRequest, Map<String, Object> caseData) {
-        ResponseEntity<AboutToStartOrSubmitCallbackResponse> feeResponse = new FeeLookupController(feeService, caseDataService)
+                           @RequestBody OldCallbackRequest callbackRequest, Map<String, Object> caseData) {
+        ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> feeResponse = new FeeLookupController(feeService, caseDataService)
             .feeLookup(authToken, callbackRequest);
         caseData.put(ORDER_SUMMARY, Objects.requireNonNull(feeResponse.getBody()).getData().get(ORDER_SUMMARY));
         caseData.put(AMOUNT_TO_PAY, Objects.requireNonNull(feeResponse.getBody()).getData().get(AMOUNT_TO_PAY));
     }
 
-    private ResponseEntity<AboutToStartOrSubmitCallbackResponse> paymentFailure(Map<String, Object> caseData, PaymentResponse paymentResponse) {
+    private ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> paymentFailure(Map<String, Object> caseData, PaymentResponse paymentResponse) {
         String paymentError = paymentResponse.getPaymentError();
         log.info("Payment by PBA number {} failed, payment error : {} ", caseData.get(PBA_NUMBER), paymentResponse.getPaymentError());
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder()
             .errors(ImmutableList.of(paymentError))
             .build());
     }

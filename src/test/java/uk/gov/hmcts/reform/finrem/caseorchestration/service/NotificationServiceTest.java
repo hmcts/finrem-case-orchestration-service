@@ -13,14 +13,15 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.match.MockRestRequestMatchers;
 import org.springframework.test.web.client.response.MockRestResponseCreators;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.ccd.domain.InterimHearingCollection;
@@ -103,8 +104,8 @@ public class NotificationServiceTest extends BaseServiceTest {
     @SpyBean
     private NotificationServiceConfiguration notificationServiceConfiguration;
 
-    private CallbackRequest callbackRequest;
-    private uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest newCallbackRequest;
+    private OldCallbackRequest callbackRequest;
+    private CallbackRequest newCallbackRequest;
 
     private MockRestServiceServer mockServer;
 

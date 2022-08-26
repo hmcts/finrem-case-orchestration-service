@@ -10,7 +10,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 import uk.gov.hmcts.reform.finrem.functional.util.FunctionalTestUtils;
 
@@ -30,7 +30,7 @@ public class RejectedOrderDocumentTest extends IntegrationTestBase {
     private FunctionalTestUtils functionalTestUtils;
 
     private ObjectMapper objectMapper = new ObjectMapper();
-    private CallbackRequest callbackRequest = null;
+    private OldCallbackRequest callbackRequest = null;
 
     private static final String consentedDir = "/json/consented/";
 
@@ -50,7 +50,7 @@ public class RejectedOrderDocumentTest extends IntegrationTestBase {
         caseDetails.remove(ORDER_REFUSAL_PREVIEW_COLLECTION);
 
         try {
-            callbackRequest = objectMapper.readValue(documentContext.jsonString(), CallbackRequest.class);
+            callbackRequest = objectMapper.readValue(documentContext.jsonString(), OldCallbackRequest.class);
         } catch (IOException e) {
             throw new RuntimeException("Error generating CallbackRequest from rejected-consent-order.json ");
         }
@@ -71,7 +71,7 @@ public class RejectedOrderDocumentTest extends IntegrationTestBase {
         int uploadOrdersBeforeCount = ((List) documentContext.read("$.case_details.case_data.uploadOrder")).size();
 
         try {
-            callbackRequest = objectMapper.readValue(documentContext.jsonString(), CallbackRequest.class);
+            callbackRequest = objectMapper.readValue(documentContext.jsonString(), OldCallbackRequest.class);
         } catch (IOException e) {
             throw new RuntimeException("Error generating CallbackRequest from rejected-consent-order.json ");
         }

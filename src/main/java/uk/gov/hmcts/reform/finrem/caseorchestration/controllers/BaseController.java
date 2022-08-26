@@ -1,7 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
 
 import java.util.Map;
 import java.util.Objects;
@@ -14,7 +15,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public abstract class BaseController {
 
     @Deprecated
-    public void validateCaseData(CallbackRequest callbackRequest) {
+    public void validateCaseData(OldCallbackRequest callbackRequest) {
         if (callbackRequest == null
             || callbackRequest.getCaseDetails() == null
             || callbackRequest.getCaseDetails().getData() == null) {
@@ -22,7 +23,7 @@ public abstract class BaseController {
         }
     }
 
-    public void validateCaseData(uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest) {
+    public void validateCaseData(CallbackRequest callbackRequest) {
         if (callbackRequest == null
             || callbackRequest.getCaseDetails() == null
             || callbackRequest.getCaseDetails().getCaseData() == null) {

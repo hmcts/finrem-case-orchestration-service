@@ -10,6 +10,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import java.util.HashMap;
@@ -83,7 +84,7 @@ public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
         caseDetails.getCaseData().setOutOfFamilyCourtResolution(newDocument());
 
         return objectMapper.convertValue(
-            uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.builder()
+            AboutToStartOrSubmitCallbackResponse.builder()
                 .warnings(ImmutableList.of(DATE_BETWEEN_6_AND_10_WEEKS))
                 .data(caseDetails.getCaseData()).build(),
             TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, Object.class));

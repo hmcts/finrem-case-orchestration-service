@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.ResourceUtils;
 import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.functional.TestContextConfiguration;
 import uk.gov.hmcts.reform.finrem.functional.idam.IdamUtils;
 
@@ -162,7 +162,7 @@ public class FunctionalTestUtils {
         return jsonPath;
     }
 
-    public Response getResponseData(String url, CallbackRequest callbackRequest) {
+    public Response getResponseData(String url, OldCallbackRequest callbackRequest) {
         return SerenityRest.given()
             .relaxedHTTPSValidation()
             .headers(getHeader())

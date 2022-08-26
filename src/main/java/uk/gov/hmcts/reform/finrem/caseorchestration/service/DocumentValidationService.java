@@ -3,10 +3,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse.DocumentValidationResponseBuilder;
@@ -40,7 +40,7 @@ public class DocumentValidationService {
         return nonNull(documentValidationResponse.getErrors());
     }
 
-    public DocumentValidationResponse validateDocument(CallbackRequest callbackRequest, String field, String authToken) {
+    public DocumentValidationResponse validateDocument(OldCallbackRequest callbackRequest, String field, String authToken) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
@@ -66,7 +66,7 @@ public class DocumentValidationService {
             .build();
     }
 
-    private boolean respondToOrderDocument(CallbackRequest callbackRequest) {
+    private boolean respondToOrderDocument(OldCallbackRequest callbackRequest) {
         return FR_RESPOND_TO_ORDER.equalsIgnoreCase(callbackRequest.getEventId());
     }
 
@@ -92,16 +92,16 @@ public class DocumentValidationService {
         return PENSION_DOCS_COLLECTION.equalsIgnoreCase(field);
     }
 
-    private boolean amendConsentOrder(CallbackRequest callbackRequest) {
+    private boolean amendConsentOrder(OldCallbackRequest callbackRequest) {
         return FR_AMENDED_CONSENT_ORDER.equalsIgnoreCase(callbackRequest.getEventId());
     }
 
-    private boolean consentInContestedEvent(CallbackRequest callbackRequest) {
+    private boolean consentInContestedEvent(OldCallbackRequest callbackRequest) {
         return FR_CONSENT_ORDER.equalsIgnoreCase(callbackRequest.getEventId())
             || FR_RESPOND_TO_CONSENT_ORDER.equalsIgnoreCase(callbackRequest.getEventId());
     }
 
-    private boolean createOrAmendApplication(CallbackRequest callbackRequest) {
+    private boolean createOrAmendApplication(OldCallbackRequest callbackRequest) {
         return FR_SOLICITOR_CREATE.equalsIgnoreCase(callbackRequest.getEventId())
             || FR_AMEND_APPLICATION_DETAILS.equalsIgnoreCase(callbackRequest.getEventId());
     }

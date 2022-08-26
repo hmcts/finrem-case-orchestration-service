@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentClientDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ClientDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
 
@@ -25,7 +25,7 @@ public interface DocumentClient {
         path = "/version/1/generate-pdf",
         headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
     )
-    DocumentClientDocument generatePdf(
+    ClientDocument generatePdf(
         @RequestBody DocumentGenerationRequest generateDocumentRequest,
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
 
@@ -50,23 +50,23 @@ public interface DocumentClient {
         path = "/version/1/stamp-document",
         headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
     )
-    DocumentClientDocument stampDocument(
-        @RequestBody DocumentClientDocument document,
+    ClientDocument stampDocument(
+        @RequestBody ClientDocument document,
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
 
     @PostMapping(
         path = "/version/1/annex-stamp-document",
         headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
     )
-    DocumentClientDocument annexStampDocument(
-        @RequestBody DocumentClientDocument document,
+    ClientDocument annexStampDocument(
+        @RequestBody ClientDocument document,
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
 
     @PostMapping(
         path = "/version/1/convert-to-pdf",
         headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
     )
-    DocumentClientDocument convertDocumentToPdf(
+    ClientDocument convertDocumentToPdf(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken,
-        @RequestBody DocumentClientDocument document);
+        @RequestBody ClientDocument document);
 }

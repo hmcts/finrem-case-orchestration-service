@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.OldAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 
 import java.util.Map;
 
@@ -29,9 +29,9 @@ public class RemoveCaseDataStateController extends BaseController {
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/remove-case-data-state", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Remove state from a given case")
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> removeCaseDataState(
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> removeCaseDataState(
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
-        @RequestBody CallbackRequest callbackRequest) {
+        @RequestBody OldCallbackRequest callbackRequest) {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request for removing case state for Case ID: {}", caseDetails.getId());
@@ -39,6 +39,6 @@ public class RemoveCaseDataStateController extends BaseController {
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = caseDetails.getData();
         caseData.remove(STATE);
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 }

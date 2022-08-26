@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.OldAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
@@ -57,25 +57,25 @@ public class CaseDataController extends BaseController {
 
     @PostMapping(path = "/consented/set-defaults", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(description = "Set default values for consented journey")
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setConsentedDefaultValues(
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> setConsentedDefaultValues(
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken,
-        @RequestBody final CallbackRequest callbackRequest) {
+        @RequestBody final OldCallbackRequest callbackRequest) {
         log.info("Setting default values for consented journey.");
         setDefaultValues(callbackRequest, authToken);
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build());
     }
 
     @PostMapping(path = "/contested/set-defaults", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(description = "Set default values for contested journey")
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setContestedDefaultValues(
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> setContestedDefaultValues(
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken,
-        @RequestBody final CallbackRequest callbackRequest) {
+        @RequestBody final OldCallbackRequest callbackRequest) {
         log.info("Setting default values for contested journey.");
         setDefaultValues(callbackRequest, authToken);
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build());
     }
 
-    private void setDefaultValues(CallbackRequest callbackRequest, String authToken) {
+    private void setDefaultValues(OldCallbackRequest callbackRequest, String authToken) {
         validateCaseData(callbackRequest);
         final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         setData(authToken, caseData);
@@ -87,44 +87,44 @@ public class CaseDataController extends BaseController {
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(description = "Set Financial Remedies Court details")
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setFinancialRemediesCourtDetails(
-        @RequestBody final CallbackRequest callbackRequest) {
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> setFinancialRemediesCourtDetails(
+        @RequestBody final OldCallbackRequest callbackRequest) {
         log.info("Setting Financial Remedies Court details.");
         caseDataService.setFinancialRemediesCourtDetails(callbackRequest.getCaseDetails());
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build());
     }
 
     @PostMapping(path = "/contested/set-paper-case-defaults",
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(description = "Set default values for contested paper case journey")
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setContestedPaperCaseDefaultValues(
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> setContestedPaperCaseDefaultValues(
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken,
-        @RequestBody final CallbackRequest callbackRequest) {
+        @RequestBody final OldCallbackRequest callbackRequest) {
         log.info("Setting default values for contested paper case journey.");
         validateCaseData(callbackRequest);
         final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         setData(authToken, caseData);
         setPaperCaseData(caseData);
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
     @PostMapping(path = "/contested/set-paper-case-org-policy",
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(description = "Set default values for contested paper case journey")
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setContestedPaperCaseOrganisationPolicy(
-        @RequestBody final CallbackRequest callbackRequest) {
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> setContestedPaperCaseOrganisationPolicy(
+        @RequestBody final OldCallbackRequest callbackRequest) {
         log.info("Setting default values for contested paper case journey.");
         validateCaseData(callbackRequest);
         setOrganisationPolicyForNewPaperCase(callbackRequest.getCaseDetails());
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build());
     }
 
     @PostMapping(path = "/move-collection/{source}/to/{destination}", consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> moveValues(
-        @RequestBody final CallbackRequest callbackRequest,
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> moveValues(
+        @RequestBody final OldCallbackRequest callbackRequest,
         @PathVariable("source") final String source,
         @PathVariable("destination") final String destination) {
 
@@ -133,32 +133,32 @@ public class CaseDataController extends BaseController {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         caseDataService.moveCollection(caseData, source, destination);
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
     @PostMapping(path = "/default-values", consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(description = "Default application state")
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> defaultValue(
-        @RequestBody final CallbackRequest callbackRequest) {
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> defaultValue(
+        @RequestBody final OldCallbackRequest callbackRequest) {
 
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         caseData.putIfAbsent(CIVIL_PARTNERSHIP, NO_VALUE);
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
     @PostMapping(path = "/org-policies", consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(description = "Add empty org policies for both parties")
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setOrgPolicies(
-        @RequestBody CallbackRequest callbackRequest
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> setOrgPolicies(
+        @RequestBody OldCallbackRequest callbackRequest
     ) {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         if (featureToggleService.isSolicitorNoticeOfChangeEnabled()) {
             addDefaultChangeOrganisationRequest(caseData);
         }
         addOrganisationPoliciesIfPartiesNotRepresented(caseData);
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
     private void addDefaultChangeOrganisationRequest(Map<String, Object> caseData) {

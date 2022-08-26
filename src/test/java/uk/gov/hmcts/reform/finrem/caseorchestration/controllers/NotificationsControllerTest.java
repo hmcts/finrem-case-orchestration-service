@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotific
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.ccd.domain.DirectionOrderCollection;
@@ -874,8 +875,8 @@ public class NotificationsControllerTest extends BaseControllerTest {
         verify(paperNotificationService, times(1)).printUpdateFrcInformationNotification(any(), any());
     }
 
-    private uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest createNewCallbackRequestWithFinalOrder() {
-        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest = buildNewCallbackRequest();
+    private CallbackRequest createNewCallbackRequestWithFinalOrder() {
+        CallbackRequest callbackRequest = buildNewCallbackRequest();
 
         ArrayList<DirectionOrderCollection> finalOrderCollection = new ArrayList<>();
         finalOrderCollection.add(DirectionOrderCollection.builder()
@@ -889,8 +890,8 @@ public class NotificationsControllerTest extends BaseControllerTest {
         return callbackRequest;
     }
 
-    private CallbackRequest createCallbackRequestWithFinalOrder() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
+    private OldCallbackRequest createCallbackRequestWithFinalOrder() {
+        OldCallbackRequest callbackRequest = buildCallbackRequest();
 
         ArrayList<HearingOrderCollectionData> finalOrderCollection = new ArrayList<>();
         finalOrderCollection.add(HearingOrderCollectionData.builder()
@@ -918,7 +919,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().caseType(CaseType.CONSENTED).id(123L)
                 .caseData(caseData).build();
         return objectMapper.writeValueAsString(
-            uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest.builder()
+            CallbackRequest.builder()
                 .eventType(EventType.PREPARE_FOR_HEARING)
                 .caseDetails(caseDetails)
                 .build());
@@ -933,7 +934,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().caseType(CaseType.CONSENTED).id(123L)
                 .caseData(caseData).build();
         return objectMapper.writeValueAsString(
-            uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest.builder()
+            CallbackRequest.builder()
                 .eventType(EventType.PREPARE_FOR_HEARING)
                 .caseDetails(caseDetails)
                 .build());
@@ -948,7 +949,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().caseType(CaseType.CONTESTED).id(123L)
                 .caseData(caseData).build();
         return objectMapper.writeValueAsString(
-            uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest.builder()
+            CallbackRequest.builder()
                 .eventType(EventType.PREPARE_FOR_HEARING)
                 .caseDetails(caseDetails)
                 .caseDetailsBefore(caseDetails)
@@ -964,7 +965,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().caseType(CaseType.CONTESTED).id(123L)
                 .caseData(caseData).build();
         return objectMapper.writeValueAsString(
-            uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest.builder()
+            CallbackRequest.builder()
                 .eventType(EventType.PREPARE_FOR_HEARING)
                 .caseDetails(caseDetails)
                 .build());

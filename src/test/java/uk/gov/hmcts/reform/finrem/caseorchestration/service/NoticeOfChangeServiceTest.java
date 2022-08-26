@@ -6,9 +6,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
@@ -51,7 +51,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
 
     @MockBean private RemovedSolicitorService removedSolicitorService;
 
-    private CallbackRequest callbackRequest;
+    private OldCallbackRequest callbackRequest;
 
     private final Function<Map<String, Object>, List<Element<RepresentationUpdate>>> getFirstChangeElement =
         this::convertToUpdateHistory;
@@ -65,7 +65,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
     private void setUpCaseDetails(String fileName) throws Exception {
         try (InputStream resourceAsStream =
                  getClass().getResourceAsStream(PATH + fileName)) {
-            callbackRequest = mapper.readValue(resourceAsStream, CallbackRequest.class);
+            callbackRequest = mapper.readValue(resourceAsStream, OldCallbackRequest.class);
         }
     }
 
@@ -86,9 +86,9 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
         try (InputStream resourceAsStream = getClass()
             .getResourceAsStream(PATH + "change-of-representatives-before.json")) {
 
-            CallbackRequest actualRequest = mapper.readValue(resourceAsStream, CallbackRequest.class);
+            OldCallbackRequest actualRequest = mapper.readValue(resourceAsStream, OldCallbackRequest.class);
             InputStream is = getClass().getResourceAsStream(PATH + "change-of-representatives-original-data.json");
-            CaseDetails originalDetails = mapper.readValue(is, CallbackRequest.class).getCaseDetails();
+            CaseDetails originalDetails = mapper.readValue(is, OldCallbackRequest.class).getCaseDetails();
 
             Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(),
                 authTokenGenerator.generate(),
@@ -120,9 +120,9 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             .build());
 
         try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH + "change-of-representatives.json")) {
-            CallbackRequest actualRequest = mapper.readValue(resourceAsStream, CallbackRequest.class);
+            OldCallbackRequest actualRequest = mapper.readValue(resourceAsStream, OldCallbackRequest.class);
             InputStream is = getClass().getResourceAsStream(PATH + "change-of-reps-populated-original.json");
-            CaseDetails originalDetails = mapper.readValue(is, CallbackRequest.class).getCaseDetails();
+            CaseDetails originalDetails = mapper.readValue(is, OldCallbackRequest.class).getCaseDetails();
             Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(),
                 authTokenGenerator.generate(),
                 originalDetails);
@@ -157,9 +157,9 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH
             + "consented-change-of-reps-before.json")) {
 
-            CallbackRequest actualRequest = mapper.readValue(resourceAsStream, CallbackRequest.class);
+            OldCallbackRequest actualRequest = mapper.readValue(resourceAsStream, OldCallbackRequest.class);
             InputStream is = getClass().getResourceAsStream(PATH + "consented-change-of-reps-original.json");
-            CaseDetails originalDetails = mapper.readValue(is, CallbackRequest.class).getCaseDetails();
+            CaseDetails originalDetails = mapper.readValue(is, OldCallbackRequest.class).getCaseDetails();
             Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(),
                 authTokenGenerator.generate(), originalDetails);
             RepresentationUpdate actualChange = getFirstChangeElement.apply(caseData).get(0).getValue();
@@ -189,9 +189,9 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
 
         when(mockCaseDataService.isConsentedApplication(any())).thenReturn(true);
         try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH + "consented-change-of-reps.json")) {
-            CallbackRequest actualRequest = mapper.readValue(resourceAsStream, CallbackRequest.class);
+            OldCallbackRequest actualRequest = mapper.readValue(resourceAsStream, OldCallbackRequest.class);
             InputStream is = getClass().getResourceAsStream(PATH + "consented-change-of-reps-original.json");
-            CaseDetails originalDetails = mapper.readValue(is, CallbackRequest.class).getCaseDetails();
+            CaseDetails originalDetails = mapper.readValue(is, OldCallbackRequest.class).getCaseDetails();
             Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(),
                 authTokenGenerator.generate(), originalDetails);
             List<Element<RepresentationUpdate>> actual = getFirstChangeElement.apply(caseData);
@@ -224,10 +224,10 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
                 .build());
 
         try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH + "change-of-reps-removing-before.json")) {
-            CallbackRequest actualRequest = mapper.readValue(resourceAsStream, CallbackRequest.class);
+            OldCallbackRequest actualRequest = mapper.readValue(resourceAsStream, OldCallbackRequest.class);
 
             InputStream is = getClass().getResourceAsStream(PATH + "change-of-reps-removing-original.json");
-            CaseDetails originalDetails = mapper.readValue(is, CallbackRequest.class).getCaseDetails();
+            CaseDetails originalDetails = mapper.readValue(is, OldCallbackRequest.class).getCaseDetails();
             Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(),
                 authTokenGenerator.generate(),
                 originalDetails);
@@ -269,9 +269,9 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
 
         try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH
             + "change-of-reps-replacing-before.json")) {
-            CallbackRequest actualRequest = mapper.readValue(resourceAsStream, CallbackRequest.class);
+            OldCallbackRequest actualRequest = mapper.readValue(resourceAsStream, OldCallbackRequest.class);
             InputStream is = getClass().getResourceAsStream(PATH + "change-of-reps-replacing-original.json");
-            CaseDetails originalDetails = mapper.readValue(is, CallbackRequest.class).getCaseDetails();
+            CaseDetails originalDetails = mapper.readValue(is, OldCallbackRequest.class).getCaseDetails();
             Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(),
                 authTokenGenerator.generate(),
                 originalDetails);
@@ -307,10 +307,10 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
 
         try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH
             + "change-of-representatives-respondent-before.json")) {
-            CallbackRequest actualRequest = mapper.readValue(resourceAsStream, CallbackRequest.class);
+            OldCallbackRequest actualRequest = mapper.readValue(resourceAsStream, OldCallbackRequest.class);
             InputStream is = getClass().getResourceAsStream(PATH
                 + "change-of-representatives-respondent-original.json");
-            CaseDetails originalDetails = mapper.readValue(is, CallbackRequest.class).getCaseDetails();
+            CaseDetails originalDetails = mapper.readValue(is, OldCallbackRequest.class).getCaseDetails();
 
             Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(),
                 authTokenGenerator.generate(),

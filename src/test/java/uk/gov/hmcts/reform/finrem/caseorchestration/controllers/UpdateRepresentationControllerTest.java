@@ -9,8 +9,8 @@ import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.OldAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
@@ -87,7 +87,7 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
         return when(updateRepresentationService.updateRepresentationAsSolicitor(any(), eq(VALID_AUTH_TOKEN)));
     }
 
-    protected OngoingStubbing<AboutToStartOrSubmitCallbackResponse> whenServiceAssignsCaseAccessValid() {
+    protected OngoingStubbing<OldAboutToStartOrSubmitCallbackResponse> whenServiceAssignsCaseAccessValid() {
         return when(assignCaseAccessService.applyDecision(eq(VALID_AUTH_TOKEN), any()));
     }
 
@@ -105,7 +105,7 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
         objectMapper.registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         InputStream resourceAsStream = getClass().getResourceAsStream(filename);
-        return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails().getData();
+        return objectMapper.readValue(resourceAsStream, OldCallbackRequest.class).getCaseDetails().getData();
     }
 
     @Test
@@ -113,7 +113,7 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
         doRequestSetUp();
 
         whenServiceUpdatesRepresentationValid().thenReturn(getUpdatedRepresentationData(beforeAppliedFixture()));
-        whenServiceAssignsCaseAccessValid().thenReturn(AboutToStartOrSubmitCallbackResponse
+        whenServiceAssignsCaseAccessValid().thenReturn(OldAboutToStartOrSubmitCallbackResponse
             .builder()
             .data(getUpdatedRepresentationData(jsonFixture()))
             .build());

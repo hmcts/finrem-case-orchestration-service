@@ -7,7 +7,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentClientDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ClientDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 
@@ -52,7 +52,7 @@ public class GenericDocumentService {
 
     @Deprecated
     public CaseDocument annexStampDocument(CaseDocument document, String authorisationToken) {
-        DocumentClientDocument stampedDocument = documentClient.annexStampDocument(toDocumentClientDocument(document), authorisationToken);
+        ClientDocument stampedDocument = documentClient.annexStampDocument(toDocumentClientDocument(document), authorisationToken);
         return toCaseDocumentFromClientResponse(stampedDocument);
     }
 
@@ -85,7 +85,7 @@ public class GenericDocumentService {
 
 
     public CaseDocument stampDocument(CaseDocument document, String authorisationToken) {
-        DocumentClientDocument stampedDocument = documentClient.stampDocument(toDocumentClientDocument(document), authorisationToken);
+        ClientDocument stampedDocument = documentClient.stampDocument(toDocumentClientDocument(document), authorisationToken);
         return toCaseDocumentFromClientResponse(stampedDocument);
     }
 
@@ -102,15 +102,15 @@ public class GenericDocumentService {
         return caseDocument;
     }
 
-    public static Document toDocumentFromClientResponse(DocumentClientDocument documentClientDocument) {
+    public static Document toDocumentFromClientResponse(ClientDocument clientDocument) {
         return Document.builder()
-            .url(documentClientDocument.getUrl())
-            .filename(documentClientDocument.getFileName())
-            .binaryUrl(documentClientDocument.getBinaryUrl())
+            .url(clientDocument.getUrl())
+            .filename(clientDocument.getFileName())
+            .binaryUrl(clientDocument.getBinaryUrl())
             .build();
     }
 
-    public static CaseDocument toCaseDocumentFromClientResponse(DocumentClientDocument document) {
+    public static CaseDocument toCaseDocumentFromClientResponse(ClientDocument document) {
         return CaseDocument.builder()
             .documentUrl(document.getUrl())
             .documentBinaryUrl(document.getBinaryUrl())
@@ -118,16 +118,16 @@ public class GenericDocumentService {
             .build();
     }
 
-    public static DocumentClientDocument toDocumentClientDocument(Document document) {
-        return DocumentClientDocument.builder()
+    public static ClientDocument toDocumentClientDocument(Document document) {
+        return ClientDocument.builder()
             .binaryUrl(document.getBinaryUrl())
             .url(document.getUrl())
             .fileName(document.getFilename())
             .build();
     }
 
-    public static DocumentClientDocument toDocumentClientDocument(CaseDocument document) {
-        return DocumentClientDocument.builder()
+    public static ClientDocument toDocumentClientDocument(CaseDocument document) {
+        return ClientDocument.builder()
             .binaryUrl(document.getDocumentBinaryUrl())
             .fileName(document.getDocumentFilename())
             .url(document.getDocumentUrl())

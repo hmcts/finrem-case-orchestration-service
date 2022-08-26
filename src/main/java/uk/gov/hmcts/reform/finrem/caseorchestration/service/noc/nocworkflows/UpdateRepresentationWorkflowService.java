@@ -6,8 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.OldAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
@@ -39,9 +39,9 @@ public class UpdateRepresentationWorkflowService {
     @Autowired
     private final SystemUserService systemUserService;
 
-    public AboutToStartOrSubmitCallbackResponse handleNoticeOfChangeWorkflow(CaseDetails caseDetails,
-                                                                             String authorisationToken,
-                                                                             CaseDetails originalCaseDetails) {
+    public OldAboutToStartOrSubmitCallbackResponse handleNoticeOfChangeWorkflow(CaseDetails caseDetails,
+                                                                                String authorisationToken,
+                                                                                CaseDetails originalCaseDetails) {
         log.info("Received request to update representation on case with Case ID: {}", caseDetails.getId());
         assignCaseAccessService.findAndRevokeCreatorRole(caseDetails);
         Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(caseDetails, authorisationToken,
@@ -50,7 +50,7 @@ public class UpdateRepresentationWorkflowService {
         if (isNoOrganisationsToAddOrRemove(caseDetails)) {
             persistDefaultOrganisationPolicy(caseDetails);
             setDefaultChangeOrganisationRequest(caseDetails);
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
+            return OldAboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
         }
 
         caseDetails.getData().putAll(caseData);

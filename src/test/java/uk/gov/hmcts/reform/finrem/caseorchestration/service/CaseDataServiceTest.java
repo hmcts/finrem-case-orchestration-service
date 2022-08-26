@@ -5,10 +5,10 @@ import com.google.common.collect.ImmutableMap;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
@@ -305,7 +305,7 @@ public class  CaseDataServiceTest extends BaseServiceTest {
     @Test
     public void isConsentedInContestedCaseShouldReturnTrueWhenIsContestedCaseAndConsentD81QuestionIsPopulated() throws IOException {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
-            "/fixtures/general-order-consented-in-contested.json"), CallbackRequest.class).getCaseDetails();
+            "/fixtures/general-order-consented-in-contested.json"), OldCallbackRequest.class).getCaseDetails();
 
         assertThat(caseDataService.isConsentedInContestedCase(caseDetails), is(true));
     }
@@ -313,7 +313,7 @@ public class  CaseDataServiceTest extends BaseServiceTest {
     @Test
     public void isConsentedInContestedCaseShouldReturnFalseWhenIsContestedCaseAndConsentD81QuestionIsNull() throws IOException {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
-            "/fixtures/general-order-contested.json"), CallbackRequest.class).getCaseDetails();
+            "/fixtures/general-order-contested.json"), OldCallbackRequest.class).getCaseDetails();
 
         assertThat(caseDataService.isConsentedInContestedCase(caseDetails), is(false));
     }
@@ -321,7 +321,7 @@ public class  CaseDataServiceTest extends BaseServiceTest {
     @Test
     public void isConsentedInContestedCaseShouldReturnFalseWhenIsConsentedCaseAndConsentD81QuestionIsNull() throws IOException {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
-            "/fixtures/general-order-consented.json"), CallbackRequest.class).getCaseDetails();
+            "/fixtures/general-order-consented.json"), OldCallbackRequest.class).getCaseDetails();
 
         assertThat(caseDataService.isConsentedInContestedCase(caseDetails), is(false));
     }
@@ -404,7 +404,7 @@ public class  CaseDataServiceTest extends BaseServiceTest {
     @Test
     public void isConsentedApplicationShouldReturnTrueWheCaseTypeIsSetToConsentedCaseType() throws IOException {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
-            "/fixtures/valid-latest-consent-order.json"), CallbackRequest.class).getCaseDetails();
+            "/fixtures/valid-latest-consent-order.json"), OldCallbackRequest.class).getCaseDetails();
 
         assertThat(caseDataService.isConsentedApplication(caseDetails), is(true));
     }
@@ -412,7 +412,7 @@ public class  CaseDataServiceTest extends BaseServiceTest {
     @Test
     public void isConsentedApplicationShouldReturnFalseWhenCaseTypeIsSetToContested() throws IOException {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
-            "/fixtures/contested/contested-hwf-without-solicitor-consent.json"), CallbackRequest.class).getCaseDetails();
+            "/fixtures/contested/contested-hwf-without-solicitor-consent.json"), OldCallbackRequest.class).getCaseDetails();
 
         assertThat(caseDataService.isConsentedApplication(caseDetails), is(false));
     }
@@ -420,7 +420,7 @@ public class  CaseDataServiceTest extends BaseServiceTest {
     @Test
     public void isConsentedApplicationShouldReturnFalseWhenCaseTypeIsNull() throws IOException {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
-            "/fixtures/empty-casedata.json"), CallbackRequest.class).getCaseDetails();
+            "/fixtures/empty-casedata.json"), OldCallbackRequest.class).getCaseDetails();
 
         assertThat(caseDataService.isConsentedApplication(caseDetails), is(false));
     }
@@ -428,7 +428,7 @@ public class  CaseDataServiceTest extends BaseServiceTest {
     @Test
     public void isContestedApplicationShouldReturnTrueWheCaseTypeIsSetToContested() throws IOException {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
-            "/fixtures/contested/contested-hwf-without-solicitor-consent.json"), CallbackRequest.class).getCaseDetails();
+            "/fixtures/contested/contested-hwf-without-solicitor-consent.json"), OldCallbackRequest.class).getCaseDetails();
 
         assertThat(caseDataService.isContestedApplication(caseDetails), is(true));
     }
@@ -436,7 +436,7 @@ public class  CaseDataServiceTest extends BaseServiceTest {
     @Test
     public void isContestedApplicationShouldReturnFalseWheCaseTypeIsSetToConsented() throws IOException {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
-            "/fixtures/valid-latest-consent-order.json"), CallbackRequest.class).getCaseDetails();
+            "/fixtures/valid-latest-consent-order.json"), OldCallbackRequest.class).getCaseDetails();
 
         assertThat(caseDataService.isContestedApplication(caseDetails), is(false));
     }
@@ -444,7 +444,7 @@ public class  CaseDataServiceTest extends BaseServiceTest {
     @Test
     public void isContestedApplicationShouldReturnFalseWheCaseTypeIsSetToNull() throws IOException {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
-            "/fixtures/empty-casedata.json"), CallbackRequest.class).getCaseDetails();
+            "/fixtures/empty-casedata.json"), OldCallbackRequest.class).getCaseDetails();
 
         assertThat(caseDataService.isContestedApplication(caseDetails), is(false));
     }
@@ -452,7 +452,7 @@ public class  CaseDataServiceTest extends BaseServiceTest {
     @Test
     public void isContestedPaperApplicationShouldReturnTrueWhenCaseTypeIsSetToContestedAndIsPaperCase() throws IOException {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
-            "/fixtures/contested/validate-hearing-with-fastTrackDecision-paperApplication.json"), CallbackRequest.class).getCaseDetails();
+            "/fixtures/contested/validate-hearing-with-fastTrackDecision-paperApplication.json"), OldCallbackRequest.class).getCaseDetails();
 
         assertThat(caseDataService.isContestedPaperApplication(caseDetails), is(true));
     }
@@ -460,7 +460,7 @@ public class  CaseDataServiceTest extends BaseServiceTest {
     @Test
     public void isContestedPaperApplicationShouldReturnFalseWhenCaseTypeIsSetToConsentedAndIsPaperCase() throws IOException {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
-            "/fixtures/bulkprint/bulk-print-paper-application.json"), CallbackRequest.class).getCaseDetails();
+            "/fixtures/bulkprint/bulk-print-paper-application.json"), OldCallbackRequest.class).getCaseDetails();
 
         assertThat(caseDataService.isContestedPaperApplication(caseDetails), is(false));
     }
@@ -468,7 +468,7 @@ public class  CaseDataServiceTest extends BaseServiceTest {
     @Test
     public void isContestedPaperApplicationShouldReturnFalseWhenCaseTypeIsSetToContestedAndNotPaperCase() throws IOException {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
-            "/fixtures/contested/contested-hwf-without-solicitor-consent.json"), CallbackRequest.class).getCaseDetails();
+            "/fixtures/contested/contested-hwf-without-solicitor-consent.json"), OldCallbackRequest.class).getCaseDetails();
 
         assertThat(caseDataService.isContestedPaperApplication(caseDetails), is(false));
     }
@@ -476,7 +476,7 @@ public class  CaseDataServiceTest extends BaseServiceTest {
     @Test
     public void isContestedPaperApplicationShouldReturnFalseWhenCaseTypeIsSetToConsented() throws IOException {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
-            "/fixtures/valid-latest-consent-order.json"), CallbackRequest.class).getCaseDetails();
+            "/fixtures/valid-latest-consent-order.json"), OldCallbackRequest.class).getCaseDetails();
 
         assertThat(caseDataService.isContestedPaperApplication(caseDetails), is(false));
     }
@@ -484,7 +484,7 @@ public class  CaseDataServiceTest extends BaseServiceTest {
     @Test
     public void isContestedPaperApplicationShouldReturnFalseWhenCaseTypeIsSetToNull() throws IOException {
         CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
-            "/fixtures/empty-casedata.json"), CallbackRequest.class).getCaseDetails();
+            "/fixtures/empty-casedata.json"), OldCallbackRequest.class).getCaseDetails();
 
         assertThat(caseDataService.isContestedPaperApplication(caseDetails), is(false));
     }

@@ -3,9 +3,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.mapper;
 import lombok.SneakyThrows;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.ccd.domain.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
@@ -72,7 +73,7 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
 
     @Test
     public void shouldCreateNotificationRequestForAppSolicitorForContestedJourney() {
-        CallbackRequest callbackRequest = getContestedCallbackRequest();
+        OldCallbackRequest callbackRequest = getContestedCallbackRequest();
 
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(
             callbackRequest.getCaseDetails());
@@ -88,7 +89,7 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
 
     @Test
     public void shouldCreateNotificationRequestForRespSolicitorForConsentedJourney() {
-        CallbackRequest callbackRequest = getConsentedCallbackRequest();
+        OldCallbackRequest callbackRequest = getConsentedCallbackRequest();
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForRespondentSolicitor(
             callbackRequest.getCaseDetails());
 
@@ -104,7 +105,7 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
 
     @Test
     public void shouldCreateNotificationRequestForRespSolicitorForConsentedJourneyWithNatureIsVariationOrder() {
-        CallbackRequest callbackRequest = getConsentedCallbackRequestForVariationOrder();
+        OldCallbackRequest callbackRequest = getConsentedCallbackRequestForVariationOrder();
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForRespondentSolicitor(
             callbackRequest.getCaseDetails());
 
@@ -120,7 +121,7 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
 
     @Test
     public void shouldCreateNotificationRequestForRespSolicitorForContestedJourney() {
-        CallbackRequest callbackRequest = getContestedCallbackRequest();
+        OldCallbackRequest callbackRequest = getContestedCallbackRequest();
 
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForRespondentSolicitor(
             callbackRequest.getCaseDetails());
@@ -136,7 +137,7 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
 
     @Test
     public void givenApplicantSolicitorNoticeOfChangeOnContestedWhenGetNotificationRequestCalledThenReturnNotificationRequestToAddedSolicitor() {
-        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest = getContestedNewCallbackRequest();
+        CallbackRequest callbackRequest = getContestedNewCallbackRequest();
         callbackRequest.getCaseDetails().getCaseData()
             .setRepresentationUpdateHistory(getChangeOfRepresentationListJson("Applicant", TEST_SOLICITOR_NAME, TEST_SOLICITOR_EMAIL));
 
@@ -150,7 +151,7 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
 
     @Test
     public void givenRespondentSolicitorNoticeOfChangeOnContestedWhenGetNotificationRequestCalledThenReturnNotificationRequestToAddedSolicitor() {
-        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest = getContestedNewCallbackRequest();
+        CallbackRequest callbackRequest = getContestedNewCallbackRequest();
         callbackRequest.getCaseDetails().getCaseData().setRepresentationUpdateHistory(getChangeOfRepresentationListJson(
             "Respondent", TEST_RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_EMAIL));
 
@@ -164,7 +165,7 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
 
     @Test
     public void givenApplicantSolicitorNoticeOfChangeOnConsentedWhenGetNotificationRequestCalledThenReturnNotificationRequestToAddedSolicitor() {
-        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest = getConsentedNewCallbackRequest();
+        CallbackRequest callbackRequest = getConsentedNewCallbackRequest();
         callbackRequest.getCaseDetails().getCaseData().setRepresentationUpdateHistory(getChangeOfRepresentationListJson(
             "Applicant", TEST_SOLICITOR_NAME, TEST_SOLICITOR_EMAIL));
 
@@ -180,7 +181,7 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
 
     @Test
     public void givenRespondentSolicitorNoticeOfChangeOnConsentedWhenGetNotificationRequestCalledThenReturnNotificationRequestToAddedSolicitor() {
-        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest = getConsentedNewCallbackRequest();
+        CallbackRequest callbackRequest = getConsentedNewCallbackRequest();
         callbackRequest.getCaseDetails().getCaseData().setRepresentationUpdateHistory(getChangeOfRepresentationListJson(
             "Respondent", TEST_RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_EMAIL));
 

@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaymentConfirmationService;
@@ -41,7 +41,7 @@ public class PaymentConfirmationController extends BaseController {
     @Operation(summary = "Handles PBA Payments Confirmation")
     public ResponseEntity<SubmittedCallbackResponse> paymentConfirmation(
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
-        @RequestBody CallbackRequest callbackRequest) throws IOException {
+        @RequestBody OldCallbackRequest callbackRequest) throws IOException {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request for PBA confirmation for Case ID: {}", caseDetails.getId());

@@ -5,10 +5,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
@@ -162,7 +162,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     private void setUpCaseDetails(String fileName) throws Exception {
         try (InputStream resourceAsStream =
                  getClass().getResourceAsStream(PATH + fileName)) {
-            initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class)
+            initialDetails = mapper.readValue(resourceAsStream, OldCallbackRequest.class)
                 .getCaseDetails();
             expectedCaseData = initialDetails.getData();
         }
@@ -175,7 +175,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
 
         InputStream resourceAsStream = getClass().getResourceAsStream(PATH
             + "contestedAppSolicitorAdding/change-of-representatives-before.json");
-        initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+        initialDetails = mapper.readValue(resourceAsStream, OldCallbackRequest.class).getCaseDetails();
 
         Map<String, Object> actualData = updateRepresentationService
             .updateRepresentationAsSolicitor(initialDetails, "bebe");
@@ -220,7 +220,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         setUpCaseDetails("consentedAppSolicitorAdding/after-update-details.json");
         try (InputStream resourceAsStream = getClass()
             .getResourceAsStream(PATH + "consentedAppSolicitorAdding/change-of-representatives-before.json")) {
-            initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class)
+            initialDetails = mapper.readValue(resourceAsStream, OldCallbackRequest.class)
                 .getCaseDetails();
         }
 
@@ -267,7 +267,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         setUpCaseDetails("RespSolicitorAdding/after-update-details.json");
         InputStream resourceAsStream = getClass()
             .getResourceAsStream(PATH + "RespSolicitorAdding/change-of-representatives-before.json");
-        initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+        initialDetails = mapper.readValue(resourceAsStream, OldCallbackRequest.class).getCaseDetails();
 
         Map<String, Object> actualData = updateRepresentationService
             .updateRepresentationAsSolicitor(initialDetails, "bebe");
@@ -329,7 +329,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
 
         InputStream resourceAsStream = getClass().getResourceAsStream(PATH
             + "AppSolReplacing/change-of-representatives-before.json");
-        initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+        initialDetails = mapper.readValue(resourceAsStream, OldCallbackRequest.class).getCaseDetails();
 
         Map<String, Object> actualData = updateRepresentationService
             .updateRepresentationAsSolicitor(initialDetails, "someAuthToken");
@@ -436,7 +436,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     private Map<String, Object> getUpdatedContactData(String subPath) throws Exception {
         InputStream resourceAsStream = getClass()
             .getResourceAsStream(PATH + subPath + "/after-update-details.json");
-        return mapper.readValue(resourceAsStream, CallbackRequest.class)
+        return mapper.readValue(resourceAsStream, OldCallbackRequest.class)
             .getCaseDetails().getData();
     }
 

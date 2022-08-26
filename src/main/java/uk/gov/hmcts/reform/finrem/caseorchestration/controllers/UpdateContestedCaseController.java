@@ -32,6 +32,9 @@ import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.NoCSolicitorDetailsHelper.removeSolicitorAddress;
+import static uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo.isNo;
+import static uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo.isNoOrNull;
+import static uk.gov.hmcts.reform.finrem.ccd.domain.YesOrNo.isYes;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -137,13 +140,13 @@ public class UpdateContestedCaseController extends BaseController {
     }
 
     private void isApplicantsHomeCourt(FinremCaseData caseData) {
-        if (caseData.getIsApplicantsHomeCourt().isNoOrNull()) {
+        if (isNoOrNull(caseData.getIsApplicantsHomeCourt())) {
             caseData.setReasonForLocalCourt(null);
         }
     }
 
     private void updateContestedMiamDetails(FinremCaseData caseData) {
-        if (caseData.getMiamWrapper().getApplicantAttendedMiam().isYes()) {
+        if (isYes(caseData.getMiamWrapper().getApplicantAttendedMiam())) {
             removeAllMiamExceptionDetails(caseData);
             removeMiamCertificationDetailsForApplicantAttendedMiam(caseData);
         } else {
@@ -153,7 +156,7 @@ public class UpdateContestedCaseController extends BaseController {
     }
 
     private void updateWhenClaimingExemptionMiam(FinremCaseData caseData) {
-        if (caseData.getMiamWrapper().getClaimingExemptionMiam().isNoOrNull()) {
+        if (isNoOrNull(caseData.getMiamWrapper().getClaimingExemptionMiam())) {
             caseData.getMiamWrapper().setFamilyMediatorMiam(null);
             removeMiamExceptionDetails(caseData);
         } else {
@@ -181,7 +184,7 @@ public class UpdateContestedCaseController extends BaseController {
     }
 
     private void updateClaimingExemptionMiamDetails(FinremCaseData caseData) {
-        if (caseData.getMiamWrapper().getFamilyMediatorMiam().isYes()) {
+        if (isYes(caseData.getMiamWrapper().getFamilyMediatorMiam())) {
             removeMiamExceptionDetails(caseData);
         } else {
             removeMiamCertificationDetails(caseData);
@@ -227,11 +230,11 @@ public class UpdateContestedCaseController extends BaseController {
     }
 
     private void updateContestedPeriodicPaymentDetails(FinremCaseData caseData) {
-        if (!caseData.getPaymentForChildrenDecision().isYes()) {
+        if (!isYes(caseData.getPaymentForChildrenDecision())) {
             removeBenefitsDetails(caseData);
             return;
         }
-        if (caseData.getBenefitForChildrenDecision().isYes()) {
+        if (isYes(caseData.getBenefitForChildrenDecision())) {
             caseData.setBenefitPaymentChecklist(null);
         }
     }
@@ -257,7 +260,7 @@ public class UpdateContestedCaseController extends BaseController {
     }
 
     private void updatePropertyAdjustmentOrderDetails(FinremCaseData caseData) {
-        if (caseData.getAdditionalPropertyOrderDecision().isNoOrNull()) {
+        if (isNoOrNull(caseData.getAdditionalPropertyOrderDecision())) {
             caseData.setPropertyAdjustmentOrderDetail(null);
         }
     }
@@ -300,7 +303,7 @@ public class UpdateContestedCaseController extends BaseController {
     }
 
     private void updateContestedRespondentDetails(FinremCaseData caseData) {
-        if (caseData.getContactDetailsWrapper().getContestedRespondentRepresented().isNoOrNull()) {
+        if (isNo(caseData.getContactDetailsWrapper().getContestedRespondentRepresented())) {
             removeRespondentSolicitorAddress(caseData);
         } else {
             removeContestedRespondentAddress(caseData);

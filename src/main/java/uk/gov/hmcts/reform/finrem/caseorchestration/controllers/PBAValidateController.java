@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.OldAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAValidationService;
 
 import java.util.Map;
@@ -33,9 +33,9 @@ public class PBAValidateController extends BaseController {
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/pba-validate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Validates if PBA Number provided is valid")
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> pbaValidate(
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> pbaValidate(
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
-        @RequestBody CallbackRequest callbackRequest) {
+        @RequestBody OldCallbackRequest callbackRequest) {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request to validate PBA number for Case ID: {}", caseDetails.getId());
@@ -48,12 +48,12 @@ public class PBAValidateController extends BaseController {
             log.info("Validating PBA Number: {}", pbaNumber);
             if (!pbaValidationService.isValidPBA(authToken, pbaNumber)) {
                 log.info("PBA number for is invalid for Case ID: {}", caseDetails.getId());
-                return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
+                return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder()
                     .errors(ImmutableList.of("PBA Account Number is not valid, please enter a valid one."))
                     .build());
             }
             log.info("PBA number is valid.");
         }
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().build());
     }
 }

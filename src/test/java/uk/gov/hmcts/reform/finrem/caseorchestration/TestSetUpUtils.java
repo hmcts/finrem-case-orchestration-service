@@ -7,17 +7,17 @@ import feign.Request;
 import feign.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpServerErrorException;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchFieldExistsException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentClientDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ClientDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
@@ -161,8 +161,8 @@ public class TestSetUpUtils {
         return document;
     }
 
-    public static DocumentClientDocument variationDocumentClientDocument() {
-        DocumentClientDocument document = new DocumentClientDocument();
+    public static ClientDocument variationDocumentClientDocument() {
+        ClientDocument document = new ClientDocument();
         document.setBinaryUrl(BINARY_URL);
         document.setFileName(VARIATION_FILE_NAME);
         document.setUrl(DOC_URL);
@@ -390,7 +390,7 @@ public class TestSetUpUtils {
 
     public static CaseDetails caseDetailsFromResource(String resourcePath, ObjectMapper mapper) {
         try (InputStream resourceAsStream = TestSetUpUtils.class.getResourceAsStream(resourcePath)) {
-            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+            return mapper.readValue(resourceAsStream, OldCallbackRequest.class).getCaseDetails();
         } catch (Exception exception) {
             throw new IllegalStateException(exception.getMessage(), exception);
         }
@@ -516,9 +516,9 @@ public class TestSetUpUtils {
         return caseDocument;
     }
 
-    public static DocumentClientDocument newDocumentClientDocument() {
-        DocumentClientDocument caseDocument =
-            new DocumentClientDocument();
+    public static ClientDocument newDocumentClientDocument() {
+        ClientDocument caseDocument =
+            new ClientDocument();
         caseDocument.setUrl(DOC_URL);
         caseDocument.setFileName(FILE_NAME);
         caseDocument.setBinaryUrl(BINARY_URL);
@@ -536,8 +536,8 @@ public class TestSetUpUtils {
         return caseDocument;
     }
 
-    public static DocumentClientDocument docClientWordDocument() {
-        return DocumentClientDocument.builder()
+    public static ClientDocument docClientWordDocument() {
+        return ClientDocument.builder()
             .url(DOC_URL)
             .fileName("doc.docx")
             .binaryUrl(BINARY_URL)

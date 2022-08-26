@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.OldAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
@@ -45,9 +45,9 @@ public class FeeLookupController extends BaseController {
 
     @PostMapping(path = "/fee-lookup", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Handles looking up Case Fees")
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> feeLookup(
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> feeLookup(
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
-        @RequestBody CallbackRequest callbackRequest) {
+        @RequestBody OldCallbackRequest callbackRequest) {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request for Fee lookup for Case ID {}", caseDetails.getId());
@@ -61,7 +61,7 @@ public class FeeLookupController extends BaseController {
         Map<String, Object> mapOfCaseData = caseDetails.getData();
         updateCaseWithFee(mapOfCaseData, feeResponseData, feeResponse);
         ObjectMapper objectMapper = new ObjectMapper();
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder()
             .data(objectMapper.convertValue(feeResponseData, Map.class)).build());
     }
 

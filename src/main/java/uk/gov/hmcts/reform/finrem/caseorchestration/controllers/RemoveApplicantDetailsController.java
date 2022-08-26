@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.OldAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
@@ -66,12 +66,12 @@ public class RemoveApplicantDetailsController extends BaseController {
     @Operation(summary = "Removes applicant details or applicants solicitor details")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback was processed successfully or in case of an error message is attached to the case",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = OldAboutToStartOrSubmitCallbackResponse.class))}),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> removeDetails(
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> removeDetails(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callback) {
+        @NotNull @RequestBody @Parameter(description = "CaseData") OldCallbackRequest callback) {
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request for removing Applicant/Applicants Solicitor details for Case ID: {}", caseDetails.getId());
@@ -96,7 +96,7 @@ public class RemoveApplicantDetailsController extends BaseController {
         }
 
         persistOrgPolicies(caseData, callback.getCaseDetailsBefore());
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
     private void removeApplicantDetails(Map<String, Object> caseData) {

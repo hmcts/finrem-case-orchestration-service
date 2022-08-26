@@ -8,8 +8,8 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
 
 import java.io.File;
@@ -37,7 +37,7 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
     @MockBean
     private CaseDataService caseDataService;
 
-    private CallbackRequest callbackRequest;
+    private OldCallbackRequest callbackRequest;
 
     @ClassRule
     public static WireMockClassRule paymentService = new WireMockClassRule(9001);
@@ -49,7 +49,7 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
     public void setupCaseData() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         callbackRequest = mapper.readValue(new File(getClass()
-            .getResource("/fixtures/pba-payment.json").toURI()), CallbackRequest.class);
+            .getResource("/fixtures/pba-payment.json").toURI()), OldCallbackRequest.class);
     }
 
     @Test

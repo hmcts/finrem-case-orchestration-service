@@ -10,8 +10,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentValidationService;
 
@@ -57,7 +57,7 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
         doRequestSetUp(AMEND_CONTESTED_CONSENT_ORDER_BY_SOL_JSON);
         DocumentValidationResponse response = builder()
             .mimeType("application/pdf").build();
-        when(documentValidationService.validateDocument(any(CallbackRequest.class), anyString(), anyString()))
+        when(documentValidationService.validateDocument(any(OldCallbackRequest.class), anyString(), anyString()))
             .thenReturn(response);
         this.mockMvc.perform(MockMvcRequestBuilders
                 .post("/case-orchestration/field/consentOrder/file-upload-check")
@@ -76,7 +76,7 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
         doRequestSetUp(AMEND_CONSENT_ORDER_BY_SOL_JSON);
         DocumentValidationResponse response = builder()
             .mimeType("application/pdf").build();
-        when(documentValidationService.validateDocument(any(CallbackRequest.class), anyString(), anyString()))
+        when(documentValidationService.validateDocument(any(OldCallbackRequest.class), anyString(), anyString()))
             .thenReturn(response);
         this.mockMvc.perform(MockMvcRequestBuilders
             .post("/case-orchestration/field/consentOrder/file-upload-check")
@@ -97,7 +97,7 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
             .mimeType("application/json")
             .errors(singletonList("Invalid File Type"))
             .build();
-        when(documentValidationService.validateDocument(any(CallbackRequest.class), anyString(), anyString()))
+        when(documentValidationService.validateDocument(any(OldCallbackRequest.class), anyString(), anyString()))
             .thenReturn(response);
         this.mockMvc.perform(MockMvcRequestBuilders
             .post("/case-orchestration/field/consentOrder/file-upload-check")
@@ -116,7 +116,7 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
         DocumentValidationResponse response = builder()
             .mimeType("application/pdf")
             .build();
-        when(documentValidationService.validateDocument(any(CallbackRequest.class), anyString(), anyString()))
+        when(documentValidationService.validateDocument(any(OldCallbackRequest.class), anyString(), anyString()))
             .thenReturn(response);
         this.mockMvc.perform(MockMvcRequestBuilders
             .post("/case-orchestration/field/yyyyy/file-upload-check")

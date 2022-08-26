@@ -2,10 +2,11 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 import uk.gov.hmcts.reform.finrem.ccd.domain.EventType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
@@ -30,7 +31,7 @@ public class ConsentOrderService {
 
     private final DocumentHelper documentHelper;
 
-    public CaseDocument getLatestConsentOrderData(CallbackRequest callbackRequest) {
+    public CaseDocument getLatestConsentOrderData(OldCallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
         String eventId = callbackRequest.getEventId();
@@ -44,7 +45,7 @@ public class ConsentOrderService {
         }
     }
 
-    public Document getLatestConsentOrderData(uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest) {
+    public Document getLatestConsentOrderData(CallbackRequest callbackRequest) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         FinremCaseData caseData = caseDetails.getCaseData();

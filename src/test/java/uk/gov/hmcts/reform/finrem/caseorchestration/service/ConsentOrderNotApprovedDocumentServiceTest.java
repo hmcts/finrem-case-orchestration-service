@@ -8,7 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentClientDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ClientDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.ccd.domain.ConsentOrder;
 import uk.gov.hmcts.reform.finrem.ccd.domain.ConsentOrderCollection;
@@ -50,7 +50,7 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
 
     @Before
     public void setupDocumentGenerationMocks() {
-        DocumentClientDocument generatedDocument = newDocumentClientDocument();
+        ClientDocument generatedDocument = newDocumentClientDocument();
         generatedDocument.setBinaryUrl(COVER_LETTER_URL);
 
         when(documentClientMock.generatePdf(any(DocumentGenerationRequest.class), eq(AUTH_TOKEN)))

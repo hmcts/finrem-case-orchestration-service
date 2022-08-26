@@ -10,7 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 import uk.gov.hmcts.reform.finrem.functional.util.FunctionalTestUtils;
 import uk.gov.hmcts.reform.finrem.functional.util.ServiceUtils;
@@ -37,7 +37,7 @@ public class ConsentOrderApprovedTest extends IntegrationTestBase {
 
     @Test
     public void verifyConsentOrderApprovedForConsentedCaseForApplicant() {
-        CallbackRequest callbackRequest = null;
+        OldCallbackRequest callbackRequest = null;
         InputStream resourceAsStream = getClass().getResourceAsStream(
             "/json/consented/approved-consent-order.json");
 
@@ -51,7 +51,7 @@ public class ConsentOrderApprovedTest extends IntegrationTestBase {
         DocumentContext documentContext = JsonPath.parse(resourceAsStream).set("$..latestConsentOrder", uploadedDoc);
         documentContext.set("$..pensionCollection[0].value.uploadedDocument", uploadedDoc);
         try {
-            callbackRequest = objectMapper.readValue(documentContext.jsonString(), CallbackRequest.class);
+            callbackRequest = objectMapper.readValue(documentContext.jsonString(), OldCallbackRequest.class);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -61,7 +61,7 @@ public class ConsentOrderApprovedTest extends IntegrationTestBase {
 
     @Test
     public void verifyConsentOrderApprovedForConsentedCaseWhenApplicantRepresentedBySolicitor() {
-        CallbackRequest callbackRequest = null;
+        OldCallbackRequest callbackRequest = null;
         InputStream resourceAsStream = getClass().getResourceAsStream(
             "/json/consented/approved-consent-order-with-applicant-solicitor.json");
 
@@ -75,7 +75,7 @@ public class ConsentOrderApprovedTest extends IntegrationTestBase {
         DocumentContext documentContext = JsonPath.parse(resourceAsStream).set("$..latestConsentOrder", uploadedDoc);
         documentContext.set("$..pensionCollection[0].value.uploadedDocument", uploadedDoc);
         try {
-            callbackRequest = objectMapper.readValue(documentContext.jsonString(), CallbackRequest.class);
+            callbackRequest = objectMapper.readValue(documentContext.jsonString(), OldCallbackRequest.class);
         } catch (IOException e) {
             e.printStackTrace();
         }

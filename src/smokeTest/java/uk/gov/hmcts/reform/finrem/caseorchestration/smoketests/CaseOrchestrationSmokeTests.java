@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,9 +58,9 @@ public class CaseOrchestrationSmokeTests {
             .statusCode(HttpStatus.OK.value());
     }
 
-    private CallbackRequest getRequestFromFile(String fileName) throws IOException {
+    private OldCallbackRequest getRequestFromFile(String fileName) throws IOException {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(fileName)) {
-            return objectMapper.readValue(resourceAsStream, CallbackRequest.class);
+            return objectMapper.readValue(resourceAsStream, OldCallbackRequest.class);
         }
     }
 

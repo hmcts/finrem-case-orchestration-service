@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentClientDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ClientDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
 
@@ -102,9 +102,9 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void givenDocument_whenConvertToPdf_thenConvertToPdf() {
-        DocumentClientDocument pdf = newDocumentClientDocument();
+        ClientDocument pdf = newDocumentClientDocument();
         pdf.setFileName(PDF_DOCUMENT_NAME);
-        when(documentClientMock.convertDocumentToPdf(any(), isA(DocumentClientDocument.class))).thenReturn(pdf);
+        when(documentClientMock.convertDocumentToPdf(any(), isA(ClientDocument.class))).thenReturn(pdf);
 
         Document actual = genericDocumentService.convertDocumentToPdf(wordDoc(), AUTH_TOKEN);
 
@@ -115,9 +115,9 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void givenWordDocument_whenConvertToPdfIfNotAlready_thenConvertToPdf() {
-        DocumentClientDocument pdf = newDocumentClientDocument();
+        ClientDocument pdf = newDocumentClientDocument();
         pdf.setFileName(PDF_DOCUMENT_NAME);
-        when(documentClientMock.convertDocumentToPdf(any(), isA(DocumentClientDocument.class))).thenReturn(pdf);
+        when(documentClientMock.convertDocumentToPdf(any(), isA(ClientDocument.class))).thenReturn(pdf);
 
         Document actual = genericDocumentService.convertDocumentIfNotPdfAlready(wordDoc(), AUTH_TOKEN);
 

@@ -4,12 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.CaseAssignmentApi;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.CaseDataApiV2;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.AssignCaseAccessServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.AssignCaseAccessRequestMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.OldAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.AssignCaseAccessRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.DecisionRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRole;
@@ -54,7 +54,7 @@ public class AssignCaseAccessService {
         );
     }
 
-    public AboutToStartOrSubmitCallbackResponse applyDecision(String authToken, CaseDetails caseDetails) {
+    public OldAboutToStartOrSubmitCallbackResponse applyDecision(String authToken, CaseDetails caseDetails) {
         return caseAssignmentApi.applyDecision(authToken, authTokenGenerator.generate(),
             DecisionRequest.decisionRequest(caseDetails));
     }

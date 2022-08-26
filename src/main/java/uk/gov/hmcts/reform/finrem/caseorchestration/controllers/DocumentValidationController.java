@@ -16,11 +16,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse.AboutToStartOrSubmitCallbackResponseBuilder;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.OldAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentValidationService;
 
@@ -32,7 +31,7 @@ import java.util.Optional;
 import static com.google.common.base.Strings.nullToEmpty;
 import static java.util.Objects.nonNull;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse.builder;
+
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
 
@@ -50,13 +49,13 @@ public class DocumentValidationController extends BaseController {
     @Operation(summary = "Checks the file type and returns error.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback was processed successfully.",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = OldAboutToStartOrSubmitCallbackResponse.class))}),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
 
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> checkUploadedFileType(
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> checkUploadedFileType(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callbackRequest,
+        @NotNull @RequestBody @Parameter(description = "CaseData") OldCallbackRequest callbackRequest,
         @PathVariable("field") String field) {
 
         Optional<Long> caseId = Optional.ofNullable(callbackRequest.getCaseDetails().getId());
@@ -69,9 +68,10 @@ public class DocumentValidationController extends BaseController {
         return ResponseEntity.ok(response(callbackRequest, field, authorisationToken));
     }
 
-    private AboutToStartOrSubmitCallbackResponse response(CallbackRequest callbackRequest, String field, String authorisationToken) {
+    private OldAboutToStartOrSubmitCallbackResponse response(OldCallbackRequest callbackRequest, String field, String authorisationToken) {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        AboutToStartOrSubmitCallbackResponseBuilder builder = builder().data(caseData);
+        OldAboutToStartOrSubmitCallbackResponse.OldAboutToStartOrSubmitCallbackResponseBuilder builder =
+            OldAboutToStartOrSubmitCallbackResponse.builder().data(caseData);
         if (nonNull(caseData.get(field))) {
             DocumentValidationResponse response = service.validateDocument(callbackRequest, field, authorisationToken);
             return builder.errors(response.getErrors()).build();

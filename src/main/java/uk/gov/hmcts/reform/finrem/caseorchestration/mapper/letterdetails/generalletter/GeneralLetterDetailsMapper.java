@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.generalletter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CourtDetailsMapper;
@@ -62,7 +63,7 @@ public class GeneralLetterDetailsMapper extends AbstractLetterDetailsMapper {
         GeneralLetterAddressToType recipient = caseData.getGeneralLetterWrapper().getGeneralLetterAddressTo();
 
         if (List.of(GeneralLetterAddressToType.RESPONDENT, GeneralLetterAddressToType.OTHER).contains(recipient)) {
-            return "";
+            return StringUtils.EMPTY;
         }
 
         return recipient.equals(GeneralLetterAddressToType.RESPONDENT_SOLICITOR)

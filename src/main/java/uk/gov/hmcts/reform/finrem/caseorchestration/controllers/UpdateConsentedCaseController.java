@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.OldAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
@@ -71,12 +71,12 @@ public class UpdateConsentedCaseController extends BaseController {
     @Operation(summary = "Handles update case details and cleans up the data fields based on the options chosen for Consented Cases")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback was processed successfully or in case of an error message is attached to the case",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = OldAboutToStartOrSubmitCallbackResponse.class))}),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> updateCase(
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> updateCase(
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
-        @RequestBody CallbackRequest ccdRequest) {
+        @RequestBody OldCallbackRequest ccdRequest) {
 
         CaseDetails caseDetails = ccdRequest.getCaseDetails();
         log.info("Received request to update consented case with Case ID: {}", caseDetails.getId());
@@ -92,19 +92,19 @@ public class UpdateConsentedCaseController extends BaseController {
         updateApplicantOrSolicitorContactDetails(caseData);
         updateLatestConsentOrder(ccdRequest);
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
     @PostMapping(path = "/update-contact-details", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Handles update case details and cleans up the data fields based on the options chosen for Consented Cases")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback was processed successfully or in case of an error message is attached to the case",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = OldAboutToStartOrSubmitCallbackResponse.class))}),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> updateDetails(
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> updateDetails(
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
-        @RequestBody CallbackRequest ccdRequest) {
+        @RequestBody OldCallbackRequest ccdRequest) {
 
         CaseDetails caseDetails = ccdRequest.getCaseDetails();
         log.info("Received request to update consented case with Case ID: {}", caseDetails.getId());
@@ -128,29 +128,29 @@ public class UpdateConsentedCaseController extends BaseController {
         }
 
         persistOrgPolicies(caseData, ccdRequest.getCaseDetailsBefore());
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
     @PostMapping(path = "/update-case-solicitor", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Handles update case details and cleans up the data fields based on the options chosen for Consented Cases")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback was processed successfully or in case of an error message is attached to the case",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = OldAboutToStartOrSubmitCallbackResponse.class))}),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> updateCaseSolicitor(
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> updateCaseSolicitor(
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
-        @RequestBody CallbackRequest ccdRequest) {
+        @RequestBody OldCallbackRequest ccdRequest) {
 
         CaseDetails caseDetails = ccdRequest.getCaseDetails();
         log.info("Received request to update consented case solicitor contact details with Case ID: {}", caseDetails.getId());
 
         validateCaseData(ccdRequest);
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(removeSolicitorAddress(caseDetails, false)).build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().data(removeSolicitorAddress(caseDetails, false)).build());
     }
 
-    private void updateLatestConsentOrder(CallbackRequest callbackRequest) {
+    private void updateLatestConsentOrder(OldCallbackRequest callbackRequest) {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         caseData.put(LATEST_CONSENT_ORDER, consentOrderService.getLatestConsentOrderData(callbackRequest));
     }

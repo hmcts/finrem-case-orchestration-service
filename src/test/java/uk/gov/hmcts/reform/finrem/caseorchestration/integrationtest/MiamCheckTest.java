@@ -14,9 +14,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,7 +47,7 @@ public class MiamCheckTest extends BaseTest {
     @Autowired
     protected MockMvc webClient;
 
-    protected CallbackRequest request;
+    protected OldCallbackRequest request;
 
     @Test
     public void miamAttendExemptCheckError() throws Exception {
@@ -75,7 +75,7 @@ public class MiamCheckTest extends BaseTest {
 
     private void setUp(String jsonContent) throws IOException {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(jsonContent)) {
-            request = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
+            request = objectMapper.readValue(resourceAsStream, OldCallbackRequest.class);
         }
     }
 }

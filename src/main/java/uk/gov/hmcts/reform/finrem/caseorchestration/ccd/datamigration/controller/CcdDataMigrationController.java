@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.OldAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.MigrationHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.RemoveRespondentSolOrg;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.Rpet164FrcCourtListMigrationImpl;
@@ -41,13 +41,13 @@ public class CcdDataMigrationController {
             content = {@Content(mediaType = "application/json", schema = @Schema(implementation = CallbackResponse.class))})})
     public CallbackResponse migrate(
         @RequestHeader(value = AUTHORIZATION_HEADER) final String authorisationToken,
-        @RequestBody @Parameter(description = "CaseData") final CallbackRequest ccdRequest) {
+        @RequestBody @Parameter(description = "CaseData") final OldCallbackRequest ccdRequest) {
 
         CaseDetails caseDetails = ccdRequest.getCaseDetails();
         log.info("FR case migration for removing respondent org policy. Request received for case {}", caseDetails.getId());
 
-        AboutToStartOrSubmitCallbackResponse.AboutToStartOrSubmitCallbackResponseBuilder responseBuilder =
-            AboutToStartOrSubmitCallbackResponse.builder();
+        OldAboutToStartOrSubmitCallbackResponse.OldAboutToStartOrSubmitCallbackResponseBuilder responseBuilder =
+            OldAboutToStartOrSubmitCallbackResponse.builder();
 
         // Change the below to point to your new migration service and modify controller tests to match
         Map<String, Object> caseData = removeRespondentSolOrg.migrateCaseData(caseDetails.getData());
@@ -66,13 +66,13 @@ public class CcdDataMigrationController {
             content = {@Content(mediaType = "application/json", schema = @Schema(implementation = CallbackResponse.class))})})
     public CallbackResponse migrateFrc(
         @RequestHeader(value = AUTHORIZATION_HEADER) final String authorisationToken,
-        @RequestBody @Parameter(description = "CaseData") final CallbackRequest ccdRequest) {
+        @RequestBody @Parameter(description = "CaseData") final OldCallbackRequest ccdRequest) {
 
         CaseDetails caseDetails = ccdRequest.getCaseDetails();
         log.info("FR case migration request received for case {}", caseDetails.getId());
 
-        AboutToStartOrSubmitCallbackResponse.AboutToStartOrSubmitCallbackResponseBuilder responseBuilder =
-            AboutToStartOrSubmitCallbackResponse.builder();
+        OldAboutToStartOrSubmitCallbackResponse.OldAboutToStartOrSubmitCallbackResponseBuilder responseBuilder =
+            OldAboutToStartOrSubmitCallbackResponse.builder();
 
         // Change the below to point to your new migration service and modify controller tests to match
         MigrationHandler migration = new Rpet164FrcCourtListMigrationImpl();

@@ -8,8 +8,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.OldAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationApprovalStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
@@ -54,7 +54,7 @@ public class UpdateRepresentationWorkflowServiceTest {
 
     private CaseDetails defaultChangeDetails;
 
-    private AboutToStartOrSubmitCallbackResponse response;
+    private OldAboutToStartOrSubmitCallbackResponse response;
 
     @Before
     public void setUp() {
@@ -63,7 +63,7 @@ public class UpdateRepresentationWorkflowServiceTest {
         Map<String, Object> defaultCaseData = new HashMap<>();
         defaultChangeDetails = CaseDetails.builder().data(defaultCaseData).build();
         Map<String, Object> responseCaseData = new HashMap<>();
-        response = AboutToStartOrSubmitCallbackResponse.builder().data(responseCaseData).build();
+        response = OldAboutToStartOrSubmitCallbackResponse.builder().data(responseCaseData).build();
     }
 
     @Test
@@ -91,7 +91,7 @@ public class UpdateRepresentationWorkflowServiceTest {
         when(noticeOfChangeService.updateRepresentation(caseDetails, AUTH_TOKEN, caseDetails))
             .thenReturn(caseDetails.getData());
 
-        AboutToStartOrSubmitCallbackResponse actualResponse = updateRepresentationWorkflowService
+        OldAboutToStartOrSubmitCallbackResponse actualResponse = updateRepresentationWorkflowService
             .handleNoticeOfChangeWorkflow(caseDetails, AUTH_TOKEN, caseDetails);
 
         verify(assignCaseAccessService, never()).applyDecision(AUTH_TOKEN, caseDetails);

@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.OldAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import javax.validation.constraints.NotNull;
@@ -47,12 +47,12 @@ public class GeneralOrderStartController extends BaseController {
     @Operation(summary = "Clears previous entered field values. Serves as a callback from CCD")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback was processed successfully or in case of an error message is attached to the case",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = OldAboutToStartOrSubmitCallbackResponse.class))}),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> initialiseGeneralOrderProperties(
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> initialiseGeneralOrderProperties(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callback) {
+        @NotNull @RequestBody @Parameter(description = "CaseData") OldCallbackRequest callback) {
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to clear general order fields for Case ID: {}", caseDetails.getId());
@@ -69,6 +69,6 @@ public class GeneralOrderStartController extends BaseController {
         caseData.put(GENERAL_ORDER_JUDGE_TYPE, null);
         caseData.put(GENERAL_ORDER_CREATED_BY, service.getIdamFullName(authorisationToken));
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 }

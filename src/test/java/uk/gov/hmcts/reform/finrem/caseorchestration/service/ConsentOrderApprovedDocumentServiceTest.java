@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentClientDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ClientDocument;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Address;
 import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.ConsentOrder;
@@ -92,7 +92,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     public void setUp() {
         caseDetails = defaultConsentedFinremCaseDetails();
 
-        DocumentClientDocument defaultCoversheetResponse = newDocumentClientDocument();
+        ClientDocument defaultCoversheetResponse = newDocumentClientDocument();
         defaultCoversheetResponse.setBinaryUrl(DEFAULT_COVERSHEET_URL);
 
         when(documentClientMock.generatePdf(matchDocumentGenerationRequestTemplateAndFilename(documentBulkPrintTemplate,
@@ -101,7 +101,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         when(documentClientMock.generatePdf(matchDocumentGenerationRequestTemplateAndFilename(documentApprovedConsentOrderTemplate,
             documentApprovedConsentOrderFileName), anyString())).thenReturn(newDocumentClientDocument());
 
-        DocumentClientDocument consentOrderApprovedCoverLetterResponse = newDocumentClientDocument();
+        ClientDocument consentOrderApprovedCoverLetterResponse = newDocumentClientDocument();
         consentOrderApprovedCoverLetterResponse.setBinaryUrl(CONSENT_ORDER_APPROVED_COVER_LETTER_URL);
 
         when(documentClientMock.generatePdf(matchDocumentGenerationRequestTemplateAndFilename(documentApprovedConsentOrderNotificationTemplate,

@@ -4,7 +4,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ShareDocumentsService;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -26,7 +26,7 @@ public class ShareDocumentsControllerTest extends BaseControllerTest {
 
     @Test
     public void whenApplicantSharesDocuments_thenRelevantServiceMethodsAreInvoked() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
+        OldCallbackRequest callbackRequest = buildCallbackRequest();
         callbackRequest.getCaseDetails().getData().put(APPLICANT_SHARE_DOCUMENTS, YES_VALUE);
 
         shareDocumentsController.shareDocumentsWithRespondent(callbackRequest);
@@ -37,7 +37,7 @@ public class ShareDocumentsControllerTest extends BaseControllerTest {
 
     @Test
     public void whenApplicantStopsSharingDocuments_thenRelevantServiceMethodsAreInvoked() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
+        OldCallbackRequest callbackRequest = buildCallbackRequest();
         callbackRequest.getCaseDetails().getData().put(APPLICANT_SHARE_DOCUMENTS, NO_VALUE);
 
         shareDocumentsController.shareDocumentsWithRespondent(callbackRequest);
@@ -50,7 +50,7 @@ public class ShareDocumentsControllerTest extends BaseControllerTest {
 
     @Test
     public void whenRespondentSharesDocuments_thenRelevantServiceMethodsAreInvoked() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
+        OldCallbackRequest callbackRequest = buildCallbackRequest();
         callbackRequest.getCaseDetails().getData().put(RESPONDENT_SHARE_DOCUMENTS, YES_VALUE);
 
         shareDocumentsController.shareDocumentsWithApplicant(callbackRequest);
@@ -61,7 +61,7 @@ public class ShareDocumentsControllerTest extends BaseControllerTest {
 
     @Test
     public void whenRespondentStopsSharingDocuments_thenRelevantServiceMethodsAreInvoked() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
+        OldCallbackRequest callbackRequest = buildCallbackRequest();
         callbackRequest.getCaseDetails().getData().put(RESPONDENT_SHARE_DOCUMENTS, NO_VALUE);
 
         shareDocumentsController.shareDocumentsWithApplicant(callbackRequest);

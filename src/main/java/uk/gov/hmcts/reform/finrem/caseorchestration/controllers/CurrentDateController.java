@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.OldAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 
 import javax.validation.constraints.NotNull;
 
@@ -35,12 +35,12 @@ public class CurrentDateController extends BaseController {
     @Operation(summary = "Generates current date for the supplied field in the URL path. Serves as a callback from CCD")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback was processed successfully or in case of an error message is attached to the case",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = OldAboutToStartOrSubmitCallbackResponse.class))}),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateCurrentDateFor(
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> generateCurrentDateFor(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callback,
+        @NotNull @RequestBody @Parameter(description = "CaseData") OldCallbackRequest callback,
         @PathVariable("field") String field) {
 
         CaseDetails caseDetails = callback.getCaseDetails();
@@ -51,6 +51,6 @@ public class CurrentDateController extends BaseController {
         Map<String, Object> caseData = caseDetails.getData();
         caseData.put(field, LocalDate.now());
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 }

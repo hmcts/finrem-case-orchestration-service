@@ -22,15 +22,17 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.util.ResourceUtils;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.OldAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
+import uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
 import java.io.File;
@@ -95,15 +97,15 @@ public class NotificationsTest extends BaseTest {
     @ClassRule
     public static WireMockClassRule notificationService = new WireMockClassRule(8086);
 
-    private CallbackRequest request;
-    private uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest newRequest;
+    private OldCallbackRequest request;
+    private CallbackRequest newRequest;
 
     @Before
     public void setUp() throws IOException {
         File file = ResourceUtils.getFile(this.getClass().getResource("/fixtures/consented-ccd-request-with-solicitor-agreed-to-emails.json"));
         newRequest = deserializer.deserialize(new String(Files.readAllBytes(file.toPath())));
         try (InputStream resourceAsStream = getClass().getResourceAsStream(FIXTURES_CONSENTED_CCD_REQUEST_JSON)) {
-            request = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
+            request = objectMapper.readValue(resourceAsStream, OldCallbackRequest.class);
         }
     }
 
@@ -165,14 +167,14 @@ public class NotificationsTest extends BaseTest {
 
     private String expectedCaseData() throws JsonProcessingException {
         CaseDetails caseDetails = request.getCaseDetails();
-        return objectMapper.writeValueAsString(AboutToStartOrSubmitCallbackResponse.builder()
+        return objectMapper.writeValueAsString(OldAboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDetails.getData()).build());
     }
 
     private String expectedFinremCaseData() throws JsonProcessingException {
         FinremCaseDetails caseDetails = newRequest.getCaseDetails();
 
-        return objectMapper.writeValueAsString(uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse
+        return objectMapper.writeValueAsString(AboutToStartOrSubmitCallbackResponse
             .builder().data(caseDetails.getCaseData()).build());
     }
 

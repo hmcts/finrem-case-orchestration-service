@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.OldAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationService;
@@ -45,12 +45,12 @@ public class UpdateRepresentationController extends BaseController {
     @Operation(summary = "Applies Notice of Change Decision when initiated by solicitor and saves new sol's details to case")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback was processed successfully or in case of an error message is attached to the case",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = OldAboutToStartOrSubmitCallbackResponse.class))}),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> updateRepresentation(
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> updateRepresentation(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
-        @RequestBody CallbackRequest ccdRequest) {
+        @RequestBody OldCallbackRequest ccdRequest) {
 
         CaseDetails caseDetails = ccdRequest.getCaseDetails();
         log.info("Received request to apply Notice of Change Decision and update representation for case {}",
@@ -67,12 +67,12 @@ public class UpdateRepresentationController extends BaseController {
     @Operation(summary = "Sets default values for update contact details event")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback was processed successfully or in case of an error message is attached to the case",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = OldAboutToStartOrSubmitCallbackResponse.class))}),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setNocDefaults(
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> setNocDefaults(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
-        @RequestBody CallbackRequest ccdRequest) {
+        @RequestBody OldCallbackRequest ccdRequest) {
         log.info("Received request to set default values for Update Contact Details Event for case {}",
             ccdRequest.getCaseDetails().getId());
 
@@ -84,6 +84,6 @@ public class UpdateRepresentationController extends BaseController {
             caseData.put(INCLUDES_REPRESENTATIVE_UPDATE, null);
         }
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 }

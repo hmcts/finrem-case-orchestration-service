@@ -8,12 +8,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Classification;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.ccd.domain.CaseType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.EventType;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
@@ -81,22 +82,22 @@ public abstract class BaseControllerTest extends BaseTest {
         loadRequestContentWith("/fixtures/bulkprint/bulk-print-additional-hearing.json");
     }
 
-    protected uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest getCallbackRequest(String source) {
+    protected CallbackRequest getCallbackRequest(String source) {
         return new FinremCallbackRequestDeserializer(objectMapper).deserialize(source);
     }
 
-    protected uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest getCallbackRequest() {
-        return uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest.builder()
+    protected CallbackRequest getCallbackRequest() {
+        return CallbackRequest.builder()
             .caseDetails(FinremCaseDetails.builder().caseData(FinremCaseData.builder().build()).build())
             .eventType(EventType.ALLOCATE_TO_JUDGE)
             .caseDetailsBefore(FinremCaseDetails.builder().caseData(FinremCaseData.builder().build()).build())
             .build();
     }
 
-    protected CallbackRequest buildCallbackRequest() {
+    protected OldCallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
         CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CaseType.CONSENTED.getCcdType()).id(Long.valueOf(123)).data(caseData).build();
-        return CallbackRequest.builder().eventId("FR_issueApplication").caseDetails(caseDetails).build();
+        return OldCallbackRequest.builder().eventId("FR_issueApplication").caseDetails(caseDetails).build();
     }
 
     protected String buildNewCallbackRequestString() throws JsonProcessingException {
@@ -109,7 +110,7 @@ public abstract class BaseControllerTest extends BaseTest {
             .id(123L).caseData(caseData).build();
 
         return objectMapper.writeValueAsString(
-            uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest.builder()
+            CallbackRequest.builder()
                 .eventType(EventType.PREPARE_FOR_HEARING)
                 .caseDetails(caseDetails)
                 .build());
@@ -124,7 +125,7 @@ public abstract class BaseControllerTest extends BaseTest {
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().caseType(CaseType.CONSENTED).id(123L)
             .caseData(caseData).build();
         return objectMapper.writeValueAsString(
-            uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest.builder()
+            CallbackRequest.builder()
                 .eventType(EventType.PREPARE_FOR_HEARING)
                 .caseDetails(caseDetails)
                 .build());
@@ -136,41 +137,41 @@ public abstract class BaseControllerTest extends BaseTest {
         caseData.getContactDetailsWrapper().setApplicantSolicitorConsentForEmails(YesOrNo.NO);
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123L).caseData(caseData).build();
         return objectMapper.writeValueAsString(
-            uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest.builder()
+            CallbackRequest.builder()
                 .eventType(EventType.PREPARE_FOR_HEARING)
                 .caseDetails(caseDetails)
                 .build());
     }
 
-    protected uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest buildNewCallbackRequest() {
+    protected CallbackRequest buildNewCallbackRequest() {
         FinremCaseData caseData = new FinremCaseData();
         caseData.setCcdCaseType(CaseType.CONTESTED);
         FinremCaseDetails caseDetails = new FinremCaseDetails(123, "x", State.APPLICATION_ISSUED,
             LocalDateTime.now(), 2, "200", LocalDateTime.now(),
             Classification.PUBLIC, caseData, CaseType.CONTESTED, 1);
 
-        return new uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest(EventType.PREPARE_FOR_HEARING, caseDetails, caseDetails);
+        return new CallbackRequest(EventType.PREPARE_FOR_HEARING, caseDetails, caseDetails);
     }
 
-    protected uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest buildNewCallbackRequestConsented() {
+    protected CallbackRequest buildNewCallbackRequestConsented() {
         FinremCaseData caseData = new FinremCaseData();
         caseData.setCcdCaseType(CaseType.CONSENTED);
         FinremCaseDetails caseDetails = new FinremCaseDetails(123, "x", State.APPLICATION_ISSUED,
             LocalDateTime.now(), 2, "200", LocalDateTime.now(),
             Classification.PUBLIC, caseData, CaseType.CONSENTED, 1);
 
-        return new uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest(EventType.PREPARE_FOR_HEARING, caseDetails, caseDetails);
+        return new CallbackRequest(EventType.PREPARE_FOR_HEARING, caseDetails, caseDetails);
     }
 
     protected String buildCallbackRequestString() throws JsonProcessingException {
         return objectMapper.writeValueAsString(buildCallbackRequest());
     }
 
-    protected CallbackRequest buildNoCCaseworkerCallbackRequest() {
+    protected OldCallbackRequest buildNoCCaseworkerCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(INCLUDES_REPRESENTATIVE_UPDATE, YES_VALUE);
         CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
-        return CallbackRequest.builder().eventId(UPDATE_CONTACT_DETAILS_EVENT)
+        return OldCallbackRequest.builder().eventId(UPDATE_CONTACT_DETAILS_EVENT)
             .caseDetails(caseDetails)
             .caseDetailsBefore(caseDetails)
             .build();
@@ -181,18 +182,18 @@ public abstract class BaseControllerTest extends BaseTest {
         caseData.getContactDetailsWrapper().setUpdateIncludesRepresentativeChange(YesOrNo.YES);
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123L).caseType(CaseType.CONTESTED).caseData(caseData).build();
         return objectMapper.writeValueAsString(
-            uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest.builder()
+            CallbackRequest.builder()
                 .eventType(EventType.UPDATE_CONTACT_DETAILS)
                 .caseDetails(caseDetails)
                 .caseDetailsBefore(caseDetails)
                 .build());
     }
 
-    protected CallbackRequest buildCallbackRequestWithBeforeCaseDetails() {
+    protected OldCallbackRequest buildCallbackRequestWithBeforeCaseDetails() {
         Map<String, Object> caseData = new HashMap<>();
         CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(123)).data(caseData).build();
         CaseDetails caseDetailsBefore = CaseDetails.builder().id(Long.valueOf(120)).data(caseData).build();
-        return CallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
+        return OldCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
     }
 
     protected String buildCallbackRequestWithBeforeCaseDetailsStringPaper() throws JsonProcessingException {
@@ -209,25 +210,25 @@ public abstract class BaseControllerTest extends BaseTest {
         FinremCaseData caseData = new FinremCaseData();
         FinremCaseDetails caseDetails = FinremCaseDetails.builder().caseType(CaseType.CONTESTED).id(123L).caseData(caseData).build();
         FinremCaseDetails caseDetailsBefore = FinremCaseDetails.builder().caseType(CaseType.CONTESTED).id(123L).caseData(caseData).build();
-        return objectMapper.writeValueAsString(uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest.builder()
+        return objectMapper.writeValueAsString(CallbackRequest.builder()
             .caseDetails(caseDetails)
             .caseDetailsBefore(caseDetailsBefore)
             .build());
     }
 
     protected String buildCallbackRequestStringBase(FinremCaseDetails caseDetails) throws JsonProcessingException {
-        return objectMapper.writeValueAsString(uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest.builder()
+        return objectMapper.writeValueAsString(CallbackRequest.builder()
             .caseDetails(caseDetails)
             .caseDetailsBefore(caseDetails)
             .build());
     }
 
-    protected CallbackRequest buildCallbackInterimRequest() {
+    protected OldCallbackRequest buildCallbackInterimRequest() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(RESP_SOLICITOR_EMAIL, "abc@mailinator.com");
         caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, "YES");
         CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(123)).data(caseData).build();
-        return CallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build();
+        return OldCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build();
     }
 
     protected CaseDocument getCaseDocument() {
@@ -257,8 +258,8 @@ public abstract class BaseControllerTest extends BaseTest {
         }
     }
 
-    protected uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest getCallbackRequestEmptyCaseData() {
-        return uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest.builder()
+    protected CallbackRequest getCallbackRequestEmptyCaseData() {
+        return CallbackRequest.builder()
             .caseDetails(FinremCaseDetails.builder().build())
             .eventType(EventType.ALLOCATE_TO_JUDGE)
             .caseDetailsBefore(FinremCaseDetails.builder().build())

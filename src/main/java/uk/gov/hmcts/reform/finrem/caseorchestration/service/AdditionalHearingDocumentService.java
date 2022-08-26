@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseExcep
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.additionalhearing.AdditionalHearingDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.ccd.domain.AdditionalHearingDocument;
 import uk.gov.hmcts.reform.finrem.ccd.domain.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.ccd.domain.DirectionDetail;
 import uk.gov.hmcts.reform.finrem.ccd.domain.DirectionDetailCollection;
@@ -108,7 +109,7 @@ public class AdditionalHearingDocumentService {
 
     public void addAdditionalHearingDocumentToCaseData(FinremCaseDetails caseDetails, Document document) {
         AdditionalHearingDocumentCollection generatedDocumentData = AdditionalHearingDocumentCollection.builder()
-            .value(uk.gov.hmcts.reform.finrem.ccd.domain.AdditionalHearingDocument.builder()
+            .value(AdditionalHearingDocument.builder()
                 .additionalHearingDocument(document)
                 .build())
             .build();

@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.OldAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ShareDocumentsService;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
@@ -37,11 +37,11 @@ public class ShareDocumentsController extends BaseController {
     @Operation(summary = "Share documents with respondent")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback was processed successfully or in case of an error message is attached to the case",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = OldAboutToStartOrSubmitCallbackResponse.class))}),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> shareDocumentsWithRespondent(
-        @RequestBody CallbackRequest ccdRequest) {
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> shareDocumentsWithRespondent(
+        @RequestBody OldCallbackRequest ccdRequest) {
         log.info("Received request to share documents with respondent");
         validateCaseData(ccdRequest);
 
@@ -54,18 +54,18 @@ public class ShareDocumentsController extends BaseController {
             shareDocumentsService.clearSharedDocumentsVisibleToRespondent(caseDetails);
         }
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
 
     @PostMapping(path = "/share-documents-with-applicant", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Share documents with applicant")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback was processed successfully or in case of an error message is attached to the case",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = OldAboutToStartOrSubmitCallbackResponse.class))}),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> shareDocumentsWithApplicant(
-        @RequestBody CallbackRequest ccdRequest) {
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> shareDocumentsWithApplicant(
+        @RequestBody OldCallbackRequest ccdRequest) {
         log.info("Received request to share documents with applicant");
         validateCaseData(ccdRequest);
 
@@ -78,6 +78,6 @@ public class ShareDocumentsController extends BaseController {
             shareDocumentsService.clearSharedDocumentsVisibleToApplicant(caseDetails);
         }
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
 }

@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.OldAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
@@ -30,6 +30,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotific
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
+import uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.ccd.domain.FinremCaseDetails;
 
@@ -65,12 +67,12 @@ public class NotificationsController extends BaseController {
         @ApiResponse(responseCode = "200",
             description = "HWFSuccessful notification sent successfully",
             content = {@Content(mediaType = "application/json",
-                schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendHwfSuccessfulConfirmationNotification(
+                schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendHwfSuccessfulConfirmationNotification(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @RequestBody String source) {
 
-        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest =
+        CallbackRequest callbackRequest =
             finremCallbackRequestDeserializer.deserialize(source);
 
         log.info("Received request to send email for HWF Successful for Case ID: {}", callbackRequest.getCaseDetails().getId());
@@ -90,7 +92,7 @@ public class NotificationsController extends BaseController {
             notificationService.sendContestedHwfSuccessfulConfirmationEmail(caseDetails);
         }
 
-        return ResponseEntity.ok(uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.builder()
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseData)
             .build());
     }
@@ -101,12 +103,12 @@ public class NotificationsController extends BaseController {
         @ApiResponse(responseCode = "200",
             description = "Case assigned to Judge notification sent successfully",
             content = {@Content(mediaType = "application/json",
-                schema = @Schema(implementation =  uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendAssignToJudgeConfirmationNotification(
+                schema = @Schema(implementation =  AboutToStartOrSubmitCallbackResponse.class))})})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendAssignToJudgeConfirmationNotification(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @RequestBody String source) {
 
-        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest =
+        CallbackRequest callbackRequest =
             finremCallbackRequestDeserializer.deserialize(source);
 
         log.info("Received request to notify solicitor for Judge successfully assigned to case for Case ID: {}",
@@ -127,7 +129,7 @@ public class NotificationsController extends BaseController {
             notificationService.sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
         }
 
-        return ResponseEntity.ok(uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.builder()
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseData)
             .build());
     }
@@ -138,13 +140,13 @@ public class NotificationsController extends BaseController {
         @ApiResponse(responseCode = "200",
             description = "Case assigned to Judge notification sent successfully",
             content = {@Content(mediaType = "application/json",
-                schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse>
+                schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse>
         sendConsentInContestedAssignToJudgeConfirmationPaperNotification(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @RequestBody String source) {
 
-        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest =
+        CallbackRequest callbackRequest =
             finremCallbackRequestDeserializer.deserialize(source);
 
         log.info("Received request to notify applicant and respondent for Judge successfully assigned to case for Case ID: {}",
@@ -154,7 +156,7 @@ public class NotificationsController extends BaseController {
 
         paperNotificationService.printConsentInContestedAssignToJudgeConfirmationNotification(caseDetails, authToken);
 
-        return ResponseEntity.ok(uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.builder()
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDetails.getCaseData())
             .build());
     }
@@ -165,11 +167,11 @@ public class NotificationsController extends BaseController {
         @ApiResponse(responseCode = "200",
             description = "Consent order made e-mail sent successfully",
             content = {@Content(mediaType = "application/json",
-                schema = @Schema(implementation =  uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendConsentOrderMadeConfirmationEmail(
+                schema = @Schema(implementation =  AboutToStartOrSubmitCallbackResponse.class))})})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendConsentOrderMadeConfirmationEmail(
         @RequestBody String source) {
 
-        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest
+        CallbackRequest callbackRequest
             = finremCallbackRequestDeserializer.deserialize(source);
 
         log.info("Received request to send email for 'Consent Order Made' for Case ID: {}", callbackRequest.getCaseDetails().getId());
@@ -188,7 +190,7 @@ public class NotificationsController extends BaseController {
             notificationService.sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(caseDetails);
         }
 
-        return ResponseEntity.ok(uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.builder()
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseData)
             .build());
     }
@@ -199,11 +201,11 @@ public class NotificationsController extends BaseController {
         @ApiResponse(responseCode = "200",
             description = "Consent/Contest order not approved e-mail sent successfully",
             content = {@Content(mediaType = "application/json",
-                schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendConsentOrderNotApprovedEmail(
+                schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendConsentOrderNotApprovedEmail(
         @RequestBody String source) {
 
-        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest = finremCallbackRequestDeserializer.deserialize(source);
+        CallbackRequest callbackRequest = finremCallbackRequestDeserializer.deserialize(source);
         log.info("Received request to send email for 'Consent/Contest Order Not Approved' for Case ID: {}", callbackRequest.getCaseDetails().getId());
 
         validateCaseData(callbackRequest);
@@ -230,7 +232,7 @@ public class NotificationsController extends BaseController {
             }
         }
 
-        return ResponseEntity.ok(uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.builder()
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseData)
             .build());
     }
@@ -240,9 +242,9 @@ public class NotificationsController extends BaseController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200",
             description = "Contested consent order approved e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendContestedConsentOrderApprovedEmail(
-        @RequestBody CallbackRequest callbackRequest) {
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = OldAboutToStartOrSubmitCallbackResponse.class))})})
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> sendContestedConsentOrderApprovedEmail(
+        @RequestBody OldCallbackRequest callbackRequest) {
 
         log.info("Received request to send email for 'Contested Consent Order Approved' for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
@@ -259,7 +261,7 @@ public class NotificationsController extends BaseController {
             notificationService.sendContestedConsentOrderApprovedEmailToRespondentSolicitor(caseDetails);
         }
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
     @PostMapping(value = "/contested-consent-order-not-approved", consumes = APPLICATION_JSON_VALUE)
@@ -267,9 +269,9 @@ public class NotificationsController extends BaseController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200",
             description = "Contested consent order not approved e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendContestedConsentOrderNotApprovedEmail(
-        @RequestBody CallbackRequest callbackRequest) {
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = OldAboutToStartOrSubmitCallbackResponse.class))})})
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> sendContestedConsentOrderNotApprovedEmail(
+        @RequestBody OldCallbackRequest callbackRequest) {
         validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
@@ -285,7 +287,7 @@ public class NotificationsController extends BaseController {
             notificationService.sendContestedConsentOrderNotApprovedEmailRespondentSolicitor(caseDetails);
         }
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
     @PostMapping(value = "/general-order-raised", consumes = APPLICATION_JSON_VALUE)
@@ -293,9 +295,9 @@ public class NotificationsController extends BaseController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200",
             description = "General order raised e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendGeneralOrderRaisedEmail(
-        @RequestBody CallbackRequest callbackRequest) {
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = OldAboutToStartOrSubmitCallbackResponse.class))})})
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> sendGeneralOrderRaisedEmail(
+        @RequestBody OldCallbackRequest callbackRequest) {
 
         log.info("Received request to send email for General Order raised for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
@@ -332,7 +334,7 @@ public class NotificationsController extends BaseController {
             }
         }
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
     @PostMapping(value = "/consent-order-available", consumes = APPLICATION_JSON_VALUE)
@@ -341,11 +343,11 @@ public class NotificationsController extends BaseController {
         @ApiResponse(responseCode = "200",
             description = "Consent order available e-mail sent successfully",
             content = {@Content(mediaType = "application/json",
-                schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendConsentOrderAvailableEmail(
+                schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendConsentOrderAvailableEmail(
         @RequestBody String source) {
 
-        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest =
+        CallbackRequest callbackRequest =
             finremCallbackRequestDeserializer.deserialize(source);
 
         log.info("Received request to send email for 'Consent Order Available' for Case ID: {}", callbackRequest.getCaseDetails().getId());
@@ -363,7 +365,7 @@ public class NotificationsController extends BaseController {
             notificationService.sendConsentOrderAvailableEmailToRespondentSolicitor(caseDetails);
         }
 
-        return ResponseEntity.ok(uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.builder()
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseData)
             .build());
     }
@@ -373,12 +375,12 @@ public class NotificationsController extends BaseController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204", description = "'Prepare for Hearing' e-mail sent successfully",
             content = {@Content(mediaType = "application/json",
-                schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendPrepareForHearingEmail(
+                schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendPrepareForHearingEmail(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @RequestBody String source) {
 
-        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest =
+        CallbackRequest callbackRequest =
             finremCallbackRequestDeserializer.deserialize(source);
         validateCaseData(callbackRequest);
 
@@ -395,7 +397,7 @@ public class NotificationsController extends BaseController {
             notificationService.sendPrepareForHearingEmailRespondent(caseDetails);
         }
 
-        return ResponseEntity.ok(uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.builder()
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDetails.getCaseData())
             .build());
     }
@@ -405,9 +407,9 @@ public class NotificationsController extends BaseController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200",
             description = "'Prepare for Hearing (after send order)' e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendPrepareForHearingOrderSentEmail(
-        @RequestBody CallbackRequest callbackRequest) {
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = OldAboutToStartOrSubmitCallbackResponse.class))})})
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> sendPrepareForHearingOrderSentEmail(
+        @RequestBody OldCallbackRequest callbackRequest) {
 
         log.info("Received request to send email for 'Prepare for Hearing (after order sent)' for Case ID: {}",
             callbackRequest.getCaseDetails().getId());
@@ -425,7 +427,7 @@ public class NotificationsController extends BaseController {
             notificationService.sendPrepareForHearingOrderSentEmailRespondent(caseDetails);
         }
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
     @PostMapping(value = "/contest-application-issued", consumes = APPLICATION_JSON_VALUE)
@@ -433,9 +435,9 @@ public class NotificationsController extends BaseController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200",
             description = "Consent order available e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendContestedApplicationIssuedEmail(
-        @RequestBody CallbackRequest callbackRequest) {
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = OldAboutToStartOrSubmitCallbackResponse.class))})})
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> sendContestedApplicationIssuedEmail(
+        @RequestBody OldCallbackRequest callbackRequest) {
         log.info("Received request to send email for Contested 'Application Issued' for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
@@ -451,7 +453,7 @@ public class NotificationsController extends BaseController {
             notificationService.sendContestedApplicationIssuedEmailToRespondentSolicitor(caseDetails);
         }
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
     @PostMapping(value = "/draft-order", consumes = APPLICATION_JSON_VALUE)
@@ -459,9 +461,9 @@ public class NotificationsController extends BaseController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200",
             description = "Draft Order e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendDraftOrderEmail(
-        @RequestBody CallbackRequest callbackRequest) {
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = OldAboutToStartOrSubmitCallbackResponse.class))})})
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> sendDraftOrderEmail(
+        @RequestBody OldCallbackRequest callbackRequest) {
 
         log.info("Received request to send email for 'Solicitor To Draft Order' for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
@@ -480,7 +482,7 @@ public class NotificationsController extends BaseController {
             notificationService.sendSolicitorToDraftOrderEmailRespondent(caseDetails);
         }
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
     @PostMapping(value = "/general-email", consumes = APPLICATION_JSON_VALUE)
@@ -488,9 +490,9 @@ public class NotificationsController extends BaseController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200",
             description = "General e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendGeneralEmail(
-        @RequestBody CallbackRequest callbackRequest) {
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = OldAboutToStartOrSubmitCallbackResponse.class))})})
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> sendGeneralEmail(
+        @RequestBody OldCallbackRequest callbackRequest) {
 
         log.info("Received request to send general email for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
@@ -505,7 +507,7 @@ public class NotificationsController extends BaseController {
 
         generalEmailService.storeGeneralEmail(caseDetails);
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
 
     @PostMapping(value = "/manual-payment", consumes = APPLICATION_JSON_VALUE)
@@ -514,11 +516,11 @@ public class NotificationsController extends BaseController {
         @ApiResponse(responseCode = "200",
             description = "Manual Payment letter sent successfully",
             content = {@Content(mediaType = "application/json",
-                schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendManualPaymentPaperNotification(
+                schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendManualPaymentPaperNotification(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @RequestBody String source) {
-        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest =
+        CallbackRequest callbackRequest =
             finremCallbackRequestDeserializer.deserialize(source);
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request to send Manual Payment Letter for Case ID: {}", caseDetails.getId());
@@ -526,7 +528,7 @@ public class NotificationsController extends BaseController {
 
         paperNotificationService.printManualPaymentNotification(caseDetails, authToken);
 
-        return ResponseEntity.ok(uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.builder()
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDetails.getCaseData())
             .build());
     }
@@ -536,16 +538,16 @@ public class NotificationsController extends BaseController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200",
             description = "General application refer to judge email sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendGeneralApplicationReferToJudgeEmail(
-        @RequestBody CallbackRequest callbackRequest) {
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = OldAboutToStartOrSubmitCallbackResponse.class))})})
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> sendGeneralApplicationReferToJudgeEmail(
+        @RequestBody OldCallbackRequest callbackRequest) {
         log.info("Received request to send general application refer to judge email for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         notificationService.sendContestedGeneralApplicationReferToJudgeEmail(caseDetails);
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
 
     @PostMapping(value = "/general-application-outcome", consumes = APPLICATION_JSON_VALUE)
@@ -553,16 +555,16 @@ public class NotificationsController extends BaseController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200",
             description = "General Application Outcome email sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendGeneralApplicationOutcomeEmail(
-        @RequestBody CallbackRequest callbackRequest) throws IOException {
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = OldAboutToStartOrSubmitCallbackResponse.class))})})
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> sendGeneralApplicationOutcomeEmail(
+        @RequestBody OldCallbackRequest callbackRequest) throws IOException {
         log.info("Received request to send General Application Outcome email for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         notificationService.sendContestedGeneralApplicationOutcomeEmail(caseDetails);
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
 
     @PostMapping(value = "/consent-order-not-approved-sent", consumes = APPLICATION_JSON_VALUE)
@@ -570,9 +572,9 @@ public class NotificationsController extends BaseController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200",
             description = "Consent order not approved sent email sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = OldAboutToStartOrSubmitCallbackResponse.class))})})
     public ResponseEntity<SubmittedCallbackResponse> sendConsentOrderNotApprovedSentEmail(
-        @RequestBody CallbackRequest callbackRequest) {
+        @RequestBody OldCallbackRequest callbackRequest) {
         validateCaseData(callbackRequest);
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
@@ -596,9 +598,9 @@ public class NotificationsController extends BaseController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200",
             description = "Transfer to Local Courts e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendTransferCourtsEmail(
-        @RequestBody CallbackRequest callbackRequest) {
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = OldAboutToStartOrSubmitCallbackResponse.class))})})
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> sendTransferCourtsEmail(
+        @RequestBody OldCallbackRequest callbackRequest) {
 
         log.info("Received request to send transfer courts email for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
@@ -612,7 +614,7 @@ public class NotificationsController extends BaseController {
             transferCourtService.storeTransferToCourtEmail(caseDetails);
         }
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
 
     @PostMapping(value = "/prepare-for-interim-hearing", consumes = APPLICATION_JSON_VALUE)
@@ -620,9 +622,9 @@ public class NotificationsController extends BaseController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200",
             description = "General application refer to judge email sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendInterimHearingNotification(
-        @RequestBody CallbackRequest callbackRequest) {
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = OldAboutToStartOrSubmitCallbackResponse.class))})})
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> sendInterimHearingNotification(
+        @RequestBody OldCallbackRequest callbackRequest) {
         log.info("Received request to send general application refer to judge email for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
 
@@ -639,7 +641,7 @@ public class NotificationsController extends BaseController {
                 notificationService.sendInterimNotificationEmailToRespondentSolicitor(caseDetails);
             }
         }
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
 
 
@@ -649,11 +651,11 @@ public class NotificationsController extends BaseController {
         @ApiResponse(responseCode = "200",
             description = "Notice of change e-mail and letter sent successfully",
             content = {@Content(mediaType = "application/json",
-                schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendNoticeOfChangeNotifications(
+                schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendNoticeOfChangeNotifications(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @RequestBody String source) {
-        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest =
+        CallbackRequest callbackRequest =
             finremCallbackRequestDeserializer.deserialize(source);
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
@@ -664,7 +666,7 @@ public class NotificationsController extends BaseController {
         log.info("Call the noc letter service");
         nocLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, callbackRequest.getCaseDetailsBefore(), authorisationToken);
 
-        return ResponseEntity.ok(uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.builder()
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDetails.getCaseData())
             .build());
     }
@@ -675,26 +677,26 @@ public class NotificationsController extends BaseController {
         @ApiResponse(responseCode = "200",
             description = "Notice of change e-mail and letter sent successfully",
             content = {@Content(mediaType = "application/json",
-                schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendNoticeOfChangeNotificationsCaseworker(
+                schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendNoticeOfChangeNotificationsCaseworker(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @RequestBody String source) {
 
-        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest =
+        CallbackRequest callbackRequest =
             finremCallbackRequestDeserializer.deserialize(source);
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         validateCaseData(callbackRequest);
 
         if (!requiresNotifications(callbackRequest)) {
-            return ResponseEntity.ok(uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse
+            return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
                 .builder().data(caseDetails.getCaseData()).build());
         }
         log.info("Received request to send Notice of Change email and letter for Case ID: {}", callbackRequest.getCaseDetails().getId());
         notificationService.sendNoticeOfChangeEmailCaseworker(caseDetails);
         log.info("Call the noc letter service");
         nocLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, callbackRequest.getCaseDetailsBefore(), authorisationToken);
-        return ResponseEntity.ok(uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.builder()
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDetails.getCaseData())
             .build());
     }
@@ -705,11 +707,11 @@ public class NotificationsController extends BaseController {
         @ApiResponse(responseCode = "204",
             description = "Update FRC information notificatons sent successfully",
             content = {@Content(mediaType = "application/json",
-                schema = @Schema(implementation = uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.class))})})
-    ResponseEntity<uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse> sendUpdateFrcNotifications(
+                schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
+    ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendUpdateFrcNotifications(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @RequestBody String source) throws JsonProcessingException {
-        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest = finremCallbackRequestDeserializer.deserialize(source);
+        CallbackRequest callbackRequest = finremCallbackRequestDeserializer.deserialize(source);
         log.info("Received request to send update FRC info notifications for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
 
@@ -730,12 +732,12 @@ public class NotificationsController extends BaseController {
         notificationService.sendUpdateFrcInformationEmailToCourt(caseDetails);
         paperNotificationService.printUpdateFrcInformationNotification(caseDetails, authToken);
 
-        return ResponseEntity.ok(uk.gov.hmcts.reform.finrem.ccd.callback.AboutToStartOrSubmitCallbackResponse.builder()
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseData)
             .build());
     }
 
-    private boolean requiresNotifications(uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callbackRequest) {
+    private boolean requiresNotifications(CallbackRequest callbackRequest) {
         FinremCaseData caseData = callbackRequest.getCaseDetails().getCaseData();
 
         return featureToggleService.isCaseworkerNoCEnabled()

@@ -18,10 +18,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,13 +58,13 @@ public class FeeLookUpTest extends BaseTest {
     @ClassRule
     public static WireMockClassRule feeLookUpService = new WireMockClassRule(9001);
 
-    private CallbackRequest request;
+    private OldCallbackRequest request;
 
-    public CallbackRequest request(ApplicationType applicationType) throws IOException {
+    public OldCallbackRequest request(ApplicationType applicationType) throws IOException {
         String fileName = applicationType == CONSENTED
             ? "/fixtures/fee-lookup.json" : "/fixtures/contested/fee-lookup.json";
         try (InputStream resourceAsStream = getClass().getResourceAsStream(fileName)) {
-            return objectMapper.readValue(resourceAsStream, CallbackRequest.class);
+            return objectMapper.readValue(resourceAsStream, OldCallbackRequest.class);
         }
     }
 

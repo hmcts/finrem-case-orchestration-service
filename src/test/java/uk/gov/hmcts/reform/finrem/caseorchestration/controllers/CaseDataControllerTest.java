@@ -8,8 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
@@ -58,7 +58,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         try (InputStream resourceAsStream =
                  getClass().getResourceAsStream(PATH + fileName)) {
-            caseDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+            caseDetails = mapper.readValue(resourceAsStream, OldCallbackRequest.class).getCaseDetails();
         }
     }
 
@@ -239,7 +239,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
 
-        CallbackRequest callbackRequest = buildCallbackRequest();
+        OldCallbackRequest callbackRequest = buildCallbackRequest();
 
         caseDataController.setContestedDefaultValues(AUTH_TOKEN, callbackRequest);
 
@@ -271,7 +271,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
 
-        CallbackRequest callbackRequest = buildCallbackRequest();
+        OldCallbackRequest callbackRequest = buildCallbackRequest();
 
         caseDataController.setConsentedDefaultValues(AUTH_TOKEN, callbackRequest);
 

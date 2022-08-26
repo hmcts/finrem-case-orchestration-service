@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.OldAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 
 import javax.validation.constraints.NotNull;
 
@@ -36,12 +36,12 @@ public class CheckLatestConsentOrderController extends BaseController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200",
             description = "Callback was processed successfully or in case of an error message is attached to the case",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = OldAboutToStartOrSubmitCallbackResponse.class))}),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateConsentOrderNotApproved(
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> generateConsentOrderNotApproved(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callback) {
+        @NotNull @RequestBody @Parameter(description = "CaseData") OldCallbackRequest callback) {
 
         validateCaseData(callback);
 
@@ -50,12 +50,12 @@ public class CheckLatestConsentOrderController extends BaseController {
 
         if (isNull(caseData.get(LATEST_CONSENT_ORDER))) {
             log.info("Failed validation for {} as latest Consent Order field was null", caseId);
-            return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
+            return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder()
                 .errors(Arrays.asList("Latest Consent Order Field is empty. Please use the Upload Consent Order Event instead of Send Order"))
                 .build());
         }
 
         log.info("Successfully validated {} as latest Consent Order field was present", caseId);
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().build());
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse.builder().build());
     }
 }

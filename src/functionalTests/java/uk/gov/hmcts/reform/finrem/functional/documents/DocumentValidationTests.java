@@ -9,10 +9,10 @@ import net.serenitybdd.rest.SerenityRest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrder;
@@ -39,7 +39,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
     private static final String consentedDir = "/json/latestConsentedConsentOrder/";
 
     private ObjectMapper objectMapper = new ObjectMapper();
-    private CallbackRequest callbackRequest;
+    private OldCallbackRequest callbackRequest;
 
     @Value("${cos.document.miniform.api}")
     private String generatorUrl;
@@ -59,7 +59,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
     private void setUpCaseDetails(String fileName) throws Exception {
         try (InputStream resourceAsStream =
                  getClass().getResourceAsStream(consentedDir + fileName)) {
-            callbackRequest = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
+            callbackRequest = objectMapper.readValue(resourceAsStream, OldCallbackRequest.class);
         }
     }
 

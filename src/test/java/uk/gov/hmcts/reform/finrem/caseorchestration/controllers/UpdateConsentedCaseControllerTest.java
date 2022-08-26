@@ -7,8 +7,8 @@ import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.OldAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
@@ -237,7 +237,7 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldUpdateCaseDataWithLatestConsentOrder() throws Exception {
-        when(consentOrderService.getLatestConsentOrderData(any(CallbackRequest.class))).thenReturn(getCaseDocument());
+        when(consentOrderService.getLatestConsentOrderData(any(OldCallbackRequest.class))).thenReturn(getCaseDocument());
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/latestConsentedConsentOrder/"
                 + "amend-consent-order-by-solicitor.json").toURI()));
@@ -289,7 +289,7 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/noticeOfChange/caseworkerNoc/consented-change-of-reps.json").toURI()));
         when(mockNocWorkflowService.handleNoticeOfChangeWorkflow(any(), any(), any()))
-            .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().build());
+            .thenReturn(OldAboutToStartOrSubmitCallbackResponse.builder().build());
         when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(true);
         mvc.perform(post(UPDATE_CONTACT_DETAILS_ENDPOINT)
             .content(requestContent.toString())

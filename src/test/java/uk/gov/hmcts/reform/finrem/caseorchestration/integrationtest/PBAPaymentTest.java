@@ -19,9 +19,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -93,7 +93,7 @@ public class PBAPaymentTest extends BaseTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private CallbackRequest request;
+    private OldCallbackRequest request;
 
     @ClassRule public static WireMockClassRule feeLookUpService = new WireMockClassRule(9001);
     @ClassRule public static WireMockClassRule idamService = new WireMockClassRule(4501);
@@ -232,7 +232,7 @@ public class PBAPaymentTest extends BaseTest {
 
     private void setUpPbaPayment(String name) throws IOException {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(name)) {
-            request = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
+            request = objectMapper.readValue(resourceAsStream, OldCallbackRequest.class);
         }
     }
 

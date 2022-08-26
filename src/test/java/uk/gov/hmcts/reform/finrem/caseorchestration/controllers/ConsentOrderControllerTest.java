@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
@@ -49,7 +49,7 @@ public class ConsentOrderControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldUpdateCaseDataWithLatestConsentOrder() throws Exception {
-        when(consentOrderService.getLatestConsentOrderData(any(CallbackRequest.class))).thenReturn(getCaseDocument());
+        when(consentOrderService.getLatestConsentOrderData(any(OldCallbackRequest.class))).thenReturn(getCaseDocument());
         when(idamService.isUserRoleAdmin(any())).thenReturn(true);
         mvc.perform(post(UPDATE_LATEST_CONSENT_ORDER_JSON)
             .content(requestContent.toString())
@@ -64,7 +64,7 @@ public class ConsentOrderControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldUpdateCaseDataWithApplicantRepresented() throws Exception {
-        when(consentOrderService.getLatestConsentOrderData(any(CallbackRequest.class))).thenReturn(getCaseDocument());
+        when(consentOrderService.getLatestConsentOrderData(any(OldCallbackRequest.class))).thenReturn(getCaseDocument());
         when(idamService.isUserRoleAdmin(any())).thenReturn(false);
         mvc.perform(post(UPDATE_LATEST_CONSENT_ORDER_JSON)
             .content(requestContent.toString())

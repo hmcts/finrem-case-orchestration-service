@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.OldAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 
 import javax.validation.constraints.NotNull;
@@ -37,12 +37,12 @@ public class GeneralApplicationController extends BaseController {
     @Operation(summary = "Submit general application")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback was processed successfully or in case of an error message is attached to the case",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = OldAboutToStartOrSubmitCallbackResponse.class))}),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> submitGeneralApplication(
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> submitGeneralApplication(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callback) {
+        @NotNull @RequestBody @Parameter(description = "CaseData") OldCallbackRequest callback) {
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to submit general application for Case ID: {}", caseDetails.getId());
@@ -51,7 +51,7 @@ public class GeneralApplicationController extends BaseController {
         CaseDetails caseDetailsBefore = callback.getCaseDetailsBefore();
         generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, authorisationToken);
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse
             .builder()
             .data(caseDetails.getData())
             .build());
@@ -61,12 +61,12 @@ public class GeneralApplicationController extends BaseController {
     @Operation(summary = "Start general application")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback was processed successfully or in case of an error message is attached to the case",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = OldAboutToStartOrSubmitCallbackResponse.class))}),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> startGeneralApplication(
+    public ResponseEntity<OldAboutToStartOrSubmitCallbackResponse> startGeneralApplication(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callback) {
+        @NotNull @RequestBody @Parameter(description = "CaseData") OldCallbackRequest callback) {
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to start general application for Case ID: {}", caseDetails.getId());
@@ -74,7 +74,7 @@ public class GeneralApplicationController extends BaseController {
 
         generalApplicationService.updateCaseDataStart(caseDetails.getData(), authorisationToken);
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
+        return ResponseEntity.ok(OldAboutToStartOrSubmitCallbackResponse
             .builder()
             .data(caseDetails.getData())
             .build());

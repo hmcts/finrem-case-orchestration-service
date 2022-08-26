@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DocumentClientDocument {
+public class ClientDocument {
 
     private String url;
     private String fileName;

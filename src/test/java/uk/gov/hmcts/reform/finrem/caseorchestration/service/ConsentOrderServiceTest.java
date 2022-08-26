@@ -3,9 +3,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.ccd.domain.AmendedConsentOrder;
 import uk.gov.hmcts.reform.finrem.ccd.domain.AmendedConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.ccd.domain.Document;
@@ -29,13 +30,13 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
     @Autowired
     private ConsentOrderService consentOrderService;
 
-    private CallbackRequest callbackRequest;
+    private OldCallbackRequest callbackRequest;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private void setUpCaseDetails(String fileName) throws Exception {
         try (InputStream resourceAsStream =
                  getClass().getResourceAsStream(PATH + fileName)) {
-            callbackRequest = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
+            callbackRequest = objectMapper.readValue(resourceAsStream, OldCallbackRequest.class);
         }
     }
 
@@ -80,7 +81,7 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
 
     @Test
     public void givenValidCaseDataAndRespondToOrderEvent_whenGetLatestConsentOrder_thenReturnLatestOrder() {
-        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callback = setUpCallbackRequest(EventType.RESPOND_TO_ORDER);
+        CallbackRequest callback = setUpCallbackRequest(EventType.RESPOND_TO_ORDER);
 
         Document latestConsentOrderData = consentOrderService.getLatestConsentOrderData(callback);
 
@@ -89,7 +90,7 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
 
     @Test
     public void givenRespondToOrderEventAndNoRespondToOrderDocCollection_whenGetLatestConsentOrder_thenReturnLatestOrder() {
-        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callback = setUpCallbackRequest(EventType.RESPOND_TO_ORDER);
+        CallbackRequest callback = setUpCallbackRequest(EventType.RESPOND_TO_ORDER);
         callback.getCaseDetails().getCaseData().setRespondToOrderDocuments(null);
         callback.getCaseDetails().getCaseData().setLatestConsentOrder(Document.builder().filename("latestOrder").build());
 
@@ -100,7 +101,7 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
 
     @Test
     public void givenAmendedConsentOrderEvent_whenGetLatestConsentOrderData_thenReturnLatestOrder() {
-        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callback = setUpCallbackRequest(EventType.AMENDED_CONSENT_ORDER);
+        CallbackRequest callback = setUpCallbackRequest(EventType.AMENDED_CONSENT_ORDER);
         callback.getCaseDetails().getCaseData().setAmendedConsentOrderCollection(getAmendedConsentOrderCollection());
 
         Document latestConsentOrderData = consentOrderService.getLatestConsentOrderData(callback);
@@ -110,7 +111,7 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
 
     @Test
     public void givenAmendedConsentOrderEventAndNoAmendedConsentOrders_whenGetLatestConsentOrderData_thenReturnLatestOrder() {
-        uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest callback = setUpCallbackRequest(EventType.AMENDED_CONSENT_ORDER);
+        CallbackRequest callback = setUpCallbackRequest(EventType.AMENDED_CONSENT_ORDER);
         callback.getCaseDetails().getCaseData().setLatestConsentOrder(Document.builder().filename("latestConsentOrder").build());
 
         Document latestConsentOrderData = consentOrderService.getLatestConsentOrderData(callback);
@@ -133,7 +134,7 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
         );
     }
 
-    private uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest setUpCallbackRequest(EventType eventType) {
+    private CallbackRequest setUpCallbackRequest(EventType eventType) {
         FinremCaseData caseData = new FinremCaseData();
         caseData.setRespondToOrderDocuments(List.of(
                 RespondToOrderDocumentCollection.builder()
@@ -150,7 +151,7 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
                 .build()
         ));
 
-        return uk.gov.hmcts.reform.finrem.ccd.callback.CallbackRequest.builder()
+        return CallbackRequest.builder()
             .eventType(eventType)
             .caseDetails(FinremCaseDetails.builder().caseData(caseData).build())
             .build();

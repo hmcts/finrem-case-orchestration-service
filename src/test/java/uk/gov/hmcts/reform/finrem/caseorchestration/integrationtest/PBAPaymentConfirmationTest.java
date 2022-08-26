@@ -14,9 +14,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 
 import java.io.InputStream;
 
@@ -44,7 +44,7 @@ public class PBAPaymentConfirmationTest extends BaseTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private CallbackRequest request;
+    private OldCallbackRequest request;
 
     @Test
     public void shouldDoPbaConfirmation() throws Exception {
@@ -93,7 +93,7 @@ public class PBAPaymentConfirmationTest extends BaseTest {
 
     private void setRequest(String name) throws Exception {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(name)) {
-            request = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
+            request = objectMapper.readValue(resourceAsStream, OldCallbackRequest.class);
         }
     }
 }

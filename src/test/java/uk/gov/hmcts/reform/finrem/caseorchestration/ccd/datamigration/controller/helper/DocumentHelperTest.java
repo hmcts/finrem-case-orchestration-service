@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.ccd.domain.DirectionDetail;
@@ -56,7 +56,7 @@ public class DocumentHelperTest {
 
     @Test
     public void shouldGetLatestAmendedConsentOrder() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("amend-consent-order-by-caseworker.json");
+        OldCallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("amend-consent-order-by-caseworker.json");
         CaseDocument latestAmendedConsentOrder = documentHelper.getLatestAmendedConsentOrder(
             callbackRequest.getCaseDetails().getData());
         assertThat(latestAmendedConsentOrder.getDocumentBinaryUrl(),
@@ -65,7 +65,7 @@ public class DocumentHelperTest {
 
     @Test
     public void shouldGetPensionDocuments() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("validate-pension-collection.json");
+        OldCallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("validate-pension-collection.json");
         List<CaseDocument> pensionDocuments = documentHelper.getPensionDocumentsData(
             callbackRequest.getCaseDetails().getData());
         assertThat(pensionDocuments.size(), is(2));
@@ -73,7 +73,7 @@ public class DocumentHelperTest {
 
     @Test
     public void shouldGetFormADocuments() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("validate-form-a-collection.json");
+        OldCallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("validate-form-a-collection.json");
         List<CaseDocument> pensionDocuments = documentHelper.getFormADocumentsData(
             callbackRequest.getCaseDetails().getData());
         assertThat(pensionDocuments.size(), is(2));
@@ -81,7 +81,7 @@ public class DocumentHelperTest {
 
     @Test
     public void shouldGetConsentedInContestedPensionDocuments() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("consented-in-consented.json");
+        OldCallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("consented-in-consented.json");
         List<CaseDocument> pensionDocuments = documentHelper.getConsentedInContestedPensionDocumentsData(
             callbackRequest.getCaseDetails().getData());
         assertThat(pensionDocuments.size(), is(2));
@@ -132,7 +132,7 @@ public class DocumentHelperTest {
 
     @Test
     public void shouldGetRespondToOrderDocuments() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("respond-to-order-solicitor.json");
+        OldCallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("respond-to-order-solicitor.json");
         Optional<CaseDocument> latestRespondToOrderDocuments = documentHelper.getLatestRespondToOrderDocuments(
             callbackRequest.getCaseDetails().getData());
         assertThat(latestRespondToOrderDocuments.isPresent(), is(true));
@@ -141,7 +141,7 @@ public class DocumentHelperTest {
 
     @Test
     public void shouldNotGetRespondToOrderDocuments() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("respond-to-order-without-consent-order.json");
+        OldCallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("respond-to-order-without-consent-order.json");
         Optional<CaseDocument> latestRespondToOrderDocuments = documentHelper.getLatestRespondToOrderDocuments(
             callbackRequest.getCaseDetails().getData());
         assertThat(latestRespondToOrderDocuments.isPresent(), is(false));
@@ -149,7 +149,7 @@ public class DocumentHelperTest {
 
     @Test
     public void shouldGetCaseDocument() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("draft-consent-order.json");
+        OldCallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("draft-consent-order.json");
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> data = caseDetails.getData();
         CaseDocument caseDocument = documentHelper.convertToCaseDocument(data.get(CONSENT_ORDER));
@@ -286,9 +286,9 @@ public class DocumentHelperTest {
         assertEquals(ctscContactDetails, preparedCaseDetails.getData().get(CTSC_CONTACT_DETAILS));
     }
 
-    private CallbackRequest prepareCallbackRequestForLatestConsentedConsentOrder(String fileName) throws Exception {
+    private OldCallbackRequest prepareCallbackRequestForLatestConsentedConsentOrder(String fileName) throws Exception {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH + fileName)) {
-            return objectMapper.readValue(resourceAsStream, CallbackRequest.class);
+            return objectMapper.readValue(resourceAsStream, OldCallbackRequest.class);
         }
     }
 }

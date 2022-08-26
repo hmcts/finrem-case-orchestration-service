@@ -2,9 +2,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TransferLocalCourtEmail;
 
 import java.io.InputStream;
@@ -43,7 +43,7 @@ public class TransferCourtServiceTest extends BaseServiceTest {
 
     private CaseDetails caseDetailsConsented() throws Exception {
         try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/transfer-to-local-court-email-consented.json")) {
-            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+            return mapper.readValue(resourceAsStream, OldCallbackRequest.class).getCaseDetails();
         }
     }
 }

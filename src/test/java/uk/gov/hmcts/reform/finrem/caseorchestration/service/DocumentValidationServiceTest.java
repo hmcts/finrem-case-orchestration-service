@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
 
 import java.io.InputStream;
@@ -41,12 +41,12 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
     @Autowired private DocumentClient documentClientMock;
     @Autowired private ObjectMapper objectMapper;
 
-    private CallbackRequest callbackRequest;
+    private OldCallbackRequest callbackRequest;
 
     private void setUpCaseDetails(String fileName) throws Exception {
         try (InputStream resourceAsStream =
                  getClass().getResourceAsStream(PATH + fileName)) {
-            callbackRequest = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
+            callbackRequest = objectMapper.readValue(resourceAsStream, OldCallbackRequest.class);
         }
     }
 

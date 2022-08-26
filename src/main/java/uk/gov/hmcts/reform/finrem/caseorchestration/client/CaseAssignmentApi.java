@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.ResponseBody;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.OldAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.DecisionRequest;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -24,7 +24,7 @@ public interface CaseAssignmentApi {
         value = "/noc/apply-decision",
         consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    AboutToStartOrSubmitCallbackResponse applyDecision(
+    OldAboutToStartOrSubmitCallbackResponse applyDecision(
         @RequestHeader(AUTHORIZATION) String authorisation,
         @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorization,
         @RequestBody DecisionRequest decisionRequest);

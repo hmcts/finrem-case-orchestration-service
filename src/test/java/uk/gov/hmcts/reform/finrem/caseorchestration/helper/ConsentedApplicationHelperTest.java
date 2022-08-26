@@ -2,9 +2,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 
 import org.junit.Before;
 import org.junit.Test;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +34,7 @@ public class ConsentedApplicationHelperTest {
 
     @Test
     public void isVariationOrder() {
-        CallbackRequest callbackRequest =  callbackRequest();
+        OldCallbackRequest callbackRequest =  callbackRequest();
         callbackRequest.getCaseDetails().getData()
             .put(CONSENTED_NATURE_OF_APPLICATION, List.of("Variation Order","Pension document","Lump sum"));
         assertTrue(helper.isVariationOrder(callbackRequest.getCaseDetails().getData()));
@@ -42,7 +42,7 @@ public class ConsentedApplicationHelperTest {
 
     @Test
     public void setConsentVariationOrderLabelField() {
-        CallbackRequest callbackRequest =  callbackRequest();
+        OldCallbackRequest callbackRequest =  callbackRequest();
         Map<String, Object> data = callbackRequest.getCaseDetails().getData();
         data.put(CONSENTED_NATURE_OF_APPLICATION, List.of("Variation Order","Pension document","Lump sum"));
 
@@ -55,7 +55,7 @@ public class ConsentedApplicationHelperTest {
 
     @Test
     public void givenCase_whenEmptyNatureOfApplicationIsEmpty_thenReturnEmptyList() {
-        CallbackRequest callbackRequest =  callbackRequest();
+        OldCallbackRequest callbackRequest =  callbackRequest();
         Map<String, Object> data = callbackRequest.getCaseDetails().getData();
 
         helper.setConsentVariationOrderLabelField(callbackRequest.getCaseDetails().getData());
@@ -65,8 +65,8 @@ public class ConsentedApplicationHelperTest {
         assertEquals(CONSENT_OTHER_DOC_LABEL_VALUE, data.get(CV_OTHER_DOC_LABEL_FIELD));
     }
 
-    private CallbackRequest callbackRequest() {
-        return CallbackRequest
+    private OldCallbackRequest callbackRequest() {
+        return OldCallbackRequest
             .builder()
             .caseDetails(CaseDetails.builder()
                 .data(new HashMap<>()).build())
