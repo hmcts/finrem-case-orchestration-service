@@ -71,7 +71,8 @@ public class UploadConfidentialDocumentsHandlerTest {
 
     @Before
     public void setUpTest() {
-        uploadConfidentialDocumentsAboutToSubmitHandler = new UploadConfidentialDocumentsAboutToSubmitHandler(objectMapper, uploadedConfidentialDocumentHelper);
+        uploadConfidentialDocumentsAboutToSubmitHandler = new UploadConfidentialDocumentsAboutToSubmitHandler(
+            objectMapper, uploadedConfidentialDocumentHelper);
     }
 
     @Test
