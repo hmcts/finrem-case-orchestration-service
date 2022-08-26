@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocumentData;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,35 +14,31 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Component
-public class UploadedDocumentHelper {
+public class UploadedConfidentialDocumentHelper {
 
     private final ObjectMapper mapper;
-    final BiPredicate<String, List<ContestedUploadedDocumentData>> isAnyIdMatches = (id, oldDocuments) ->
-        oldDocuments.stream().map(ContestedUploadedDocumentData::getId).anyMatch(oldId -> oldId.equals(id));
+    final BiPredicate<String, List<ConfidentialUploadedDocumentData>> isAnyIdMatches = (id, oldDocuments) ->
+        oldDocuments.stream().map(ConfidentialUploadedDocumentData::getId).anyMatch(oldId -> oldId.equals(id));
 
     public Map<String, Object> addUploadDateToNewDocuments(Map<String, Object> caseData,
                                                            Map<String, Object> caseDataBefore,
                                                            String documentCollection) {
 
-        List<ContestedUploadedDocumentData> allDocuments = mapper.convertValue(
+        List<ConfidentialUploadedDocumentData> allDocuments = mapper.convertValue(
             caseData.get(documentCollection), new TypeReference<>() {
             });
 
-        List<ContestedUploadedDocumentData> oldDocuments = mapper.convertValue(
+        List<ConfidentialUploadedDocumentData> oldDocuments = mapper.convertValue(
             caseDataBefore.get(documentCollection), new TypeReference<>() {
             });
 
-        List<ContestedUploadedDocumentData> newDocuments = allDocuments;
+        List<ConfidentialUploadedDocumentData> newDocuments = allDocuments;
         if (oldDocuments != null) {
             newDocuments = allDocuments.stream()
                 .filter(document -> isAnyIdMatches.negate().test(document.getId(), oldDocuments))
                 .collect(Collectors.toList());
         }
-        newDocuments.forEach(document -> {
-            if (document.getUploadedCaseDocument().getCaseDocumentUploadDateTime() == null) {
-                document.getUploadedCaseDocument().setCaseDocumentUploadDateTime(LocalDateTime.now());
-            }
-        });
+        newDocuments.forEach(document -> document.getConfidentialUploadedDocument().setConfidentialDocumentUploadDateTime(LocalDateTime.now()));
 
         if (oldDocuments != null) {
             newDocuments.addAll(oldDocuments);

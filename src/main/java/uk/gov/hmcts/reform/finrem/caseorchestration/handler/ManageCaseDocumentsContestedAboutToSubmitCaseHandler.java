@@ -32,9 +32,12 @@ public class ManageCaseDocumentsContestedAboutToSubmitCaseHandler implements Cal
 
     @Override
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest, String userAuthorisation) {
+        Map<String, Object> caseDataBefore = manageCaseDocumentsService.setCaseDataBeforeManageCaseDocumentCollection(
+            callbackRequest.getCaseDetails().getData(), callbackRequest.getCaseDetailsBefore().getData());
+
         Map<String, Object> caseData = uploadedDocumentHelper.addUploadDateToNewDocuments(
             callbackRequest.getCaseDetails().getData(),
-            callbackRequest.getCaseDetailsBefore().getData(), CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
+            caseDataBefore, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(
             manageCaseDocumentsService.manageCaseDocuments(

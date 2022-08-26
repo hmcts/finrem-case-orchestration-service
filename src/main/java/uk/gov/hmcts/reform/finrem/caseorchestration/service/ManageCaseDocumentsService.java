@@ -148,6 +148,34 @@ public class ManageCaseDocumentsService {
         return documentIdToCollection;
     }
 
+    public Map<String, Object> setCaseDataBeforeManageCaseDocumentCollection(Map<String, Object> caseData, Map<String, Object> caseDataBefore) {
+        List<String> caseDocumentsCollection = getAllDocumentsInCollection(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION)
+            .stream().map(ContestedUploadedDocumentData::getId).collect(Collectors.toList());
+
+        List<ContestedUploadedDocumentData> caseDataBeforeManagedCaseDocumentCollection = new ArrayList<>();
+        for (ContestedUploadCaseFilesCollectionType collectionType : ContestedUploadCaseFilesCollectionType.values()) {
+
+            String collection = collectionType.getCcdKey();
+
+            List<ContestedUploadedDocumentData> docsInCollection = getAllDocumentsInCollection(caseDataBefore, collection);
+
+            if (!docsInCollection.isEmpty()) {
+                for (ContestedUploadedDocumentData documentData : docsInCollection) {
+                    for (String caseDocument : caseDocumentsCollection) {
+                        if (caseDocument.equals(documentData.getId())) {
+                            caseDataBeforeManagedCaseDocumentCollection.add(documentData);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!caseDataBeforeManagedCaseDocumentCollection.isEmpty()) {
+            caseDataBefore.put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, caseDataBeforeManagedCaseDocumentCollection);
+        }
+        return caseDataBefore;
+    }
+
     private List<ContestedUploadedDocumentData> getAllDocumentsInCollection(Map<String, Object> caseData, String collection) {
 
         if (StringUtils.isEmpty(caseData.get(collection))) {
