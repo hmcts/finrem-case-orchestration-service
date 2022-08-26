@@ -166,12 +166,13 @@ public class NotificationRequestMapper {
         notificationRequest.setGeneralEmailBody(Objects.toString(mapOfCaseData.get(GENERAL_EMAIL_BODY)));
         notificationRequest.setCaseType(getCaseType(caseDetails));
         notificationRequest.setPhoneOpeningHours(CTSC_OPENING_HOURS);
-        notificationRequest.setApplicantName(caseDataService.buildFullName(caseDetails.getData(),
-            APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME));
+        String appName = caseDataService.buildFullName(caseDetails.getData(), APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME);
+        notificationRequest.setApplicantName(Objects.toString(appName));
 
         if (caseDataService.isConsentedApplication(caseDetails)) {
-            notificationRequest.setRespondentName(caseDataService.buildFullName(caseDetails.getData(),
-                CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, CONSENTED_RESPONDENT_LAST_NAME));
+            String respName = caseDataService.buildFullName(caseDetails.getData(),
+                CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, CONSENTED_RESPONDENT_LAST_NAME);
+            notificationRequest.setRespondentName(Objects.toString(respName));
             if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(mapOfCaseData))) {
                 notificationRequest.setCaseOrderType("variation");
                 notificationRequest.setCamelCaseOrderType("Variation");
@@ -184,8 +185,9 @@ public class NotificationRequestMapper {
         }
 
         if (caseDataService.isContestedApplication(caseDetails)) {
-            notificationRequest.setRespondentName(caseDataService.buildFullName(caseDetails.getData(),
-                CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME, CONTESTED_RESPONDENT_LAST_NAME));
+            String respName = caseDataService.buildFullName(caseDetails.getData(),
+                CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME, CONTESTED_RESPONDENT_LAST_NAME);
+            notificationRequest.setRespondentName(Objects.toString(respName));
         }
         return notificationRequest;
     }
