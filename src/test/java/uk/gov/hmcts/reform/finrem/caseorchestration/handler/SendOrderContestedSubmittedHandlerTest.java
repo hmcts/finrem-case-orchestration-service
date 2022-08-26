@@ -16,8 +16,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollec
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,13 +43,16 @@ public class SendOrderContestedSubmittedHandlerTest {
     @Mock
     private CaseDataService caseDataService;
     @Mock
-    private FeatureToggleService featureToggleService;
-    @Mock
     private NotificationService notificationService;
 
     @Mock
     private CcdService ccdService;
 
+    @Mock
+    private CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
+
+    @Mock
+    private CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
     @InjectMocks
     private SendOrderContestedSubmittedHandler sendOrderContestedSubmittedHandler;
 
@@ -112,12 +116,32 @@ public class SendOrderContestedSubmittedHandlerTest {
     }
 
     @Test
-    public void givenAgreedToReceiveEmails_WhenHandle_ThenSendContestOrderApprovedEmail() {
+    public void givenAppAgreedToReceiveEmailsAndIsDigital_WhenHandle_ThenSendContestOrderApprovedEmailToApplicant() {
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(true);
 
         sendOrderContestedSubmittedHandler.handle(createCallbackRequestWithFinalOrder(), AUTH_TOKEN);
 
         verify(notificationService).sendContestOrderApprovedEmailApplicant(any());
+    }
+
+    @Test
+    public void givenAppNotAgreedToReceiveEmailsAndIsDigital_WhenHandle_ThenDoNotSendContestOrderApprovedEmailToApplicant() {
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(true);
+
+        sendOrderContestedSubmittedHandler.handle(createCallbackRequestWithFinalOrder(), AUTH_TOKEN);
+
+        verify(notificationService, never()).sendContestOrderApprovedEmailApplicant(any());
+    }
+
+    @Test
+    public void givenAppAgreedToReceiveEmailsAndIsNotDigital_WhenHandle_ThenDoNotSendContestOrderApprovedEmailToApplicant() {
+        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(false);
+
+        sendOrderContestedSubmittedHandler.handle(createCallbackRequestWithFinalOrder(), AUTH_TOKEN);
+
+        verify(notificationService, never()).sendContestOrderApprovedEmailApplicant(any());
     }
 
     @Test
@@ -129,8 +153,9 @@ public class SendOrderContestedSubmittedHandlerTest {
     }
 
     @Test
-    public void givenRespAgreedToReceiveEmails_WhenHandle_ThenSendContestOrderApprovedEmailToRespondent() {
+    public void givenRespAgreedToReceiveEmailsAndIsDigital_WhenHandle_ThenSendContestOrderApprovedEmailToRespondent() {
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
+        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(true);
 
         sendOrderContestedSubmittedHandler.handle(createCallbackRequestWithFinalOrder(), AUTH_TOKEN);
 
@@ -138,9 +163,26 @@ public class SendOrderContestedSubmittedHandlerTest {
     }
 
     @Test
-    public void givenRespNotAgreedToReceiveEmails_WhenHandle_ThenDoNotSendContestOrderApprovedEmailToRespondent() {
+    public void givenResIsDigitalAndNotAcceptingEmail_WhenHandle_ThenDoNotSendEmailToRespondent() {
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
+        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(true);
 
+        sendOrderContestedSubmittedHandler.handle(createCallbackRequestWithFinalOrder(), AUTH_TOKEN);
+
+        verify(notificationService, never()).sendContestOrderApprovedEmailRespondent(any());
+    }
+
+    @Test
+    public void givenResIsNotDigital_WhenHandle_ThenDoNotSendEmailToRespondent() {
+        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(false);
+
+        sendOrderContestedSubmittedHandler.handle(createCallbackRequestWithFinalOrder(), AUTH_TOKEN);
+
+        verify(notificationService, never()).sendContestOrderApprovedEmailRespondent(any());
+    }
+
+    @Test
+    public void givenRespNotAgreedToReceiveEmails_WhenHandle_ThenDoNotSendContestOrderApprovedEmailToRespondent() {
         sendOrderContestedSubmittedHandler.handle(createCallbackRequestWithFinalOrder(), AUTH_TOKEN);
 
         verify(notificationService, never()).sendContestOrderApprovedEmailRespondent(any());
