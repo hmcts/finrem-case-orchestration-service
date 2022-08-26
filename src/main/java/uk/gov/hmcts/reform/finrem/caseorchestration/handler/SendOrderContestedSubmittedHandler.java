@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 
 import java.util.Map;
 import java.util.Objects;
@@ -31,6 +33,8 @@ public class SendOrderContestedSubmittedHandler implements CallbackHandler {
     private final FeatureToggleService featureToggleService;
     private final NotificationService notificationService;
     private final CcdService ccdService;
+    private final CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
+    private final CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -76,17 +80,27 @@ public class SendOrderContestedSubmittedHandler implements CallbackHandler {
     private void sendNotifications(CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
-        if (!caseDataService.isPaperApplication(caseData) && Objects.nonNull(caseData.get(FINAL_ORDER_COLLECTION))) {
+        if (Objects.nonNull(caseData.get(FINAL_ORDER_COLLECTION))) {
             log.info("Received request to send email for 'Contest Order Approved' for Case ID: {}", callbackRequest.getCaseDetails().getId());
-            if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-                log.info("Sending 'Contest Order Approved' email notification to Applicant Solicitor");
-                notificationService.sendContestOrderApprovedEmailApplicant(caseDetails);
-            }
 
-            if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData)) {
-                log.info("Sending 'Contest Order Approved' email notification to Respondent Solicitor");
-                notificationService.sendContestOrderApprovedEmailRespondent(caseDetails);
-            }
+            sendApplicantNotifications(caseDetails);
+            sendRespondentNotifications(caseDetails);
+        }
+    }
+
+    private void sendApplicantNotifications(CaseDetails caseDetails) {
+        if (checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)
+            && caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
+            log.info("Sending 'Contest Order Approved' email notification to Applicant Solicitor");
+            notificationService.sendContestOrderApprovedEmailApplicant(caseDetails);
+        }
+    }
+
+    private void sendRespondentNotifications(CaseDetails caseDetails) {
+        if (checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)
+            && notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
+            log.info("Sending 'Contest Order Approved' email notification to Respondent Solicitor");
+            notificationService.sendContestOrderApprovedEmailRespondent(caseDetails);
         }
     }
 }
