@@ -30,6 +30,7 @@ public class GeneralUploadedDocumentData implements CaseDocumentData {
     }
 
     @Override
+    @JsonIgnore
     public void setUploadDateTime(LocalDateTime dateTime) {
         if (generalUploadedDocument != null) {
             generalUploadedDocument.setGeneralDocumentUploadDateTime(dateTime);
