@@ -92,7 +92,7 @@ public class UploadGeneralDocumentsAboutToSubmitHandlerTest {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         GeneralUploadedDocumentData newDoc = createGeneralUploadDocumentItem(
             "New", "New email content", documentLink, "", "New Example", "newDocument.filename");
-        uploadDocumentList.add(newDoc);
+        uploadDocumentList.addAll(List.of(newDoc, oldDoc));
         caseDetails.getData().put(GENERAL_UPLOADED_DOCUMENTS, uploadDocumentList);
 
         expectedDocumentIdList.add(newDoc.getId());

@@ -83,33 +83,28 @@ public class UploadConfidentialDocumentsHandlerTest {
         CallbackRequest callbackRequest = buildCallbackRequest();
         CaseDocument documentLink = new CaseDocument("/fileUrl", "document.extension", "/binaryUrl");
 
-        // Setup caseDetailsBefore
         CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         ConfidentialUploadedDocumentData oldDoc = createConfidentialUploadDocumentItem(
             "Old", documentLink, "", "oldDocument.filename", "Old Example");
         existingDocumentList.add(oldDoc);
         caseDetailsBefore.getData().put(CONFIDENTIAL_DOCS_UPLOADED_COLLECTION, existingDocumentList);
 
-        // Setup caseDetails
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         ConfidentialUploadedDocumentData newDoc = createConfidentialUploadDocumentItem(
             "New", documentLink, "", "newDocument.filename", "New Example");
         uploadDocumentList.add(newDoc);
+        uploadDocumentList.add(oldDoc);
         caseDetails.getData().put(CONFIDENTIAL_DOCS_UPLOADED_COLLECTION, uploadDocumentList);
 
-        // Setup expected document order (newest first)
         expectedDocumentIdList.add(newDoc.getId());
         expectedDocumentIdList.add(oldDoc.getId());
 
-        // Get results from handler
         handledDocumentList.addAll(
             (List<ConfidentialUploadedDocumentData>) uploadConfidentialDocumentsAboutToSubmitHandler.handle(
                 callbackRequest, AUTH_TOKEN).getData().get(CONFIDENTIAL_DOCS_UPLOADED_COLLECTION));
 
-        // Get document ids from handled documents
         handledDocumentList.forEach(doc -> handledDocumentIdList.add(doc.getId()));
 
-        // Validate results
         assertThat(handledDocumentIdList.equals(expectedDocumentIdList), is(true));
     }
 

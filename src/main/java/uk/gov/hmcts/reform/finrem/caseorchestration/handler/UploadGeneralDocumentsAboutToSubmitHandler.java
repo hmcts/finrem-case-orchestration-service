@@ -42,7 +42,8 @@ public class UploadGeneralDocumentsAboutToSubmitHandler implements CallbackHandl
 
         Map<String, Object> caseData = uploadedGeneralDocumentHelper.addUploadDateToNewDocuments(
             callbackRequest.getCaseDetails().getData(),
-            callbackRequest.getCaseDetailsBefore().getData(), GENERAL_UPLOADED_DOCUMENTS);
+            callbackRequest.getCaseDetailsBefore().getData(),
+            GENERAL_UPLOADED_DOCUMENTS);
         List<GeneralUploadedDocumentData> uploadedDocuments = getGeneralDocumentCollection(caseData, GENERAL_UPLOADED_DOCUMENTS);
         uploadedDocuments.sort(Comparator.comparing(
             GeneralUploadedDocumentData::getGeneralUploadedDocument, Comparator.comparing(

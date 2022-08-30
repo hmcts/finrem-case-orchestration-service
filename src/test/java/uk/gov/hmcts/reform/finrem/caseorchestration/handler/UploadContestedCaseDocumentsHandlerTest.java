@@ -98,7 +98,7 @@ public class UploadContestedCaseDocumentsHandlerTest extends CaseDocumentHandler
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         ContestedUploadedDocumentData newDoc = createContestedUploadDocumentItem("Other", "applicant", "yes", "no", "New Document Example");
-        uploadDocumentList.add(newDoc);
+        uploadDocumentList.addAll(List.of(newDoc, oldDoc));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
         expectedDocumentIdList.add(newDoc.getId());

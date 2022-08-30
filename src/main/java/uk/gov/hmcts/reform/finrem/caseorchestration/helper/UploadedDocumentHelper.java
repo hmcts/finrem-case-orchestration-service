@@ -1,54 +1,38 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 
-import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiPredicate;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
-@RequiredArgsConstructor
 @Component
-public class UploadedDocumentHelper {
+public class UploadedDocumentHelper extends DocumentDateHelper<ContestedUploadedDocumentData> {
 
-    private final ObjectMapper mapper;
-    final BiPredicate<String, List<ContestedUploadedDocumentData>> isAnyIdMatches = (id, oldDocuments) ->
-        oldDocuments.stream().map(ContestedUploadedDocumentData::getId).anyMatch(oldId -> oldId.equals(id));
+    public UploadedDocumentHelper(ObjectMapper objectMapper) {
+        super(objectMapper);
+    }
 
     public Map<String, Object> addUploadDateToNewDocuments(Map<String, Object> caseData,
                                                            Map<String, Object> caseDataBefore,
                                                            String documentCollection) {
 
-        List<ContestedUploadedDocumentData> allDocuments = mapper.convertValue(
-            caseData.get(documentCollection), new TypeReference<>() {
-            });
+        List<ContestedUploadedDocumentData> allDocuments = Optional.ofNullable(
+            getDocumentCollection(caseData, documentCollection, ContestedUploadedDocumentData.class))
+            .orElse(Collections.emptyList());
 
-        List<ContestedUploadedDocumentData> oldDocuments = mapper.convertValue(
-            caseDataBefore.get(documentCollection), new TypeReference<>() {
-            });
+        List<ContestedUploadedDocumentData> documentsBeforeEvent = Optional.ofNullable(
+            getDocumentCollection(caseDataBefore, documentCollection, ContestedUploadedDocumentData.class))
+            .orElse(Collections.emptyList());
 
-        List<ContestedUploadedDocumentData> newDocuments = allDocuments;
-        if (oldDocuments != null) {
-            newDocuments = allDocuments.stream()
-                .filter(document -> isAnyIdMatches.negate().test(document.getId(), oldDocuments))
-                .collect(Collectors.toList());
-        }
-        newDocuments.forEach(document -> {
-            if (document.getUploadedCaseDocument().getCaseDocumentUploadDateTime() == null) {
-                document.getUploadedCaseDocument().setCaseDocumentUploadDateTime(LocalDateTime.now());
-            }
-        });
+        List<ContestedUploadedDocumentData> modifiedDocuments = allDocuments.stream()
+            .peek(document -> addDateToNewDocuments(documentsBeforeEvent, document))
+            .toList();
 
-        if (oldDocuments != null) {
-            newDocuments.addAll(oldDocuments);
-        }
-        caseData.put(documentCollection, newDocuments);
-
+        caseData.put(documentCollection, modifiedDocuments);
         return caseData;
     }
 }
