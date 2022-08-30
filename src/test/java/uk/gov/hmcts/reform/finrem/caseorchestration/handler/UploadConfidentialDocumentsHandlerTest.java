@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
+import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -45,19 +45,8 @@ public class UploadConfidentialDocumentsHandlerTest {
     protected ConfidentialUploadedDocumentData createConfidentialUploadDocumentItem(String type, CaseDocument link,
                                                                                     String dateAdded, String fileName,
                                                                                     String comment) {
-        int leftLimit = 48;
-        int rightLimit = 122;
-        int targetStringLength = 10;
-        Random random = new Random();
-
-        String documentId = random.ints(leftLimit, rightLimit + 1)
-            .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
-            .limit(targetStringLength)
-            .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-            .toString();
-
         return ConfidentialUploadedDocumentData.builder()
-            .id(documentId)
+            .id(UUID.randomUUID().toString())
             .confidentialUploadedDocument(ConfidentialUploadedDocument
                 .builder()
                 .documentType(type)
