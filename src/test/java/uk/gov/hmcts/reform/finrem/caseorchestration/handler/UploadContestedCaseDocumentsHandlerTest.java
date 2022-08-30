@@ -91,31 +91,25 @@ public class UploadContestedCaseDocumentsHandlerTest extends CaseDocumentHandler
     public void givenUploadCaseDocument_When_IsValid_ThenExecuteHandler_And_ValidateDocumentOrder() {
         CallbackRequest callbackRequest = buildCallbackRequest();
 
-        // Setup caseDetailsBefore
         CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         ContestedUploadedDocumentData oldDoc = createContestedUploadDocumentItem("Other", "applicant", "yes", "no", "Old Document Example");
         existingDocumentList.add(oldDoc);
         caseDetailsBefore.getData().put(CONTESTED_UPLOADED_DOCUMENTS, existingDocumentList);
 
-        // Setup caseDetails
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         ContestedUploadedDocumentData newDoc = createContestedUploadDocumentItem("Other", "applicant", "yes", "no", "New Document Example");
         uploadDocumentList.add(newDoc);
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        // Setup expected document order (newest first)
         expectedDocumentIdList.add(newDoc.getId());
         expectedDocumentIdList.add(oldDoc.getId());
 
-        // Get results from handler
         handledDocumentList.addAll(
             (List<ContestedUploadedDocumentData>) uploadContestedCaseDocumentsHandler.handle(
                 callbackRequest, AUTH_TOKEN).getData().get(CONTESTED_UPLOADED_DOCUMENTS));
 
-        // Get document ids from handled documents
         handledDocumentList.forEach(doc -> handledDocumentIdList.add(doc.getId()));
 
-        // Validate results
         assertThat(handledDocumentIdList.equals(expectedDocumentIdList), is(true));
     }
 

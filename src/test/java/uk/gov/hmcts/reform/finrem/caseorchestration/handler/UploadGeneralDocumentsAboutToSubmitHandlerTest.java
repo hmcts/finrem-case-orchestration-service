@@ -20,14 +20,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
+import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_UPLOADED_DOCUMENTS;
 
 @RunWith(MockitoJUnitRunner.class)
-public class UploadGeneralDocumentsHandlerTest {
+public class UploadGeneralDocumentsAboutToSubmitHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
 
@@ -45,19 +45,8 @@ public class UploadGeneralDocumentsHandlerTest {
     protected GeneralUploadedDocumentData createGeneralUploadDocumentItem(String type, String emailContent,
                                                                           CaseDocument link, String dateAdded, String comment,
                                                                           String fileName) {
-        int leftLimit = 48;
-        int rightLimit = 122;
-        int targetStringLength = 10;
-        Random random = new Random();
-
-        String documentId = random.ints(leftLimit, rightLimit + 1)
-            .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
-            .limit(targetStringLength)
-            .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-            .toString();
-
         return GeneralUploadedDocumentData.builder()
-            .id(documentId)
+            .id(UUID.randomUUID().toString())
             .generalUploadedDocument(GeneralUploadedDocument
                 .builder()
                 .documentType(type)
@@ -90,37 +79,31 @@ public class UploadGeneralDocumentsHandlerTest {
     }
 
     @Test
-    public void givenUploadGeneralDocument_When_IsValid_ThenExecuteHandler() {
+    public void givenValidCaseData_whenHandleUploadGeneralDocument_thenSortCollectionByDate() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         CaseDocument documentLink = new CaseDocument("/fileUrl", "document.extension", "/binaryUrl");
 
-        // Setup caseDetailsBefore
         CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         GeneralUploadedDocumentData oldDoc = createGeneralUploadDocumentItem(
             "Old", "Old email content", documentLink, "", "Old Example", "oldDocument.filename");
         existingDocumentList.add(oldDoc);
         caseDetailsBefore.getData().put(GENERAL_UPLOADED_DOCUMENTS, existingDocumentList);
 
-        // Setup caseDetails
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         GeneralUploadedDocumentData newDoc = createGeneralUploadDocumentItem(
             "New", "New email content", documentLink, "", "New Example", "newDocument.filename");
         uploadDocumentList.add(newDoc);
         caseDetails.getData().put(GENERAL_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        // Setup expected document order (newest first)
         expectedDocumentIdList.add(newDoc.getId());
         expectedDocumentIdList.add(oldDoc.getId());
 
-        // Get results from handler
         handledDocumentList.addAll(
             (List<GeneralUploadedDocumentData>) uploadGeneralDocumentsAboutToSubmitHandler.handle(
                 callbackRequest, AUTH_TOKEN).getData().get(GENERAL_UPLOADED_DOCUMENTS));
 
-        // Get document ids from handled documents
         handledDocumentList.forEach(doc -> handledDocumentIdList.add(doc.getId()));
 
-        // Validate results
         assertThat(handledDocumentIdList.equals(expectedDocumentIdList), is(true));
     }
 

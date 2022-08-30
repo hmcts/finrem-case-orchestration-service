@@ -149,24 +149,20 @@ public class ManageCaseDocumentsService {
     }
 
     public Map<String, Object> setCaseDataBeforeManageCaseDocumentCollection(Map<String, Object> caseData, Map<String, Object> caseDataBefore) {
-        List<String> caseDocumentsCollection = getAllDocumentsInCollection(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION)
-            .stream().map(ContestedUploadedDocumentData::getId).collect(Collectors.toList());
+        List<String> manageCaseDocumentCollectionIds = getAllDocumentsInCollection(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION)
+            .stream().map(ContestedUploadedDocumentData::getId).toList();
 
         List<ContestedUploadedDocumentData> caseDataBeforeManagedCaseDocumentCollection = new ArrayList<>();
         for (ContestedUploadCaseFilesCollectionType collectionType : ContestedUploadCaseFilesCollectionType.values()) {
-
-            String collection = collectionType.getCcdKey();
-
-            List<ContestedUploadedDocumentData> docsInCollection = getAllDocumentsInCollection(caseDataBefore, collection);
+            List<ContestedUploadedDocumentData> docsInCollection = getAllDocumentsInCollection(caseDataBefore, collectionType.getCcdKey());
 
             if (!docsInCollection.isEmpty()) {
-                for (ContestedUploadedDocumentData documentData : docsInCollection) {
-                    for (String caseDocument : caseDocumentsCollection) {
-                        if (caseDocument.equals(documentData.getId())) {
-                            caseDataBeforeManagedCaseDocumentCollection.add(documentData);
-                        }
-                    }
-                }
+                List<ContestedUploadedDocumentData> documentData = docsInCollection.stream()
+                    .filter(document -> manageCaseDocumentCollectionIds.stream()
+                        .anyMatch(caseDocumentId -> document.getId().equals(caseDocumentId)))
+                    .toList();
+
+                caseDataBeforeManagedCaseDocumentCollection.addAll(documentData);
             }
         }
 

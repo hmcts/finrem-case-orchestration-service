@@ -202,8 +202,8 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
 
         manageCaseDocumentsService.setCaseDataBeforeManageCaseDocumentCollection(caseData, caseDataBefore);
 
-        assertThat(getDocumentCollection(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION), hasSize(2));
-        assertThat(getDocumentCollection(caseDataBefore, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION), hasSize(1));
+        assertThat(getDocumentCollection(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION), hasSize(3));
+        assertThat(getDocumentCollection(caseDataBefore, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION), hasSize(2));
     }
 
     private CaseDetails populateCaseData() {
@@ -224,6 +224,7 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
 
         uploadDocumentList.add(createContestedUploadDocumentItem("123","Chronology", "Respondent", "no", null));
         uploadDocumentList.add(createContestedUploadDocumentItem("456","Chronology", "Respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("1234", "Chronology", "applicant", "no", null));
 
         caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
 
@@ -236,6 +237,8 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
         caseDocs.add(createContestedUploadDocumentItem("123", "Chronology", "respondent", "no", null));
 
         caseDetailsBefore.getData().put(RESP_CHRONOLOGIES_STATEMENTS_COLLECTION, caseDocs);
+        caseDetailsBefore.getData().put(APP_CHRONOLOGIES_STATEMENTS_COLLECTION,
+            List.of(createContestedUploadDocumentItem("1234", "Chronology", "applicant", "no", null)));
 
         return caseDetailsBefore;
     }
