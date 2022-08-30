@@ -8,11 +8,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.PaymentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.FeeRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentRequestWithSiteID;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.client.PBAPaymentClient;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -36,7 +36,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 public class PBAPaymentService {
 
-    private final PaymentClient paymentClient;
+    private final PBAPaymentClient pbaPaymentClient;
     private final CaseDataService caseDataService;
     private final FeatureToggleService featureToggleService;
 
@@ -55,14 +55,14 @@ public class PBAPaymentService {
             log.info("Inside makePayment for ccdCaseId : {}", caseDetails.getId());
             PaymentRequest paymentRequest = buildPaymentRequestWithCaseType(caseDetails);
             log.info("paymentRequest with case type: {}", paymentRequest);
-            PaymentResponse paymentResponse = paymentClient.pbaPaymentWithCaseType(authToken, paymentRequest);
+            PaymentResponse paymentResponse = pbaPaymentClient.makePaymentWithCaseType(authToken, paymentRequest);
             log.info("paymentResponse with case type: {} ", paymentResponse);
             return paymentResponse;
         } else {
             log.info("Inside makePayment for ccdCaseId : {}", caseDetails.getId());
             PaymentRequestWithSiteID paymentRequest = buildPaymentRequest(caseDetails);
             log.info("paymentRequest: {}", paymentRequest);
-            PaymentResponse paymentResponse = paymentClient.pbaPayment(authToken, paymentRequest);
+            PaymentResponse paymentResponse = pbaPaymentClient.makePaymentWithSiteId(authToken, paymentRequest);
             log.info("paymentResponse : {} ", paymentResponse);
             return paymentResponse;
         }

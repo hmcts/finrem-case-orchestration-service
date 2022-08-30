@@ -29,7 +29,8 @@ public class PaymentRequest {
     private String customerReference;
 
     @JsonProperty(value = "description")
-    private String description;
+    @Builder.Default
+    private String description = "Financial Remedy Consented Application";
 
     @JsonProperty(value = "organisation_name")
     private String organisationName;
