@@ -15,7 +15,7 @@ import java.util.function.BiPredicate;
 
 public abstract class DocumentDateHelper<T extends CaseDocumentTabData> {
 
-    protected final ObjectMapper mapper;
+    private final ObjectMapper mapper;
     private final Class<T> documentType;
 
     private final BiPredicate<String, List<T>> isNewDocument = (id, oldDocuments) ->
