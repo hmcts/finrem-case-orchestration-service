@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseDocumentData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseDocumentTabData;
 
 import java.time.LocalDateTime;
 
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class GeneralUploadedDocumentData implements CaseDocumentData {
+public class GeneralUploadedDocumentData implements CaseDocumentTabData {
     @JsonProperty("id")
     private String id;
     @JsonProperty("value")
