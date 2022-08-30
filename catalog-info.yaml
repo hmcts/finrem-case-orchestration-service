@@ -1,0 +1,18 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: "finrem-cos"
+  annotations:
+    # This must match folder-name/job-name in Jenkins.
+    jenkins.io/job-full-name: cft:HMCTS_d_to_i/finrem-case-orchestration-service
+    github.com/project-slug: hmcts/finrem-case-orchestration-service
+  tags:
+    - java
+  links:
+    - url: https://hmcts-reform.slack.com/app_redirect?channel=finrem-dev
+      title: "#finrem-dev on Slack"
+      icon: chat
+spec:
+  type: service
+  lifecycle: production
+  owner: dcd_financialremedy
