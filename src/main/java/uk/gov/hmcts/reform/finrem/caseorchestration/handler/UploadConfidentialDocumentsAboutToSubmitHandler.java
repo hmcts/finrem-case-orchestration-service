@@ -6,7 +6,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -20,7 +19,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.nullsLast;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONFIDENTIAL_DOCS_UPLOADED_COLLECTION;
 
 @Slf4j
@@ -42,24 +44,28 @@ public class UploadConfidentialDocumentsAboutToSubmitHandler implements Callback
 
         Map<String, Object> caseData = uploadedConfidentialDocumentHelper.addUploadDateToNewDocuments(
             callbackRequest.getCaseDetails().getData(),
-            callbackRequest.getCaseDetailsBefore().getData(), CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
-        List<ConfidentialUploadedDocumentData> uploadedDocuments = getConfidentialDocumentCollection(caseData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
-        uploadedDocuments.sort(Comparator.comparing(
-            ConfidentialUploadedDocumentData::getConfidentialUploadedDocument, Comparator.comparing(
-                ConfidentialUploadedDocument::getConfidentialDocumentUploadDateTime, Comparator.nullsLast(
-                    Comparator.reverseOrder()))));
+            callbackRequest.getCaseDetailsBefore().getData(),
+            CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
+
+        List<ConfidentialUploadedDocumentData> uploadedDocuments = getConfidentialDocumentCollection(caseData);
+
+        uploadedDocuments.sort(comparing(ConfidentialUploadedDocumentData::getConfidentialUploadedDocument,
+            comparing(ConfidentialUploadedDocument::getConfidentialDocumentUploadDateTime, nullsLast(Comparator.reverseOrder()))));
+
         caseData.put(CONFIDENTIAL_DOCS_UPLOADED_COLLECTION, uploadedDocuments);
+
         return AboutToStartOrSubmitCallbackResponse
             .builder()
             .data(caseData)
             .build();
     }
 
-    private List<ConfidentialUploadedDocumentData> getConfidentialDocumentCollection(Map<String, Object> caseData, String collection) {
-        if (StringUtils.isEmpty(caseData.get(collection))) {
-            return new ArrayList<>();
-        }
+    private List<ConfidentialUploadedDocumentData> getConfidentialDocumentCollection(Map<String, Object> caseData) {
+        objectMapper.registerModule(new JavaTimeModule());
 
-        return objectMapper.registerModule(new JavaTimeModule()).convertValue(caseData.get(collection), new TypeReference<>() {});
+        List<ConfidentialUploadedDocumentData> confidentialDocuments = objectMapper
+            .convertValue(caseData.get(CONFIDENTIAL_DOCS_UPLOADED_COLLECTION), new TypeReference<>() {});
+
+        return Optional.ofNullable(confidentialDocuments).orElse(new ArrayList<>());
     }
 }

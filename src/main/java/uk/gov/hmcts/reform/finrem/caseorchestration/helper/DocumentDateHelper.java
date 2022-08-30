@@ -15,8 +15,8 @@ public abstract class DocumentDateHelper<T extends CaseDocumentData> {
 
     protected final ObjectMapper mapper;
 
-    private final BiPredicate<String, List<T>> isAnyMatchingId = (id, oldDocuments) ->
-        oldDocuments.stream().map(T::getElementId).anyMatch(oldId -> oldId.equals(id));
+    private final BiPredicate<String, List<T>> isNewDocument = (id, oldDocuments) ->
+        oldDocuments.stream().map(T::getElementId).noneMatch(oldId -> oldId.equals(id));
 
     public DocumentDateHelper(ObjectMapper objectMapper) {
         objectMapper.registerModule(new JavaTimeModule());
@@ -28,13 +28,15 @@ public abstract class DocumentDateHelper<T extends CaseDocumentData> {
                                                                     String documentCollection);
 
     protected void addDateToNewDocuments(List<T> documentsBeforeEvent, T document) {
-        if (isAnyMatchingId.negate().test(document.getElementId(), documentsBeforeEvent)) {
+        if (isNewDocument.test(document.getElementId(), documentsBeforeEvent)) {
             document.setUploadDateTime(LocalDateTime.now());
         }
     }
 
-    protected List<T> getDocumentCollection(Map<String, Object> caseData, String documentCollection, Class<T> typeClass) {
+    protected List<T> getDocumentCollection(Map<String, Object> caseData,
+                                            String documentCollection,
+                                            Class<T> documentClass) {
         return mapper.convertValue(caseData.get(documentCollection),
-            TypeFactory.defaultInstance().constructCollectionType(ArrayList.class, typeClass));
+            TypeFactory.defaultInstance().constructCollectionType(ArrayList.class, documentClass));
     }
 }

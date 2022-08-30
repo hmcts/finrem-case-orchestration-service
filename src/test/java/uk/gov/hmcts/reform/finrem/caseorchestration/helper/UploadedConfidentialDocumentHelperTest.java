@@ -17,7 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CONFIDENTIAL_DOCS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONFIDENTIAL_DOCS_UPLOADED_COLLECTION;
 
 public class UploadedConfidentialDocumentHelperTest {
 
@@ -37,16 +37,16 @@ public class UploadedConfidentialDocumentHelperTest {
 
     @Test
     public void givenValidCaseData_whenAddUploadDateToConfidentialDocs_thenAddDate() {
-        caseData.put(APPLICANT_CONFIDENTIAL_DOCS_COLLECTION, List.of(
+        caseData.put(CONFIDENTIAL_DOCS_UPLOADED_COLLECTION, List.of(
             confidentialDocument("AppConfidentialOne.docx", UUID.randomUUID()),
             confidentialDocument("AppConfidentialTwo.docx", UUID.randomUUID())
         ));
 
         Map<String, Object> modifiedData = uploadedConfidentialDocumentHelper.addUploadDateToNewDocuments(caseData,
             caseDataBefore,
-            APPLICANT_CONFIDENTIAL_DOCS_COLLECTION);
+            CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
 
-        List<ConfidentialUploadedDocumentData> documentData = getContestedUploadedDocs(modifiedData, APPLICANT_CONFIDENTIAL_DOCS_COLLECTION);
+        List<ConfidentialUploadedDocumentData> documentData = getContestedUploadedDocs(modifiedData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
 
         documentData.forEach(document ->
             assertThat(document.getConfidentialUploadedDocument().getConfidentialDocumentUploadDateTime(), is(notNullValue())));
@@ -55,20 +55,20 @@ public class UploadedConfidentialDocumentHelperTest {
     @Test
     public void givenValidCaseData_andOldDocsInCollection_whenAddUploadDate_thenAddToNewDocsOnly() {
         UUID oldId = UUID.randomUUID();
-        caseData.put(APPLICANT_CONFIDENTIAL_DOCS_COLLECTION, List.of(
+        caseData.put(CONFIDENTIAL_DOCS_UPLOADED_COLLECTION, List.of(
             confidentialDocument("AppConfidentialOne.docx", UUID.randomUUID()),
             confidentialDocument("AppConfidentialTwo.docx", UUID.randomUUID()),
             confidentialDocument("AppConfidentialOld.docx", oldId)
         ));
-        caseDataBefore.put(APPLICANT_CONFIDENTIAL_DOCS_COLLECTION, List.of(
+        caseDataBefore.put(CONFIDENTIAL_DOCS_UPLOADED_COLLECTION, List.of(
             confidentialDocument("AppConfidentialOld.docx", oldId)
         ));
 
         Map<String, Object> modifiedData = uploadedConfidentialDocumentHelper.addUploadDateToNewDocuments(caseData,
             caseDataBefore,
-            APPLICANT_CONFIDENTIAL_DOCS_COLLECTION);
+            CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
 
-        List<ConfidentialUploadedDocumentData> documentData = getContestedUploadedDocs(modifiedData, APPLICANT_CONFIDENTIAL_DOCS_COLLECTION);
+        List<ConfidentialUploadedDocumentData> documentData = getContestedUploadedDocs(modifiedData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
 
         assertThat(documentData, hasSize(3));
         assertThat(documentData.stream()
@@ -81,8 +81,7 @@ public class UploadedConfidentialDocumentHelperTest {
     @Test
     public void givenEmptyCollection_whenAddUploadDate_thenHandleGracefully() {
         Map<String, Object> modifiedData = uploadedConfidentialDocumentHelper.addUploadDateToNewDocuments(caseData,
-            caseDataBefore,
-            APPLICANT_CONFIDENTIAL_DOCS_COLLECTION);
+            caseDataBefore, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
 
         assertThat(modifiedData, is(notNullValue()));
     }

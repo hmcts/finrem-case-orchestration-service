@@ -6,7 +6,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -20,7 +19,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.nullsLast;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_UPLOADED_DOCUMENTS;
 
 @Slf4j
@@ -44,11 +46,12 @@ public class UploadGeneralDocumentsAboutToSubmitHandler implements CallbackHandl
             callbackRequest.getCaseDetails().getData(),
             callbackRequest.getCaseDetailsBefore().getData(),
             GENERAL_UPLOADED_DOCUMENTS);
-        List<GeneralUploadedDocumentData> uploadedDocuments = getGeneralDocumentCollection(caseData, GENERAL_UPLOADED_DOCUMENTS);
-        uploadedDocuments.sort(Comparator.comparing(
-            GeneralUploadedDocumentData::getGeneralUploadedDocument, Comparator.comparing(
-                GeneralUploadedDocument::getGeneralDocumentUploadDateTime, Comparator.nullsLast(
-                    Comparator.reverseOrder()))));
+
+        List<GeneralUploadedDocumentData> uploadedDocuments = getGeneralDocumentCollection(caseData);
+
+        uploadedDocuments.sort(comparing(GeneralUploadedDocumentData::getGeneralUploadedDocument,
+            comparing(GeneralUploadedDocument::getGeneralDocumentUploadDateTime, nullsLast(Comparator.reverseOrder()))));
+
         caseData.put(GENERAL_UPLOADED_DOCUMENTS, uploadedDocuments);
         return AboutToStartOrSubmitCallbackResponse
             .builder()
@@ -56,11 +59,12 @@ public class UploadGeneralDocumentsAboutToSubmitHandler implements CallbackHandl
             .build();
     }
 
-    private List<GeneralUploadedDocumentData> getGeneralDocumentCollection(Map<String, Object> caseData, String collection) {
-        if (StringUtils.isEmpty(caseData.get(collection))) {
-            return new ArrayList<>();
-        }
+    private List<GeneralUploadedDocumentData> getGeneralDocumentCollection(Map<String, Object> caseData) {
+        objectMapper.registerModule(new JavaTimeModule());
 
-        return objectMapper.registerModule(new JavaTimeModule()).convertValue(caseData.get(collection), new TypeReference<>() {});
+        List<GeneralUploadedDocumentData> generalDocuments = objectMapper.convertValue(
+            caseData.get(GENERAL_UPLOADED_DOCUMENTS), new TypeReference<>() {});
+
+        return Optional.ofNullable(generalDocuments).orElse(new ArrayList<>());
     }
 }

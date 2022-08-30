@@ -6,7 +6,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -19,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDo
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 
@@ -44,7 +44,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler implements Callbac
         Map<String, Object> caseData = uploadedDocumentHelper.addUploadDateToNewDocuments(
             callbackRequest.getCaseDetails().getData(),
             callbackRequest.getCaseDetailsBefore().getData(), CONTESTED_UPLOADED_DOCUMENTS);
-        List<ContestedUploadedDocumentData> uploadedDocuments = getDocumentCollection(caseData, CONTESTED_UPLOADED_DOCUMENTS);
+        List<ContestedUploadedDocumentData> uploadedDocuments = getDocumentCollection(caseData);
         caseDocumentHandlers.stream().forEach(h -> h.handle(uploadedDocuments, caseData));
         caseData.put(CONTESTED_UPLOADED_DOCUMENTS, uploadedDocuments);
         return AboutToStartOrSubmitCallbackResponse
@@ -53,12 +53,13 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler implements Callbac
             .build();
     }
 
-    private List<ContestedUploadedDocumentData> getDocumentCollection(Map<String, Object> caseData, String collection) {
-        if (StringUtils.isEmpty(caseData.get(collection))) {
-            return new ArrayList<>();
-        }
+    private List<ContestedUploadedDocumentData> getDocumentCollection(Map<String, Object> caseData) {
+        objectMapper.registerModule(new JavaTimeModule());
 
-        return objectMapper.registerModule(new JavaTimeModule()).convertValue(caseData.get(collection), new TypeReference<>() {});
+        List<ContestedUploadedDocumentData> contestedUploadDocuments = objectMapper.convertValue(
+            caseData.get(CONTESTED_UPLOADED_DOCUMENTS), new TypeReference<>() {});
+
+        return Optional.ofNullable(contestedUploadDocuments).orElse(new ArrayList<>());
     }
 
 }
