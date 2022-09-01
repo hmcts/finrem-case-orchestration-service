@@ -39,11 +39,11 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
 
     private OldCallbackRequest callbackRequest;
 
-    @ClassRule
-    public static WireMockClassRule paymentService = new WireMockClassRule(9001);
 
-    private static final String PBA_PAYMENT_API = "/payments/pba-payment";
-    private static final String PBA_PAYMENT_API_FOR_CASE_TYPE = "/payments/new-pba-payment";
+    @ClassRule
+    public static WireMockClassRule paymentService = new WireMockClassRule(8181);
+
+    private static final String PBA_PAYMENT_API = "/credit-account-payments";
 
     @Before
     public void setupCaseData() throws Exception {
@@ -377,7 +377,7 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
     }
 
     private void setUpPbaPaymentForCaseType(String response) {
-        paymentService.stubFor(post(urlPathEqualTo(PBA_PAYMENT_API_FOR_CASE_TYPE))
+        paymentService.stubFor(post(urlPathEqualTo(PBA_PAYMENT_API))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)

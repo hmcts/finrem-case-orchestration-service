@@ -178,7 +178,9 @@ sonarqube {
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/handler/AmendApplicationAboutToSubmitHandler.java',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/handler/ApprovedConsentOrderAboutToSubmitHandler.java',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/handler/RejectedConsentOrderSubmittedHandler.java',
-                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/CaseOrchestrationApplication']
+                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/CaseOrchestrationApplication',
+                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/service/payments/config/**',
+                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/service/payments/model/**']
 
     properties {
         property "sonar.projectKey", "finrem-case-orchestration"

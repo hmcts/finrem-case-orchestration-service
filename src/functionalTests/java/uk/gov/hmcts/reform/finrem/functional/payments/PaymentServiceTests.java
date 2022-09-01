@@ -8,8 +8,6 @@ import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(SerenityRunner.class)
@@ -85,17 +83,6 @@ public class PaymentServiceTests extends IntegrationTestBase {
     @Test
     public void verifyPBAConfirmationMessageForPBAPaymentContested() {
         validatePaymentConfirmationMessage(pbaConfirmation, "pba-payment_contested.json", contestedDir, pba);
-    }
-
-    /**
-     * Verify a "duplicate payment" error is received when sending a fee with the same fee code more than once within
-     * 2 minutes.
-     */
-    @Test
-    public void verifyDuplicatePaymentReturnsErrorWithin2MinutesForContested() {
-        String filename = "SuccessPaymentRequestPayload_Contested_Duplicate.json";
-        utils.validatePostSuccess(pbaPayment, filename, contestedDir);
-        assertThat(utils.getResponse(pbaPayment, filename, contestedDir).jsonPath().get("errors[0]"), is("duplicate payment"));
     }
 
     private void validatePaymentConfirmationMessage(String url, String fileName,

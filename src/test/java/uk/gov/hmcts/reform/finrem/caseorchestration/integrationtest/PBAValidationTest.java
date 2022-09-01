@@ -1,7 +1,9 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
+import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,15 +21,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OldCallbackRequest;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.fail;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -55,18 +60,39 @@ public class PBAValidationTest extends BaseTest {
     private ObjectMapper objectMapper;
 
     @ClassRule
-    public static WireMockClassRule feeLookUpService = new WireMockClassRule(9001);
+    public static WireMockClassRule pbaServiceClassRule = new WireMockClassRule(8090);
+
+    @ClassRule
+    public static WireMockClassRule idamServiceClassRule = new WireMockClassRule(4501);
 
     private OldCallbackRequest request;
+    private JsonNode pbaValidResponseContent;
+    private JsonNode pbaInValidResponseContent;
+
+    @Before
+    public void setUp() {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        try {
+            pbaValidResponseContent = objectMapper.readTree(new File(getClass()
+                .getResource("/fixtures/payment-by-account-full.json").toURI()));
+            pbaInValidResponseContent = objectMapper.readTree(new File(getClass()
+                .getResource("/fixtures/payment-by-account-not-including-PBA123.json").toURI()));
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+
+    }
 
     @Test
     public void shouldPBAValidationSuccessful() throws Exception {
         setUpPbaValidationRequest("/fixtures/pba-validate.json");
-        stubPBAValidate(PBA_VALID_RESPONSE);
+        stubPBAValidate(pbaValidResponseContent.toString());
+        stubForIdam();
         webClient.perform(post(PBA_VALIDATE_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(objectMapper.writeValueAsString(request)))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
@@ -76,11 +102,12 @@ public class PBAValidationTest extends BaseTest {
     @Test
     public void shouldPBAValidationFail() throws Exception {
         setUpPbaValidationRequest("/fixtures/pba-validate.json");
-        stubPBAValidate(PBA_INVALID_RESPONSE);
+        stubPBAValidate(pbaInValidResponseContent.toString());
+        stubForIdam();
         webClient.perform(post(PBA_VALIDATE_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(objectMapper.writeValueAsString(request)))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.errors", hasSize(1)))
@@ -91,9 +118,9 @@ public class PBAValidationTest extends BaseTest {
     public void shouldNotDoPBAValidationWhenPaymentIsDoneWithHWF() throws Exception {
         setUpPbaValidationRequest("/fixtures/hwf.json");
         webClient.perform(post(PBA_VALIDATE_URL)
-            .content(objectMapper.writeValueAsString(request))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(objectMapper.writeValueAsString(request))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
@@ -103,9 +130,9 @@ public class PBAValidationTest extends BaseTest {
     public void shouldReturnBadRequestError() throws Exception {
         setUpPbaValidationRequest("/fixtures/empty-casedata.json");
         webClient.perform(post(PBA_VALIDATE_URL)
-            .content(objectMapper.writeValueAsString(request))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(objectMapper.writeValueAsString(request))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest());
     }
 
@@ -116,10 +143,22 @@ public class PBAValidationTest extends BaseTest {
     }
 
     private void stubPBAValidate(String response) {
-        stubFor(get("/payments/pba-validate/PBA123")
+        pbaServiceClassRule.stubFor(get("/refdata/external/v1/organisations/pbas")
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(response)));
+    }
+
+
+    private void stubForIdam() {
+        idamServiceClassRule.stubFor(get("/details")
+            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
+            .withHeader(CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE))
+            .willReturn(
+                aResponse()
+                    .withStatus(HttpStatus.OK.value())
+                    .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody("{\"email\": \"test@TEST.com\"}")));
     }
 }
