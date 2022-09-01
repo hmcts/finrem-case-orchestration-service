@@ -15,7 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralUploadedDocumentData;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +65,6 @@ public class UploadGeneralDocumentsAboutToSubmitHandler implements CallbackHandl
         List<GeneralUploadedDocumentData> generalDocuments = objectMapper.convertValue(
             caseData.get(GENERAL_UPLOADED_DOCUMENTS), new TypeReference<>() {});
 
-        return Optional.ofNullable(generalDocuments).orElse(new ArrayList<>());
+        return Optional.ofNullable(generalDocuments).orElse(Collections.emptyList());
     }
 }
