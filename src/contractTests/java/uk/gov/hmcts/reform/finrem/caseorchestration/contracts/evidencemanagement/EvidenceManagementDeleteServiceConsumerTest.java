@@ -10,16 +10,13 @@ import org.json.JSONException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -31,10 +28,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 
-@RunWith(SpringRunner.class)
-@ContextConfiguration(classes = CaseOrchestrationApplication.class)
-@TestPropertySource(locations = "/application-contract.properties")
-public class EvidenceManagementDeleteServiceConsumerTest {
+@SpringBootTest
+public class EvidenceManagementDeleteServiceConsumerTest extends BaseTest {
 
     @MockBean
     protected AuthTokenGenerator authTokenGenerator;
