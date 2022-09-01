@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.ASSIGN_CASE_ACCESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CASEWORKER_NOTICE_OF_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.MANAGE_BUNDLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.PAYMENT_REQUEST_USING_CASE_TYPE;
@@ -56,13 +55,6 @@ public class FeatureToggleService {
      */
     public boolean isManageBundleEnabled() {
         return isFeatureEnabled(MANAGE_BUNDLE);
-    }
-
-    /*
-     * Defaulted to true. Only to be set to false in Preview as ACA API is not deployed there
-     */
-    public boolean isAssignCaseAccessEnabled() {
-        return isFeatureEnabled(ASSIGN_CASE_ACCESS);
     }
 
     public boolean isRespondentJourneyEnabled() {
