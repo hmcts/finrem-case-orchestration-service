@@ -108,41 +108,38 @@ public class PBAPaymentController extends BaseController {
         validateCaseData(callbackRequest);
         final Map<String, Object> mapOfCaseData = caseDetails.getData();
 
-        if (featureToggleService.isAssignCaseAccessEnabled()) {
-            try {
-                String applicantOrgId = getApplicantOrgId(caseDetails);
+        try {
+            String applicantOrgId = getApplicantOrgId(caseDetails);
 
-                if (applicantOrgId != null) {
-                    OrganisationsResponse prdOrganisation = prdOrganisationService.retrieveOrganisationsData(authToken);
+            if (applicantOrgId != null) {
+                OrganisationsResponse prdOrganisation = prdOrganisationService.retrieveOrganisationsData(authToken);
 
-                    if (prdOrganisation.getOrganisationIdentifier().equals(applicantOrgId)) {
-                        log.info("Assigning case access for Case ID: {}", caseDetails.getId());
-                        try {
-                            assignCaseAccessService.assignCaseAccess(caseDetails, authToken);
-                            ccdDataStoreService.removeCreatorRole(caseDetails, authToken);
-                        } catch (Exception e) {
-                            log.error("Assigning case access threw exception for Case ID: {}, {}",
-                                caseDetails.getId(), e.getMessage());
-                            return assignCaseAccessFailure(caseDetails, emptyList());
-                        }
-                    } else {
-                        String errorMessage = "Applicant solicitor does not belong to chosen applicant organisation";
-                        log.info("{} for Case ID: {}", errorMessage, caseDetails.getId());
-                        return assignCaseAccessFailure(caseDetails, singletonList(errorMessage));
+                if (prdOrganisation.getOrganisationIdentifier().equals(applicantOrgId)) {
+                    log.info("Assigning case access for Case ID: {}", caseDetails.getId());
+                    try {
+                        assignCaseAccessService.assignCaseAccess(caseDetails, authToken);
+                        ccdDataStoreService.removeCreatorRole(caseDetails, authToken);
+                    } catch (Exception e) {
+                        log.error("Assigning case access threw exception for Case ID: {}, {}",
+                            caseDetails.getId(), e.getMessage());
+                        return assignCaseAccessFailure(caseDetails, emptyList());
                     }
                 } else {
-                    String errorMessage = "Applicant organisation not selected";
+                    String errorMessage = "Applicant solicitor does not belong to chosen applicant organisation";
                     log.info("{} for Case ID: {}", errorMessage, caseDetails.getId());
                     return assignCaseAccessFailure(caseDetails, singletonList(errorMessage));
                 }
-            } catch (Exception e) {
-                log.error("Exception when trying to assign case access for Case ID: {}, {}",
-                    caseDetails.getId(), e.getMessage());
-                return assignCaseAccessFailure(caseDetails, emptyList());
+            } else {
+                String errorMessage = "Applicant organisation not selected";
+                log.info("{} for Case ID: {}", errorMessage, caseDetails.getId());
+                return assignCaseAccessFailure(caseDetails, singletonList(errorMessage));
             }
-        } else {
-            log.info("Assign case info not enabled, Case ID: {}", caseDetails.getId());
+        } catch (Exception e) {
+            log.error("Exception when trying to assign case access for Case ID: {}, {}",
+                caseDetails.getId(), e.getMessage());
+            return assignCaseAccessFailure(caseDetails, emptyList());
         }
+
 
         mapOfCaseData.put(SUBMIT_CASE_DATE, LocalDate.now());
 

@@ -80,7 +80,7 @@ public class FeatureToggleServiceTest {
         public void isSendToFRCEnabledReturnsFalse() {
             assertThat(featureToggleService.isSendToFRCEnabled(), is(false));
         }
-        
+
         @Test
         public void isPbaToggleEnabledReturnsFalse() {
             assertThat(featureToggleService.isPBAUsingCaseTypeEnabled(), is(false));

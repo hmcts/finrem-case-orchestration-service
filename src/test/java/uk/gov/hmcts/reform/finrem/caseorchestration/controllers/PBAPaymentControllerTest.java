@@ -94,7 +94,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     @Before
     public void setUp() {
         super.setUp();
-        when(featureToggleService.isAssignCaseAccessEnabled()).thenReturn(true);
         when(featureToggleService.isUseUserTokenEnabled()).thenReturn(true);
 
         when(prdOrganisationService.retrieveOrganisationsData(AUTH_TOKEN)).thenReturn(OrganisationsResponse.builder()
@@ -224,7 +223,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     @Test
     public void shouldAssignApplicantSolicitor() throws Exception {
         doPBAPaymentReferenceAlreadyExistsSetup();
-        when(featureToggleService.isAssignCaseAccessEnabled()).thenReturn(true);
 
         mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
                 .content(requestContent.toString())
@@ -242,7 +240,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     public void shouldNotAssignApplicantSolicitor_assignCaseAccessToggledOff() throws Exception {
         doPBAPaymentReferenceAlreadyExistsSetup();
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-        when(featureToggleService.isAssignCaseAccessEnabled()).thenReturn(false);
 
         mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
                 .content(requestContent.toString())
