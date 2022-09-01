@@ -15,7 +15,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
@@ -31,8 +30,6 @@ import static org.mockito.BDDMockito.given;
 @SpringBootTest
 public class EvidenceManagementDeleteServiceConsumerTest extends BaseTest {
 
-    @MockBean
-    protected AuthTokenGenerator authTokenGenerator;
     private static final String authorizationToken = "Bearer some-access-token";
     private static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
     private static final String USER_ID_VALUE = "1000";

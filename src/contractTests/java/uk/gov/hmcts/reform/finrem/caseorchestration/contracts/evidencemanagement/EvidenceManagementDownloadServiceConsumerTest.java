@@ -11,10 +11,8 @@ import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 
@@ -23,8 +21,6 @@ import static org.mockito.BDDMockito.given;
 
 @SpringBootTest
 public class EvidenceManagementDownloadServiceConsumerTest extends BaseTest {
-    @MockBean
-    protected AuthTokenGenerator authTokenGenerator;
     private static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
     private final String someServiceAuthToken = "someServiceAuthToken";
     private static final String DOCUMENT_ID = "5c3c3906-2b51-468e-8cbb-a4002eded075";
