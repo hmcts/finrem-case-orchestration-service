@@ -9,10 +9,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentGen
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocmosisPdfGenerationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentGeneratorValidationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementUploadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PdfStampingService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementUploadService;
 
 @Profile("test-mock-feign-clients")
 @Configuration
