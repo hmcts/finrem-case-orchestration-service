@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

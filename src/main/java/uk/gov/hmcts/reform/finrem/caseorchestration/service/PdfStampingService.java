@@ -16,6 +16,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.FinremMultipartFile;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.PdfAnnexStampingInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementUploadService;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;

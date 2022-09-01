@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement;
 
 import feign.FeignException;
 import feign.Request;
@@ -16,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.util.HashMap;
@@ -36,7 +38,8 @@ public class EvidenceManagementDeleteServiceTest {
 
     private static final String EVIDENCE_MANAGEMENT_SERVICE_URL = "http://localhost:8080/documents/";
 
-    @Mock IdamAuthService idamAuthService;
+    @Mock
+    IdamAuthService idamAuthService;
     @Mock private RestTemplate restTemplate;
     @Mock private AuthTokenGenerator authTokenGenerator;
 

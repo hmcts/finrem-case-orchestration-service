@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentgenerator;
 
 import org.apache.tika.Tika;
 import org.apache.tika.metadata.Metadata;
@@ -11,6 +11,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentGeneratorValidationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 
 import java.io.IOException;
 
