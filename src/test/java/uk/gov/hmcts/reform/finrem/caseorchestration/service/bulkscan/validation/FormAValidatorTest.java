@@ -91,25 +91,6 @@ public class FormAValidatorTest {
 
     @Before
     public void setup() {
-        mandatoryFieldsWithValues = asList(
-            new OcrDataField(DIVORCE_CASE_NUMBER, "DD12D12345"),
-            new OcrDataField(APPLICANT_FULL_NAME, "Peter Griffin"),
-            new OcrDataField(RESPONDENT_FULL_NAME, "Louis Griffin"),
-            new OcrDataField(PROVISION_MADE_FOR, "in connection with matrimonial or civil partnership proceedings"),
-            new OcrDataField(NATURE_OF_APPLICATION, "Periodical Payment Order, Pension Attachment Order"),
-            new OcrDataField(APPLICANT_INTENDS_TO, "ApplyToCourtFor"),
-            new OcrDataField(APPLYING_FOR_CONSENT_ORDER, "Yes"),
-            new OcrDataField(DIVORCE_STAGE_REACHED, "Decree Nisi"),
-            new OcrDataField(APPLICANT_REPRESENTED, "I am not represented by a solicitor in these proceedings"),
-            new OcrDataField(AUTHORISATION_SIGNED, "Yes"),
-            new OcrDataField(AUTHORISATION_SIGNED_BY, "Applicant's solicitor"),
-            new OcrDataField(AUTHORISATION_DATE, "12/03/2020"),
-            new OcrDataField(APPLICANT_ADDRESS_LINE_1, "Road"),
-            new OcrDataField(APPLICANT_ADDRESS_POSTCODE, "SW9 9SD"),
-            new OcrDataField(RESPONDENT_ADDRESS_LINE_1, "Avenue"),
-            new OcrDataField(RESPONDENT_ADDRESS_POSTCODE, "SW1 9SD")
-        );
-
         optionalFieldsWithValues = asList(
             new OcrDataField(HWF_NUMBER, "123456"),
             new OcrDataField(DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE, "a lump sum order,a pension compensation sharing order"),
@@ -139,8 +120,40 @@ public class FormAValidatorTest {
         );
     }
 
+    private void setupMandatoryFields() {
+        mandatoryFieldsWithValues = new ArrayList<>();
+        mandatoryFieldsWithValues.add(new OcrDataField(APPLICANT_FULL_NAME, "Peter Griffin"));
+        mandatoryFieldsWithValues.add(new OcrDataField(RESPONDENT_FULL_NAME, "Louis Griffin"));
+        mandatoryFieldsWithValues.add(new OcrDataField(PROVISION_MADE_FOR, "in connection with matrimonial or civil partnership proceedings"));
+        mandatoryFieldsWithValues.add(new OcrDataField(NATURE_OF_APPLICATION, "Periodical Payment Order, Pension Attachment Order"));
+        mandatoryFieldsWithValues.add(new OcrDataField(APPLICANT_INTENDS_TO, "ApplyToCourtFor"));
+        mandatoryFieldsWithValues.add(new OcrDataField(APPLYING_FOR_CONSENT_ORDER, "Yes"));
+        mandatoryFieldsWithValues.add(new OcrDataField(DIVORCE_STAGE_REACHED, "Decree Nisi"));
+        mandatoryFieldsWithValues.add(new OcrDataField(APPLICANT_REPRESENTED, "I am not represented by a solicitor in these proceedings"));
+        mandatoryFieldsWithValues.add(new OcrDataField(AUTHORISATION_SIGNED, "Yes"));
+        mandatoryFieldsWithValues.add(new OcrDataField(AUTHORISATION_SIGNED_BY, "Applicant's solicitor"));
+        mandatoryFieldsWithValues.add(new OcrDataField(AUTHORISATION_DATE, "12/03/2020"));
+        mandatoryFieldsWithValues.add(new OcrDataField(APPLICANT_ADDRESS_LINE_1, "Road"));
+        mandatoryFieldsWithValues.add(new OcrDataField(APPLICANT_ADDRESS_POSTCODE, "SW9 9SD"));
+        mandatoryFieldsWithValues.add(new OcrDataField(RESPONDENT_ADDRESS_LINE_1, "Avenue"));
+        mandatoryFieldsWithValues.add(new OcrDataField(RESPONDENT_ADDRESS_POSTCODE, "SW1 9SD"));
+    }
+
     @Test
     public void shouldPassValidationForValidMandatoryAndOptionalFields() {
+        assertFields("DD12D12345");
+        assertFields("DD12d12345");
+        assertFields("DD12N12345");
+        assertFields("DD12n12345");
+        assertFields("DD12J12345");
+        assertFields("DD12j12345");
+        assertFields("1529665798757092");
+        assertFields("1529-6657-9875-7092");
+    }
+
+    private void assertFields(String divorceCaseNumber) {
+        setupMandatoryFields();
+        mandatoryFieldsWithValues.add(new OcrDataField(DIVORCE_CASE_NUMBER, divorceCaseNumber));
         List<OcrDataField> ocrDataFields = new ArrayList<>(mandatoryFieldsWithValues);
         ocrDataFields.addAll(optionalFieldsWithValues);
         OcrValidationResult validationResult = formAValidator.validateBulkScanForm(ocrDataFields);
@@ -150,8 +163,11 @@ public class FormAValidatorTest {
         assertThat(validationResult.getErrors(), is(emptyList()));
     }
 
+
     @Test
     public void shouldFailValidationWhenMandatoryFieldsAreMissing() {
+        setupMandatoryFields();
+        mandatoryFieldsWithValues.add(new OcrDataField(DIVORCE_CASE_NUMBER, "DD12J12345"));
         OcrValidationResult validationResult = formAValidator.validateBulkScanForm(emptyList());
 
         assertThat(validationResult.getStatus(), is(WARNINGS));
@@ -161,6 +177,8 @@ public class FormAValidatorTest {
 
     @Test
     public void shouldFailValidationWhenMandatoryFieldsArePresentButEmpty() {
+        setupMandatoryFields();
+        mandatoryFieldsWithValues.add(new OcrDataField(DIVORCE_CASE_NUMBER, "DD12J12345"));
         OcrValidationResult validationResult = formAValidator.validateBulkScanForm(
             mandatoryFieldsWithValues.stream()
                 .map(emptyValueOcrDataField)
@@ -173,6 +191,8 @@ public class FormAValidatorTest {
 
     @Test
     public void shouldPassValidationForOptionalEmptyFields() {
+        setupMandatoryFields();
+        mandatoryFieldsWithValues.add(new OcrDataField(DIVORCE_CASE_NUMBER, "DD12J12345"));
         List<OcrDataField> optionalFieldsWithEmptyValues = optionalFieldsWithValues.stream()
             .map(emptyValueOcrDataField)
             .collect(Collectors.toList());
@@ -267,6 +287,8 @@ public class FormAValidatorTest {
 
     @Test
     public void shouldPassValidationForValuesWeDoNotSupportYet() {
+        setupMandatoryFields();
+        mandatoryFieldsWithValues.add(new OcrDataField(DIVORCE_CASE_NUMBER, "DD12J12345"));
         String domesticViolenceValue = "ArrestedRelevantDomesticViolenceOffence, "
             + "invalid, insert random here,"
             + "UndertakingSection46Or63EFamilyLawActOrScotlandNorthernIrelandProtectiveInjunction";

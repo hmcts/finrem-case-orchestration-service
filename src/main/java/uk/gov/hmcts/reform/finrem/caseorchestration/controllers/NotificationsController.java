@@ -401,11 +401,6 @@ public class NotificationsController extends BaseController {
         }
 
         Map<String, Object> caseData = caseDetails.getData();
-        if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData)) {
-            log.info("Sending Contested 'Application Issued' email notification to Respondent Solicitor");
-            notificationService.sendContestedApplicationIssuedEmailToRespondentSolicitor(caseDetails);
-        }
-
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 

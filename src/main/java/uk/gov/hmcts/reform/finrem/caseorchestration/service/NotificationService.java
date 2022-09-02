@@ -128,10 +128,6 @@ public class NotificationService {
         sendContestedApplicationIssuedEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
 
-    public void sendContestedApplicationIssuedEmailToRespondentSolicitor(CaseDetails caseDetails) {
-        sendContestedApplicationIssuedEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
-    }
-
     private void sendContestedApplicationIssuedEmail(NotificationRequest notificationRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getContestedApplicationIssued());
         sendNotificationEmail(notificationRequest, uri);
