@@ -442,30 +442,6 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void sendContestedApplicationIssuedRespondentEmail() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_APPLICATION_ISSUED))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedApplicationIssuedEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
-
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
-    }
-
-    @Test
-    public void throwExceptionWhenContestedApplicationIssuedRespondentEmailIsRequested() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_APPLICATION_ISSUED))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
-        try {
-            notificationService.sendContestedApplicationIssuedEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
-        } catch (Exception ex) {
-            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
-        }
-
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
-    }
-
-    @Test
     public void sendContestOrderApprovedEmailApplicantSolicitor() {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTEST_ORDER_APPROVED))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
