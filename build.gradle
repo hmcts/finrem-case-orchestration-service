@@ -328,6 +328,16 @@ dependencies {
     implementation group: 'com.github.hmcts', name: 'send-letter-client', version: versions.sendLetterClient
     implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
 
+    implementation("org.springframework.boot:spring-boot-starter-web") {
+        exclude group: "org.yaml", module: "snakeyaml"
+    }
+
+    implementation("org.springdoc:springdoc-openapi-ui") {
+        exclude group: "org.yaml", module: "snakeyaml"
+    }
+
+    implementation group: 'org.yaml', name: 'snakeyaml', version: '1.31'
+
     developmentOnly group: 'org.springframework.boot', name: 'spring-boot-devtools'
 
     runtimeOnly group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
