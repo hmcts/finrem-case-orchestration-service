@@ -91,6 +91,12 @@ public class GeneralApplicationDirectionsService {
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
 
+    private static final String CASE_NUMBER = "ccdCaseNumber";
+    private static final String COURT_DETAIL = "courtDetails";
+    private static final String APPLICANT_NAME = "applicantName";
+    private static final String RESPONDENT_NAME = "respondentName";
+    private static final String LETTER_DATE = "letterDate";
+
     public void startGeneralApplicationDirections(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
         Stream.of(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED,
@@ -170,12 +176,12 @@ public class GeneralApplicationDirectionsService {
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         Map<String, Object> caseData = caseDetailsCopy.getData();
 
-        caseData.put("ccdCaseNumber", caseDetails.getId());
-        caseData.put("courtDetails", buildInterimFrcCourtDetails(caseData));
-        caseData.put("applicantName", documentHelper.getApplicantFullName(caseDetailsCopy));
-        caseData.put("respondentName", documentHelper.getRespondentFullNameContested(caseDetailsCopy));
+        caseData.put(CASE_NUMBER, caseDetails.getId());
+        caseData.put(COURT_DETAIL, buildInterimFrcCourtDetails(caseData));
+        caseData.put(APPLICANT_NAME, documentHelper.getApplicantFullName(caseDetailsCopy));
+        caseData.put(RESPONDENT_NAME, documentHelper.getRespondentFullNameContested(caseDetailsCopy));
         addInterimHearingVenueDetails(caseDetailsCopy);
-        caseData.put("letterDate", String.valueOf(LocalDate.now()));
+        caseData.put(LETTER_DATE, String.valueOf(LocalDate.now()));
 
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
             documentConfiguration.getGeneralApplicationInterimHearingNoticeTemplate(),
@@ -246,10 +252,10 @@ public class GeneralApplicationDirectionsService {
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         Map<String, Object> caseData = caseDetailsCopy.getData();
 
-        caseData.put("courtDetails", buildFrcCourtDetails(caseData));
-        caseData.put("applicantName", documentHelper.getApplicantFullName(caseDetailsCopy));
-        caseData.put("respondentName", documentHelper.getRespondentFullNameContested(caseDetailsCopy));
-        caseData.put("letterDate", String.valueOf(LocalDate.now()));
+        caseData.put(COURT_DETAIL, buildFrcCourtDetails(caseData));
+        caseData.put(APPLICANT_NAME, documentHelper.getApplicantFullName(caseDetailsCopy));
+        caseData.put(RESPONDENT_NAME, documentHelper.getRespondentFullNameContested(caseDetailsCopy));
+        caseData.put(LETTER_DATE, String.valueOf(LocalDate.now()));
 
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
             documentConfiguration.getGeneralApplicationOrderTemplate(),
@@ -260,12 +266,12 @@ public class GeneralApplicationDirectionsService {
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         Map<String, Object> caseData = caseDetailsCopy.getData();
 
-        caseData.put("ccdCaseNumber", caseDetails.getId());
-        caseData.put("courtDetails", buildFrcCourtDetails(caseData));
-        caseData.put("applicantName", documentHelper.getApplicantFullName(caseDetailsCopy));
-        caseData.put("respondentName", documentHelper.getRespondentFullNameContested(caseDetailsCopy));
+        caseData.put(CASE_NUMBER, caseDetails.getId());
+        caseData.put(COURT_DETAIL, buildFrcCourtDetails(caseData));
+        caseData.put(APPLICANT_NAME, documentHelper.getApplicantFullName(caseDetailsCopy));
+        caseData.put(RESPONDENT_NAME, documentHelper.getRespondentFullNameContested(caseDetailsCopy));
         addHearingVenueDetails(caseDetailsCopy);
-        caseData.put("letterDate", String.valueOf(LocalDate.now()));
+        caseData.put(LETTER_DATE, String.valueOf(LocalDate.now()));
 
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
             documentConfiguration.getGeneralApplicationHearingNoticeTemplate(),

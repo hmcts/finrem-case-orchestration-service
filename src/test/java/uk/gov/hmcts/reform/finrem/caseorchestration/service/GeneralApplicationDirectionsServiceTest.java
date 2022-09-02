@@ -155,7 +155,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
 
     @Test
     public void givenHearingRequired_whenGeneralApplicationDirectionsSubmitted_thenHearingNoticeIsPrinted() {
-        generalApplicationDirectionsService.submitGeneralApplicationDirections(caseDetails, AUTH_TOKEN);
+        generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(caseDetails, AUTH_TOKEN);
 
         assertCaseDataHasGeneralApplicationDirectionsDocument();
 
@@ -309,7 +309,6 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
 
     private void assertDocumentPrintRequestContainsExpectedDocuments() {
         List<BulkPrintDocument> documentsToPrint = printDocumentsRequestDocumentListCaptor.getValue();
-        System.out.println(documentsToPrint);
         assertThat(documentsToPrint, containsInAnyOrder(Stream.of(
             GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL,
             "http://dm-store/hijbb-general-application-latest-document/binary",
