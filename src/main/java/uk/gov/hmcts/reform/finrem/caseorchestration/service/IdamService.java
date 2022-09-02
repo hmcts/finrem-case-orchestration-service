@@ -47,6 +47,11 @@ public class IdamService {
     private final IdamServiceConfiguration serviceConfig;
     private final RestTemplate restTemplate;
 
+    private static final Function<ResponseEntity<Map>, String> email = responseEntity -> {
+        Map body = responseEntity.getBody();
+        return (String) body.get("email").toString().toLowerCase();
+    };
+
     public boolean isUserRoleAdmin(String authToken) {
         return isAdmin.apply(restTemplate.exchange(uriSupplier.apply(serviceConfig), HttpMethod.GET,
             buildAuthRequest.apply(authToken), Map.class));
@@ -61,4 +66,11 @@ public class IdamService {
         return userId.apply(restTemplate.exchange(uriSupplier.apply(serviceConfig), HttpMethod.GET,
             buildAuthRequest.apply(authorisationToken), Map.class));
     }
+
+
+    public String getUserEmailId(String authorisationToken) {
+        return email.apply(restTemplate.exchange(uriSupplier.apply(serviceConfig), HttpMethod.GET,
+            buildAuthRequest.apply(authorisationToken), Map.class));
+    }
 }
+
