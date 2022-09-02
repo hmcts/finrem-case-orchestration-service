@@ -323,6 +323,16 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
     implementation 'com.github.hmcts:finrem-common:v1.0.3-RC-DFR-1074_4.114'
 
+    implementation("org.springframework.boot:spring-boot-starter-web") {
+        exclude group: "org.yaml", module: "snakeyaml"
+    }
+
+    implementation("org.springdoc:springdoc-openapi-ui") {
+        exclude group: "org.yaml", module: "snakeyaml"
+    }
+
+    implementation group: 'org.yaml', name: 'snakeyaml', version: '1.31'
+
     developmentOnly group: 'org.springframework.boot', name: 'spring-boot-devtools'
 
     runtimeOnly group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
