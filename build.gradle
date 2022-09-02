@@ -325,8 +325,8 @@ dependencies {
         exclude group: "org.yaml", module: "snakeyaml"
     }
 
-    implementation("org.springframework.boot:spring-boot-starter-web") {
-        exclude group: "org.springdoc", module: "springdoc-openapi-ui"
+    implementation("org.springdoc:springdoc-openapi-ui") {
+        exclude group: "org.yaml", module: "snakeyaml"
     }
 
     implementation group: 'org.yaml', name: 'snakeyaml', version: '1.31'
