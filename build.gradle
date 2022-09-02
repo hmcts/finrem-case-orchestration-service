@@ -321,6 +321,16 @@ dependencies {
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: versions.apacheLogging
     implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: versions.apacheLogging
 
+    implementation("org.springframework.boot:spring-boot-starter-web") {
+        exclude group: "org.yaml", module: "snakeyaml"
+    }
+
+    implementation("org.springframework.boot:spring-boot-starter-web") {
+        exclude group: "org.springdoc", module: "springdoc-openapi-ui"
+    }
+
+    implementation group: 'org.yaml', name: 'snakeyaml', version: '1.31'
+
     developmentOnly group: 'org.springframework.boot', name: 'spring-boot-devtools'
 
     runtimeOnly group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
