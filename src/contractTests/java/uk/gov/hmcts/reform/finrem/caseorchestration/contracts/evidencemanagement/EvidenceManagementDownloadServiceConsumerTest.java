@@ -12,7 +12,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
@@ -21,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 
 @SpringBootTest
-@TestPropertySource(locations = "/application.properties")
 public class EvidenceManagementDownloadServiceConsumerTest extends BaseTest {
     private static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
     private final String someServiceAuthToken = "someServiceAuthToken";
@@ -37,7 +35,7 @@ public class EvidenceManagementDownloadServiceConsumerTest extends BaseTest {
     RestTemplate restTemplate;
 
     @Rule
-    public PactProviderRule mockProvider = new PactProviderRule("em_dm_store", "localhost", 8889, this);
+    public PactProviderRule mockProvider = new PactProviderRule("em_dm_store", "localhost", 3405, this);
 
     @BeforeEach
     public void setUpEachTest() throws InterruptedException {
@@ -63,7 +61,7 @@ public class EvidenceManagementDownloadServiceConsumerTest extends BaseTest {
     @PactVerification()
     public void verifyDocumentDownloadFromDmStore() throws Exception {
         given(authTokenGenerator.generate()).willReturn(someServiceAuthToken);
-        ResponseEntity<byte[]> responses = evidenceManagementDownloadService.download("http://localhost:8889" + DOWNLOAD_FILE_URL);
+        ResponseEntity<byte[]> responses = evidenceManagementDownloadService.download("http://localhost:3405" + DOWNLOAD_FILE_URL);
         assertTrue(responses.getStatusCode().is2xxSuccessful());
     }
 
