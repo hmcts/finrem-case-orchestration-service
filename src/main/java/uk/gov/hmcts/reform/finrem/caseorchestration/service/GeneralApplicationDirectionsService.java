@@ -129,7 +129,7 @@ public class GeneralApplicationDirectionsService {
             GENERAL_APPLICATION_DIRECTIONS_JUDGE_NAME,
             GENERAL_APPLICATION_DIRECTIONS_RECITALS,
             GENERAL_APPLICATION_DIRECTIONS_TEXT_FROM_JUDGE
-        ).forEach(generalApplicationDirectionCcdField -> caseData.remove(generalApplicationDirectionCcdField));
+        ).forEach(caseData::remove);
     }
 
     public void submitInterimHearing(CaseDetails caseDetails, String authorisationToken) {
@@ -196,6 +196,11 @@ public class GeneralApplicationDirectionsService {
         } catch (IOException exception) {
             throw new IllegalStateException(exception);
         }
+    }
+
+    public void submitCollectionGeneralApplicationDirections(CaseDetails caseDetails, String authorisationToken) {
+        List<BulkPrintDocument> documents = prepareDocumentsToPrint(caseDetails, authorisationToken);
+        printDocumentPackAndSendToApplicantAndRespondent(caseDetails, authorisationToken, documents);
     }
 
     public void submitGeneralApplicationDirections(CaseDetails caseDetails, String authorisationToken) {

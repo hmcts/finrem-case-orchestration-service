@@ -327,7 +327,12 @@ public class CCDConfigConstant {
     public static final String GENERAL_EMAIL_BODY = "generalEmailBody";
 
     // General application
+    public static final String GENERAL_APPLICATION_REFERRED_DETAIL = "generalApplicationReferDetail";
     public static final String GENERAL_APPLICATION_REJECT_REASON = "generalApplicationRejectReason";
+    public static final String GENERAL_APPLICATION_REFER_LIST = "generalApplicationReferList";
+    public static final String GENERAL_APPLICATION_OUTCOME_LIST = "generalApplicationOutcomeList";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_LIST = "generalApplicationDirectionsList";
+    public static final String GENERAL_APPLICATION_OUTCOME_DECISION = "generalApplicationOutcome";
     public static final String GENERAL_APPLICATION_LIST = "generalApplicationList";
     public static final String GENERAL_APPLICATION_TRACKING = "generalApplicationTracking";
     public static final String GENERAL_APPLICATION_COLLECTION = "generalApplications";
@@ -343,6 +348,7 @@ public class CCDConfigConstant {
     public static final String GENERAL_APPLICATION_DOCUMENT_LATEST_DATE = "generalApplicationLatestDocumentDate";
     public static final String GENERAL_APPLICATION_PRE_STATE = "generalApplicationPreState";
     public static final String GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL = "generalApplicationReferToJudgeEmail";
+    public static final String GENERAL_APPLICATION_OUTCOME_OTHER = "generalApplicationOutcomeOther";
 
     // General application directions
     public static final String GENERAL_APPLICATION_DIRECTIONS_ADDITIONAL_INFORMATION = "generalApplicationDirectionsAdditionalInformation";

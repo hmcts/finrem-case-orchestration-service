@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
@@ -119,7 +120,7 @@ public class GeneralApplicationService {
         generalApplicationItems.setGeneralApplicationCreatedDate(LocalDate.now());
         CaseDocument caseDocument = covertToPdf(generalApplicationItems.getGeneralApplicationDocument(), userAuthorisation);
         generalApplicationItems.setGeneralApplicationDocument(caseDocument);
-
+        generalApplicationItems.setGeneralApplicationStatus(GeneralApplicationStatus.CREATED.getId());
         if (generalApplicationItems.getGeneralApplicationDraftOrder() != null) {
             CaseDocument draftDocument = covertToPdf(generalApplicationItems.getGeneralApplicationDraftOrder(), userAuthorisation);
             generalApplicationItems.setGeneralApplicationDraftOrder(draftDocument);

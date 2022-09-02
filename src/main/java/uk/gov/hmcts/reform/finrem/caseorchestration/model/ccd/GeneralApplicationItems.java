@@ -34,4 +34,10 @@ public class GeneralApplicationItems {
     private LocalDate generalApplicationCreatedDate;
     @JsonProperty("gaSupportDocuments")
     private List<GeneralApplicationSupportingDocumentData> gaSupportDocuments;
+    @JsonProperty("generalApplicationStatus")
+    private String generalApplicationStatus;
+    @JsonProperty("generalApplicationOutcomeOther")
+    private String generalApplicationOutcomeOther;
+    @JsonProperty("generalApplicationDirectionsDocument")
+    private CaseDocument generalApplicationDirectionsDocument;
 }
