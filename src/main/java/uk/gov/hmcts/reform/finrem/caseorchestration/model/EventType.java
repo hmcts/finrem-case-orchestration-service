@@ -25,6 +25,8 @@ public enum EventType {
     CLOSE("FR_close"),
     MANAGE_CASE_DOCUMENTS("FR_manageCaseDocuments"),
     UPLOAD_APPROVED_ORDER("FR_uploadApprovedOrder"),
+    NEW_PAPER_CASE("FR_newPaperCase"),
+
     NONE("");
 
     private final String ccdType;
