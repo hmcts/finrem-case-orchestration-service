@@ -53,7 +53,6 @@ public class UploadApprovedOrderService {
     public AboutToStartOrSubmitCallbackResponse handleUploadApprovedOrderAboutToSubmit(CaseDetails caseDetails,
                                                                                        String authorisationToken) {
         List<String> errors = new ArrayList<>();
-        convertToPdfAndStoreApprovedHearingOrder(caseDetails, authorisationToken);
         contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, authorisationToken);
 
         try {
@@ -69,21 +68,6 @@ public class UploadApprovedOrderService {
             approvedOrderNoticeOfHearingService.createAndStoreHearingNoticeDocumentPack(caseDetails, authorisationToken);
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build();
-    }
-
-    private void convertToPdfAndStoreApprovedHearingOrder(CaseDetails caseDetails, String authorisationToken) {
-        Map<String, Object> caseData = caseDetails.getData();
-        List<CollectionElement<DirectionOrder>> hearingOrders = getHearingOrderList(caseData);
-        Optional<CollectionElement<DirectionOrder>> latestHearingOrder = getLatestHearingOrder(hearingOrders);
-
-        if (latestHearingOrder.isPresent()) {
-            CaseDocument pdfHearingOrder = genericDocumentService.convertDocumentIfNotPdfAlready(
-                latestHearingOrder.get().getValue().getUploadDraftDocument(),
-                    authorisationToken);
-            hearingOrderService.updateCaseDataForLatestHearingOrderCollection(caseData, pdfHearingOrder);
-        } else {
-            throw new InvalidCaseDataException(BAD_REQUEST.value(), "Missing data from callbackRequest.");
-        }
     }
 
     private boolean isAnotherHearingToBeListed(CaseDetails caseDetails) {
