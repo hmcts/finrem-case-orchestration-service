@@ -160,7 +160,7 @@ public class ConsentedCourtHelper {
         .build();
     private static Map<String, String> nwOtherMap = ImmutableMap.<String, String>builder()
         .put("FR_NWList_1", "West Cumbria Courthouse")
-        .put("FR_NWList_2", "Preston Combined Court Centre")
+        .put("FR_NWList_2", "Preston Designated Family Court")
         .put("FR_NWList_3", "Lancaster Courthouse")
         .put("FR_NWList_4", "Carlisle Combined Court")
         .put("FR_NWList_5", "Burnley Combined Court")
@@ -169,7 +169,7 @@ public class ConsentedCourtHelper {
         .put("FR_NWList_8", "Barrow-in-Furness County and Family Court")
         .build();
     private static Map<String, String> cleavelandMap = ImmutableMap.<String, String>builder()
-        .put("FR_clevelandList_1", "Newcastle upon Tyne Justice Centre")
+        .put("FR_clevelandList_1", "Newcastle Civil and Family Courts and Tribunals Centre")
         .put("FR_clevelandList_2", "Durham Justice Centre")
         .put("FR_clevelandList_3", "Sunderland County and Family Court")
         .put("FR_clevelandList_4", "Middlesbrough County Court at Teesside Combined Court")
@@ -184,7 +184,7 @@ public class ConsentedCourtHelper {
         .put("FR_manchesterList_3", "Wigan County Court and Family Court")
         .build();
     private static Map<String, String> lancashireMap = ImmutableMap.<String, String>builder()
-        .put(PRESTON, "Preston Combined Court Centre")
+        .put(PRESTON, "Preston Designated Family Court")
         .put(BLACKBURN, "Blackburn Family Court")
         .put(BLACKPOOL, "Blackpool Family Court")
         .put(LANCASTER, "Lancaster Courthouse")
