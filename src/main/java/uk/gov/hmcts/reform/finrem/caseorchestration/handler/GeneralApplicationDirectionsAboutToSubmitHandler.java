@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 
 import java.util.ArrayList;
@@ -46,21 +47,23 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
                                                        String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         final String caseId = caseDetails.getId().toString();
-        log.info("Received on submit request for general application direction for Case ID: {}", caseId);
+        log.info("Processing About to Submit callback for event {} with Case ID : {}",
+            EventType.GENERAL_APPLICATION_DIRECTIONS, callbackRequest.getCaseDetails().getId());
         Map<String, Object> caseData = caseDetails.getData();
+        List<BulkPrintDocument> documents = new ArrayList<>();
+        updateApplicationStatus(caseId, caseData, documents);
 
         List<String> errors = new ArrayList<>();
         try {
-            service.submitCollectionGeneralApplicationDirections(caseDetails, userAuthorisation);
+            service.submitCollectionGeneralApplicationDirections(caseDetails, documents, userAuthorisation);
         } catch (InvalidCaseDataException invalidCaseDataException) {
             errors.add(invalidCaseDataException.getMessage());
         }
 
-        updateApplicationStatus(caseId, caseData);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build();
     }
 
-    private void updateApplicationStatus(String caseId, Map<String, Object> caseData) {
+    private void updateApplicationStatus(String caseId, Map<String, Object> caseData, List<BulkPrintDocument> bulkPrintDocuments) {
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(caseData);
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_DIRECTIONS_LIST));
 
@@ -72,7 +75,8 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
         final String valueCode = choice[0];
         log.info("selected dynamic list code : {} Case ID: {}", valueCode, caseId);
         final List<GeneralApplicationCollectionData> applicationCollectionDataList
-            = existingList.stream().map(ga -> setStatus(caseData, ga, valueCode, outcome)).sorted(helper::getCompareTo).toList();
+            = existingList.stream().map(ga -> setStatus(caseData, ga, valueCode, outcome, bulkPrintDocuments))
+            .sorted(helper::getCompareTo).toList();
 
         log.info("applicationCollectionDataList : {} caseId {}", applicationCollectionDataList.size(), caseId);
         caseData.put(GENERAL_APPLICATION_COLLECTION, applicationCollectionDataList);
@@ -83,7 +87,8 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
     private GeneralApplicationCollectionData setStatus(Map<String, Object> caseData,
                                                        GeneralApplicationCollectionData data,
                                                        String code,
-                                                       String outcome) {
+                                                       String outcome,
+                                                       List<BulkPrintDocument> bulkPrintDocuments) {
         if (code.equals(data.getId())) {
             GeneralApplicationItems items = data.getGeneralApplicationItems();
             CaseDocument directionDocument = helper.convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT));
@@ -95,6 +100,18 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
                 case "Not Approved" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_NOT_APPROVED.getId());
                 case "Other" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_OTHER.getId());
                 default -> throw new IllegalStateException("Unexpected value: " + outcome);
+            }
+
+            final BulkPrintDocument genDoc = BulkPrintDocument.builder()
+                .binaryFileUrl(items.getGeneralApplicationDocument().getDocumentBinaryUrl())
+                .build();
+            bulkPrintDocuments.add(genDoc);
+
+            if (items.getGeneralApplicationDraftOrder() != null) {
+                final BulkPrintDocument draftDoc = BulkPrintDocument.builder()
+                    .binaryFileUrl(items.getGeneralApplicationDraftOrder().getDocumentBinaryUrl())
+                    .build();
+                bulkPrintDocuments.add(draftDoc);
             }
         }
         return data;

@@ -64,8 +64,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_THAMESVALLEY_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_WALES_FRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_WALES_OTHER_COURT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_PRE_STATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_UPLOADED_DOCUMENT;
@@ -204,8 +202,12 @@ public class GeneralApplicationDirectionsService {
         }
     }
 
-    public void submitCollectionGeneralApplicationDirections(CaseDetails caseDetails, String authorisationToken) {
+    public void submitCollectionGeneralApplicationDirections(CaseDetails caseDetails, List<BulkPrintDocument> dirDocuments,
+                                                             String authorisationToken) {
         List<BulkPrintDocument> documents = prepareDocumentsToPrint(caseDetails, authorisationToken);
+        if (!dirDocuments.isEmpty()) {
+            documents.addAll(dirDocuments);
+        }
         printDocumentPackAndSendToApplicantAndRespondent(caseDetails, authorisationToken, documents);
     }
 
@@ -223,14 +225,6 @@ public class GeneralApplicationDirectionsService {
             : prepareGeneralApplicationDirectionsOrderDocument(caseDetails, authorisationToken);
         documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(directionsDocument));
         caseData.put(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT, directionsDocument);
-
-        Stream.of(GENERAL_APPLICATION_DOCUMENT_LATEST, GENERAL_APPLICATION_DRAFT_ORDER).forEach(documentFieldName -> {
-            if (caseData.get(documentFieldName) != null) {
-                documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(
-                    documentHelper.convertToCaseDocument(caseData.get(documentFieldName))));
-            }
-        });
-
         return documents;
     }
 

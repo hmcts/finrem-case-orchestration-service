@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -77,6 +78,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_THAMESVALLEY_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_WALES_FRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_WALES_OTHER_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DOCUMENT;
 
 public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
@@ -155,7 +157,12 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
 
     @Test
     public void givenHearingRequired_whenGeneralApplicationDirectionsSubmitted_thenHearingNoticeIsPrinted() {
-        generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(caseDetails, AUTH_TOKEN);
+
+        List<BulkPrintDocument> documents = new ArrayList<>();
+        documents.add(getCaseDocumentAsBulkPrintDocument(
+            convertToCaseDocument(caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST))));
+
+        generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(caseDetails, documents, AUTH_TOKEN);
 
         assertCaseDataHasGeneralApplicationDirectionsDocument();
 
@@ -183,7 +190,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
                 "Croydon County Court And Family Court, Croydon County Court, Altyre Road, Croydon, CR9 5AB"),
             hasKey("letterDate")));
 
-        assertDocumentPrintRequestContainsExpectedDocuments();
+        assertDocumentPrintRequestContainsExpectedDocumentsForCollection();
     }
 
     @Test
@@ -310,21 +317,26 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     private void assertDocumentPrintRequestContainsExpectedDocuments() {
         List<BulkPrintDocument> documentsToPrint = printDocumentsRequestDocumentListCaptor.getValue();
         assertThat(documentsToPrint, containsInAnyOrder(Stream.of(
-            GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL,
-            "http://dm-store/hijbb-general-application-latest-document/binary",
-            "http://dm-store/hijbb-general-application-draft-order/binary")
+            GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL)
             .map(binaryFileUrl -> BulkPrintDocument.builder().binaryFileUrl(binaryFileUrl).build())
             .toArray()));
     }
 
-    private void assertDocumentPrintRequestContainsExpectedInterimDocuments() {
+
+    private void assertDocumentPrintRequestContainsExpectedDocumentsForCollection() {
         List<BulkPrintDocument> documentsToPrint = printDocumentsRequestDocumentListCaptor.getValue();
-        System.out.println(documentsToPrint);
         assertThat(documentsToPrint, containsInAnyOrder(Stream.of(
-                INTERIM_HEARING_DOCUMENT_BIN_URL,
-                "http://dm-store/hijbb-general-application-latest-document/binary",
-                "http://dm-store/hijbb-general-application-draft-order/binary")
+                GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL,
+                "http://dm-store/hijbb-general-application-latest-document/binary")
             .map(binaryFileUrl -> BulkPrintDocument.builder().binaryFileUrl(binaryFileUrl).build())
             .toArray()));
+    }
+
+    private CaseDocument convertToCaseDocument(Object object) {
+        return objectMapper.convertValue(object, CaseDocument.class);
+    }
+
+    private BulkPrintDocument getCaseDocumentAsBulkPrintDocument(CaseDocument caseDocument) {
+        return BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl()).build();
     }
 }
