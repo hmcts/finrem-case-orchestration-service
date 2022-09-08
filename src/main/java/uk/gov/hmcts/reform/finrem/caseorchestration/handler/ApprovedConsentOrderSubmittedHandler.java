@@ -35,18 +35,8 @@ public class ApprovedConsentOrderSubmittedHandler implements CallbackHandler {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
-        sendNotifications(caseDetails, caseData);
-
-        if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)
-            && caseDataService.isConsentedApplication(caseDetails)) {
-            log.info("Sending email notification to Applicant Solicitor for 'Consent Order Made'");
-            notificationService.sendConsentOrderMadeConfirmationEmailToApplicantSolicitor(caseDetails);
-        }
-
-        if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData)) {
-            log.info("Sending email notification to Respondent Solicitor for 'Consent Order Made'");
-            notificationService.sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(caseDetails);
-        }
+        sendConsentOrderAvailableEmailNotifications(caseDetails, caseData);
+        sendConsentOrderMadeEmailNotifications(caseDetails, caseData);
 
         return AboutToStartOrSubmitCallbackResponse
             .builder()
@@ -55,7 +45,7 @@ public class ApprovedConsentOrderSubmittedHandler implements CallbackHandler {
     }
 
 
-    private void sendNotifications(CaseDetails caseDetails, Map<String, Object> caseData) {
+    private void sendConsentOrderAvailableEmailNotifications(CaseDetails caseDetails, Map<String, Object> caseData) {
         notificationService.sendConsentOrderAvailableCtscEmail(caseDetails);
 
         if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
@@ -65,6 +55,19 @@ public class ApprovedConsentOrderSubmittedHandler implements CallbackHandler {
         if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData)) {
             log.info("case - {}: Sending email notification to Respondent Solicitor for 'Consent Order Available'", caseDetails.getId());
             notificationService.sendConsentOrderAvailableEmailToRespondentSolicitor(caseDetails);
+        }
+    }
+
+    private void sendConsentOrderMadeEmailNotifications(CaseDetails caseDetails, Map<String, Object> caseData) {
+        if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)
+            && caseDataService.isConsentedApplication(caseDetails)) {
+            log.info("Sending email notification to Applicant Solicitor for 'Consent Order Made'");
+            notificationService.sendConsentOrderMadeConfirmationEmailToApplicantSolicitor(caseDetails);
+        }
+
+        if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData)) {
+            log.info("Sending email notification to Respondent Solicitor for 'Consent Order Made'");
+            notificationService.sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(caseDetails);
         }
     }
 }

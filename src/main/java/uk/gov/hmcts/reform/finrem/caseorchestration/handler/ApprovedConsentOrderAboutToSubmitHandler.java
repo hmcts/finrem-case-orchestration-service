@@ -43,8 +43,6 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
     private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     private final GenericDocumentService genericDocumentService;
     private final ConsentOrderPrintService consentOrderPrintService;
-    private final NotificationService notificationService;
-    private final CaseDataService caseDataService;
     private final DocumentHelper documentHelper;
     private final ObjectMapper mapper;
 
