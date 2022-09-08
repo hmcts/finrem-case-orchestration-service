@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_LIST;
 
 @Slf4j
@@ -46,12 +45,11 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
                                                        String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        final String caseId = caseDetails.getId().toString();
         log.info("Processing About to Submit callback for event {} with Case ID : {}",
             EventType.GENERAL_APPLICATION_DIRECTIONS, callbackRequest.getCaseDetails().getId());
         Map<String, Object> caseData = caseDetails.getData();
         List<BulkPrintDocument> documents = new ArrayList<>();
-        updateApplicationStatus(caseId, caseData, documents);
+        updateApplicationStatus(caseDetails, documents, userAuthorisation);
 
         List<String> errors = new ArrayList<>();
         try {
@@ -63,44 +61,49 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build();
     }
 
-    private void updateApplicationStatus(String caseId, Map<String, Object> caseData, List<BulkPrintDocument> bulkPrintDocuments) {
+    private void updateApplicationStatus(CaseDetails caseDetails, List<BulkPrintDocument> bulkPrintDocuments, String userAuthorisation) {
+        Map<String, Object> caseData = caseDetails.getData();
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(caseData);
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_DIRECTIONS_LIST));
 
         String[] choice =  dynamicList.getValueCode().split("#");
 
         final String outcome  = choice[1];
-        log.info("outcome decision {} general application for Case ID: {}", outcome, caseId);
+        log.info("outcome decision {} general application for Case ID: {}", outcome, caseDetails.getId());
 
         final String valueCode = choice[0];
-        log.info("selected dynamic list code : {} Case ID: {}", valueCode, caseId);
+        log.info("selected dynamic list code : {} Case ID: {}", valueCode, caseDetails.getId());
         final List<GeneralApplicationCollectionData> applicationCollectionDataList
-            = existingList.stream().map(ga -> setStatus(caseData, ga, valueCode, outcome, bulkPrintDocuments))
+            = existingList.stream().map(ga -> setStatus(caseDetails, ga, valueCode, outcome, bulkPrintDocuments, userAuthorisation))
             .sorted(helper::getCompareTo).toList();
 
-        log.info("applicationCollectionDataList : {} caseId {}", applicationCollectionDataList.size(), caseId);
+        log.info("applicationCollectionDataList : {} caseId {}", applicationCollectionDataList.size(), caseDetails.getId());
         caseData.put(GENERAL_APPLICATION_COLLECTION, applicationCollectionDataList);
         caseData.remove(GENERAL_APPLICATION_DIRECTIONS_LIST);
-        caseData.remove(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT);
     }
 
-    private GeneralApplicationCollectionData setStatus(Map<String, Object> caseData,
+    private GeneralApplicationCollectionData setStatus(CaseDetails caseDetails,
                                                        GeneralApplicationCollectionData data,
                                                        String code,
                                                        String outcome,
-                                                       List<BulkPrintDocument> bulkPrintDocuments) {
+                                                       List<BulkPrintDocument> bulkPrintDocuments,
+                                                       String userAuthorisation) {
         if (code.equals(data.getId())) {
             GeneralApplicationItems items = data.getGeneralApplicationItems();
-            CaseDocument directionDocument = helper.convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT));
-            if (directionDocument != null) {
-                items.setGeneralApplicationDirectionsDocument(directionDocument);
-            }
+            CaseDocument caseDocument = service.getBulkPrintDocument(caseDetails, userAuthorisation);
+            items.setGeneralApplicationDirectionsDocument(caseDocument);
+
             switch (outcome) {
                 case "Approved" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_APPROVED.getId());
                 case "Not Approved" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_NOT_APPROVED.getId());
                 case "Other" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_OTHER.getId());
                 default -> throw new IllegalStateException("Unexpected value: " + outcome);
             }
+
+            final BulkPrintDocument bpDoc = BulkPrintDocument.builder()
+                .binaryFileUrl(items.getGeneralApplicationDirectionsDocument().getDocumentBinaryUrl())
+                .build();
+            bulkPrintDocuments.add(bpDoc);
 
             final BulkPrintDocument genDoc = BulkPrintDocument.builder()
                 .binaryFileUrl(items.getGeneralApplicationDocument().getDocumentBinaryUrl())

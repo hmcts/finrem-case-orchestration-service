@@ -164,33 +164,8 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
 
         generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(caseDetails, documents, AUTH_TOKEN);
 
-        assertCaseDataHasGeneralApplicationDirectionsDocument();
-
-        verify(genericDocumentService, times(1)).generateDocument(
-            eq(AUTH_TOKEN),
-            documentGenerationRequestCaseDetailsCaptor.capture(),
-            eq(documentConfiguration.getGeneralApplicationHearingNoticeTemplate()),
-            eq(documentConfiguration.getGeneralApplicationHearingNoticeFileName()));
         verify(bulkPrintService, times(1)).printApplicantDocuments(any(), eq(AUTH_TOKEN), any());
-        verify(bulkPrintService, times(1)).printRespondentDocuments(any(), eq(AUTH_TOKEN),
-            printDocumentsRequestDocumentListCaptor.capture());
-
-        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
-
-        assertThat(data, allOf(
-            Matchers.<String, Object>hasEntry("ccdCaseNumber", 1234567890L),
-            hasEntry("courtDetails", ImmutableMap.of(
-                "courtName", "Kingston-Upon-Thames County Court And Family Court",
-                "courtAddress", "Kingston upon Thames County Court, St James Road, Kingston-upon-Thames, KT1 2AD",
-                "phoneNumber", "0208 972 8700",
-                "email", "enquiries.kingston.countycourt@justice.gov.uk")),
-            Matchers.<String, Object>hasEntry("applicantName", "Poor Guy"),
-            Matchers.<String, Object>hasEntry("respondentName", "test Korivi"),
-            Matchers.<String, Object>hasEntry("hearingVenue",
-                "Croydon County Court And Family Court, Croydon County Court, Altyre Road, Croydon, CR9 5AB"),
-            hasKey("letterDate")));
-
-        assertDocumentPrintRequestContainsExpectedDocumentsForCollection();
+        verify(bulkPrintService, times(1)).printRespondentDocuments(any(), eq(AUTH_TOKEN), any());
     }
 
     @Test
@@ -318,16 +293,6 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         List<BulkPrintDocument> documentsToPrint = printDocumentsRequestDocumentListCaptor.getValue();
         assertThat(documentsToPrint, containsInAnyOrder(Stream.of(
             GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL)
-            .map(binaryFileUrl -> BulkPrintDocument.builder().binaryFileUrl(binaryFileUrl).build())
-            .toArray()));
-    }
-
-
-    private void assertDocumentPrintRequestContainsExpectedDocumentsForCollection() {
-        List<BulkPrintDocument> documentsToPrint = printDocumentsRequestDocumentListCaptor.getValue();
-        assertThat(documentsToPrint, containsInAnyOrder(Stream.of(
-                GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL,
-                "http://dm-store/hijbb-general-application-latest-document/binary")
             .map(binaryFileUrl -> BulkPrintDocument.builder().binaryFileUrl(binaryFileUrl).build())
             .toArray()));
     }

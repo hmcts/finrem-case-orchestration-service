@@ -204,17 +204,20 @@ public class GeneralApplicationDirectionsService {
 
     public void submitCollectionGeneralApplicationDirections(CaseDetails caseDetails, List<BulkPrintDocument> dirDocuments,
                                                              String authorisationToken) {
-        List<BulkPrintDocument> documents = prepareDocumentsToPrint(caseDetails, authorisationToken);
-        if (!dirDocuments.isEmpty()) {
-            documents.addAll(dirDocuments);
-        }
-        printDocumentPackAndSendToApplicantAndRespondent(caseDetails, authorisationToken, documents);
+        printDocumentPackAndSendToApplicantAndRespondent(caseDetails, authorisationToken, dirDocuments);
     }
 
     public void submitGeneralApplicationDirections(CaseDetails caseDetails, String authorisationToken) {
         List<BulkPrintDocument> documents = prepareDocumentsToPrint(caseDetails, authorisationToken);
         printDocumentPackAndSendToApplicantAndRespondent(caseDetails, authorisationToken, documents);
         resetStateToGeneralApplicationPrestate(caseDetails);
+    }
+
+    public CaseDocument getBulkPrintDocument(CaseDetails caseDetails, String authorisationToken) {
+        Map<String, Object> caseData = caseDetails.getData();
+        return caseData.get(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED).equals(YES_VALUE)
+            ? prepareHearingRequiredNoticeDocument(caseDetails, authorisationToken)
+            : prepareGeneralApplicationDirectionsOrderDocument(caseDetails, authorisationToken);
     }
 
     private List<BulkPrintDocument> prepareDocumentsToPrint(CaseDetails caseDetails, String authorisationToken) {

@@ -9,11 +9,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
@@ -26,6 +28,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.DIRECTION_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.DIRECTION_NOT_APPROVED;
@@ -42,6 +45,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
     private GeneralApplicationDirectionsAboutToStartHandler startHandler;
     private GeneralApplicationDirectionsAboutToSubmitHandler submitHandler;
     private GeneralApplicationHelper helper;
+    private final CaseDocument caseDocument = TestSetUpUtils.caseDocument();
     @Mock
     private GeneralApplicationDirectionsService service;
     private ObjectMapper objectMapper;
@@ -88,6 +92,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
     @Test
     public void givenCase_whenApproveAnApplication_thenUpdateStatusApprovedCompleted() {
         CallbackRequest callbackRequest = buildCallbackRequest();
+        when(service.getBulkPrintDocument(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(caseDocument);
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(callbackRequest.getCaseDetails().getData());
         List<GeneralApplicationCollectionData> updatedList
             = existingList.stream().map(obj -> updateStatus(obj, APPROVED)).toList();
@@ -116,6 +121,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
     @Test
     public void givenCase_whenNotApproveAnApplication_thenUpdateStatusNotApproved() {
         CallbackRequest callbackRequest = buildCallbackRequest();
+        when(service.getBulkPrintDocument(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(caseDocument);
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(callbackRequest.getCaseDetails().getData());
         List<GeneralApplicationCollectionData> updatedList
             = existingList.stream().map(obj -> updateStatus(obj, NOT_APPROVED)).toList();
@@ -143,6 +149,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
     @Test
     public void givenCase_whenOtherAnApplication_thenUpdateStatusOther() {
         CallbackRequest callbackRequest = buildCallbackRequest();
+        when(service.getBulkPrintDocument(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(caseDocument);
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(callbackRequest.getCaseDetails().getData());
         List<GeneralApplicationCollectionData> updatedList
             = existingList.stream().map(obj -> updateStatus(obj, OTHER)).toList();
