@@ -112,9 +112,11 @@ public class InterimHearingService {
     private void sendToBulkPrint(CaseDetails caseDetails, Map<String, Object> caseData, String authorisationToken,
                                  List<BulkPrintDocument> documents) {
         if (isPaperApplication(caseData) || !isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
+            log.info("Sending interim hearing documents to applicant - bulk print for caseid {}", caseDetails.getId());
             bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
         }
         if (isPaperApplication(caseData) || !isRespondentSolicitorAgreeToReceiveEmails(caseData)) {
+            log.info("Sending interim hearing documents to respondent - bulk print for caseid {}", caseDetails.getId());
             bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documents);
         }
     }
@@ -122,6 +124,8 @@ public class InterimHearingService {
     private List<BulkPrintDocument> prepareDocumentsForPrint(CaseDetails caseDetails,
                                                              List<InterimHearingData> interimHearingList,
                                                              String authorisationToken) {
+        String caseId = caseDetails.getId().toString();
+        log.info("preparing for bulk print document for case id {}", caseId);
         Map<String, Object> caseData = caseDetails.getData();
         List<CaseDocument> interimDocument = prepareInterimHearingRequiredNoticeDocument(caseDetails,
             interimHearingList, authorisationToken);
@@ -135,23 +139,24 @@ public class InterimHearingService {
         List<BulkPrintDocument> documents = interimDocument.stream()
             .map(documentHelper::getCaseDocumentAsBulkPrintDocument).collect(Collectors.toList());
 
-        addUploadedDocumentsToBulkPrintList(interimHearingList, documents, authorisationToken);
+        addUploadedDocumentsToBulkPrintList(caseId, interimHearingList, documents, authorisationToken);
 
         return documents;
     }
 
-    private void addUploadedDocumentsToBulkPrintList(List<InterimHearingData> interimHearingList,
+    private void addUploadedDocumentsToBulkPrintList(String caseId,
+                                                     List<InterimHearingData> interimHearingList,
                                                      List<BulkPrintDocument> documents,
                                                      String authorisationToken) {
         List<Map<String, Object>> interimCaseData = convertInterimHearingCollectionDataToMap(interimHearingList);
-        interimCaseData.forEach(interimData -> addToBulkPrintList(interimData, documents, authorisationToken));
+        interimCaseData.forEach(interimData -> addToBulkPrintList(caseId, interimData, documents, authorisationToken));
     }
 
-    private void addToBulkPrintList(Map<String, Object> interimData,
+    private void addToBulkPrintList(String caseId, Map<String, Object> interimData,
                                       List<BulkPrintDocument> documents,String authorisationToken) {
         String isDocUploaded = nullToEmpty(interimData.get(INTERIM_HEARING_PROMPT_FOR_DOCUMENT));
         if ("Yes".equalsIgnoreCase(isDocUploaded)) {
-            log.warn("Additional uploaded interim document found for printing for case");
+            log.warn("Additional uploaded interim document found for printing for case id {}", caseId);
             CaseDocument caseDocument = documentHelper.convertToCaseDocument(interimData.get(INTERIM_HEARING_UPLOADED_DOCUMENT));
             CaseDocument additionalUploadedDocuments = genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken);
             documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(additionalUploadedDocuments));
@@ -369,11 +374,11 @@ public class InterimHearingService {
 
     private void notify(CaseDetails caseDetails, Map<String, Object> interimHearingData) {
         if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-            log.info("Sending email notification to Applicant Solicitor about interim hearing");
+            log.info("Sending email notification to Applicant Solicitor about interim hearing for case id {}", caseDetails.getId());
             notificationService.sendInterimHearingNotificationEmailToApplicantSolicitor(caseDetails, interimHearingData);
         }
         if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
-            log.info("Sending email notification to Respondent Solicitor about interim hearing");
+            log.info("Sending email notification to Respondent Solicitor about interim hearing for case id {}", caseDetails.getId());
             notificationService.sendInterimHearingNotificationEmailToRespondentSolicitor(caseDetails, interimHearingData);
         }
     }
