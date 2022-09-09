@@ -64,6 +64,8 @@ public class DocumentConversionService {
             File file = new File(filename);
             Files.write(docInBytes, file);
 
+            log.info("Calling docmosis with key: ", docmosisAccessKey);
+
             return restTemplate
                 .postForObject(
                     documentConversionUrl,

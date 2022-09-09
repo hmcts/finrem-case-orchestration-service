@@ -52,6 +52,7 @@ public class DocmosisPdfGenerationService {
     }
 
     private PdfDocumentRequest request(String templateName, Map<String, Object> placeholders) {
+        log.info("Calling docmosis with key: ", pdfServiceAccessKey);
         return PdfDocumentRequest.builder()
                 .accessKey(pdfServiceAccessKey)
                 .templateName(templateName)
