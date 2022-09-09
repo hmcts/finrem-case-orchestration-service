@@ -279,7 +279,7 @@ public class DocumentHelper {
         String applicantName = getApplicantFullName(caseDetailsCopy);
         String respondentName = getRespondentFullName(caseDetailsCopy, isConsentedApplication);
 
-        if (caseDataService.addressLineOneNotEmpty(addressToSendTo)) {
+        if (caseDataService.addressLineOneAndPostCodeAreBothNotEmpty(addressToSendTo)) {
             Addressee addressee = Addressee.builder()
                 .name(addresseeName)
                 .formattedAddress(formatAddressForLetterPrinting(addressToSendTo))
