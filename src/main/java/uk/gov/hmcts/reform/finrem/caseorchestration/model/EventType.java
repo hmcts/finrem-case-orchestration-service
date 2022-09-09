@@ -25,6 +25,7 @@ public enum EventType {
     CLOSE("FR_close"),
     MANAGE_CASE_DOCUMENTS("FR_manageCaseDocuments"),
     UPLOAD_APPROVED_ORDER("FR_uploadApprovedOrder"),
+    LIST_FOR_HEARING("FR_addSchedulingListingInfo"),
     NONE("");
 
     private final String ccdType;

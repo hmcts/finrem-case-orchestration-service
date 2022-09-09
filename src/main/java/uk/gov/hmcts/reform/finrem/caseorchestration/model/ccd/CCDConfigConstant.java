@@ -270,6 +270,7 @@ public class CCDConfigConstant {
     public static final String FORM_C = "formC";
     public static final String FORM_G = "formG";
     public static final String OUT_OF_FAMILY_COURT_RESOLUTION = "outOfFamilyCourtResolution";
+    public static final String HEARING_ADDITIONAL_DOC = "additionalListOfHearingDocuments";
     public static final String OTHER_DOCS_COLLECTION = "otherCollection";
     public static final String GENERAL_LETTER = "generalLetterCollection";
     public static final String GENERAL_LETTER_BODY = "generalLetterBody";
@@ -560,4 +561,7 @@ public class CCDConfigConstant {
     //Upload Approved Order
     public static final String HEARING_DIRECTION_DETAILS_COLLECTION = "hearingDirectionDetailsCollection";
     public static final String HEARING_NOTICE_DOCUMENT_PACK = "hearingNoticeDocumentPack";
+
+    public static final String ADDITIONAL_HEARING_DOCUMENTS_OPTION = "additionalHearingDocumentsOption";
+
 }
