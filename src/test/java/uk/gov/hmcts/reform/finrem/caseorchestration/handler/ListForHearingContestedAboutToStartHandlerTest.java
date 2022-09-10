@@ -20,10 +20,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENTS_OPTION;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ListForHearingAboutToStartHandlerTest {
+public class ListForHearingContestedAboutToStartHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
-    private final ListForHearingAboutToStartHandler handler =  new ListForHearingAboutToStartHandler();
+    private final ListForHearingContestedAboutToStartHandler handler =  new ListForHearingContestedAboutToStartHandler();
 
     @Test
     public void givenContestedCase_whenEventIsListForHearing_thenHandlerCanHandle() {

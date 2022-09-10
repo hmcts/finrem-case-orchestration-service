@@ -147,11 +147,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         verify(bulkPrintService).printRespondentDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
 
         assertThat(bulkPrintDocumentsCaptor.getValue().size(), is(5));
-        assertThat(bulkPrintDocumentsCaptor.getValue().get(0).getBinaryFileUrl(), is(BINARY_URL));
-        assertThat(bulkPrintDocumentsCaptor.getValue().get(1).getBinaryFileUrl(), is(BINARY_URL));
-        assertThat(bulkPrintDocumentsCaptor.getValue().get(2).getBinaryFileUrl(), is(BINARY_URL));
-        assertThat(bulkPrintDocumentsCaptor.getValue().get(3).getBinaryFileUrl(), is(BINARY_URL));
-        assertThat(bulkPrintDocumentsCaptor.getValue().get(4).getBinaryFileUrl(), is(BINARY_URL));
+        bulkPrintDocumentsCaptor.getValue().forEach(obj -> assertThat(obj.getBinaryFileUrl(), is(BINARY_URL)));
     }
 
     @Test
@@ -168,13 +164,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         verify(bulkPrintService).printApplicantDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
 
         assertThat(bulkPrintDocumentsCaptor.getValue().size(), is(7));
-        assertThat(bulkPrintDocumentsCaptor.getValue().get(0).getBinaryFileUrl(), is(BINARY_URL));
-        assertThat(bulkPrintDocumentsCaptor.getValue().get(1).getBinaryFileUrl(), is(BINARY_URL));
-        assertThat(bulkPrintDocumentsCaptor.getValue().get(2).getBinaryFileUrl(), is(BINARY_URL));
-        assertThat(bulkPrintDocumentsCaptor.getValue().get(3).getBinaryFileUrl(), is(BINARY_URL));
-        assertThat(bulkPrintDocumentsCaptor.getValue().get(4).getBinaryFileUrl(), is(BINARY_URL));
-        assertThat(bulkPrintDocumentsCaptor.getValue().get(5).getBinaryFileUrl(), is(BINARY_URL));
-        assertThat(bulkPrintDocumentsCaptor.getValue().get(6).getBinaryFileUrl(), is(BINARY_URL));
+        bulkPrintDocumentsCaptor.getValue().forEach(obj -> assertThat(obj.getBinaryFileUrl(), is(BINARY_URL)));
     }
 
     @Test

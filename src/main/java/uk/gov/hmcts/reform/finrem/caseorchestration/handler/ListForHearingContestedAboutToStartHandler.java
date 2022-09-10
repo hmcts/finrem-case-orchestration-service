@@ -17,7 +17,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ListForHearingAboutToStartHandler implements CallbackHandler {
+public class ListForHearingContestedAboutToStartHandler implements CallbackHandler {
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
