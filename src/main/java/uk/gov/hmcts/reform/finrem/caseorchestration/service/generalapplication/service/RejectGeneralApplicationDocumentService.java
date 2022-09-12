@@ -32,7 +32,7 @@ public class RejectGeneralApplicationDocumentService  {
 
     public CaseDocument generateGeneralApplicationRejectionLetter(CaseDetails caseDetails, String authToken,
                                                      DocumentHelper.PaperNotificationRecipient recipient) {
-        log.info("Generating General Application Rejection Letter for {} SOLICITOR for caseId {}", recipient, caseDetails.getId());
+        log.info("Generating General Application Rejection Letter for {} for caseId {}", recipient, caseDetails.getId());
         GeneralApplicationRejectionLetterDetails letterDetails = generalApplicationRejectionLetterGenerator.generate(caseDetails, recipient);
         Map letterDetailsMap = convertGeneralApplicationRejectionLetterDetailsToMap(letterDetails);
         return genericDocumentService.generateDocumentFromPlaceholdersMap(authToken, letterDetailsMap,
