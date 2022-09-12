@@ -86,6 +86,7 @@ public class GeneralApplicationAboutToStartHandlerTest {
         assertEquals("applicant", generalApplicationItems.getGeneralApplicationReceivedFrom());
         assertEquals("Claire Mumford", generalApplicationItems.getGeneralApplicationCreatedBy());
         assertEquals("No", generalApplicationItems.getGeneralApplicationHearingRequired());
+        assertEquals("Created", generalApplicationItems.getGeneralApplicationStatus());
         assertNull(generalApplicationItems.getGeneralApplicationTimeEstimate());
         assertNull(generalApplicationItems.getGeneralApplicationSpecialMeasures());
         CaseDocument generalApplicationDocument = generalApplicationItems.getGeneralApplicationDocument();

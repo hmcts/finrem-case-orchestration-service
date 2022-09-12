@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 
@@ -30,17 +31,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_HEARING_REQUIRED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_RECEIVED_FROM;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REJECT_REASON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REFER_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_SPECIAL_MEASURES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_TIME_ESTIMATE;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RejectGeneralApplicationAboutToSubmitHandlerTest {
+public class GeneralApplicationReferToJudgeAboutToSubmitHandlerTest {
 
-    private RejectGeneralApplicationAboutToStartHandler startHandler;
-    private RejectGeneralApplicationAboutToSubmitHandler submitHandler;
+    private GeneralApplicationReferToJudgeAboutToStartHandler startHandler;
+    private GeneralApplicationReferToJudgeAboutToSubmitHandler submitHandler;
     private GeneralApplicationHelper helper;
     private ObjectMapper objectMapper;
 
@@ -53,21 +53,21 @@ public class RejectGeneralApplicationAboutToSubmitHandlerTest {
     public void setup() {
         objectMapper = new ObjectMapper();
         helper = new GeneralApplicationHelper(objectMapper);
-        startHandler  = new RejectGeneralApplicationAboutToStartHandler(helper);
-        submitHandler  = new RejectGeneralApplicationAboutToSubmitHandler(helper);
+        startHandler  = new GeneralApplicationReferToJudgeAboutToStartHandler(helper);
+        submitHandler  = new GeneralApplicationReferToJudgeAboutToSubmitHandler(helper);
     }
 
     @Test
     public void givenCase_whenCorrectConfigSupplied_thenHandlerCanHandle() {
         assertThat(submitHandler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.REJECT_GENERAL_APPLICATION),
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.GENERAL_APPLICATION_REFER_TO_JUDGE),
             is(true));
     }
 
     @Test
     public void givenCase_whenInCorrectConfigCaseTypeSupplied_thenHandlerCanHandle() {
         assertThat(submitHandler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.REJECT_GENERAL_APPLICATION),
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.GENERAL_APPLICATION_REFER_TO_JUDGE),
             is(false));
     }
 
@@ -81,7 +81,7 @@ public class RejectGeneralApplicationAboutToSubmitHandlerTest {
     @Test
     public void givenCase_whenInCorrectConfigCallbackTypeSupplied_thenHandlerCanHandle() {
         assertThat(submitHandler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.REJECT_GENERAL_APPLICATION),
+                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.GENERAL_APPLICATION_REFER_TO_JUDGE),
             is(false));
     }
 
@@ -92,17 +92,18 @@ public class RejectGeneralApplicationAboutToSubmitHandlerTest {
         AboutToStartOrSubmitCallbackResponse startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = startHandle.getData();
-        DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_LIST));
+        DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_REFER_LIST));
         assertEquals(2, dynamicList.getListItems().size());
-        assertNull(caseData.get(GENERAL_APPLICATION_REJECT_REASON));
 
         AboutToStartOrSubmitCallbackResponse submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> data = submitHandle.getData();
         List<GeneralApplicationCollectionData> generalApplicationCollectionData
             = helper.covertToGeneralApplicationData(data.get(GENERAL_APPLICATION_COLLECTION));
-        assertEquals(1, generalApplicationCollectionData.size());
+        assertEquals(2, generalApplicationCollectionData.size());
 
+        assertEquals(GeneralApplicationStatus.REFERRED.getId(),
+            generalApplicationCollectionData.get(1).getGeneralApplicationItems().getGeneralApplicationStatus());
     }
 
     @Test
@@ -112,12 +113,12 @@ public class RejectGeneralApplicationAboutToSubmitHandlerTest {
         AboutToStartOrSubmitCallbackResponse startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = startHandle.getData();
-        DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_LIST));
+        DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_REFER_LIST));
         assertNull(dynamicList);
-        assertNull(caseData.get(GENERAL_APPLICATION_REJECT_REASON));
+        assertNull(caseData.get(GENERAL_APPLICATION_REFER_LIST));
 
         AboutToStartOrSubmitCallbackResponse submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
-        assertThat(submitHandle.getErrors(), CoreMatchers.hasItem("There is no general application available to reject."));
+        assertThat(submitHandle.getErrors(), CoreMatchers.hasItem("There is no general application available to refer."));
 
     }
 
@@ -128,15 +129,20 @@ public class RejectGeneralApplicationAboutToSubmitHandlerTest {
         AboutToStartOrSubmitCallbackResponse startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = startHandle.getData();
-        DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_LIST));
+        DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_REFER_LIST));
         assertEquals(1, dynamicList.getListItems().size());
-        assertNull(caseData.get(GENERAL_APPLICATION_REJECT_REASON));
 
         AboutToStartOrSubmitCallbackResponse submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> data = submitHandle.getData();
         assertExistingGeneralApplication(data);
 
+        List<GeneralApplicationCollectionData> generalApplicationCollectionData
+            = helper.covertToGeneralApplicationData(data.get(GENERAL_APPLICATION_COLLECTION));
+        assertEquals(1, generalApplicationCollectionData.size());
+
+        assertEquals(GeneralApplicationStatus.REFERRED.getId(),
+            generalApplicationCollectionData.get(0).getGeneralApplicationItems().getGeneralApplicationStatus());
     }
 
     private void assertExistingGeneralApplication(Map<String, Object> caseData) {

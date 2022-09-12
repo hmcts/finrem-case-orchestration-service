@@ -58,6 +58,7 @@
       "propertyAddress": "26 Riverside gardens, SW10XE",
       "applicantSolicitorConsentForEmails": "Yes",
       "isAdmin": "No",
+      "generalApplicationOutcome":"Approved",
       "generalApplications": [
         {
           "id": "b0bfb0af-4f07-4628-a677-1de904b6ea1c",
@@ -99,7 +100,7 @@
             "generalApplicationReceivedFrom": "applicant",
             "generalApplicationTimeEstimate": "24 Hours",
             "generalApplicationHearingRequired": "Yes",
-            "generalApplicationStatus": "Created",
+            "generalApplicationStatus": "Approved",
             "generalApplicationSpecialMeasures": "Nisi quod sit sint"
           }
         },
@@ -137,7 +138,7 @@
             "generalApplicationCreatedDate": "2022-08-03",
             "generalApplicationReceivedFrom": "respondent",
             "generalApplicationTimeEstimate": null,
-            "generalApplicationStatus": "Created",
+            "generalApplicationStatus": "Referred To Judge",
             "generalApplicationHearingRequired": "No",
             "generalApplicationSpecialMeasures": null
           }

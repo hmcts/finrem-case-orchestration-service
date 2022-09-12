@@ -27,6 +27,9 @@ public enum EventType {
     CLOSE("FR_close"),
     MANAGE_CASE_DOCUMENTS("FR_manageCaseDocuments"),
     UPLOAD_APPROVED_ORDER("FR_uploadApprovedOrder"),
+    GENERAL_APPLICATION_REFER_TO_JUDGE("FR_generalApplicationReferToJudge"),
+    GENERAL_APPLICATION_OUTCOME("FR_GeneralApplicationOutcome"),
+    GENERAL_APPLICATION_DIRECTIONS("FR_GeneralApplicationDirections"),
     NONE("");
 
     private final String ccdType;
