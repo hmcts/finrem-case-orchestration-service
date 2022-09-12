@@ -12,10 +12,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedDocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandler;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -46,6 +48,10 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler implements Callbac
             callbackRequest.getCaseDetailsBefore().getData(), CONTESTED_UPLOADED_DOCUMENTS);
         List<ContestedUploadedDocumentData> uploadedDocuments = getDocumentCollection(caseData);
         caseDocumentHandlers.stream().forEach(h -> h.handle(uploadedDocuments, caseData));
+        uploadedDocuments.sort(Comparator.comparing(
+            ContestedUploadedDocumentData::getUploadedCaseDocument, Comparator.comparing(
+                ContestedUploadedDocument::getCaseDocumentUploadDateTime, Comparator.nullsLast(
+                    Comparator.reverseOrder()))));
         caseData.put(CONTESTED_UPLOADED_DOCUMENTS, uploadedDocuments);
         return AboutToStartOrSubmitCallbackResponse
             .builder()

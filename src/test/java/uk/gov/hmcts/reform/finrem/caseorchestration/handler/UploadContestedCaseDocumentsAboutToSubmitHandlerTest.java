@@ -30,7 +30,7 @@ import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 
 @RunWith(MockitoJUnitRunner.class)
-public class UploadContestedCaseDocumentsHandlerTest extends CaseDocumentHandlerTest {
+public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDocumentHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
 
