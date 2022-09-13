@@ -25,6 +25,7 @@ public enum EventType {
     CLOSE("FR_close"),
     MANAGE_CASE_DOCUMENTS("FR_manageCaseDocuments"),
     UPLOAD_APPROVED_ORDER("FR_uploadApprovedOrder"),
+    MANAGE_BARRISTER("FR_manageBarrister"),
     NONE("");
 
     private final String ccdType;
