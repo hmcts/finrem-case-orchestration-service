@@ -48,16 +48,7 @@ public class RejectGeneralApplicationAboutToStartHandler implements CallbackHand
         List<GeneralApplicationCollectionData> existingGeneralApplicationList = helper.getReadyForRejectOrReadyForReferList(caseData);
         AtomicInteger index = new AtomicInteger(0);
         if (existingGeneralApplicationList.isEmpty() && caseData.get(GENERAL_APPLICATION_CREATED_BY) != null) {
-            GeneralApplicationItems applicationItems = helper.getApplicationItems(caseData);
-            DynamicListElement dynamicListElements
-                = getDynamicListElements(applicationItems.getGeneralApplicationCreatedBy(), getLabel(applicationItems, index.incrementAndGet()));
-
-            List<DynamicListElement> dynamicListElementsList = new ArrayList<>();
-            dynamicListElementsList.add(dynamicListElements);
-
-            DynamicList dynamicList = generateAvailableGeneralApplicationAsDynamicList(dynamicListElementsList);
-            log.info("non collection dynamicList {} for case id {}", dynamicList, caseDetails.getId());
-            caseData.put(GENERAL_APPLICATION_LIST, dynamicList);
+            setNonCollectionGeneralApplication(caseData, index);
         } else {
             List<DynamicListElement> dynamicListElements = existingGeneralApplicationList.stream()
                 .map(ga -> getDynamicListElements(ga.getId(), getLabel(ga.getGeneralApplicationItems(), index.incrementAndGet())))
@@ -75,5 +66,17 @@ public class RejectGeneralApplicationAboutToStartHandler implements CallbackHand
 
         caseData.remove(GENERAL_APPLICATION_REJECT_REASON);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
+    }
+
+    private void setNonCollectionGeneralApplication(Map<String, Object> caseData, AtomicInteger index) {
+        GeneralApplicationItems applicationItems = helper.getApplicationItems(caseData);
+        DynamicListElement dynamicListElements
+            = getDynamicListElements(applicationItems.getGeneralApplicationCreatedBy(), getLabel(applicationItems, index.incrementAndGet()));
+
+        List<DynamicListElement> dynamicListElementsList = new ArrayList<>();
+        dynamicListElementsList.add(dynamicListElements);
+
+        DynamicList dynamicList = generateAvailableGeneralApplicationAsDynamicList(dynamicListElementsList);
+        caseData.put(GENERAL_APPLICATION_LIST, dynamicList);
     }
 }

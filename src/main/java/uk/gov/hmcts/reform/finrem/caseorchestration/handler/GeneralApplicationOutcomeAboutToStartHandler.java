@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_OUTCOME_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_OUTCOME_LIST;
 
@@ -52,17 +51,15 @@ public class GeneralApplicationOutcomeAboutToStartHandler implements CallbackHan
 
         AtomicInteger index = new AtomicInteger(0);
 
-        log.info("existingGeneralApplicationList size {}", referredList.size());
-        log.info("caseData.get(GENERAL_APPLICATION_CREATED_BY) ::{}", helper.objectToString(caseData.get(GENERAL_APPLICATION_CREATED_BY)));
-        log.info("existingGeneralApplicationList I should not be here ");
         List<DynamicListElement> dynamicListElements = referredList.stream()
             .map(ga -> getDynamicListElements(ga.getId(), getLabel(ga.getGeneralApplicationItems(), index.incrementAndGet())))
             .toList();
 
         DynamicList dynamicList = generateAvailableGeneralApplicationAsDynamicList(dynamicListElements);
-        log.info("collection dynamicList {} for case id {}", dynamicList, caseDetails.getId());
+
         caseData.put(GENERAL_APPLICATION_OUTCOME_LIST, dynamicList);
         caseData.remove(GENERAL_APPLICATION_OUTCOME_DECISION);
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
     }
 }
