@@ -161,7 +161,7 @@ public class ContestedCourtHelperTest {
     @Test
     public void cleavelandCourts() {
         verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, CLEAVELAND, CLEAVELAND_COURTLIST,
-            "FR_cleaveland_hc_list_1", "Newcastle upon Tyne Justice Centre");
+            "FR_cleaveland_hc_list_1", "Newcastle Civil and Family Courts and Tribunals Centre");
 
         verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, CLEAVELAND, CLEAVELAND_COURTLIST,
             "FR_cleaveland_hc_list_2", "Durham Justice Centre");
