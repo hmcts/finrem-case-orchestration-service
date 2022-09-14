@@ -178,7 +178,9 @@ sonarqube {
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/handler/AmendApplicationAboutToSubmitHandler.java',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/handler/ApprovedConsentOrderAboutToSubmitHandler.java',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/handler/RejectedConsentOrderSubmittedHandler.java',
-                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/CaseOrchestrationApplication']
+                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/CaseOrchestrationApplication',
+                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/service/payments/config/**',
+                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/service/payments/model/**']
 
     properties {
         property "sonar.projectKey", "finrem-case-orchestration"
@@ -318,6 +320,16 @@ dependencies {
     implementation group: 'com.github.hmcts', name: 'bsp-common-lib', version: versions.bspCommonLib
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: versions.apacheLogging
     implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: versions.apacheLogging
+
+    implementation("org.springframework.boot:spring-boot-starter-web") {
+        exclude group: "org.yaml", module: "snakeyaml"
+    }
+
+    implementation("org.springdoc:springdoc-openapi-ui") {
+        exclude group: "org.yaml", module: "snakeyaml"
+    }
+
+    implementation group: 'org.yaml', name: 'snakeyaml', version: '1.31'
 
     developmentOnly group: 'org.springframework.boot', name: 'spring-boot-devtools'
 

@@ -549,7 +549,7 @@ public class ConsentedCourtHelperTest {
     @Test
     public void cleavelandCourts() {
         verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, CLEAVELAND, CLEAVELAND_COURTLIST,
-            "FR_clevelandList_1", "Newcastle upon Tyne Justice Centre");
+            "FR_clevelandList_1", "Newcastle Civil and Family Courts and Tribunals Centre");
 
         verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, CLEAVELAND, CLEAVELAND_COURTLIST,
             "FR_clevelandList_2", "Durham Justice Centre");
@@ -682,7 +682,7 @@ public class ConsentedCourtHelperTest {
     @Test
     public void lancashireCourtList() {
         verifyCorrectCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, LANCASHIRE, LANCASHIRE_COURTLIST,
-            PRESTON, "Preston Combined Court Centre");
+            PRESTON, "Preston Designated Family Court");
 
         verifyCorrectCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, LANCASHIRE, LANCASHIRE_COURTLIST,
             BLACKBURN, "Blackburn Family Court");
@@ -718,7 +718,7 @@ public class ConsentedCourtHelperTest {
             "FR_NWList_1", "West Cumbria Courthouse");
 
         verifyCorrectCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, OTHER, NWOTHER_COURTLIST,
-            "FR_NWList_2", "Preston Combined Court Centre");
+            "FR_NWList_2", "Preston Designated Family Court");
 
         verifyCorrectCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, OTHER, NWOTHER_COURTLIST,
             "FR_NWList_3", "Lancaster Courthouse");

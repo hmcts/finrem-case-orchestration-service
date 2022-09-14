@@ -319,24 +319,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldSendContestedApplicationIssuedEmailWhenAgreed_andNotifyRespondentSolicitorWhenShould() {
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
-
-        notificationsController.sendContestedApplicationIssuedEmail(buildCallbackRequest());
-
-        verify(notificationService).sendContestedApplicationIssuedEmailToRespondentSolicitor(any());
-    }
-
-    @Test
-    public void shouldNotSendContestedApplicationIssuedEmailWhenNotAgreed_andDontNotifyRespondentSolicitorWhenShouldNot() {
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
-
-        notificationsController.sendContestedApplicationIssuedEmail(buildCallbackRequest());
-
-        verify(notificationService, never()).sendContestedApplicationIssuedEmailToRespondentSolicitor(any());
-    }
-
-    @Test
     public void sendDraftOrderEmailWhenApplicantSolicitorIsNominatedAndIsAcceptingEmails() {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
