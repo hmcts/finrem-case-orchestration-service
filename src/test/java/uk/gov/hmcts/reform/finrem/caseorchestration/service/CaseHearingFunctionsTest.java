@@ -101,7 +101,7 @@ public class CaseHearingFunctionsTest {
         assertThat(stringObjectMap.get(COURT_DETAILS_NAME_KEY), is("Reedley Family Hearing Centre"));
         assertThat(stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY), is("Blackburn Family Court, 64 Victoria Street, Blackburn, BB1 6DJ"));
         assertThat(stringObjectMap.get(COURT_DETAILS_PHONE_KEY), is("0300 303 0642"));
-        assertThat(stringObjectMap.get(COURT_DETAILS_EMAIL_KEY), is("hmctsfinancialremedy@justice.gov.uk"));
+        assertThat(stringObjectMap.get(COURT_DETAILS_EMAIL_KEY), is("LancashireandCumbriaFRC@justice.gov.uk"));
     }
 
     @Test
@@ -115,7 +115,7 @@ public class CaseHearingFunctionsTest {
         assertThat(stringObjectMap.get(COURT_DETAILS_NAME_KEY), is("Leyland Family Hearing Centre"));
         assertThat(stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY), is("The Family Court, Sessions House, Lancaster Road, Preston, PR1 2PD"));
         assertThat(stringObjectMap.get(COURT_DETAILS_PHONE_KEY), is("0300 303 0642"));
-        assertThat(stringObjectMap.get(COURT_DETAILS_EMAIL_KEY), is("hmctsfinancialremedy@justice.gov.uk"));
+        assertThat(stringObjectMap.get(COURT_DETAILS_EMAIL_KEY), is("LancashireandCumbriaFRC@justice.gov.uk"));
     }
 
     @Test
@@ -126,8 +126,8 @@ public class CaseHearingFunctionsTest {
             BEDFORDSHIRE_COURTLIST, CAMBRIDGE);
 
         Map<String, Object> stringObjectMap = CaseHearingFunctions.buildFrcCourtDetails(caseData);
-        assertThat(stringObjectMap.get(COURT_DETAILS_NAME_KEY), is("Cambridge County Court and Family Court"));
-        assertThat(stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY), is("Crown Buildings, Rivergate, Peterborough, PE1 1EJ"));
+        assertThat(stringObjectMap.get(COURT_DETAILS_NAME_KEY), is("Cambridge County and Family Court"));
+        assertThat(stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY), is("197 East Road, Cambridge, CB1 1BA"));
         assertThat(stringObjectMap.get(COURT_DETAILS_PHONE_KEY), is("0344 892 4000"));
         assertThat(stringObjectMap.get(COURT_DETAILS_EMAIL_KEY), is("FRC.NES.BCH@justice.gov.uk"));
     }
@@ -142,7 +142,7 @@ public class CaseHearingFunctionsTest {
         Map<String, Object> stringObjectMap = CaseHearingFunctions.buildFrcCourtDetails(caseData);
         assertThat(stringObjectMap.get(COURT_DETAILS_NAME_KEY), is("Reading County Court and Family Court"));
         assertThat(stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY), is("Hearing Centre, 160-163 Friar Street, Reading, RG1 1HE"));
-        assertThat(stringObjectMap.get(COURT_DETAILS_PHONE_KEY), is("01865 264 200"));
+        assertThat(stringObjectMap.get(COURT_DETAILS_PHONE_KEY), is("01865 264 225"));
         assertThat(stringObjectMap.get(COURT_DETAILS_EMAIL_KEY), is("FRCThamesValley@justice.gov.uk"));
     }
 
@@ -198,8 +198,8 @@ public class CaseHearingFunctionsTest {
         Map<String, Object> stringObjectMap = CaseHearingFunctions.buildFrcCourtDetails(caseData);
         assertThat(stringObjectMap.get(COURT_DETAILS_NAME_KEY), is("Prestatyn Justice Centre"));
         assertThat(stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY), is("Victoria Road, Prestatyn, LL19 7TE"));
-        assertThat(stringObjectMap.get(COURT_DETAILS_PHONE_KEY), is("0300 303 0642"));
-        assertThat(stringObjectMap.get(COURT_DETAILS_EMAIL_KEY), is("hmctsfinancialremedy@justice.gov.uk"));
+        assertThat(stringObjectMap.get(COURT_DETAILS_PHONE_KEY), is("01745 851916"));
+        assertThat(stringObjectMap.get(COURT_DETAILS_EMAIL_KEY), is("Family.prestatyn.countycourt@justice.gov.uk"));
     }
 
     @Test
