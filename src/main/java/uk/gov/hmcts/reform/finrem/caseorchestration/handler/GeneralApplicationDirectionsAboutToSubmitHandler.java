@@ -73,7 +73,8 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
         final String valueCode = choice[0];
 
         final List<GeneralApplicationCollectionData> applicationCollectionDataList
-            = existingList.stream().map(ga -> setStatusAndBulkPrintDouments(caseDetails, ga, valueCode, outcome, bulkPrintDocuments, userAuthorisation))
+            = existingList.stream().map(ga -> setStatusAndBulkPrintDouments(caseDetails,
+                ga, valueCode, outcome, bulkPrintDocuments, userAuthorisation))
             .sorted(helper::getCompareTo).toList();
 
         log.info("applicationCollectionDataList : {} caseId {}", applicationCollectionDataList.size(), caseDetails.getId());

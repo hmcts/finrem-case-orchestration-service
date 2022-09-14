@@ -68,7 +68,8 @@ public class GeneralApplicationReferToJudgeAboutToStartHandler implements Callba
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
     }
 
-    private List<DynamicListElement> getDynamicListElements(List<GeneralApplicationCollectionData> existingGeneralApplicationList, AtomicInteger index) {
+    private List<DynamicListElement> getDynamicListElements(List<GeneralApplicationCollectionData> existingGeneralApplicationList,
+                                                            AtomicInteger index) {
         return existingGeneralApplicationList.stream()
             .map(ga -> getDynamicListElements(ga.getId(), getLabel(ga.getGeneralApplicationItems(), index.incrementAndGet())))
             .toList();

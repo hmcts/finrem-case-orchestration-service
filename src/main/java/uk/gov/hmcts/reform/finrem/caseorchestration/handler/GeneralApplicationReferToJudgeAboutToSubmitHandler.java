@@ -59,7 +59,9 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandler implements Callb
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
     }
 
-    private void setGeneralApplicationList(Map<String, Object> caseData, List<GeneralApplicationCollectionData> existingList, DynamicList dynamicList) {
+    private void setGeneralApplicationList(Map<String, Object> caseData,
+                                           List<GeneralApplicationCollectionData> existingList,
+                                           DynamicList dynamicList) {
         final String valueCode = dynamicList.getValueCode();
         String label  = dynamicList.getValue().getLabel();
         String referredApplicationDetails = label.substring(label.indexOf("-") + 1);
