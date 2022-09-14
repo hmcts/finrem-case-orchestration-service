@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -61,7 +62,7 @@ public class GeneralApplicationService {
         List<GeneralApplicationCollectionData> generalApplicationListBefore = helper.getGeneralApplicationList(caseDetailsBefore.getData());
         List<GeneralApplicationCollectionData> generalApplicationList = helper.getGeneralApplicationList(caseDetails.getData());
 
-        String initialCollectionId  = helper.objectToString(caseDetails.getData().get(GENERAL_APPLICATION_TRACKING));
+        String initialCollectionId  = Objects.toString(caseDetails.getData().get(GENERAL_APPLICATION_TRACKING), null);
 
         List<GeneralApplicationCollectionData> interimGeneralApplicationList = generalApplicationList.stream()
             .filter(f -> generalApplicationListBefore.stream().map(GeneralApplicationCollectionData::getId)
