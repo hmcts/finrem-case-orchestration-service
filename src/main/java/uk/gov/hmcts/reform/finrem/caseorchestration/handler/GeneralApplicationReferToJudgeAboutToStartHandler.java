@@ -44,40 +44,46 @@ public class GeneralApplicationReferToJudgeAboutToStartHandler implements Callba
                                                        String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received on start request to refer general application for Case ID: {}", caseDetails.getId());
+
         Map<String, Object> caseData = caseDetails.getData();
         caseData.remove(GENERAL_APPLICATION_REFER_LIST);
+
         List<GeneralApplicationCollectionData> existingGeneralApplicationList = helper.getReadyForRejectOrReadyForReferList(caseData);
         AtomicInteger index = new AtomicInteger(0);
-
         if (existingGeneralApplicationList.isEmpty() && caseData.get(GENERAL_APPLICATION_CREATED_BY) != null) {
-            log.info("existingGeneralApplicationList If refer general application for Case ID: {}", caseDetails.getId());
-            GeneralApplicationItems applicationItems = helper.getApplicationItems(caseData);
-            DynamicListElement dynamicListElements
-                = getDynamicListElements(applicationItems.getGeneralApplicationCreatedBy(), getLabel(applicationItems, index.incrementAndGet()));
-
-            List<DynamicListElement> dynamicListElementsList = new ArrayList<>();
-            dynamicListElementsList.add(dynamicListElements);
-
-            DynamicList dynamicList = generateAvailableGeneralApplicationAsDynamicList(dynamicListElementsList);
-            log.info("non collection dynamicList {} for case id {}", dynamicList, caseDetails.getId());
-            caseData.put(GENERAL_APPLICATION_REFER_LIST, dynamicList);
+            log.info("setting refer list if existing ga not moved to collection for Case ID: {}", caseDetails.getId());
+            setReferListForNonCollectionGeneralApplication(caseData, index);
         } else {
-            log.info("existingGeneralApplicationList Else refer general application for Case ID: {}", caseDetails.getId());
-            List<DynamicListElement> dynamicListElements = existingGeneralApplicationList.stream()
-                .map(ga -> getDynamicListElements(ga.getId(), getLabel(ga.getGeneralApplicationItems(), index.incrementAndGet())))
-                .toList();
-
+            log.info("setting refer list for Case ID: {}", caseDetails.getId());
+            List<DynamicListElement> dynamicListElements = getDynamicListElements(existingGeneralApplicationList, index);
             if (dynamicListElements.isEmpty()) {
                 return AboutToStartOrSubmitCallbackResponse.builder().data(caseData)
                     .errors(List.of("There are no general application available to refer.")).build();
             }
-
             DynamicList dynamicList = generateAvailableGeneralApplicationAsDynamicList(dynamicListElements);
-            log.info("collection dynamicList {} for case id {}", dynamicList, caseDetails.getId());
             caseData.put(GENERAL_APPLICATION_REFER_LIST, dynamicList);
         }
         caseData.remove(GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL);
         caseData.remove(GENERAL_APPLICATION_REFERRED_DETAIL);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
+    }
+
+    private List<DynamicListElement> getDynamicListElements(List<GeneralApplicationCollectionData> existingGeneralApplicationList,
+                                                            AtomicInteger index) {
+        return existingGeneralApplicationList.stream()
+            .map(ga -> getDynamicListElements(ga.getId(), getLabel(ga.getGeneralApplicationItems(), index.incrementAndGet())))
+            .toList();
+    }
+
+    private void setReferListForNonCollectionGeneralApplication(Map<String, Object> caseData, AtomicInteger index) {
+        GeneralApplicationItems applicationItems = helper.getApplicationItems(caseData);
+        DynamicListElement dynamicListElements
+            = getDynamicListElements(applicationItems.getGeneralApplicationCreatedBy(), getLabel(applicationItems, index.incrementAndGet()));
+
+        List<DynamicListElement> dynamicListElementsList = new ArrayList<>();
+        dynamicListElementsList.add(dynamicListElements);
+
+        DynamicList dynamicList = generateAvailableGeneralApplicationAsDynamicList(dynamicListElementsList);
+        caseData.put(GENERAL_APPLICATION_REFER_LIST, dynamicList);
     }
 }

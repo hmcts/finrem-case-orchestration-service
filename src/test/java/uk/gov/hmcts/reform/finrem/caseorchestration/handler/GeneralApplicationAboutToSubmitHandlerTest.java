@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -162,11 +163,11 @@ public class GeneralApplicationAboutToSubmitHandlerTest {
     private GeneralApplicationItems getApplicationItems(Map<String,Object> caseData) {
         GeneralApplicationItems.GeneralApplicationItemsBuilder builder =
             GeneralApplicationItems.builder();
-        builder.generalApplicationReceivedFrom(helper.objectToString(caseData.get(GENERAL_APPLICATION_RECEIVED_FROM)));
-        builder.generalApplicationCreatedBy("helper.objectToString(caseData.get(GENERAL_APPLICATION_CREATED_BY))");
-        builder.generalApplicationHearingRequired(helper.objectToString(caseData.get(GENERAL_APPLICATION_HEARING_REQUIRED)));
-        builder.generalApplicationTimeEstimate(helper.objectToString(caseData.get(GENERAL_APPLICATION_TIME_ESTIMATE)));
-        builder.generalApplicationSpecialMeasures(helper.objectToString(caseData.get(GENERAL_APPLICATION_SPECIAL_MEASURES)));
+        builder.generalApplicationReceivedFrom(Objects.toString(caseData.get(GENERAL_APPLICATION_RECEIVED_FROM), null));
+        builder.generalApplicationCreatedBy(Objects.toString(caseData.get(GENERAL_APPLICATION_CREATED_BY), null));
+        builder.generalApplicationHearingRequired(Objects.toString(caseData.get(GENERAL_APPLICATION_HEARING_REQUIRED), null));
+        builder.generalApplicationTimeEstimate(Objects.toString(caseData.get(GENERAL_APPLICATION_TIME_ESTIMATE), null));
+        builder.generalApplicationSpecialMeasures(Objects.toString(caseData.get(GENERAL_APPLICATION_SPECIAL_MEASURES), null));
         builder.generalApplicationDocument(helper.convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DOCUMENT)));
         CaseDocument draftDocument = helper.convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DRAFT_ORDER));
         builder.generalApplicationCreatedDate(helper.objectToDateTime(caseData.get(GENERAL_APPLICATION_DOCUMENT_LATEST_DATE)));

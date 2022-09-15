@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -59,24 +60,16 @@ public class GeneralApplicationService {
         CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
 
         List<GeneralApplicationCollectionData> generalApplicationListBefore = helper.getGeneralApplicationList(caseDetailsBefore.getData());
-        log.info("generalApplicationListBefore : {}", generalApplicationListBefore.size());
-
         List<GeneralApplicationCollectionData> generalApplicationList = helper.getGeneralApplicationList(caseDetails.getData());
-        log.info("generalApplicationList Current : {}", generalApplicationList.size());
 
-        String initialCollectionId  = helper.objectToString(caseDetails.getData().get(GENERAL_APPLICATION_TRACKING));
-        log.info("Migration collection id : {}", initialCollectionId);
+        String initialCollectionId  = Objects.toString(caseDetails.getData().get(GENERAL_APPLICATION_TRACKING), null);
 
         List<GeneralApplicationCollectionData> interimGeneralApplicationList = generalApplicationList.stream()
             .filter(f -> generalApplicationListBefore.stream().map(GeneralApplicationCollectionData::getId)
                 .noneMatch(i -> i.equals(f.getId()))).toList();
-        log.info("interimGeneralApplicationList  : {}", interimGeneralApplicationList.size());
 
-        log.info("remove migrated general application for case id{}", caseDetails.getId());
         List<GeneralApplicationCollectionData> processableList = interimGeneralApplicationList.stream()
             .filter(f -> !(initialCollectionId != null && initialCollectionId.equals(f.getId()))).toList();
-
-        log.info("After remove processableList : {}", processableList.size());
 
         Map<String, Object> caseData = caseDetails.getData();
         caseData.put(GENERAL_APPLICATION_PRE_STATE, caseDetailsBefore.getState());
@@ -86,28 +79,21 @@ public class GeneralApplicationService {
             processableList.stream().map(items -> setUserAndDate(items, userAuthorisation))
                 .collect(Collectors.toList());
 
-        log.info("generalApplicationCollectionDataList : {}", processableList.size());
-
         if (!generalApplicationListBefore.isEmpty()) {
-            log.info("add the original before case data: for case id {}", caseDetails.getId());
             generalApplicationCollectionDataList.addAll(generalApplicationListBefore);
         }
 
         if (initialCollectionId != null) {
-            //avoid new change while migrating to collection so restore all value from case data
             GeneralApplicationCollectionData originalGeneralApplicationList
                 = helper.retrieveInitialGeneralApplicationData(caseData, initialCollectionId);
             generalApplicationCollectionDataList.add(originalGeneralApplicationList);
         }
 
-        log.info("After processing generalApplicationCollectionDataList  : {}", generalApplicationCollectionDataList.size());
-        log.info("sorting generalApplicationCollectionDataList");
         List<GeneralApplicationCollectionData> applicationCollectionDataList = generalApplicationCollectionDataList.stream()
             .sorted(helper::getCompareTo)
             .toList();
 
         caseData.put(GENERAL_APPLICATION_COLLECTION, applicationCollectionDataList);
-        log.info("applicationCollectionDataList : {}", applicationCollectionDataList.size());
         return caseData;
     }
 

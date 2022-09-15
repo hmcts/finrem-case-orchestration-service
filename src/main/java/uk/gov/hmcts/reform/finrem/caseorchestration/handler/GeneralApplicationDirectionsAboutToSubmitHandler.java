@@ -47,11 +47,13 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Processing About to Submit callback for event {} with Case ID : {}",
             EventType.GENERAL_APPLICATION_DIRECTIONS, callbackRequest.getCaseDetails().getId());
-        Map<String, Object> caseData = caseDetails.getData();
-        List<BulkPrintDocument> documents = new ArrayList<>();
-        updateApplicationStatus(caseDetails, documents, userAuthorisation);
 
+        Map<String, Object> caseData = caseDetails.getData();
+
+        List<BulkPrintDocument> documents = new ArrayList<>();
+        updateApplications(caseDetails, documents, userAuthorisation);
         List<String> errors = new ArrayList<>();
+
         try {
             service.submitCollectionGeneralApplicationDirections(caseDetails, documents, userAuthorisation);
         } catch (InvalidCaseDataException invalidCaseDataException) {
@@ -61,20 +63,18 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build();
     }
 
-    private void updateApplicationStatus(CaseDetails caseDetails, List<BulkPrintDocument> bulkPrintDocuments, String userAuthorisation) {
+    private void updateApplications(CaseDetails caseDetails, List<BulkPrintDocument> bulkPrintDocuments, String userAuthorisation) {
         Map<String, Object> caseData = caseDetails.getData();
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(caseData);
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_DIRECTIONS_LIST));
 
         String[] choice =  dynamicList.getValueCode().split("#");
-
         final String outcome  = choice[1];
-        log.info("outcome decision {} general application for Case ID: {}", outcome, caseDetails.getId());
-
         final String valueCode = choice[0];
-        log.info("selected dynamic list code : {} Case ID: {}", valueCode, caseDetails.getId());
+
         final List<GeneralApplicationCollectionData> applicationCollectionDataList
-            = existingList.stream().map(ga -> setStatus(caseDetails, ga, valueCode, outcome, bulkPrintDocuments, userAuthorisation))
+            = existingList.stream().map(ga -> setStatusAndBulkPrintDouments(caseDetails,
+                ga, valueCode, outcome, bulkPrintDocuments, userAuthorisation))
             .sorted(helper::getCompareTo).toList();
 
         log.info("applicationCollectionDataList : {} caseId {}", applicationCollectionDataList.size(), caseDetails.getId());
@@ -82,12 +82,12 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
         caseData.remove(GENERAL_APPLICATION_DIRECTIONS_LIST);
     }
 
-    private GeneralApplicationCollectionData setStatus(CaseDetails caseDetails,
-                                                       GeneralApplicationCollectionData data,
-                                                       String code,
-                                                       String outcome,
-                                                       List<BulkPrintDocument> bulkPrintDocuments,
-                                                       String userAuthorisation) {
+    private GeneralApplicationCollectionData setStatusAndBulkPrintDouments(CaseDetails caseDetails,
+                                                                           GeneralApplicationCollectionData data,
+                                                                           String code,
+                                                                           String outcome,
+                                                                           List<BulkPrintDocument> bulkPrintDocuments,
+                                                                           String userAuthorisation) {
         if (code.equals(data.getId())) {
             GeneralApplicationItems items = data.getGeneralApplicationItems();
             CaseDocument caseDocument = service.getBulkPrintDocument(caseDetails, userAuthorisation);

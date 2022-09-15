@@ -33,12 +33,11 @@ public class GeneralApplicationAboutToSubmitHandler implements CallbackHandler {
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
                                                        String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Received request to submit general application from Handler for Case ID: {}", caseDetails.getId());
+        log.info("About to Submit callback event type {} for case id: {}", EventType.GENERAL_APPLICATION, caseDetails.getId());
 
         Map<String, Object> caseData
             = service.updateGeneralApplications(callbackRequest, userAuthorisation);
 
-        log.info("Delete non collection general application casedata for Case ID: {}", caseDetails.getId());
         helper.deleteNonCollectionGeneralApplication(caseData);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();

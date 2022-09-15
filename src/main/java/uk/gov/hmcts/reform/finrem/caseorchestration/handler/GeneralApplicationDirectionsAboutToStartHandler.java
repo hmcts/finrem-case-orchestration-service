@@ -40,9 +40,8 @@ public class GeneralApplicationDirectionsAboutToStartHandler implements Callback
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
                                                        String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        final String caseId = caseDetails.getId().toString();
+        log.info("About to Start callback event type {} for case id: {}", EventType.GENERAL_APPLICATION_DIRECTIONS, caseDetails.getId());
 
-        log.info("Received on start request for general application direction for Case ID: {}", caseId);
         Map<String, Object> caseData = caseDetails.getData();
 
         service.startGeneralApplicationDirections(caseDetails);
@@ -55,14 +54,13 @@ public class GeneralApplicationDirectionsAboutToStartHandler implements Callback
         }
 
         AtomicInteger index = new AtomicInteger(0);
-        log.info("outcomeList size {}", outcomeList.size());
         List<DynamicListElement> dynamicListElements = outcomeList.stream()
             .map(ga -> getDynamicListElements(ga.getId() + "#" + ga.getGeneralApplicationItems().getGeneralApplicationStatus(),
                 getLabel(ga.getGeneralApplicationItems(), index.incrementAndGet())))
             .toList();
 
         DynamicList dynamicList = generateAvailableGeneralApplicationAsDynamicList(dynamicListElements);
-        log.info("collection dynamicList {} for case id {}", dynamicList, caseDetails.getId());
+
         caseData.put(GENERAL_APPLICATION_DIRECTIONS_LIST, dynamicList);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
     }

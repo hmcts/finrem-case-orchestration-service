@@ -98,13 +98,6 @@ public class GeneralApplicationHelper {
         return null;
     }
 
-    public String objectToString(Object object) {
-        if (object != null) {
-            return objectMapper.registerModule(new JavaTimeModule()).convertValue(object, String.class);
-        }
-        return null;
-    }
-
     public LocalDate objectToDateTime(Object object) {
         if (object != null) {
             return objectMapper.registerModule(new JavaTimeModule()).convertValue(object, LocalDate.class);
@@ -138,23 +131,23 @@ public class GeneralApplicationHelper {
     public GeneralApplicationItems getApplicationItems(Map<String,Object> caseData) {
         GeneralApplicationItems.GeneralApplicationItemsBuilder builder =
             GeneralApplicationItems.builder();
-        builder.generalApplicationReceivedFrom(objectToString(caseData.get(GENERAL_APPLICATION_RECEIVED_FROM)));
-        builder.generalApplicationCreatedBy(objectToString(caseData.get(GENERAL_APPLICATION_CREATED_BY)));
-        builder.generalApplicationHearingRequired(objectToString(caseData.get(GENERAL_APPLICATION_HEARING_REQUIRED)));
-        builder.generalApplicationTimeEstimate(objectToString(caseData.get(GENERAL_APPLICATION_TIME_ESTIMATE)));
-        builder.generalApplicationSpecialMeasures(objectToString(caseData.get(GENERAL_APPLICATION_SPECIAL_MEASURES)));
+        builder.generalApplicationReceivedFrom(Objects.toString(caseData.get(GENERAL_APPLICATION_RECEIVED_FROM), null));
+        builder.generalApplicationCreatedBy(Objects.toString(caseData.get(GENERAL_APPLICATION_CREATED_BY), null));
+        builder.generalApplicationHearingRequired(Objects.toString(caseData.get(GENERAL_APPLICATION_HEARING_REQUIRED), null));
+        builder.generalApplicationTimeEstimate(Objects.toString(caseData.get(GENERAL_APPLICATION_TIME_ESTIMATE), null));
+        builder.generalApplicationSpecialMeasures(Objects.toString(caseData.get(GENERAL_APPLICATION_SPECIAL_MEASURES), null));
         builder.generalApplicationDocument(convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DOCUMENT)));
         CaseDocument draftDocument = convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DRAFT_ORDER));
         if (draftDocument != null) {
             builder.generalApplicationDraftOrder(draftDocument);
         }
         builder.generalApplicationCreatedDate(objectToDateTime(caseData.get(GENERAL_APPLICATION_DOCUMENT_LATEST_DATE)));
-        builder.generalApplicationOutcomeOther(objectToString(caseData.get(GENERAL_APPLICATION_OUTCOME_OTHER)));
+        builder.generalApplicationOutcomeOther(Objects.toString(caseData.get(GENERAL_APPLICATION_OUTCOME_OTHER), null));
         CaseDocument directionDocument = convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT));
         if (directionDocument != null) {
             builder.generalApplicationDirectionsDocument(directionDocument);
         }
-        String outcome = objectToString(caseData.get(GENERAL_APPLICATION_OUTCOME_DECISION));
+        String outcome = Objects.toString(caseData.get(GENERAL_APPLICATION_OUTCOME_DECISION), null);
         if (outcome != null) {
             setStatus(builder, outcome);
         } else {

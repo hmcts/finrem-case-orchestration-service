@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_OUTCOME_DECISION;
@@ -48,7 +49,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler implements CallbackHa
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(caseData);
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_OUTCOME_LIST));
 
-        final String outcome  = helper.objectToString(caseData.get(GENERAL_APPLICATION_OUTCOME_DECISION));
+        final String outcome  = Objects.toString(caseData.get(GENERAL_APPLICATION_OUTCOME_DECISION), null);
         log.info("outcome decision {} general application for Case ID: {}", outcome, caseId);
 
         final String valueCode = dynamicList.getValueCode();
@@ -69,7 +70,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler implements CallbackHa
                                                        String outcome) {
         if (code.equals(data.getId())) {
             GeneralApplicationItems items = data.getGeneralApplicationItems();
-            items.setGeneralApplicationOutcomeOther(helper.objectToString(caseData.get(GENERAL_APPLICATION_OUTCOME_OTHER)));
+            items.setGeneralApplicationOutcomeOther(Objects.toString(caseData.get(GENERAL_APPLICATION_OUTCOME_OTHER), null));
             switch (outcome) {
                 case "Approved" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.APPROVED.getId());
                 case "Not Approved" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.NOT_APPROVED.getId());

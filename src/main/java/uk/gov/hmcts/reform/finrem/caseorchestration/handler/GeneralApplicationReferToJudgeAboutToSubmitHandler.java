@@ -40,42 +40,48 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandler implements Callb
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
                                                        String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        final String caseId = caseDetails.getId().toString();
-        log.info("Received on start request to refer to judge general application for Case ID: {}", caseId);
+        log.info("Received on start request to {} for Case ID: {}", EventType.GENERAL_APPLICATION_REFER_TO_JUDGE, caseDetails.getId());
         Map<String, Object> caseData = caseDetails.getData();
 
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(caseData);
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_REFER_LIST));
 
         if (existingList.isEmpty() && caseData.get(GENERAL_APPLICATION_CREATED_BY) != null) {
-            List<GeneralApplicationCollectionData> existingGeneralApplication = helper.getGeneralApplicationList(caseData);
-            GeneralApplicationCollectionData data = helper.migrateExistingGeneralApplication(caseData);
-            if (data != null) {
-                log.info("data ={}=caseId {}", data, caseId);
-                data.getGeneralApplicationItems().setGeneralApplicationStatus(REFERRED.getId());
-                existingGeneralApplication.add(data);
-                caseData.put(GENERAL_APPLICATION_COLLECTION,existingGeneralApplication);
-            }
-            helper.deleteNonCollectionGeneralApplication(caseData);
+            migrateExistingApplication(caseData);
 
         } else {
             if (dynamicList == null) {
                 return AboutToStartOrSubmitCallbackResponse.builder().data(caseData)
                     .errors(List.of("There is no general application available to refer.")).build();
             }
-            final String valueCode = dynamicList.getValueCode();
-            String label  = dynamicList.getValue().getLabel();
-            String referredApplicationDetails = label.substring(label.indexOf("-") + 1);
-            caseData.put(GENERAL_APPLICATION_REFERRED_DETAIL, referredApplicationDetails);
-            log.info("selected dynamicList.getValue() : {} Case ID: {}", dynamicList.getValue().getLabel(), caseId);
-            log.info("selected dynamic list code : {} Case ID: {}", valueCode, caseId);
-            final List<GeneralApplicationCollectionData> applicationCollectionDataList
-                = existingList.stream().map(ga -> setStatus(ga, valueCode)).sorted(helper::getCompareTo).toList();
-
-            log.info("applicationCollectionDataList : {} caseId {}", applicationCollectionDataList.size(), caseId);
-            caseData.put(GENERAL_APPLICATION_COLLECTION, applicationCollectionDataList);
+            setGeneralApplicationList(caseData, existingList, dynamicList);
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
+    }
+
+    private void setGeneralApplicationList(Map<String, Object> caseData,
+                                           List<GeneralApplicationCollectionData> existingList,
+                                           DynamicList dynamicList) {
+        final String valueCode = dynamicList.getValueCode();
+        String label  = dynamicList.getValue().getLabel();
+        String referredApplicationDetails = label.substring(label.indexOf("-") + 1);
+        caseData.put(GENERAL_APPLICATION_REFERRED_DETAIL, referredApplicationDetails);
+
+        final List<GeneralApplicationCollectionData> applicationCollectionDataList
+            = existingList.stream().map(ga -> setStatus(ga, valueCode)).sorted(helper::getCompareTo).toList();
+
+        caseData.put(GENERAL_APPLICATION_COLLECTION, applicationCollectionDataList);
+    }
+
+    private void migrateExistingApplication(Map<String, Object> caseData) {
+        List<GeneralApplicationCollectionData> existingGeneralApplication = helper.getGeneralApplicationList(caseData);
+        GeneralApplicationCollectionData data = helper.migrateExistingGeneralApplication(caseData);
+        if (data != null) {
+            data.getGeneralApplicationItems().setGeneralApplicationStatus(REFERRED.getId());
+            existingGeneralApplication.add(data);
+            caseData.put(GENERAL_APPLICATION_COLLECTION,existingGeneralApplication);
+        }
+        helper.deleteNonCollectionGeneralApplication(caseData);
     }
 
     private GeneralApplicationCollectionData setStatus(GeneralApplicationCollectionData data, String code) {
