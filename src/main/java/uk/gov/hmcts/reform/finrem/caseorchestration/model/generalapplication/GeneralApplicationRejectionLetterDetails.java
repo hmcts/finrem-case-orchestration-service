@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.model.frcupateinfo;
+package uk.gov.hmcts.reform.finrem.caseorchestration.model.generalapplication;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Builder;
@@ -11,12 +11,13 @@ import java.util.Map;
 @Data
 @Builder(toBuilder = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class UpdateFrcInfoLetterDetails implements ParentLetterDetails {
+public class GeneralApplicationRejectionLetterDetails implements ParentLetterDetails {
     private Map<String, Object> courtDetails;
     private Addressee addressee;
     private String caseNumber;
-    private String reference;
     private String divorceCaseNumber;
+    private String reference;
+    private String generalApplicationRejectionReason;
     private String letterDate;
     private String applicantName;
     private String respondentName;

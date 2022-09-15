@@ -43,4 +43,5 @@ public class NotificationServiceConfiguration {
     private String consentedNoCCaseworker;
     private String updateFRCInformation;
     private String updateFRCInformationCourt;
+    private String generalApplicationRejection;
 }
