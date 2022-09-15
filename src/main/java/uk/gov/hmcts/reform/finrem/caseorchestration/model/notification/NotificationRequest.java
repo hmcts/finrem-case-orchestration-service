@@ -35,6 +35,8 @@ public class NotificationRequest {
     private String caseOrderType;
     @JsonProperty("camelCaseOrderType")
     private String camelCaseOrderType;
+    @JsonProperty("generalApplicationRejectionReason")
+    private String generalApplicationRejectionReason;
     @JsonProperty("applicantName")
     private String applicantName;
     @JsonProperty("respondentName")
