@@ -200,6 +200,10 @@ public class CCDConfigConstant {
     public static final String BATH = "FR_bristolList_5";
     public static final String WESTON = "FR_bristolList_6";
 
+    public static final String BRISTOL_MAGISTRATES = "FR_bristolList_7";
+
+    public static final String SWINDON_MAGISTRATES = "FR_bristolList_8";
+
     //North Wales Court List
     public static final String WREXHAM = "FR_northwalesList_1";
     public static final String CAERNARFON = "FR_northwalesList_2";
