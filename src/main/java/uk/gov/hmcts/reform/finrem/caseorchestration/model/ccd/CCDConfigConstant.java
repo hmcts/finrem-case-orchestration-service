@@ -200,6 +200,10 @@ public class CCDConfigConstant {
     public static final String BATH = "FR_bristolList_5";
     public static final String WESTON = "FR_bristolList_6";
 
+    public static final String BRISTOL_MAGISTRATES = "FR_bristolList_7";
+
+    public static final String SWINDON_MAGISTRATES = "FR_bristolList_8";
+
     //North Wales Court List
     public static final String WREXHAM = "FR_northwalesList_1";
     public static final String CAERNARFON = "FR_northwalesList_2";
@@ -330,6 +334,15 @@ public class CCDConfigConstant {
     public static final String GENERAL_EMAIL_BODY = "generalEmailBody";
 
     // General application
+    public static final String GENERAL_APPLICATION_REFERRED_DETAIL = "generalApplicationReferDetail";
+    public static final String GENERAL_APPLICATION_REJECT_REASON = "generalApplicationRejectReason";
+    public static final String GENERAL_APPLICATION_REFER_LIST = "generalApplicationReferList";
+    public static final String GENERAL_APPLICATION_OUTCOME_LIST = "generalApplicationOutcomeList";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_LIST = "generalApplicationDirectionsList";
+    public static final String GENERAL_APPLICATION_OUTCOME_DECISION = "generalApplicationOutcome";
+    public static final String GENERAL_APPLICATION_LIST = "generalApplicationList";
+    public static final String GENERAL_APPLICATION_TRACKING = "generalApplicationTracking";
+    public static final String GENERAL_APPLICATION_COLLECTION = "generalApplications";
     public static final String GENERAL_APPLICATION_DOCUMENT_LATEST = "generalApplicationLatestDocument";
     public static final String GENERAL_APPLICATION_DOCUMENT = "generalApplicationDocument";
     public static final String GENERAL_APPLICATION_RECEIVED_FROM = "generalApplicationReceivedFrom";
@@ -342,6 +355,7 @@ public class CCDConfigConstant {
     public static final String GENERAL_APPLICATION_DOCUMENT_LATEST_DATE = "generalApplicationLatestDocumentDate";
     public static final String GENERAL_APPLICATION_PRE_STATE = "generalApplicationPreState";
     public static final String GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL = "generalApplicationReferToJudgeEmail";
+    public static final String GENERAL_APPLICATION_OUTCOME_OTHER = "generalApplicationOutcomeOther";
 
     // General application directions
     public static final String GENERAL_APPLICATION_DIRECTIONS_ADDITIONAL_INFORMATION = "generalApplicationDirectionsAdditionalInformation";

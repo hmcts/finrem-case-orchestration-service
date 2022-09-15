@@ -195,7 +195,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyCourtDetailsFields(
             "Newport Civil and Family Court", "Clarence House, Clarence Place, Newport, NP19 7AA",
-            "01633 245 040", "FRCNewport@justice.gov.uk");
+            "01633 258946", "FRCNewport@justice.gov.uk");
     }
 
     @Test
@@ -238,8 +238,8 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         verifyAdditionalNonFastTrackFields();
 
         verifyCourtDetailsFields(
-            "Newcastle Upon Tyne Justice Centre", "Barras Bridge, Newcastle upon Tyne, NE18QF",
-            "0191 2012000", "Family.newcastle.countycourt@justice.gov.uk");
+            "Newcastle Civil and Family Courts and Tribunals Centre", "Barras Bridge, Newcastle upon Tyne, NE18QF",
+            "0191 2058750", "Family.newcastle.countycourt@justice.gov.uk");
     }
 
     @Test
