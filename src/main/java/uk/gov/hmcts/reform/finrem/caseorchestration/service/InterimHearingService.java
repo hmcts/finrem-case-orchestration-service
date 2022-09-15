@@ -210,7 +210,7 @@ public class InterimHearingService {
         caseData.put("interimHearingType", interimHearingCaseData.get("interimHearingType"));
         caseData.put("interimHearingDate", interimHearingCaseData.get("interimHearingDate"));
         caseData.put("interimHearingTime", interimHearingCaseData.get("interimHearingTime"));
-        caseData.put("interimTimeEstimate", interimHearingCaseData.get("interimTimeEstimate"));
+        caseData.put("interimTimeEstimate", interimHearingCaseData.get("interimHearingTimeEstimate"));
         caseData.put("interimAdditionalInformationAboutHearing", interimHearingCaseData.get("interimAdditionalInformationAboutHearing"));
 
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
