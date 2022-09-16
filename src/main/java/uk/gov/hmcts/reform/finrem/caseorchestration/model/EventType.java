@@ -30,6 +30,7 @@ public enum EventType {
     GENERAL_APPLICATION_REFER_TO_JUDGE("FR_generalApplicationReferToJudge"),
     GENERAL_APPLICATION_OUTCOME("FR_GeneralApplicationOutcome"),
     GENERAL_APPLICATION_DIRECTIONS("FR_GeneralApplicationDirections"),
+    MANAGE_BARRISTER("FR_manageBarrister"),
     NONE("");
 
     private final String ccdType;
