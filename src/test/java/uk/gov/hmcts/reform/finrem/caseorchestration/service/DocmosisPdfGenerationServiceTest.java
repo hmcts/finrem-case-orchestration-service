@@ -14,6 +14,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.PdfGenerationException;
 
@@ -36,7 +37,8 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 public class DocmosisPdfGenerationServiceTest {
 
     public static final String FILE_CONTENT = "Welcome to PDF document service";
-    public static final ImmutableMap<String, Object> PLACEHOLDERS = ImmutableMap.of("caseDetails",caseDataMap());
+    public static final ImmutableMap<String, Object> PLACEHOLDERS =
+        ImmutableMap.of("caseDetails", CaseDetails.builder().data(caseDataMap()).build());
     public static final String TEMPLATE_NAME = "template name";
     public static final String PDF_SERVICE_URI = "http://localhost:4001/rs/render";
 

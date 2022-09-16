@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.PdfDocumentConfig;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.PdfGenerationException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.PdfDocumentRequest;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -43,16 +42,23 @@ public class DocmosisPdfGenerationService {
             + "placeholders of size [{}], pdfServiceEndpoint [{}] ",
             templateName, placeholders.size(), pdfServiceEndpoint);
 
-        Map<String, Object> placeholdersCopy = new HashMap<>();
-        placeholdersCopy.putAll(placeholders);
-
         try {
             ResponseEntity<byte[]> response =
-                restTemplate.postForEntity(pdfServiceEndpoint, request(templateName, placeholdersCopy), byte[].class);
+                restTemplate.postForEntity(pdfServiceEndpoint, request(templateName, placeholders), byte[].class);
+            removePdfConfigEntriesFromCaseData(placeholders);
             return response.getBody();
         } catch (Exception e) {
             throw new PdfGenerationException("Failed to request PDF from REST endpoint " + e.getMessage(), e);
         }
+    }
+
+    private void removePdfConfigEntriesFromCaseData(Map<String, Object> placeholders) {
+        CaseDetails caseDetails = (CaseDetails) placeholders.get(CASE_DETAILS);
+
+        Map<String, Object> data = caseDetails.getData();
+        data.remove(pdfDocumentConfig.getDisplayTemplateKey());
+        data.remove(pdfDocumentConfig.getFamilyCourtImgKey());
+        data.remove(pdfDocumentConfig.getHmctsImgKey());
     }
 
     private PdfDocumentRequest request(String templateName, Map<String, Object> placeholders) {
@@ -66,11 +72,9 @@ public class DocmosisPdfGenerationService {
     @SuppressWarnings("unchecked")
     private Map<String, Object> caseData(Map<String, Object> placeholders) {
 
-        Object caseDetails = placeholders.get(CASE_DETAILS);
+        CaseDetails caseDetails = (CaseDetails) placeholders.get(CASE_DETAILS);
 
-        Map<String, Object> data = caseDetails instanceof CaseDetails
-            ? ((CaseDetails) caseDetails).getData()
-            : (Map<String, Object>) ((Map<String, Object>)  caseDetails).get(CASE_DATA);
+        Map<String, Object> data = caseDetails.getData();
         data.put(pdfDocumentConfig.getDisplayTemplateKey(), pdfDocumentConfig.getDisplayTemplateVal());
         data.put(pdfDocumentConfig.getFamilyCourtImgKey(), pdfDocumentConfig.getFamilyCourtImgVal());
         data.put(pdfDocumentConfig.getHmctsImgKey(), pdfDocumentConfig.getHmctsImgVal());
