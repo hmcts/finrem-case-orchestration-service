@@ -38,6 +38,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicat
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_OUTCOME_DECISION;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
@@ -52,6 +53,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
     private static final String GA_JSON = "/fixtures/contested/general-application-direction.json";
+    private static final String GA_NON_COLL_JSON = "/fixtures/contested/general-application.json";
 
     @Before
     public void setup() {
@@ -90,8 +92,33 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
     }
 
     @Test
+    public void givenCase_whenExistingApplication_thenMigratedAndUpdateStatusApprovedCompleted() {
+        CallbackRequest callbackRequest = buildCallbackRequest(GA_NON_COLL_JSON);
+        when(service.getBulkPrintDocument(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(caseDocument);
+        callbackRequest.getCaseDetails().getData().put(GENERAL_APPLICATION_OUTCOME_DECISION, APPROVED.getId());
+
+        AboutToStartOrSubmitCallbackResponse startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        Map<String, Object> caseData = startHandle.getData();
+        DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_DIRECTIONS_LIST));
+        assertEquals(1, dynamicList.getListItems().size());
+
+        AboutToStartOrSubmitCallbackResponse submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
+        Map<String, Object> data = submitHandle.getData();
+
+        List<GeneralApplicationCollectionData> list
+            = helper.covertToGeneralApplicationData(data.get(GENERAL_APPLICATION_COLLECTION));
+        assertEquals(1, list.size());
+
+        assertEquals(DIRECTION_APPROVED.getId(),
+            list.get(0).getGeneralApplicationItems().getGeneralApplicationStatus());
+        assertNull(data.get(GENERAL_APPLICATION_DIRECTIONS_LIST));
+        assertNull(data.get(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT));
+    }
+
+    @Test
     public void givenCase_whenApproveAnApplication_thenUpdateStatusApprovedCompleted() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
+        CallbackRequest callbackRequest = buildCallbackRequest(GA_JSON);
         when(service.getBulkPrintDocument(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(caseDocument);
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(callbackRequest.getCaseDetails().getData());
         List<GeneralApplicationCollectionData> updatedList
@@ -120,7 +147,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
 
     @Test
     public void givenCase_whenNotApproveAnApplication_thenUpdateStatusNotApproved() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
+        CallbackRequest callbackRequest = buildCallbackRequest(GA_JSON);
         when(service.getBulkPrintDocument(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(caseDocument);
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(callbackRequest.getCaseDetails().getData());
         List<GeneralApplicationCollectionData> updatedList
@@ -148,7 +175,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
 
     @Test
     public void givenCase_whenOtherAnApplication_thenUpdateStatusOther() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
+        CallbackRequest callbackRequest = buildCallbackRequest(GA_JSON);
         when(service.getBulkPrintDocument(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(caseDocument);
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(callbackRequest.getCaseDetails().getData());
         List<GeneralApplicationCollectionData> updatedList
@@ -181,8 +208,8 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         return obj;
     }
 
-    private CallbackRequest buildCallbackRequest()  {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(GA_JSON)) {
+    private CallbackRequest buildCallbackRequest(String testJson)  {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(testJson)) {
             CaseDetails caseDetails = objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
             return CallbackRequest.builder().caseDetails(caseDetails).build();
         } catch (Exception e) {

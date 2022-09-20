@@ -25,6 +25,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_OUTCOME_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_OUTCOME_LIST;
@@ -39,6 +40,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
     private static final String GA_JSON = "/fixtures/contested/general-application-referred.json";
+    private static final String GA_NON_COLL_JSON = "/fixtures/contested/general-application.json";
 
     @Before
     public void setup() {
@@ -77,8 +79,31 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest {
     }
 
     @Test
+    public void givenCase_whenNonCollectionApproveAnApplication_thenMigratedAndUpdateStatusApproved() {
+        CallbackRequest callbackRequest = buildCallbackRequest(GA_NON_COLL_JSON);
+        callbackRequest.getCaseDetails().getData().put(GENERAL_APPLICATION_OUTCOME_DECISION, APPROVED.getId());
+
+        AboutToStartOrSubmitCallbackResponse startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        Map<String, Object> caseData = startHandle.getData();
+        DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_OUTCOME_LIST));
+        assertEquals(1, dynamicList.getListItems().size());
+
+        AboutToStartOrSubmitCallbackResponse submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        Map<String, Object> data = submitHandle.getData();
+        List<GeneralApplicationCollectionData> generalApplicationCollectionData
+            = helper.covertToGeneralApplicationData(data.get(GENERAL_APPLICATION_COLLECTION));
+        assertEquals(1, generalApplicationCollectionData.size());
+
+        assertEquals(GeneralApplicationStatus.APPROVED.getId(),
+            generalApplicationCollectionData.get(0).getGeneralApplicationItems().getGeneralApplicationStatus());
+        assertNull(data.get(GENERAL_APPLICATION_OUTCOME_LIST));
+    }
+
+    @Test
     public void givenCase_whenApproveAnApplication_thenUpdateStatusApproved() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
+        CallbackRequest callbackRequest = buildCallbackRequest(GA_JSON);
 
         AboutToStartOrSubmitCallbackResponse startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -100,7 +125,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest {
 
     @Test
     public void givenCase_whenNotApproveAnApplication_thenUpdateStatusNotApproved() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
+        CallbackRequest callbackRequest = buildCallbackRequest(GA_JSON);
 
         AboutToStartOrSubmitCallbackResponse startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -122,7 +147,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest {
 
     @Test
     public void givenCase_whenOtherAnApplication_thenUpdateStatusOther() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
+        CallbackRequest callbackRequest = buildCallbackRequest(GA_JSON);
 
         AboutToStartOrSubmitCallbackResponse startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -144,7 +169,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest {
 
     @Test
     public void givenCase_whenUnknowAnApplication_thenThrowException() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
+        CallbackRequest callbackRequest = buildCallbackRequest(GA_JSON);
 
         AboutToStartOrSubmitCallbackResponse startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -160,8 +185,8 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest {
         assertEquals(expectedMessage, actualMessage);
     }
 
-    private CallbackRequest buildCallbackRequest()  {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(GA_JSON)) {
+    private CallbackRequest buildCallbackRequest(String testJson)  {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(testJson)) {
             CaseDetails caseDetails = objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
             return CallbackRequest.builder().caseDetails(caseDetails).build();
         } catch (Exception e) {
