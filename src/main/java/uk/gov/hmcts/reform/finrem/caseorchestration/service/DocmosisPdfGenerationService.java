@@ -53,9 +53,11 @@ public class DocmosisPdfGenerationService {
     }
 
     private void removePdfConfigEntriesFromCaseData(Map<String, Object> placeholders) {
-        CaseDetails caseDetails = (CaseDetails) placeholders.get(CASE_DETAILS);
+        Object caseDetails = placeholders.get(CASE_DETAILS);
 
-        Map<String, Object> data = caseDetails.getData();
+        Map<String, Object> data = caseDetails instanceof CaseDetails
+            ? ((CaseDetails) caseDetails).getData()
+            : (Map<String, Object>) ((Map<String, Object>)  caseDetails).get(CASE_DATA);
         data.remove(pdfDocumentConfig.getDisplayTemplateKey());
         data.remove(pdfDocumentConfig.getFamilyCourtImgKey());
         data.remove(pdfDocumentConfig.getHmctsImgKey());
