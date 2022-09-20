@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.PdfDocumentConfig;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.PdfGenerationException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.PdfDocumentRequest;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -40,27 +39,36 @@ public class DocmosisPdfGenerationService {
         checkNotNull(placeholders, "placeholders map cannot be null");
 
         log.info("Making request to pdf service to generate pdf document with template [{}], "
-                + "placeholders of size [{}], pdfServiceEndpoint [{}] ",
+            + "placeholders of size [{}], pdfServiceEndpoint [{}] ",
             templateName, placeholders.size(), pdfServiceEndpoint);
-
-        Map<String, Object> placeholdersCopy = new HashMap<>();
-        placeholdersCopy.putAll(placeholders);
 
         try {
             ResponseEntity<byte[]> response =
-                restTemplate.postForEntity(pdfServiceEndpoint, request(templateName, placeholdersCopy), byte[].class);
+                restTemplate.postForEntity(pdfServiceEndpoint, request(templateName, placeholders), byte[].class);
+            removePdfConfigEntriesFromCaseData(placeholders);
             return response.getBody();
         } catch (Exception e) {
             throw new PdfGenerationException("Failed to request PDF from REST endpoint " + e.getMessage(), e);
         }
     }
 
+    private void removePdfConfigEntriesFromCaseData(Map<String, Object> placeholders) {
+        Object caseDetails = placeholders.get(CASE_DETAILS);
+
+        Map<String, Object> data = caseDetails instanceof CaseDetails
+            ? ((CaseDetails) caseDetails).getData()
+            : (Map<String, Object>) ((Map<String, Object>)  caseDetails).get(CASE_DATA);
+        data.remove(pdfDocumentConfig.getDisplayTemplateKey());
+        data.remove(pdfDocumentConfig.getFamilyCourtImgKey());
+        data.remove(pdfDocumentConfig.getHmctsImgKey());
+    }
+
     private PdfDocumentRequest request(String templateName, Map<String, Object> placeholders) {
         return PdfDocumentRequest.builder()
-            .accessKey(pdfServiceAccessKey)
-            .templateName(templateName)
-            .outputName("result.pdf")
-            .data(caseData(placeholders)).build();
+                .accessKey(pdfServiceAccessKey)
+                .templateName(templateName)
+                .outputName("result.pdf")
+                .data(caseData(placeholders)).build();
     }
 
     @SuppressWarnings("unchecked")
