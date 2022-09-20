@@ -27,8 +27,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RE
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_RES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
@@ -69,6 +75,10 @@ public abstract class BaseServiceTest extends BaseTest {
 
     protected CallbackRequest getConsentedCallbackRequestForVariationOrder() {
         Map<String, Object> caseData = new HashMap<>();
+        caseData.put(CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, "David");
+        caseData.put(CONSENTED_RESPONDENT_LAST_NAME, "Goodman");
+        caseData.put(APPLICANT_FIRST_MIDDLE_NAME, "Victoria");
+        caseData.put(APPLICANT_LAST_NAME, "Goodman");
         caseData.put(SOLICITOR_EMAIL, TEST_SOLICITOR_EMAIL);
         caseData.put(CONSENTED_SOLICITOR_NAME, TEST_SOLICITOR_NAME);
         caseData.put(SOLICITOR_REFERENCE, TEST_SOLICITOR_REFERENCE);
@@ -97,6 +107,10 @@ public abstract class BaseServiceTest extends BaseTest {
 
     protected CallbackRequest getConsentedCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
+        caseData.put(CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, "David");
+        caseData.put(CONSENTED_RESPONDENT_LAST_NAME, "Goodman");
+        caseData.put(APPLICANT_FIRST_MIDDLE_NAME, "Victoria");
+        caseData.put(APPLICANT_LAST_NAME, "Goodman");
         caseData.put(SOLICITOR_EMAIL, TEST_SOLICITOR_EMAIL);
         caseData.put(CONSENTED_SOLICITOR_NAME, TEST_SOLICITOR_NAME);
         caseData.put(SOLICITOR_REFERENCE, TEST_SOLICITOR_REFERENCE);
@@ -124,6 +138,10 @@ public abstract class BaseServiceTest extends BaseTest {
 
     protected CallbackRequest getConsentedCallbackRequestUpdateDetails() {
         Map<String, Object> caseData = new HashMap<>();
+        caseData.put(CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, "David");
+        caseData.put(CONSENTED_RESPONDENT_LAST_NAME, "Goodman");
+        caseData.put(APPLICANT_FIRST_MIDDLE_NAME, "Victoria");
+        caseData.put(APPLICANT_LAST_NAME, "Goodman");
         caseData.put(SOLICITOR_EMAIL, TEST_SOLICITOR_EMAIL);
         caseData.put(CONSENTED_SOLICITOR_NAME, TEST_SOLICITOR_NAME);
         caseData.put(SOLICITOR_REFERENCE, TEST_SOLICITOR_REFERENCE);
@@ -153,6 +171,8 @@ public abstract class BaseServiceTest extends BaseTest {
 
     protected CallbackRequest getContestedCallbackRequest() {
         Map<String, Object> caseData = getCaseData();
+        caseData.put(CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME, "David");
+        caseData.put(CONTESTED_RESPONDENT_LAST_NAME, "Goodman");
         return CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
                 .caseTypeId(CASE_TYPE_ID_CONTESTED)
@@ -164,6 +184,8 @@ public abstract class BaseServiceTest extends BaseTest {
 
     protected CallbackRequest getContestedCallbackRequestWithCaseDataValues(Map<String, Object> caseDataValuesToAdd) {
         Map<String, Object> caseData = getCaseData();
+        caseData.put(CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME, "David");
+        caseData.put(CONTESTED_RESPONDENT_LAST_NAME, "Goodman");
         caseData.putAll(caseDataValuesToAdd);
         //caseDataValuesToAdd.keySet().stream().forEach(k ->  caseData.put( k, caseDataValuesToAdd.get(k)));
         return CallbackRequest.builder()
@@ -177,6 +199,8 @@ public abstract class BaseServiceTest extends BaseTest {
 
     private Map<String, Object> getCaseData() {
         Map<String, Object> caseData = new HashMap<>();
+        caseData.put(APPLICANT_FIRST_MIDDLE_NAME, "Victoria");
+        caseData.put(APPLICANT_LAST_NAME, "Goodman");
         caseData.put(CONTESTED_SOLICITOR_EMAIL, TEST_SOLICITOR_EMAIL);
         caseData.put(CONTESTED_SOLICITOR_NAME, TEST_SOLICITOR_NAME);
         caseData.put(RESP_SOLICITOR_EMAIL, TEST_RESP_SOLICITOR_EMAIL);
@@ -194,6 +218,10 @@ public abstract class BaseServiceTest extends BaseTest {
 
     protected CallbackRequest getContestedCallbackRequestUpdateDetails() {
         Map<String, Object> caseData = new HashMap<>();
+        caseData.put(CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME, "David");
+        caseData.put(CONTESTED_RESPONDENT_LAST_NAME, "Goodman");
+        caseData.put(APPLICANT_FIRST_MIDDLE_NAME, "Victoria");
+        caseData.put(APPLICANT_LAST_NAME, "Goodman");
         caseData.put(CONTESTED_SOLICITOR_EMAIL, TEST_SOLICITOR_EMAIL);
         caseData.put(CONTESTED_SOLICITOR_NAME, TEST_SOLICITOR_NAME);
         caseData.put(RESP_SOLICITOR_EMAIL, TEST_RESP_SOLICITOR_EMAIL);
