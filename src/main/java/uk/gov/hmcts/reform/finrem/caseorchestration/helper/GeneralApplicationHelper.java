@@ -6,7 +6,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
@@ -158,10 +157,10 @@ public class GeneralApplicationHelper {
 
     private void setStatus(GeneralApplicationItems.GeneralApplicationItemsBuilder builder, String outcome) {
         switch (outcome) {
-            case "Approved" -> builder.generalApplicationStatus(GeneralApplicationStatus.DIRECTION_APPROVED.getId());
-            case "Not Approved" -> builder.generalApplicationStatus(GeneralApplicationStatus.DIRECTION_NOT_APPROVED.getId());
-            case "Other" -> builder.generalApplicationStatus(GeneralApplicationStatus.DIRECTION_OTHER.getId());
-            default -> builder.generalApplicationStatus(CREATED.getId());
+            case "Approved" -> builder.generalApplicationStatus(APPROVED.getId());
+            case "Not Approved" -> builder.generalApplicationStatus(NOT_APPROVED.getId());
+            case "Other" -> builder.generalApplicationStatus(OTHER.getId());
+            default -> builder.generalApplicationStatus(OTHER.getId());
         }
     }
 
