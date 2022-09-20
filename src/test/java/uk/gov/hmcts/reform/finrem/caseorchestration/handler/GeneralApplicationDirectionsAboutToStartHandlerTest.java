@@ -15,9 +15,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHel
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -25,6 +27,9 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.DIRECTION_APPROVED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_LIST;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -80,7 +85,11 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
     public void givenCase_whenExistingGeneAppNonCollection_thenCreateSelectionList() {
         CallbackRequest callbackRequest = buildCallbackRequest(GA_NON_COLL_JSON);
         AboutToStartOrSubmitCallbackResponse handle = handler.handle(callbackRequest, AUTH_TOKEN);
-        assertThat(handle.getErrors(), CoreMatchers.hasItem("There are no general application available for issue direction."));
+
+        Map<String, Object> caseData = handle.getData();
+        DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_DIRECTIONS_LIST));
+
+        assertEquals(1, dynamicList.getListItems().size());
         verify(service).startGeneralApplicationDirections(any());
     }
 
@@ -94,6 +103,27 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
 
         assertEquals(1, dynamicList.getListItems().size());
         verify(service).startGeneralApplicationDirections(any());
+    }
+
+    @Test
+    public void givenCase_whenNoApplicationAvailable_thenShowErrorMessage() {
+        CallbackRequest callbackRequest = buildCallbackRequest(GA_JSON);
+        List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(callbackRequest.getCaseDetails().getData());
+        List<GeneralApplicationCollectionData> updatedList
+            = existingList.stream().map(obj -> updateStatus(obj)).toList();
+        callbackRequest.getCaseDetails().getData().put(GENERAL_APPLICATION_COLLECTION, updatedList);
+        callbackRequest.getCaseDetails().getData().remove(GENERAL_APPLICATION_CREATED_BY);
+
+        AboutToStartOrSubmitCallbackResponse handle = handler.handle(callbackRequest, AUTH_TOKEN);
+        assertThat(handle.getErrors(), CoreMatchers.hasItem("There are no general application available for issue direction."));
+        verify(service).startGeneralApplicationDirections(any());
+    }
+
+    private GeneralApplicationCollectionData updateStatus(GeneralApplicationCollectionData obj) {
+        if (obj.getId().equals("b0bfb0af-4f07-4628-a677-1de904b6ea1c")) {
+            obj.getGeneralApplicationItems().setGeneralApplicationStatus(DIRECTION_APPROVED.getId());
+        }
+        return obj;
     }
 
     private CallbackRequest buildCallbackRequest(String path)  {
