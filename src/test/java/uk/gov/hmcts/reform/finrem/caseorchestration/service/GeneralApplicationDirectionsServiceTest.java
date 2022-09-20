@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -77,6 +78,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_THAMESVALLEY_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_WALES_FRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_WALES_OTHER_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DOCUMENT;
 
 public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
@@ -155,35 +157,15 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
 
     @Test
     public void givenHearingRequired_whenGeneralApplicationDirectionsSubmitted_thenHearingNoticeIsPrinted() {
-        generalApplicationDirectionsService.submitGeneralApplicationDirections(caseDetails, AUTH_TOKEN);
 
-        assertCaseDataHasGeneralApplicationDirectionsDocument();
+        List<BulkPrintDocument> documents = new ArrayList<>();
+        documents.add(getCaseDocumentAsBulkPrintDocument(
+            convertToCaseDocument(caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST))));
 
-        verify(genericDocumentService, times(1)).generateDocument(
-            eq(AUTH_TOKEN),
-            documentGenerationRequestCaseDetailsCaptor.capture(),
-            eq(documentConfiguration.getGeneralApplicationHearingNoticeTemplate()),
-            eq(documentConfiguration.getGeneralApplicationHearingNoticeFileName()));
+        generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(caseDetails, documents, AUTH_TOKEN);
+
         verify(bulkPrintService, times(1)).printApplicantDocuments(any(), eq(AUTH_TOKEN), any());
-        verify(bulkPrintService, times(1)).printRespondentDocuments(any(), eq(AUTH_TOKEN),
-            printDocumentsRequestDocumentListCaptor.capture());
-
-        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
-
-        assertThat(data, allOf(
-            Matchers.<String, Object>hasEntry("ccdCaseNumber", 1234567890L),
-            hasEntry("courtDetails", ImmutableMap.of(
-                "courtName", "Kingston-Upon-Thames County Court And Family Court",
-                "courtAddress", "Kingston upon Thames County Court, St James Road, Kingston-upon-Thames, KT1 2AD",
-                "phoneNumber", "0208 972 8700",
-                "email", "enquiries.kingston.countycourt@justice.gov.uk")),
-            Matchers.<String, Object>hasEntry("applicantName", "Poor Guy"),
-            Matchers.<String, Object>hasEntry("respondentName", "test Korivi"),
-            Matchers.<String, Object>hasEntry("hearingVenue",
-                "Croydon County Court And Family Court, Croydon County Court, Altyre Road, Croydon, CR9 5AB"),
-            hasKey("letterDate")));
-
-        assertDocumentPrintRequestContainsExpectedDocuments();
+        verify(bulkPrintService, times(1)).printRespondentDocuments(any(), eq(AUTH_TOKEN), any());
     }
 
     @Test
@@ -309,23 +291,17 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
 
     private void assertDocumentPrintRequestContainsExpectedDocuments() {
         List<BulkPrintDocument> documentsToPrint = printDocumentsRequestDocumentListCaptor.getValue();
-        System.out.println(documentsToPrint);
         assertThat(documentsToPrint, containsInAnyOrder(Stream.of(
-            GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL,
-            "http://dm-store/hijbb-general-application-latest-document/binary",
-            "http://dm-store/hijbb-general-application-draft-order/binary")
+            GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL)
             .map(binaryFileUrl -> BulkPrintDocument.builder().binaryFileUrl(binaryFileUrl).build())
             .toArray()));
     }
 
-    private void assertDocumentPrintRequestContainsExpectedInterimDocuments() {
-        List<BulkPrintDocument> documentsToPrint = printDocumentsRequestDocumentListCaptor.getValue();
-        System.out.println(documentsToPrint);
-        assertThat(documentsToPrint, containsInAnyOrder(Stream.of(
-                INTERIM_HEARING_DOCUMENT_BIN_URL,
-                "http://dm-store/hijbb-general-application-latest-document/binary",
-                "http://dm-store/hijbb-general-application-draft-order/binary")
-            .map(binaryFileUrl -> BulkPrintDocument.builder().binaryFileUrl(binaryFileUrl).build())
-            .toArray()));
+    private CaseDocument convertToCaseDocument(Object object) {
+        return objectMapper.convertValue(object, CaseDocument.class);
+    }
+
+    private BulkPrintDocument getCaseDocumentAsBulkPrintDocument(CaseDocument caseDocument) {
+        return BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl()).build();
     }
 }
