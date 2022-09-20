@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.FinremDateUtils.getLocalDateTime;
+
 /**
  * The class name FileUploadResponse is to maintain consistency. It was created in Evidence Management Client
  * to represent response for uploading a file to Document Management Store. Exactly the same metadata is returned
@@ -29,10 +31,10 @@ public class FileUploadResponse {
     private HttpStatus status;
 
     public LocalDateTime getModifiedOn() {
-        return LocalDateTime.parse(this.modifiedOn);
+        return getLocalDateTime(this.modifiedOn);
     }
 
     public LocalDateTime getCreatedOn() {
-        return LocalDateTime.parse(this.createdOn);
+        return getLocalDateTime(this.createdOn);
     }
 }
