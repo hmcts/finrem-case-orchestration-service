@@ -14,14 +14,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHel
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.APPROVED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_OUTCOME_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_OUTCOME_LIST;
 
@@ -73,10 +78,15 @@ public class GeneralApplicationOutcomeAboutToStartHandlerTest {
     }
 
     @Test
-    public void givenCase_whenExistingGeneAppNonCollection_thenShowError() {
+    public void givenCase_whenExistingGeneAppNonCollection_thenCreateSelectionList() {
         CallbackRequest callbackRequest = buildCallbackRequest(GA_NON_COLL_JSON);
         AboutToStartOrSubmitCallbackResponse handle = handler.handle(callbackRequest, AUTH_TOKEN);
-        assertThat(handle.getErrors(), CoreMatchers.hasItem("There are no general application available for decision."));
+
+        Map<String, Object> caseData = handle.getData();
+        DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_OUTCOME_LIST));
+
+        assertEquals(1, dynamicList.getListItems().size());
+        assertNull(caseData.get(GENERAL_APPLICATION_OUTCOME_DECISION));
     }
 
     @Test
@@ -91,6 +101,28 @@ public class GeneralApplicationOutcomeAboutToStartHandlerTest {
         assertNull(caseData.get(GENERAL_APPLICATION_OUTCOME_DECISION));
     }
 
+    @Test
+    public void givenCase_whenNoExistingGeneAppAvailable_thenShowError() {
+        CallbackRequest callbackRequest = buildCallbackRequest(GA_NON_COLL_JSON);
+
+        List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(callbackRequest.getCaseDetails().getData());
+        List<GeneralApplicationCollectionData> updatedList
+            = existingList.stream().map(this::updateStatus).toList();
+        callbackRequest.getCaseDetails().getData().put(GENERAL_APPLICATION_COLLECTION, updatedList);
+        callbackRequest.getCaseDetails().getData().remove(GENERAL_APPLICATION_CREATED_BY);
+
+        AboutToStartOrSubmitCallbackResponse handle = handler.handle(callbackRequest, AUTH_TOKEN);
+        assertThat(handle.getErrors(), CoreMatchers.hasItem("There are no general application available for decision."));
+
+
+    }
+
+    private GeneralApplicationCollectionData updateStatus(GeneralApplicationCollectionData obj) {
+        if (obj.getId().equals("b0bfb0af-4f07-4628-a677-1de904b6ea1c")) {
+            obj.getGeneralApplicationItems().setGeneralApplicationStatus(APPROVED.getId());
+        }
+        return obj;
+    }
 
     private CallbackRequest buildCallbackRequest(String path)  {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(path)) {

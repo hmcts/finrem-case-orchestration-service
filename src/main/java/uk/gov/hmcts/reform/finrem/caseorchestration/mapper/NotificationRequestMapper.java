@@ -21,7 +21,13 @@ import java.util.Map;
 import java.util.Objects;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_OPENING_HOURS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
@@ -167,7 +173,12 @@ public class NotificationRequestMapper {
         notificationRequest.setPhoneOpeningHours(CTSC_OPENING_HOURS);
         notificationRequest.setGeneralApplicationRejectionReason(
             Objects.toString(caseDetails.getData().get(GENERAL_APPLICATION_REJECT_REASON), ""));
+        String appName = caseDataService.buildFullName(caseDetails.getData(), APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME);
+        notificationRequest.setApplicantName(Objects.toString(appName));
         if (caseDataService.isConsentedApplication(caseDetails)) {
+            String respName = caseDataService.buildFullName(caseDetails.getData(),
+                CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, CONSENTED_RESPONDENT_LAST_NAME);
+            notificationRequest.setRespondentName(Objects.toString(respName));
             if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(caseData))) {
                 notificationRequest.setCaseOrderType("variation");
                 notificationRequest.setCamelCaseOrderType("Variation");
@@ -179,6 +190,11 @@ public class NotificationRequestMapper {
                 notificationRequest.getCaseReferenceNumber());
         }
 
+        if (caseDataService.isContestedApplication(caseDetails)) {
+            String respName = caseDataService.buildFullName(caseDetails.getData(),
+                CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME, CONTESTED_RESPONDENT_LAST_NAME);
+            notificationRequest.setRespondentName(Objects.toString(respName));
+        }
         return notificationRequest;
     }
 }
