@@ -7,12 +7,12 @@ import java.time.format.DateTimeFormatter;
 public class FinremDateUtils {
 
     public static LocalDateTime getLocalDateTime(String dateInString) {
-        if(dateInString.contains("+")) {
-            DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter
+        if (dateInString.contains("+")) {
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter
                 .ofPattern("yyyy-MM-dd'T'HH:mm:ssZ");
-            OffsetDateTime odtInstanceAtOffset = OffsetDateTime.parse(dateInString, DATE_TIME_FORMATTER);
+            OffsetDateTime odtInstanceAtOffset = OffsetDateTime.parse(dateInString, dateTimeFormatter);
             return odtInstanceAtOffset.toLocalDateTime();
-        }else{
+        } else {
             return LocalDateTime.parse(dateInString);
         }
     }
