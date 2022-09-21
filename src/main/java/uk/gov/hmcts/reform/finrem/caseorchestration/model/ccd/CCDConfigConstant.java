@@ -564,4 +564,10 @@ public class CCDConfigConstant {
     //Upload Approved Order
     public static final String HEARING_DIRECTION_DETAILS_COLLECTION = "hearingDirectionDetailsCollection";
     public static final String HEARING_NOTICE_DOCUMENT_PACK = "hearingNoticeDocumentPack";
+
+    //Manage Barristers
+    public static final String APPLICANT_BARRISTER_COLLECTION = "appBarristerCollection";
+    public static final String RESPONDENT_BARRISTER_COLLECTION = "respBarristerCollection";
+    public static final String APPLICANT_BARRISTER_ROLE = "[APPBARISTER]";
+    public static final String RESPONDENT_BARRISTER_ROLE = "[RESPBARRISTER]";
 }

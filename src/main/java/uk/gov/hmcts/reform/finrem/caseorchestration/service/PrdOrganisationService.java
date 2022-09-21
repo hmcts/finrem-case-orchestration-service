@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -8,6 +9,11 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.OrganisationApi;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.PrdOrganisationConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
+
+import java.util.Optional;
+
+import static org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.MaskHelper.maskEmail;
 
 @Service
 @RequiredArgsConstructor
@@ -32,5 +38,20 @@ public class PrdOrganisationService {
         String userToken = systemUserService.getSysUserToken();
 
         return organisationApi.findOrganisationByOrgId(userToken, authTokenGenerator.generate(), orgId);
+    }
+
+    public OrganisationsResponse findUserOrganisation(String authToken) {
+        return organisationApi.findUserOrganisation(authToken, authTokenGenerator.generate());
+    }
+
+    public Optional<String> findUserByEmail(String email, String authToken) {
+        try {
+            return Optional.of(organisationApi.findUserByEmail(authToken, authTokenGenerator.generate(), email).getUserIdentifier());
+        } catch (FeignException.NotFound notFoundException) {
+            log.info("User with email {} not found", maskEmail(email));
+            return Optional.empty();
+        } catch (FeignException exception) {
+            throw new RuntimeException(maskEmail(getStackTrace(exception), email));
+        }
     }
 }

@@ -1,14 +1,17 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.CaseUser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.CaseAssignmentApi;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.CaseDataApiV2;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.AssignCaseAccessServiceConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.GrantCaseAccessException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.AssignCaseAccessRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.AssignCaseAccessRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.DecisionRequest;
@@ -17,9 +20,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUser
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -36,7 +41,8 @@ public class AssignCaseAccessService {
     private final IdamService idamService;
     private final RestService restService;
     private final CaseAssignmentApi caseAssignmentApi;
-    private final AuthTokenGenerator authTokenGenerator;
+    private final AuthTokenGenerator serviceAuthTokenGenerator;
+    private final PrdOrganisationService organisationService;
     private final CaseDataApiV2 caseDataApi;
     private final SystemUserService systemUserService;
     private final FeatureToggleService featureToggleService;
@@ -55,8 +61,61 @@ public class AssignCaseAccessService {
     }
 
     public AboutToStartOrSubmitCallbackResponse applyDecision(String authToken, CaseDetails caseDetails) {
-        return caseAssignmentApi.applyDecision(authToken, authTokenGenerator.generate(),
+        return caseAssignmentApi.applyDecision(authToken, serviceAuthTokenGenerator.generate(),
             DecisionRequest.decisionRequest(caseDetails));
+    }
+
+    public void addCaseRolesForUser(String caseId, String userId, Set<String> caseRoles, String userAuthToken) {
+        final CaseUser caseUser = CaseUser.builder().userId(userId).caseRoles(caseRoles).build();
+        log.info("Grant case roles {} to user {} for case {}", caseRoles, userId, caseId);
+
+        caseDataApi.updateCaseRolesForUser(
+            userAuthToken,
+            serviceAuthTokenGenerator.generate(),
+            caseId,
+            userId,
+            caseUser);
+    }
+
+    public void grantCaseRoleToUser(Long caseId, String userId, String caseRole, String authToken) {
+        grantCaseAccess(caseId, Set.of(userId), caseRole, authToken);
+        log.info("User {} granted {} to case {}", userId, caseRole, caseId);
+    }
+
+    private void grantCaseAccess(Long caseId, Set<String> users, String caseRole, String authToken) {
+        try {
+            final String userToken = systemUserService.getSysUserToken();
+            final String serviceToken = serviceAuthTokenGenerator.generate();
+
+            final String organisationId = Optional.ofNullable(organisationService.findUserOrganisation(authToken))
+                .map(OrganisationsResponse::getOrganisationIdentifier)
+                .orElse(null);
+
+            final List<CaseAssignmentUserRoleWithOrganisation> caseAssignedRoles = users.stream()
+                .map(user -> buildCaseAssignedUserRoles(caseId, caseRole, organisationId, user))
+                .toList();
+
+            CaseAssignmentUserRolesRequest addCaseAssignedUserRolesRequest = CaseAssignmentUserRolesRequest.builder()
+                    .caseAssignmentUserRolesWithOrganisation(caseAssignedRoles)
+                    .build();
+
+            caseDataApi.addCaseUserRoles(userToken, serviceToken, addCaseAssignedUserRolesRequest);
+        } catch (FeignException ex) {
+            log.error("Could not assign the users to the case", ex);
+            throw new GrantCaseAccessException(caseId, users, caseRole);
+        }
+    }
+
+    private CaseAssignmentUserRoleWithOrganisation buildCaseAssignedUserRoles(Long caseId,
+                                                                              String caseRole,
+                                                                              String organisationId,
+                                                                              String userId) {
+        return CaseAssignmentUserRoleWithOrganisation.builder()
+            .caseDataId(caseId.toString())
+            .organisationId(organisationId)
+            .userId(userId)
+            .caseRole(caseRole)
+            .build();
     }
 
     public CaseAssignmentUserRolesResponse findAndRevokeCreatorRole(CaseDetails caseDetails) {
@@ -88,7 +147,7 @@ public class AssignCaseAccessService {
     private CaseAssignmentUserRolesResource getUserRoles(String caseId) {
         return caseDataApi.getUserRoles(
             systemUserService.getSysUserToken(),
-            authTokenGenerator.generate(),
+            serviceAuthTokenGenerator.generate(),
             List.of(caseId));
     }
 
@@ -118,7 +177,7 @@ public class AssignCaseAccessService {
 
         CaseAssignmentUserRolesResponse response = caseDataApi.removeCaseUserRoles(
             systemUserService.getSysUserToken(),
-            authTokenGenerator.generate(),
+            serviceAuthTokenGenerator.generate(),
             revokeAccessRequest);
 
         log.info("CCD response after Revoke Creator Role Access Request: {}", response);

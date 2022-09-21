@@ -8,20 +8,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Builder
 @Data
-@NoArgsConstructor
+@Builder
 @AllArgsConstructor
-public class ManageBarrister {
-    @JsonProperty("name")
-    private String name;
-
-    @JsonProperty("eMail")
-    private String email;
-
-    @JsonProperty("phoneNumber")
-    private String phone;
-
-    @JsonProperty("organisation")
-    private Organisation organisation;
+@NoArgsConstructor
+public class BarristerData {
+    @JsonProperty("id")
+    private String id;
+    @JsonProperty("value")
+    private Barrister barrister;
 }
+
