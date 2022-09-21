@@ -375,6 +375,19 @@ public class NotificationService {
         sendNotificationEmail(notificationRequest, uri);
     }
 
+    public void sendGeneralApplicationRejectionEmailToAppSolicitor(CaseDetails caseDetails) {
+        sendGeneralApplicationRejectionEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
+    }
+
+    public void sendGeneralApplicationRejectionEmailToResSolicitor(CaseDetails caseDetails) {
+        sendGeneralApplicationRejectionEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
+    }
+
+    public void sendGeneralApplicationRejectionEmail(NotificationRequest notificationRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getGeneralApplicationRejection());
+        sendNotificationEmail(notificationRequest, uri);
+    }
+
     private void sendNotificationEmail(NotificationRequest notificationRequest, URI uri) {
         HttpEntity<NotificationRequest> request = new HttpEntity<>(notificationRequest, buildHeaders());
         try {
@@ -394,6 +407,12 @@ public class NotificationService {
             && !NO_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT)));
     }
 
+    public boolean shouldEmailRespondentSolicitor(Map<String, Object> caseData) {
+        return caseDataService.isRespondentRepresentedByASolicitor(caseData)
+            && caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData)
+            && !NO_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT)));
+    }
+
     public boolean isContestedApplicantSolicitorEmailCommunicationEnabled(Map<String, Object> caseData) {
         return !caseDataService.isPaperApplication(caseData)
             && caseDataService.isApplicantRepresentedByASolicitor(caseData)
@@ -407,7 +426,7 @@ public class NotificationService {
     }
 
     public boolean isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(CaseDetails caseDetails) {
-        return isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())
+        return shouldEmailRespondentSolicitor(caseDetails.getData())
             && checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails);
     }
 
