@@ -16,7 +16,7 @@ public class Barrister {
     @JsonProperty("name")
     private String name;
 
-    @JsonProperty("eMail")
+    @JsonProperty("email")
     private String email;
 
     @JsonProperty("phoneNumber")
