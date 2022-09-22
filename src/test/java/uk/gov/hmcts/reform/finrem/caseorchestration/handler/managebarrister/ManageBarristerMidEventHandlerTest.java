@@ -90,7 +90,7 @@ public class ManageBarristerMidEventHandlerTest {
 
     @Test
     public void givenBarristerEmailsAreValid_whenHandle_thenReturnResponseWithNoErrors() {
-        when(manageBarristerService.getBarristersForParty(callbackRequest.getCaseDetails()))
+        when(manageBarristerService.getBarristersForParty(callbackRequest.getCaseDetails(), AUTH_TOKEN))
             .thenReturn(getBarristerData());
         when(barristerEmailValidationService.validateBarristerEmails(getBarristerData(), AUTH_TOKEN))
             .thenReturn(new ArrayList<>());
@@ -102,7 +102,7 @@ public class ManageBarristerMidEventHandlerTest {
 
     @Test
     public void givenBarristerEmailsAreInvalid_whenHandle_thenReturnResponseWithErrors() {
-        when(manageBarristerService.getBarristersForParty(callbackRequest.getCaseDetails()))
+        when(manageBarristerService.getBarristersForParty(callbackRequest.getCaseDetails(), AUTH_TOKEN))
             .thenReturn(getBarristerData());
         when(barristerEmailValidationService.validateBarristerEmails(getBarristerData(), AUTH_TOKEN))
             .thenReturn(List.of("Validation Error"));

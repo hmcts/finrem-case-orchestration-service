@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerEmailValidationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 
@@ -23,6 +24,7 @@ public class ManageBarristerMidEventHandler implements CallbackHandler {
 
     private final ManageBarristerService manageBarristerService;
     private final BarristerEmailValidationService barristerEmailValidationService;
+    private final CaseAssignedRoleService caseAssignedRoleService;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -35,7 +37,7 @@ public class ManageBarristerMidEventHandler implements CallbackHandler {
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest, String userAuthorisation) {
         log.info("In the manage barrister mid-event handler");
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        List<BarristerData> barristers = manageBarristerService.getBarristersForParty(caseDetails);
+        List<BarristerData> barristers = manageBarristerService.getBarristersForParty(caseDetails, userAuthorisation);
         List<String> errors = barristerEmailValidationService.validateBarristerEmails(barristers, userAuthorisation);
 
         if (!errors.isEmpty()) {

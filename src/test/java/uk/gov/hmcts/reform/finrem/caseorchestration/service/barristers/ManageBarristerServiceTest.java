@@ -16,6 +16,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.BarristerUpdateDiffer
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
@@ -23,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ChangeOfRepresentationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
@@ -83,6 +86,8 @@ public class ManageBarristerServiceTest {
     private IdamService idamService;
     @Mock
     private CaseDataService caseDataService;
+    @Mock
+    private CaseAssignedRoleService caseAssignedRoleService;
     @Spy
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -105,8 +110,10 @@ public class ManageBarristerServiceTest {
         List<BarristerData> applicantBarristers = applicantBarristerCollection();
         caseDetails.getData().put(CASE_ROLE, APP_SOLICITOR_POLICY);
         caseDetails.getData().put(APPLICANT_BARRISTER_COLLECTION, applicantBarristers);
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
+            .thenReturn(buildCaseAssignedUserRolesResource(APP_SOLICITOR_POLICY));
 
-        List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails);
+        List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
 
         assertThat(barristerData, is(applicantBarristers));
     }
@@ -115,8 +122,10 @@ public class ManageBarristerServiceTest {
     public void givenNoCurrentBarristers_whenGetBarristersForPartyApplicant_thenReturnEmptyList() {
         caseDetails.getData().put(CASE_ROLE, APP_SOLICITOR_POLICY);
         caseDetails.getData().put(RESPONDENT_BARRISTER_COLLECTION, respondentBarristerCollection());
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
+            .thenReturn(buildCaseAssignedUserRolesResource(APP_SOLICITOR_POLICY));
 
-        List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails);
+        List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
 
         assertThat(barristerData, is(empty()));
     }
@@ -126,8 +135,10 @@ public class ManageBarristerServiceTest {
         List<BarristerData> respondentBarristers = respondentBarristerCollection();
         caseDetails.getData().put(CASE_ROLE, RESP_SOLICITOR_POLICY);
         caseDetails.getData().put(RESPONDENT_BARRISTER_COLLECTION, respondentBarristers);
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
+            .thenReturn(buildCaseAssignedUserRolesResource(RESP_SOLICITOR_POLICY));
 
-        List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails);
+        List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
 
         assertThat(barristerData, is(respondentBarristers));
     }
@@ -138,8 +149,10 @@ public class ManageBarristerServiceTest {
         caseDetails.getData().put(CASE_ROLE, CASEWORKER_ROLE);
         caseDetails.getData().put(MANAGE_BARRISTER_PARTY, APPLICANT);
         caseDetails.getData().put(APPLICANT_BARRISTER_COLLECTION, applicantBarristers);
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
+            .thenReturn(CaseAssignedUserRolesResource.builder().build());
 
-        List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails);
+        List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
 
         assertThat(barristerData, is(applicantBarristers));
     }
@@ -153,6 +166,8 @@ public class ManageBarristerServiceTest {
         when(caseDataService.buildFullApplicantName(any())).thenReturn(CLIENT_NAME);
         when(changeOfRepresentationService.generateRepresentationUpdateHistory(any()))
             .thenReturn(buildRepresentationUpdateHistory());
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN)).thenReturn(
+            buildCaseAssignedUserRolesResource(APP_SOLICITOR_POLICY));
 
         Map<String, Object> caseData = manageBarristerService.updateBarristerAccess(caseDetails,
             List.of(DEFAULT_BARRISTER),
@@ -182,6 +197,8 @@ public class ManageBarristerServiceTest {
     public void givenNoUserFound_whenUpdateBarristerAccess_thenThrowError() {
         caseDetails.getData().put(CASE_ROLE, APP_SOLICITOR_POLICY);
         when(barristerUpdateDifferenceCalculator.calculate(any(), any())).thenReturn(buildAddedBarristerChange());
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN)).thenReturn(
+            buildCaseAssignedUserRolesResource(APP_SOLICITOR_POLICY));
         when(organisationService.findUserByEmail(APP_BARRISTER_EMAIL_ONE, AUTH_TOKEN)).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(IllegalArgumentException.class, () ->
@@ -262,5 +279,13 @@ public class ManageBarristerServiceTest {
         assertThat(request.getBy(), is(by));
         assertThat(request.getParty(), is(party));
         assertThat(request.getClientName(), is(client));
+    }
+
+    private CaseAssignedUserRolesResource buildCaseAssignedUserRolesResource(String role) {
+        return CaseAssignedUserRolesResource.builder()
+            .caseAssignedUserRoles(List.of(CaseAssignedUserRole.builder()
+                .caseRole(role)
+                .build()))
+            .build();
     }
 }

@@ -22,6 +22,6 @@ public class Barrister {
     @JsonProperty("phoneNumber")
     private String phone;
 
-    @JsonProperty("organisation")
+    @JsonProperty("Organisation")
     private Organisation organisation;
 }

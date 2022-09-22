@@ -93,8 +93,10 @@ public class ManageBarristerAboutToSubmitHandlerTest {
     @Test
     public void givenValidData_whenHandle_thenReturnResponseWithUpdatedCaseData() {
         List<BarristerData> barristerCollection = getBarristers();
-        when(manageBarristerService.getBarristersForParty(callbackRequest.getCaseDetails())).thenReturn(barristerCollection);
-        when(manageBarristerService.getBarristersForParty(callbackRequest.getCaseDetailsBefore())).thenReturn(barristerCollection);
+        when(manageBarristerService.getBarristersForParty(callbackRequest.getCaseDetails(), AUTH_TOKEN))
+            .thenReturn(barristerCollection);
+        when(manageBarristerService.getBarristersForParty(callbackRequest.getCaseDetailsBefore(), AUTH_TOKEN))
+            .thenReturn(barristerCollection);
         List<Barrister> barristers = getBarristers().stream().map(BarristerData::getBarrister).toList();
         when(manageBarristerService.updateBarristerAccess(callbackRequest.getCaseDetails(),
             barristers, barristers, AUTH_TOKEN)).thenReturn(Map.of(REPRESENTATION_UPDATE_HISTORY, RepresentationUpdateHistory.builder().build()));
