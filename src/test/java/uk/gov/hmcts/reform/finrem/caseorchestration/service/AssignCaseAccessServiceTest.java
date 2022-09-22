@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUser
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 
 import java.util.List;
 import java.util.Set;
@@ -56,7 +55,7 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
     public static final String TEST_USER_ID = "someUserId";
     public static final String CASE_ID = "1234567890";
     private static final String CREATOR_ROLE = "[CREATOR]";
-    private static final String SOME_OTHER_ID = "otherID";
+    private static final String ORG_ID = "otherID";
     private static final String ACA_ENDPOINT = TEST_URL + "?use_user_token=true";
     private static final String TEST_S2S_TOKEN = "someS2SToken";
 
@@ -67,7 +66,6 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
     @MockBean private IdamService idamService;
     @MockBean private RestService restService;
     @MockBean private FeatureToggleService featureToggleService;
-    @MockBean private PrdOrganisationService organisationService;
     @MockBean private SystemUserService systemUserService;
 
     @ClassRule
@@ -178,7 +176,7 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
             CaseAssignmentUserRoleWithOrganisation.builder()
                 .caseDataId(CASE_ID)
                 .userId(TEST_USER_ID)
-                .organisationId(SOME_OTHER_ID)
+                .organisationId(ORG_ID)
                 .caseRole(APPLICANT_BARRISTER_ROLE)
                 .build();
 
@@ -192,12 +190,7 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .withBody(mapper.writeValueAsString(requestBody))));
 
-        when(organisationService.findUserOrganisation(AUTH_TOKEN)).thenReturn(OrganisationsResponse.builder()
-            .organisationIdentifier(SOME_OTHER_ID).build());
-
-        assignCaseAccessService.grantCaseRoleToUser(Long.parseLong(CASE_ID), TEST_USER_ID, APPLICANT_BARRISTER_ROLE, AUTH_TOKEN);
-
-        verify(organisationService).findUserOrganisation(AUTH_TOKEN);
+        assignCaseAccessService.grantCaseRoleToUser(Long.parseLong(CASE_ID), TEST_USER_ID, APPLICANT_BARRISTER_ROLE, ORG_ID);
 
         WireMock.verify(postRequestedFor(urlMatching("/case-users")));
     }
@@ -226,7 +219,7 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
             CaseAssignmentUserRole.builder()
                 .caseRole(APP_SOLICITOR_POLICY)
                 .caseDataId(TEST_CASE_ID)
-                .userId(SOME_OTHER_ID).build()
+                .userId(ORG_ID).build()
         );
 
         return CaseAssignmentUserRolesResource.builder().caseAssignmentUserRoles(roles).build();
@@ -241,7 +234,7 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
             CaseAssignmentUserRole.builder()
                 .caseRole(APP_SOLICITOR_POLICY)
                 .caseDataId(TEST_CASE_ID)
-                .userId(SOME_OTHER_ID).build()
+                .userId(ORG_ID).build()
         );
 
         return CaseAssignmentUserRolesResource.builder().caseAssignmentUserRoles(roles).build();

@@ -34,9 +34,10 @@ public class BarristerEmailValidationService {
 
         Optional<String> userId = organisationService.findUserByEmail(barrister.getEmail(), authToken);
         if (userId.isEmpty()) {
+            log.info("User id is empty");
             validationErrors.add(validationMessageForInvalidEmail(currentRepresentativeIndex, sizeOfRepresentatives));
         }
-
+        log.info("Barrister id is: {}", userId);
         return validationErrors;
     }
 

@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
@@ -68,6 +69,7 @@ public class ManageBarristerServiceTest {
         .email("someEmail")
         .build();
     private static final String CLIENT_NAME = "Client Name";
+    private static final String SOME_ORG_ID = "someOrgId";
 
     @Mock
     private BarristerUpdateDifferenceCalculator barristerUpdateDifferenceCalculator;
@@ -164,7 +166,7 @@ public class ManageBarristerServiceTest {
         assertThat(update.getParty(), is(APPLICANT));
 
         verify(assignCaseAccessService).grantCaseRoleToUser(caseDetails.getId(), BARRISTER_USER_ID,
-            APPLICANT_BARRISTER_ROLE, AUTH_TOKEN);
+            APPLICANT_BARRISTER_ROLE, SOME_ORG_ID);
         verify(changeOfRepresentationService).generateRepresentationUpdateHistory(changeOfRepresentationRequestCaptor.capture());
 
         ChangeOfRepresentationRequest representationRequest = changeOfRepresentationRequestCaptor.getValue();
@@ -230,6 +232,7 @@ public class ManageBarristerServiceTest {
         return BarristerChange.builder()
             .added(Set.of(Barrister.builder()
                     .email(APP_BARRISTER_EMAIL_ONE)
+                    .organisation(Organisation.builder().organisationID(SOME_ORG_ID).build())
                 .build()))
             .build();
     }

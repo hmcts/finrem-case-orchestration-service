@@ -46,6 +46,7 @@ public class PrdOrganisationService {
 
     public Optional<String> findUserByEmail(String email, String authToken) {
         try {
+            log.info("finding user by email {}", maskEmail(email));
             return Optional.of(organisationApi.findUserByEmail(authToken, authTokenGenerator.generate(), email).getUserIdentifier());
         } catch (FeignException.NotFound notFoundException) {
             log.info("User with email {} not found", maskEmail(email));

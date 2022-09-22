@@ -40,6 +40,8 @@ public class ManageBarristerAboutToSubmitHandler implements CallbackHandler {
             .map(BarristerData::getBarrister).toList();
         List<Barrister> barristersBeforeEvent = manageBarristerService.getBarristersForParty(caseDetailsBefore).stream()
             .map(BarristerData::getBarrister).toList();
+        log.info("Current barristers: {}", barristers.toString());
+        log.info("Original Barristers: {}", barristersBeforeEvent.toString());
 
         Map<String, Object> caseData = manageBarristerService.updateBarristerAccess(caseDetails,
             barristers,

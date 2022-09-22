@@ -58,6 +58,7 @@ public class ManageBarristerService {
     public List<BarristerData> getBarristersForParty(CaseDetails caseDetails) {
         String caseRole = getCaseRole(caseDetails);
 
+        log.info("Fetched case role with value {} for case {}", caseRole, caseDetails.getId());
         return Optional.ofNullable(getBarristerCollection(caseDetails, caseRole)).orElse(new ArrayList<>());
     }
 
@@ -65,18 +66,21 @@ public class ManageBarristerService {
                                                      List<Barrister> barristers,
                                                      List<Barrister> barristersBeforeEvent,
                                                      String authToken) {
+        log.info("About to start updating barrister access for case {}", caseDetails.getId());
         final BarristerChange barristerChange = barristerUpdateDifferenceCalculator.calculate(barristersBeforeEvent, barristers);
         final String caseRole = getBarristerCaseRole(caseDetails);
 
+        log.info("changed barristers: {}", barristerChange.toString());
         barristerChange.getAdded().forEach(userToBeAdded -> addUser(caseDetails, authToken, caseRole, userToBeAdded));
 
         return updateRepresentationUpdateHistoryForCase(caseDetails, barristerChange, authToken);
     }
 
     private void addUser(CaseDetails caseDetails, String authToken, String caseRole, Barrister userToBeAdded) {
+        String orgId = userToBeAdded.getOrganisation().getOrganisationID();
         organisationService.findUserByEmail(userToBeAdded.getEmail(), authToken)
             .ifPresentOrElse(
-                userId -> assignCaseAccessService.grantCaseRoleToUser(caseDetails.getId(), userId, caseRole, authToken),
+                userId -> assignCaseAccessService.grantCaseRoleToUser(caseDetails.getId(), userId, caseRole, orgId),
                 throwMissingUserException(userToBeAdded)
             );
     }
@@ -87,19 +91,24 @@ public class ManageBarristerService {
         barristerChange.getAdded().forEach(addedUser -> {
             RepresentationUpdateHistory representationUpdateHistory =
                 changeOfRepresentationService.generateRepresentationUpdateHistory(
-                    ChangeOfRepresentationRequest.builder()
-                        .addedRepresentative(convertToChangedRepresentative(addedUser))
-                        .by(idamService.getIdamFullName(authToken))
-                        .via(MANAGE_BARRISTERS)
-                        .clientName(getClientName(caseDetails))
-                        .party(getManageBarristerParty(caseDetails))
-                        .current(getRepresentationUpdateHistory(caseDetails))
-                        .build());
-            caseDetails.getData().put(REPRESENTATION_UPDATE_HISTORY,
-                representationUpdateHistory.getRepresentationUpdateHistory());
+                    buildChangeOfRepresentationRequest(caseDetails, authToken, addedUser));
+            caseDetails.getData().put(REPRESENTATION_UPDATE_HISTORY, representationUpdateHistory.getRepresentationUpdateHistory());
         });
 
         return caseDetails.getData();
+    }
+
+    private ChangeOfRepresentationRequest buildChangeOfRepresentationRequest(CaseDetails caseDetails,
+                                                                             String authToken,
+                                                                             Barrister addedUser) {
+        return ChangeOfRepresentationRequest.builder()
+            .addedRepresentative(convertToChangedRepresentative(addedUser))
+            .by(idamService.getIdamFullName(authToken))
+            .via(MANAGE_BARRISTERS)
+            .clientName(getClientName(caseDetails))
+            .party(getManageBarristerParty(caseDetails))
+            .current(getRepresentationUpdateHistory(caseDetails))
+            .build();
     }
 
     private String getCaseRole(CaseDetails caseDetails) {
@@ -146,7 +155,8 @@ public class ManageBarristerService {
     }
 
     private List<BarristerData> getBarristerCollection(CaseDetails caseDetails, String caseRole) {
-        return objectMapper.convertValue(caseDetails.getData().get(getBarristerCollectionKey(caseRole)), new TypeReference<>() {});
+        String barristerCollectionKey = getBarristerCollectionKey(caseRole);
+        return objectMapper.convertValue(caseDetails.getData().get(barristerCollectionKey), new TypeReference<>() {});
     }
 
     private List<Element<RepresentationUpdate>> getUpdateHistory(CaseDetails caseDetails) {

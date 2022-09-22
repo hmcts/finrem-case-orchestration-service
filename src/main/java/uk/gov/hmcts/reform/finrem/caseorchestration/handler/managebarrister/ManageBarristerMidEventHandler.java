@@ -33,6 +33,7 @@ public class ManageBarristerMidEventHandler implements CallbackHandler {
 
     @Override
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest, String userAuthorisation) {
+        log.info("In the manage barrister mid-event handler");
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         List<BarristerData> barristers = manageBarristerService.getBarristersForParty(caseDetails);
         List<String> errors = barristerEmailValidationService.validateBarristerEmails(barristers, userAuthorisation);

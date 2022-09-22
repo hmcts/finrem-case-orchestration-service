@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUser
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 
 import java.util.List;
 import java.util.Optional;
@@ -42,7 +41,6 @@ public class AssignCaseAccessService {
     private final RestService restService;
     private final CaseAssignmentApi caseAssignmentApi;
     private final AuthTokenGenerator serviceAuthTokenGenerator;
-    private final PrdOrganisationService organisationService;
     private final CaseDataApiV2 caseDataApi;
     private final SystemUserService systemUserService;
     private final FeatureToggleService featureToggleService;
@@ -77,22 +75,20 @@ public class AssignCaseAccessService {
             caseUser);
     }
 
-    public void grantCaseRoleToUser(Long caseId, String userId, String caseRole, String authToken) {
-        grantCaseAccess(caseId, Set.of(userId), caseRole, authToken);
+    public void grantCaseRoleToUser(Long caseId, String userId, String caseRole, String orgId) {
+        grantCaseAccess(caseId, Set.of(userId), caseRole, orgId);
         log.info("User {} granted {} to case {}", userId, caseRole, caseId);
     }
 
-    private void grantCaseAccess(Long caseId, Set<String> users, String caseRole, String authToken) {
+    private void grantCaseAccess(Long caseId, Set<String> users, String caseRole, String orgId) {
         try {
             final String userToken = systemUserService.getSysUserToken();
             final String serviceToken = serviceAuthTokenGenerator.generate();
 
-            final String organisationId = Optional.ofNullable(organisationService.findUserOrganisation(authToken))
-                .map(OrganisationsResponse::getOrganisationIdentifier)
-                .orElse(null);
+            log.info("about to start granting case access for users {}", users);
 
             final List<CaseAssignmentUserRoleWithOrganisation> caseAssignedRoles = users.stream()
-                .map(user -> buildCaseAssignedUserRoles(caseId, caseRole, organisationId, user))
+                .map(user -> buildCaseAssignedUserRoles(caseId, caseRole, orgId, user))
                 .toList();
 
             CaseAssignmentUserRolesRequest addCaseAssignedUserRolesRequest = CaseAssignmentUserRolesRequest.builder()
