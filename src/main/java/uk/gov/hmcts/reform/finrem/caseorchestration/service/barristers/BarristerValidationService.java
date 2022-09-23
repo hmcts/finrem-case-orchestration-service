@@ -36,9 +36,8 @@ public class BarristerValidationService {
                                                 String caseId,
                                                 String caseRole) {
         return Streams.mapWithIndex(
-            barristers.stream(),
-            (barristerData, index) ->
-                performBasicValidation(barristerData.getBarrister(), index, barristers.size(), authToken, caseId, caseRole))
+            barristers.stream(), (barristerData, index) -> performBasicValidation(
+                barristerData.getBarrister(), index, barristers.size(), authToken, caseId, caseRole))
             .flatMap(Collection::stream).toList();
     }
 
@@ -50,13 +49,16 @@ public class BarristerValidationService {
                                                 String caseRole) {
         List<String> validationErrors = newArrayList();
         Set<String> opposingRoles = caseRole.equals(APP_SOLICITOR_POLICY) ? RESPONDENT_ROLES : APPLICANT_ROLES;
+
         Optional<String> userId = organisationService.findUserByEmail(barrister.getEmail(), authToken);
+
         if (userId.isEmpty()) {
             log.info("User id is empty");
             validationErrors.add(validationMessageForInvalidEmail(currentRepresentativeIndex, sizeOfRepresentatives));
         } else {
             if (assignCaseAccessService.isLegalCounselRepresentingOpposingLitigant(userId.get(), caseId, opposingRoles)) {
-                validationErrors.add(validationMessageForAlreadyRepresentingOpposition(currentRepresentativeIndex, sizeOfRepresentatives));
+                validationErrors.add(
+                    validationMessageForAlreadyRepresentingOpposition(currentRepresentativeIndex, sizeOfRepresentatives));
             }
         }
         log.info("Barrister id is: {}", userId);

@@ -12,15 +12,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ChangeOfRepresentationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 
@@ -29,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_BARRISTER_COLLECTION;
@@ -39,6 +37,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_BARRISTER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_BARRISTER_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element.element;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -50,7 +49,6 @@ public class ManageBarristerService {
     public static final String CASEWORKER_ROLE = "[CASEWORKER]";
 
     private final BarristerUpdateDifferenceCalculator barristerUpdateDifferenceCalculator;
-    private final ChangeOfRepresentationService changeOfRepresentationService;
     private final CaseAssignedRoleService caseAssignedRoleService;
     private final AssignCaseAccessService assignCaseAccessService;
     private final PrdOrganisationService organisationService;
@@ -79,41 +77,6 @@ public class ManageBarristerService {
         return updateRepresentationUpdateHistoryForCase(caseDetails, barristerChange, authToken);
     }
 
-    private void addUser(CaseDetails caseDetails, String authToken, String caseRole, Barrister userToBeAdded) {
-        String orgId = userToBeAdded.getOrganisation().getOrganisationID();
-        organisationService.findUserByEmail(userToBeAdded.getEmail(), authToken)
-            .ifPresentOrElse(
-                userId -> assignCaseAccessService.grantCaseRoleToUser(caseDetails.getId(), userId, caseRole, orgId),
-                throwMissingUserException(userToBeAdded)
-            );
-    }
-
-    private Map<String, Object> updateRepresentationUpdateHistoryForCase(CaseDetails caseDetails,
-                                                                         BarristerChange barristerChange,
-                                                                         String authToken) {
-        barristerChange.getAdded().forEach(addedUser -> {
-            RepresentationUpdateHistory representationUpdateHistory =
-                changeOfRepresentationService.generateRepresentationUpdateHistory(
-                    buildChangeOfRepresentationRequest(caseDetails, authToken, addedUser));
-            caseDetails.getData().put(REPRESENTATION_UPDATE_HISTORY, representationUpdateHistory.getRepresentationUpdateHistory());
-        });
-
-        return caseDetails.getData();
-    }
-
-    private ChangeOfRepresentationRequest buildChangeOfRepresentationRequest(CaseDetails caseDetails,
-                                                                             String authToken,
-                                                                             Barrister addedUser) {
-        return ChangeOfRepresentationRequest.builder()
-            .addedRepresentative(convertToChangedRepresentative(addedUser))
-            .by(idamService.getIdamFullName(authToken))
-            .via(MANAGE_BARRISTERS)
-            .clientName(getClientName(caseDetails, authToken))
-            .party(getManageBarristerParty(caseDetails, authToken))
-            .current(getRepresentationUpdateHistory(caseDetails))
-            .build();
-    }
-
     public String getCaseRole(CaseDetails caseDetails, String authToken) {
         CaseAssignedUserRolesResource caseRoleResource = caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, authToken);
         String caseRole = isCaseRoleResourceNullOrEmpty(caseRoleResource)
@@ -126,6 +89,42 @@ public class ManageBarristerService {
         }
 
         return caseRole;
+    }
+
+    private void addUser(CaseDetails caseDetails, String authToken, String caseRole, Barrister userToBeAdded) {
+        String orgId = userToBeAdded.getOrganisation().getOrganisationID();
+        organisationService.findUserByEmail(userToBeAdded.getEmail(), authToken)
+            .ifPresentOrElse(
+                userId -> assignCaseAccessService.grantCaseRoleToUser(caseDetails.getId(), userId, caseRole, orgId),
+                throwMissingUserException(userToBeAdded)
+            );
+    }
+
+    private Map<String, Object> updateRepresentationUpdateHistoryForCase(CaseDetails caseDetails,
+                                                                         BarristerChange barristerChange,
+                                                                         String authToken) {
+        List<Element<RepresentationUpdate>> representationUpdateHistory = getRepresentationUpdateHistory(caseDetails);
+
+        barristerChange.getAdded().forEach(addedUser -> representationUpdateHistory.add(
+            element(UUID.randomUUID(), buildRepresentationUpdate(caseDetails, authToken, addedUser, null)))
+        );
+
+        caseDetails.getData().put(REPRESENTATION_UPDATE_HISTORY, representationUpdateHistory);
+        return caseDetails.getData();
+    }
+
+    private RepresentationUpdate buildRepresentationUpdate(CaseDetails caseDetails,
+                                                           String authToken,
+                                                           Barrister addedUser,
+                                                           Barrister removedUser) {
+        return RepresentationUpdate.builder()
+            .added(convertToChangedRepresentative(addedUser))
+            .removed(convertToChangedRepresentative(removedUser))
+            .by(idamService.getIdamFullName(authToken))
+            .via(MANAGE_BARRISTERS)
+            .clientName(getClientName(caseDetails, authToken))
+            .party(getManageBarristerParty(caseDetails, authToken))
+            .build();
     }
 
     private boolean isCaseRoleResourceNullOrEmpty(CaseAssignedUserRolesResource caseRoleResource) {
@@ -141,16 +140,13 @@ public class ManageBarristerService {
     }
 
     private ChangedRepresentative convertToChangedRepresentative(Barrister barrister) {
+        if (barrister == null) {
+            return null;
+        }
         return ChangedRepresentative.builder()
             .name(barrister.getName())
             .email(barrister.getEmail())
             .organisation(barrister.getOrganisation())
-            .build();
-    }
-
-    private RepresentationUpdateHistory getRepresentationUpdateHistory(CaseDetails caseDetails) {
-        return RepresentationUpdateHistory.builder()
-            .representationUpdateHistory(Optional.ofNullable(getUpdateHistory(caseDetails)).orElse(new ArrayList<>()))
             .build();
     }
 
@@ -167,6 +163,10 @@ public class ManageBarristerService {
     private List<BarristerData> getBarristerCollection(CaseDetails caseDetails, String caseRole) {
         String barristerCollectionKey = getBarristerCollectionKey(caseRole);
         return objectMapper.convertValue(caseDetails.getData().get(barristerCollectionKey), new TypeReference<>() {});
+    }
+
+    private List<Element<RepresentationUpdate>> getRepresentationUpdateHistory(CaseDetails caseDetails) {
+        return Optional.ofNullable(getUpdateHistory(caseDetails)).orElse(new ArrayList<>());
     }
 
     private List<Element<RepresentationUpdate>> getUpdateHistory(CaseDetails caseDetails) {

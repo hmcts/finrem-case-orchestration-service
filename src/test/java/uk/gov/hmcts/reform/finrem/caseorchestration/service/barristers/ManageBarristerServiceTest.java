@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -18,16 +16,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ChangeOfRepresentationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 
@@ -54,7 +48,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REPRESENTATION_UPDATE_HISTORY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_BARRISTER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element.element;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdServiceTest.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService.MANAGE_BARRISTERS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService.MANAGE_BARRISTER_PARTY;
@@ -77,8 +70,6 @@ public class ManageBarristerServiceTest {
     @Mock
     private BarristerUpdateDifferenceCalculator barristerUpdateDifferenceCalculator;
     @Mock
-    private ChangeOfRepresentationService changeOfRepresentationService;
-    @Mock
     private AssignCaseAccessService assignCaseAccessService;
     @Mock
     private PrdOrganisationService organisationService;
@@ -93,9 +84,6 @@ public class ManageBarristerServiceTest {
 
     @InjectMocks
     ManageBarristerService manageBarristerService;
-
-    @Captor
-    ArgumentCaptor<ChangeOfRepresentationRequest> changeOfRepresentationRequestCaptor;
 
     private CaseDetails caseDetails;
 
@@ -164,10 +152,8 @@ public class ManageBarristerServiceTest {
         when(organisationService.findUserByEmail(APP_BARRISTER_EMAIL_ONE, AUTH_TOKEN)).thenReturn(Optional.of(BARRISTER_USER_ID));
         when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn(APP_SOLICITOR);
         when(caseDataService.buildFullApplicantName(any())).thenReturn(CLIENT_NAME);
-        when(changeOfRepresentationService.generateRepresentationUpdateHistory(any()))
-            .thenReturn(buildRepresentationUpdateHistory());
-        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN)).thenReturn(
-            buildCaseAssignedUserRolesResource(APP_SOLICITOR_POLICY));
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
+            .thenReturn(buildCaseAssignedUserRolesResource(APP_SOLICITOR_POLICY));
 
         Map<String, Object> caseData = manageBarristerService.updateBarristerAccess(caseDetails,
             List.of(DEFAULT_BARRISTER),
@@ -179,18 +165,11 @@ public class ManageBarristerServiceTest {
         assertThat(update.getBy(), is(APP_SOLICITOR));
         assertThat(update.getAdded().getEmail(), is(APP_BARRISTER_EMAIL_ONE));
         assertThat(update.getParty(), is(APPLICANT));
+        assertThat(update.getVia(), is(MANAGE_BARRISTERS));
+        assertThat(update.getClientName(), is(CLIENT_NAME));
 
         verify(assignCaseAccessService).grantCaseRoleToUser(caseDetails.getId(), BARRISTER_USER_ID,
             APPLICANT_BARRISTER_ROLE, SOME_ORG_ID);
-        verify(changeOfRepresentationService).generateRepresentationUpdateHistory(changeOfRepresentationRequestCaptor.capture());
-
-        ChangeOfRepresentationRequest representationRequest = changeOfRepresentationRequestCaptor.getValue();
-
-        assertChangeOfRepresentationRequest(representationRequest,
-            APP_BARRISTER_EMAIL_ONE,
-            APP_SOLICITOR,
-            APPLICANT,
-            CLIENT_NAME);
     }
 
     @Test
@@ -252,33 +231,6 @@ public class ManageBarristerServiceTest {
                     .organisation(Organisation.builder().organisationID(SOME_ORG_ID).build())
                 .build()))
             .build();
-    }
-
-    private RepresentationUpdateHistory buildRepresentationUpdateHistory() {
-        return RepresentationUpdateHistory.builder()
-            .representationUpdateHistory(List.of(element(UUID.randomUUID(),
-                RepresentationUpdate.builder()
-                    .added(ChangedRepresentative.builder()
-                        .email(APP_BARRISTER_EMAIL_ONE)
-                        .build())
-                    .by(APP_SOLICITOR)
-                    .via(MANAGE_BARRISTERS)
-                    .party(APPLICANT)
-                    .clientName("The Applicant")
-                    .build()
-            )))
-            .build();
-    }
-
-    private void assertChangeOfRepresentationRequest(ChangeOfRepresentationRequest request,
-                                                     String email,
-                                                     String by,
-                                                     String party,
-                                                     String client) {
-        assertThat(request.getAddedRepresentative().getEmail(), is(email));
-        assertThat(request.getBy(), is(by));
-        assertThat(request.getParty(), is(party));
-        assertThat(request.getClientName(), is(client));
     }
 
     private CaseAssignedUserRolesResource buildCaseAssignedUserRolesResource(String role) {
