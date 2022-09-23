@@ -11,8 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerEmailValidationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerValidationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 
 import java.util.List;
@@ -23,8 +22,7 @@ import java.util.List;
 public class ManageBarristerMidEventHandler implements CallbackHandler {
 
     private final ManageBarristerService manageBarristerService;
-    private final BarristerEmailValidationService barristerEmailValidationService;
-    private final CaseAssignedRoleService caseAssignedRoleService;
+    private final BarristerValidationService barristerValidationService;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -38,7 +36,9 @@ public class ManageBarristerMidEventHandler implements CallbackHandler {
         log.info("In the manage barrister mid-event handler");
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         List<BarristerData> barristers = manageBarristerService.getBarristersForParty(caseDetails, userAuthorisation);
-        List<String> errors = barristerEmailValidationService.validateBarristerEmails(barristers, userAuthorisation);
+        String caseRole = manageBarristerService.getCaseRole(caseDetails, userAuthorisation);
+        List<String> errors = barristerValidationService.validateBarristerEmails(barristers,
+            userAuthorisation, caseDetails.getId().toString(), caseRole);
 
         if (!errors.isEmpty()) {
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).errors(errors).build();

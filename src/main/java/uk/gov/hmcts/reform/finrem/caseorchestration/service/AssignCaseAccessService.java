@@ -82,11 +82,7 @@ public class AssignCaseAccessService {
 
     private void grantCaseAccess(Long caseId, Set<String> users, String caseRole, String orgId) {
         try {
-            final String userToken = systemUserService.getSysUserToken();
-            final String serviceToken = serviceAuthTokenGenerator.generate();
-
             log.info("about to start granting case access for users {}", users);
-
             final List<CaseAssignmentUserRoleWithOrganisation> caseAssignedRoles = users.stream()
                 .map(user -> buildCaseAssignedUserRoles(caseId, caseRole, orgId, user))
                 .toList();
@@ -95,7 +91,8 @@ public class AssignCaseAccessService {
                     .caseAssignmentUserRolesWithOrganisation(caseAssignedRoles)
                     .build();
 
-            caseDataApi.addCaseUserRoles(userToken, serviceToken, addCaseAssignedUserRolesRequest);
+            caseDataApi.addCaseUserRoles(systemUserService.getSysUserToken(), serviceAuthTokenGenerator.generate(),
+                addCaseAssignedUserRolesRequest);
         } catch (FeignException ex) {
             log.error("Could not assign the users to the case", ex);
             throw new GrantCaseAccessException(caseId, users, caseRole);
@@ -138,6 +135,18 @@ public class AssignCaseAccessService {
         }
 
         return revokeCreatorRole(caseDetails, userToRemove.get().getUserId());
+    }
+
+    public boolean isLegalCounselRepresentingOpposingLitigant(String userId,
+                                                              String caseId,
+                                                              Set<String> opposingCaseRoles) {
+        List<CaseAssignmentUserRole> allRoles = getUserRoles(caseId).getCaseAssignmentUserRoles();
+
+        final Predicate<CaseAssignmentUserRole> barristerIsRepresentingOpposingLitigant = role ->
+            opposingCaseRoles.stream().anyMatch(opposingRole -> opposingRole.equals(role.getCaseRole()))
+                && role.getUserId().equals(userId);
+
+        return allRoles.stream().anyMatch(barristerIsRepresentingOpposingLitigant);
     }
 
     private CaseAssignmentUserRolesResource getUserRoles(String caseId) {

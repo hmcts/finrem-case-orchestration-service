@@ -114,7 +114,7 @@ public class ManageBarristerService {
             .build();
     }
 
-    private String getCaseRole(CaseDetails caseDetails, String authToken) {
+    public String getCaseRole(CaseDetails caseDetails, String authToken) {
         CaseAssignedUserRolesResource caseRoleResource = caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, authToken);
         String caseRole = isCaseRoleResourceNullOrEmpty(caseRoleResource)
             ? CASEWORKER_ROLE

@@ -15,7 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerEmailValidationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerValidationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 
 import java.util.ArrayList;
@@ -28,6 +28,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdServiceTest.AUTH_TOKEN;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -38,7 +39,7 @@ public class ManageBarristerMidEventHandlerTest {
     @Mock
     private ManageBarristerService manageBarristerService;
     @Mock
-    private BarristerEmailValidationService barristerEmailValidationService;
+    private BarristerValidationService barristerValidationService;
     @InjectMocks
     private ManageBarristerMidEventHandler manageBarristerMidEventHandler;
 
@@ -92,7 +93,8 @@ public class ManageBarristerMidEventHandlerTest {
     public void givenBarristerEmailsAreValid_whenHandle_thenReturnResponseWithNoErrors() {
         when(manageBarristerService.getBarristersForParty(callbackRequest.getCaseDetails(), AUTH_TOKEN))
             .thenReturn(getBarristerData());
-        when(barristerEmailValidationService.validateBarristerEmails(getBarristerData(), AUTH_TOKEN))
+        when(manageBarristerService.getCaseRole(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(APP_SOLICITOR_POLICY);
+        when(barristerValidationService.validateBarristerEmails(getBarristerData(), AUTH_TOKEN, CASE_ID, APP_SOLICITOR_POLICY))
             .thenReturn(new ArrayList<>());
 
         AboutToStartOrSubmitCallbackResponse response = manageBarristerMidEventHandler.handle(callbackRequest, AUTH_TOKEN);
@@ -104,7 +106,8 @@ public class ManageBarristerMidEventHandlerTest {
     public void givenBarristerEmailsAreInvalid_whenHandle_thenReturnResponseWithErrors() {
         when(manageBarristerService.getBarristersForParty(callbackRequest.getCaseDetails(), AUTH_TOKEN))
             .thenReturn(getBarristerData());
-        when(barristerEmailValidationService.validateBarristerEmails(getBarristerData(), AUTH_TOKEN))
+        when(manageBarristerService.getCaseRole(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(APP_SOLICITOR_POLICY);
+        when(barristerValidationService.validateBarristerEmails(getBarristerData(), AUTH_TOKEN, CASE_ID, APP_SOLICITOR_POLICY))
             .thenReturn(List.of("Validation Error"));
 
         AboutToStartOrSubmitCallbackResponse response = manageBarristerMidEventHandler.handle(callbackRequest, AUTH_TOKEN);
