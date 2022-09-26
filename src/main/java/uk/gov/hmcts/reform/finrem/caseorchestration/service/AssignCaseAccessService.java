@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -27,6 +28,8 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.config.CacheConfiguration.REQUEST_SCOPED_CACHE_MANAGER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.config.CacheConfiguration.USER_ROLES_CACHE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 
 @Service
@@ -140,15 +143,16 @@ public class AssignCaseAccessService {
     public boolean isLegalCounselRepresentingOpposingLitigant(String userId,
                                                               String caseId,
                                                               Set<String> opposingCaseRoles) {
-        List<CaseAssignmentUserRole> allRoles = getUserRoles(caseId).getCaseAssignmentUserRoles();
+        final List<CaseAssignmentUserRole> allRoleAssignments = getUserRoles(caseId).getCaseAssignmentUserRoles();
 
-        final Predicate<CaseAssignmentUserRole> barristerIsRepresentingOpposingLitigant = role ->
-            opposingCaseRoles.stream().anyMatch(opposingRole -> opposingRole.equals(role.getCaseRole()))
-                && role.getUserId().equals(userId);
+        final Predicate<CaseAssignmentUserRole> isBarristerRepresentingOpposingLitigant = roleAssignment ->
+            opposingCaseRoles.stream().anyMatch(opposingRole -> opposingRole.equals(roleAssignment.getCaseRole()))
+                && roleAssignment.getUserId().equals(userId);
 
-        return allRoles.stream().anyMatch(barristerIsRepresentingOpposingLitigant);
+        return allRoleAssignments.stream().anyMatch(isBarristerRepresentingOpposingLitigant);
     }
 
+    @Cacheable(cacheManager = REQUEST_SCOPED_CACHE_MANAGER, cacheNames = USER_ROLES_CACHE)
     private CaseAssignmentUserRolesResource getUserRoles(String caseId) {
         return caseDataApi.getUserRoles(
             systemUserService.getSysUserToken(),
@@ -175,10 +179,8 @@ public class AssignCaseAccessService {
 
     private CaseAssignmentUserRolesResponse revokeCreatorRole(CaseDetails caseDetails, String userId) {
 
-        CaseAssignmentUserRolesRequest revokeAccessRequest = CaseAssignmentUserRolesRequest
-            .builder()
-            .caseAssignmentUserRolesWithOrganisation(buildRevokeAccessRequest(caseDetails, userId))
-            .build();
+        CaseAssignmentUserRolesRequest revokeAccessRequest = CaseAssignmentUserRolesRequest.builder()
+            .caseAssignmentUserRolesWithOrganisation(buildRevokeAccessRequest(caseDetails, userId)).build();
 
         CaseAssignmentUserRolesResponse response = caseDataApi.removeCaseUserRoles(
             systemUserService.getSysUserToken(),

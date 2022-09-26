@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchUserException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.BarristerUpdateDifferenceCalculator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
@@ -180,7 +181,7 @@ public class ManageBarristerServiceTest {
             buildCaseAssignedUserRolesResource(APP_SOLICITOR_POLICY));
         when(organisationService.findUserByEmail(APP_BARRISTER_EMAIL_ONE, AUTH_TOKEN)).thenReturn(Optional.empty());
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () ->
+        Exception exception = assertThrows(NoSuchUserException.class, () ->
             manageBarristerService.updateBarristerAccess(caseDetails,
                 List.of(DEFAULT_BARRISTER),
                 List.of(DEFAULT_BARRISTER), AUTH_TOKEN));

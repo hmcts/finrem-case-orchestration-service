@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchUserException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.BarristerUpdateDifferenceCalculator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
@@ -96,7 +97,7 @@ public class ManageBarristerService {
         organisationService.findUserByEmail(userToBeAdded.getEmail(), authToken)
             .ifPresentOrElse(
                 userId -> assignCaseAccessService.grantCaseRoleToUser(caseDetails.getId(), userId, caseRole, orgId),
-                throwMissingUserException(userToBeAdded)
+                throwNoSuchUserException(userToBeAdded)
             );
     }
 
@@ -173,9 +174,9 @@ public class ManageBarristerService {
         return objectMapper.convertValue(caseDetails.getData().get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {});
     }
 
-    private Runnable throwMissingUserException(Barrister userToBeAdded) {
+    private Runnable throwNoSuchUserException(Barrister userToBeAdded) {
         return () -> {
-            throw new IllegalArgumentException(String.format("Could not find the user with email %s",
+            throw new NoSuchUserException(String.format("Could not find the user with email %s",
                 userToBeAdded.getEmail()));
         };
     }
