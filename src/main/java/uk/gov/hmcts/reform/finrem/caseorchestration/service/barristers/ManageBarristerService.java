@@ -82,20 +82,17 @@ public class ManageBarristerService {
         return updateRepresentationUpdateHistoryForCase(caseDetails, barristerChange, authToken);
     }
 
-    public Map<String, Object> notifyBarristerAccess(CaseDetails caseDetails,
+    public void notifyBarristerAccess(CaseDetails caseDetails,
                                                      List<Barrister> barristers,
                                                      List<Barrister> barristersBeforeEvent,
                                                      String authToken) {
-        log.info("About to start updating barrister access for case {}", caseDetails.getId());
-        final String caseRole = getBarristerCaseRole(caseDetails, authToken);
 
         BarristerChange barristerChange = barristerUpdateDifferenceCalculator.calculate(barristers, barristersBeforeEvent);
-        List<Barrister> addedBarristers = new ArrayList<>(barristerChange.getAdded());
-        List<Barrister> removedBarristers = new ArrayList<>(barristerChange.getRemoved());
+        List<Barrister> addedBarristers = barristerChange.getAdded().stream().toList();
+        List<Barrister> removedBarristers = barristerChange.getRemoved().stream().toList();
 
-        addedBarristers.forEach(barrister -> notificationService.sendBarristerAddedEmail(NotificationRequest.builder().build()));
+        addedBarristers.forEach(barrister -> notificationService.sendBarristerAddedEmail(caseDetails, barrister));
 
-        return updateRepresentationUpdateHistoryForCase(caseDetails, barristerChange, authToken);
     }
 
     private void addUser(CaseDetails caseDetails, String authToken, String caseRole, Barrister userToBeAdded) {

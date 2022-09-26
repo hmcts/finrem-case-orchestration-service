@@ -389,8 +389,9 @@ public class NotificationService {
         sendNotificationEmail(notificationRequest, uri);
     }
 
-    public void sendBarristerAddedEmail(NotificationRequest notificationRequest) {
+    public void sendBarristerAddedEmail(CaseDetails caseDetails, Barrister barrister) {
         URI uri = buildUri(notificationServiceConfiguration.getAddedBarrister());
+        NotificationRequest notificationRequest = notificationRequestMapper.buildNotificationRequest(caseDetails, barrister);
         sendNotificationEmail(notificationRequest, uri);
     }
 

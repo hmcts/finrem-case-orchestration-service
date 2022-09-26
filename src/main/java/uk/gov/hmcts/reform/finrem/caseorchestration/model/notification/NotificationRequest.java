@@ -41,4 +41,7 @@ public class NotificationRequest {
     private String applicantName;
     @JsonProperty("respondentName")
     private String respondentName;
+    @JsonProperty("BarristerReferenceNumber")
+    private String barristerReferenceNumber;
+
 }
