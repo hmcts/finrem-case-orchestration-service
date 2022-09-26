@@ -17,11 +17,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentat
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ChangeOfRepresentationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 
 import java.util.ArrayList;
@@ -54,6 +56,7 @@ public class ManageBarristerService {
     private final CaseAssignedRoleService caseAssignedRoleService;
     private final AssignCaseAccessService assignCaseAccessService;
     private final PrdOrganisationService organisationService;
+    private final NotificationService notificationService;
     private final IdamService idamService;
     private final CaseDataService caseDataService;
     private final ObjectMapper objectMapper;
@@ -75,6 +78,22 @@ public class ManageBarristerService {
 
         log.info("changed barristers: {}", barristerChange.toString());
         barristerChange.getAdded().forEach(userToBeAdded -> addUser(caseDetails, authToken, caseRole, userToBeAdded));
+
+        return updateRepresentationUpdateHistoryForCase(caseDetails, barristerChange, authToken);
+    }
+
+    public Map<String, Object> notifyBarristerAccess(CaseDetails caseDetails,
+                                                     List<Barrister> barristers,
+                                                     List<Barrister> barristersBeforeEvent,
+                                                     String authToken) {
+        log.info("About to start updating barrister access for case {}", caseDetails.getId());
+        final String caseRole = getBarristerCaseRole(caseDetails, authToken);
+
+        BarristerChange barristerChange = barristerUpdateDifferenceCalculator.calculate(barristers, barristersBeforeEvent);
+        List<Barrister> addedBarristers = new ArrayList<>(barristerChange.getAdded());
+        List<Barrister> removedBarristers = new ArrayList<>(barristerChange.getRemoved());
+
+        addedBarristers.forEach(barrister -> notificationService.sendBarristerAddedEmail(NotificationRequest.builder().build()));
 
         return updateRepresentationUpdateHistoryForCase(caseDetails, barristerChange, authToken);
     }

@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.BarristerUpdateDifferenceCalculator;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
@@ -17,8 +16,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -26,8 +25,6 @@ import java.util.List;
 public class ManageBarristerSubmittedHandler implements CallbackHandler {
 
     ManageBarristerService manageBarristerService;
-    BarristerUpdateDifferenceCalculator barristerUpdateDifferenceCalculator;
-    NotificationService notificationService;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -52,13 +49,12 @@ public class ManageBarristerSubmittedHandler implements CallbackHandler {
         log.info("Current barristers: {}", barristers.toString());
         log.info("Original Barristers: {}", barristersBeforeEvent.toString());
 
-        BarristerChange barristerChange = barristerUpdateDifferenceCalculator.calculate(barristers, barristersBeforeEvent);
-        //iterate through barrister change lists calling send email from notification service
-        List<Barrister> addedBarristers = new ArrayList<>(barristerChange.getAdded());
-        for(int x = 0; x <= addedBarristers.size(); x++) {
-            notificationService.sendBarristerAddedEmail();
-        }
 
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build();
+        Map<String, Object> caseData = manageBarristerService.notifyBarristerAccess(caseDetails,
+            barristers,
+            barristersBeforeEvent,
+            userAuthorisation);
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
     }
 }
