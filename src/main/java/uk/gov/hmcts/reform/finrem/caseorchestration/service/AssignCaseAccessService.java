@@ -153,7 +153,7 @@ public class AssignCaseAccessService {
     }
 
     @Cacheable(cacheManager = REQUEST_SCOPED_CACHE_MANAGER, cacheNames = USER_ROLES_CACHE)
-    private CaseAssignmentUserRolesResource getUserRoles(String caseId) {
+    public CaseAssignmentUserRolesResource getUserRoles(String caseId) {
         return caseDataApi.getUserRoles(
             systemUserService.getSysUserToken(),
             serviceAuthTokenGenerator.generate(),
