@@ -22,7 +22,7 @@ public class CacheConfiguration {
     public static final String USER_ROLES_CACHE = "userRolesCache";
 
     @Bean
-    @Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
+    @Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
     public CacheManager requestScopeCacheManager() {
         final SimpleCacheManager simpleCacheManager = new SimpleCacheManager();
         simpleCacheManager.setCaches(List.of(
