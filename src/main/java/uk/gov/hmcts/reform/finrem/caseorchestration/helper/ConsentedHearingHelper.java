@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataWrapper;
 
 import java.util.ArrayList;
@@ -44,10 +43,6 @@ public class ConsentedHearingHelper {
     public Map<String, Object> convertToMap(Object object) {
         return objectMapper.convertValue(object, new TypeReference<>() {
         });
-    }
-
-    public CaseDocument convertToCaseDocument(Object object) {
-        return objectMapper.convertValue(object, CaseDocument.class);
     }
 
     public boolean isPaperApplication(Map<String, Object> caseData) {

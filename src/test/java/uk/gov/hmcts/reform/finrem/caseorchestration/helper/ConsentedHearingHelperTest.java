@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
 import java.util.HashMap;
 import java.util.List;
@@ -47,7 +45,7 @@ public class ConsentedHearingHelperTest {
     }
 
     @Test
-    public void givenConsentCase_whenAllConditionNotSatisfied_thenReturnFalse() {
+    public void givenConsentCase_whenAllConditionNotSatisfied_thenReturnFalse_1() {
         CallbackRequest callbackRequest =  callbackRequest();
         Map<String, Object> data = callbackRequest.getCaseDetails().getData();
         data.put(PAPER_APPLICATION, YES_VALUE);
@@ -60,17 +58,43 @@ public class ConsentedHearingHelperTest {
     }
 
     @Test
-    public void givenConsentCase_whenCallToCovertToCaseDocument_thenReturnCaseDocument() {
+    public void givenConsentCase_whenAllConditionNotSatisfied_thenReturnFalse_2() {
         CallbackRequest callbackRequest =  callbackRequest();
         Map<String, Object> data = callbackRequest.getCaseDetails().getData();
-        data.put("HearingNotice", TestSetUpUtils.caseDocument());
-
+        data.put(PAPER_APPLICATION, NO_VALUE);
+        data.put(CONTESTED_RESPONDENT_REPRESENTED, NO_VALUE);
+        data.put(RESP_SOLICITOR_EMAIL, "test@test.com");
+        data.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, YES_VALUE);
 
         ConsentedHearingHelper helper = new ConsentedHearingHelper(mapper);
-        CaseDocument caseDocument = helper.convertToCaseDocument(data.get("HearingNotice"));
-        TestSetUpUtils.assertCaseDocument(caseDocument);
+        assertFalse(helper.isRespondentSolicitorAgreeToReceiveEmails(data));
     }
 
+    @Test
+    public void givenConsentCase_whenAllConditionNotSatisfied_thenReturnFalse_3() {
+        CallbackRequest callbackRequest =  callbackRequest();
+        Map<String, Object> data = callbackRequest.getCaseDetails().getData();
+        data.put(PAPER_APPLICATION, NO_VALUE);
+        data.put(CONTESTED_RESPONDENT_REPRESENTED, YES_VALUE);
+        data.put(RESP_SOLICITOR_EMAIL, "test@test.com");
+        data.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, NO_VALUE);
+
+        ConsentedHearingHelper helper = new ConsentedHearingHelper(mapper);
+        assertFalse(helper.isRespondentSolicitorAgreeToReceiveEmails(data));
+    }
+
+    @Test
+    public void givenConsentCase_whenAllConditionNotSatisfied_thenReturnFalse_4() {
+        CallbackRequest callbackRequest =  callbackRequest();
+        Map<String, Object> data = callbackRequest.getCaseDetails().getData();
+        data.put(PAPER_APPLICATION, NO_VALUE);
+        data.put(CONTESTED_RESPONDENT_REPRESENTED, YES_VALUE);
+        data.put(RESP_SOLICITOR_EMAIL, "");
+        data.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, NO_VALUE);
+
+        ConsentedHearingHelper helper = new ConsentedHearingHelper(mapper);
+        assertFalse(helper.isRespondentSolicitorAgreeToReceiveEmails(data));
+    }
 
     private CallbackRequest callbackRequest() {
         return CallbackRequest
