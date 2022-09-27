@@ -125,7 +125,7 @@
             "northWalesCourtList": null,
             "nottinghamCourtList": "FR_s_NottinghamList_1",
             "nwyorkshireCourtList": null,
-            "promptForAnyDocument": "No",
+            "promptForAnyDocument": "Yes",
             "bedfordshireCourtList": null,
             "thamesvalleyCourtList": null,
             "uploadAdditionalDocument": null,
