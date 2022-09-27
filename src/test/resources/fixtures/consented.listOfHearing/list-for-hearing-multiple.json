@@ -1,0 +1,258 @@
+{
+  "token": "test_token",
+  "event_id": "FR_listForHearing",
+  "case_details": {
+    "id": "12345678",
+    "jurisdiction": "divorce",
+    "state": "created",
+    "case_type_id": "FinancialRemedyMVP2",
+    "case_data": {
+      "isAdmin": "Yes",
+      "d81Joint": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/8543f9c5-1986-42c3-be4d-c3031b6bf967",
+        "document_filename": "generalOrder.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/8543f9c5-1986-42c3-be4d-c3031b6bf967/binary"
+      },
+      "issueDate": "2022-09-26",
+      "miniFormA": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/27076073-40cd-4ebb-b0b6-b051a7a94325",
+        "document_filename": "OnlineForm.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/27076073-40cd-4ebb-b0b6-b051a7a94325/binary"
+      },
+      "regionList": "london",
+      "d81Question": "Yes",
+      "consentOrder": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/41fadeed-4980-4a37-a9d5-a20f9ea18337",
+        "document_filename": "generalOrder.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/41fadeed-4980-4a37-a9d5-a20f9ea18337/binary"
+      },
+      "d81Applicant": null,
+      "walesFRCList": null,
+      "d81Respondent": null,
+      "londonFRCList": "london",
+      "otherDocLabel": null,
+      "solicitorFirm": null,
+      "solicitorName": null,
+      "applicantEmail": null,
+      "applicantLName": "Porter",
+      "applicantPhone": null,
+      "devonCourtList": null,
+      "rSolicitorFirm": null,
+      "rSolicitorName": null,
+      "solicitorEmail": null,
+      "solicitorPhone": null,
+      "applicantFMName": "Austin Bates",
+      "assignedToJudge": "new_application@mailinator.com",
+      "dorsetCourtList": null,
+      "humberCourtList": null,
+      "listForHearings": [
+        {
+          "id": "1f7e210d-87d8-4e98-8c48-db15d1dc0d14",
+          "value": {
+            "regionList": "northwest",
+            "hearingDate": "2012-05-19",
+            "hearingTime": "1400",
+            "hearingType": "Directions (DIR)",
+            "cfcCourtList": null,
+            "walesFRCList": null,
+            "hearingNotice": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/955581be-f8eb-468c-95d2-f5f95f0a8a36",
+              "document_filename": "HearingNotice.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/955581be-f8eb-468c-95d2-f5f95f0a8a36/binary"
+            },
+            "londonFRCList": null,
+            "devonCourtList": null,
+            "dorsetCourtList": null,
+            "humberCourtList": null,
+            "midlandsFRCList": null,
+            "bristolCourtList": null,
+            "newportCourtList": null,
+            "northEastFRCList": null,
+            "northWestFRCList": "liverpool",
+            "southEastFRCList": null,
+            "southWestFRCList": null,
+            "swanseaCourtList": null,
+            "clevelandCourtList": null,
+            "liverpoolCourtList": "FR_liverpool_hc_list_2",
+            "birminghamCourtList": null,
+            "hearingTimeEstimate": "5 days",
+            "kentSurreyCourtList": null,
+            "lancashireCourtList": null,
+            "manchesterCourtList": null,
+            "northWalesCourtList": null,
+            "nottinghamCourtList": null,
+            "nwyorkshireCourtList": null,
+            "promptForAnyDocument": "No",
+            "bedfordshireCourtList": null,
+            "thamesvalleyCourtList": null,
+            "uploadAdditionalDocument": null,
+            "additionalInformationAboutHearing": "this is first hearing"
+          }
+        },
+        {
+          "id": "39125540-bf98-4acf-b354-33fd03a6978e",
+          "value": {
+            "regionList": "midlands",
+            "hearingDate": "2023-12-10",
+            "hearingTime": "14:00",
+            "hearingType": "First Directions Appointment (FDA)",
+            "cfcCourtList": null,
+            "walesFRCList": null,
+            "hearingNotice": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/7be03183-3078-4237-bce4-54da286e4852",
+              "document_filename": "HearingNotice.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/7be03183-3078-4237-bce4-54da286e4852/binary"
+            },
+            "londonFRCList": null,
+            "devonCourtList": null,
+            "dorsetCourtList": null,
+            "humberCourtList": null,
+            "midlandsFRCList": "nottingham",
+            "bristolCourtList": null,
+            "newportCourtList": null,
+            "northEastFRCList": null,
+            "northWestFRCList": null,
+            "southEastFRCList": null,
+            "southWestFRCList": null,
+            "swanseaCourtList": null,
+            "clevelandCourtList": null,
+            "liverpoolCourtList": null,
+            "birminghamCourtList": null,
+            "hearingTimeEstimate": "5 Days",
+            "kentSurreyCourtList": null,
+            "lancashireCourtList": null,
+            "manchesterCourtList": null,
+            "northWalesCourtList": null,
+            "nottinghamCourtList": "FR_s_NottinghamList_1",
+            "nwyorkshireCourtList": null,
+            "promptForAnyDocument": "No",
+            "bedfordshireCourtList": null,
+            "thamesvalleyCourtList": null,
+            "uploadAdditionalDocument": null,
+            "additionalInformationAboutHearing": "This is second hearing"
+          }
+        }
+      ],
+      "londonCourtList": "FR_londonList_9",
+      "midlandsFRCList": null,
+      "otherCollection": [],
+      "rSolicitorEmail": null,
+      "rSolicitorPhone": null,
+      "respondentEmail": null,
+      "respondentPhone": null,
+      "appRespondentRep": "No",
+      "applicantAddress": {
+        "County": "",
+        "Country": "United Kingdom",
+        "PostCode": "SW11 1PD",
+        "PostTown": "London",
+        "AddressLine1": "1 Rse Way",
+        "AddressLine2": "",
+        "AddressLine3": ""
+      },
+      "bristolCourtList": null,
+      "civilPartnership": "No",
+      "copyOfPaperFormA": [
+        {
+          "id": "90eec231-b74b-4da9-a751-7dc4ce93a90f",
+          "value": {
+            "typeOfDocument": "Copy of paper form A",
+            "uploadedDocument": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/438607e4-42b3-4ac0-8138-b00da8ca833d",
+              "document_filename": "generalOrder.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/438607e4-42b3-4ac0-8138-b00da8ca833d/binary"
+            }
+          }
+        }
+      ],
+      "newportCourtList": null,
+      "northEastFRCList": null,
+      "northWestFRCList": null,
+      "referToJudgeDate": "2022-09-26",
+      "referToJudgeText": "consent for approval",
+      "solicitorAddress": {},
+      "southEastFRCList": null,
+      "southWestFRCList": null,
+      "swanseaCourtList": null,
+      "divorceCaseNumber": "EM18D84321",
+      "rSolicitorAddress": {},
+      "respondentAddress": {
+        "County": "",
+        "Country": "United Kingdom",
+        "PostCode": "SW11 1PD",
+        "PostTown": "London",
+        "AddressLine1": "1 Rse Way",
+        "AddressLine2": "",
+        "AddressLine3": ""
+      },
+      "solicitorDXnumber": null,
+      "appRespondentLName": "Mcbride",
+      "clevelandCourtList": null,
+      "latestConsentOrder": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/41fadeed-4980-4a37-a9d5-a20f9ea18337",
+        "document_filename": "generalOrder.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/41fadeed-4980-4a37-a9d5-a20f9ea18337/binary"
+      },
+      "liverpoolCourtList": null,
+      "rSolicitorDXnumber": null,
+      "solicitorReference": null,
+      "appRespondentFMName": "Lee Powers",
+      "birminghamCourtList": null,
+      "divorceStageReached": "Petition Issued",
+      "kentSurreyCourtList": null,
+      "lancashireCourtList": null,
+      "manchesterCourtList": null,
+      "northWalesCourtList": null,
+      "nottinghamCourtList": null,
+      "rSolicitorReference": null,
+      "applicantRepresented": "No",
+      "natureOfApplication2": [
+        "Maintenance Pending Suit"
+      ],
+      "nwyorkshireCourtList": null,
+      "assignedToJudgeReason": "Draft consent order",
+      "bedfordshireCourtList": null,
+      "divorceDecreeNisiDate": null,
+      "natureOfApplication3a": null,
+      "natureOfApplication3b": null,
+      "thamesvalleyCourtList": null,
+      "bulkPrintCoverSheetApp": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/1d0e77ab-3fe9-499e-95f5-059974d1b0d6",
+        "document_filename": "BulkPrintCoverSheet.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/1d0e77ab-3fe9-499e-95f5-059974d1b0d6/binary"
+      },
+      "bulkPrintCoverSheetRes": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/76e4d32f-dca8-455e-aa08-4395f1db4d2e",
+        "document_filename": "BulkPrintCoverSheet.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/76e4d32f-dca8-455e-aa08-4395f1db4d2e/binary"
+      },
+      "divorceUploadEvidence1": null,
+      "divorceUploadEvidence2": null,
+      "otherVariationCollection": [],
+      "divorceDecreeAbsoluteDate": null,
+      "ApplicantOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": null,
+          "OrganisationName": null
+        },
+        "OrgPolicyReference": null,
+        "PreviousOrganisations": [],
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]",
+        "PrepopulateToUsersOrganisation": null
+      },
+      "consentVariationOrderLabelC": null,
+      "consentVariationOrderLabelL": null,
+      "RespondentOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": null,
+          "OrganisationName": null
+        },
+        "OrgPolicyReference": null,
+        "PreviousOrganisations": [],
+        "OrgPolicyCaseAssignedRole": "[RESPSOLICITOR]",
+        "PrepopulateToUsersOrganisation": null
+      },
+      "solicitorAgreeToReceiveEmails": null
+    }
+  }
+}
