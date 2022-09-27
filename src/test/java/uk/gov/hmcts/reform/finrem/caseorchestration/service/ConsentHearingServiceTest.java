@@ -17,6 +17,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
@@ -128,10 +129,10 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
 
         verify(caseDataService).isPaperApplication(any());
 
-        verify(caseDataService).isApplicantSolicitorAgreeToReceiveEmails(any());
-        verify(notificationService).isRespondentSolicitorEmailCommunicationEnabled(any());
-        verify(notificationService).sendConsentHearingNotificationEmailToApplicantSolicitor(any(), anyMap());
-        verify(notificationService).sendConsentHearingNotificationEmailToRespondentSolicitor(any(), anyMap());
+        verify(caseDataService, times(2)).isApplicantSolicitorAgreeToReceiveEmails(any());
+        verify(notificationService, times(2)).isRespondentSolicitorEmailCommunicationEnabled(any());
+        verify(notificationService, times(2)).sendConsentHearingNotificationEmailToApplicantSolicitor(any(), anyMap());
+        verify(notificationService, times(2)).sendConsentHearingNotificationEmailToRespondentSolicitor(any(), anyMap());
     }
 
     private CaseDetails buildCaseDetails(String testPayload)  {
