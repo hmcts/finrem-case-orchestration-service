@@ -22,6 +22,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class ConsentedHearingHelperTest {
 
     private final ObjectMapper mapper =  new ObjectMapper();
+
     @Test
     public void isNotEmpty() {
         CallbackRequest callbackRequest =  callbackRequest();
