@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.generalapplication.service.RejectGeneralApplicationDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.service.UpdateFrcInfoApplicantDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.service.UpdateFrcInfoRespondentDocumentService;
 
@@ -28,6 +29,7 @@ public class PaperNotificationService {
     private final ManualPaymentDocumentService manualPaymentDocumentService;
     private final UpdateFrcInfoApplicantDocumentService updateFrcInfoApplicantDocumentService;
     private final UpdateFrcInfoRespondentDocumentService updateFrcInfoRespondentDocumentService;
+    private final RejectGeneralApplicationDocumentService rejectGeneralApplicationDocumentService;
     private final BulkPrintService bulkPrintService;
     private final CaseDataService caseDataService;
 
@@ -143,5 +145,17 @@ public class PaperNotificationService {
     private boolean shouldPrintNotificationForRespondentSolicitor(CaseDetails caseDetails) {
         return caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())
             && !YES_VALUE.equalsIgnoreCase(nullToEmpty(caseDetails.getData().get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT)));
+    }
+
+    public void printApplicantRejectionGeneralApplication(CaseDetails caseDetails, String authToken) {
+        CaseDocument applicantGeneralApplicationRejectDoc = rejectGeneralApplicationDocumentService.generateGeneralApplicationRejectionLetter(
+            caseDetails, authToken, APPLICANT);
+        bulkPrintService.sendDocumentForPrint(applicantGeneralApplicationRejectDoc, caseDetails);
+    }
+
+    public void printRespondentRejectionGeneralApplication(CaseDetails caseDetails, String authToken) {
+        CaseDocument applicantGeneralApplicationRejectDoc = rejectGeneralApplicationDocumentService.generateGeneralApplicationRejectionLetter(
+            caseDetails, authToken, RESPONDENT);
+        bulkPrintService.sendDocumentForPrint(applicantGeneralApplicationRejectDoc, caseDetails);
     }
 }

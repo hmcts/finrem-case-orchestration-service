@@ -22,9 +22,14 @@ public enum EventType {
     APPROVE_ORDER("FR_approveApplication"),
     REJECT_ORDER("FR_orderRefusal"),
     CONSENT_ORDER_NOT_APPROVED("FR_consentOrderNotApproved"),
+    GENERAL_APPLICATION("createGeneralApplication"),
+    REJECT_GENERAL_APPLICATION("rejectGeneralApplication"),
     CLOSE("FR_close"),
     MANAGE_CASE_DOCUMENTS("FR_manageCaseDocuments"),
     UPLOAD_APPROVED_ORDER("FR_uploadApprovedOrder"),
+    GENERAL_APPLICATION_REFER_TO_JUDGE("FR_generalApplicationReferToJudge"),
+    GENERAL_APPLICATION_OUTCOME("FR_GeneralApplicationOutcome"),
+    GENERAL_APPLICATION_DIRECTIONS("FR_GeneralApplicationDirections"),
     NONE("");
 
     private final String ccdType;
