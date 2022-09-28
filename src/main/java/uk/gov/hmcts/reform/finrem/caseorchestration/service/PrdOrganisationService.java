@@ -43,10 +43,6 @@ public class PrdOrganisationService {
         return organisationApi.findOrganisationByOrgId(userToken, authTokenGenerator.generate(), orgId);
     }
 
-    public OrganisationsResponse findUserOrganisation(String authToken) {
-        return organisationApi.findUserOrganisation(authToken, authTokenGenerator.generate());
-    }
-
     @Cacheable(cacheManager = REQUEST_SCOPED_CACHE_MANAGER, cacheNames = BARRISTER_USER_CACHE)
     public Optional<String> findUserByEmail(String email, String authToken) {
         try {

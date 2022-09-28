@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +57,7 @@ public class ManageBarristerService {
     private final IdamService idamService;
     private final CaseDataService caseDataService;
     private final ObjectMapper objectMapper;
+    private final SystemUserService systemUserService;
 
     public List<BarristerData> getBarristersForParty(CaseDetails caseDetails, String authToken) {
         String caseRole = getCaseRole(caseDetails, authToken);
@@ -74,6 +76,7 @@ public class ManageBarristerService {
 
         log.info("changed barristers: {}", barristerChange.toString());
         barristerChange.getAdded().forEach(userToBeAdded -> addUser(caseDetails, authToken, caseRole, userToBeAdded));
+        caseDetails.getData().remove(MANAGE_BARRISTER_PARTY);
 
         return updateRepresentationUpdateHistoryForCase(caseDetails, barristerChange, authToken);
     }
@@ -92,9 +95,17 @@ public class ManageBarristerService {
         return caseRole;
     }
 
+    /*Temporary solution while ref data has code freeze as findUserByEmail endpoint is secured
+    Todo: create Reference Data Common Capability (RDCC) Jira ticket to add caseworker-divorce-financialremedy-courtadmin
+    to list of secured roles. In the meantime, Finrem's system user has required roles*/
+    public String getAuthTokenToUse(CaseDetails caseDetails, String authToken) {
+        String caseworkerParty = Objects.toString(caseDetails.getData().get(MANAGE_BARRISTER_PARTY), StringUtils.EMPTY);
+        return caseworkerParty.isEmpty() ? authToken : systemUserService.getSysUserToken();
+    }
+
     private void addUser(CaseDetails caseDetails, String authToken, String caseRole, Barrister userToBeAdded) {
         String orgId = userToBeAdded.getOrganisation().getOrganisationID();
-        organisationService.findUserByEmail(userToBeAdded.getEmail(), authToken)
+        organisationService.findUserByEmail(userToBeAdded.getEmail(), getAuthTokenToUse(caseDetails, authToken))
             .ifPresentOrElse(
                 userId -> assignCaseAccessService.grantCaseRoleToUser(caseDetails.getId(), userId, caseRole, orgId),
                 throwNoSuchUserException(userToBeAdded)

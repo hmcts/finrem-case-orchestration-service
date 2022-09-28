@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -80,6 +81,8 @@ public class ManageBarristerServiceTest {
     private CaseDataService caseDataService;
     @Mock
     private CaseAssignedRoleService caseAssignedRoleService;
+    @Mock
+    private SystemUserService systemUserService;
     @Spy
     private ObjectMapper objectMapper = new ObjectMapper();
 

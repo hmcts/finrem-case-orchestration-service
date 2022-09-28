@@ -91,6 +91,7 @@ public class ManageBarristerMidEventHandlerTest {
 
     @Test
     public void givenBarristerEmailsAreValid_whenHandle_thenReturnResponseWithNoErrors() {
+        when(manageBarristerService.getAuthTokenToUse(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(AUTH_TOKEN);
         when(manageBarristerService.getBarristersForParty(callbackRequest.getCaseDetails(), AUTH_TOKEN))
             .thenReturn(getBarristerData());
         when(manageBarristerService.getCaseRole(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(APP_SOLICITOR_POLICY);
@@ -104,6 +105,7 @@ public class ManageBarristerMidEventHandlerTest {
 
     @Test
     public void givenBarristerEmailsAreInvalid_whenHandle_thenReturnResponseWithErrors() {
+        when(manageBarristerService.getAuthTokenToUse(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(AUTH_TOKEN);
         when(manageBarristerService.getBarristersForParty(callbackRequest.getCaseDetails(), AUTH_TOKEN))
             .thenReturn(getBarristerData());
         when(manageBarristerService.getCaseRole(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(APP_SOLICITOR_POLICY);
