@@ -95,9 +95,9 @@ public class ManageBarristerService {
         return caseRole;
     }
 
-    /*Temporary solution while ref data has code freeze as findUserByEmail endpoint is secured
-    Todo: create Reference Data Common Capability (RDCC) Jira ticket to add caseworker-divorce-financialremedy-courtadmin
-    to list of secured roles. In the meantime, Finrem's system user has required roles*/
+    /*Below is temporary solution while ref data has code freeze - findUserByEmail endpoint is secured
+    Finrem's system user has required roles, so below can be permanent solution but not preferred
+    Todo: create Ref Data (RDCC) Jira ticket to add finrem's caseworker to list of secured roles.*/
     public String getAuthTokenToUse(CaseDetails caseDetails, String authToken) {
         String caseworkerParty = Objects.toString(caseDetails.getData().get(MANAGE_BARRISTER_PARTY), StringUtils.EMPTY);
         return caseworkerParty.isEmpty() ? authToken : systemUserService.getSysUserToken();
