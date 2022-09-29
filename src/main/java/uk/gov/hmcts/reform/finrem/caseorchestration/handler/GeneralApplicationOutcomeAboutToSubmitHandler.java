@@ -82,6 +82,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler implements CallbackHa
         }
         helper.deleteNonCollectionGeneralApplication(caseData);
         caseData.remove(GENERAL_APPLICATION_OUTCOME_LIST);
+        caseData.remove(GENERAL_APPLICATION_OUTCOME_DECISION);
     }
 
     private GeneralApplicationCollectionData setStatusForElement(Map<String, Object> caseData,

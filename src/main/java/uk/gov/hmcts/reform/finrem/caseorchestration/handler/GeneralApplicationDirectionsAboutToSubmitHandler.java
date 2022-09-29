@@ -68,7 +68,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
         } catch (InvalidCaseDataException invalidCaseDataException) {
             errors.add(invalidCaseDataException.getMessage());
         }
-
+        caseData.remove(GENERAL_APPLICATION_OUTCOME_DECISION);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build();
     }
 
