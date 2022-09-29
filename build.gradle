@@ -283,7 +283,7 @@ bootWithCCD {
     }
 
     //AAT or Local (IDAM and S2S Simulators)
-    authMode = uk.gov.hmcts.rse.AuthMode.Local
+    authMode = uk.gov.hmcts.rse.AuthMode.AAT
 
     environment("SERVICE_AUTH_MICROSERVICE", "finrem_case_orchestration")
 
