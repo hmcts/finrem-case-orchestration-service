@@ -49,8 +49,8 @@ public class ConsentedHearingDataElement {
     public String manchesterCourtList;
     @JsonProperty("lancashireCourtList")
     public String lancashireCourtList;
-    @JsonProperty("clevelandCourtList")
-    public String clevelandCourtList;
+    @JsonProperty("cleavelandCourtList")
+    public String cleavelandCourtList;
     @JsonProperty("nwyorkshireCourtList")
     public String nwyorkshireCourtList;
     @JsonProperty("humberCourtList")
