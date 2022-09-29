@@ -96,8 +96,16 @@ public class CaseDataService {
 
     public boolean addressLineOneAndPostCodeAreBothNotEmpty(Map address) {
         return ObjectUtils.isNotEmpty(address)
-            && StringUtils.isNotBlank((String) address.get(LINE_1))
-            && StringUtils.isNotBlank((String) address.get(POSTCODE));
+            && addressLineOneNotEmpty(address)
+            && postcodeNotEmpty(address);
+    }
+
+    public boolean addressLineOneNotEmpty(Map address) {
+        return StringUtils.isNotBlank((String) address.get(LINE_1));
+    }
+
+    private boolean postcodeNotEmpty(Map address) {
+        return StringUtils.isNotBlank((String) address.get(POSTCODE));
     }
 
     public String buildFullName(Map<String, Object> caseData, String firstMiddleNameCcdFieldName, String lastNameCcdFieldName) {
