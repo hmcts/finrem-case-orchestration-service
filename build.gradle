@@ -283,7 +283,7 @@ bootWithCCD {
     }
 
     //AAT or Local (IDAM and S2S Simulators)
-    authMode = uk.gov.hmcts.rse.AuthMode.AAT
+    authMode = uk.gov.hmcts.rse.AuthMode.Local
 
     environment("SERVICE_AUTH_MICROSERVICE", "finrem_case_orchestration")
 
@@ -329,7 +329,7 @@ dependencies {
         exclude group: "org.yaml", module: "snakeyaml"
     }
 
-    implementation group: 'org.yaml', name: 'snakeyaml', version: '1.31'
+    implementation group: 'org.yaml', name: 'snakeyaml', version: '1.32'
 
     developmentOnly group: 'org.springframework.boot', name: 'spring-boot-devtools'
 
