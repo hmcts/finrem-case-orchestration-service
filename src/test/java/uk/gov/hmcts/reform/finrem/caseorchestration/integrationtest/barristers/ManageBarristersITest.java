@@ -55,8 +55,11 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_BARRISTER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASEWORKER_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ROLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MANAGE_BARRISTER_PARTY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REPRESENTATION_UPDATE_HISTORY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_BARRISTER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_BARRISTER_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
@@ -81,6 +84,7 @@ public class ManageBarristersITest implements IntegrationTest {
     private static final String RESP_BARRISTER_ID = "respBarristerId";
     private static final String SYS_USER_TOKEN = "sysUserToken";
     private static final String RESP_SOL_ID = "someOtherId";
+    private static final String CASEWORKER_NAME = "the Caseworker";
 
     @Autowired
     private CcdCallbackController ccdCallbackController;
@@ -195,7 +199,7 @@ public class ManageBarristersITest implements IntegrationTest {
     }
 
     @Test
-    public void givenValidRequest_whenManageBarristerAboutToSubmit_thenProcess() {
+    public void givenValidRequest_whenManageBarristerAboutToSubmitAsSolicitor_thenProcess() {
         when(dataStoreClient.getUserRoles(AUTH_TOKEN, SERVICE_AUTH_TOKEN, CASE_ID, USER_ID))
             .thenReturn(CaseAssignedUserRolesResource.builder()
                 .caseAssignedUserRoles(List.of(CaseAssignedUserRole.builder().caseRole(RESP_SOLICITOR_POLICY).build()))
@@ -226,6 +230,43 @@ public class ManageBarristersITest implements IntegrationTest {
             .organisation(Organisation.builder().organisationID(RESP_BARR_ORG_ID).build())
             .build()));
         assertThat(update.getBy(), is(SOLICITOR_NAME));
+        assertThat(update.getClientName(), is("Jane Smith"));
+    }
+
+    @Test
+    public void givenValidRequestAsCaseworker_whenManageBarristerAboutToSubmit_thenProcess() {
+        when(dataStoreClient.getUserRoles(AUTH_TOKEN, SERVICE_AUTH_TOKEN, CASE_ID, USER_ID))
+            .thenReturn(CaseAssignedUserRolesResource.builder()
+                .caseAssignedUserRoles(List.of(CaseAssignedUserRole.builder().caseRole(RESP_SOLICITOR_POLICY).build()))
+                .build());
+        when(authTokenGenerator.generate()).thenReturn(SERVICE_AUTH_TOKEN);
+        when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(USER_ID);
+        when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn(CASEWORKER_NAME);
+        when(organisationApi.findUserByEmail(SYS_USER_TOKEN, SERVICE_AUTH_TOKEN, RESP_BARRISTER_EMAIL_ONE))
+            .thenReturn(OrganisationUser.builder().userIdentifier(RESP_BARRISTER_ID).build());
+        when(systemUserService.getSysUserToken()).thenReturn(SYS_USER_TOKEN);
+
+        CallbackRequest request = buildCallbackRequest();
+        request.getCaseDetails().getData().put(RESPONDENT_BARRISTER_COLLECTION, respondentBarristerCollection());
+        request.getCaseDetails().getData().put(CASE_ROLE, CASEWORKER_ROLE);
+        request.getCaseDetails().getData().put(MANAGE_BARRISTER_PARTY, RESPONDENT);
+
+        ResponseEntity<AboutToStartOrSubmitCallbackResponse> response =
+            ccdCallbackController.ccdAboutToSubmit(AUTH_TOKEN, request);
+
+        verify(caseDataApiV2).addCaseUserRoles(SYS_USER_TOKEN, SERVICE_AUTH_TOKEN, caseAssignmentUserRolesRequest());
+
+        assertNotNull(response.getBody());
+        List<Element<RepresentationUpdate>> representationUpdateHistory = objectMapper
+            .convertValue(response.getBody().getData().get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {});
+
+        assertThat(representationUpdateHistory, hasSize(1));
+        RepresentationUpdate update = representationUpdateHistory.get(0).getValue();
+        assertThat(update.getAdded(), is(ChangedRepresentative.builder()
+            .email(RESP_BARRISTER_EMAIL_ONE)
+            .organisation(Organisation.builder().organisationID(RESP_BARR_ORG_ID).build())
+            .build()));
+        assertThat(update.getBy(), is(CASEWORKER_NAME));
         assertThat(update.getClientName(), is("Jane Smith"));
     }
 

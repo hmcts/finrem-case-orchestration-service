@@ -580,4 +580,8 @@ public class CCDConfigConstant {
     public static final String RESPONDENT_BARRISTER_COLLECTION = "respBarristerCollection";
     public static final String APPLICANT_BARRISTER_ROLE = "[APPBARISTER]";
     public static final String RESPONDENT_BARRISTER_ROLE = "[RESPBARRISTER]";
+    public static final String CASEWORKER_ROLE = "[CASEWORKER]";
+    public static final String MANAGE_BARRISTER_PARTY = "barristerParty";
+
+
 }

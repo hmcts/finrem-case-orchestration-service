@@ -34,6 +34,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_BARRISTER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_BARRISTER_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASEWORKER_ROLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MANAGE_BARRISTER_PARTY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REPRESENTATION_UPDATE_HISTORY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_BARRISTER_COLLECTION;
@@ -46,9 +48,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element.ele
 @Service
 public class ManageBarristerService {
 
-    public static final String MANAGE_BARRISTER_PARTY = "barristerParty";
     public static final String MANAGE_BARRISTERS = "Manage Barristers";
-    public static final String CASEWORKER_ROLE = "[CASEWORKER]";
 
     private final BarristerUpdateDifferenceCalculator barristerUpdateDifferenceCalculator;
     private final CaseAssignedRoleService caseAssignedRoleService;
