@@ -329,7 +329,7 @@ dependencies {
         exclude group: "org.yaml", module: "snakeyaml"
     }
 
-    implementation group: 'org.yaml', name: 'snakeyaml', version: '1.31'
+    implementation group: 'org.yaml', name: 'snakeyaml', version: '1.33'
 
     developmentOnly group: 'org.springframework.boot', name: 'spring-boot-devtools'
 
