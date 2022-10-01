@@ -23,11 +23,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_DATE;
 
 
-public  class GeneralApplicationHelperTest {
+public class GeneralApplicationHelperTest {
 
     @Test
     public void givenDate_whenOjectToDateTimeIsNotNull_thenReturnLocalDate() {
-        CallbackRequest callbackRequest =  callbackRequest();
+        CallbackRequest callbackRequest = callbackRequest();
         Map<String, Object> data = callbackRequest.getCaseDetails().getData();
         data.put(GENERAL_ORDER_DATE, "2022-10-10");
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper());
@@ -36,31 +36,31 @@ public  class GeneralApplicationHelperTest {
 
     @Test
     public void givenDate_whenOjectToDateTimeIsNull_thenReturnNull() {
-        CallbackRequest callbackRequest =  callbackRequest();
+        CallbackRequest callbackRequest = callbackRequest();
         Map<String, Object> data = callbackRequest.getCaseDetails().getData();
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper());
         assertNull(helper.objectToDateTime(data.get(GENERAL_ORDER_DATE)));
     }
 
     @Test
-    public void givenContestedCase_whenMigratingExistingGeneralApplicationAndCreatedByIsNull_thenReturnNull () {
-        CallbackRequest callbackRequest =  callbackRequest();
+    public void givenContestedCase_whenMigratingExistingGeneralApplicationAndCreatedByIsNull_thenReturnNull() {
+        CallbackRequest callbackRequest = callbackRequest();
         Map<String, Object> data = callbackRequest.getCaseDetails().getData();
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper());
         assertNull(helper.migrateExistingGeneralApplication(data));
     }
 
-   @Test
-    public void givenContestedCase_whenRetrieveInitialGeneralApplicationDataCreatedByIsNull_thenReturnNull () {
-        CallbackRequest callbackRequest =  callbackRequest();
+    @Test
+    public void givenContestedCase_whenRetrieveInitialGeneralApplicationDataCreatedByIsNull_thenReturnNull() {
+        CallbackRequest callbackRequest = callbackRequest();
         Map<String, Object> data = callbackRequest.getCaseDetails().getData();
         GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper());
         assertNull(helper.retrieveInitialGeneralApplicationData(data, "any"));
     }
 
     @Test
-    public void givenContestedCase_whenRetrieveInitialGeneralApplicationDataCreatedByIsNotNull_thenReturnNull () {
-        CallbackRequest callbackRequest =  callbackRequest();
+    public void givenContestedCase_whenRetrieveInitialGeneralApplicationDataCreatedByIsNotNull_thenReturnNull() {
+        CallbackRequest callbackRequest = callbackRequest();
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
 
         caseData.put(GENERAL_APPLICATION_RECEIVED_FROM, "Applicant");
