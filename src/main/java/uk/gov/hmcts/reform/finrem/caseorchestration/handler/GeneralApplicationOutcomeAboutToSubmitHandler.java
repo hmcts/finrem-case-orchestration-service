@@ -67,6 +67,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler implements CallbackHa
             caseData.put(GENERAL_APPLICATION_COLLECTION, applicationCollectionDataList);
             caseData.remove(GENERAL_APPLICATION_OUTCOME_LIST);
             caseData.remove(GENERAL_APPLICATION_OUTCOME_OTHER);
+            caseData.remove(GENERAL_APPLICATION_OUTCOME_DECISION);
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
     }

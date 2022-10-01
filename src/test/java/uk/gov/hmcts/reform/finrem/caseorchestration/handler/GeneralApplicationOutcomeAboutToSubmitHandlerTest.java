@@ -122,6 +122,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest {
         assertEquals(GeneralApplicationStatus.APPROVED.getId(),
             generalApplicationCollectionData.get(1).getGeneralApplicationItems().getGeneralApplicationStatus());
         assertNull(data.get(GENERAL_APPLICATION_OUTCOME_LIST));
+        assertNull(data.get(GENERAL_APPLICATION_OUTCOME_DECISION));
     }
 
     @Test
