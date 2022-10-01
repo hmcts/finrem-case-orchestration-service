@@ -55,10 +55,11 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler implements CallbackHa
             DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_OUTCOME_LIST));
 
             final String outcome  = Objects.toString(caseData.get(GENERAL_APPLICATION_OUTCOME_DECISION), null);
-            log.info("outcome decision {} general application for Case ID: {}", outcome, caseId);
+            log.info("Outcome decision {} for general application for Case ID: {} Event type {}",
+                outcome, caseId, EventType.GENERAL_APPLICATION_OUTCOME);
 
             final String valueCode = dynamicList.getValueCode();
-            log.info("selected dynamic list code : {} Case ID: {}", valueCode, caseId);
+            log.info("Selected dynamic list code : {} Case ID: {}", valueCode, caseId);
             final List<GeneralApplicationCollectionData> applicationCollectionDataList
                 = existingList.stream().map(ga -> setStatusForElement(caseData, ga, valueCode, outcome)).sorted(helper::getCompareTo).toList();
 
@@ -76,13 +77,14 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler implements CallbackHa
         GeneralApplicationCollectionData data = helper.migrateExistingGeneralApplication(caseData);
         if (data != null) {
             String status  = Objects.toString(caseData.get(GENERAL_APPLICATION_OUTCOME_DECISION), null);
+            log.info("In migration outcome decision {} for general application for Case ID: {} Event type {}",
+                status, caseDetails.getId(), EventType.GENERAL_APPLICATION_OUTCOME);
             updateStatus(caseData, data, status);
             existingGeneralApplication.add(data);
             caseData.put(GENERAL_APPLICATION_COLLECTION,existingGeneralApplication);
         }
         helper.deleteNonCollectionGeneralApplication(caseData);
         caseData.remove(GENERAL_APPLICATION_OUTCOME_LIST);
-        caseData.remove(GENERAL_APPLICATION_OUTCOME_DECISION);
     }
 
     private GeneralApplicationCollectionData setStatusForElement(Map<String, Object> caseData,

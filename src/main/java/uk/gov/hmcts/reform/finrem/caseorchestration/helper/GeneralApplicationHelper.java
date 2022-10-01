@@ -209,6 +209,8 @@ public class GeneralApplicationHelper {
                 caseData.remove(GENERAL_APPLICATION_DOCUMENT_LATEST_DATE);
                 caseData.remove(GENERAL_APPLICATION_DOCUMENT_LATEST);
             }
+            caseData.remove(GENERAL_APPLICATION_OUTCOME_DECISION);
+            caseData.remove(GENERAL_APPLICATION_OUTCOME_OTHER);
         }
     }
 }
