@@ -22,10 +22,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDi
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_OUTCOME_DECISION;
 
 @Slf4j
 @Service
@@ -77,8 +79,9 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
         List<GeneralApplicationCollectionData> existingGeneralApplication = helper.getGeneralApplicationList(caseData);
         GeneralApplicationCollectionData data = helper.migrateExistingGeneralApplication(caseData);
         if (data != null) {
+            String status = Objects.toString(caseData.get(GENERAL_APPLICATION_OUTCOME_DECISION), null);
             setStatusForNonCollAndBulkPrintDouments(caseDetails,
-                data, bulkPrintDocuments,null, userAuthorisation);
+                data, bulkPrintDocuments,status, userAuthorisation);
             existingGeneralApplication.add(data);
             caseData.put(GENERAL_APPLICATION_COLLECTION,existingGeneralApplication);
         }
