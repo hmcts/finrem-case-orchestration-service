@@ -8,16 +8,13 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.BarristerUpdateDifferenceCalculator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Service
@@ -50,11 +47,10 @@ public class ManageBarristerSubmittedHandler implements CallbackHandler {
         log.info("Original Barristers: {}", barristersBeforeEvent.toString());
 
 
-        Map<String, Object> caseData = manageBarristerService.notifyBarristerAccess(caseDetails,
+        manageBarristerService.notifyBarristerAccess(caseDetails,
             barristers,
-            barristersBeforeEvent,
-            userAuthorisation);
+            barristersBeforeEvent);
 
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build();
     }
 }

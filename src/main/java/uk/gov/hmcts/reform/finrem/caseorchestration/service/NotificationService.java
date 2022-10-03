@@ -395,6 +395,12 @@ public class NotificationService {
         sendNotificationEmail(notificationRequest, uri);
     }
 
+    public void sendBarristerRemovedEmail(CaseDetails caseDetails, Barrister barrister) {
+        URI uri = buildUri(notificationServiceConfiguration.getRemovedBarrister());
+        NotificationRequest notificationRequest = notificationRequestMapper.buildNotificationRequest(caseDetails, barrister);
+        sendNotificationEmail(notificationRequest, uri);
+    }
+
     private void sendNotificationEmail(NotificationRequest notificationRequest, URI uri) {
         HttpEntity<NotificationRequest> request = new HttpEntity<>(notificationRequest, buildHeaders());
         try {

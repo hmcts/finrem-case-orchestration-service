@@ -84,14 +84,14 @@ public class ManageBarristerService {
 
     public void notifyBarristerAccess(CaseDetails caseDetails,
                                                      List<Barrister> barristers,
-                                                     List<Barrister> barristersBeforeEvent,
-                                                     String authToken) {
+                                                     List<Barrister> barristersBeforeEvent) {
 
         BarristerChange barristerChange = barristerUpdateDifferenceCalculator.calculate(barristers, barristersBeforeEvent);
         List<Barrister> addedBarristers = barristerChange.getAdded().stream().toList();
         List<Barrister> removedBarristers = barristerChange.getRemoved().stream().toList();
 
         addedBarristers.forEach(barrister -> notificationService.sendBarristerAddedEmail(caseDetails, barrister));
+        removedBarristers.forEach(barrister -> notificationService.sendBarristerRemovedEmail(caseDetails, barrister));
 
     }
 
