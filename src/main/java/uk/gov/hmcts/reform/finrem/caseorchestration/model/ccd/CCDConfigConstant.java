@@ -325,6 +325,9 @@ public class CCDConfigConstant {
     public static final String FR_CONSENT_ORDER = "FR_consentOrder";
     public static final String FR_RESPOND_TO_CONSENT_ORDER = "FR_respondToConsentOrder";
 
+    //general document
+    public static final String GENERAL_UPLOADED_DOCUMENTS = "uploadGeneralDocuments";
+
     //general email
     public static final String GENERAL_EMAIL_COLLECTION = "generalEmailCollection";
     public static final String GENERAL_EMAIL_RECIPIENT = "generalEmailRecipient";

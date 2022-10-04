@@ -16,23 +16,24 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ConfidentialUploadedDocumentData implements CaseDocumentTabData {
+public class GeneralUploadedDocumentData implements CaseDocumentTabData {
     @JsonProperty("id")
     private String id;
     @JsonProperty("value")
-    private ConfidentialUploadedDocument confidentialUploadedDocument;
+    private GeneralUploadedDocument generalUploadedDocument;
+
 
     @Override
     @JsonIgnore
     public String getElementId() {
-        return this.id;
+        return id;
     }
 
     @Override
     @JsonIgnore
-    public void setUploadDateTime(LocalDateTime date) {
-        if (confidentialUploadedDocument != null) {
-            confidentialUploadedDocument.setConfidentialDocumentUploadDateTime(date);
+    public void setUploadDateTime(LocalDateTime dateTime) {
+        if (generalUploadedDocument != null) {
+            generalUploadedDocument.setGeneralDocumentUploadDateTime(dateTime);
         }
     }
 }
