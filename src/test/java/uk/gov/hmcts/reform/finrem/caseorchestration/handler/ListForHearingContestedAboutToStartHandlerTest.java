@@ -66,5 +66,4 @@ public class ListForHearingContestedAboutToStartHandlerTest {
         CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
         return CallbackRequest.builder().eventId("SomeEventId").caseDetails(caseDetails).build();
     }
-
 }
