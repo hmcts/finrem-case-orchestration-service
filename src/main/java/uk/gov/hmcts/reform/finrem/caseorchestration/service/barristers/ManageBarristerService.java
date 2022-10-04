@@ -178,10 +178,10 @@ public class ManageBarristerService {
     }
 
     private List<Element<RepresentationUpdate>> getRepresentationUpdateHistory(CaseDetails caseDetails) {
-        return Optional.ofNullable(getUpdateHistory(caseDetails)).orElse(new ArrayList<>());
+        return Optional.ofNullable(convertToUpdateHistory(caseDetails)).orElse(new ArrayList<>());
     }
 
-    private List<Element<RepresentationUpdate>> getUpdateHistory(CaseDetails caseDetails) {
+    private List<Element<RepresentationUpdate>> convertToUpdateHistory(CaseDetails caseDetails) {
         return objectMapper.convertValue(caseDetails.getData().get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {});
     }
 
