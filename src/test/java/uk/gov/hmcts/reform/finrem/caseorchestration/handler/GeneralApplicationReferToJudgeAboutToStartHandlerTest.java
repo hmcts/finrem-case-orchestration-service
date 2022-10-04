@@ -21,6 +21,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REFER_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL;
 
@@ -69,6 +70,16 @@ public class GeneralApplicationReferToJudgeAboutToStartHandlerTest {
         assertThat(handler
                 .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.GENERAL_APPLICATION_REFER_TO_JUDGE),
             is(false));
+    }
+
+    @Test
+    public void givenContestedCase_whenNonCollectionGeneralApplicationExistAndAlreadyReferred_thenReturnError() {
+        CallbackRequest callbackRequest = buildCallbackRequest(GA_NON_COLL_JSON);
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        caseData.put(GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL, "judge@mailinator.com");
+
+        AboutToStartOrSubmitCallbackResponse startHandle = handler.handle(callbackRequest, AUTH_TOKEN);
+        assertTrue(startHandle.getErrors().contains("There are no general application available to refer."));
     }
 
     @Test
