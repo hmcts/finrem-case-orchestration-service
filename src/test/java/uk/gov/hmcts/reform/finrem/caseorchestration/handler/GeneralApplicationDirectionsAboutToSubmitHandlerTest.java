@@ -114,6 +114,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
             list.get(0).getGeneralApplicationItems().getGeneralApplicationStatus());
         assertNull(data.get(GENERAL_APPLICATION_DIRECTIONS_LIST));
         assertNull(data.get(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT));
+        assertNull(data.get(GENERAL_APPLICATION_OUTCOME_DECISION));
     }
 
     @Test
