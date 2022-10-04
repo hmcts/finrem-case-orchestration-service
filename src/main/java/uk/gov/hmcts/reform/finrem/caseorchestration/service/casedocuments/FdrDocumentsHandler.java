@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -40,10 +39,6 @@ public class FdrDocumentsHandler extends CaseDocumentHandler<ContestedUploadedDo
 
         List<ContestedUploadedDocumentData> fdrDocsCollection = getDocumentCollection(caseData, FDR_DOCS_COLLECTION);
         fdrDocsCollection.addAll(fdrFiltered);
-        fdrDocsCollection.sort(Comparator.comparing(
-            ContestedUploadedDocumentData::getUploadedCaseDocument, Comparator.comparing(
-                ContestedUploadedDocument::getCaseDocumentUploadDateTime, Comparator.nullsLast(
-                    Comparator.reverseOrder()))));
         log.info("Adding items: {}, to FDR Documents Collection", fdrFiltered);
         uploadedDocuments.removeAll(fdrFiltered);
 

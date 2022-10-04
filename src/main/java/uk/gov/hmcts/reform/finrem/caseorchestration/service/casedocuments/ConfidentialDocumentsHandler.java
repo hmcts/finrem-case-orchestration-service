@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUpload
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -41,16 +40,11 @@ public class ConfidentialDocumentsHandler extends CaseDocumentHandler<Confidenti
         log.info("Adding items: {}, to Confidential Documents Collection", confidentialFiltered);
         uploadedDocuments.removeAll(confidentialFiltered);
 
-        List<ConfidentialUploadedDocumentData> confidentialDocsCollection = getConfidentialDocumentCollection(
-            caseData,CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
+        List<ConfidentialUploadedDocumentData> confidentialDocsCollection = getDocumentCollection(caseData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
         if (!confidentialFiltered.isEmpty()) {
             List<ConfidentialUploadedDocumentData> confidentialDocs = confidentialFiltered.stream().map(
                 doc -> buildConfidentialDocument(doc)).collect((Collectors.toList()));
             confidentialDocsCollection.addAll(confidentialDocs);
-            confidentialDocsCollection.sort(Comparator.comparing(
-                ConfidentialUploadedDocumentData::getConfidentialUploadedDocument, Comparator.comparing(
-                    ConfidentialUploadedDocument::getConfidentialDocumentUploadDateTime, Comparator.nullsLast(
-                        Comparator.reverseOrder()))));
             caseData.put(CONFIDENTIAL_DOCS_UPLOADED_COLLECTION, confidentialDocsCollection);
         }
     }
@@ -68,7 +62,6 @@ public class ConfidentialDocumentsHandler extends CaseDocumentHandler<Confidenti
                 .documentComment(uploadedCaseDocument.getHearingDetails())
                 .documentLink(uploadedCaseDocument.getCaseDocuments())
                 .documentType(uploadedCaseDocument.getCaseDocumentType())
-                .confidentialDocumentUploadDateTime(uploadedCaseDocument.getCaseDocumentUploadDateTime())
                 .build()).build();
     }
 }

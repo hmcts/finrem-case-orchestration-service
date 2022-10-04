@@ -1,15 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest;
 
 import org.junit.Test;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import java.util.Collections;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 public class DraftOnlineFormTest extends GenerateMiniFormATest {
 
@@ -33,9 +28,6 @@ public class DraftOnlineFormTest extends GenerateMiniFormATest {
             .build();
     }
 
-    @MockBean
-    private IdamService idamService;
-
     @Test
     public void deleteExistingMiniFormAWithSuccess() throws Exception {
         doTestDeleteMiniFormA(HttpStatus.OK);
@@ -49,7 +41,7 @@ public class DraftOnlineFormTest extends GenerateMiniFormATest {
     private void doTestDeleteMiniFormA(HttpStatus miniFormAServiceStatus) throws Exception {
         generateDocumentServiceSuccessStub();
         deleteDocumentServiceStubWith(miniFormAServiceStatus);
-        when(idamService.isUserRoleAdmin(any())).thenReturn(true);
+        idamServiceStub();
         generateDocument();
     }
 }
