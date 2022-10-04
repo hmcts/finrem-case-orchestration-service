@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -9,6 +10,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedDocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ManageCaseDocumentsService;
@@ -24,10 +26,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 @RunWith(MockitoJUnitRunner.class)
 public class ManageCaseDocumentsContestedAboutToSubmitCaseHandlerTest {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
     @Mock
     private ManageCaseDocumentsService manageCaseDocumentsService;
+
+    @Mock
+    private UploadedDocumentHelper uploadedDocumentHelper = new UploadedDocumentHelper(objectMapper);
 
     @InjectMocks
     private ManageCaseDocumentsContestedAboutToSubmitCaseHandler manageCaseDocumentsAboutToSubmitCaseHandler;
@@ -48,9 +53,8 @@ public class ManageCaseDocumentsContestedAboutToSubmitCaseHandlerTest {
 
     @Test
     public void givenManageCaseDocumentsAboutToSubmitCaseHandlerShouldCallUploadCaseFilesAboutToSubmitHandlerMethod() {
-
         CallbackRequest callbackRequest =
-            CallbackRequest.builder().caseDetails(generalOrderContestedCaseDetails()).build();
+            CallbackRequest.builder().caseDetails(generalOrderContestedCaseDetails()).caseDetailsBefore(generalOrderContestedCaseDetails()).build();
         manageCaseDocumentsAboutToSubmitCaseHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(manageCaseDocumentsService).manageCaseDocuments(any());

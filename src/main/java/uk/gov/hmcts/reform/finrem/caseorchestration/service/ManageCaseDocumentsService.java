@@ -45,7 +45,6 @@ public class ManageCaseDocumentsService {
     }
 
     public Map<String, Object> manageCaseDocuments(Map<String, Object> caseData) {
-
         removeDeletedFilesFromCaseData(caseData);
 
         Map<String, String> idToCollectionData = findCollectionNameOfDocument(caseData);
@@ -147,6 +146,30 @@ public class ManageCaseDocumentsService {
         }
 
         return documentIdToCollection;
+    }
+
+    public Map<String, Object> setCaseDataBeforeManageCaseDocumentCollection(Map<String, Object> caseData, Map<String, Object> caseDataBefore) {
+        List<String> manageCaseDocumentCollectionIds = getAllDocumentsInCollection(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION)
+            .stream().map(ContestedUploadedDocumentData::getId).toList();
+
+        List<ContestedUploadedDocumentData> caseDataBeforeManagedCaseDocumentCollection = new ArrayList<>();
+        for (ContestedUploadCaseFilesCollectionType collectionType : ContestedUploadCaseFilesCollectionType.values()) {
+            List<ContestedUploadedDocumentData> docsInCollection = getAllDocumentsInCollection(caseDataBefore, collectionType.getCcdKey());
+
+            if (!docsInCollection.isEmpty()) {
+                List<ContestedUploadedDocumentData> documentData = docsInCollection.stream()
+                    .filter(document -> manageCaseDocumentCollectionIds.stream()
+                        .anyMatch(caseDocumentId -> document.getId().equals(caseDocumentId)))
+                    .toList();
+
+                caseDataBeforeManagedCaseDocumentCollection.addAll(documentData);
+            }
+        }
+
+        if (!caseDataBeforeManagedCaseDocumentCollection.isEmpty()) {
+            caseDataBefore.put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, caseDataBeforeManagedCaseDocumentCollection);
+        }
+        return caseDataBefore;
     }
 
     private List<ContestedUploadedDocumentData> getAllDocumentsInCollection(Map<String, Object> caseData, String collection) {

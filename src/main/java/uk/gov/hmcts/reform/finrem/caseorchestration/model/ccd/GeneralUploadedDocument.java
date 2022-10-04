@@ -16,10 +16,13 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ConfidentialUploadedDocument {
+public class GeneralUploadedDocument {
 
     @JsonProperty("DocumentType")
     private String documentType;
+
+    @JsonProperty("DocumentEmailContent")
+    private String documentEmailContent;
 
     @JsonProperty("DocumentLink")
     private CaseDocument documentLink;
@@ -27,12 +30,12 @@ public class ConfidentialUploadedDocument {
     @JsonProperty("DocumentDateAdded")
     private String documentDateAdded;
 
-    @JsonProperty("DocumentFileName")
-    private String documentFileName;
-
     @JsonProperty("DocumentComment")
     private String documentComment;
 
+    @JsonProperty("DocumentFileName")
+    private String documentFileName;
+
     @JsonSerialize(using = LocalDateTimeSerializer.class)
-    private LocalDateTime confidentialDocumentUploadDateTime;
+    private LocalDateTime generalDocumentUploadDateTime;
 }
