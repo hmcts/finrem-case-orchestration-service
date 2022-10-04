@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
@@ -51,8 +52,19 @@ public class GeneralApplicationReferToJudgeAboutToStartHandler implements Callba
         List<GeneralApplicationCollectionData> existingGeneralApplicationList = helper.getReadyForRejectOrReadyForReferList(caseData);
         AtomicInteger index = new AtomicInteger(0);
         if (existingGeneralApplicationList.isEmpty() && caseData.get(GENERAL_APPLICATION_CREATED_BY) != null) {
+            String judgeEmail = Objects.toString(caseData.get(GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL), null);
+            log.info("general application has referred to judge while existing ga not moved to collection for Case ID: {}",
+                caseDetails.getId());
+            if (existingGeneralApplicationList.isEmpty() && judgeEmail != null) {
+                List<DynamicListElement> dynamicListElements = getDynamicListElements(existingGeneralApplicationList, index);
+                if (dynamicListElements.isEmpty()) {
+                    return AboutToStartOrSubmitCallbackResponse.builder().data(caseData)
+                        .errors(List.of("There are no general application available to refer.")).build();
+                }
+            }
             log.info("setting refer list if existing ga not moved to collection for Case ID: {}", caseDetails.getId());
             setReferListForNonCollectionGeneralApplication(caseData, index);
+
         } else {
             log.info("setting refer list for Case ID: {}", caseDetails.getId());
             List<DynamicListElement> dynamicListElements = getDynamicListElements(existingGeneralApplicationList, index);
