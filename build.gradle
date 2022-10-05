@@ -33,7 +33,8 @@ def versions = [
         idamClient           : '2.0.1',
         jjwt                 : '0.9.1',
         skyscreamer          : '1.5.0',
-        jaxbOsgi             : '2.3.3'
+        jaxbOsgi             : '2.3.3',
+        jackson              : '2.13.4'
 ]
 
 project.ext {
@@ -320,6 +321,7 @@ dependencies {
     implementation group: 'com.github.hmcts', name: 'bsp-common-lib', version: versions.bspCommonLib
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: versions.apacheLogging
     implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: versions.apacheLogging
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: versions.jackson
 
     implementation("org.springframework.boot:spring-boot-starter-web") {
         exclude group: "org.yaml", module: "snakeyaml"
