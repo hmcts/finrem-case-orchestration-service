@@ -30,6 +30,7 @@ public class CallbackDispatchService {
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = AboutToStartOrSubmitCallbackResponse
             .builder()
+            .data(callbackRequest.getCaseDetails().getData())
             .errors(new ArrayList<>())
             .warnings(new ArrayList<>())
             .build();

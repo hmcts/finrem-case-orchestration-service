@@ -1,0 +1,850 @@
+{
+  "FR_s_CFCList_1": {
+    "baseLocation": 29656,
+    "region": 2
+  },
+  "FR_s_CFCList_2": {
+    "baseLocation": 407494,
+    "region": 2
+  },
+  "FR_s_CFCList_3": {
+    "baseLocation": 25463,
+    "region": 2
+  },
+  "FR_s_CFCList_4": {
+    "baseLocation": 13660,
+    "region": 2
+  },
+  "FR_s_CFCList_5": {
+    "baseLocation": 400947,
+    "region": 2
+  },
+  "FR_s_CFCList_6": {
+    "baseLocation": 229786,
+    "region": 2
+  },
+  "FR_s_CFCList_8": {
+    "baseLocation": 36791,
+    "region": 2
+  },
+  "FR_s_CFCList_9": {
+    "baseLocation": 356855,
+    "region": 2
+  },
+  "FR_s_CFCList_11": {
+    "baseLocation": 898213,
+    "region": 2
+  },
+  "FR_s_CFCList_14": {
+    "baseLocation": 621184,
+    "region": 2
+  },
+  "FR_s_CFCList_16": {
+    "baseLocation": 228015,
+    "region": 2
+  },
+  "FR_s_NottinghamList_1": {
+    "baseLocation": 424213,
+    "region": 3
+  },
+  "FR_s_NottinghamList_2": {
+    "baseLocation": 201339,
+    "region": 3
+  },
+  "FR_s_NottinghamList_3": {
+    "baseLocation": 425094,
+    "region": 3
+  },
+  "FR_s_NottinghamList_4": {
+    "baseLocation": 195465,
+    "region": 3
+  },
+  "FR_s_NottinghamList_5": {
+    "baseLocation": 195489,
+    "region": 3
+  },
+  "FR_s_NottinghamList_6": {
+    "baseLocation": 652852,
+    "region": 3
+  },
+  "FR_s_NottinghamList_7": {
+    "baseLocation": 455368,
+    "region": 3
+  },
+  "FR_s_NottinghamList_8": {
+    "baseLocation": 117667,
+    "region": 3
+  },
+  "FR_birmingham_hc_list_1": {
+    "baseLocation": 231596,
+    "region": 3
+  },
+  "FR_birmingham_hc_list_2": {
+    "baseLocation": 497679,
+    "region": 3
+  },
+  "FR_birmingham_hc_list_3": {
+    "baseLocation": 292771,
+    "region": 3
+  },
+  "FR_birmingham_hc_list_4": {
+    "baseLocation": -100,
+    "region": 3
+  },
+  "FR_birmingham_hc_list_5": {
+    "baseLocation": 758998,
+    "region": 3
+  },
+  "FR_birmingham_hc_list_6": {
+    "baseLocation": 177463,
+    "region": 3
+  },
+  "FR_birmingham_hc_list_7": {
+    "baseLocation": 195496,
+    "region": 3
+  },
+  "FR_birmingham_hc_list_8": {
+    "baseLocation": 102050,
+    "region": 3
+  },
+  "FR_birmingham_hc_list_9": {
+    "baseLocation": 195472,
+    "region": 3
+  },
+  "FR_birmingham_hc_list_10": {
+    "baseLocation": 228883,
+    "region": 3
+  },
+  "FR_cleaveland_hc_list_1": {
+    "baseLocation": -100,
+    "region": 4
+  },
+  "FR_cleaveland_hc_list_2": {
+    "baseLocation": 491107,
+    "region": 4
+  },
+  "FR_cleaveland_hc_list_3": {
+    "baseLocation": 517400,
+    "region": 4
+  },
+  "FR_cleaveland_hc_list_4": {
+    "baseLocation": 195537,
+    "region": 4
+  },
+  "FR_cleaveland_hc_list_5": {
+    "baseLocation": 427519,
+    "region": 4
+  },
+  "FR_cleaveland_hc_list_6": {
+    "baseLocation": 563156,
+    "region": 4
+  },
+  "FR_cleaveland_hc_list_7": {
+    "baseLocation": -100,
+    "region": 4
+  },
+  "FR_cleaveland_hc_list_8": {
+    "baseLocation": 288691,
+    "region": 4
+  },
+  "FR_humber_hc_list_1": {
+    "baseLocation": 232607,
+    "region": 4
+  },
+  "FR_humber_hc_list_2": {
+    "baseLocation": 195520,
+    "region": 4
+  },
+  "FR_humber_hc_list_3": {
+    "baseLocation": 640119,
+    "region": 4
+  },
+  "FR_humber_hc_list_4": {
+    "baseLocation": 478126,
+    "region": 4
+  },
+  "FR_humber_hc_list_5": {
+    "baseLocation": 574546,
+    "region": 4
+  },
+  "FR_liverpool_hc_list_1": {
+    "baseLocation": 345663,
+    "region": 5
+  },
+  "FR_liverpool_hc_list_2": {
+    "baseLocation": 226511,
+    "region": 5
+  },
+  "FR_liverpool_hc_list_3": {
+    "baseLocation": -100,
+    "region": 5
+  },
+  "FR_liverpool_hc_list_4": {
+    "baseLocation": 563906,
+    "region": 5
+  },
+  "FR_liverpool_hc_list_5": {
+    "baseLocation": 444097,
+    "region": 5
+  },
+  "FR_manchester_hc_list_1": {
+    "baseLocation": 701411,
+    "region": 5
+  },
+  "FR_manchester_hc_list_2": {
+    "baseLocation": 560788,
+    "region": 5
+  },
+  "FR_manchester_hc_list_3": {
+    "baseLocation": 245068,
+    "region": 5
+  },
+  "FR_newport_hc_list_1": {
+    "baseLocation": 217250,
+    "region": 8
+  },
+  "FR_newport_hc_list_2": {
+    "baseLocation": 234850,
+    "region": 8
+  },
+  "FR_newport_hc_list_3": {
+    "baseLocation": 448345,
+    "region": 8
+  },
+  "FR_newport_hc_list_4": {
+    "baseLocation": 232298,
+    "region": 8
+  },
+  "FR_newport_hc_list_5": {
+    "baseLocation": 304576,
+    "region": 8
+  },
+  "FR_kent_surrey_hc_list_1": {
+    "baseLocation": 259679,
+    "region": 6
+  },
+  "FR_kent_surrey_hc_list_2": {
+    "baseLocation": 465872,
+    "region": 6
+  },
+  "FR_kent_surrey_hc_list_3": {
+    "baseLocation": 194172,
+    "region": 6
+  },
+  "FR_kent_surrey_hc_list_4": {
+    "baseLocation": -100,
+    "region": 6
+  },
+  "FR_kent_surrey_hc_list_5": {
+    "baseLocation": 568484,
+    "region": 6
+  },
+  "FR_kent_surrey_hc_list_6": {
+    "baseLocation": 298828,
+    "region": 6
+  },
+  "FR_kent_surrey_hc_list_7": {
+    "baseLocation": 478896,
+    "region": 6
+  },
+  "FR_kent_surrey_hc_list_8": {
+    "baseLocation": -100,
+    "region": 6
+  },
+  "FR_kent_surrey_hc_list_9": {
+    "baseLocation": 784691,
+    "region": 6
+  },
+  "FR_kent_surrey_hc_list_10": {
+    "baseLocation": 317442,
+    "region": 6
+  },
+  "FR_swansea_hc_list_1": {
+    "baseLocation": -100,
+    "region": 8
+  },
+  "FR_swansea_hc_list_2": {
+    "baseLocation": 827534,
+    "region": 8
+  },
+  "FR_swansea_hc_list_3": {
+    "baseLocation": -100,
+    "region": 8
+  },
+  "FR_swansea_hc_list_4": {
+    "baseLocation": -100,
+    "region": 8
+  },
+  "FR_swansea_hc_list_5": {
+    "baseLocation": 390932,
+    "region": 8
+  },
+  "FR_swansea_hc_list_6": {
+    "baseLocation": 846055,
+    "region": 8
+  },
+  "FR_nw_yorkshire_hc_list_1": {
+    "baseLocation": 505683,
+    "region": 4
+  },
+  "FR_nw_yorkshire_hc_list_2": {
+    "baseLocation": 88516,
+    "region": 4
+  },
+  "FR_nw_yorkshire_hc_list_3": {
+    "baseLocation": 197852,
+    "region": 4
+  },
+  "FR_nw_yorkshire_hc_list_4": {
+    "baseLocation": 852649,
+    "region": 4
+  },
+  "FR_nw_yorkshire_hc_list_5": {
+    "baseLocation": 107581,
+    "region": 4
+  },
+  "FR_nw_yorkshire_hc_list_6": {
+    "baseLocation": 744412,
+    "region": 4
+  },
+  "FR_nw_yorkshire_hc_list_7": {
+    "baseLocation": 318324,
+    "region": 4
+  },
+  "FR_nw_yorkshire_hc_list_8": {
+    "baseLocation": 455174,
+    "region": 4
+  },
+  "FR_lancashireList_1": {
+    "baseLocation": 102476,
+    "region": 5
+  },
+  "FR_lancashireList_2": {
+    "baseLocation": -100,
+    "region": 5
+  },
+  "FR_lancashireList_3": {
+    "baseLocation": 214320,
+    "region": 5
+  },
+  "FR_lancashireList_4": {
+    "baseLocation": 353615,
+    "region": 5
+  },
+  "FR_lancashireList_5": {
+    "baseLocation": 102476,
+    "region": 5
+  },
+  "FR_lancashireList_6": {
+    "baseLocation": 150431,
+    "region": 5
+  },
+  "FR_lancashireList_7": {
+    "baseLocation": -100,
+    "region": 5
+  },
+  "FR_lancashireList_8": {
+    "baseLocation": 45106,
+    "region": 5
+  },
+  "FR_lancashireList_9": {
+    "baseLocation": 209396,
+    "region": 5
+  },
+  "FR_bedfordshireList_1": {
+    "baseLocation": 471569,
+    "region": 6
+  },
+  "FR_bedfordshireList_2": {
+    "baseLocation": 650344,
+    "region": 6
+  },
+  "FR_bedfordshireList_3": {
+    "baseLocation": 257431,
+    "region": 6
+  },
+  "FR_bedfordshireList_4": {
+    "baseLocation": 471332,
+    "region": 6
+  },
+  "FR_bedfordshireList_5": {
+    "baseLocation": 471349,
+    "region": 6
+  },
+  "FR_bedfordshireList_6": {
+    "baseLocation": 816875,
+    "region": 6
+  },
+  "FR_bedfordshireList_7": {
+    "baseLocation": -100,
+    "region": 6
+  },
+  "FR_bedfordshireList_8": {
+    "baseLocation": -100,
+    "region": 6
+  },
+  "FR_bedfordshireList_9": {
+    "baseLocation": -100,
+    "region": 6
+  },
+  "FR_bedfordshireList_10": {
+    "baseLocation": -100,
+    "region": 6
+  },
+  "FR_bedfordshireList_11": {
+    "baseLocation": 403751,
+    "region": 6
+  },
+  "FR_thamesvalleyList_1": {
+    "baseLocation": 371016,
+    "region": 6
+  },
+  "FR_thamesvalleyList_2": {
+    "baseLocation": 185657,
+    "region": 6
+  },
+  "FR_thamesvalleyList_3": {
+    "baseLocation": 815997,
+    "region": 6
+  },
+  "FR_thamesvalleyList_4": {
+    "baseLocation": -100,
+    "region": 6
+  },
+  "FR_devonList_1": {
+    "baseLocation": 339463,
+    "region": 7
+  },
+  "FR_devonList_2": {
+    "baseLocation": 735217,
+    "region": 7
+  },
+  "FR_devonList_3": {
+    "baseLocation": 382409,
+    "region": 7
+  },
+  "FR_devonList_4": {
+    "baseLocation": 235617,
+    "region": 7
+  },
+  "FR_devonList_5": {
+    "baseLocation": -100,
+    "region": 7
+  },
+  "FR_devonList_6": {
+    "baseLocation": 475776,
+    "region": 7
+  },
+  "FR_devonList_7": {
+    "baseLocation": 315404,
+    "region": 7
+  },
+  "FR_devonList_8": {
+    "baseLocation": 271813,
+    "region": 7
+  },
+  "FR_dorsetList_1": {
+    "baseLocation": 101633,
+    "region": 7
+  },
+  "FR_dorsetList_2": {
+    "baseLocation": 624161,
+    "region": 7
+  },
+  "FR_dorsetList_3": {
+    "baseLocation": 886493,
+    "region": 7
+  },
+  "FR_dorsetList_4": {
+    "baseLocation": 460592,
+    "region": 7
+  },
+  "FR_dorsetList_5": {
+    "baseLocation": 43104,
+    "region": 7
+  },
+  "FR_dorsetList_6": {
+    "baseLocation": 450049,
+    "region": 7
+  },
+  "FR_dorsetList_7": {
+    "baseLocation": 457273,
+    "region": 7
+  },
+  "FR_dorsetList_8": {
+    "baseLocation": 416742,
+    "region": 7
+  },
+  "FR_bristolList_1": {
+    "baseLocation": 819890,
+    "region": 7
+  },
+  "FR_bristolList_2": {
+    "baseLocation": 198592,
+    "region": 7
+  },
+  "FR_bristolList_3": {
+    "baseLocation": 438850,
+    "region": 7
+  },
+  "FR_bristolList_4": {
+    "baseLocation": 817113,
+    "region": 7
+  },
+  "FR_bristolList_5": {
+    "baseLocation": 411234,
+    "region": 7
+  },
+  "FR_bristolList_6": {
+    "baseLocation": 545334,
+    "region": 7
+  },
+  "FR_bristolList_7": {
+    "baseLocation": 781155,
+    "region": 7
+  },
+  "FR_bristolList_8": {
+    "baseLocation": 314074,
+    "region": 7
+  },
+  "FR_northwalesList_1": {
+    "baseLocation": 637145,
+    "region": 8
+  },
+  "FR_northwalesList_2": {
+    "baseLocation": 366572,
+    "region": 8
+  },
+  "FR_northwalesList_3": {
+    "baseLocation": 379656,
+    "region": 8
+  },
+  "FR_northwalesList_4": {
+    "baseLocation": -100,
+    "region": 8
+  },
+  "FR_northwalesList_5": {
+    "baseLocation": 211138,
+    "region": 8
+  },
+  "FR_nottinghamList_1": {
+    "baseLocation": 424213,
+    "region": 3
+  },
+  "FR_nottinghamList_2": {
+    "baseLocation": 201339,
+    "region": 3
+  },
+  "FR_nottinghamList_3": {
+    "baseLocation": 425094,
+    "region": 3
+  },
+  "FR_nottinghamList_4": {
+    "baseLocation": 195465,
+    "region": 3
+  },
+  "FR_nottinghamList_5": {
+    "baseLocation": 195489,
+    "region": 3
+  },
+  "FR_nottinghamList_6": {
+    "baseLocation": 652852,
+    "region": 3
+  },
+  "FR_nottinghamList_7": {
+    "baseLocation": 455368,
+    "region": 3
+  },
+  "FR_nottinghamList_8": {
+    "baseLocation": 117667,
+    "region": 3
+  },
+  "FR_birminghamList_1": {
+    "baseLocation": 231596,
+    "region": 3
+  },
+  "FR_birminghamList_2": {
+    "baseLocation": 497679,
+    "region": 3
+  },
+  "FR_birminghamList_3": {
+    "baseLocation": 292771,
+    "region": 3
+  },
+  "FR_birminghamList_4": {
+    "baseLocation": -100,
+    "region": 3
+  },
+  "FR_birminghamList_5": {
+    "baseLocation": 758998,
+    "region": 3
+  },
+  "FR_birminghamList_6": {
+    "baseLocation": 177463,
+    "region": 3
+  },
+  "FR_birminghamList_7": {
+    "baseLocation": 195496,
+    "region": 3
+  },
+  "FR_birminghamList_8": {
+    "baseLocation": 102050,
+    "region": 3
+  },
+  "FR_birminghamList_9": {
+    "baseLocation": 195472,
+    "region": 3
+  },
+  "FR_birminghamList_10": {
+    "baseLocation": 228883,
+    "region": 3
+  },
+  "FR_londonList_1": {
+    "baseLocation": 356855,
+    "region": 2
+  },
+  "FR_londonList_2": {
+    "baseLocation": 228015,
+    "region": 2
+  },
+  "FR_londonList_3": {
+    "baseLocation": 621184,
+    "region": 2
+  },
+  "FR_londonList_4": {
+    "baseLocation": 898213,
+    "region": 2
+  },
+  "FR_londonList_5": {
+    "baseLocation": 36791,
+    "region": 2
+  },
+  "FR_londonList_6": {
+    "baseLocation": 229786,
+    "region": 2
+  },
+  "FR_londonList_7": {
+    "baseLocation": 400947,
+    "region": 2
+  },
+  "FR_londonList_8": {
+    "baseLocation": 13660,
+    "region": 2
+  },
+  "FR_londonList_9": {
+    "baseLocation": 25463,
+    "region": 2
+  },
+  "FR_londonList_10": {
+    "baseLocation": 407494,
+    "region": 2
+  },
+  "FR_londonList_11": {
+    "baseLocation": 29656,
+    "region": 2
+  },
+  "FR_londonList_12": {
+    "baseLocation": -100,
+    "region": 2
+  },
+  "FR_liverpoolList_1": {
+    "baseLocation": 345663,
+    "region": 5
+  },
+  "FR_liverpoolList_2": {
+    "baseLocation": 226511,
+    "region": 5
+  },
+  "FR_liverpoolList_3": {
+    "baseLocation": -100,
+    "region": 5
+  },
+  "FR_liverpoolList_4": {
+    "baseLocation": 563906,
+    "region": 5
+  },
+  "FR_liverpoolList_5": {
+    "baseLocation": 444097,
+    "region": 5
+  },
+  "FR_manchesterList_1": {
+    "baseLocation": 701411,
+    "region": 5
+  },
+  "FR_manchesterList_2": {
+    "baseLocation": 560788,
+    "region": 5
+  },
+  "FR_manchesterList_3": {
+    "baseLocation": 245068,
+    "region": 5
+  },
+  "FR_clevelandList_1": {
+    "baseLocation": -100,
+    "region": 4
+  },
+  "FR_clevelandList_2": {
+    "baseLocation": 491107,
+    "region": 4
+  },
+  "FR_clevelandList_3": {
+    "baseLocation": 517400,
+    "region": 4
+  },
+  "FR_clevelandList_4": {
+    "baseLocation": 195537,
+    "region": 4
+  },
+  "FR_clevelandList_5": {
+    "baseLocation": 427519,
+    "region": 4
+  },
+  "FR_clevelandList_6": {
+    "baseLocation": 563156,
+    "region": 4
+  },
+  "FR_clevelandList_7": {
+    "baseLocation": -100,
+    "region": 4
+  },
+  "FR_clevelandList_8": {
+    "baseLocation": 288691,
+    "region": 4
+  },
+  "FR_nw_yorkshireList_1": {
+    "baseLocation": 505683,
+    "region": 4
+  },
+  "FR_nw_yorkshireList_2": {
+    "baseLocation": 88516,
+    "region": 4
+  },
+  "FR_nw_yorkshireList_3": {
+    "baseLocation": 197852,
+    "region": 4
+  },
+  "FR_nw_yorkshireList_4": {
+    "baseLocation": 852649,
+    "region": 4
+  },
+  "FR_nw_yorkshireList_5": {
+    "baseLocation": 107581,
+    "region": 4
+  },
+  "FR_nw_yorkshireList_6": {
+    "baseLocation": 744412,
+    "region": 4
+  },
+  "FR_nw_yorkshireList_7": {
+    "baseLocation": 318324,
+    "region": 4
+  },
+  "FR_nw_yorkshireList_8": {
+    "baseLocation": 455174,
+    "region": 4
+  },
+  "FR_humberList_1": {
+    "baseLocation": 232607,
+    "region": 4
+  },
+  "FR_humberList_2": {
+    "baseLocation": 195520,
+    "region": 4
+  },
+  "FR_humberList_3": {
+    "baseLocation": 640119,
+    "region": 4
+  },
+  "FR_humberList_4": {
+    "baseLocation": 478126,
+    "region": 4
+  },
+  "FR_humberList_5": {
+    "baseLocation": 574546,
+    "region": 4
+  },
+  "FR_kent_surreyList_1": {
+    "baseLocation": 259679,
+    "region": 6
+  },
+  "FR_kent_surreyList_2": {
+    "baseLocation": 465872,
+    "region": 6
+  },
+  "FR_kent_surreyList_3": {
+    "baseLocation": 194172,
+    "region": 6
+  },
+  "FR_kent_surreyList_4": {
+    "baseLocation": -100,
+    "region": 6
+  },
+  "FR_kent_surreyList_5": {
+    "baseLocation": 568484,
+    "region": 6
+  },
+  "FR_kent_surreyList_6": {
+    "baseLocation": 298828,
+    "region": 6
+  },
+  "FR_kent_surreyList_7": {
+    "baseLocation": 478896,
+    "region": 6
+  },
+  "FR_kent_surreyList_8": {
+    "baseLocation": -100,
+    "region": 6
+  },
+  "FR_kent_surreyList_9": {
+    "baseLocation": 784691,
+    "region": 6
+  },
+  "FR_kent_surreyList_10": {
+    "baseLocation": 317442,
+    "region": 6
+  },
+  "FR_newportList_1": {
+    "baseLocation": 217250,
+    "region": 8
+  },
+  "FR_newportList_2": {
+    "baseLocation": 234850,
+    "region": 8
+  },
+  "FR_newportList_3": {
+    "baseLocation": 448345,
+    "region": 8
+  },
+  "FR_newportList_4": {
+    "baseLocation": 232298,
+    "region": 8
+  },
+  "FR_newportList_5": {
+    "baseLocation": 304576,
+    "region": 8
+  },
+  "FR_swanseaList_1": {
+    "baseLocation": -100,
+    "region": 8
+  },
+  "FR_swanseaList_2": {
+    "baseLocation": 827534,
+    "region": 8
+  },
+  "FR_swanseaList_3": {
+    "baseLocation": -100,
+    "region": 8
+  },
+  "FR_swanseaList_4": {
+    "baseLocation": -100,
+    "region": 8
+  },
+  "FR_swanseaList_5": {
+    "baseLocation": 390932,
+    "region": 8
+  },
+  "FR_swanseaList_6": {
+    "baseLocation": 846055,
+    "region": 8
+  }
+}
