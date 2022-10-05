@@ -299,10 +299,12 @@ dependencyManagement {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudBomVersion}"
         mavenBom "io.rest-assured:rest-assured-bom:${restAssuredBomVersion}"
     }
-    dependencySet(group: 'com.fasterxml.jackson.core', version: versions.jackson) {
-        entry 'jackson-databind'
-        entry 'jackson-core'
-        entry 'jackson-annotations'
+    dependencies {
+        dependencySet(group: 'com.fasterxml.jackson.core', version: versions.jackson) {
+            entry 'jackson-databind'
+            entry 'jackson-core'
+            entry 'jackson-annotations'
+        }
     }
 }
 
