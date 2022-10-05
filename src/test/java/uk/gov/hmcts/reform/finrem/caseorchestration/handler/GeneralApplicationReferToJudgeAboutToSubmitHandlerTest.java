@@ -107,7 +107,7 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void givenCase_whenNoApplicationAvailableToReject_thenReturnError() {
+    public void givenContestedCase_whenNonCollectionGeneralApplicationExistAndAlreadyReferred_thenReturnError() {
         CallbackRequest callbackRequest = buildCallbackRequest(NO_GA_JSON);
 
         AboutToStartOrSubmitCallbackResponse startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);

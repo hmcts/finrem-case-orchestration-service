@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
@@ -19,12 +20,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_OUTCOME_DECISION;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GeneralApplicationAboutToStartHandlerTest {
@@ -79,14 +84,31 @@ public class GeneralApplicationAboutToStartHandlerTest {
 
         Map<String, Object> caseData = handle.getData();
         List<GeneralApplicationCollectionData> generalApplicationList = helper.getGeneralApplicationList(caseData);
-        assertData(generalApplicationList.get(0).getGeneralApplicationItems());
+        assertData(caseData, generalApplicationList.get(0).getGeneralApplicationItems());
     }
 
-    private void assertData(GeneralApplicationItems generalApplicationItems) {
+    @Test
+    public void givenContestedCase_whenExistingGeneAppAndDirectionGiven_thenMigrateToCollection() {
+        CallbackRequest callbackRequest = buildCallbackRequest();
+        Map<String, Object> data = callbackRequest.getCaseDetails().getData();
+        data.put(GENERAL_APPLICATION_OUTCOME_DECISION, GeneralApplicationStatus.APPROVED.getId());
+        data.put(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED, YES_VALUE);
+        AboutToStartOrSubmitCallbackResponse handle = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        Map<String, Object> caseData = handle.getData();
+        List<GeneralApplicationCollectionData> generalApplicationList = helper.getGeneralApplicationList(caseData);
+        assertData(data, generalApplicationList.get(0).getGeneralApplicationItems());
+    }
+
+    private void assertData(Map<String, Object> caseData, GeneralApplicationItems generalApplicationItems) {
         assertEquals("applicant", generalApplicationItems.getGeneralApplicationReceivedFrom());
         assertEquals("Claire Mumford", generalApplicationItems.getGeneralApplicationCreatedBy());
         assertEquals("No", generalApplicationItems.getGeneralApplicationHearingRequired());
-        assertEquals("Created", generalApplicationItems.getGeneralApplicationStatus());
+        String directionGiven = Objects.toString(caseData.get(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED),null);
+        assertEquals(directionGiven == null
+                ? GeneralApplicationStatus.CREATED.getId() : GeneralApplicationStatus.DIRECTION_APPROVED.getId(),
+            generalApplicationItems.getGeneralApplicationStatus());
+        System.out.println(generalApplicationItems.getGeneralApplicationStatus());
         assertNull(generalApplicationItems.getGeneralApplicationTimeEstimate());
         assertNull(generalApplicationItems.getGeneralApplicationSpecialMeasures());
         CaseDocument generalApplicationDocument = generalApplicationItems.getGeneralApplicationDocument();
