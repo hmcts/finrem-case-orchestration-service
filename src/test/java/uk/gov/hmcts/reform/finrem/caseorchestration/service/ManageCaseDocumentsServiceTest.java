@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,8 +32,10 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
     private ManageCaseDocumentsService manageCaseDocumentsService;
 
     private CaseDetails caseDetails;
+    private CaseDetails caseDetailsBefore;
 
     private Map<String, Object> caseData;
+    private Map<String, Object> caseDataBefore;
 
     private final List<ContestedUploadedDocumentData> uploadDocumentList = new ArrayList<>();
 
@@ -44,6 +47,7 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
         when(featureToggleService.isManageBundleEnabled()).thenReturn(false);
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         caseDetails = buildCaseDetails();
+        caseDetailsBefore = buildCaseDetails();
         caseData = caseDetails.getData();
     }
 
@@ -191,6 +195,17 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
         assertThat(getDocumentCollection(caseData, FDR_DOCS_COLLECTION), hasSize(0));
     }
 
+    @Test
+    public void givenSetCaseDataBeforeManageCaseDocumentCollection_populateManageCaseDocumentCollection() {
+        caseData = populateCaseDataManageCaseDocumentCollection().getData();
+        caseDataBefore = populateCaseDataBefore().getData();
+
+        manageCaseDocumentsService.setCaseDataBeforeManageCaseDocumentCollection(caseData, caseDataBefore);
+
+        assertThat(getDocumentCollection(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION), hasSize(3));
+        assertThat(getDocumentCollection(caseDataBefore, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION), hasSize(2));
+    }
+
     private CaseDetails populateCaseData() {
 
         uploadDocumentList.add(createContestedUploadDocumentItem("123","Chronology", "Respondent", "no", null));
@@ -200,10 +215,32 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
         caseDocs.add(createContestedUploadDocumentItem("123", "Chronology", "respondent", "no", null));
 
         caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, caseDocs);
-
         caseDetails.getData().put(RESP_CHRONOLOGIES_STATEMENTS_COLLECTION, uploadDocumentList);
 
         return caseDetails;
+    }
+
+    private CaseDetails populateCaseDataManageCaseDocumentCollection() {
+
+        uploadDocumentList.add(createContestedUploadDocumentItem("123","Chronology", "Respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("456","Chronology", "Respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("1234", "Chronology", "applicant", "no", null));
+
+        caseDetails.getData().put(CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION, uploadDocumentList);
+
+        return caseDetails;
+    }
+
+    private CaseDetails populateCaseDataBefore() {
+
+        List<ContestedUploadedDocumentData> caseDocs = new ArrayList<>();
+        caseDocs.add(createContestedUploadDocumentItem("123", "Chronology", "respondent", "no", null));
+
+        caseDetailsBefore.getData().put(RESP_CHRONOLOGIES_STATEMENTS_COLLECTION, caseDocs);
+        caseDetailsBefore.getData().put(APP_CHRONOLOGIES_STATEMENTS_COLLECTION,
+            List.of(createContestedUploadDocumentItem("1234", "Chronology", "applicant", "no", null)));
+
+        return caseDetailsBefore;
     }
 
     private List<ContestedUploadedDocumentData> getDocumentCollection(Map<String, Object> data, String field) {
@@ -226,6 +263,7 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
                 .caseDocumentOther(other)
                 .caseDocumentFdr("no")
                 .hearingDetails("hearingDetails")
+                .caseDocumentUploadDateTime(LocalDateTime.now())
                 .build())
             .build();
     }

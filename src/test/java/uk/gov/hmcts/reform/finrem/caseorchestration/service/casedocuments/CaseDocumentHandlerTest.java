@@ -2,16 +2,19 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Before;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 
@@ -31,7 +34,10 @@ public abstract class CaseDocumentHandlerTest {
 
     protected ContestedUploadedDocumentData createContestedUploadDocumentItem(String type, String party,
                                                                               String isConfidential, String isFdr, String other) {
+        UUID uuid = UUID.randomUUID();
+
         return ContestedUploadedDocumentData.builder()
+            .id(uuid.toString())
             .uploadedCaseDocument(ContestedUploadedDocument
                 .builder()
                 .caseDocuments(new CaseDocument())
@@ -41,6 +47,7 @@ public abstract class CaseDocumentHandlerTest {
                 .caseDocumentOther(other)
                 .caseDocumentFdr(isFdr)
                 .hearingDetails(null)
+                .caseDocumentUploadDateTime(LocalDateTime.now())
                 .build())
             .build();
     }
@@ -51,7 +58,7 @@ public abstract class CaseDocumentHandlerTest {
     }
 
     protected List<ContestedUploadedDocumentData> getDocumentCollection(Map<String, Object> data, String field) {
-        return mapper.convertValue(data.get(field),
+        return mapper.registerModule(new JavaTimeModule()).convertValue(data.get(field),
             new TypeReference<>() {
             });
     }

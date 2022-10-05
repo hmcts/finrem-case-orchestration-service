@@ -22,10 +22,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDi
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_OUTCOME_DECISION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_OUTCOME_OTHER;
 
 @Slf4j
 @Service
@@ -66,7 +69,6 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
         } catch (InvalidCaseDataException invalidCaseDataException) {
             errors.add(invalidCaseDataException.getMessage());
         }
-
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build();
     }
 
@@ -77,8 +79,11 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
         List<GeneralApplicationCollectionData> existingGeneralApplication = helper.getGeneralApplicationList(caseData);
         GeneralApplicationCollectionData data = helper.migrateExistingGeneralApplication(caseData);
         if (data != null) {
+            String status = Objects.toString(caseData.get(GENERAL_APPLICATION_OUTCOME_DECISION), null);
+            log.info("In migration outcome decision {} for general application for Case ID: {} Event type {}",
+                status, caseDetails.getId(), EventType.GENERAL_APPLICATION_DIRECTIONS);
             setStatusForNonCollAndBulkPrintDouments(caseDetails,
-                data, bulkPrintDocuments,null, userAuthorisation);
+                data, bulkPrintDocuments, status, userAuthorisation);
             existingGeneralApplication.add(data);
             caseData.put(GENERAL_APPLICATION_COLLECTION,existingGeneralApplication);
         }
@@ -126,8 +131,11 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
         GeneralApplicationItems items = data.getGeneralApplicationItems();
         CaseDocument caseDocument = service.getBulkPrintDocument(caseDetails, userAuthorisation);
         items.setGeneralApplicationDirectionsDocument(caseDocument);
-
+        items.setGeneralApplicationOutcomeOther(Objects.toString(caseDetails.getData().get(GENERAL_APPLICATION_OUTCOME_OTHER), null));
         String gaElementStatus =  status != null ? status : items.getGeneralApplicationStatus();
+
+        log.info("status {} for general application for Case ID: {} Event type {}",
+            status, caseDetails.getId(), EventType.GENERAL_APPLICATION_DIRECTIONS);
 
         switch (gaElementStatus) {
             case "Approved" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_APPROVED.getId());

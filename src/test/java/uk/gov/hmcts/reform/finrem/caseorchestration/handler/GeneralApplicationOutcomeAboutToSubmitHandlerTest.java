@@ -78,17 +78,17 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest {
             is(false));
     }
 
+    //This senario should not come
     @Test
     public void givenCase_whenNonCollectionApproveAnApplication_thenMigratedAndUpdateStatusApproved() {
         CallbackRequest callbackRequest = buildCallbackRequest(GA_NON_COLL_JSON);
-        callbackRequest.getCaseDetails().getData().put(GENERAL_APPLICATION_OUTCOME_DECISION, APPROVED.getId());
-
         AboutToStartOrSubmitCallbackResponse startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = startHandle.getData();
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_OUTCOME_LIST));
         assertEquals(1, dynamicList.getListItems().size());
 
+        callbackRequest.getCaseDetails().getData().put(GENERAL_APPLICATION_OUTCOME_DECISION, APPROVED.getId());
         AboutToStartOrSubmitCallbackResponse submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> data = submitHandle.getData();
@@ -99,6 +99,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest {
         assertEquals(GeneralApplicationStatus.APPROVED.getId(),
             generalApplicationCollectionData.get(0).getGeneralApplicationItems().getGeneralApplicationStatus());
         assertNull(data.get(GENERAL_APPLICATION_OUTCOME_LIST));
+        assertNull(data.get(GENERAL_APPLICATION_OUTCOME_DECISION));
     }
 
     @Test
@@ -121,6 +122,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest {
         assertEquals(GeneralApplicationStatus.APPROVED.getId(),
             generalApplicationCollectionData.get(1).getGeneralApplicationItems().getGeneralApplicationStatus());
         assertNull(data.get(GENERAL_APPLICATION_OUTCOME_LIST));
+        assertNull(data.get(GENERAL_APPLICATION_OUTCOME_DECISION));
     }
 
     @Test
