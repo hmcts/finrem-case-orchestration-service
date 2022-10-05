@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseLocation;
 
@@ -33,11 +34,18 @@ public class CaseManagementLocationService {
     private static final String COURT_ID_MAPPING_PATH = "/json/court-id-mappings.json";
 
     private final ObjectMapper objectMapper;
+    private final CaseDataService caseDataService;
 
     public AboutToStartOrSubmitCallbackResponse setCaseManagementLocation(CallbackRequest callbackRequest) {
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        Map<String, Object> caseData = caseDetails.getData();
         List<String> errors = new ArrayList<>();
-        String selectedCourtId = Objects.toString(caseData.get(getSelectedCourt(caseData)), StringUtils.EMPTY);
+
+        boolean isConsentedCase = caseDataService.isConsentedApplication(caseDetails);
+
+        String selectedCourtId = isConsentedCase
+            ? ConsentedCaseHearingFunctions.getSelectedCourt(caseDetails)
+            : Objects.toString(caseData.get(getSelectedCourt(caseData)), StringUtils.EMPTY);
 
         if (selectedCourtId.isEmpty()) {
             errors.add("Selected court data is missing from caseData");
