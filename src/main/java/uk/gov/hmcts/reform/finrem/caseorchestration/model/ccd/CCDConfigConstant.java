@@ -579,4 +579,8 @@ public class CCDConfigConstant {
     //Upload Approved Order
     public static final String HEARING_DIRECTION_DETAILS_COLLECTION = "hearingDirectionDetailsCollection";
     public static final String HEARING_NOTICE_DOCUMENT_PACK = "hearingNoticeDocumentPack";
+
+    //Case Flags
+    public static final String CASE_FLAGS_APPLICANT = "applicantFlags";
+    public static final String CASE_FLAGS_RESPONDENT = "respondentFlags";
 }
