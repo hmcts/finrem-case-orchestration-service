@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ChangeOfRepresentationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 
 import java.util.HashMap;
@@ -44,6 +45,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
@@ -88,6 +90,8 @@ public class ManageBarristerServiceTest {
     private CaseDataService caseDataService;
     @Mock
     private CaseAssignedRoleService caseAssignedRoleService;
+    @Mock
+    private NotificationService notificationService;
     @Spy
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -157,10 +161,12 @@ public class ManageBarristerServiceTest {
         assertThat(barristerData, is(applicantBarristers));
     }
 
+
+
     @Test
     public void givenValidData_whenUpdateBarristerAccess_thenGrantAccessAndGenerateRepresentationUpdateData() {
         caseDetails.getData().put(CASE_ROLE, APP_SOLICITOR_POLICY);
-        when(barristerUpdateDifferenceCalculator.calculate(any(), any())).thenReturn(buildAddedBarristerChange());
+        when(barristerUpdateDifferenceCalculator.calculate(any(), any())).thenReturn(buildBarristerChange());
         when(organisationService.findUserByEmail(APP_BARRISTER_EMAIL_ONE, AUTH_TOKEN)).thenReturn(Optional.of(BARRISTER_USER_ID));
         when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn(APP_SOLICITOR);
         when(caseDataService.buildFullApplicantName(any())).thenReturn(CLIENT_NAME);
@@ -196,7 +202,7 @@ public class ManageBarristerServiceTest {
     @Test
     public void givenNoUserFound_whenUpdateBarristerAccess_thenThrowError() {
         caseDetails.getData().put(CASE_ROLE, APP_SOLICITOR_POLICY);
-        when(barristerUpdateDifferenceCalculator.calculate(any(), any())).thenReturn(buildAddedBarristerChange());
+        when(barristerUpdateDifferenceCalculator.calculate(any(), any())).thenReturn(buildBarristerChange());
         when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN)).thenReturn(
             buildCaseAssignedUserRolesResource(APP_SOLICITOR_POLICY));
         when(organisationService.findUserByEmail(APP_BARRISTER_EMAIL_ONE, AUTH_TOKEN)).thenReturn(Optional.empty());
@@ -209,6 +215,19 @@ public class ManageBarristerServiceTest {
         String expectedMessage = "Could not find the user with email " + APP_BARRISTER_EMAIL_ONE;
         String actual = exception.getMessage();
         assertEquals(expectedMessage, actual);
+    }
+
+    @Test
+    public void givenValidData_whenNotifyBarristerAccess_sendBarristerNotification() {
+        caseDetails.getData().put(CASE_ROLE, APP_SOLICITOR_POLICY);
+        when(barristerUpdateDifferenceCalculator.calculate(any(), any())).thenReturn(buildBarristerChange());
+
+        manageBarristerService.notifyBarristerAccess(caseDetails,
+            List.of(DEFAULT_BARRISTER),
+            List.of(DEFAULT_BARRISTER));
+
+        verify(notificationService).sendBarristerAddedEmail(eq(caseDetails), any());
+        verify(notificationService).sendBarristerRemovedEmail(eq(caseDetails), any());
     }
 
     private List<BarristerData> applicantBarristerCollection() {
@@ -245,11 +264,15 @@ public class ManageBarristerServiceTest {
         );
     }
 
-    private BarristerChange buildAddedBarristerChange() {
+    private BarristerChange buildBarristerChange() {
         return BarristerChange.builder()
             .added(Set.of(Barrister.builder()
                     .email(APP_BARRISTER_EMAIL_ONE)
                     .organisation(Organisation.builder().organisationID(SOME_ORG_ID).build())
+                .build()))
+            .removed(Set.of(Barrister.builder()
+                .email(APP_BARRISTER_EMAIL_TWO)
+                .organisation(Organisation.builder().organisationID(SOME_ORG_ID).build())
                 .build()))
             .build();
     }

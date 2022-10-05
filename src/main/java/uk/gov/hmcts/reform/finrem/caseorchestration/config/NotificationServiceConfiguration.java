@@ -45,6 +45,5 @@ public class NotificationServiceConfiguration {
     private String updateFRCInformationCourt;
     private String generalApplicationRejection;
     private String addedBarrister;
-
     private String removedBarrister;
 }
