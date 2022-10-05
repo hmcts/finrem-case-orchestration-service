@@ -98,13 +98,10 @@ public class ManageBarristerSubmittedHandlerTest {
         when(manageBarristerService.getBarristersForParty(callbackRequest.getCaseDetailsBefore(), AUTH_TOKEN))
             .thenReturn(barristerCollection);
         List<Barrister> barristers = getBarristers().stream().map(BarristerData::getBarrister).toList();
-        when(manageBarristerService.updateBarristerAccess(callbackRequest.getCaseDetails(),
-            barristers, barristers, AUTH_TOKEN)).thenReturn(Map.of(REPRESENTATION_UPDATE_HISTORY, RepresentationUpdateHistory.builder().build()));
 
-        AboutToStartOrSubmitCallbackResponse response = manageBarristerAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+        AboutToStartOrSubmitCallbackResponse response = manageBarristerSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(manageBarristerService).updateBarristerAccess(callbackRequest.getCaseDetails(), barristers, barristers, AUTH_TOKEN);
-        assertTrue(response.getData().containsKey(REPRESENTATION_UPDATE_HISTORY));
+        verify(manageBarristerService).notifyBarristerAccess(callbackRequest.getCaseDetails(), barristers, barristers);
     }
 
 
