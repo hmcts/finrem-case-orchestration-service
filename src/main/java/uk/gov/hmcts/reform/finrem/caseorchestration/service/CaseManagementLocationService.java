@@ -3,10 +3,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -27,14 +27,21 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getSelectedCourt;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class CaseManagementLocationService {
 
-    private static final String COURT_ID_MAPPING_PATH = "/json/court-id-mappings.json";
+    private final String courtIdMappingJsonFile;
 
     private final ObjectMapper objectMapper;
     private final CaseDataService caseDataService;
+
+    public CaseManagementLocationService(@Value("${courtIdMappingJsonFile}") String courtIdMappingJsonFile,
+                                         ObjectMapper objectMapper,
+                                         CaseDataService caseDataService) {
+        this.courtIdMappingJsonFile = courtIdMappingJsonFile;
+        this.objectMapper = objectMapper;
+        this.caseDataService = caseDataService;
+    }
 
     public AboutToStartOrSubmitCallbackResponse setCaseManagementLocation(CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
@@ -61,7 +68,8 @@ public class CaseManagementLocationService {
     }
 
     private String getCourtIdMappingsString() {
-        try (InputStream inputStream = this.getClass().getResourceAsStream(COURT_ID_MAPPING_PATH)) {
+        System.out.println(courtIdMappingJsonFile);
+        try (InputStream inputStream = this.getClass().getResourceAsStream(courtIdMappingJsonFile)) {
             return IOUtils.toString(inputStream, UTF_8);
         } catch (IOException e) {
             throw new CourtDetailsParseException();

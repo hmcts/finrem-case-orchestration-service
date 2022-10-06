@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -44,6 +45,7 @@ public class CaseManagementLocationServiceTest {
     private ObjectMapper objectMapper = new ObjectMapper();
     @Mock
     private CaseDataService caseDataService;
+
     @InjectMocks
     private CaseManagementLocationService caseManagementLocationService;
 
@@ -56,6 +58,7 @@ public class CaseManagementLocationServiceTest {
         caseData = new HashMap<>();
         caseDetails = CaseDetails.builder().id(CASE_ID).data(caseData).build();
         callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        ReflectionTestUtils.setField(caseManagementLocationService, "courtIdMappingJsonFile", "/json/court-id-mappings.json");
     }
 
     @Test

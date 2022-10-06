@@ -62,6 +62,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class ConsentedCaseHearingFunctions {
 
+    private ConsentedCaseHearingFunctions() {
+
+    }
+
     public static String getSelectedCourt(Map<String, Object> caseData) {
         return switch (Objects.toString(caseData.get(REGION), EMPTY)) {
             case SOUTHWEST -> getSouthWestFRC(caseData);
