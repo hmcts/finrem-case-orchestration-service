@@ -116,7 +116,7 @@ public class ContestedCourtHelper {
         .put("FR_manchester_hc_list_3", "Wigan County Court and Family Court")
         .build();
     private static Map<String, String> cleavelandMap = ImmutableMap.<String, String>builder()
-        .put("FR_cleaveland_hc_list_1", "Newcastle upon Tyne Justice Centre")
+        .put("FR_cleaveland_hc_list_1", "Newcastle Civil and Family Courts and Tribunals Centre")
         .put("FR_cleaveland_hc_list_2", "Durham Justice Centre")
         .put("FR_cleaveland_hc_list_3", "Sunderland County and Family Court")
         .put("FR_cleaveland_hc_list_4", "Middlesbrough County Court at Teesside Combined Court")
