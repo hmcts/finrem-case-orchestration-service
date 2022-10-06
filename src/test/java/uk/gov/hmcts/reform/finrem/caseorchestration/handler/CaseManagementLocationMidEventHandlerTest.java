@@ -26,7 +26,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_MANAGEMENT_LOCATION;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CreateCaseMidEventHandlerTest {
+public class CaseManagementLocationMidEventHandlerTest {
 
     public static final String BASE_LOCATION = "123458";
     public static final String REGION = "1";
@@ -35,46 +35,67 @@ public class CreateCaseMidEventHandlerTest {
     private CaseManagementLocationService caseManagementLocationService;
 
     @InjectMocks
-    private CreateCaseMidEventHandler createCaseMidEventHandler;
+    private CaseManagementLocationMidEventHandler caseManagementLocationMidEventHandler;
 
     @Test
     public void givenCallbackCanBeHandledCreateCase_whenCanHandleCalled_thenReturnTrue() {
-        assertThat(createCaseMidEventHandler
+        assertThat(caseManagementLocationMidEventHandler
                 .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.SOLICITOR_CREATE),
             is(true));
     }
 
     @Test
     public void givenCallbackCanBeHandledPaperCase_whenCanHandleCalled_thenReturnTrue() {
-        assertThat(createCaseMidEventHandler
+        assertThat(caseManagementLocationMidEventHandler
                 .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.PAPER_CASE),
             is(true));
     }
 
     @Test
+    public void givenCallbackCanBeHandledUpdateFrcInfo_whenCanHandleCalled_thenReturnTrue() {
+        assertThat(caseManagementLocationMidEventHandler
+                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.UPDATE_FRC_INFORMATION),
+            is(true));
+    }
+
+    @Test
+    public void givenCallbackCanBeHandledAllocationDirections_whenCanHandleCalled_thenReturnTrue() {
+        assertThat(caseManagementLocationMidEventHandler
+                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.GIVE_ALLOCATION_DIRECTIONS),
+            is(true));
+    }
+
+    @Test
+    public void givenCallbackCanBeHandledListForHearing_whenCanHandleCalled_thenReturnTrue() {
+        assertThat(caseManagementLocationMidEventHandler
+                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.LIST_FOR_HEARING),
+            is(true));
+    }
+
+    @Test
     public void givenCallbackCanBeHandledAmendApplication_whenCanHandleCalled_thenReturnTrue() {
-        assertThat(createCaseMidEventHandler
+        assertThat(caseManagementLocationMidEventHandler
                 .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.AMEND_CONTESTED_APP_DETAILS),
             is(true));
     }
 
     @Test
     public void givenCallbackCannotBeHandledBadCallbackType_whenCanHandleCalled_thenReturnFalse() {
-        assertThat(createCaseMidEventHandler
+        assertThat(caseManagementLocationMidEventHandler
                 .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.PAPER_CASE),
             is(false));
     }
 
     @Test
     public void givenCallbackCannotBeHandledBadCaseType_whenCanHandleCalled_thenReturnFalse() {
-        assertThat(createCaseMidEventHandler
+        assertThat(caseManagementLocationMidEventHandler
                 .canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.PAPER_CASE),
             is(false));
     }
 
     @Test
     public void givenCallbackCannotBeHandledBadEventType_whenCanHandleCalled_thenReturnFalse() {
-        assertThat(createCaseMidEventHandler
+        assertThat(caseManagementLocationMidEventHandler
                 .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.MANAGE_CASE_DOCUMENTS),
             is(false));
     }
@@ -88,7 +109,7 @@ public class CreateCaseMidEventHandlerTest {
         when(caseManagementLocationService.setCaseManagementLocation(any()))
             .thenReturn(aboutToStartOrSubmitCallbackResponse());
 
-        AboutToStartOrSubmitCallbackResponse response = createCaseMidEventHandler.handle(callbackRequest, AUTH_TOKEN);
+        AboutToStartOrSubmitCallbackResponse response = caseManagementLocationMidEventHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(caseManagementLocationService).setCaseManagementLocation(callbackRequest);
 

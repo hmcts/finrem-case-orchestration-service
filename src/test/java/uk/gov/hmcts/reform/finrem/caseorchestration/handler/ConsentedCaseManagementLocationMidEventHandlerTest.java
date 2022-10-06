@@ -26,7 +26,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_MANAGEMENT_LOCATION;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GiveAllocationDirectionsMidEventHandlerTest {
+public class ConsentedCaseManagementLocationMidEventHandlerTest {
 
     public static final String BASE_LOCATION = "123458";
     public static final String REGION = "1";
@@ -35,33 +35,49 @@ public class GiveAllocationDirectionsMidEventHandlerTest {
     private CaseManagementLocationService caseManagementLocationService;
 
     @InjectMocks
-    private GiveAllocationDirectionsMidEventHandler giveAllocationDirectionsMidEventHandler;
+    private ConsentedCaseManagementLocationMidEventHandler consentedCaseManagementLocationMidEventHandler;
+
+    private CallbackRequest callbackRequest;
 
     @Test
     public void givenCallbackCanBeHandledCreateCase_whenCanHandleCalled_thenReturnTrue() {
-        assertThat(giveAllocationDirectionsMidEventHandler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.GIVE_ALLOCATION_DIRECTIONS),
+        assertThat(consentedCaseManagementLocationMidEventHandler
+                .canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.AMEND_APP_DETAILS),
+            is(true));
+    }
+
+    @Test
+    public void givenCallbackCanBeHandledUpdateFrcInfo_whenCanHandleCalled_thenReturnTrue() {
+        assertThat(consentedCaseManagementLocationMidEventHandler
+                .canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.CONSENTED_UPDATE_COURT_INFO),
+            is(true));
+    }
+
+    @Test
+    public void givenCallbackCanBeHandledPaperCase_whenCanHandleCalled_thenReturnTrue() {
+        assertThat(consentedCaseManagementLocationMidEventHandler
+                .canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.AMEND_APP_DETAILS),
             is(true));
     }
 
     @Test
     public void givenCallbackCannotBeHandledBadCallbackType_whenCanHandleCalled_thenReturnFalse() {
-        assertThat(giveAllocationDirectionsMidEventHandler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.GIVE_ALLOCATION_DIRECTIONS),
+        assertThat(consentedCaseManagementLocationMidEventHandler
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.AMEND_APP_DETAILS),
             is(false));
     }
 
     @Test
     public void givenCallbackCannotBeHandledBadCaseType_whenCanHandleCalled_thenReturnFalse() {
-        assertThat(giveAllocationDirectionsMidEventHandler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.GIVE_ALLOCATION_DIRECTIONS),
+        assertThat(consentedCaseManagementLocationMidEventHandler
+                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.AMEND_APP_DETAILS),
             is(false));
     }
 
     @Test
     public void givenCallbackCannotBeHandledBadEventType_whenCanHandleCalled_thenReturnFalse() {
-        assertThat(giveAllocationDirectionsMidEventHandler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.MANAGE_CASE_DOCUMENTS),
+        assertThat(consentedCaseManagementLocationMidEventHandler
+                .canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.MANAGE_CASE_DOCUMENTS),
             is(false));
     }
 
@@ -69,12 +85,12 @@ public class GiveAllocationDirectionsMidEventHandlerTest {
     public void givenValidRequest_whenHandle_thenReturnExpectedResponse() {
         Map<String, Object> caseData = new HashMap<>();
         CaseDetails caseDetails = CaseDetails.builder().data(caseData).build();
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
         when(caseManagementLocationService.setCaseManagementLocation(any()))
             .thenReturn(aboutToStartOrSubmitCallbackResponse());
 
-        AboutToStartOrSubmitCallbackResponse response = giveAllocationDirectionsMidEventHandler.handle(callbackRequest, AUTH_TOKEN);
+        AboutToStartOrSubmitCallbackResponse response = consentedCaseManagementLocationMidEventHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(caseManagementLocationService).setCaseManagementLocation(callbackRequest);
 
@@ -93,5 +109,4 @@ public class GiveAllocationDirectionsMidEventHandlerTest {
             .region(REGION)
             .build();
     }
-
 }
