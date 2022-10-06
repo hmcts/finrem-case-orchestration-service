@@ -57,10 +57,7 @@ public class CaseManagementLocationService {
             errors.add(String.format("Error parsing court Ids: %s", e.getMessage()));
         }
 
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseData)
-            .errors(errors.isEmpty() ? null : errors)
-            .build();
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build();
     }
 
     private String getCourtIdMappingsString() {
@@ -73,9 +70,8 @@ public class CaseManagementLocationService {
 
     private String getSelectedCourtId(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
-        boolean isConsentedCase = caseDataService.isConsentedApplication(caseDetails);
 
-        return isConsentedCase
+        return caseDataService.isConsentedApplication(caseDetails)
             ? ConsentedCaseHearingFunctions.getSelectedCourt(caseData)
             : Objects.toString(caseData.get(getSelectedCourt(caseData)), StringUtils.EMPTY);
     }
