@@ -9,12 +9,15 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 public class FlagDetailsData {
+
+    @JsonProperty("id")
+    private String id;
+    @JsonProperty("value")
+    private List<FlagDetails> details;
+
     @JsonProperty("partyName")
     private String partyName;
     @JsonProperty("roleOnCase")
     private String roleOnCase;
-    @JsonProperty("details")
-    private List<FlagDetails> details;
-
 }
 
