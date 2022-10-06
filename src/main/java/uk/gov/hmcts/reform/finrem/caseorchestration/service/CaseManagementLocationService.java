@@ -41,13 +41,9 @@ public class CaseManagementLocationService {
         Map<String, Object> caseData = caseDetails.getData();
         List<String> errors = new ArrayList<>();
 
-        boolean isConsentedCase = caseDataService.isConsentedApplication(caseDetails);
+        String selectedCourtId = getSelectedCourtId(caseDetails);
 
-        String selectedCourtId = isConsentedCase
-            ? ConsentedCaseHearingFunctions.getSelectedCourt(caseDetails)
-            : Objects.toString(caseData.get(getSelectedCourt(caseData)), StringUtils.EMPTY);
-
-        if (selectedCourtId.isEmpty()) {
+        if (StringUtils.isBlank(selectedCourtId)) {
             errors.add("Selected court data is missing from caseData");
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build();
         }
@@ -59,17 +55,28 @@ public class CaseManagementLocationService {
             caseData.put(CASE_MANAGEMENT_LOCATION, caseManagementLocation);
         } catch (JsonProcessingException e) {
             errors.add(String.format("Error parsing court Ids: %s", e.getMessage()));
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build();
         }
 
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseData)
+            .errors(errors.isEmpty() ? null : errors)
+            .build();
     }
 
     private String getCourtIdMappingsString() {
-        try (InputStream inputStream = CaseHearingFunctions.class.getResourceAsStream(COURT_ID_MAPPING_PATH)) {
+        try (InputStream inputStream = this.getClass().getResourceAsStream(COURT_ID_MAPPING_PATH)) {
             return IOUtils.toString(inputStream, UTF_8);
         } catch (IOException e) {
             throw new CourtDetailsParseException();
         }
+    }
+
+    private String getSelectedCourtId(CaseDetails caseDetails) {
+        Map<String, Object> caseData = caseDetails.getData();
+        boolean isConsentedCase = caseDataService.isConsentedApplication(caseDetails);
+
+        return isConsentedCase
+            ? ConsentedCaseHearingFunctions.getSelectedCourt(caseData)
+            : Objects.toString(caseData.get(getSelectedCourt(caseData)), StringUtils.EMPTY);
     }
 }

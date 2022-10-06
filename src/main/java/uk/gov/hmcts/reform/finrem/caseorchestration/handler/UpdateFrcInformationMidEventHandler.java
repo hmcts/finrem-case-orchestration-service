@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseManagementLocati
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class CreateCaseMidEventHandler implements CallbackHandler {
+public class UpdateFrcInformationMidEventHandler implements CallbackHandler {
 
     private final CaseManagementLocationService caseManagementLocationService;
 
@@ -21,9 +21,7 @@ public class CreateCaseMidEventHandler implements CallbackHandler {
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.MID_EVENT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && (EventType.SOLICITOR_CREATE.equals(eventType)
-            || EventType.PAPER_CASE.equals(eventType)
-            || EventType.AMEND_CONTESTED_APP_DETAILS.equals(eventType));
+            && EventType.UPDATE_FRC_INFORMATION.equals(eventType);
     }
 
     @Override

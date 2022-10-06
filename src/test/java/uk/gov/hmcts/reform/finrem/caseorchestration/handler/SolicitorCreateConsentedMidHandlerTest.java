@@ -1,8 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -11,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseManagementLocationService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +24,9 @@ import java.util.Map;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CONSENT_ORDER_CAMELCASE_LABEL_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CONSENT_ORDER_LOWERCASE_LABEL_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CONSENT_OTHER_DOC_LABEL_VALUE;
@@ -32,13 +40,17 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @RunWith(MockitoJUnitRunner.class)
 public class SolicitorCreateConsentedMidHandlerTest {
 
-    private SolicitorCreateConsentedMidHandler solicitorCreateConsentedMidHandler;
     public static final String AUTH_TOKEN = "4d73f8d4-2a8d-48e2-af91-11cbaa642345";
 
-    @Before
-    public void setup() {
-        solicitorCreateConsentedMidHandler = new SolicitorCreateConsentedMidHandler(new ConsentedApplicationHelper());
-    }
+    @Mock
+    private CaseManagementLocationService caseManagementLocationService;
+    @Spy
+    private ConsentedApplicationHelper consentedApplicationHelper = new ConsentedApplicationHelper();
+    @InjectMocks
+    private SolicitorCreateConsentedMidHandler solicitorCreateConsentedMidHandler;
+
+    @Captor
+    private ArgumentCaptor<CallbackRequest> requestCaptor;
 
     @Test
     public void given_case_whenEvent_type_is_amendApp_thenCanHandle() {
@@ -74,14 +86,20 @@ public class SolicitorCreateConsentedMidHandlerTest {
         List<String> orderList  = List.of("Variation Order", "Property Adjustment Order");
         callbackRequest.getCaseDetails().getData().put("natureOfApplication2", orderList);
 
-        AboutToStartOrSubmitCallbackResponse response =
-            solicitorCreateConsentedMidHandler.handle(callbackRequest, AUTH_TOKEN);
+        when(caseManagementLocationService.setCaseManagementLocation(any()))
+            .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().build());
 
-        final String camelCaseLabel = (String) response.getData().get(CV_ORDER_CAMELCASE_LABEL_FIELD);
+        solicitorCreateConsentedMidHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(caseManagementLocationService).setCaseManagementLocation(requestCaptor.capture());
+
+        Map<String, Object> responseData = requestCaptor.getValue().getCaseDetails().getData();
+
+        final String camelCaseLabel = (String) responseData.get(CV_ORDER_CAMELCASE_LABEL_FIELD);
         assertEquals(VARIATION_ORDER_CAMELCASE_LABEL_VALUE, camelCaseLabel);
-        final String lowerCaseLabel = (String) response.getData().get(CV_LOWERCASE_LABEL_FIELD);
+        final String lowerCaseLabel = (String) responseData.get(CV_LOWERCASE_LABEL_FIELD);
         assertEquals(VARIATION_ORDER_LOWERCASE_LABEL_VALUE, lowerCaseLabel);
-        final String docLabel = (String) response.getData().get(CV_OTHER_DOC_LABEL_FIELD);
+        final String docLabel = (String) responseData.get(CV_OTHER_DOC_LABEL_FIELD);
         assertEquals(CV_OTHER_DOC_LABEL_VALUE, docLabel);
     }
 
@@ -91,14 +109,20 @@ public class SolicitorCreateConsentedMidHandlerTest {
         List<String> orderList  = List.of("Property Adjustment Order");
         callbackRequest.getCaseDetails().getData().put("natureOfApplication2", orderList);
 
-        AboutToStartOrSubmitCallbackResponse response =
-            solicitorCreateConsentedMidHandler.handle(callbackRequest, AUTH_TOKEN);
+        when(caseManagementLocationService.setCaseManagementLocation(any()))
+            .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().build());
 
-        final String camelCaseLabel = (String) response.getData().get(CV_ORDER_CAMELCASE_LABEL_FIELD);
+        solicitorCreateConsentedMidHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(caseManagementLocationService).setCaseManagementLocation(requestCaptor.capture());
+
+        Map<String, Object> responseData = requestCaptor.getValue().getCaseDetails().getData();
+
+        final String camelCaseLabel = (String) responseData.get(CV_ORDER_CAMELCASE_LABEL_FIELD);
         assertEquals(CONSENT_ORDER_CAMELCASE_LABEL_VALUE, camelCaseLabel);
-        final String lowerCaseLabel = (String) response.getData().get(CV_LOWERCASE_LABEL_FIELD);
+        final String lowerCaseLabel = (String) responseData.get(CV_LOWERCASE_LABEL_FIELD);
         assertEquals(CONSENT_ORDER_LOWERCASE_LABEL_VALUE, lowerCaseLabel);
-        final String docLabel = (String) response.getData().get(CV_OTHER_DOC_LABEL_FIELD);
+        final String docLabel = (String) responseData.get(CV_OTHER_DOC_LABEL_FIELD);
         assertEquals(CONSENT_OTHER_DOC_LABEL_VALUE, docLabel);
     }
 

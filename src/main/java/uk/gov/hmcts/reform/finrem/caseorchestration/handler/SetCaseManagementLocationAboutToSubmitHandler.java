@@ -13,22 +13,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseManagementLocati
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class CreateCaseMidEventHandler implements CallbackHandler {
-
+public class SetCaseManagementLocationAboutToSubmitHandler implements CallbackHandler {
     private final CaseManagementLocationService caseManagementLocationService;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.MID_EVENT.equals(callbackType)
+        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && (EventType.SOLICITOR_CREATE.equals(eventType)
-            || EventType.PAPER_CASE.equals(eventType)
-            || EventType.AMEND_CONTESTED_APP_DETAILS.equals(eventType));
+            && EventType.SET_CASE_MANAGEMENT_LOCATION.equals(eventType);
     }
 
     @Override
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest, String userAuthorisation) {
-        log.info("About to start handling case creation mid-event, setting caseManagement location for {}",
+        log.info("About to start handling set Case management location about to submit for {}",
             callbackRequest.getCaseDetails().getId());
 
         return caseManagementLocationService.setCaseManagementLocation(callbackRequest);

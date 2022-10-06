@@ -18,6 +18,7 @@ public enum EventType {
     SOLICITOR_CREATE("FR_solicitorCreate"),
     AMEND_APP_DETAILS("FR_amendApplicationDetails"),
     AMEND_CONTESTED_APP_DETAILS("FR_amendApplication"),
+    SET_CASE_MANAGEMENT_LOCATION("setCaseManagementLocation"),
     AMEND_CONSENT_ORDER("FR_amendedConsentOrder"),
     RESPOND_TO_ORDER("FR_respondToOrder"),
     AMEND_CASE("FR_amendCase"),
@@ -34,6 +35,9 @@ public enum EventType {
     GENERAL_APPLICATION_OUTCOME("FR_GeneralApplicationOutcome"),
     GENERAL_APPLICATION_DIRECTIONS("FR_GeneralApplicationDirections"),
     PAPER_CASE("FR_newPaperCase"),
+    CONSENTED_UPDATE_COURT_INFO("FR_updateCourtInfo"),
+    UPDATE_FRC_INFORMATION("FR_updateFRCInformation"),
+    GIVE_ALLOCATION_DIRECTIONS("FR_giveAllocationDirections"),
     NONE("");
 
     private final String ccdType;

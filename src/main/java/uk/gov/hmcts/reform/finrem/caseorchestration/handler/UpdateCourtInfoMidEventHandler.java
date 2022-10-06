@@ -13,22 +13,20 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseManagementLocati
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class CreateCaseMidEventHandler implements CallbackHandler {
+public class UpdateCourtInfoMidEventHandler implements CallbackHandler {
 
     private final CaseManagementLocationService caseManagementLocationService;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.MID_EVENT.equals(callbackType)
-            && CaseType.CONTESTED.equals(caseType)
-            && (EventType.SOLICITOR_CREATE.equals(eventType)
-            || EventType.PAPER_CASE.equals(eventType)
-            || EventType.AMEND_CONTESTED_APP_DETAILS.equals(eventType));
+            && CaseType.CONSENTED.equals(caseType)
+            && EventType.CONSENTED_UPDATE_COURT_INFO.equals(eventType);
     }
 
     @Override
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest, String userAuthorisation) {
-        log.info("About to start handling case creation mid-event, setting caseManagement location for {}",
+        log.info("About to start handling update court info consented mid-event, setting caseManagement location for {}",
             callbackRequest.getCaseDetails().getId());
 
         return caseManagementLocationService.setCaseManagementLocation(callbackRequest);
