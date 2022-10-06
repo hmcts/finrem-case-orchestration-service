@@ -68,7 +68,6 @@ public class CaseManagementLocationService {
     }
 
     private String getCourtIdMappingsString() {
-        System.out.println(courtIdMappingJsonFile);
         try (InputStream inputStream = this.getClass().getResourceAsStream(courtIdMappingJsonFile)) {
             return IOUtils.toString(inputStream, UTF_8);
         } catch (IOException e) {
