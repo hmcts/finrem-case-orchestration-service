@@ -581,6 +581,7 @@ public class CCDConfigConstant {
     public static final String HEARING_NOTICE_DOCUMENT_PACK = "hearingNoticeDocumentPack";
 
     //Case Flags
-    public static final String CASE_FLAGS_APPLICANT = "applicantFlags";
-    public static final String CASE_FLAGS_RESPONDENT = "respondentFlags";
+    public static final String CASE_LEVEL_FLAGS = "caseFlags";
+    public static final String CASE_APPLICANT_FLAGS = "applicantFlags";
+    public static final String CASE_RESPONDENT_FLAGS = "respondentFlags";
 }
