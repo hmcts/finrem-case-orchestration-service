@@ -10,16 +10,18 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.caseflag.FlagDetailsData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.caseflag.CaseFlag;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 
 import java.util.Map;
-import java.util.Objects;
+import java.util.Optional;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_APPLICANT_FLAGS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_FLAGS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_RESPONDENT_FLAGS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ROLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 
 @Slf4j
 @Service
@@ -45,21 +47,28 @@ public class CaseFlagAboutToSubmitHandler implements CallbackHandler {
         Map<String, Object> caseData = caseDetails.getData();
 
         updateCaseFlagsAtCaseLevel(caseData);
-        updateCaseFlagsForParty(caseData, CASE_APPLICANT_FLAGS, caseDataService.buildFullApplicantName(caseDetails));
-        updateCaseFlagsForParty(caseData, CASE_RESPONDENT_FLAGS, caseDataService.buildFullRespondentName(caseDetails));
+        updateCaseFlagsForParty(caseData, CASE_APPLICANT_FLAGS, caseDataService.buildFullApplicantName(caseDetails), APPLICANT);
+        updateCaseFlagsForParty(caseData, CASE_RESPONDENT_FLAGS, caseDataService.buildFullRespondentName(caseDetails), RESPONDENT);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
     }
 
     private void updateCaseFlagsAtCaseLevel(Map<String, Object> caseData) {
-        FlagDetailsData caseflagDetailsData = objectMapper.convertValue(caseData.get(CASE_LEVEL_FLAGS), FlagDetailsData.class);
-        caseData.put(CASE_LEVEL_FLAGS,caseflagDetailsData);
+        CaseFlag caseFlag = Optional.ofNullable(objectMapper.convertValue(caseData.get(CASE_LEVEL_FLAGS), CaseFlag.class))
+            .orElse(new CaseFlag());
+        caseFlag.setRoleOnCase(CASE_LEVEL_ROLE);
+        caseFlag.setPartyName(CASE_LEVEL_ROLE);
+        caseData.put(CASE_LEVEL_FLAGS, caseFlag);
     }
 
-    private void updateCaseFlagsForParty(Map<String, Object> caseData, String flagLevel, String party) {
-        FlagDetailsData caseflagDetailsData = objectMapper.convertValue(caseData.get(flagLevel), FlagDetailsData.class);
-        caseflagDetailsData.setPartyName(party);
-        caseflagDetailsData.setRoleOnCase(Objects.toString(caseData.get(CASE_ROLE)));
-        caseData.put(flagLevel,caseflagDetailsData);
+    private void updateCaseFlagsForParty(Map<String, Object> caseData,
+                                         String flagLevel,
+                                         String party,
+                                         String roleOnCase) {
+        CaseFlag caseFlag = Optional.ofNullable(objectMapper.convertValue(caseData.get(flagLevel), CaseFlag.class))
+            .orElse(new CaseFlag());
+        caseFlag.setPartyName(party);
+        caseFlag.setRoleOnCase(roleOnCase);
+        caseData.put(flagLevel, caseFlag);
     }
 }

@@ -19,8 +19,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
-public class FlagDetails {
-
+public class FlagDetail {
     @JsonProperty("name")
     private String name;
     @JsonProperty("subTypeValue")
@@ -45,5 +44,4 @@ public class FlagDetails {
     private String flagCode;
     @JsonProperty("status")
     private String status;
-
 }

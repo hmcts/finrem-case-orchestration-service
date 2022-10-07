@@ -584,4 +584,5 @@ public class CCDConfigConstant {
     public static final String CASE_LEVEL_FLAGS = "caseFlags";
     public static final String CASE_APPLICANT_FLAGS = "applicantFlags";
     public static final String CASE_RESPONDENT_FLAGS = "respondentFlags";
+    public static final String CASE_LEVEL_ROLE = "Case";
 }
