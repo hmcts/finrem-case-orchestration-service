@@ -1,0 +1,161 @@
+{
+  "event_id": "createGeneralApplication",
+  "case_details": {
+    "id": "123",
+    "jurisdiction": "DIVORCE",
+    "state": "applicationDrafted",
+    "case_type_id": "FinancialRemedyContested",
+    "case_data": {
+      "propertyAdjutmentOrderDetail": [],
+      "divorceUploadEvidence1": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/33482ce7-639b-48dd-bee4-61a849da50cc",
+        "document_filename": "fileupload.txt",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/33482ce7-639b-48dd-bee4-61a849da50cc/binary"
+      },
+      "divorceUploadEvidence2": null,
+      "divorceStageReached": "Decree Nisi",
+      "otherReasonForComplexity": null,
+      "applicantFMName": "Tik",
+      "fastTrackDecision": "No",
+      "potentialAllegationChecklist": null,
+      "applicantSolicitorAddress": {
+        "County": "Middlesex",
+        "Country": "United Kingdom",
+        "PostCode": "TW3 1SS",
+        "PostTown": "Hounslow",
+        "AddressLine1": "67 Pears Road",
+        "AddressLine2": "Near Roundabout",
+        "AddressLine3": "Opposite Tesco"
+      },
+      "nameOfCourtDivorceCentre": "Brentford Court",
+      "RespondentOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "OQYVO1C",
+          "OrganisationName": "frrespondentorgaat"
+        },
+        "OrgPolicyReference": "res-sox",
+        "OrgPolicyCaseAssignedRole": "[RESPSOLICITOR]"
+      },
+      "rSolicitorDXnumber": "078890",
+      "netValueOfHome": null,
+      "dateOfSepration": "2010-03-02",
+      "promptForAnyDocument": "No",
+      "claimingExemptionMIAM": null,
+      "solicitorFirm": "Abc Org",
+      "propertyAddress": "26 Riverside gardens, SW10XE",
+      "applicantSolicitorConsentForEmails": "Yes",
+      "isAdmin": "No",
+      "orderSummary": {
+        "Fees": [
+          {
+            "id": "edeb16d6-316d-4446-a27f-05f3bf9afb4b",
+            "value": {
+              "FeeCode": "FEE0229",
+              "FeeAmount": "27500",
+              "FeeVersion": "2",
+              "FeeDescription": "Application for a financial order"
+            }
+          }
+        ],
+        "PaymentTotal": "27500",
+        "PaymentReference": "null"
+      },
+      "applicantSolicitorName": "Parrot",
+      "HWFNumber": "HWF22345",
+      "familyMediatorServiceName": "mediator",
+      "specificArrangementsRequired": "Not required",
+      "respondentRepresented": "Yes",
+      "miniFormA": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/6f2fd8d7-5473-41b3-b978-01ad7de7a59d",
+        "document_filename": "OnlineForm.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/6f2fd8d7-5473-41b3-b978-01ad7de7a59d/binary"
+      },
+      "cfcCourtList": "FR_s_CFCList_9",
+      "familyMediatorMIAM": null,
+      "applicantRepresented": "Yes",
+      "applicantAttendedMIAM": "Yes",
+      "specialAssistanceRequired": "Not required",
+      "respondentPhone": null,
+      "isApplicantsHomeCourt": "No",
+      "fastTrackDecisionReason": null,
+      "MIAMOtherGroundsChecklist": null,
+      "divorceCaseNumber": "EM18D33333",
+      "additionalPropertyOrderDecision": "No",
+      "estimatedAssetsChecklist": null,
+      "londonFRCList": "cfc",
+      "MIAMDomesticViolenceChecklist": null,
+      "amountToPay": "27500",
+      "rSolicitorAddress": {
+        "County": "Essex",
+        "Country": "United Kingdom",
+        "PostCode": "TW3 1SS",
+        "PostTown": "Hounslow",
+        "AddressLine1": "75 Pears Road",
+        "AddressLine2": "Flat2",
+        "AddressLine3": "Ring Road"
+      },
+      "divorcePetitionIssuedDate": "2020-08-14",
+      "rSolicitorName": "ResSol",
+      "RespSolNotificationsEmailConsent": "No",
+      "authorisationName": "Viasda",
+      "soleTraderName1": null,
+      "divorceDecreeNisiDate": "2020-08-15",
+      "otherReasonForComplexityText": null,
+      "uploadAdditionalDocument": [],
+      "authorisation3": "2020-08-10",
+      "applicantSolicitorFirm": "MSN Firm",
+      "applicantLName": "Tok",
+      "rSolicitorEmail": "vivcontestedupdatesol@mailinator.com",
+      "respondentAddress": {},
+      "natureOfApplicationChecklist": [
+        "Maintenance Pending Suit",
+        "periodicalPaymentOrder",
+        "Lump Sum Order",
+        "Pension Sharing Order",
+        "Pension Attachment Order",
+        "Pension Compensation Sharing Order",
+        "Pension Compensation Attachment Order",
+        "propertyAdjustmentOrder"
+      ],
+      "mediatorRegistrationNumber1": null,
+      "applicantSolicitorDXnumber": "776890",
+      "applicantSolicitorEmail": "fr_applicant_sol@sharklasers.com",
+      "paymentForChildrenDecision": "No",
+      "mortgageDetail": "Halifax mortgage",
+      "familyMediatorServiceName1": null,
+      "ApplicantOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "A31PTVA",
+          "OrganisationName": "FRApplicantSolicitorFirm"
+        },
+        "OrgPolicyReference": "FRApplicant",
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
+      },
+      "respondentLName": "Whisper",
+      "reasonForLocalCourt": null,
+      "rSolicitorPhone": "07889009908",
+      "benefitPaymentChecklist": null,
+      "rSolicitorReference": "MahSol73",
+      "rSolicitorFirm": "MahFirm",
+      "applicantSolicitorPhone": "07766121111",
+      "solicitorReference": "undefined",
+      "MIAMExemptionsChecklist": null,
+      "soleTraderName": "sole trading",
+      "authorisation2b": "Sol Org reb",
+      "divorceUploadPetition": null,
+      "issueDate": "2002-01-24",
+      "mediatorRegistrationNumber": "765234",
+      "detailPotentialAllegation": null,
+      "benefitForChildrenDecision": null,
+      "regionList": "london",
+      "dateOfMarriage": "2000-02-01",
+      "divorceDecreeAbsoluteDate": null,
+      "MIAMPreviousAttendanceChecklist": null,
+      "MIAMUrgencyReasonChecklist": null,
+      "respondentEmail": "vivek.reddy@hmcts.net",
+      "respondentFMName": "Qunatico",
+      "helpWithFeesQuestion": "Yes",
+      "addToComplexityListOfCourts": "falseNo"
+    }
+  }
+}

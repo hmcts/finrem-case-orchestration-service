@@ -23,6 +23,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BRISTOL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BRISTOLFRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BRISTOL_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BRISTOL_MAGISTRATES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BURY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CAERNARFON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CAMBRIDGE;
@@ -95,6 +96,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWANSEA;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWANSEA_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWINDON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWINDON_MAGISTRATES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWOTHER_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TAUNTON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.THAMESVALLEY;
@@ -158,7 +160,7 @@ public class ConsentedCourtHelper {
         .build();
     private static Map<String, String> nwOtherMap = ImmutableMap.<String, String>builder()
         .put("FR_NWList_1", "West Cumbria Courthouse")
-        .put("FR_NWList_2", "Preston Combined Court Centre")
+        .put("FR_NWList_2", "Preston Designated Family Court")
         .put("FR_NWList_3", "Lancaster Courthouse")
         .put("FR_NWList_4", "Carlisle Combined Court")
         .put("FR_NWList_5", "Burnley Combined Court")
@@ -167,7 +169,7 @@ public class ConsentedCourtHelper {
         .put("FR_NWList_8", "Barrow-in-Furness County and Family Court")
         .build();
     private static Map<String, String> cleavelandMap = ImmutableMap.<String, String>builder()
-        .put("FR_clevelandList_1", "Newcastle upon Tyne Justice Centre")
+        .put("FR_clevelandList_1", "Newcastle Civil and Family Courts and Tribunals Centre")
         .put("FR_clevelandList_2", "Durham Justice Centre")
         .put("FR_clevelandList_3", "Sunderland County and Family Court")
         .put("FR_clevelandList_4", "Middlesbrough County Court at Teesside Combined Court")
@@ -182,7 +184,7 @@ public class ConsentedCourtHelper {
         .put("FR_manchesterList_3", "Wigan County Court and Family Court")
         .build();
     private static Map<String, String> lancashireMap = ImmutableMap.<String, String>builder()
-        .put(PRESTON, "Preston Combined Court Centre")
+        .put(PRESTON, "Preston Designated Family Court")
         .put(BLACKBURN, "Blackburn Family Court")
         .put(BLACKPOOL, "Blackpool Family Court")
         .put(LANCASTER, "Lancaster Courthouse")
@@ -307,6 +309,8 @@ public class ConsentedCourtHelper {
         .put(SALISBURY, "Salisbury Law Courts")
         .put(BATH, "Bath Law Courts")
         .put(WESTON, "Weston Super Mare County and Family Court")
+        .put(BRISTOL_MAGISTRATES, "Bristol Magistrates Court")
+        .put(SWINDON_MAGISTRATES, "Swindon Magistrates Court")
         .build();
     private static Map<String, String> newportMap = ImmutableMap.<String, String>builder()
         .put("FR_newportList_1", "Newport Civil and Family Court")

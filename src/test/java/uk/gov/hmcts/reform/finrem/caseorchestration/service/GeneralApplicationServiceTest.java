@@ -5,15 +5,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationData;
 
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -27,10 +30,13 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT;
@@ -55,8 +61,9 @@ public class GeneralApplicationServiceTest {
     public static final String PDF_FORMAT_EXTENSION = ".pdf";
     public static final String DOC_IN_EXISTING_COLLECTION_URL = "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-c06d1e6344ee";
     public static final String USER_NAME = "Tony";
+    private static final String GA_SINGLE_JSON = "/fixtures/contested/general-application-single.json";
+    private static final String GA_DOUBLE_JSON = "/fixtures/contested/general-application-double.json";
 
-    @InjectMocks
     private GeneralApplicationService generalApplicationService;
     @Mock
     private IdamService idamService;
@@ -64,21 +71,46 @@ public class GeneralApplicationServiceTest {
     private DocumentHelper documentHelper;
     @Mock
     private GenericDocumentService genericDocumentService;
-    @Mock
+    private GeneralApplicationHelper helper;
     private ObjectMapper objectMapper;
-
     private CaseDetails caseDetails;
     private CaseDetails caseDetailsBefore;
 
     @Before
     public void setUp() {
+        objectMapper = new ObjectMapper();
         caseDetailsBefore = getApplicationIssuedCaseDetailsBefore();
         caseDetails = CaseDetails.builder().data(new LinkedHashMap<>()).build();
+        helper = new GeneralApplicationHelper(objectMapper);
+        generalApplicationService = new GeneralApplicationService(documentHelper,
+            objectMapper, idamService, genericDocumentService, helper);
 
         CaseDocument caseDocument = getCaseDocument(PDF_FORMAT_EXTENSION);
         when(documentHelper.convertToCaseDocument(any())).thenReturn(caseDocument);
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), anyString()))
             .thenReturn(getCaseDocument(PDF_FORMAT_EXTENSION));
+    }
+
+    @Test
+    public void updateAndSortGeneralApplications() {
+        CaseDetails caseDetails = buildCaseDetails(GA_DOUBLE_JSON);
+        CaseDetails caseDetailsBefore = buildCaseDetails(GA_SINGLE_JSON);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetailsBefore).build();
+
+        Map<String, Object> caseData = generalApplicationService.updateGeneralApplications(callbackRequest, AUTH_TOKEN);
+
+        List<GeneralApplicationCollectionData> generalApplicationCollectionDataList
+            = helper.covertToGeneralApplicationData(caseData.get(GENERAL_APPLICATION_COLLECTION));
+
+        assertEquals(2, generalApplicationCollectionDataList.size());
+        assertEquals(LocalDate.now(),
+            generalApplicationCollectionDataList.get(0).getGeneralApplicationItems().getGeneralApplicationCreatedDate());
+        assertEquals(LocalDate.of(2022,8,2),
+            generalApplicationCollectionDataList.get(1).getGeneralApplicationItems().getGeneralApplicationCreatedDate());
+
+        verify(idamService).getIdamFullName(any());
     }
 
     @Test
@@ -138,8 +170,8 @@ public class GeneralApplicationServiceTest {
 
         generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
 
-        List<GeneralApplicationData> generalApplicationDataList =
-            (List<GeneralApplicationData>) caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_COLLECTION);
+        List<GeneralApplicationData> generalApplicationDataList = objectMapper.convertValue(caseDetails.getData()
+            .get(GENERAL_APPLICATION_DOCUMENT_COLLECTION), new TypeReference<>(){});
         assertThat(generalApplicationDataList, hasSize(1));
         assertThat(
             matchesUploadedDocumentFields(
@@ -161,12 +193,10 @@ public class GeneralApplicationServiceTest {
     public void givenGeneralApplicationWithPreviousDocs_whenUpdateCaseDataSubmit_thenGenAppDocIsAddedToCollection() {
 
         caseDetails.getData().put(GENERAL_APPLICATION_DOCUMENT_COLLECTION, getGeneralApplicationDataList());
-
-        when(objectMapper.convertValue(any(), (TypeReference<Object>) any())).thenReturn(getGeneralApplicationDataList());
         generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
 
-        List<GeneralApplicationData> generalApplicationDataList =
-            (List<GeneralApplicationData>) caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_COLLECTION);
+        List<GeneralApplicationData> generalApplicationDataList = objectMapper.convertValue(caseDetails.getData()
+                .get(GENERAL_APPLICATION_DOCUMENT_COLLECTION), new TypeReference<>(){});
         assertThat(generalApplicationDataList, hasSize(2));
         assertThat(generalApplicationDataList.get(0).getGeneralApplication().getGeneralApplicationDocument().getDocumentUrl(),
             is(DOC_IN_EXISTING_COLLECTION_URL));
@@ -244,5 +274,14 @@ public class GeneralApplicationServiceTest {
 
     private CaseDetails getApplicationIssuedCaseDetailsBefore() {
         return CaseDetails.builder().state("applicationIssued").build();
+    }
+
+    private CaseDetails buildCaseDetails(String path)  {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(path)) {
+            CaseDetails caseDetails = objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+            return CallbackRequest.builder().caseDetails(caseDetails).build().getCaseDetails();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
