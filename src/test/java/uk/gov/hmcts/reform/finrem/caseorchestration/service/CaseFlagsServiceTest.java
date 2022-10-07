@@ -23,8 +23,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_APPLICANT_FLAGS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_FLAGS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_RESPONDENT_FLAGS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 
@@ -76,21 +74,6 @@ public class CaseFlagsServiceTest {
     }
 
     @Test
-    public void givenCaseFlags_whenHandleAboutToSubmit_thenSetCaseLevelFlagDetails() {
-        CaseDetails caseDetails = caseData();
-        caseDetails.getData().put(CASE_LEVEL_FLAGS, flagDetailsData());
-
-        caseFlagsService.setCaseFlagInformation(caseDetails);
-
-        Map<String, Object> caseData = caseDetails.getData();
-
-        CaseFlag caseLevelFlag = objectMapper.convertValue(caseData.get(CASE_LEVEL_FLAGS), CaseFlag.class);
-
-        assertThat(caseLevelFlag.getPartyName(), is(CASE_LEVEL_ROLE));
-        assertThat(caseLevelFlag.getRoleOnCase(), is(CASE_LEVEL_ROLE));
-    }
-
-    @Test
     public void givenNoCaseFlags_whenHandleAboutToSubmit_thenSetDefaultCaseFlagField() {
         when(caseDataService.buildFullApplicantName(any())).thenReturn(APPLICANT_NAME);
         when(caseDataService.buildFullRespondentName(any())).thenReturn(RESPONDENT_NAME);
@@ -100,10 +83,6 @@ public class CaseFlagsServiceTest {
         caseFlagsService.setCaseFlagInformation(caseDetails);
 
         Map<String, Object> caseData = caseDetails.getData();
-
-        CaseFlag caseLevelFlag = objectMapper.convertValue(caseData.get(CASE_LEVEL_FLAGS), CaseFlag.class);
-        assertThat(caseLevelFlag.getPartyName(), is(CASE_LEVEL_ROLE));
-        assertThat(caseLevelFlag.getRoleOnCase(), is(CASE_LEVEL_ROLE));
 
         CaseFlag respondentFlags = objectMapper.convertValue(caseData.get(CASE_RESPONDENT_FLAGS), CaseFlag.class);
         assertThat(respondentFlags.getPartyName(), is(RESPONDENT_NAME));
