@@ -83,7 +83,7 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
         paperNotificationService.printManualPaymentNotification(buildCaseDetails(), AUTH_TOKEN);
 
         verify(manualPaymentDocumentService).generateManualPaymentLetter(any(), any(), eq(APPLICANT));
-        verify(bulkPrintService, times(1)).sendDocumentForPrint(any(), any());
+        verify(bulkPrintService).sendDocumentForPrint(any(), any());
     }
 
     @Test
