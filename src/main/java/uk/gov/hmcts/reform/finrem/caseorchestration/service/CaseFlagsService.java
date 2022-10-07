@@ -1,17 +1,11 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.caseflag.CaseFlag;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 
 import java.util.Map;
 import java.util.Optional;
@@ -26,21 +20,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CaseFlagAboutToSubmitHandler implements CallbackHandler {
+public class CaseFlagsService {
 
     private final ObjectMapper objectMapper;
     private final CaseDataService caseDataService;
 
-    @Override
-    public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
-            && (EventType.CASE_FLAG_CREATE.equals(eventType)
-            || EventType.CASE_FLAG_MANAGE.equals(eventType));
-    }
-
-    @Override
-    public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest, String userAuthorisation) {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+    public void setCaseFlagInformation(CaseDetails caseDetails) {
         log.info("Received request to update case flags with Case ID: {}", caseDetails.getId());
 
         Map<String, Object> caseData = caseDetails.getData();
@@ -48,8 +33,6 @@ public class CaseFlagAboutToSubmitHandler implements CallbackHandler {
         updateCaseFlagsAtCaseLevel(caseData);
         updateCaseFlagsForParty(caseData, CASE_APPLICANT_FLAGS, caseDataService.buildFullApplicantName(caseDetails), APPLICANT);
         updateCaseFlagsForParty(caseData, CASE_RESPONDENT_FLAGS, caseDataService.buildFullRespondentName(caseDetails), RESPONDENT);
-
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
     }
 
     private void updateCaseFlagsAtCaseLevel(Map<String, Object> caseData) {
