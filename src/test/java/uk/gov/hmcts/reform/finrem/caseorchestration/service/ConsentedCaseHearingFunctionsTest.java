@@ -101,7 +101,7 @@ public class ConsentedCaseHearingFunctionsTest {
     private static Stream<Arguments> provideMidlandsParameters() {
         return Stream.of(
             Arguments.of(BIRMINGHAM, BIRMINGHAM_COURTLIST, BIRMINGHAM_1),
-            Arguments.of(NOTTINGHAM, NOTTINGHAM_COURTLIST, "nottinghame_1")
+            Arguments.of(NOTTINGHAM, NOTTINGHAM_COURTLIST, "nottingham_1")
         );
     }
 
