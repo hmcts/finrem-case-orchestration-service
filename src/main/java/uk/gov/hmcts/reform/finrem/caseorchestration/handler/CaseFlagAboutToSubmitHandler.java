@@ -34,7 +34,6 @@ public class CaseFlagAboutToSubmitHandler implements CallbackHandler {
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
-            && (CaseType.CONSENTED.equals(caseType) || CaseType.CONTESTED.equals(caseType))
             && (EventType.CASE_FLAG_CREATE.equals(eventType)
             || EventType.CASE_FLAG_MANAGE.equals(eventType));
     }
