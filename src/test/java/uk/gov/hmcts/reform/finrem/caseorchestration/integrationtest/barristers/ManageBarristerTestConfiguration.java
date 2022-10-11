@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.AssignCaseAccessServi
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.AssignCaseAccessRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.RestService;
 
 @TestConfiguration
@@ -40,4 +41,7 @@ public class ManageBarristerTestConfiguration {
 
     @MockBean
     private FeatureToggleService featureToggleService;
+
+    @MockBean
+    private GenericDocumentService genericDocumentService;
 }
