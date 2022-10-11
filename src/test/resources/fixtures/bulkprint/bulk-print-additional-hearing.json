@@ -55,6 +55,11 @@
         "document_filename": "Form-C.pdf",
         "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4f73432d-2889-47eb-bc16-84d021222dbc/binary"
       },
+      "additionalListOfHearingDocuments": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4f36599e-8b42-4802-9a9b-76e8be657668",
+        "document_filename": "additionalDoc.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4f36599e-8b42-4802-9a9b-76e8be657668/binary"
+      },
       "applicantSolicitorName": "Applicant Solicitor",
       "uploadCaseDocument": [],
       "applicantSolicitorEmail": "Test@Test.com",
