@@ -41,4 +41,6 @@ public class NotificationRequest {
     private String applicantName;
     @JsonProperty("respondentName")
     private String respondentName;
+    @JsonProperty("hearingType")
+    private String hearingType;
 }

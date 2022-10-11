@@ -24,10 +24,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.hamcrest.CoreMatchers.anyOf;
-import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_NAME;
@@ -36,6 +34,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REFERRED_DETAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REPRESENTATION_UPDATE_HISTORY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
@@ -77,6 +76,23 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         assertEquals("contested", notificationRequest.getCaseType());
         assertEquals("David Goodman", notificationRequest.getRespondentName());
         assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
+    }
+
+    @Test
+    public void shouldReturnHearingTypeForPrepareForHearingContestedEventInvoke() {
+        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(
+            getContestedCallbackRequestWithCaseDataValues(Collections.singletonMap(HEARING_TYPE, "First Directions Appointment (FDA)"))
+                .getCaseDetails());
+
+        assertEquals("12345", notificationRequest.getCaseReferenceNumber());
+        assertEquals("RG-123456789", notificationRequest.getSolicitorReferenceNumber());
+        assertEquals(TEST_DIVORCE_CASE_NUMBER, notificationRequest.getDivorceCaseNumber());
+        assertEquals(TEST_SOLICITOR_NAME, notificationRequest.getName());
+        assertEquals(TEST_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
+        assertEquals("contested", notificationRequest.getCaseType());
+        assertEquals("David Goodman", notificationRequest.getRespondentName());
+        assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
+        assertEquals("First Directions Appointment (FDA)", notificationRequest.getHearingType());
     }
 
     @Test
@@ -160,9 +176,9 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForNoticeOfChange(
             callbackRequest.getCaseDetails());
 
-        assertThat(notificationRequest.getNotificationEmail(), is(TEST_SOLICITOR_EMAIL));
-        assertThat(notificationRequest.getName(), is(TEST_SOLICITOR_NAME));
-        assertThat(notificationRequest.getCaseType(), is("contested"));
+        assertEquals(TEST_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
+        assertEquals(TEST_SOLICITOR_NAME, notificationRequest.getName());
+        assertEquals("contested", notificationRequest.getCaseType());
         assertEquals("David Goodman", notificationRequest.getRespondentName());
         assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
     }
@@ -176,9 +192,9 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForNoticeOfChange(
             callbackRequest.getCaseDetails());
 
-        assertThat(notificationRequest.getNotificationEmail(), is(TEST_RESP_SOLICITOR_EMAIL));
-        assertThat(notificationRequest.getName(), is(TEST_RESP_SOLICITOR_NAME));
-        assertThat(notificationRequest.getCaseType(), is("contested"));
+        assertEquals("testRespSolicitor@email.com", notificationRequest.getNotificationEmail());
+        assertEquals("Test Resp Sol", notificationRequest.getName());
+        assertEquals("contested", notificationRequest.getCaseType());
         assertEquals("David Goodman", notificationRequest.getRespondentName());
         assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
     }
@@ -192,9 +208,9 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForNoticeOfChange(
             callbackRequest.getCaseDetails());
 
-        assertThat(notificationRequest.getNotificationEmail(), is(TEST_SOLICITOR_EMAIL));
-        assertThat(notificationRequest.getName(), is(TEST_SOLICITOR_NAME));
-        assertThat(notificationRequest.getCaseType(), is("consented"));
+        assertEquals(TEST_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
+        assertEquals(TEST_SOLICITOR_NAME, notificationRequest.getName());
+        assertEquals("consented", notificationRequest.getCaseType());
         assertEquals("consent", notificationRequest.getCaseOrderType());
         assertEquals("Consent", notificationRequest.getCamelCaseOrderType());
         assertEquals("David Goodman", notificationRequest.getRespondentName());
@@ -210,9 +226,9 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForNoticeOfChange(
             callbackRequest.getCaseDetails());
 
-        assertThat(notificationRequest.getNotificationEmail(), is(TEST_RESP_SOLICITOR_EMAIL));
-        assertThat(notificationRequest.getName(), is(TEST_RESP_SOLICITOR_NAME));
-        assertThat(notificationRequest.getCaseType(), is("consented"));
+        assertEquals(TEST_RESP_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
+        assertEquals(TEST_RESP_SOLICITOR_NAME, notificationRequest.getName());
+        assertEquals("consented", notificationRequest.getCaseType());
         assertEquals("consent", notificationRequest.getCaseOrderType());
         assertEquals("Consent", notificationRequest.getCamelCaseOrderType());
         assertEquals("David Goodman", notificationRequest.getRespondentName());
@@ -228,11 +244,11 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
             .map(this::convertToInterimHearingDataList).orElse(Collections.emptyList());
 
         List<InterimHearingItem> interimHearingItems
-            = interimHearingList.stream().map(InterimHearingData::getValue).collect(Collectors.toList());
+            = interimHearingList.stream().map(InterimHearingData::getValue).toList();
 
         List<Map<String, Object>> interimDataMap = interimHearingItems.stream()
             .map(obj -> new ObjectMapper().convertValue(obj, new TypeReference<Map<String, Object>>() {
-            })).collect(Collectors.toList());
+            })).toList();
 
         interimDataMap.forEach(data -> verifyAppData(callbackRequest, data));
     }
@@ -247,10 +263,12 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         assertEquals(TEST_SOLICITOR_NAME, notificationRequest.getName());
         assertEquals(TEST_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
         assertEquals("contested", notificationRequest.getCaseType());
-        assertThat("checking in loop", notificationRequest.getSelectedCourt(),
-            anyOf(is("bristol"),
-                is("cfc")));
-
+        if (notificationRequest.getSelectedCourt().equals("bristol")) {
+            assertTrue(notificationRequest.getSelectedCourt().contains("bristol"));
+        }
+        if (notificationRequest.getSelectedCourt().equals("cfc")) {
+            assertTrue(notificationRequest.getSelectedCourt().contains("cfc"));
+        }
         assertEquals("respondent test", notificationRequest.getRespondentName());
         assertEquals("Applicant test", notificationRequest.getApplicantName());
     }
@@ -264,11 +282,11 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
             .map(this::convertToInterimHearingDataList).orElse(Collections.emptyList());
 
         List<InterimHearingItem> interimHearingItems
-            = interimHearingList.stream().map(InterimHearingData::getValue).collect(Collectors.toList());
+            = interimHearingList.stream().map(InterimHearingData::getValue).toList();
 
         List<Map<String, Object>> interimDataMap = interimHearingItems.stream()
                 .map(obj -> new ObjectMapper().convertValue(obj, new TypeReference<Map<String, Object>>() {
-                })).collect(Collectors.toList());
+                })).toList();
         interimDataMap.forEach(data -> verifyData(callbackRequest, data));
     }
 
@@ -300,9 +318,12 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         assertEquals(TEST_RESP_SOLICITOR_NAME, notificationRequest.getName());
         assertEquals(TEST_RESP_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
         assertEquals("contested", notificationRequest.getCaseType());
-        assertThat("checking in loop", notificationRequest.getSelectedCourt(),
-            anyOf(is("bristol"),
-            is("cfc")));
+        if (notificationRequest.getSelectedCourt().equals("bristol")) {
+            assertTrue(notificationRequest.getSelectedCourt().contains("bristol"));
+        }
+        if (notificationRequest.getSelectedCourt().equals("cfc")) {
+            assertTrue(notificationRequest.getSelectedCourt().contains("cfc"));
+        }
         assertEquals("respondent test", notificationRequest.getRespondentName());
         assertEquals("Applicant test", notificationRequest.getApplicantName());
     }
