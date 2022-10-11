@@ -83,14 +83,17 @@ public class ManageBarristerService {
 
     public String getCaseRole(CaseDetails caseDetails, String authToken) {
         CaseAssignedUserRolesResource caseRoleResource = caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, authToken);
+        log.info("Case assigned role resource is: {}", caseRoleResource.toString());
         String caseRole = isCaseRoleResourceNullOrEmpty(caseRoleResource)
             ? CASEWORKER_ROLE
             : caseRoleResource.getCaseAssignedUserRoles().get(0).getCaseRole();
 
         if (!List.of(APP_SOLICITOR_POLICY, RESP_SOLICITOR_POLICY).contains(caseRole)) {
             String caseworkerParty = Objects.toString(caseDetails.getData().get(MANAGE_BARRISTER_PARTY), StringUtils.EMPTY);
+            log.info("caseWorker party is {}", caseworkerParty);
             caseRole = APPLICANT.equalsIgnoreCase(caseworkerParty) ? APP_SOLICITOR_POLICY : RESP_SOLICITOR_POLICY;
         }
+        log.info("Case role is {}", caseRole);
 
         return caseRole;
     }
