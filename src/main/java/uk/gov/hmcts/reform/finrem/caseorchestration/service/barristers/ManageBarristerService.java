@@ -76,7 +76,6 @@ public class ManageBarristerService {
 
         log.info("changed barristers: {}", barristerChange.toString());
         barristerChange.getAdded().forEach(userToBeAdded -> addUser(caseDetails, authToken, caseRole, userToBeAdded));
-        caseDetails.getData().remove(MANAGE_BARRISTER_PARTY);
 
         return updateRepresentationUpdateHistoryForCase(caseDetails, barristerChange, authToken);
     }
