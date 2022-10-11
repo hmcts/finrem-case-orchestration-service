@@ -52,7 +52,7 @@ public class GeneralApplicationDirectionsAboutToStartHandler implements Callback
         AtomicInteger index = new AtomicInteger(0);
         if (outcomeList.isEmpty() && caseData.get(GENERAL_APPLICATION_CREATED_BY) != null) {
             log.info("setting direction list if existing ga not moved to collection for Case ID: {}", caseDetails.getId());
-            setDirectionListForNonCollectionGeneralApplication(caseData, index);
+            setDirectionListForNonCollectionGeneralApplication(caseData, index, userAuthorisation);
         } else {
             if (outcomeList.isEmpty()) {
                 return AboutToStartOrSubmitCallbackResponse.builder().data(caseData)
@@ -69,8 +69,10 @@ public class GeneralApplicationDirectionsAboutToStartHandler implements Callback
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
     }
 
-    private void setDirectionListForNonCollectionGeneralApplication(Map<String, Object> caseData, AtomicInteger index) {
-        GeneralApplicationItems applicationItems = helper.getApplicationItems(caseData);
+    private void setDirectionListForNonCollectionGeneralApplication(Map<String, Object> caseData,
+                                                                    AtomicInteger index,
+                                                                    String userAuthorisation) {
+        GeneralApplicationItems applicationItems = helper.getApplicationItems(caseData, userAuthorisation);
         DynamicListElement dynamicListElements
             = getDynamicListElements(applicationItems.getGeneralApplicationCreatedBy(), getLabel(applicationItems, index.incrementAndGet()));
 

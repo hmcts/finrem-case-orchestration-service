@@ -85,7 +85,7 @@ public class GeneralApplicationService {
 
         if (initialCollectionId != null) {
             GeneralApplicationCollectionData originalGeneralApplicationList
-                = helper.retrieveInitialGeneralApplicationData(caseData, initialCollectionId);
+                = helper.retrieveInitialGeneralApplicationData(caseData, initialCollectionId, userAuthorisation);
             generalApplicationCollectionDataList.add(originalGeneralApplicationList);
         }
 
