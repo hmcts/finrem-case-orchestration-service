@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -74,7 +75,7 @@ public class CallbackDispatchServiceTest extends BaseServiceTest {
         when(handler2.canHandle(any(CallbackType.class), any(CaseType.class), any(EventType.class))).thenReturn(true);
         when(handler2.handle(any(CallbackRequest.class), anyString())).thenReturn(response2);
 
-        AboutToStartOrSubmitCallbackResponse callbackResponse =
+        GenericAboutToStartOrSubmitCallbackResponse callbackResponse =
             callbackDispatchService.dispatchToHandlers(CallbackType.ABOUT_TO_SUBMIT, callbackRequest, USER_AUTHORISATION);
 
         assertNotNull(callbackResponse);
@@ -96,7 +97,7 @@ public class CallbackDispatchServiceTest extends BaseServiceTest {
 
         when(handler2.canHandle(any(CallbackType.class), any(CaseType.class), any(EventType.class))).thenReturn(false);
 
-        AboutToStartOrSubmitCallbackResponse callbackResponse =
+        GenericAboutToStartOrSubmitCallbackResponse callbackResponse =
             callbackDispatchService.dispatchToHandlers(CallbackType.ABOUT_TO_SUBMIT, callbackRequest, USER_AUTHORISATION);
 
         assertNotNull(callbackResponse);
@@ -119,7 +120,7 @@ public class CallbackDispatchServiceTest extends BaseServiceTest {
 
             when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
 
-            AboutToStartOrSubmitCallbackResponse callbackResponse = callbackDispatchService
+            GenericAboutToStartOrSubmitCallbackResponse callbackResponse = callbackDispatchService
                 .dispatchToHandlers(CallbackType.ABOUT_TO_SUBMIT, callbackRequest, USER_AUTHORISATION);
 
             assertNotNull(callbackResponse);

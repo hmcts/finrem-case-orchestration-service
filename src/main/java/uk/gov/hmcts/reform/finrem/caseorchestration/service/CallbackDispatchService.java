@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandler;
 
 import java.util.ArrayList;
@@ -23,12 +24,12 @@ public class CallbackDispatchService {
     private final List<CallbackHandler> callbackHandlers;
 
 
-    public AboutToStartOrSubmitCallbackResponse dispatchToHandlers(CallbackType callbackType,
-                                                                   CallbackRequest callbackRequest,
-                                                                   String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse dispatchToHandlers(CallbackType callbackType,
+                                                                          CallbackRequest callbackRequest,
+                                                                          String userAuthorisation) {
         requireNonNull(callbackRequest, "callback must not be null");
 
-        AboutToStartOrSubmitCallbackResponse callbackResponse = AboutToStartOrSubmitCallbackResponse
+        GenericAboutToStartOrSubmitCallbackResponse callbackResponse = GenericAboutToStartOrSubmitCallbackResponse
             .builder()
             .errors(new ArrayList<>())
             .warnings(new ArrayList<>())

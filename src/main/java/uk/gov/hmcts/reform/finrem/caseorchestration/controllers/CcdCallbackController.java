@@ -48,7 +48,7 @@ public class CcdCallbackController {
             content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> ccdAboutToStart(
+    public ResponseEntity<GenericAboutToStartOrSubmitCallbackResponse> ccdAboutToStart(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callbackRequest) {
 
@@ -69,7 +69,7 @@ public class CcdCallbackController {
             content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> ccdAboutToSubmit(
+    public ResponseEntity<GenericAboutToStartOrSubmitCallbackResponse> ccdAboutToSubmit(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callbackRequest) {
 
@@ -90,7 +90,7 @@ public class CcdCallbackController {
             content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> ccdMidEvent(
+    public ResponseEntity<GenericAboutToStartOrSubmitCallbackResponse> ccdMidEvent(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callbackRequest) {
 
@@ -108,10 +108,10 @@ public class CcdCallbackController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200",
             description = "Callback was processed successfully or in case of an error message is attached to the case",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
+            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = GenericAboutToStartOrSubmitCallbackResponse.class))}),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> ccdSubmittedEvent(
+    public ResponseEntity<GenericAboutToStartOrSubmitCallbackResponse> ccdSubmittedEvent(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callbackRequest) {
 
@@ -132,11 +132,11 @@ public class CcdCallbackController {
         }
     }
 
-    private ResponseEntity<AboutToStartOrSubmitCallbackResponse> performRequest(CallbackType callbackType,
+    private ResponseEntity<GenericAboutToStartOrSubmitCallbackResponse> performRequest(CallbackType callbackType,
                                                                                 CallbackRequest callbackRequest,
                                                                                 String userAuthorisation) {
 
-        AboutToStartOrSubmitCallbackResponse callbackResponse =
+        GenericAboutToStartOrSubmitCallbackResponse callbackResponse =
             callbackDispatchService.dispatchToHandlers(callbackType, callbackRequest, userAuthorisation);
 
         log.info("Financial Remedy Case CCD callback `{}` handled for Case ID `{}`",
