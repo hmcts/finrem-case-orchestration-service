@@ -25,7 +25,6 @@ public class ManageBarristerAboutToStartHandler implements CallbackHandler {
 
     private final CaseAssignedRoleService caseAssignedRoleService;
 
-
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_START.equals(callbackType)
