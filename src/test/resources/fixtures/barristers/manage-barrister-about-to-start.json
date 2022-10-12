@@ -1,0 +1,45 @@
+{
+  "token": "token_test",
+  "event_id": "some_event_id",
+  "case_details": {
+    "id": "12345678",
+    "jurisdiction": "DIVORCE",
+    "state": "applicationIssued",
+    "case_type_id": "FinancialRemedyContested",
+    "case_data": {
+      "applicantFMName": "John",
+      "applicantLName": "Smith",
+      "applicantSolicitorName": "Test Applicant Solicitor",
+      "applicantSolicitorEmail": "appsolicitor1@yahoo.com",
+      "applicantSolicitorFirm": "FRApplicantSolicitorFirm2",
+      "nocParty": "applicant",
+      "natureOfRepresentationChange": "replacing",
+      "updateIncludesRepresentativeChange" : "Yes",
+      "ApplicantOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "A31PTVU",
+          "OrganisationName": "FRApplicantSolicitorFirm2"
+        },
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
+      },
+      "RespondentOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "A31PTVU",
+          "OrganisationName": "FRRespondentSolicitorFirm"
+        },
+        "OrgPolicyReference": "FRRespondent",
+        "OrgPolicyCaseAssignedRole": "[RESPSOLICITOR]"
+      },
+      "rSolicitorFirm": "FRRespondentSolicitorFirm",
+      "rSolicitorName": "Test respondent Solicitor",
+      "dateOfSepration": "2014-01-11",
+      "propertyAddress": "102",
+      "rSolicitorEmail": "padmaja.ramisetti@gmail.com",
+      "rSolicitorPhone": "07411201630",
+      "respondentEmail": "padmaja102.ramisetti@gmail.com",
+      "respondentLName": "Smith",
+      "respondentPhone": "7411201631",
+      "respondentFMName": "Jane"
+    }
+  }
+}

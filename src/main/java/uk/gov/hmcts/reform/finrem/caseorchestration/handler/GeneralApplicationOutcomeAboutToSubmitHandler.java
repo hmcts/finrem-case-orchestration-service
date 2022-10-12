@@ -50,15 +50,16 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler implements CallbackHa
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(caseData);
         if (existingList.isEmpty() && caseData.get(GENERAL_APPLICATION_CREATED_BY) != null) {
             log.info("outcome stage migrate existing general application for Case ID: {}", caseId);
-            migrateExistingApplication(caseDetails);
+            migrateExistingApplication(caseDetails, userAuthorisation);
         } else {
             DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_OUTCOME_LIST));
 
             final String outcome  = Objects.toString(caseData.get(GENERAL_APPLICATION_OUTCOME_DECISION), null);
-            log.info("outcome decision {} general application for Case ID: {}", outcome, caseId);
+            log.info("Outcome decision {} for general application for Case ID: {} Event type {}",
+                outcome, caseId, EventType.GENERAL_APPLICATION_OUTCOME);
 
             final String valueCode = dynamicList.getValueCode();
-            log.info("selected dynamic list code : {} Case ID: {}", valueCode, caseId);
+            log.info("Selected dynamic list code : {} Case ID: {}", valueCode, caseId);
             final List<GeneralApplicationCollectionData> applicationCollectionDataList
                 = existingList.stream().map(ga -> setStatusForElement(caseData, ga, valueCode, outcome)).sorted(helper::getCompareTo).toList();
 
@@ -66,16 +67,19 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler implements CallbackHa
             caseData.put(GENERAL_APPLICATION_COLLECTION, applicationCollectionDataList);
             caseData.remove(GENERAL_APPLICATION_OUTCOME_LIST);
             caseData.remove(GENERAL_APPLICATION_OUTCOME_OTHER);
+            caseData.remove(GENERAL_APPLICATION_OUTCOME_DECISION);
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
     }
 
-    private void migrateExistingApplication(CaseDetails caseDetails) {
+    private void migrateExistingApplication(CaseDetails caseDetails, String userAuthorisation) {
         Map<String, Object> caseData = caseDetails.getData();
         List<GeneralApplicationCollectionData> existingGeneralApplication = helper.getGeneralApplicationList(caseData);
-        GeneralApplicationCollectionData data = helper.migrateExistingGeneralApplication(caseData);
+        GeneralApplicationCollectionData data = helper.migrateExistingGeneralApplication(caseData, userAuthorisation);
         if (data != null) {
             String status  = Objects.toString(caseData.get(GENERAL_APPLICATION_OUTCOME_DECISION), null);
+            log.info("In migration outcome decision {} for general application for Case ID: {} Event type {}",
+                status, caseDetails.getId(), EventType.GENERAL_APPLICATION_OUTCOME);
             updateStatus(caseData, data, status);
             existingGeneralApplication.add(data);
             caseData.put(GENERAL_APPLICATION_COLLECTION,existingGeneralApplication);

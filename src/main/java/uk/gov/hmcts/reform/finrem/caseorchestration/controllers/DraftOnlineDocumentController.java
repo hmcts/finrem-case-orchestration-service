@@ -55,12 +55,13 @@ public class DraftOnlineDocumentController {
             callback.getCaseDetails().getId());
 
         Map<String, Object> caseData = callback.getCaseDetails().getData();
-        CaseDocument document = service.generateDraftContestedMiniFormA(authorisationToken, callback.getCaseDetails());
-        caseData.put(MINI_FORM_A, document);
         if (!idamService.isUserRoleAdmin(authorisationToken)) {
             log.info("other users.");
             caseData.put(APPLICANT_REPRESENTED, YES_VALUE);
         }
+        CaseDocument document = service.generateDraftContestedMiniFormA(authorisationToken, callback.getCaseDetails());
+        caseData.put(MINI_FORM_A, document);
+
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }

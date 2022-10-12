@@ -16,6 +16,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBar
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MANAGE_BARRISTER_PARTY;
 
 @Slf4j
 @Service
@@ -39,6 +42,10 @@ public class ManageBarristerAboutToSubmitHandler implements CallbackHandler {
         List<Barrister> barristers = manageBarristerService
             .getBarristersForParty(caseDetails, userAuthorisation).stream()
             .map(BarristerData::getBarrister).toList();
+
+        if (Optional.ofNullable(caseDetails.getData().get(MANAGE_BARRISTER_PARTY)).isPresent()) {
+            caseDetailsBefore.getData().put(MANAGE_BARRISTER_PARTY, caseDetails.getData().get(MANAGE_BARRISTER_PARTY));
+        }
 
         List<Barrister> barristersBeforeEvent = manageBarristerService
             .getBarristersForParty(caseDetailsBefore, userAuthorisation).stream()
