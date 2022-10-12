@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleServ
 
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASEWORKER_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ROLE;
 
 @Slf4j
@@ -35,18 +36,18 @@ public class ManageBarristerAboutToStartHandler implements CallbackHandler {
     @Override
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
                                                        String userAuthorisation) {
-        log.info("In Manage barrister about to start callback");
+        log.info("In Manage barrister about to start callback for case {}", callbackRequest.getCaseDetails().getId());
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
 
         CaseAssignedUserRolesResource userCaseRole = caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, userAuthorisation);
         if (userCaseRole.getCaseAssignedUserRoles() == null || userCaseRole.getCaseAssignedUserRoles().isEmpty()) {
-            caseData.put(CASE_ROLE, "[CASEWORKER]");
+            caseData.put(CASE_ROLE, CASEWORKER_ROLE);
         } else {
             caseData.put(CASE_ROLE, userCaseRole.getCaseAssignedUserRoles().get(0).getCaseRole());
         }
 
-        log.info("current user case role is {}", caseData.get(CASE_ROLE));
+        log.info("current user case role is {} for case {}", caseData.get(CASE_ROLE), caseDetails.getId());
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
     }

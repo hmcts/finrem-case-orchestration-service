@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -22,12 +23,16 @@ import java.util.UUID;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.CREATED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.DIRECTION_APPROVED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.DIRECTION_NOT_APPROVED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.DIRECTION_OTHER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.OTHER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.REFERRED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST;
@@ -47,6 +52,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class GeneralApplicationHelper {
 
     private final ObjectMapper objectMapper;
+    private final GenericDocumentService service;
 
     public List<GeneralApplicationCollectionData> getGeneralApplicationList(Map<String, Object> caseData) {
         return Optional.ofNullable(caseData.get(GENERAL_APPLICATION_COLLECTION))
@@ -104,30 +110,32 @@ public class GeneralApplicationHelper {
         return null;
     }
 
-    public GeneralApplicationCollectionData migrateExistingGeneralApplication(Map<String, Object> caseData) {
+    public GeneralApplicationCollectionData migrateExistingGeneralApplication(Map<String, Object> caseData,
+                                                                              String userAuthorisation) {
         if (caseData.get(GENERAL_APPLICATION_CREATED_BY) != null) {
             String collectionId = UUID.randomUUID().toString();
             caseData.put(GENERAL_APPLICATION_TRACKING, collectionId);
             return GeneralApplicationCollectionData.builder()
                 .id(collectionId)
-                .generalApplicationItems(getApplicationItems(caseData))
+                .generalApplicationItems(getApplicationItems(caseData, userAuthorisation))
                 .build();
         }
         return null;
     }
 
     public GeneralApplicationCollectionData retrieveInitialGeneralApplicationData(Map<String, Object> caseData,
-                                                                                  String collectionId) {
+                                                                                  String collectionId,
+                                                                                  String userAuthorisation) {
         if (caseData.get(GENERAL_APPLICATION_CREATED_BY) != null) {
             return GeneralApplicationCollectionData.builder()
                 .id(collectionId)
-                .generalApplicationItems(getApplicationItems(caseData))
+                .generalApplicationItems(getApplicationItems(caseData, userAuthorisation))
                 .build();
         }
         return null;
     }
 
-    public GeneralApplicationItems getApplicationItems(Map<String,Object> caseData) {
+    public GeneralApplicationItems getApplicationItems(Map<String,Object> caseData, String userAuthorisation) {
         GeneralApplicationItems.GeneralApplicationItemsBuilder builder =
             GeneralApplicationItems.builder();
         builder.generalApplicationReceivedFrom(Objects.toString(caseData.get(GENERAL_APPLICATION_RECEIVED_FROM), null));
@@ -135,31 +143,37 @@ public class GeneralApplicationHelper {
         builder.generalApplicationHearingRequired(Objects.toString(caseData.get(GENERAL_APPLICATION_HEARING_REQUIRED), null));
         builder.generalApplicationTimeEstimate(Objects.toString(caseData.get(GENERAL_APPLICATION_TIME_ESTIMATE), null));
         builder.generalApplicationSpecialMeasures(Objects.toString(caseData.get(GENERAL_APPLICATION_SPECIAL_MEASURES), null));
-        builder.generalApplicationDocument(convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DOCUMENT)));
+
+        CaseDocument caseDocument = convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DOCUMENT));
+        if (caseDocument != null) {
+            builder.generalApplicationDocument(service.convertDocumentIfNotPdfAlready(caseDocument, userAuthorisation));
+        }
+
         CaseDocument draftDocument = convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DRAFT_ORDER));
         if (draftDocument != null) {
-            builder.generalApplicationDraftOrder(draftDocument);
+            builder.generalApplicationDraftOrder(service.convertDocumentIfNotPdfAlready(draftDocument, userAuthorisation));
         }
         builder.generalApplicationCreatedDate(objectToDateTime(caseData.get(GENERAL_APPLICATION_DOCUMENT_LATEST_DATE)));
         builder.generalApplicationOutcomeOther(Objects.toString(caseData.get(GENERAL_APPLICATION_OUTCOME_OTHER), null));
         CaseDocument directionDocument = convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT));
         if (directionDocument != null) {
-            builder.generalApplicationDirectionsDocument(directionDocument);
+            builder.generalApplicationDirectionsDocument(service.convertDocumentIfNotPdfAlready(directionDocument, userAuthorisation));
         }
         String outcome = Objects.toString(caseData.get(GENERAL_APPLICATION_OUTCOME_DECISION), null);
+        String directionGiven = Objects.toString(caseData.get(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED),null);
         if (outcome != null) {
-            setStatus(builder, outcome);
+            setStatus(builder, outcome, directionGiven);
         } else {
             builder.generalApplicationStatus(CREATED.getId());
         }
         return builder.build();
     }
 
-    private void setStatus(GeneralApplicationItems.GeneralApplicationItemsBuilder builder, String outcome) {
+    private void setStatus(GeneralApplicationItems.GeneralApplicationItemsBuilder builder, String outcome, String directionGiven) {
         switch (outcome) {
-            case "Approved" -> builder.generalApplicationStatus(APPROVED.getId());
-            case "Not Approved" -> builder.generalApplicationStatus(NOT_APPROVED.getId());
-            case "Other" -> builder.generalApplicationStatus(OTHER.getId());
+            case "Approved" -> builder.generalApplicationStatus(directionGiven == null ? APPROVED.getId() : DIRECTION_APPROVED.getId());
+            case "Not Approved" -> builder.generalApplicationStatus(directionGiven == null ? NOT_APPROVED.getId() : DIRECTION_NOT_APPROVED.getId());
+            case "Other" -> builder.generalApplicationStatus(directionGiven == null ? OTHER.getId() : DIRECTION_OTHER.getId());
             default -> builder.generalApplicationStatus(OTHER.getId());
         }
     }
@@ -204,6 +218,8 @@ public class GeneralApplicationHelper {
                 caseData.remove(GENERAL_APPLICATION_DOCUMENT_LATEST_DATE);
                 caseData.remove(GENERAL_APPLICATION_DOCUMENT_LATEST);
             }
+            caseData.remove(GENERAL_APPLICATION_OUTCOME_DECISION);
+            caseData.remove(GENERAL_APPLICATION_OUTCOME_OTHER);
         }
     }
 }
