@@ -36,7 +36,7 @@ public class ManageBarristerAboutToStartHandler implements CallbackHandler {
     @Override
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
                                                        String userAuthorisation) {
-        log.info("In Manage barrister about to start callback");
+        log.info("In Manage barrister about to start callback for case {}", callbackRequest.getCaseDetails().getId());
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
 
@@ -47,7 +47,7 @@ public class ManageBarristerAboutToStartHandler implements CallbackHandler {
             caseData.put(CASE_ROLE, userCaseRole.getCaseAssignedUserRoles().get(0).getCaseRole());
         }
 
-        log.info("current user case role is {}", caseData.get(CASE_ROLE));
+        log.info("current user case role is {} for case {}", caseData.get(CASE_ROLE), caseDetails.getId());
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
     }

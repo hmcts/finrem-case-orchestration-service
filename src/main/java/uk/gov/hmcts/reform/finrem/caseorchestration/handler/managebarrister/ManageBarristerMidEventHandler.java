@@ -33,7 +33,7 @@ public class ManageBarristerMidEventHandler implements CallbackHandler {
 
     @Override
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest, String userAuthorisation) {
-        log.info("In the manage barrister mid-event handler");
+        log.info("In the manage barrister mid-event handler for case {}", callbackRequest.getCaseDetails().getId());
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         String authTokenToUse = manageBarristerService.getAuthTokenToUse(caseDetails, userAuthorisation);
