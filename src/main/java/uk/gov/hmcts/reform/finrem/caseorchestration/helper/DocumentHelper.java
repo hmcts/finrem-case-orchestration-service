@@ -333,10 +333,10 @@ public class DocumentHelper {
     }
 
     public Optional<BulkPrintDocument> getDocumentLinkAsBulkPrintDocument(Map<String, Object> data, String documentName) {
-        Map<String, String> documentLink = (Map<String, String>) data.get(documentName);
-
-        return documentLink != null
-            ? Optional.of(BulkPrintDocument.builder().binaryFileUrl(documentLink.get(DOCUMENT_BINARY_URL)).build())
+        CaseDocument caseDocument = nullCheckAndConvertToCaseDocument(data.get(documentName));
+        return caseDocument != null
+            ? Optional.of(BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl())
+                .fileName(caseDocument.getDocumentFilename()).build())
             : Optional.empty();
     }
 
@@ -418,5 +418,12 @@ public class DocumentHelper {
 
     public enum PaperNotificationRecipient {
         APPLICANT, RESPONDENT, SOLICITOR
+    }
+
+    public CaseDocument nullCheckAndConvertToCaseDocument(Object object) {
+        if (object != null) {
+            return objectMapper.convertValue(object, CaseDocument.class);
+        }
+        return null;
     }
 }
