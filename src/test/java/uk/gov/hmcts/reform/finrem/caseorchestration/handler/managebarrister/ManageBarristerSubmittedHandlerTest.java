@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
 
 import java.util.HashMap;
@@ -24,10 +23,8 @@ import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REPRESENTATION_UPDATE_HISTORY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdServiceTest.AUTH_TOKEN;
 
 
