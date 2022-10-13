@@ -318,6 +318,23 @@ public class NotificationService {
             interimHearingData));
     }
 
+    public void sendConsentHearingNotificationEmailToApplicantSolicitor(CaseDetails caseDetails,
+                                                                        Map<String, Object> hearingData) {
+        sendConsentedHearingNotificationEmail(notificationRequestMapper.getNotificationRequestForConsentApplicantSolicitor(caseDetails,
+            hearingData));
+    }
+
+    private void sendConsentedHearingNotificationEmail(NotificationRequest notificationRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getConsentedHearing());
+        sendNotificationEmail(notificationRequest, uri);
+    }
+
+    public void sendConsentHearingNotificationEmailToRespondentSolicitor(CaseDetails caseDetails,
+                                                                         Map<String, Object> hearingData) {
+        sendConsentedHearingNotificationEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails,
+            hearingData));
+    }
+
     public void sendInterimNotificationEmailToApplicantSolicitor(CaseDetails caseDetails) {
         sendInterimNotificationEmail(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails));
     }
