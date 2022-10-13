@@ -46,4 +46,5 @@ public class NotificationServiceConfiguration {
     private String generalApplicationRejection;
     private String addedBarrister;
     private String removedBarrister;
+    private String consentedHearing;
 }

@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -150,6 +152,7 @@ public class ManageBarristerService {
             .removed(convertToChangedRepresentative(removedUser))
             .by(idamService.getIdamFullName(authToken))
             .via(MANAGE_BARRISTERS)
+            .date(LocalDateTime.now())
             .clientName(getClientName(caseDetails, authToken))
             .party(getManageBarristerParty(caseDetails, authToken))
             .build();
@@ -198,7 +201,8 @@ public class ManageBarristerService {
     }
 
     private List<Element<RepresentationUpdate>> convertToUpdateHistory(CaseDetails caseDetails) {
-        return objectMapper.convertValue(caseDetails.getData().get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {});
+        return objectMapper.registerModule(new JavaTimeModule())
+            .convertValue(caseDetails.getData().get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {});
     }
 
     private Runnable throwNoSuchUserException(Barrister userToBeAdded) {

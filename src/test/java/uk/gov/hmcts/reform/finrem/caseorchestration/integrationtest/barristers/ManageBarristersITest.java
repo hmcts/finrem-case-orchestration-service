@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.barristers;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.tools.rngom.util.Uri;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import feign.FeignException;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
@@ -128,7 +129,8 @@ public class ManageBarristersITest implements IntegrationTest {
     private RestTemplate restTemplate;
     @Captor
     private ArgumentCaptor<HttpEntity> restRequestCaptor;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
     @Test
     public void givenValidRequest_whenManageBarristerAboutToStart_thenProcess() {

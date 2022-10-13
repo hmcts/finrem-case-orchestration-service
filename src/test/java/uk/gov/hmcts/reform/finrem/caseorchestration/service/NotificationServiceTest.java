@@ -19,8 +19,10 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedHearingHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
@@ -33,7 +35,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertFalse;
@@ -87,6 +88,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     private static final String END_POINT_NOC_CASEWORKER_CONSENTED = "http://localhost:8086/notify/notice-of-change/caseworker";
     private static final String END_POINT_UPDATE_FRC_INFORMATION = "http://localhost:8086/notify/contested/update-frc-information";
     private static final String END_POINT_UPDATE_FRC_INFO_COURT = "http://localhost:8086/notify/contested/update-frc-information/court";
+    private static final String END_POINT_LIST_FOR_HEARING_SUCCESSFUL = "http://localhost:8086/notify/list-for-hearing";
 
     private static final String END_POINT_BARRISTER_ADDED = "http://localhost:8086/notify/contested/barrister-access-added";
 
@@ -96,8 +98,12 @@ public class NotificationServiceTest extends BaseServiceTest {
     private static final String TEST_USER_EMAIL = "fr_applicant_sol@sharklasers.com";
     private static final String NOTTINGHAM_FRC_EMAIL = "FRCNottingham@justice.gov.uk";
 
+    private static final String INTERIM_HEARING_JSON = "/fixtures/contested/interim-hearing-two-collection.json";
+    private static final String CONSENTED_HEARING_JSON = "/fixtures/consented.listOfHearing/list-for-hearing.json";
+
     @Autowired private NotificationService notificationService;
     @Autowired private RestTemplate restTemplate;
+    @Autowired private ConsentedHearingHelper helper;
 
     @MockBean private FeatureToggleService featureToggleService;
     @MockBean private RestTemplate mockRestTemplate;
@@ -1240,18 +1246,18 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void sendInterimHearingNotificationEmailToApplicantSolicitor() {
-        CallbackRequest callbackRequest = buildInterimHearingCallbackRequest();
+        CallbackRequest callbackRequest = buildHearingCallbackRequest(INTERIM_HEARING_JSON);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
 
         List<InterimHearingData> interimHearingList = Optional.ofNullable(caseData.get(INTERIM_HEARING_COLLECTION))
             .map(this::convertToInterimHearingDataList).orElse(Collections.emptyList());
 
         List<InterimHearingItem> interimHearingItems
-            = interimHearingList.stream().map(InterimHearingData::getValue).collect(Collectors.toList());
+            = interimHearingList.stream().map(InterimHearingData::getValue).toList();
 
         List<Map<String, Object>> interimDataMap = interimHearingItems.stream()
             .map(obj -> new ObjectMapper().convertValue(obj, new TypeReference<Map<String, Object>>() {
-            })).collect(Collectors.toList());
+            })).toList();
 
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_INTERIM_HEARING))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
@@ -1267,18 +1273,18 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void sendInterimHearingNotificationEmailToRespondentSolicitor() {
-        CallbackRequest callbackRequest = buildInterimHearingCallbackRequest();
+        CallbackRequest callbackRequest = buildHearingCallbackRequest(INTERIM_HEARING_JSON);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
 
         List<InterimHearingData> interimHearingList = Optional.ofNullable(caseData.get(INTERIM_HEARING_COLLECTION))
             .map(this::convertToInterimHearingDataList).orElse(Collections.emptyList());
 
         List<InterimHearingItem> interimHearingItems
-            = interimHearingList.stream().map(InterimHearingData::getValue).collect(Collectors.toList());
+            = interimHearingList.stream().map(InterimHearingData::getValue).toList();
 
         List<Map<String, Object>> interimDataMap = interimHearingItems.stream()
             .map(obj -> new ObjectMapper().convertValue(obj, new TypeReference<Map<String, Object>>() {
-            })).collect(Collectors.toList());
+            })).toList();
 
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_INTERIM_HEARING))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
@@ -1290,4 +1296,47 @@ public class NotificationServiceTest extends BaseServiceTest {
             verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails(), data);
         });
     }
+
+    @Test
+    public void sendConsentedHearingNotificationEmailToApplicantSolicitor() {
+        CallbackRequest callbackRequest = buildHearingCallbackRequest(CONSENTED_HEARING_JSON);
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+
+        List<ConsentedHearingDataWrapper> hearings = helper.getHearings(caseData);
+        List<String> hearingIdsToProcess = List.of("1f7e210d-87d8-4e98-8c48-db15d1dc0d14");
+
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_LIST_FOR_HEARING_SUCCESSFUL))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+
+        hearings.forEach(hearingData -> {
+            if (hearingIdsToProcess.contains(hearingData.getId())) {
+                Map<String, Object> data = helper.convertToMap(hearingData.getValue());
+                notificationService.sendConsentHearingNotificationEmailToApplicantSolicitor(callbackRequest.getCaseDetails(), data);
+                verify(notificationRequestMapper).getNotificationRequestForConsentApplicantSolicitor(callbackRequest.getCaseDetails(), data);
+            }
+        });
+    }
+
+    @Test
+    public void sendConsentedHearingNotificationEmailToRespondentSolicitor() {
+        CallbackRequest callbackRequest = buildHearingCallbackRequest(CONSENTED_HEARING_JSON);
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+
+        List<ConsentedHearingDataWrapper> hearings = helper.getHearings(caseData);
+        List<String> hearingIdsToProcess = List.of("1f7e210d-87d8-4e98-8c48-db15d1dc0d14");
+
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_LIST_FOR_HEARING_SUCCESSFUL))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+
+        hearings.forEach(hearingData -> {
+            if (hearingIdsToProcess.contains(hearingData.getId())) {
+                Map<String, Object> data = helper.convertToMap(hearingData.getValue());
+                notificationService.sendConsentHearingNotificationEmailToRespondentSolicitor(callbackRequest.getCaseDetails(), data);
+                verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails(), data);
+            }
+        });
+    }
+
 }
