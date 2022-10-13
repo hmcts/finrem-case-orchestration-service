@@ -76,7 +76,7 @@ public class GeneralApplicationService {
 
         log.info("Processing general application for case id {}", caseDetails.getId());
         List<GeneralApplicationCollectionData> generalApplicationCollectionDataList =
-            processableList.stream().map(items -> setUserAndDate(items, userAuthorisation))
+            processableList.stream().map(items -> setUserAndDate(caseDetails, items, userAuthorisation))
                 .collect(Collectors.toList());
 
         if (!generalApplicationListBefore.isEmpty()) {
@@ -85,7 +85,7 @@ public class GeneralApplicationService {
 
         if (initialCollectionId != null) {
             GeneralApplicationCollectionData originalGeneralApplicationList
-                = helper.retrieveInitialGeneralApplicationData(caseData, initialCollectionId);
+                = helper.retrieveInitialGeneralApplicationData(caseData, initialCollectionId, userAuthorisation);
             generalApplicationCollectionDataList.add(originalGeneralApplicationList);
         }
 
@@ -99,8 +99,10 @@ public class GeneralApplicationService {
 
 
 
-    private GeneralApplicationCollectionData setUserAndDate(GeneralApplicationCollectionData items, String userAuthorisation) {
-
+    private GeneralApplicationCollectionData setUserAndDate(CaseDetails caseDetails,
+                                                            GeneralApplicationCollectionData items,
+                                                            String userAuthorisation) {
+        log.info("Setting user and date for new application {}", caseDetails.getId());
         GeneralApplicationItems generalApplicationItems = items.getGeneralApplicationItems();
         generalApplicationItems.setGeneralApplicationCreatedBy(idamService.getIdamFullName(userAuthorisation));
         generalApplicationItems.setGeneralApplicationCreatedDate(LocalDate.now());
