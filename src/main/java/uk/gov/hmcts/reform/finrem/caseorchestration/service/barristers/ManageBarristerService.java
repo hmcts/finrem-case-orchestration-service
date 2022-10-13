@@ -86,7 +86,7 @@ public class ManageBarristerService {
                                                      List<Barrister> barristers,
                                                      List<Barrister> barristersBeforeEvent) {
 
-        BarristerChange barristerChange = barristerUpdateDifferenceCalculator.calculate(barristers, barristersBeforeEvent);
+        BarristerChange barristerChange = barristerUpdateDifferenceCalculator.calculate(barristersBeforeEvent, barristers);
         List<Barrister> addedBarristers = barristerChange.getAdded().stream().toList();
         List<Barrister> removedBarristers = barristerChange.getRemoved().stream().toList();
 

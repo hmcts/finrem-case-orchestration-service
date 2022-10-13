@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
@@ -86,6 +87,10 @@ public class NotificationServiceTest extends BaseServiceTest {
     private static final String END_POINT_NOC_CASEWORKER_CONSENTED = "http://localhost:8086/notify/notice-of-change/caseworker";
     private static final String END_POINT_UPDATE_FRC_INFORMATION = "http://localhost:8086/notify/contested/update-frc-information";
     private static final String END_POINT_UPDATE_FRC_INFO_COURT = "http://localhost:8086/notify/contested/update-frc-information/court";
+
+    private static final String END_POINT_BARRISTER_ADDED = "http://localhost:8086/notify/contested/barrister-access-added";
+
+    private static final String END_POINT_BARRISTER_REMOVED = "http://localhost:8086/notify/contested/barrister-access-removed";
 
     private static final String ERROR_500_MESSAGE = "500 Internal Server Error";
     private static final String TEST_USER_EMAIL = "fr_applicant_sol@sharklasers.com";
@@ -1214,6 +1219,23 @@ public class NotificationServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().data(caseData).build();
 
         assertTrue(notificationService.isContestedApplicationAndApplicantOrRespondentSolicitorsIsNotRegisteredOrAcceptingEmails(caseDetails));
+    }
+
+    @Test
+    public void givenBarristerAdded_sendAddedEmail() {
+        Barrister barrister = new Barrister().toBuilder().build();
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        notificationService.sendBarristerAddedEmail(caseDetails, barrister);
+        verify(notificationServiceConfiguration).getAddedBarrister();
+        verify(notificationRequestMapper).buildNotificationRequest(caseDetails, barrister);
+    }
+    @Test
+    public void givenBarristerRemoved_sendRemovedEmail() {
+        Barrister barrister = new Barrister().toBuilder().build();
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        notificationService.sendBarristerRemovedEmail(caseDetails, barrister);
+        verify(notificationServiceConfiguration).getRemovedBarrister();
+        verify(notificationRequestMapper).buildNotificationRequest(caseDetails, barrister);
     }
 
     @Test

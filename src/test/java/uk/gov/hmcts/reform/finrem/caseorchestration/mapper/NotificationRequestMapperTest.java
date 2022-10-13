@@ -6,7 +6,9 @@ import lombok.SneakyThrows;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
@@ -14,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -28,6 +31,8 @@ import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_NAME;
@@ -289,6 +294,31 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         assertEquals("contested", notificationRequest.getCaseType());
         assertEquals("nottingham", notificationRequest.getSelectedCourt());
     }
+
+    @Test
+    public void givenValidData_createBarristerNotificationRequest() {
+        CaseDetails caseDetails = buildCaseDetails();
+        Barrister barrister = createBarrister();
+        NotificationRequest result = notificationRequestMapper.buildNotificationRequest(caseDetails, barrister);
+        assertEquals("1234", result.getBarristerReferenceNumber());
+    }
+
+
+    private Barrister createBarrister() {
+        Organisation organisation = Organisation.builder()
+            .organisationID("1234")
+            .organisationName("Org Name")
+            .build();
+        Barrister barrister = Barrister.builder()
+            .name("barrister")
+            .email("barrister@barrister.com")
+            .organisation(organisation)
+            .phone("0123456789")
+            .build();
+        return barrister;
+    }
+
+
 
     private void verifyData(CallbackRequest callbackRequest, Map<String, Object> data) {
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForRespondentSolicitor(

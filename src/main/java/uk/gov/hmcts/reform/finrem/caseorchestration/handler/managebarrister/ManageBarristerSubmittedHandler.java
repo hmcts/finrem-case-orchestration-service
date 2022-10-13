@@ -21,7 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ManageBarristerSubmittedHandler implements CallbackHandler {
 
-    ManageBarristerService manageBarristerService;
+    private final ManageBarristerService manageBarristerService;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
