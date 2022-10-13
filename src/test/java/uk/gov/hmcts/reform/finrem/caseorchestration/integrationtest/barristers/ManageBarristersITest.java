@@ -92,7 +92,9 @@ public class ManageBarristersITest implements IntegrationTest {
     private static final String CASE_ID = "12345678";
     private static final String USER_ID = "userId";
     private static final String APP_BARRISTER_EMAIL_ONE = "appbarr@gmail.com";
+    private static final String APP_BARRISTER_NAME = "Barrister App";
     private static final String RESP_BARRISTER_EMAIL_ONE = "respbarr@gmail.com";
+    private static final String RESP_BARRISTER_NAME = "Barrister Res";
     private static final String SOLICITOR_NAME = "solName";
     private static final String APP_BARR_ORG_ID = "orgId";
     private static final String RESP_BARR_ORG_ID = "respOrgId";
@@ -251,6 +253,7 @@ public class ManageBarristersITest implements IntegrationTest {
         assertThat(representationUpdateHistory, hasSize(1));
         RepresentationUpdate update = representationUpdateHistory.get(0).getValue();
         assertThat(update.getAdded(), is(ChangedRepresentative.builder()
+            .name(RESP_BARRISTER_NAME)
             .email(RESP_BARRISTER_EMAIL_ONE)
             .organisation(Organisation.builder().organisationID(RESP_BARR_ORG_ID).build())
             .build()));
@@ -288,6 +291,7 @@ public class ManageBarristersITest implements IntegrationTest {
         assertThat(representationUpdateHistory, hasSize(1));
         RepresentationUpdate update = representationUpdateHistory.get(0).getValue();
         assertThat(update.getAdded(), is(ChangedRepresentative.builder()
+            .name(RESP_BARRISTER_NAME)
             .email(RESP_BARRISTER_EMAIL_ONE)
             .organisation(Organisation.builder().organisationID(RESP_BARR_ORG_ID).build())
             .build()));
@@ -356,7 +360,7 @@ public class ManageBarristersITest implements IntegrationTest {
     private List<BarristerData> applicantBarristerCollection() {
         return List.of(BarristerData.builder()
                 .barrister(Barrister.builder()
-                    .name("Barrister App")
+                    .name(APP_BARRISTER_NAME)
                     .email(APP_BARRISTER_EMAIL_ONE)
                     .organisation(Organisation.builder().organisationID(APP_BARR_ORG_ID).build())
                     .build())
@@ -366,7 +370,7 @@ public class ManageBarristersITest implements IntegrationTest {
     private List<BarristerData> respondentBarristerCollection() {
         return List.of(BarristerData.builder()
             .barrister(Barrister.builder()
-                .name("Barrister Res")
+                .name(RESP_BARRISTER_NAME)
                 .email(RESP_BARRISTER_EMAIL_ONE)
                 .organisation(Organisation.builder().organisationID(RESP_BARR_ORG_ID).build())
                 .build())

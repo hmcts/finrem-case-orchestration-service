@@ -1230,7 +1230,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         verify(notificationServiceConfiguration).getAddedBarrister();
         verify(notificationRequestMapper).buildNotificationRequest(caseDetails, barrister);
     }
-    
+
     @Test
     public void givenBarristerRemoved_sendRemovedEmail() {
         Barrister barrister = new Barrister().toBuilder().build();
