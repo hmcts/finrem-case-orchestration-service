@@ -323,13 +323,17 @@ public class DocumentHelper {
     }
 
     public BulkPrintDocument getCaseDocumentAsBulkPrintDocument(CaseDocument caseDocument) {
-        return BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl()).build();
+        return BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl())
+            .fileName(caseDocument.getDocumentFilename())
+            .build();
     }
 
     public List<BulkPrintDocument> getCaseDocumentsAsBulkPrintDocuments(List<CaseDocument> caseDocuments) {
         return caseDocuments.stream()
-            .map(caseDocument -> BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl()).build())
-            .collect(Collectors.toList());
+            .map(caseDocument -> BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl())
+                .fileName(caseDocument.getDocumentFilename())
+                .build())
+            .toList();
     }
 
     public Optional<BulkPrintDocument> getDocumentLinkAsBulkPrintDocument(Map<String, Object> data, String documentName) {
@@ -407,7 +411,9 @@ public class DocumentHelper {
     }
 
     public BulkPrintDocument getBulkPrintDocumentFromCaseDocument(CaseDocument caseDocument) {
-        return BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl()).build();
+        return BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl())
+            .fileName(caseDocument.getDocumentFilename())
+            .build();
     }
 
     public List<CaseDocument> getHearingNoticeDocuments(Map<String, Object> caseData) {
