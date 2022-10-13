@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.io.InputStream;
 import java.util.List;
@@ -39,6 +40,10 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
     private GeneralApplicationHelper helper;
     @Mock
     private GeneralApplicationDirectionsService service;
+
+    @Mock
+    private GenericDocumentService documentService;
+
     private ObjectMapper objectMapper;
 
     public static final String AUTH_TOKEN = "tokien:)";
@@ -49,7 +54,7 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
     @Before
     public void setup() {
         objectMapper = new ObjectMapper();
-        helper = new GeneralApplicationHelper(objectMapper);
+        helper = new GeneralApplicationHelper(objectMapper, documentService);
         handler  = new GeneralApplicationDirectionsAboutToStartHandler(helper, service);
     }
 

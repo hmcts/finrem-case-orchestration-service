@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.Map;
+import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedCourtHelper.getBedfordshireCourt;
@@ -312,6 +313,111 @@ public class ContestedCourtHelper {
 
     private static String getMidlandInterimHearingFRC(Map<String, Object> interimHearingData) {
         String midlandsList = (String) interimHearingData.get(INTERIM_MIDLANDS_FRC_LIST);
+        if (NOTTINGHAM.equalsIgnoreCase(midlandsList)) {
+            return NOTTINGHAM;
+        } else if (BIRMINGHAM.equalsIgnoreCase(midlandsList)) {
+            return BIRMINGHAM;
+        }
+        return EMPTY;
+    }
+
+    public static String getSelectedHearingFrc(Map<String, Object> hearingData) {
+        String region = Objects.toString(hearingData.get(REGION), "");
+
+        if (MIDLANDS.equalsIgnoreCase(region)) {
+            return getMidlandHearingFRC(hearingData);
+        }
+        if (LONDON.equalsIgnoreCase(region)) {
+            return getLondonHearingFRC(hearingData);
+        }
+        if (NORTHWEST.equalsIgnoreCase(region)) {
+            return getNorthWestHearingFRC(hearingData);
+        }
+        if (NORTHEAST.equalsIgnoreCase(region)) {
+            return getNorthEastHearingFRC(hearingData);
+        }
+        if (SOUTHEAST.equalsIgnoreCase(region)) {
+            return getSouthEastHearingFRC(hearingData);
+        }
+        if (SOUTHWEST.equalsIgnoreCase(region)) {
+            return getSouthWestHearingFRC(hearingData);
+        }
+        if (WALES.equalsIgnoreCase(region)) {
+            return getWalesHearingFRC(hearingData);
+        }
+        return EMPTY;
+    }
+
+    private static String getWalesHearingFRC(Map<String, Object> hearingData) {
+        String walesList = Objects.toString(hearingData.get(WALES_FRC_LIST),"");
+        if (NEWPORT.equalsIgnoreCase(walesList)) {
+            return NEWPORT;
+        } else if (SWANSEA.equalsIgnoreCase(walesList)) {
+            return SWANSEA;
+        } else if (NORTHWALES.equalsIgnoreCase(walesList)) {
+            return NORTHWALES;
+        }
+        return EMPTY;
+    }
+
+    private static String getSouthWestHearingFRC(Map<String, Object> hearingData) {
+        String southWestList = Objects.toString(hearingData.get(SOUTHWEST_FRC_LIST),"");
+        if (DEVON.equalsIgnoreCase(southWestList)) {
+            return DEVON;
+        } else if (DORSET.equalsIgnoreCase(southWestList)) {
+            return DORSET;
+        } else if (BRISTOLFRC.equalsIgnoreCase(southWestList)) {
+            return BRISTOLFRC;
+        }
+        return EMPTY;
+    }
+
+    private static String getSouthEastHearingFRC(Map<String, Object> hearingData) {
+        String southEastList = Objects.toString(hearingData.get(SOUTHEAST_FRC_LIST),"");
+        if (KENT.equalsIgnoreCase(southEastList)) {
+            return KENT;
+        } else if (BEDFORDSHIRE.equalsIgnoreCase(southEastList)) {
+            return BEDFORDSHIRE;
+        } else if (THAMESVALLEY.equalsIgnoreCase(southEastList)) {
+            return THAMESVALLEY;
+        }
+        return EMPTY;
+    }
+
+    private static String getNorthEastHearingFRC(Map<String, Object> hearingData) {
+        String northEastList = Objects.toString(hearingData.get(NORTHEAST_FRC_LIST),"");
+        if (CLEAVELAND.equalsIgnoreCase(northEastList)) {
+            return CLEAVELAND;
+        } else if (NWYORKSHIRE.equalsIgnoreCase(northEastList)) {
+            return NWYORKSHIRE;
+        } else if (HSYORKSHIRE.equalsIgnoreCase(northEastList)) {
+            return HSYORKSHIRE;
+        }
+        return EMPTY;
+    }
+
+    private static String getNorthWestHearingFRC(Map<String, Object> hearingData) {
+        String northWestList = Objects.toString(hearingData.get(NORTHWEST_FRC_LIST),"");
+        if (LIVERPOOL.equalsIgnoreCase(northWestList)) {
+            return LIVERPOOL;
+        } else if (MANCHESTER.equalsIgnoreCase(northWestList)) {
+            return MANCHESTER;
+        } else if (LANCASHIRE.equalsIgnoreCase(northWestList)) {
+            return LANCASHIRE;
+        }
+        return EMPTY;
+    }
+
+    private static String getLondonHearingFRC(Map<String, Object> hearingData) {
+        String londonList = Objects.toString(hearingData.get(LONDON_FRC_LIST),"");
+        if (CFC.equalsIgnoreCase(londonList)) {
+            return CFC;
+        }
+        return EMPTY;
+    }
+
+    private static String getMidlandHearingFRC(Map<String, Object> hearingData) {
+        String midlandsList = Objects.toString(hearingData.get(MIDLANDS_FRC_LIST),"");
         if (NOTTINGHAM.equalsIgnoreCase(midlandsList)) {
             return NOTTINGHAM;
         } else if (BIRMINGHAM.equalsIgnoreCase(midlandsList)) {
