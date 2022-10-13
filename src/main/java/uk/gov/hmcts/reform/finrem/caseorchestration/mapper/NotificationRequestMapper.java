@@ -63,6 +63,11 @@ public class NotificationRequestMapper {
         return buildNotificationRequest(caseDetails, getCaseDataKeysForRespondentSolicitor());
     }
 
+    public NotificationRequest getNotificationRequestForConsentApplicantSolicitor(CaseDetails caseDetails,
+                                                                           Map<String, Object> hearingData) {
+        return buildNotificationRequest(caseDetails, getConsentedCaseDataKeysForApplicantSolicitor(), hearingData);
+    }
+
     public NotificationRequest getNotificationRequestForApplicantSolicitor(CaseDetails caseDetails,
                                                                            Map<String, Object> interimHearingData) {
         return buildNotificationRequest(caseDetails, getContestedCaseDataKeysForApplicantSolicitor(), interimHearingData);
@@ -144,13 +149,15 @@ public class NotificationRequestMapper {
     private NotificationRequest buildNotificationRequest(CaseDetails caseDetails,
                                                          SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper,
                                                          Map<String, Object> interimHearingData) {
-
         NotificationRequest notificationRequest = getNotificationCoreData(caseDetails, solicitorCaseDataKeysWrapper);
 
-        String selectedCourt = ContestedCourtHelper.getSelectedInterimHearingFrc(interimHearingData);
-        notificationRequest.setSelectedCourt(selectedCourt);
+        if (caseDataService.isConsentedApplication(caseDetails)) {
+            notificationRequest.setSelectedCourt(ContestedCourtHelper.getSelectedHearingFrc(interimHearingData));
+        }
 
-        log.info("selectedCourt is {} for case ID: {}", selectedCourt, notificationRequest.getCaseReferenceNumber());
+        if (caseDataService.isContestedApplication(caseDetails)) {
+            notificationRequest.setSelectedCourt(ContestedCourtHelper.getSelectedInterimHearingFrc(interimHearingData));
+        }
 
         return notificationRequest;
     }

@@ -75,4 +75,6 @@ public class DocumentConfiguration {
     private String updateFRCInformationSolicitorFilename;
     private String updateFRCInformationLitigantTemplate;
     private String updateFRCInformationLitigantFilename;
+    private String hearingNoticeConsentedTemplate;
+    private String hearingNoticeConsentedFileName;
 }

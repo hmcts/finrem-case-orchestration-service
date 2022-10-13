@@ -57,7 +57,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public abstract class BaseServiceTest extends BaseTest {
 
     @Autowired protected ObjectMapper mapper;
-    private static final String TEST_JSON = "/fixtures/contested/interim-hearing-two-collection.json";
 
     protected CaseDetails buildCaseDetails() {
         Map<String, Object> caseData = new HashMap<>();
@@ -261,8 +260,8 @@ public abstract class BaseServiceTest extends BaseTest {
         return document;
     }
 
-    protected CallbackRequest buildInterimHearingCallbackRequest()  {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(TEST_JSON)) {
+    protected CallbackRequest buildHearingCallbackRequest(String payloadJson)  {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(payloadJson)) {
             return mapper.readValue(resourceAsStream, CallbackRequest.class);
         } catch (Exception e) {
             throw new RuntimeException(e);
