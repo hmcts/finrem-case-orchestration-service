@@ -246,6 +246,33 @@ public class ManageBarristerServiceTest {
         verify(notificationService).sendBarristerRemovedEmail(eq(caseDetails), any());
     }
 
+    @Test
+    public void givenValidData_whenUpdateBarristerAccess_thenRemoveAccessAndGenerateRepresentationUpdateData() {
+        caseDetails.getData().put(CASE_ROLE, APP_SOLICITOR_POLICY);
+        when(barristerUpdateDifferenceCalculator.calculate(any(), any())).thenReturn(buildRemovedBarristerChange());
+        when(organisationService.findUserByEmail(APP_BARRISTER_EMAIL_ONE, AUTH_TOKEN)).thenReturn(Optional.of(BARRISTER_USER_ID));
+        when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn(APP_SOLICITOR);
+        when(caseDataService.buildFullApplicantName(any())).thenReturn(CLIENT_NAME);
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
+            .thenReturn(buildCaseAssignedUserRolesResource(APP_SOLICITOR_POLICY));
+
+        Map<String, Object> caseData = manageBarristerService.updateBarristerAccess(caseDetails,
+            List.of(DEFAULT_BARRISTER),
+            Collections.emptyList(), AUTH_TOKEN);
+
+        List<Element<RepresentationUpdate>> representationUpdateHistory =
+            objectMapper.convertValue(caseData.get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {});
+        RepresentationUpdate update = representationUpdateHistory.get(0).getValue();
+        assertThat(update.getBy(), is(APP_SOLICITOR));
+        assertThat(update.getRemoved().getEmail(), is(APP_BARRISTER_EMAIL_ONE));
+        assertThat(update.getParty(), is(APPLICANT));
+        assertThat(update.getVia(), is(MANAGE_BARRISTERS));
+        assertThat(update.getClientName(), is(CLIENT_NAME));
+
+        verify(assignCaseAccessService).removeCaseRoleToUser(caseDetails.getId(), BARRISTER_USER_ID,
+            APPLICANT_BARRISTER_ROLE, SOME_ORG_ID);
+    }
+
     private List<BarristerData> applicantBarristerCollection() {
         return List.of(
             BarristerData.builder()
@@ -288,6 +315,15 @@ public class ManageBarristerServiceTest {
                 .build()))
             .removed(Set.of(Barrister.builder()
                 .email(APP_BARRISTER_EMAIL_TWO)
+                .organisation(Organisation.builder().organisationID(SOME_ORG_ID).build())
+                .build()))
+            .build();
+    }
+
+    private BarristerChange buildRemovedBarristerChange() {
+        return BarristerChange.builder()
+            .removed(Set.of(Barrister.builder()
+                .email(APP_BARRISTER_EMAIL_ONE)
                 .organisation(Organisation.builder().organisationID(SOME_ORG_ID).build())
                 .build()))
             .build();
