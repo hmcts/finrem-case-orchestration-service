@@ -163,6 +163,7 @@ public class ManageBarristerServiceTest {
         caseDetails.getData().put(CASE_ROLE, APP_SOLICITOR_POLICY);
         when(barristerUpdateDifferenceCalculator.calculate(any(), any())).thenReturn(buildBarristerChange());
         when(organisationService.findUserByEmail(APP_BARRISTER_EMAIL_ONE, AUTH_TOKEN)).thenReturn(Optional.of(BARRISTER_USER_ID));
+        when(organisationService.findUserByEmail(APP_BARRISTER_EMAIL_TWO, AUTH_TOKEN)).thenReturn(Optional.of(BARRISTER_USER_ID));
         when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn(APP_SOLICITOR);
         when(caseDataService.buildFullApplicantName(any())).thenReturn(CLIENT_NAME);
         when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
@@ -191,6 +192,7 @@ public class ManageBarristerServiceTest {
         caseDetails.getData().put(MANAGE_BARRISTER_PARTY, APPLICANT);
         when(barristerUpdateDifferenceCalculator.calculate(any(), any())).thenReturn(buildBarristerChange());
         when(organisationService.findUserByEmail(APP_BARRISTER_EMAIL_ONE, SYS_USER_TOKEN)).thenReturn(Optional.of(BARRISTER_USER_ID));
+        when(organisationService.findUserByEmail(APP_BARRISTER_EMAIL_TWO, SYS_USER_TOKEN)).thenReturn(Optional.of(BARRISTER_USER_ID));
         when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn(CASEWORKER_NAME);
         when(caseDataService.buildFullApplicantName(any())).thenReturn(CLIENT_NAME);
         when(systemUserService.getSysUserToken()).thenReturn(SYS_USER_TOKEN);
