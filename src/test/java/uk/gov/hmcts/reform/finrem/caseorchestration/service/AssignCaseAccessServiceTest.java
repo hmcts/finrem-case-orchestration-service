@@ -26,6 +26,7 @@ import java.util.Set;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.delete;
+import static com.github.tomakehurst.wiremock.client.WireMock.deleteRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
@@ -196,6 +197,32 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
         assignCaseAccessService.grantCaseRoleToUser(Long.parseLong(CASE_ID), TEST_USER_ID, APPLICANT_BARRISTER_ROLE, ORG_ID);
 
         WireMock.verify(postRequestedFor(urlMatching("/case-users")));
+    }
+
+    @Test
+    public void givenValidRequest_whenRemoveCaseAccessForBarrister_thenRemoveAccess() throws JsonProcessingException {
+        final CaseAssignmentUserRoleWithOrganisation requestInfo =
+            CaseAssignmentUserRoleWithOrganisation.builder()
+                .caseDataId(CASE_ID)
+                .userId(TEST_USER_ID)
+                .organisationId(ORG_ID)
+                .caseRole(APPLICANT_BARRISTER_ROLE)
+                .build();
+
+        final CaseAssignmentUserRolesRequest requestBody = CaseAssignmentUserRolesRequest.builder()
+            .caseAssignmentUserRolesWithOrganisation(List.of(requestInfo))
+            .build();
+
+        caseDataApi.stubFor(delete(urlEqualTo("/case-users"))
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withBody(mapper.writeValueAsString(requestBody))));
+
+        assignCaseAccessService
+            .removeCaseRoleToUser(Long.parseLong(CASE_ID), TEST_USER_ID, APPLICANT_BARRISTER_ROLE, ORG_ID);
+
+        WireMock.verify(deleteRequestedFor(urlMatching("/case-users")));
     }
 
     @Test
