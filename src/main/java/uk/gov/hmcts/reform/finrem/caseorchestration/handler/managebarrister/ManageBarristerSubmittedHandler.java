@@ -46,10 +46,10 @@ public class ManageBarristerSubmittedHandler implements CallbackHandler {
         log.info("Current barristers: {}", barristers.toString());
         log.info("Original Barristers: {}", barristersBeforeEvent.toString());
 
-
         manageBarristerService.notifyBarristerAccess(caseDetails,
             barristers,
-            barristersBeforeEvent);
+            barristersBeforeEvent,
+            userAuthorisation);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build();
     }

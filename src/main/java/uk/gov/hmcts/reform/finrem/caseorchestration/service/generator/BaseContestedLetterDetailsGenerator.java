@@ -25,6 +25,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 @Slf4j
 public abstract class BaseContestedLetterDetailsGenerator {
 
+    public static final String LETTER_DATE_FORMAT = "yyyy-MM-dd";
+
     protected CaseDataService caseDataService;
     protected DocumentHelper documentHelper;
 
