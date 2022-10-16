@@ -14,9 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +28,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -45,7 +42,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
 
 @WebMvcTest(HearingDocumentController.class)
 public class HearingDocumentControllerTest extends BaseControllerTest {
@@ -58,10 +54,6 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @MockBean private AdditionalHearingDocumentService additionalHearingDocumentService;
     @MockBean private ValidateHearingService validateHearingService;
     @MockBean private CaseDataService caseDataService;
-    @MockBean private NotificationService notificationService;
-    @MockBean
-    private CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
-
 
     @Before
     public void setUp() {
@@ -92,6 +84,8 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void generateHearingDocumentFormC() throws Exception {
+        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(hearingDocumentService.generateHearingDocuments(eq(AUTH_TOKEN), isA(CaseDetails.class)))
             .thenReturn(ImmutableMap.of("formC", caseDocument()));
 
@@ -104,11 +98,14 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.formC.document_filename", is(FILE_NAME)))
             .andExpect(jsonPath("$.data.formC.document_binary_url", is(BINARY_URL)));
 
-        verify(hearingDocumentService, never()).sendFormCAndGForBulkPrint(any(), any());
+        verify(hearingDocumentService).sendFormCAndGForBulkPrint(any(), any());
     }
 
     @Test
     public void generateHearingDocumentPaperApplication() throws Exception {
+        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+
         requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
             .getResource("/fixtures/contested/validate-hearing-with-fastTrackDecision-paperApplication.json")).toURI()));
 
@@ -126,23 +123,11 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void generateMiniFormAHttpError500() throws Exception {
-        when(hearingDocumentService.generateHearingDocuments(eq(AUTH_TOKEN), isA(CaseDetails.class)))
-                .thenThrow(feignError());
-
-        mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isInternalServerError());
-    }
-
-    @Test
     public void generateAdditionalHearingDocumentSuccess() throws Exception {
         doValidCaseDataSetUpForAdditionalHearing();
 
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
-        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
 
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
                 .content(requestContent.toString())
@@ -259,11 +244,11 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void givenNoPreviousHearing_shouldPrintHearingDocumentsForRespondentSolicitor() throws Exception {
-        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(false);
 
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/hearing-with-case-details-before.json").toURI()));
+        requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
+            .getResource("/fixtures/contested/hearing-with-case-details-before.json")).toURI()));
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -275,11 +260,11 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void givenNoPreviousHearing_shouldPrintHearingDocumentsForApplicantSolicitor() throws Exception {
-        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(false);
 
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/hearing-with-case-details-before.json").toURI()));
+        requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
+            .getResource("/fixtures/contested/hearing-with-case-details-before.json")).toURI()));
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -291,7 +276,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void givenHadPreviousHearing_thenPrintAdditionalHearingDocumentsForRespondentSolicitor() throws Exception {
-        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
 
         requestContent = objectMapper.readTree(new File(getClass()
@@ -307,11 +292,12 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void givenHadPreviousHearing_thenPrintAdditionalHearingDocumentsForApplicantSolicitor() throws Exception {
-        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(caseDataService.isPaperApplication(any())).thenReturn(true);
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
 
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/hearing-with-case-details-before.json").toURI()));
+        requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
+            .getResource("/fixtures/contested/hearing-with-case-details-before.json")).toURI()));
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)

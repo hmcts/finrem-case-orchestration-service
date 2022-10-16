@@ -32,7 +32,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -61,7 +60,6 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
 
     @Autowired private AdditionalHearingDocumentService additionalHearingDocumentService;
     @Autowired private ObjectMapper objectMapper;
-
     @Captor private ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
 
     @MockBean GenericDocumentService genericDocumentService;
@@ -414,14 +412,14 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
         additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
 
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
-        when(notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
+        when(notificationService.isApplicantEligibleToReceivePaperNotification(any())).thenReturn(true);
+        when(notificationService.isRespondentEligibleToReceivePaperNotification(any())).thenReturn(true);
+
         additionalHearingDocumentService.bulkPrintAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
 
-        verify(bulkPrintService, timeout(100).times(1))
-            .printRespondentDocuments(any(), any(), any());
-        verify(bulkPrintService, timeout(100).times(1))
-            .printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
+
     }
 
     @Test
@@ -429,14 +427,13 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
         additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
 
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
-        when(notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
+        when(notificationService.isApplicantEligibleToReceivePaperNotification(any())).thenReturn(false);
+        when(notificationService.isRespondentEligibleToReceivePaperNotification(any())).thenReturn(false);
+
         additionalHearingDocumentService.bulkPrintAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
 
-        verify(bulkPrintService, timeout(100).times(0))
-            .printRespondentDocuments(any(), any(), any());
-        verify(bulkPrintService, timeout(100).times(0))
-            .printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService, never()).printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService, never()).printRespondentDocuments(any(), any(), any());
     }
 
     @Test
@@ -444,14 +441,13 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
         additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
 
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
-        when(notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
+        when(notificationService.isApplicantEligibleToReceivePaperNotification(any())).thenReturn(false);
+        when(notificationService.isRespondentEligibleToReceivePaperNotification(any())).thenReturn(true);
+
         additionalHearingDocumentService.bulkPrintAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
 
-        verify(bulkPrintService, timeout(100).times(1))
-            .printRespondentDocuments(any(), any(), any());
-        verify(bulkPrintService, timeout(100).times(0))
-            .printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService, never()).printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
     }
 
     @Test
@@ -459,13 +455,12 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
         additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
 
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
-        when(notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
+        when(notificationService.isApplicantEligibleToReceivePaperNotification(any())).thenReturn(true);
+        when(notificationService.isRespondentEligibleToReceivePaperNotification(any())).thenReturn(false);
+
         additionalHearingDocumentService.bulkPrintAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
 
-        verify(bulkPrintService, timeout(100).times(0))
-            .printRespondentDocuments(any(), any(), any());
-        verify(bulkPrintService, timeout(100).times(1))
-            .printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService, never()).printRespondentDocuments(any(), any(), any());
     }
 }

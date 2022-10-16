@@ -10,6 +10,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
@@ -29,12 +30,14 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.pensionDocumentData;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BIRMINGHAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BIRMINGHAM_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ALLOCATED_TO;
@@ -42,6 +45,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CFC_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_ADDRESS_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_NAME_KEY;
@@ -138,8 +142,15 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void sendToBulkPrint() {
+    public void givenContestPaperCase_whenApplicantNotRepresentedBySolicitor_thenUtiliseBulkPrint() {
         CaseDetails caseDetails = caseDetails(NO_VALUE);
+        Map<String, Object> caseData = caseDetails.getData();
+        caseData.put(PAPER_APPLICATION, "Yes");
+        caseData.put(APPLICANT_REPRESENTED, "No");
+        caseData.put(CONTESTED_RESPONDENT_REPRESENTED, "No");
+
+        when(notificationService.isApplicantEligibleToReceivePaperNotification(caseDetails)).thenReturn(true);
+        when(notificationService.isRespondentEligibleToReceivePaperNotification(caseDetails)).thenReturn(true);
 
         hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, AUTH_TOKEN);
 
@@ -153,15 +164,15 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     @Test
     public void sendToBulkPrint_multipleFormA() {
         CaseDetails caseDetails = caseDetails(YES_VALUE);
-
         caseDetails.getData().put(FORM_A_COLLECTION, asList(pensionDocumentData(), pensionDocumentData(), pensionDocumentData()));
+
+        when(notificationService.isApplicantEligibleToReceivePaperNotification(caseDetails)).thenReturn(true);
+        when(notificationService.isRespondentEligibleToReceivePaperNotification(caseDetails)).thenReturn(false);
 
         hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, AUTH_TOKEN);
 
-        when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(false);
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(true);
-
         verify(bulkPrintService).printApplicantDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
+        verify(bulkPrintService, never()).printRespondentDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
 
         assertThat(bulkPrintDocumentsCaptor.getValue().size(), is(7));
         bulkPrintDocumentsCaptor.getValue().forEach(obj -> assertThat(obj.getBinaryFileUrl(), is(BINARY_URL)));
@@ -414,7 +425,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         caseData.put(OUT_OF_FAMILY_COURT_RESOLUTION, caseDocument());
         caseData.put(HEARING_ADDITIONAL_DOC, caseDocument());
 
-        return CaseDetails.builder().data(caseData).build();
+        return CaseDetails.builder().id(12345678L).caseTypeId(CaseType.CONTESTED.getCcdType()).data(caseData).build();
     }
 
     private CaseDetails caseDetailsWithCourtDetails(String region, String frcList, String frc, String courtList, String court) {

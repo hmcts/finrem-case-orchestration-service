@@ -25,9 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCo
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 
 import javax.validation.constraints.NotNull;
 
@@ -38,7 +36,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -54,9 +51,7 @@ public class HearingDocumentController extends BaseController {
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
     private final ValidateHearingService validateHearingService;
     private final CaseDataService caseDataService;
-    private final NotificationService notificationService;
     private final ObjectMapper objectMapper;
-    private final CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
 
     @PostMapping(path = "/documents/hearing", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(summary = "Handles Form C and G generation. Serves as a callback from CCD")
@@ -81,24 +76,22 @@ public class HearingDocumentController extends BaseController {
                 .build());
         }
 
-        if (hearingDocumentService.alreadyHadFirstHearing(caseDetails)) {
-            if (caseDataService.isContestedPaperApplication(caseDetails)) {
-                additionalHearingDocumentService.createAdditionalHearingDocuments(authorisationToken, caseDetails);
-            }
-        } else {
-            caseDetails.getData().putAll(hearingDocumentService.generateHearingDocuments(authorisationToken, caseDetails));
-        }
-
         List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
 
-        if (caseDataService.isContestedPaperApplication(caseDetails)) {
+        if (caseDataService.isContestedApplication(caseDetails)) {
             CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
             if (caseDetailsBefore != null && hearingDocumentService.alreadyHadFirstHearing(caseDetailsBefore)) {
+                additionalHearingDocumentService.createAdditionalHearingDocuments(authorisationToken, caseDetails);
+
                 log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
                 additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, caseDetails);
+                log.info("Sent Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
             } else {
+                caseDetails.getData().putAll(hearingDocumentService.generateHearingDocuments(authorisationToken, caseDetails));
+
                 log.info("Sending Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
                 hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, authorisationToken);
+                log.info("Sent Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
             }
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).warnings(warnings).build());
@@ -144,7 +137,7 @@ public class HearingDocumentController extends BaseController {
                 .stream()
                 .filter(e -> (e.getDirectionDetailsCollection() != null && e.getDirectionDetailsCollection().getDateOfHearing() != null))
                 .sorted(Comparator.comparing(e -> e.getDirectionDetailsCollection().getDateOfHearing()))
-                .collect(Collectors.toList());
+                .toList();
             caseData.put(DIRECTION_DETAILS_COLLECTION_CT, sortedDirectionDetailsCollectionList);
         }
     }

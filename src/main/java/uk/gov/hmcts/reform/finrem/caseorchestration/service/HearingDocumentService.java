@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
@@ -108,13 +107,13 @@ public class HearingDocumentService {
     }
 
     public void sendFormCAndGForBulkPrint(CaseDetails caseDetails, String authorisationToken) {
-        String caseId = caseDetails.getId() == null ? "noId" : caseDetails.getId().toString();
+        String caseId = caseDetails.getId().toString();
         List<BulkPrintDocument> caseDocuments = getHearingCaseDocuments(caseDetails.getData(), caseId);
 
-        if (!notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
+        if (notificationService.isApplicantEligibleToReceivePaperNotification(caseDetails)) {
             bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, caseDocuments);
         }
-        if (!notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
+        if (notificationService.isRespondentEligibleToReceivePaperNotification(caseDetails)) {
             bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, caseDocuments);
         }
     }
@@ -149,7 +148,7 @@ public class HearingDocumentService {
         documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, HEARING_ADDITIONAL_DOC).ifPresent(caseDocuments::add);
 
         List<CaseDocument> formACaseDocuments = documentHelper.getFormADocumentsData(caseData);
-        caseDocuments.addAll(formACaseDocuments.stream().map(documentHelper::getCaseDocumentAsBulkPrintDocument).collect(Collectors.toList()));
+        caseDocuments.addAll(formACaseDocuments.stream().map(documentHelper::getCaseDocumentAsBulkPrintDocument).toList());
 
         log.info("Sending Contested Paper Case bulk print documents for {} from Case Data: {}", caseId, caseData);
 

@@ -44,6 +44,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_JUDGE_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
@@ -1317,4 +1318,108 @@ public class NotificationServiceTest extends BaseServiceTest {
         });
     }
 
+
+    @Test
+    public void giveContestedPaperCase_whenRespondentNotRepresentedBySol_thenSendPaperNotification() {
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(caseDataService.isPaperApplication(any())).thenReturn(true);
+        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
+
+        assertTrue(notificationService.isRespondentEligibleToReceivePaperNotification(buildCaseDetails()));
+    }
+
+    @Test
+    public void giveContestedPaperCase_whenRepondentRepresentedButNoConsentGiven_thenSendPaperNotification() {
+        CaseDetails caseDetails = buildCaseDetails();
+        caseDetails.getData().put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, NO_VALUE);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(caseDataService.isPaperApplication(any())).thenReturn(true);
+        when(caseDataService.isNotEmpty(any(), any())).thenReturn(true);
+        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
+        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(false);
+
+        assertTrue(notificationService.isRespondentEligibleToReceivePaperNotification(caseDetails));
+    }
+
+    @Test
+    public void giveContestedPaperCase_whenRepondentRepresentedAndDigitalSol_thenSendPaperNotification() {
+        CaseDetails caseDetails = buildCaseDetails();
+        caseDetails.getData().put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, NO_VALUE);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(caseDataService.isPaperApplication(any())).thenReturn(true);
+        when(caseDataService.isNotEmpty(any(), any())).thenReturn(true);
+        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
+        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(true);
+
+        assertTrue(notificationService.isRespondentEligibleToReceivePaperNotification(caseDetails));
+    }
+
+    @Test
+    public void giveContestedCase_whenRespondentNotRepresentedBySol_thenSendPaperNotification() {
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
+
+        assertTrue(notificationService.isRespondentEligibleToReceivePaperNotification(buildCaseDetails()));
+    }
+
+    @Test
+    public void giveContestedCase_whenRespondentRepresentedByDigitalSolButNoEamilConsent_thenSendPaperNotification() {
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(true);
+
+        assertTrue(notificationService.isRespondentEligibleToReceivePaperNotification(buildCaseDetails()));
+    }
+
+    @Test
+    public void giveContestedPaperCase_whenApplicantNotRepresentedBySol_thenSendPaperNotification() {
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(caseDataService.isPaperApplication(any())).thenReturn(true);
+        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
+
+        assertTrue(notificationService.isApplicantEligibleToReceivePaperNotification(buildCaseDetails()));
+    }
+
+    @Test
+    public void giveContestedPaperCase_whenApplicantRepresentedButNoConsentGiven_thenSendPaperNotification() {
+        CaseDetails caseDetails = buildCaseDetails();
+        caseDetails.getData().put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, NO_VALUE);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(caseDataService.isPaperApplication(any())).thenReturn(true);
+        when(caseDataService.isNotEmpty(any(), any())).thenReturn(true);
+        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
+        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(false);
+
+        assertTrue(notificationService.isApplicantEligibleToReceivePaperNotification(caseDetails));
+    }
+
+    @Test
+    public void giveContestedPaperCase_whenApplicantRepresentedAndDigitalSolNoConsent_thenSendPaperNotification() {
+        CaseDetails caseDetails = buildCaseDetails();
+        caseDetails.getData().put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, NO_VALUE);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(caseDataService.isPaperApplication(any())).thenReturn(true);
+        when(caseDataService.isNotEmpty(any(), any())).thenReturn(true);
+        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
+        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(true);
+
+        assertTrue(notificationService.isApplicantEligibleToReceivePaperNotification(caseDetails));
+    }
+
+    @Test
+    public void giveContestedCase_whenApplicantNotRepresentedBySol_thenSendPaperNotification() {
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
+
+        assertTrue(notificationService.isApplicantEligibleToReceivePaperNotification(buildCaseDetails()));
+    }
+
+    @Test
+    public void giveContestedCase_whenApplicantRepresentedByDigitalSolButNoEmailConsent_thenSendPaperNotification() {
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(true);
+
+        assertTrue(notificationService.isApplicantEligibleToReceivePaperNotification(buildCaseDetails()));
+    }
 }
