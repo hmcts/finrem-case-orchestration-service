@@ -7,7 +7,10 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedHearingHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
@@ -37,14 +40,21 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REPRESENTATION_UPDATE_HISTORY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element.element;
 
 public class NotificationRequestMapperTest extends BaseServiceTest {
 
     protected static final String EMPTY_STRING = "";
+    private static final String INTERIM_HEARING_JSON = "/fixtures/contested/interim-hearing-two-collection.json";
+    private static final String CONSENTED_HEARING_JSON = "/fixtures/consented.listOfHearing/list-for-hearing-notification.json";
+
     @Autowired
     NotificationRequestMapper notificationRequestMapper;
+    @Autowired
+    ConsentedHearingHelper helper;
 
     @Test
     public void shouldCreateNotificationRequestForAppSolicitorForConsentedJourney() {
@@ -237,7 +247,7 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
 
     @Test
     public void shouldCreateNotificationRequestForAppSolicitorForContestedJourneyForInterimHearing() {
-        CallbackRequest callbackRequest = buildInterimHearingCallbackRequest();
+        CallbackRequest callbackRequest = buildHearingCallbackRequest(INTERIM_HEARING_JSON);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
 
         List<InterimHearingData> interimHearingList = Optional.ofNullable(caseData.get(INTERIM_HEARING_COLLECTION))
@@ -275,7 +285,7 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
 
     @Test
     public void shouldCreateNotificationRequestForRespSolicitorForContestedJourneyForInterimHearing() {
-        CallbackRequest callbackRequest = buildInterimHearingCallbackRequest();
+        CallbackRequest callbackRequest = buildHearingCallbackRequest(INTERIM_HEARING_JSON);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
 
         List<InterimHearingData> interimHearingList = Optional.ofNullable(caseData.get(INTERIM_HEARING_COLLECTION))
@@ -288,6 +298,74 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
                 .map(obj -> new ObjectMapper().convertValue(obj, new TypeReference<Map<String, Object>>() {
                 })).toList();
         interimDataMap.forEach(data -> verifyData(callbackRequest, data));
+    }
+
+    @Test
+    public void shouldCreateNotificationRequestForAppSolicitorForConsentedJourneyForHearing() {
+        CallbackRequest callbackRequest = buildHearingCallbackRequest(CONSENTED_HEARING_JSON);
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+
+        List<ConsentedHearingDataWrapper> hearings = helper.getHearings(caseData);
+        List<ConsentedHearingDataElement> elements = hearings.stream().map(ConsentedHearingDataWrapper::getValue).toList();
+
+        List<Map<String, Object>> hearingDataMap = elements.stream()
+            .map(obj -> new ObjectMapper().convertValue(obj, new TypeReference<Map<String, Object>>() {
+            })).toList();
+
+        hearingDataMap.forEach(data -> verifyConsentedAppHearingData(callbackRequest, data));
+    }
+
+    private void verifyConsentedAppHearingData(CallbackRequest callbackRequest, Map<String, Object> data) {
+        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForConsentApplicantSolicitor(
+            callbackRequest.getCaseDetails(), data);
+
+        assertEquals("12345678", notificationRequest.getCaseReferenceNumber());
+        assertEquals("1111-2222-3333", notificationRequest.getSolicitorReferenceNumber());
+        assertEquals("EM18D84321", notificationRequest.getDivorceCaseNumber());
+        assertEquals("Solicitor Name", notificationRequest.getName());
+        assertEquals("solicitor@mailinator.com", notificationRequest.getNotificationEmail());
+        assertEquals("consented", notificationRequest.getCaseType());
+        assertThat("checking in loop", notificationRequest.getSelectedCourt(),
+            anyOf(is("liverpool"),
+                is("cfc")));
+
+        assertEquals("Lee Powers Mcbride", notificationRequest.getRespondentName());
+        assertEquals("Austin Bates Porter", notificationRequest.getApplicantName());
+    }
+
+    @Test
+    public void shouldCreateNotificationRequestForRespSolicitorForConsentedJourneyForHearing() {
+        CallbackRequest callbackRequest = buildHearingCallbackRequest(CONSENTED_HEARING_JSON);
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        caseData.put(RESP_SOLICITOR_REFERENCE,TEST_RESP_SOLICITOR_REFERENCE);
+        caseData.put("divorceCaseNumber",TEST_DIVORCE_CASE_NUMBER);
+        caseData.put("rSolicitorEmail", TEST_RESP_SOLICITOR_EMAIL);
+        caseData.put(RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_NAME);
+
+        List<ConsentedHearingDataWrapper> hearings = helper.getHearings(caseData);
+        List<ConsentedHearingDataElement> elements = hearings.stream().map(ConsentedHearingDataWrapper::getValue).toList();
+
+        List<Map<String, Object>> hearingDataMap = elements.stream()
+            .map(obj -> new ObjectMapper().convertValue(obj, new TypeReference<Map<String, Object>>() {
+            })).toList();
+        hearingDataMap.forEach(data -> verifyConsentedRespHearingData(callbackRequest, data));
+    }
+
+    private void verifyConsentedRespHearingData(CallbackRequest callbackRequest, Map<String, Object> data) {
+        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForRespondentSolicitor(
+            callbackRequest.getCaseDetails(), data);
+
+        assertEquals("12345678", notificationRequest.getCaseReferenceNumber());
+        assertEquals(TEST_RESP_SOLICITOR_REFERENCE, notificationRequest.getSolicitorReferenceNumber());
+        assertEquals(TEST_DIVORCE_CASE_NUMBER, notificationRequest.getDivorceCaseNumber());
+        assertEquals(TEST_RESP_SOLICITOR_NAME, notificationRequest.getName());
+        assertEquals(TEST_RESP_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
+        assertEquals("consented", notificationRequest.getCaseType());
+        assertThat("checking in loop", notificationRequest.getSelectedCourt(),
+            anyOf(is("liverpool"),
+                is("cfc")));
+        assertEquals("Lee Powers Mcbride", notificationRequest.getRespondentName());
+        assertEquals("Austin Bates Porter", notificationRequest.getApplicantName());
     }
 
     @Test
