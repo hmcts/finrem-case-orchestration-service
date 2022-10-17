@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 
@@ -41,6 +42,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
@@ -86,6 +88,8 @@ public class ManageBarristerServiceTest {
     private CaseAssignedRoleService caseAssignedRoleService;
     @Mock
     private SystemUserService systemUserService;
+    @Mock
+    private NotificationService notificationService;
     @Spy
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -155,8 +159,9 @@ public class ManageBarristerServiceTest {
     @Test
     public void givenValidData_whenUpdateBarristerAccess_thenGrantAccessAndGenerateRepresentationUpdateData() {
         caseDetails.getData().put(CASE_ROLE, APP_SOLICITOR_POLICY);
-        when(barristerUpdateDifferenceCalculator.calculate(any(), any())).thenReturn(buildAddedBarristerChange());
+        when(barristerUpdateDifferenceCalculator.calculate(any(), any())).thenReturn(buildBarristerChange());
         when(organisationService.findUserByEmail(APP_BARRISTER_EMAIL_ONE, AUTH_TOKEN)).thenReturn(Optional.of(BARRISTER_USER_ID));
+        when(organisationService.findUserByEmail(APP_BARRISTER_EMAIL_TWO, AUTH_TOKEN)).thenReturn(Optional.of(BARRISTER_USER_ID));
         when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn(APP_SOLICITOR);
         when(caseDataService.buildFullApplicantName(any())).thenReturn(CLIENT_NAME);
         when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
@@ -183,8 +188,9 @@ public class ManageBarristerServiceTest {
     public void givenValidData_whenUpdateBarristerAccessAsCaseworker_thenGrantAccessAndGenerateRepresentationUpdateData() {
         caseDetails.getData().put(CASE_ROLE, CASEWORKER_ROLE);
         caseDetails.getData().put(MANAGE_BARRISTER_PARTY, APPLICANT);
-        when(barristerUpdateDifferenceCalculator.calculate(any(), any())).thenReturn(buildAddedBarristerChange());
+        when(barristerUpdateDifferenceCalculator.calculate(any(), any())).thenReturn(buildBarristerChange());
         when(organisationService.findUserByEmail(APP_BARRISTER_EMAIL_ONE, SYS_USER_TOKEN)).thenReturn(Optional.of(BARRISTER_USER_ID));
+        when(organisationService.findUserByEmail(APP_BARRISTER_EMAIL_TWO, SYS_USER_TOKEN)).thenReturn(Optional.of(BARRISTER_USER_ID));
         when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn(CASEWORKER_NAME);
         when(caseDataService.buildFullApplicantName(any())).thenReturn(CLIENT_NAME);
         when(systemUserService.getSysUserToken()).thenReturn(SYS_USER_TOKEN);
@@ -212,7 +218,7 @@ public class ManageBarristerServiceTest {
     @Test
     public void givenNoUserFound_whenUpdateBarristerAccess_thenThrowError() {
         caseDetails.getData().put(CASE_ROLE, APP_SOLICITOR_POLICY);
-        when(barristerUpdateDifferenceCalculator.calculate(any(), any())).thenReturn(buildAddedBarristerChange());
+        when(barristerUpdateDifferenceCalculator.calculate(any(), any())).thenReturn(buildBarristerChange());
         when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN)).thenReturn(
             buildCaseAssignedUserRolesResource(APP_SOLICITOR_POLICY));
         when(organisationService.findUserByEmail(APP_BARRISTER_EMAIL_ONE, AUTH_TOKEN)).thenReturn(Optional.empty());
@@ -254,6 +260,19 @@ public class ManageBarristerServiceTest {
             APPLICANT_BARRISTER_ROLE, SOME_ORG_ID);
     }
 
+    @Test
+    public void givenValidData_whenNotifyBarristerAccess_sendBarristerNotification() {
+        caseDetails.getData().put(CASE_ROLE, APP_SOLICITOR_POLICY);
+        when(barristerUpdateDifferenceCalculator.calculate(any(), any())).thenReturn(buildBarristerChange());
+
+        manageBarristerService.notifyBarristerAccess(caseDetails,
+            List.of(DEFAULT_BARRISTER),
+            List.of(DEFAULT_BARRISTER));
+
+        verify(notificationService).sendBarristerAddedEmail(eq(caseDetails), any());
+        verify(notificationService).sendBarristerRemovedEmail(eq(caseDetails), any());
+    }
+
     private List<BarristerData> applicantBarristerCollection() {
         return List.of(
             BarristerData.builder()
@@ -288,11 +307,15 @@ public class ManageBarristerServiceTest {
         );
     }
 
-    private BarristerChange buildAddedBarristerChange() {
+    private BarristerChange buildBarristerChange() {
         return BarristerChange.builder()
             .added(Set.of(Barrister.builder()
-                    .email(APP_BARRISTER_EMAIL_ONE)
-                    .organisation(Organisation.builder().organisationID(SOME_ORG_ID).build())
+                .email(APP_BARRISTER_EMAIL_ONE)
+                .organisation(Organisation.builder().organisationID(SOME_ORG_ID).build())
+                .build()))
+            .removed(Set.of(Barrister.builder()
+                .email(APP_BARRISTER_EMAIL_TWO)
+                .organisation(Organisation.builder().organisationID(SOME_ORG_ID).build())
                 .build()))
             .build();
     }
@@ -305,6 +328,7 @@ public class ManageBarristerServiceTest {
                 .build()))
             .build();
     }
+
 
     private CaseAssignedUserRolesResource buildCaseAssignedUserRolesResource(String role) {
         return CaseAssignedUserRolesResource.builder()
