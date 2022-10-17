@@ -473,9 +473,9 @@ public class NotificationService {
     public boolean isRespondentEligibleToReceivePaperNotification(CaseDetails caseDetails) {
         log.info("Check if respondent is eligible to receive paper notification case id {}", caseDetails.getId());
         if (caseDataService.isContestedApplication(caseDetails)) {
-            if (caseDataService.isContestedApplication(caseDetails)) {
+            if (caseDataService.isPaperApplication(caseDetails.getData())) {
                 log.info("Respondent, paper case id {}", caseDetails.getId());
-                return (resPaperComm1(caseDetails) || resPaperComm2(caseDetails) || resPaperComm3(caseDetails));
+                return (resPaperComm1(caseDetails) || resPaperComm2(caseDetails));
             } else {
                 log.info("Respondent, formA case id {}", caseDetails.getId());
                 return (resPaperComm1(caseDetails) || (checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)
@@ -494,13 +494,6 @@ public class NotificationService {
         return caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())
             && caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseDetails.getData())
             && (!checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails) && NO_VALUE.equalsIgnoreCase(consent));
-    }
-
-    private boolean resPaperComm3(CaseDetails caseDetails) {
-        String consent = Objects.toString(caseDetails.getData().get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT), NO_VALUE);
-        return caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())
-            && caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseDetails.getData())
-            && (checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails) && NO_VALUE.equalsIgnoreCase(consent));
     }
 
     public boolean isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(CaseDetails caseDetails) {
