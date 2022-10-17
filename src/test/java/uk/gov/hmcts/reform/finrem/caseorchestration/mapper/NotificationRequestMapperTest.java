@@ -393,8 +393,6 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         return barrister;
     }
 
-
-
     private void verifyData(CallbackRequest callbackRequest, Map<String, Object> data) {
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForRespondentSolicitor(
             callbackRequest.getCaseDetails(), data);
