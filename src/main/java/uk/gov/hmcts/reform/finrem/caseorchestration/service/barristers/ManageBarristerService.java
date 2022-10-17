@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 
@@ -57,7 +56,6 @@ public class ManageBarristerService {
     private final CaseAssignedRoleService caseAssignedRoleService;
     private final AssignCaseAccessService assignCaseAccessService;
     private final PrdOrganisationService organisationService;
-    private final NotificationService notificationService;
     private final IdamService idamService;
     private final CaseDataService caseDataService;
     private final ObjectMapper objectMapper;
@@ -82,18 +80,6 @@ public class ManageBarristerService {
         barristerChange.getAdded().forEach(userToBeAdded -> addUser(caseDetails, authToken, caseRole, userToBeAdded));
 
         return updateRepresentationUpdateHistoryForCase(caseDetails, barristerChange, authToken);
-    }
-
-    public void notifyBarristerAccess(CaseDetails caseDetails,
-                                                     List<Barrister> barristers,
-                                                     List<Barrister> barristersBeforeEvent) {
-
-        BarristerChange barristerChange = barristerUpdateDifferenceCalculator.calculate(barristersBeforeEvent, barristers);
-        List<Barrister> addedBarristers = barristerChange.getAdded().stream().toList();
-        List<Barrister> removedBarristers = barristerChange.getRemoved().stream().toList();
-
-        addedBarristers.forEach(barrister -> notificationService.sendBarristerAddedEmail(caseDetails, barrister));
-        removedBarristers.forEach(barrister -> notificationService.sendBarristerRemovedEmail(caseDetails, barrister));
     }
 
     public String getCaseRole(CaseDetails caseDetails, String authToken) {

@@ -12,7 +12,6 @@ import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
@@ -403,18 +402,6 @@ public class NotificationService {
 
     public void sendGeneralApplicationRejectionEmail(NotificationRequest notificationRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getGeneralApplicationRejection());
-        sendNotificationEmail(notificationRequest, uri);
-    }
-
-    public void sendBarristerAddedEmail(CaseDetails caseDetails, Barrister barrister) {
-        URI uri = buildUri(notificationServiceConfiguration.getAddedBarrister());
-        NotificationRequest notificationRequest = notificationRequestMapper.buildNotificationRequest(caseDetails, barrister);
-        sendNotificationEmail(notificationRequest, uri);
-    }
-
-    public void sendBarristerRemovedEmail(CaseDetails caseDetails, Barrister barrister) {
-        URI uri = buildUri(notificationServiceConfiguration.getRemovedBarrister());
-        NotificationRequest notificationRequest = notificationRequestMapper.buildNotificationRequest(caseDetails, barrister);
         sendNotificationEmail(notificationRequest, uri);
     }
 
