@@ -173,6 +173,7 @@ public class NotificationRequestMapper {
             .notificationEmail(barrister.getEmail())
             .applicantName(appName)
             .respondentName(caseDataService.buildFullRespondentName(caseDetails))
+            .phoneOpeningHours(CTSC_OPENING_HOURS)
             .build();
     }
 
