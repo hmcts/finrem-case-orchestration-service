@@ -439,70 +439,68 @@ public class NotificationService {
 
     public boolean isApplicantEligibleToReceivePaperNotification(CaseDetails caseDetails) {
         log.info("Check if applicant is eligible to receive paper notification case id {}", caseDetails.getId());
-
-        if (caseDataService.isPaperApplication(caseDetails.getData())) {
-            log.info("Applicant, paper case id {}", caseDetails.getId());
-            if ((caseDataService.isContestedApplication(caseDetails))
-                && !caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())) {
-                return true;
-            } else if (caseDataService.isContestedApplication(caseDetails)
-                && caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())
-                && caseDataService.isNotEmpty(CONTESTED_SOLICITOR_EMAIL, caseDetails.getData())
-                && (!checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)
-                && NO_VALUE.equalsIgnoreCase(nullToEmpty(caseDetails.getData().get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED))))) {
-                return true;
+        if (caseDataService.isContestedApplication(caseDetails)) {
+            if (caseDataService.isPaperApplication(caseDetails.getData())) {
+                log.info("Applicant, paper case id {}", caseDetails.getId());
+                return (appPaperComm1(caseDetails) || appPaperComm2(caseDetails) || appPaperComm3(caseDetails));
             } else {
-                return caseDataService.isContestedApplication(caseDetails)
-                    && caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())
-                    && caseDataService.isNotEmpty(CONTESTED_SOLICITOR_EMAIL, caseDetails.getData())
-                    && (checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)
-                    || NO_VALUE.equalsIgnoreCase(nullToEmpty(caseDetails.getData().get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED))));
-            }
-        } else {
-            log.info("Applicant, formA case id {}", caseDetails.getId());
-            if ((caseDataService.isContestedApplication(caseDetails))
-                && !caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())) {
-                return true;
-            } else {
-                return caseDataService.isContestedApplication(caseDetails)
-                    && checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)
-                    && !caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails);
+                log.info("Applicant, formA case id {}", caseDetails.getId());
+                return (appPaperComm1(caseDetails) || (checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)
+                    && !caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)));
             }
         }
+        return false;
+    }
+
+    private boolean appPaperComm1(CaseDetails caseDetails) {
+        return !caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData());
+    }
+
+    private boolean appPaperComm2(CaseDetails caseDetails) {
+        String consent = Objects.toString(caseDetails.getData().get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED), NO_VALUE);
+        return caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())
+            && caseDataService.isNotEmpty(CONTESTED_SOLICITOR_EMAIL, caseDetails.getData())
+            && (!checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails) && NO_VALUE.equalsIgnoreCase(consent));
+    }
+
+    private boolean appPaperComm3(CaseDetails caseDetails) {
+        String consent = Objects.toString(caseDetails.getData().get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED), NO_VALUE);
+        return caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())
+            && caseDataService.isNotEmpty(CONTESTED_SOLICITOR_EMAIL, caseDetails.getData())
+            && (checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails) && NO_VALUE.equalsIgnoreCase(consent));
     }
 
     public boolean isRespondentEligibleToReceivePaperNotification(CaseDetails caseDetails) {
         log.info("Check if respondent is eligible to receive paper notification case id {}", caseDetails.getId());
-
-        if (caseDataService.isPaperApplication(caseDetails.getData())) {
-            log.info("Respondent, paper case id {}", caseDetails.getId());
-            if ((caseDataService.isContestedApplication(caseDetails))
-                && !caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())) {
-                return true;
-            } else if (caseDataService.isContestedApplication(caseDetails)
-                && caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())
-                && caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseDetails.getData())
-                && (!checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)
-                && NO_VALUE.equalsIgnoreCase(nullToEmpty(caseDetails.getData().get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT))))) {
-                return true;
+        if (caseDataService.isContestedApplication(caseDetails)) {
+            if (caseDataService.isContestedApplication(caseDetails)) {
+                log.info("Respondent, paper case id {}", caseDetails.getId());
+                return (resPaperComm1(caseDetails) || resPaperComm2(caseDetails) || resPaperComm3(caseDetails));
             } else {
-                return caseDataService.isContestedApplication(caseDetails)
-                    && caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())
-                    && caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseDetails.getData())
-                    && (checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)
-                    || NO_VALUE.equalsIgnoreCase(nullToEmpty(caseDetails.getData().get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT))));
-            }
-        } else {
-            log.info("Respondent, formA case id {}", caseDetails.getId());
-            if ((caseDataService.isContestedApplication(caseDetails))
-                && !caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())) {
-                return true;
-            } else {
-                return caseDataService.isContestedApplication(caseDetails)
-                    && checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)
-                    && !caseDataService.isRespondentSolicitorAgreeToReceiveEmails(caseDetails);
+                log.info("Respondent, formA case id {}", caseDetails.getId());
+                return (resPaperComm1(caseDetails) || (checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)
+                    && !caseDataService.isRespondentSolicitorAgreeToReceiveEmails(caseDetails)));
             }
         }
+        return false;
+    }
+
+    private boolean resPaperComm1(CaseDetails caseDetails) {
+        return !caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData());
+    }
+
+    private boolean resPaperComm2(CaseDetails caseDetails) {
+        String consent = Objects.toString(caseDetails.getData().get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT), NO_VALUE);
+        return caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())
+            && caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseDetails.getData())
+            && (!checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails) && NO_VALUE.equalsIgnoreCase(consent));
+    }
+
+    private boolean resPaperComm3(CaseDetails caseDetails) {
+        String consent = Objects.toString(caseDetails.getData().get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT), NO_VALUE);
+        return caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())
+            && caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseDetails.getData())
+            && (checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails) && NO_VALUE.equalsIgnoreCase(consent));
     }
 
     public boolean isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(CaseDetails caseDetails) {
