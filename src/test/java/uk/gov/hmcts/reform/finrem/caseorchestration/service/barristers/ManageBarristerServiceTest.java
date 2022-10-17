@@ -189,7 +189,7 @@ public class ManageBarristerServiceTest {
     public void givenValidData_whenUpdateBarristerAccessAsCaseworker_thenGrantAccessAndGenerateRepresentationUpdateData() {
         caseDetails.getData().put(CASE_ROLE, CASEWORKER_ROLE);
         caseDetails.getData().put(MANAGE_BARRISTER_PARTY, APPLICANT);
-        when(barristerUpdateDifferenceCalculator.calculate(any(), any())).thenReturn(buildBarristerChange());
+        when(barristerUpdateDifferenceCalculator.calculate(any(), any())).thenReturn(buildAddedBarristerChange());
         when(organisationService.findUserByEmail(APP_BARRISTER_EMAIL_ONE, SYS_USER_TOKEN)).thenReturn(Optional.of(BARRISTER_USER_ID));
         when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn(CASEWORKER_NAME);
         when(caseDataService.buildFullApplicantName(any())).thenReturn(CLIENT_NAME);

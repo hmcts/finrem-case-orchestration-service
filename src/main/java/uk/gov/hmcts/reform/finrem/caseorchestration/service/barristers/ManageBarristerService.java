@@ -94,7 +94,6 @@ public class ManageBarristerService {
 
         addedBarristers.forEach(barrister -> notificationService.sendBarristerAddedEmail(caseDetails, barrister));
         removedBarristers.forEach(barrister -> notificationService.sendBarristerRemovedEmail(caseDetails, barrister));
-    }
 
     public String getCaseRole(CaseDetails caseDetails, String authToken) {
         CaseAssignedUserRolesResource caseRoleResource = caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, authToken);
