@@ -1329,6 +1329,13 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void giveCase_whenCaseIsNotContested_thenDoNotSentToPrint() {
+        when(caseDataService.isContestedApplication(any())).thenReturn(false);
+
+        assertFalse(notificationService.isRespondentEligibleToReceivePaperNotification(buildCaseDetails()));
+    }
+
+    @Test
     public void giveContestedPaperCase_whenRepondentRepresentedButNoConsentGiven_thenSendPaperNotification() {
         CaseDetails caseDetails = buildCaseDetails();
         caseDetails.getData().put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, NO_VALUE);
@@ -1396,6 +1403,13 @@ public class NotificationServiceTest extends BaseServiceTest {
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
 
         assertTrue(notificationService.isApplicantEligibleToReceivePaperNotification(buildCaseDetails()));
+    }
+
+    @Test
+    public void giveCase_whenCaseIsNotContested_thenDoNotSendToPrint() {
+        when(caseDataService.isContestedApplication(any())).thenReturn(false);
+
+        assertFalse(notificationService.isApplicantEligibleToReceivePaperNotification(buildCaseDetails()));
     }
 
     @Test
