@@ -343,7 +343,7 @@ public class NotificationsController extends BaseController {
         validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        if (notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
+        if (notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabledExtended(caseDetails)) {
             log.info("Sending email notification to Applicant Solicitor for 'Prepare for Hearing'");
             notificationService.sendPrepareForHearingEmailApplicant(caseDetails);
         }
