@@ -47,7 +47,7 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandler implements Callb
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_REFER_LIST));
 
         if (existingList.isEmpty() && caseData.get(GENERAL_APPLICATION_CREATED_BY) != null) {
-            migrateExistingApplication(caseData);
+            migrateExistingApplication(caseData, userAuthorisation);
 
         } else {
             if (dynamicList == null) {
@@ -73,9 +73,9 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandler implements Callb
         caseData.put(GENERAL_APPLICATION_COLLECTION, applicationCollectionDataList);
     }
 
-    private void migrateExistingApplication(Map<String, Object> caseData) {
+    private void migrateExistingApplication(Map<String, Object> caseData, String userAuthorisation) {
         List<GeneralApplicationCollectionData> existingGeneralApplication = helper.getGeneralApplicationList(caseData);
-        GeneralApplicationCollectionData data = helper.migrateExistingGeneralApplication(caseData);
+        GeneralApplicationCollectionData data = helper.migrateExistingGeneralApplication(caseData, userAuthorisation);
         if (data != null) {
             data.getGeneralApplicationItems().setGeneralApplicationStatus(REFERRED.getId());
             existingGeneralApplication.add(data);

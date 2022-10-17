@@ -34,11 +34,9 @@ public enum EventType {
     GENERAL_APPLICATION_REFER_TO_JUDGE("FR_generalApplicationReferToJudge"),
     GENERAL_APPLICATION_OUTCOME("FR_GeneralApplicationOutcome"),
     GENERAL_APPLICATION_DIRECTIONS("FR_GeneralApplicationDirections"),
-
+    LIST_FOR_HEARING_CONSENTED("FR_listForHearing"),
     CASE_FLAG_CREATE("createFlags"),
-
     CASE_FLAG_MANAGE("manageFlags"),
-
     NONE("");
 
     private final String ccdType;
