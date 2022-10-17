@@ -437,6 +437,12 @@ public class NotificationService {
             && YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED)));
     }
 
+    public boolean isApplicantSolicitorRegisteredAndEmailCommunicationEnabledExtended(CaseDetails caseDetails) {
+        return ((caseDataService.isPaperApplication(caseDetails.getData())
+            && caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData()))
+            || isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails));
+    }
+
     public boolean isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(CaseDetails caseDetails) {
         return caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)
             && checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails);

@@ -1141,6 +1141,26 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void shouldNotEmailApplicantSolicitorWhenApplicantSolicitorIsNotRegisteredAndNotAcceptingEmailsAndIsPaperCase() {
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(caseDataService.isPaperApplication(any())).thenReturn(true);
+        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(false);
+
+        assertFalse(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabledExtended(callbackRequest.getCaseDetails()));
+    }
+
+    @Test
+    public void shouldEmailApplicantSolicitorWhenApplicantSolicitorIsRegisteredAndEmailsProvidedAndIsPaperCase() {
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(caseDataService.isPaperApplication(any())).thenReturn(true);
+        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(false);
+
+        assertTrue(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabledExtended(callbackRequest.getCaseDetails()));
+    }
+
+    @Test
     public void shouldNotEmailApplicantSolicitorWhenApplicantSolicitorIsNotRegisteredButIsAcceptingEmails() {
         when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(any())).thenReturn(false);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
