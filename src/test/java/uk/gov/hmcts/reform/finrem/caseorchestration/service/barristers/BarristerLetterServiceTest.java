@@ -112,7 +112,7 @@ public class BarristerLetterServiceTest {
         BarristerLetterDetails letterDetails = barristerLetterDetails();
         CaseDocument addedCaseDocument = addedCaseDocument();
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
-        when(barristerLetterDetailsGenerator.generate(caseDetails, APPLICANT)).thenReturn(letterDetails);
+        when(barristerLetterDetailsGenerator.generate(eq(caseDetails), eq(APPLICANT), any())).thenReturn(letterDetails);
         when(documentConfiguration.getBarristerAddedTemplate()).thenReturn(BARRISTER_ADDED_TEMPLATE);
         when(documentConfiguration.getBarristerAddedFilename()).thenReturn(BARRISTER_ADDED_FILENAME);
         when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), any(),
@@ -137,7 +137,7 @@ public class BarristerLetterServiceTest {
         BarristerLetterDetails letterDetails = barristerLetterDetails();
         CaseDocument removed = removedCaseDocument();
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
-        when(barristerLetterDetailsGenerator.generate(caseDetails, APPLICANT)).thenReturn(letterDetails);
+        when(barristerLetterDetailsGenerator.generate(eq(caseDetails), eq(APPLICANT), any())).thenReturn(letterDetails);
         when(documentConfiguration.getBarristerRemovedTemplate()).thenReturn(BARRISTER_REMOVED_TEMPLATE);
         when(documentConfiguration.getBarristerRemovedFilename()).thenReturn(BARRISTER_REMOVED_FILENAME);
         when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), any(),
@@ -162,7 +162,7 @@ public class BarristerLetterServiceTest {
         BarristerLetterDetails letterDetails = barristerLetterDetails();
         CaseDocument addedCaseDocument = addedCaseDocument();
         when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
-        when(barristerLetterDetailsGenerator.generate(caseDetails, RESPONDENT)).thenReturn(letterDetails);
+        when(barristerLetterDetailsGenerator.generate(eq(caseDetails), eq(RESPONDENT), any())).thenReturn(letterDetails);
         when(documentConfiguration.getBarristerAddedTemplate()).thenReturn(BARRISTER_ADDED_TEMPLATE);
         when(documentConfiguration.getBarristerAddedFilename()).thenReturn(BARRISTER_ADDED_FILENAME);
         when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), any(),
@@ -187,7 +187,7 @@ public class BarristerLetterServiceTest {
         BarristerLetterDetails letterDetails = barristerLetterDetails();
         CaseDocument removed = removedCaseDocument();
         when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
-        when(barristerLetterDetailsGenerator.generate(caseDetails, RESPONDENT)).thenReturn(letterDetails);
+        when(barristerLetterDetailsGenerator.generate(eq(caseDetails), eq(RESPONDENT), any())).thenReturn(letterDetails);
         when(documentConfiguration.getBarristerRemovedTemplate()).thenReturn(BARRISTER_REMOVED_TEMPLATE);
         when(documentConfiguration.getBarristerRemovedFilename()).thenReturn(BARRISTER_REMOVED_FILENAME);
         when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), any(),

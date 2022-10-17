@@ -23,7 +23,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
 @Slf4j
-public abstract class BaseContestedLetterDetailsGenerator {
+public abstract class BaseContestedLetterDetailsGenerator<T> {
 
     public static final String LETTER_DATE_FORMAT = "yyyy-MM-dd";
 
@@ -36,7 +36,8 @@ public abstract class BaseContestedLetterDetailsGenerator {
     }
 
     public abstract ParentLetterDetails generate(CaseDetails caseDetails,
-                                                 DocumentHelper.PaperNotificationRecipient recipient);
+                                                 DocumentHelper.PaperNotificationRecipient recipient,
+                                                 T additionalData);
 
     protected Addressee getAddressee(CaseDetails caseDetails, DocumentHelper.PaperNotificationRecipient recipient) {
         Map<String, Object> caseData = caseDetails.getData();

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -17,7 +18,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
 
 @Component
-public class BarristerLetterDetailsGenerator extends BaseContestedLetterDetailsGenerator {
+public class BarristerLetterDetailsGenerator extends BaseContestedLetterDetailsGenerator<Barrister> {
 
     private final PrdOrganisationService prdOrganisationService;
 
@@ -30,23 +31,22 @@ public class BarristerLetterDetailsGenerator extends BaseContestedLetterDetailsG
 
     @Override
     public BarristerLetterDetails generate(CaseDetails caseDetails,
-                                        DocumentHelper.PaperNotificationRecipient recipient) {
+                                           DocumentHelper.PaperNotificationRecipient recipient,
+                                           Barrister barrister) {
+
+        String barristerOrgId = barrister.getOrganisation().getOrganisationID();
+        String barristerFirmName = prdOrganisationService.findOrganisationByOrgId(barristerOrgId).getName();
+
         return BarristerLetterDetails.builder()
             .courtDetails(buildFrcCourtDetails(caseDetails.getData()))
-            .divorceCaseNumber(Objects.toString(caseDetails.getData().get(DIVORCE_CASE_NUMBER)))
+            .divorceCaseNumber(Objects.toString(caseDetails.getData().get(DIVORCE_CASE_NUMBER), StringUtils.EMPTY))
             .applicantName(documentHelper.getApplicantFullName(caseDetails))
             .respondentName(documentHelper.getRespondentFullNameContested(caseDetails))
             .addressee(getAddressee(caseDetails, recipient))
             .caseNumber(caseDetails.getId().toString())
             .letterDate(DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()))
+            .barristerFirmName(barristerFirmName)
+            .reference(barristerOrgId)
             .build();
-    }
-
-    public void setBarristerFields(Barrister barrister,
-                                   BarristerLetterDetails barristerLetterDetails) {
-        String barristerOrgId = barrister.getOrganisation().getOrganisationID();
-        barristerLetterDetails.setReference(barristerOrgId);
-        String barristerFirmName = prdOrganisationService.findOrganisationByOrgId(barristerOrgId).getName();
-        barristerLetterDetails.setBarristerFirmName(barristerFirmName);
     }
 }

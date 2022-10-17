@@ -56,8 +56,8 @@ public class BarristerLetterService {
             return Optional.empty();
         }
 
-        BarristerLetterDetails barristerLetterDetails = barristerLetterDetailsGenerator.generate(caseDetails, barristerLetterTuple.getRecipient());
-        barristerLetterDetailsGenerator.setBarristerFields(barrister, barristerLetterDetails);
+        BarristerLetterDetails barristerLetterDetails = barristerLetterDetailsGenerator
+            .generate(caseDetails, barristerLetterTuple.getRecipient(), barrister);
         Pair<String, String> documentData = getTemplateFilenamePair(barristerLetterTuple.getChangeType());
 
         log.info("Sending {} letter for case {}", documentData.getRight(), caseDetails.getId());

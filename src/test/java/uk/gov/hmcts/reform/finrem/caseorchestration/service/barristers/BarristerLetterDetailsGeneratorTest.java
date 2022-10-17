@@ -70,12 +70,16 @@ public class BarristerLetterDetailsGeneratorTest {
         when(caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())).thenReturn(false);
         when(caseDataService.buildFullApplicantName(caseDetails)).thenReturn(APPLICANT_FULL_NAME);
         when(documentHelper.formatAddressForLetterPrinting(any())).thenReturn(APP_FORMATTED_ADDRESS);
+        when(prdOrganisationService.findOrganisationByOrgId(APP_BARR_ORG_ID))
+            .thenReturn(organisationsResponse(APP_BARR_ORG_NAME));
 
-        BarristerLetterDetails letterDetails = barristerLetterDetailsGenerator.generate(caseDetails, APPLICANT);
+        BarristerLetterDetails letterDetails = barristerLetterDetailsGenerator.generate(caseDetails, APPLICANT, barrister(APP_BARR_ORG_ID));
         assertLetterDetails(letterDetails);
         Addressee addressee = letterDetails.getAddressee();
         assertThat(addressee.getFormattedAddress(), is(APP_FORMATTED_ADDRESS));
         assertThat(addressee.getName(), is(APPLICANT_FULL_NAME));
+        assertThat(letterDetails.getBarristerFirmName(), is(APP_BARR_ORG_NAME));
+        assertThat(letterDetails.getReference(), is(APP_BARR_ORG_ID));
     }
 
     @Test
@@ -83,36 +87,16 @@ public class BarristerLetterDetailsGeneratorTest {
         when(caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())).thenReturn(false);
         when(caseDataService.buildFullRespondentName(caseDetails)).thenReturn(RESPONDENT_FULL_NAME_CONTESTED);
         when(documentHelper.formatAddressForLetterPrinting(any())).thenReturn(RESP_FORMATTED_ADDRESS);
+        when(prdOrganisationService.findOrganisationByOrgId(RESP_BARR_ORG_ID))
+            .thenReturn(organisationsResponse(RESP_BARR_ORG_NAME));
 
-        BarristerLetterDetails letterDetails = barristerLetterDetailsGenerator.generate(caseDetails, RESPONDENT);
+        BarristerLetterDetails letterDetails = barristerLetterDetailsGenerator.generate(caseDetails, RESPONDENT, barrister(RESP_BARR_ORG_ID));
         assertLetterDetails(letterDetails);
         Addressee addressee = letterDetails.getAddressee();
         assertThat(addressee.getFormattedAddress(), is(RESP_FORMATTED_ADDRESS));
         assertThat(addressee.getName(), is(RESPONDENT_FULL_NAME_CONTESTED));
-    }
-
-    @Test
-    public void givenApplicant_whenSetBarristerFields_thenSetFieldsCorrectly() {
-        when(prdOrganisationService.findOrganisationByOrgId(APP_BARR_ORG_ID))
-            .thenReturn(organisationsResponse(APP_BARR_ORG_NAME));
-
-        BarristerLetterDetails barristerLetterDetails = BarristerLetterDetails.builder().build();
-
-        barristerLetterDetailsGenerator.setBarristerFields(barrister(APP_BARR_ORG_ID), barristerLetterDetails);
-        assertThat(barristerLetterDetails.getBarristerFirmName(), is(APP_BARR_ORG_NAME));
-        assertThat(barristerLetterDetails.getReference(), is(APP_BARR_ORG_ID));
-    }
-
-    @Test
-    public void givenRespondent_whenSetBarristerFields_thenSetFieldsCorrectly() {
-        when(prdOrganisationService.findOrganisationByOrgId(RESP_BARR_ORG_ID))
-            .thenReturn(organisationsResponse(RESP_BARR_ORG_NAME));
-
-        BarristerLetterDetails barristerLetterDetails = BarristerLetterDetails.builder().build();
-
-        barristerLetterDetailsGenerator.setBarristerFields(barrister(RESP_BARR_ORG_ID), barristerLetterDetails);
-        assertThat(barristerLetterDetails.getBarristerFirmName(), is(RESP_BARR_ORG_NAME));
-        assertThat(barristerLetterDetails.getReference(), is(RESP_BARR_ORG_ID));
+        assertThat(letterDetails.getBarristerFirmName(), is(RESP_BARR_ORG_NAME));
+        assertThat(letterDetails.getReference(), is(RESP_BARR_ORG_ID));
     }
 
     private void assertLetterDetails(BarristerLetterDetails barristerLetterDetails) {
