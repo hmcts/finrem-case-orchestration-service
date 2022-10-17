@@ -23,6 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_APPLICANT_FLAGS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_FLAGS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_RESPONDENT_FLAGS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 
@@ -91,6 +92,19 @@ public class CaseFlagsServiceTest {
         CaseFlag applicantFlags = objectMapper.convertValue(caseData.get(CASE_APPLICANT_FLAGS), CaseFlag.class);
         assertThat(applicantFlags.getPartyName(), is(APPLICANT_NAME));
         assertThat(applicantFlags.getRoleOnCase(), is(APPLICANT));
+    }
+
+    @Test
+    public void givenNoCaseFlags_whenHandleAboutToSubmit_thenSetCaseLevelFlags() {
+        CaseDetails caseDetails = caseData();
+
+        caseFlagsService.setCaseFlagInformation(caseDetails);
+
+        Map<String, Object> caseData = caseDetails.getData();
+
+        CaseFlag caseFlag = objectMapper.convertValue(caseData.get(CASE_LEVEL_FLAGS), CaseFlag.class);
+        assertThat(caseFlag.getPartyName(), is("Case"));
+        assertThat(caseFlag.getRoleOnCase(), is("Case"));
     }
 
     private CaseDetails caseData() {

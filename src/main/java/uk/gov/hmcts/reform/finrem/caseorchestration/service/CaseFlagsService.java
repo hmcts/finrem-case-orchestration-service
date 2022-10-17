@@ -12,6 +12,8 @@ import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_APPLICANT_FLAGS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_FLAGS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_LEVEL_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_RESPONDENT_FLAGS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 
@@ -30,6 +32,15 @@ public class CaseFlagsService {
 
         updateCaseFlagsForParty(caseData, CASE_APPLICANT_FLAGS, caseDataService.buildFullApplicantName(caseDetails), APPLICANT);
         updateCaseFlagsForParty(caseData, CASE_RESPONDENT_FLAGS, caseDataService.buildFullRespondentName(caseDetails), RESPONDENT);
+        updateCaseFlagsAtCaseLevel(caseData);
+    }
+
+    private void updateCaseFlagsAtCaseLevel(Map<String, Object> caseData) {
+        CaseFlag caseFlagDetailsData = Optional.ofNullable(objectMapper.convertValue(caseData.get(CASE_LEVEL_FLAGS), CaseFlag.class))
+            .orElse(new CaseFlag());
+        caseFlagDetailsData.setPartyName(CASE_LEVEL_ROLE);
+        caseFlagDetailsData.setRoleOnCase(CASE_LEVEL_ROLE);
+        caseData.put(CASE_LEVEL_FLAGS, caseFlagDetailsData);
     }
 
     private void updateCaseFlagsForParty(Map<String, Object> caseData,
