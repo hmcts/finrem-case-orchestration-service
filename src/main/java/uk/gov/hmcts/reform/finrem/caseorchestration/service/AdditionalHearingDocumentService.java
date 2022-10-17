@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENT_COLLECTION;
@@ -233,13 +232,11 @@ public class AdditionalHearingDocumentService {
 
         document.add(additionalDoc);
 
-        if (!notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
-            CompletableFuture.runAsync(() ->
-                bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, document));
+        if (!notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabledExtended(caseDetails)) {
+            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, document);
         }
-        if (!notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
-            CompletableFuture.runAsync(() ->
-                bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, document));
+        if (!notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
+            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, document);
         }
     }
 
