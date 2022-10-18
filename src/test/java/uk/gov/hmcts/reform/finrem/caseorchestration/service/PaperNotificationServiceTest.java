@@ -84,13 +84,11 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
         when(caseDataService.isPaperApplication(any())).thenReturn(true);
-        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
 
         paperNotificationService.printManualPaymentNotification(buildCaseDetails(), AUTH_TOKEN);
 
         verify(manualPaymentDocumentService).generateManualPaymentLetter(any(), any(), eq(APPLICANT));
-        verify(manualPaymentDocumentService).generateManualPaymentLetter(any(), any(), eq(RESPONDENT));
-        verify(bulkPrintService, times(2)).sendDocumentForPrint(any(), any());
+        verify(bulkPrintService).sendDocumentForPrint(any(), any());
     }
 
     @Test
