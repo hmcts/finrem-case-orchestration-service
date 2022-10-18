@@ -77,7 +77,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
                                             String userAuthorisation) {
         Map<String, Object> caseData = caseDetails.getData();
         List<GeneralApplicationCollectionData> existingGeneralApplication = helper.getGeneralApplicationList(caseData);
-        GeneralApplicationCollectionData data = helper.migrateExistingGeneralApplication(caseData);
+        GeneralApplicationCollectionData data = helper.migrateExistingGeneralApplication(caseData, userAuthorisation);
         if (data != null) {
             String status = Objects.toString(caseData.get(GENERAL_APPLICATION_OUTCOME_DECISION), null);
             log.info("In migration outcome decision {} for general application for Case ID: {} Event type {}",
