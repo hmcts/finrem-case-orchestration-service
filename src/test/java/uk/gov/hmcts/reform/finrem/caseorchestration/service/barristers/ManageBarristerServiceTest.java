@@ -329,7 +329,6 @@ public class ManageBarristerServiceTest {
             .build();
     }
 
-
     private CaseAssignedUserRolesResource buildCaseAssignedUserRolesResource(String role) {
         return CaseAssignedUserRolesResource.builder()
             .caseAssignedUserRoles(List.of(CaseAssignedUserRole.builder()
