@@ -78,6 +78,36 @@ public class AssignCaseAccessService {
             caseUser);
     }
 
+    public void removeCaseRoleToUser(Long caseId, String userId, String caseRole, String orgId) {
+        removeCaseAccess(caseId, Set.of(userId), caseRole, orgId);
+        log.info("User {} removed {} from case {}", userId, caseRole, caseId);
+    }
+
+    private void removeCaseAccess(Long caseId, Set<String> users, String caseRole, String orgId) {
+        try {
+            log.info("about to start removing case access for users {}", users);
+            CaseAssignmentUserRolesRequest removeCaseAssignedUserRolesRequest =
+                getCaseAssignmentUserRolesRequest(caseId, users, caseRole, orgId);
+
+            caseDataApi.removeCaseUserRoles(systemUserService.getSysUserToken(), serviceAuthTokenGenerator.generate(),
+                removeCaseAssignedUserRolesRequest);
+        } catch (FeignException ex) {
+            log.error("Could not assign the users to the case", ex);
+            throw new GrantCaseAccessException(caseId, users, caseRole);
+        }
+    }
+
+    private CaseAssignmentUserRolesRequest getCaseAssignmentUserRolesRequest(Long caseId, Set<String> users, String caseRole, String orgId) {
+        final List<CaseAssignmentUserRoleWithOrganisation> caseAssignedRoles = users.stream()
+            .map(user -> buildCaseAssignedUserRoles(caseId, caseRole, orgId, user))
+            .toList();
+
+        CaseAssignmentUserRolesRequest removeCaseAssignedUserRolesRequest = CaseAssignmentUserRolesRequest.builder()
+            .caseAssignmentUserRolesWithOrganisation(caseAssignedRoles)
+            .build();
+        return removeCaseAssignedUserRolesRequest;
+    }
+
     public void grantCaseRoleToUser(Long caseId, String userId, String caseRole, String orgId) {
         grantCaseAccess(caseId, Set.of(userId), caseRole, orgId);
         log.info("User {} granted {} to case {}", userId, caseRole, caseId);
@@ -86,13 +116,8 @@ public class AssignCaseAccessService {
     private void grantCaseAccess(Long caseId, Set<String> users, String caseRole, String orgId) {
         try {
             log.info("about to start granting case access for users {}", users);
-            final List<CaseAssignmentUserRoleWithOrganisation> caseAssignedRoles = users.stream()
-                .map(user -> buildCaseAssignedUserRoles(caseId, caseRole, orgId, user))
-                .toList();
-
-            CaseAssignmentUserRolesRequest addCaseAssignedUserRolesRequest = CaseAssignmentUserRolesRequest.builder()
-                    .caseAssignmentUserRolesWithOrganisation(caseAssignedRoles)
-                    .build();
+            CaseAssignmentUserRolesRequest addCaseAssignedUserRolesRequest =
+                getCaseAssignmentUserRolesRequest(caseId, users, caseRole, orgId);
 
             caseDataApi.addCaseUserRoles(systemUserService.getSysUserToken(), serviceAuthTokenGenerator.generate(),
                 addCaseAssignedUserRolesRequest);
