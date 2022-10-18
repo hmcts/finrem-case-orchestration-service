@@ -10,6 +10,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.SystemUpdateUserConfi
 import uk.gov.hmcts.reform.finrem.caseorchestration.wrapper.IdamToken;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.config.CacheConfiguration.REQUEST_SCOPED_CACHE_MANAGER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.config.CacheConfiguration.SYS_USER_CACHE;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
@@ -19,7 +22,7 @@ public class SystemUserService {
     private final IdamAuthService idamAuthService;
     private final AuthTokenGenerator authTokenGenerator;
 
-    @Cacheable("systemUserTokenCache")
+    @Cacheable(cacheManager = REQUEST_SCOPED_CACHE_MANAGER, cacheNames = SYS_USER_CACHE)
     public String getSysUserToken() {
         return idamAuthService.getAccessToken(systemUpdateUserConfiguration.getUserName(), systemUpdateUserConfiguration.getPassword());
     }
