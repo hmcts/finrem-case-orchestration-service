@@ -78,6 +78,7 @@ public class ManageBarristerService {
 
         log.info("changed barristers: {}", barristerChange.toString());
         barristerChange.getAdded().forEach(userToBeAdded -> addUser(caseDetails, authToken, caseRole, userToBeAdded));
+        barristerChange.getRemoved().forEach(userToBeRemoved -> removeUser(caseDetails, authToken, caseRole, userToBeRemoved));
 
         return updateRepresentationUpdateHistoryForCase(caseDetails, barristerChange, authToken);
     }
@@ -116,6 +117,15 @@ public class ManageBarristerService {
             );
     }
 
+    private void removeUser(CaseDetails caseDetails, String authToken, String caseRole, Barrister userToBeRemoved) {
+        String orgId = userToBeRemoved.getOrganisation().getOrganisationID();
+        organisationService.findUserByEmail(userToBeRemoved.getEmail(), getAuthTokenToUse(caseDetails, authToken))
+            .ifPresentOrElse(
+                userId -> assignCaseAccessService.removeCaseRoleToUser(caseDetails.getId(), userId, caseRole, orgId),
+                throwNoSuchUserException(userToBeRemoved)
+            );
+    }
+
     private Map<String, Object> updateRepresentationUpdateHistoryForCase(CaseDetails caseDetails,
                                                                          BarristerChange barristerChange,
                                                                          String authToken) {
@@ -123,6 +133,10 @@ public class ManageBarristerService {
 
         barristerChange.getAdded().forEach(addedUser -> representationUpdateHistory.add(
             element(UUID.randomUUID(), buildRepresentationUpdate(caseDetails, authToken, addedUser, null)))
+        );
+
+        barristerChange.getRemoved().forEach(removedUser -> representationUpdateHistory.add(
+            element(UUID.randomUUID(), buildRepresentationUpdate(caseDetails, authToken, null, removedUser)))
         );
 
         caseDetails.getData().put(REPRESENTATION_UPDATE_HISTORY, representationUpdateHistory);
