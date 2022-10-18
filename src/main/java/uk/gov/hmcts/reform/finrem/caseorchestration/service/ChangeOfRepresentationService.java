@@ -25,8 +25,8 @@ public class ChangeOfRepresentationService {
 
     private static final String NOTICE_OF_CHANGE = "Notice of Change";
 
-    public RepresentationUpdateHistory generateRepresentationUpdateHistory(ChangeOfRepresentationRequest
-                                                                               changeOfRepresentationRequest) {
+    public RepresentationUpdateHistory generateRepresentationUpdateHistory(
+        ChangeOfRepresentationRequest changeOfRepresentationRequest) {
 
         log.info("Updating change of representatives for case.");
 

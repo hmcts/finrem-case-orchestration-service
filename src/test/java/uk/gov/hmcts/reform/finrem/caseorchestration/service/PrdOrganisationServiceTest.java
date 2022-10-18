@@ -1,18 +1,29 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.client.OrganisationApi;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.PrdOrganisationConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationUser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -20,12 +31,25 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_URL;
 
+@RunWith(MockitoJUnitRunner.class)
 public class PrdOrganisationServiceTest extends BaseServiceTest {
 
-    @Autowired PrdOrganisationService prdOrganisationService;
+    public static final String USER_ID = "someUserId";
+    public static final String TEST_EMAIL = "test@gmail.com";
 
-    @MockBean RestService restService;
-    @MockBean PrdOrganisationConfiguration prdOrganisationConfiguration;
+    @InjectMocks
+    private PrdOrganisationService prdOrganisationService;
+
+    @Mock
+    private RestService restService;
+    @Mock
+    private PrdOrganisationConfiguration prdOrganisationConfiguration;
+    @Mock
+    private OrganisationApi organisationApi;
+    @Mock
+    private AuthTokenGenerator authTokenGenerator;
+    @Spy
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     public void whenRetrieveOrganisationData_thenRestTemplateIsCalledWithExpectedParameters() {
@@ -64,5 +88,26 @@ public class PrdOrganisationServiceTest extends BaseServiceTest {
 
         verify(restService, times(1)).restApiGetCall(eq(AUTH_TOKEN), eq(TEST_URL));
         verify(prdOrganisationConfiguration, times(1)).getOrganisationsUrl();
+    }
+
+    @Test
+    public void givenRegisteredUser_whenFindUserByEmail_thenReturnUserIdOptional() {
+        OrganisationUser user = OrganisationUser.builder().userIdentifier(USER_ID).build();
+        when(organisationApi.findUserByEmail(eq(AUTH_TOKEN), any(), eq(TEST_EMAIL))).thenReturn(user);
+
+        Optional<String> userId = prdOrganisationService.findUserByEmail(TEST_EMAIL, AUTH_TOKEN);
+
+        assertTrue(userId.isPresent());
+        assertThat(userId.get(), is(USER_ID));
+    }
+
+    @Test
+    public void givenUnregisteredUser_whenFindUserByEmail_thenHandleNotFoundException() {
+        when(organisationApi.findUserByEmail(eq(AUTH_TOKEN), any(), eq(TEST_EMAIL)))
+            .thenThrow(FeignException.NotFound.class);
+
+        Optional<String> userId = prdOrganisationService.findUserByEmail(TEST_EMAIL, AUTH_TOKEN);
+
+        assertTrue(userId.isEmpty());
     }
 }
