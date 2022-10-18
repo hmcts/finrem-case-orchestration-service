@@ -585,4 +585,14 @@ public class CCDConfigConstant {
     public static final String HEARING_PROMPT_FOR_DOCUMENT = "promptForAnyDocument";
     public static final String HEARING_UPLOADED_DOCUMENT = "uploadAdditionalDocument";
     public static final String HEARING_NOTICE_DOCUMENT = "hearingNotice";
+
+    //Manage Barristers
+    public static final String APPLICANT_BARRISTER_COLLECTION = "appBarristerCollection";
+    public static final String RESPONDENT_BARRISTER_COLLECTION = "respBarristerCollection";
+    public static final String APPLICANT_BARRISTER_ROLE = "[APPBARRISTER]";
+    public static final String RESPONDENT_BARRISTER_ROLE = "[RESPBARRISTER]";
+    public static final String CASEWORKER_ROLE = "[CASEWORKER]";
+    public static final String MANAGE_BARRISTER_PARTY = "barristerParty";
+
+
 }
