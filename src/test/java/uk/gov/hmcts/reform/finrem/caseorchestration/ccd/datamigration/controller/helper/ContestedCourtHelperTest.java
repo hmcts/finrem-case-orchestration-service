@@ -56,6 +56,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHWEST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHWEST_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWANSEA;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWANSEA_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.THAMESVALLEY;
@@ -479,6 +480,66 @@ public class ContestedCourtHelperTest {
     private Map<String, Object> getCaseDetailsWithAllocatedValuesForInterimHearing(String region, String subRegionListName, String subRegion) {
         CaseDetails details = defaultConsentedCaseDetails();
         details.getData().put(INTERIM_HEARING_REGION_LIST, region);
+        details.getData().put(subRegionListName, subRegion);
+        return details.getData();
+    }
+
+
+    @Test
+    public void walesFRCCourts() {
+        verifyCorrectHearingCourtReturned(WALES, WALES_FRC_LIST, NEWPORT);
+        verifyCorrectHearingCourtReturned(WALES, WALES_FRC_LIST, SWANSEA);
+        verifyCorrectHearingCourtReturned(WALES, WALES_FRC_LIST, NORTHWALES);
+    }
+
+    @Test
+    public void southWestFRCCourts() {
+        verifyCorrectHearingCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, DEVON);
+        verifyCorrectHearingCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, DORSET);
+        verifyCorrectHearingCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, BRISTOLFRC);
+    }
+
+    @Test
+    public void southEastFRCCourts() {
+        verifyCorrectHearingCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT);
+        verifyCorrectHearingCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, BEDFORDSHIRE);
+        verifyCorrectHearingCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, THAMESVALLEY);
+    }
+
+    @Test
+    public void northEastFRCCourts() {
+        verifyCorrectHearingCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, CLEAVELAND);
+        verifyCorrectHearingCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, NWYORKSHIRE);
+        verifyCorrectHearingCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, HSYORKSHIRE);
+    }
+
+    @Test
+    public void northWestFRCCourts() {
+        verifyCorrectHearingCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, LIVERPOOL);
+        verifyCorrectHearingCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, MANCHESTER);
+        verifyCorrectHearingCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, LANCASHIRE);
+    }
+
+    @Test
+    public void londonFRCCourts() {
+        verifyCorrectHearingCourtReturned(LONDON, LONDON_FRC_LIST, CFC);
+    }
+
+    @Test
+    public void midlandsFRCCourts() {
+        verifyCorrectHearingCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, NOTTINGHAM);
+        verifyCorrectHearingCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, BIRMINGHAM);
+    }
+
+    private void verifyCorrectHearingCourtReturned(final String region, final String subRegionListName, final String subRegion) {
+        Map<String, Object> caseData = getCaseDetailsWithAllocatedValuesForHearing(region, subRegionListName, subRegion);
+        String selectedHearingFrc = ContestedCourtHelper.getSelectedHearingFrc(caseData);
+        MatcherAssert.assertThat(selectedHearingFrc, is(subRegion));
+    }
+
+    private Map<String, Object> getCaseDetailsWithAllocatedValuesForHearing(String region, String subRegionListName, String subRegion) {
+        CaseDetails details = defaultConsentedCaseDetails();
+        details.getData().put(REGION, region);
         details.getData().put(subRegionListName, subRegion);
         return details.getData();
     }
