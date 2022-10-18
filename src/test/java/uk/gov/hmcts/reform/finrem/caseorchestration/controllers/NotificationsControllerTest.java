@@ -224,7 +224,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void givenApplicantSolicitorIsRegisteredAndAgreedToEmails_shouldSendPrepareForHearingEmail() {
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabledExtended(any())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(true);
 
         notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
 

@@ -232,7 +232,7 @@ public class AdditionalHearingDocumentService {
 
         document.add(additionalDoc);
 
-        if (!notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabledExtended(caseDetails)) {
+        if (!notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
             bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, document);
         }
         if (!notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {

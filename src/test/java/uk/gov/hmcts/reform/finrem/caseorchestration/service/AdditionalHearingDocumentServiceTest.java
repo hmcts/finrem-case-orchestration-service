@@ -414,7 +414,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
         additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
 
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabledExtended(any())).thenReturn(false);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(false);
         when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(false);
 
         additionalHearingDocumentService.bulkPrintAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
@@ -430,7 +430,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
         additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
 
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabledExtended(any())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(true);
         when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(true);
 
         additionalHearingDocumentService.bulkPrintAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
@@ -446,7 +446,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
         additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
 
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabledExtended(any())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(true);
         when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(false);
 
         additionalHearingDocumentService.bulkPrintAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
@@ -462,7 +462,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
         additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
 
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabledExtended(any())).thenReturn(false);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(false);
         when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(true);
 
         additionalHearingDocumentService.bulkPrintAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
