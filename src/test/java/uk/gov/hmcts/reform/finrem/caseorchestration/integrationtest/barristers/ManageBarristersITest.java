@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.CaseDataApiV2;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DataStoreClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.OrganisationApi;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.PrdOrganisationConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.CcdCallbackController;
@@ -39,15 +40,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUser
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRoleWithOrganisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResource;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationUser;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CallbackDispatchService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
@@ -63,11 +68,15 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_BARRISTER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASEWORKER_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ROLE;
@@ -85,7 +94,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdServiceTes
     ManageBarristerTestConfiguration.class, PrdOrganisationService.class, PrdOrganisationConfiguration.class,
     AssignCaseAccessService.class, CaseAssignedRoleService.class, CcdCallbackController.class,
     CallbackDispatchService.class, NotificationService.class, NotificationServiceConfiguration.class,
-    NotificationRequestMapper.class})
+    NotificationRequestMapper.class, DocumentConfiguration.class})
 public class ManageBarristersITest implements IntegrationTest {
 
     private static final String SERVICE_AUTH_TOKEN = "serviceAuth";
@@ -103,10 +112,14 @@ public class ManageBarristersITest implements IntegrationTest {
     private static final String SYS_USER_TOKEN = "sysUserToken";
     private static final String RESP_SOL_ID = "someOtherId";
     private static final String CASEWORKER_NAME = "the Caseworker";
+    public static final String APP_BARR_ORG_NAME = "app_barr_org_name";
+
 
     private static final String END_POINT_BARRISTER_ADDED = "http://localhost:8086/notify/contested/barrister-access-added";
 
     private static final String END_POINT_BARRISTER_REMOVED = "http://localhost:8086/notify/contested/barrister-access-removed";
+    public static final String ADDED_BIN_URL = "added_bin_url";
+    public static final String REMOVED_BIN_URL = "REMOVED_BIN_URL";
 
     @Autowired
     private CcdCallbackController ccdCallbackController;
@@ -125,6 +138,10 @@ public class ManageBarristersITest implements IntegrationTest {
     private SystemUserService systemUserService;
     @MockBean
     private RestTemplate restTemplate;
+    @MockBean
+    BulkPrintService bulkPrintService;
+    @MockBean
+    private GenericDocumentService genericDocumentService;
     @Captor
     private ArgumentCaptor<HttpEntity> restRequestCaptor;
 
@@ -290,8 +307,8 @@ public class ManageBarristersITest implements IntegrationTest {
         assertThat(representationUpdateHistory, hasSize(1));
         RepresentationUpdate update = representationUpdateHistory.get(0).getValue();
         assertThat(update.getAdded(), is(ChangedRepresentative.builder()
-            .email(RESP_BARRISTER_EMAIL_ONE)
             .name(RESP_BARRISTER_NAME)
+            .email(RESP_BARRISTER_EMAIL_ONE)
             .organisation(Organisation.builder().organisationID(RESP_BARR_ORG_ID).build())
             .build()));
         assertThat(update.getBy(), is(CASEWORKER_NAME));
@@ -300,6 +317,59 @@ public class ManageBarristersITest implements IntegrationTest {
 
     @Test
     public void givenValidRequest_WhenManageBarristerAddedSubmitted_thenProcess() throws URISyntaxException {
+        CaseDocument addedDocument = CaseDocument.builder().documentBinaryUrl(ADDED_BIN_URL).build();
+        when(dataStoreClient.getUserRoles(AUTH_TOKEN, SERVICE_AUTH_TOKEN, CASE_ID, USER_ID))
+            .thenReturn(CaseAssignedUserRolesResource.builder()
+                .caseAssignedUserRoles(List.of(CaseAssignedUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
+                .build());
+        when(authTokenGenerator.generate()).thenReturn(SERVICE_AUTH_TOKEN);
+        when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(USER_ID);
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), any(), any(), any()))
+            .thenReturn(addedDocument);
+        when(organisationApi.findOrganisationByOrgId(any(), any(), any())).thenReturn(organisationsResponse());
+
+        CallbackRequest request = buildCallbackRequest();
+        request.getCaseDetails().getData().put(APPLICANT_BARRISTER_COLLECTION, applicantBarristerCollection());
+
+
+        ccdCallbackController.ccdSubmittedEvent(AUTH_TOKEN, request);
+        URI uri = new URI(END_POINT_BARRISTER_ADDED);
+
+        verify(restTemplate).exchange(eq(uri), eq(HttpMethod.POST), restRequestCaptor.capture(), eq(String.class));
+        verify(bulkPrintService).sendDocumentForPrint(eq(addedDocument), any());
+
+        HttpEntity<NotificationRequest> notificationRequestHttpEntity = restRequestCaptor.getValue();
+        assertEquals(notificationRequestHttpEntity.getBody().getBarristerReferenceNumber(), APP_BARR_ORG_ID);
+    }
+
+    @Test
+    public void givenValidRequest_WhenManageBarristerRemovedSubmitted_thenProcess() throws URISyntaxException {
+        CaseDocument removedDocument = CaseDocument.builder().documentBinaryUrl(REMOVED_BIN_URL).build();
+        when(dataStoreClient.getUserRoles(AUTH_TOKEN, SERVICE_AUTH_TOKEN, CASE_ID, USER_ID))
+            .thenReturn(CaseAssignedUserRolesResource.builder()
+                .caseAssignedUserRoles(List.of(CaseAssignedUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
+                .build());
+        when(authTokenGenerator.generate()).thenReturn(SERVICE_AUTH_TOKEN);
+        when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(USER_ID);
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), any(), any(), any()))
+            .thenReturn(removedDocument);
+        when(organisationApi.findOrganisationByOrgId(any(), any(), any())).thenReturn(organisationsResponse());
+
+        CallbackRequest request = buildCallbackRequest();
+        request.getCaseDetailsBefore().getData().put(APPLICANT_BARRISTER_COLLECTION, applicantBarristerCollection());
+
+        ccdCallbackController.ccdSubmittedEvent(AUTH_TOKEN, request);
+        URI uri = new URI(END_POINT_BARRISTER_REMOVED);
+
+        verify(restTemplate).exchange(eq(uri), eq(HttpMethod.POST), restRequestCaptor.capture(), eq(String.class));
+        verify(bulkPrintService).sendDocumentForPrint(eq(removedDocument), any());
+
+        HttpEntity<NotificationRequest> notificationRequestHttpEntity = restRequestCaptor.getValue();
+        assertEquals(notificationRequestHttpEntity.getBody().getBarristerReferenceNumber(), APP_BARR_ORG_ID);
+    }
+
+    @Test
+    public void givenRepresentedApplicant_WhenManageBarristerAddedSubmitted_thenProcessWithoutLetter() throws URISyntaxException {
         when(dataStoreClient.getUserRoles(AUTH_TOKEN, SERVICE_AUTH_TOKEN, CASE_ID, USER_ID))
             .thenReturn(CaseAssignedUserRolesResource.builder()
                 .caseAssignedUserRoles(List.of(CaseAssignedUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
@@ -309,34 +379,13 @@ public class ManageBarristersITest implements IntegrationTest {
 
         CallbackRequest request = buildCallbackRequest();
         request.getCaseDetails().getData().put(APPLICANT_BARRISTER_COLLECTION, applicantBarristerCollection());
+        request.getCaseDetails().getData().put(APPLICANT_REPRESENTED, YES_VALUE);
 
-        ResponseEntity<AboutToStartOrSubmitCallbackResponse> response =
-            ccdCallbackController.ccdSubmittedEvent(AUTH_TOKEN, request);
+        ccdCallbackController.ccdSubmittedEvent(AUTH_TOKEN, request);
         URI uri = new URI(END_POINT_BARRISTER_ADDED);
 
         verify(restTemplate).exchange(eq(uri), eq(HttpMethod.POST), restRequestCaptor.capture(), eq(String.class));
-
-        HttpEntity<NotificationRequest> notificationRequestHttpEntity = restRequestCaptor.getValue();
-        assertEquals(notificationRequestHttpEntity.getBody().getBarristerReferenceNumber(), APP_BARR_ORG_ID);
-    }
-
-    @Test
-    public void givenValidRequest_WhenManageBarristerRemovedSubmitted_thenProcess() throws URISyntaxException {
-        when(dataStoreClient.getUserRoles(AUTH_TOKEN, SERVICE_AUTH_TOKEN, CASE_ID, USER_ID))
-            .thenReturn(CaseAssignedUserRolesResource.builder()
-                .caseAssignedUserRoles(List.of(CaseAssignedUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
-                .build());
-        when(authTokenGenerator.generate()).thenReturn(SERVICE_AUTH_TOKEN);
-        when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(USER_ID);
-
-        CallbackRequest request = buildCallbackRequest();
-        request.getCaseDetailsBefore().getData().put(APPLICANT_BARRISTER_COLLECTION, applicantBarristerCollection());
-
-        ResponseEntity<AboutToStartOrSubmitCallbackResponse> response =
-            ccdCallbackController.ccdSubmittedEvent(AUTH_TOKEN, request);
-        URI uri = new URI(END_POINT_BARRISTER_REMOVED);
-
-        verify(restTemplate).exchange(eq(uri), eq(HttpMethod.POST), restRequestCaptor.capture(), eq(String.class));
+        verify(bulkPrintService, never()).sendDocumentForPrint(any(), any());
 
         HttpEntity<NotificationRequest> notificationRequestHttpEntity = restRequestCaptor.getValue();
         assertEquals(notificationRequestHttpEntity.getBody().getBarristerReferenceNumber(), APP_BARR_ORG_ID);
@@ -401,4 +450,11 @@ public class ManageBarristersITest implements IntegrationTest {
                     .build()))
             .build();
     }
+
+    private OrganisationsResponse organisationsResponse() {
+        return OrganisationsResponse.builder()
+            .name(APP_BARR_ORG_NAME)
+            .build();
+    }
+
 }
