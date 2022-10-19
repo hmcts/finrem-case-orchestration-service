@@ -106,7 +106,7 @@ public class SolicitorCreateConsentedMidHandlerTest {
         Map<String, Object> caseData = new HashMap<>();
         CaseDetails caseDetails = CaseDetails.builder().id(123L).build();
         caseDetails.setData(caseData);
-        return CallbackRequest.builder().eventId(uk.gov.hmcts.reform.finrem.ccd.domain.EventType.SOLICITOR_CREATE.getCcdType())
+        return CallbackRequest.builder().eventId(uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.EventType.SOLICITOR_CREATE.getCcdType())
             .caseDetails(caseDetails).build();
     }
 }

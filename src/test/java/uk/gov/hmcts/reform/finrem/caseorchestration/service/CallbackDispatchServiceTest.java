@@ -89,7 +89,7 @@ public class CallbackDispatchServiceTest extends BaseServiceTest {
 
         when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
         when(caseDetails.getCaseTypeId()).thenReturn(uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.CaseType.CONSENTED.getCcdType());
-        when(callbackRequest.getEventId()).thenReturn(uk.gov.hmcts.reform.finrem.ccd.domain.EventType.SEND_ORDER.getCcdType());
+        when(callbackRequest.getEventId()).thenReturn(uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.EventType.SEND_ORDER.getCcdType());
 
         when(handler1.canHandle(any(CallbackType.class), any(CaseType.class), any(EventType.class))).thenReturn(true);
         when(handler1.handle(any(CallbackRequest.class), anyString())).thenReturn(response1);

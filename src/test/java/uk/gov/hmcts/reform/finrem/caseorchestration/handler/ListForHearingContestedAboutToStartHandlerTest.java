@@ -65,7 +65,7 @@ public class ListForHearingContestedAboutToStartHandlerTest {
         Map<String, Object> caseData = new HashMap<>();
         CaseDetails caseDetails = CaseDetails.builder().id(123L).build();
         caseDetails.setData(caseData);
-        return CallbackRequest.builder().eventId(uk.gov.hmcts.reform.finrem.ccd.domain.EventType.AMEND_CASE.getCcdType())
+        return CallbackRequest.builder().eventId(uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.EventType.AMEND_CASE.getCcdType())
             .caseDetails(caseDetails).build();
     }
 }

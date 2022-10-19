@@ -376,9 +376,9 @@ public class TestSetUpUtils {
             .build();
     }
 
-    public static uk.gov.hmcts.reform.finrem.ccd.domain.Document newDocument() {
-        uk.gov.hmcts.reform.finrem.ccd.domain.Document caseDocument =
-            new uk.gov.hmcts.reform.finrem.ccd.domain.Document();
+    public static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.Document newDocument() {
+        uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.Document caseDocument =
+            new uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.Document();
         caseDocument.setUrl(DOC_URL);
         caseDocument.setFilename(FILE_NAME);
         caseDocument.setBinaryUrl(BINARY_URL);
@@ -396,9 +396,9 @@ public class TestSetUpUtils {
         return caseDocument;
     }
 
-    public static uk.gov.hmcts.reform.finrem.ccd.domain.Document wordDoc() {
-        uk.gov.hmcts.reform.finrem.ccd.domain.Document caseDocument =
-            new uk.gov.hmcts.reform.finrem.ccd.domain.Document();
+    public static uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.Document wordDoc() {
+        uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.Document caseDocument =
+            new uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.Document();
         caseDocument.setUrl(DOC_URL);
         caseDocument.setFilename("doc.docx");
         caseDocument.setBinaryUrl(BINARY_URL);

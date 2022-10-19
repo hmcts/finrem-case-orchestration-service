@@ -185,7 +185,7 @@ public class RejectedConsentOrderSubmittedHandlerTest {
             "Property Adjustment Order");
         caseData.put("natureOfApplication2", natureOfApplication);
         CaseDetails caseDetails = CaseDetails.builder()
-            .caseTypeId(uk.gov.hmcts.reform.finrem.ccd.domain.CaseType.CONSENTED.getCcdType())
+            .caseTypeId(uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.CaseType.CONSENTED.getCcdType())
             .id(12345L)
             .build();
         caseDetails.setData(caseData);
@@ -214,7 +214,7 @@ public class RejectedConsentOrderSubmittedHandlerTest {
             "Property Adjustment Order");
         caseData.put("natureOfApplication2", natureOfApplication);
         CaseDetails caseDetails = CaseDetails.builder()
-            .caseTypeId(uk.gov.hmcts.reform.finrem.ccd.domain.CaseType.CONSENTED.getCcdType())
+            .caseTypeId(uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.CaseType.CONSENTED.getCcdType())
             .id(12345L)
             .build();
         caseDetails.setData(caseData);

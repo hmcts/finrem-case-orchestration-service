@@ -150,7 +150,7 @@ public class SendOrderContestedSubmittedHandlerTest {
         Map<String, Object> caseData = new HashMap<>();
         CaseDetails caseDetails = CaseDetails.builder().id(123L).build();
         caseDetails.setData(caseData);
-        return CallbackRequest.builder().eventId(uk.gov.hmcts.reform.finrem.ccd.domain.EventType.SEND_ORDER.getCcdType())
+        return CallbackRequest.builder().eventId(uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.EventType.SEND_ORDER.getCcdType())
             .caseDetails(caseDetails).build();
     }
 
