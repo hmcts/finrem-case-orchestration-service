@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedHearingHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
@@ -1230,6 +1231,24 @@ public class NotificationServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().data(caseData).build();
 
         assertTrue(notificationService.isContestedApplicationAndApplicantOrRespondentSolicitorsIsNotRegisteredOrAcceptingEmails(caseDetails));
+    }
+
+    @Test
+    public void givenBarristerAdded_sendAddedEmail() {
+        Barrister barrister = new Barrister().toBuilder().build();
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        notificationService.sendBarristerAddedEmail(caseDetails, barrister);
+        verify(notificationServiceConfiguration).getAddedBarrister();
+        verify(notificationRequestMapper).buildNotificationRequest(caseDetails, barrister);
+    }
+
+    @Test
+    public void givenBarristerRemoved_sendRemovedEmail() {
+        Barrister barrister = new Barrister().toBuilder().build();
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        notificationService.sendBarristerRemovedEmail(caseDetails, barrister);
+        verify(notificationServiceConfiguration).getRemovedBarrister();
+        verify(notificationRequestMapper).buildNotificationRequest(caseDetails, barrister);
     }
 
     @Test
