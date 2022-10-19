@@ -12,7 +12,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchUserException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.BarristerUpdateDifferenceCalculator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChangeType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerLetterTuple;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRole;
@@ -24,6 +27,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 
@@ -41,6 +45,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
@@ -85,7 +90,11 @@ public class ManageBarristerServiceTest {
     @Mock
     private CaseAssignedRoleService caseAssignedRoleService;
     @Mock
+    private NotificationService notificationService;
+    @Mock
     private SystemUserService systemUserService;
+    @Mock
+    private BarristerLetterService barristerLetterService;
     @Spy
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -155,8 +164,9 @@ public class ManageBarristerServiceTest {
     @Test
     public void givenValidData_whenUpdateBarristerAccess_thenGrantAccessAndGenerateRepresentationUpdateData() {
         caseDetails.getData().put(CASE_ROLE, APP_SOLICITOR_POLICY);
-        when(barristerUpdateDifferenceCalculator.calculate(any(), any())).thenReturn(buildAddedBarristerChange());
+        when(barristerUpdateDifferenceCalculator.calculate(any(), any())).thenReturn(buildBarristerChange());
         when(organisationService.findUserByEmail(APP_BARRISTER_EMAIL_ONE, AUTH_TOKEN)).thenReturn(Optional.of(BARRISTER_USER_ID));
+        when(organisationService.findUserByEmail(APP_BARRISTER_EMAIL_TWO, AUTH_TOKEN)).thenReturn(Optional.of(BARRISTER_USER_ID));
         when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn(APP_SOLICITOR);
         when(caseDataService.buildFullApplicantName(any())).thenReturn(CLIENT_NAME);
         when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
@@ -183,8 +193,9 @@ public class ManageBarristerServiceTest {
     public void givenValidData_whenUpdateBarristerAccessAsCaseworker_thenGrantAccessAndGenerateRepresentationUpdateData() {
         caseDetails.getData().put(CASE_ROLE, CASEWORKER_ROLE);
         caseDetails.getData().put(MANAGE_BARRISTER_PARTY, APPLICANT);
-        when(barristerUpdateDifferenceCalculator.calculate(any(), any())).thenReturn(buildAddedBarristerChange());
+        when(barristerUpdateDifferenceCalculator.calculate(any(), any())).thenReturn(buildBarristerChange());
         when(organisationService.findUserByEmail(APP_BARRISTER_EMAIL_ONE, SYS_USER_TOKEN)).thenReturn(Optional.of(BARRISTER_USER_ID));
+        when(organisationService.findUserByEmail(APP_BARRISTER_EMAIL_TWO, SYS_USER_TOKEN)).thenReturn(Optional.of(BARRISTER_USER_ID));
         when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn(CASEWORKER_NAME);
         when(caseDataService.buildFullApplicantName(any())).thenReturn(CLIENT_NAME);
         when(systemUserService.getSysUserToken()).thenReturn(SYS_USER_TOKEN);
@@ -212,7 +223,7 @@ public class ManageBarristerServiceTest {
     @Test
     public void givenNoUserFound_whenUpdateBarristerAccess_thenThrowError() {
         caseDetails.getData().put(CASE_ROLE, APP_SOLICITOR_POLICY);
-        when(barristerUpdateDifferenceCalculator.calculate(any(), any())).thenReturn(buildAddedBarristerChange());
+        when(barristerUpdateDifferenceCalculator.calculate(any(), any())).thenReturn(buildBarristerChange());
         when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN)).thenReturn(
             buildCaseAssignedUserRolesResource(APP_SOLICITOR_POLICY));
         when(organisationService.findUserByEmail(APP_BARRISTER_EMAIL_ONE, AUTH_TOKEN)).thenReturn(Optional.empty());
@@ -225,6 +236,34 @@ public class ManageBarristerServiceTest {
         String expectedMessage = "Could not find the user with email " + APP_BARRISTER_EMAIL_ONE;
         String actual = exception.getMessage();
         assertEquals(expectedMessage, actual);
+    }
+
+    @Test
+    public void givenValidData_whenNotifyBarristerAccess_sendBarristerNotification() {
+        caseDetails.getData().put(CASE_ROLE, APP_SOLICITOR_POLICY);
+        BarristerChange barristerChange = buildBarristerChange();
+        when(barristerUpdateDifferenceCalculator.calculate(any(), any())).thenReturn(barristerChange);
+        when(caseAssignedRoleService.getCaseAssignedUserRole(any(), any()))
+            .thenReturn(buildCaseAssignedUserRolesResource(APP_SOLICITOR_POLICY));
+
+        manageBarristerService.notifyBarristerAccess(caseDetails,
+            List.of(DEFAULT_BARRISTER),
+            List.of(DEFAULT_BARRISTER),
+            AUTH_TOKEN);
+
+        Barrister expectedAdded = barristerChange.getAdded().stream().toList().get(0);
+        Barrister expectedRemoved = barristerChange.getRemoved().stream().toList().get(0);
+
+        verify(notificationService).sendBarristerAddedEmail(eq(caseDetails), eq(expectedAdded));
+        verify(notificationService).sendBarristerRemovedEmail(eq(caseDetails), eq(expectedRemoved));
+
+        BarristerLetterTuple addedTuple = BarristerLetterTuple
+            .of(DocumentHelper.PaperNotificationRecipient.APPLICANT, AUTH_TOKEN, BarristerChangeType.ADDED);
+        BarristerLetterTuple removedTuple = BarristerLetterTuple
+            .of(DocumentHelper.PaperNotificationRecipient.APPLICANT, AUTH_TOKEN, BarristerChangeType.REMOVED);
+
+        verify(barristerLetterService).sendBarristerLetter(eq(caseDetails), eq(expectedAdded), eq(addedTuple));
+        verify(barristerLetterService).sendBarristerLetter(eq(caseDetails), eq(expectedRemoved), eq(removedTuple));
     }
 
     @Test
@@ -288,11 +327,15 @@ public class ManageBarristerServiceTest {
         );
     }
 
-    private BarristerChange buildAddedBarristerChange() {
+    private BarristerChange buildBarristerChange() {
         return BarristerChange.builder()
             .added(Set.of(Barrister.builder()
                     .email(APP_BARRISTER_EMAIL_ONE)
                     .organisation(Organisation.builder().organisationID(SOME_ORG_ID).build())
+                .build()))
+            .removed(Set.of(Barrister.builder()
+                .email(APP_BARRISTER_EMAIL_TWO)
+                .organisation(Organisation.builder().organisationID(SOME_ORG_ID).build())
                 .build()))
             .build();
     }

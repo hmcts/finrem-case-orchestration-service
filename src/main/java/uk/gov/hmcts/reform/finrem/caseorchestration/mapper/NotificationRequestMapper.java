@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
@@ -160,6 +161,20 @@ public class NotificationRequestMapper {
         }
 
         return notificationRequest;
+    }
+
+    public NotificationRequest buildNotificationRequest(CaseDetails caseDetails, Barrister barrister) {
+
+        String appName = caseDataService.buildFullName(caseDetails.getData(), APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME);
+        return NotificationRequest.builder()
+            .name(barrister.getName())
+            .barristerReferenceNumber(barrister.getOrganisation().getOrganisationID())
+            .caseReferenceNumber(caseDetails.getId().toString())
+            .notificationEmail(barrister.getEmail())
+            .applicantName(appName)
+            .respondentName(caseDataService.buildFullRespondentName(caseDetails))
+            .phoneOpeningHours(CTSC_OPENING_HOURS)
+            .build();
     }
 
     private NotificationRequest getNotificationCoreData(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {

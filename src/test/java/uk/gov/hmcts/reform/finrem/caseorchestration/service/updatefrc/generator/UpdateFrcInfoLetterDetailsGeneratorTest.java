@@ -64,7 +64,7 @@ public class UpdateFrcInfoLetterDetailsGeneratorTest {
         when(caseDataService.buildFullApplicantName(caseDetails)).thenReturn(APPLICANT_FULL_NAME);
         when(documentHelper.formatAddressForLetterPrinting(any())).thenReturn(APP_FORMATTED_ADDRESS);
 
-        UpdateFrcInfoLetterDetails letterDetails = updateFrcInfoLetterDetailsGenerator.generate(caseDetails, APPLICANT);
+        UpdateFrcInfoLetterDetails letterDetails = updateFrcInfoLetterDetailsGenerator.generate(caseDetails, APPLICANT, null);
         assertLetterDetails(letterDetails, (String) caseDetails.getData().get(SOLICITOR_REFERENCE));
         Addressee addressee = letterDetails.getAddressee();
         assertThat(addressee.getFormattedAddress(), is(APP_FORMATTED_ADDRESS));
@@ -77,7 +77,7 @@ public class UpdateFrcInfoLetterDetailsGeneratorTest {
         when(caseDataService.buildFullRespondentName(caseDetails)).thenReturn(RESPONDENT_FULL_NAME_CONTESTED);
         when(documentHelper.formatAddressForLetterPrinting(any())).thenReturn(RESP_FORMATTED_ADDRESS);
 
-        UpdateFrcInfoLetterDetails letterDetails = updateFrcInfoLetterDetailsGenerator.generate(caseDetails, RESPONDENT);
+        UpdateFrcInfoLetterDetails letterDetails = updateFrcInfoLetterDetailsGenerator.generate(caseDetails, RESPONDENT, null);
         assertLetterDetails(letterDetails, (String) caseDetails.getData().get(RESP_SOLICITOR_REFERENCE));
         Addressee addressee = letterDetails.getAddressee();
         assertThat(addressee.getFormattedAddress(), is(RESP_FORMATTED_ADDRESS));
@@ -89,7 +89,7 @@ public class UpdateFrcInfoLetterDetailsGeneratorTest {
         when(caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())).thenReturn(true);
         when(documentHelper.formatAddressForLetterPrinting(any())).thenReturn(APP_SOL_FORMATTED_ADDRESS);
 
-        UpdateFrcInfoLetterDetails letterDetails = updateFrcInfoLetterDetailsGenerator.generate(caseDetails, APPLICANT);
+        UpdateFrcInfoLetterDetails letterDetails = updateFrcInfoLetterDetailsGenerator.generate(caseDetails, APPLICANT, null);
         assertLetterDetails(letterDetails, (String) caseDetails.getData().get(SOLICITOR_REFERENCE));
         Addressee addressee = letterDetails.getAddressee();
         assertThat(addressee.getFormattedAddress(), is(APP_SOL_FORMATTED_ADDRESS));
@@ -101,7 +101,7 @@ public class UpdateFrcInfoLetterDetailsGeneratorTest {
         when(caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())).thenReturn(true);
         when(documentHelper.formatAddressForLetterPrinting(any())).thenReturn(RESP_SOL_FORMATTED_ADDRESS);
 
-        UpdateFrcInfoLetterDetails letterDetails = updateFrcInfoLetterDetailsGenerator.generate(caseDetails, RESPONDENT);
+        UpdateFrcInfoLetterDetails letterDetails = updateFrcInfoLetterDetailsGenerator.generate(caseDetails, RESPONDENT, null);
         assertLetterDetails(letterDetails, (String) caseDetails.getData().get(RESP_SOLICITOR_REFERENCE));
         Addressee addressee = letterDetails.getAddressee();
         assertThat(addressee.getFormattedAddress(), is(RESP_SOL_FORMATTED_ADDRESS));

@@ -26,7 +26,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFu
 
 @Component
 @Slf4j
-public class GeneralApplicationRejectionLetterGenerator extends BaseContestedLetterDetailsGenerator {
+public class GeneralApplicationRejectionLetterGenerator extends BaseContestedLetterDetailsGenerator<String> {
 
     public static final String LETTER_DATE_FORMAT = "yyyy-MM-dd";
     private final ObjectMapper objectMapper;
@@ -40,7 +40,8 @@ public class GeneralApplicationRejectionLetterGenerator extends BaseContestedLet
 
     @Override
     public GeneralApplicationRejectionLetterDetails generate(CaseDetails caseDetails,
-                                                             DocumentHelper.PaperNotificationRecipient recipient) {
+                                                             DocumentHelper.PaperNotificationRecipient recipient,
+                                                             String additionalData) {
         try {
             return GeneralApplicationRejectionLetterDetails.builder()
                 .divorceCaseNumber(Objects.toString(caseDetails.getData().get(DIVORCE_CASE_NUMBER), ""))
