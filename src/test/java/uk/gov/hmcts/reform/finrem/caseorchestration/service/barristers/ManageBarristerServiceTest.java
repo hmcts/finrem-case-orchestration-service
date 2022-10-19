@@ -12,7 +12,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchUserException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.BarristerUpdateDifferenceCalculator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChangeType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerLetterTuple;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRole;
@@ -87,9 +90,11 @@ public class ManageBarristerServiceTest {
     @Mock
     private CaseAssignedRoleService caseAssignedRoleService;
     @Mock
+    private NotificationService notificationService;
+    @Mock
     private SystemUserService systemUserService;
     @Mock
-    private NotificationService notificationService;
+    private BarristerLetterService barristerLetterService;
     @Spy
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -234,6 +239,34 @@ public class ManageBarristerServiceTest {
     }
 
     @Test
+    public void givenValidData_whenNotifyBarristerAccess_sendBarristerNotification() {
+        caseDetails.getData().put(CASE_ROLE, APP_SOLICITOR_POLICY);
+        BarristerChange barristerChange = buildBarristerChange();
+        when(barristerUpdateDifferenceCalculator.calculate(any(), any())).thenReturn(barristerChange);
+        when(caseAssignedRoleService.getCaseAssignedUserRole(any(), any()))
+            .thenReturn(buildCaseAssignedUserRolesResource(APP_SOLICITOR_POLICY));
+
+        manageBarristerService.notifyBarristerAccess(caseDetails,
+            List.of(DEFAULT_BARRISTER),
+            List.of(DEFAULT_BARRISTER),
+            AUTH_TOKEN);
+
+        Barrister expectedAdded = barristerChange.getAdded().stream().toList().get(0);
+        Barrister expectedRemoved = barristerChange.getRemoved().stream().toList().get(0);
+
+        verify(notificationService).sendBarristerAddedEmail(eq(caseDetails), eq(expectedAdded));
+        verify(notificationService).sendBarristerRemovedEmail(eq(caseDetails), eq(expectedRemoved));
+
+        BarristerLetterTuple addedTuple = BarristerLetterTuple
+            .of(DocumentHelper.PaperNotificationRecipient.APPLICANT, AUTH_TOKEN, BarristerChangeType.ADDED);
+        BarristerLetterTuple removedTuple = BarristerLetterTuple
+            .of(DocumentHelper.PaperNotificationRecipient.APPLICANT, AUTH_TOKEN, BarristerChangeType.REMOVED);
+
+        verify(barristerLetterService).sendBarristerLetter(eq(caseDetails), eq(expectedAdded), eq(addedTuple));
+        verify(barristerLetterService).sendBarristerLetter(eq(caseDetails), eq(expectedRemoved), eq(removedTuple));
+    }
+
+    @Test
     public void givenValidData_whenUpdateBarristerAccess_thenRemoveAccessAndGenerateRepresentationUpdateData() {
         caseDetails.getData().put(CASE_ROLE, APP_SOLICITOR_POLICY);
         when(barristerUpdateDifferenceCalculator.calculate(any(), any())).thenReturn(buildRemovedBarristerChange());
@@ -258,19 +291,6 @@ public class ManageBarristerServiceTest {
 
         verify(assignCaseAccessService).removeCaseRoleToUser(caseDetails.getId(), BARRISTER_USER_ID,
             APPLICANT_BARRISTER_ROLE, SOME_ORG_ID);
-    }
-
-    @Test
-    public void givenValidData_whenNotifyBarristerAccess_sendBarristerNotification() {
-        caseDetails.getData().put(CASE_ROLE, APP_SOLICITOR_POLICY);
-        when(barristerUpdateDifferenceCalculator.calculate(any(), any())).thenReturn(buildBarristerChange());
-
-        manageBarristerService.notifyBarristerAccess(caseDetails,
-            List.of(DEFAULT_BARRISTER),
-            List.of(DEFAULT_BARRISTER));
-
-        verify(notificationService).sendBarristerAddedEmail(eq(caseDetails), any());
-        verify(notificationService).sendBarristerRemovedEmail(eq(caseDetails), any());
     }
 
     private List<BarristerData> applicantBarristerCollection() {
@@ -310,8 +330,8 @@ public class ManageBarristerServiceTest {
     private BarristerChange buildBarristerChange() {
         return BarristerChange.builder()
             .added(Set.of(Barrister.builder()
-                .email(APP_BARRISTER_EMAIL_ONE)
-                .organisation(Organisation.builder().organisationID(SOME_ORG_ID).build())
+                    .email(APP_BARRISTER_EMAIL_ONE)
+                    .organisation(Organisation.builder().organisationID(SOME_ORG_ID).build())
                 .build()))
             .removed(Set.of(Barrister.builder()
                 .email(APP_BARRISTER_EMAIL_TWO)
