@@ -161,8 +161,6 @@ public class ManageBarristerServiceTest {
         assertThat(barristerData, is(applicantBarristers));
     }
 
-
-
     @Test
     public void givenValidData_whenUpdateBarristerAccess_thenGrantAccessAndGenerateRepresentationUpdateData() {
         caseDetails.getData().put(CASE_ROLE, APP_SOLICITOR_POLICY);
