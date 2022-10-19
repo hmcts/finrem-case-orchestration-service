@@ -7,7 +7,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CallbackRequestWithoutMap;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
 import java.util.Map;
@@ -28,7 +28,7 @@ public class ConsentOrderService {
         return getCaseDocument(caseDetails, callbackRequest.getEventId());
     }
 
-    public CaseDocument getLatestConsentOrderData(CallbackRequestWithoutMap callbackRequest) {
+    public CaseDocument getLatestConsentOrderData(FinremCallbackRequest callbackRequest) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         return getCaseDocument(caseDetails, callbackRequest.getEventType().getCcdType());
     }

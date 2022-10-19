@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.model;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.FinremCaseDetails
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Jacksonized
-public class CallbackRequestWithoutMap {
+public class FinremCallbackRequest {
 
     @JsonProperty("case_details")
     private FinremCaseDetails caseDetails;

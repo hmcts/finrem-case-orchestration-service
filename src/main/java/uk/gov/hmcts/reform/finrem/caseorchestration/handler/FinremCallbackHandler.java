@@ -10,10 +10,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CallbackRequestWithoutMap;
 
 @RequiredArgsConstructor
-public abstract class FinremCaseDetailsCallbackHandler implements CallbackHandler<FinremCaseData> {
+public abstract class FinremCallbackHandler implements CallbackHandler<FinremCaseData> {
 
     private final ObjectMapper mapper;
 
@@ -25,7 +24,7 @@ public abstract class FinremCaseDetailsCallbackHandler implements CallbackHandle
         if (callbackRequest.getCaseDetailsBefore() != null) {
             finremCaseDetailsBefore = buildFinremCaseDetails(callbackRequest.getCaseDetailsBefore());
         }
-        CallbackRequestWithoutMap callbackRequestWithFinremCaseDetails = CallbackRequestWithoutMap.builder()
+        FinremCallbackRequest callbackRequestWithFinremCaseDetails = FinremCallbackRequest.builder()
             .caseDetails(finremCaseDetails)
             .caseDetailsBefore(finremCaseDetailsBefore)
             .eventType(EventType.getEventType(callbackRequest.getEventId()))
@@ -34,7 +33,7 @@ public abstract class FinremCaseDetailsCallbackHandler implements CallbackHandle
         return handle(callbackRequestWithFinremCaseDetails, userAuthorisation);
     }
 
-    public abstract GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(CallbackRequestWithoutMap callbackRequestWithFinremCaseDetails,
+    public abstract GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequestWithFinremCaseDetails,
                                                                                        String userAuthorisation);
 
     private FinremCaseDetails buildFinremCaseDetails(CaseDetails caseDetails) {

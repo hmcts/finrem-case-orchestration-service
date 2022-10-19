@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.Intention;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CallbackRequestWithoutMap;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 
 import java.util.List;
@@ -65,7 +64,7 @@ public class AmendApplicationAboutToStartHandlerTest {
 
     @Test
     public void givenCase_whenIntendsToIsApplyToVary_thenShouldAddToNatureList() {
-        CallbackRequestWithoutMap callbackRequest = callbackRequest();
+        FinremCallbackRequest callbackRequest = callbackRequest();
 
         FinremCaseData data = callbackRequest.getCaseDetails().getData();
         data.getNatureApplicationWrapper().setNatureOfApplication2(Lists.newArrayList(
@@ -85,7 +84,7 @@ public class AmendApplicationAboutToStartHandlerTest {
 
     @Test
     public void givenCase_whenIntendsToIsNotApplyToVary_thenShouldNotDoAnything() {
-        CallbackRequestWithoutMap callbackRequest = callbackRequest();
+        FinremCallbackRequest callbackRequest = callbackRequest();
 
         FinremCaseData data = callbackRequest.getCaseDetails().getData();
         data.getNatureApplicationWrapper().setNatureOfApplication2(Lists.newArrayList(
@@ -106,7 +105,7 @@ public class AmendApplicationAboutToStartHandlerTest {
 
     @Test
     public void givenCase_whenNatureListIsEmptyAndIntendsToIsApplyToVary_thenShouldAddToNatureList() {
-        CallbackRequestWithoutMap callbackRequest = callbackRequest();
+        FinremCallbackRequest callbackRequest = callbackRequest();
 
         FinremCaseData data = callbackRequest.getCaseDetails().getData();
         data.setApplicantIntendsTo(Intention.APPLY_TO_VARY);
@@ -121,8 +120,8 @@ public class AmendApplicationAboutToStartHandlerTest {
         assertEquals(YesOrNo.NO, responseData.getCivilPartnership());
     }
 
-    private CallbackRequestWithoutMap callbackRequest() {
-        return CallbackRequestWithoutMap
+    private FinremCallbackRequest callbackRequest() {
+        return FinremCallbackRequest
             .<FinremCaseDetails>builder()
             .caseDetails(FinremCaseDetails.builder().id(123L)
                 .data(new FinremCaseData()).build())

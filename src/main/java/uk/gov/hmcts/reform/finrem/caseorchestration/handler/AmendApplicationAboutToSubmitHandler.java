@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.NatureApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.StageReached;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CallbackRequestWithoutMap;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 
@@ -25,7 +24,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.NoCSolicitorDe
 
 @Slf4j
 @Service
-public class AmendApplicationAboutToSubmitHandler extends FinremCaseDetailsCallbackHandler {
+public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler {
 
     private final ConsentOrderService consentOrderService;
 
@@ -44,7 +43,7 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCaseDetailsCallb
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(CallbackRequestWithoutMap callbackRequest,
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request to update consented case with Case ID: {}", caseDetails.getId());
@@ -62,7 +61,7 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCaseDetailsCallb
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 
-    private void updateLatestConsentOrder(CallbackRequestWithoutMap callbackRequest) {
+    private void updateLatestConsentOrder(FinremCallbackRequest callbackRequest) {
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         caseData.setLatestConsentOrder(consentOrderService.getLatestConsentOrderData(callbackRequest));
     }

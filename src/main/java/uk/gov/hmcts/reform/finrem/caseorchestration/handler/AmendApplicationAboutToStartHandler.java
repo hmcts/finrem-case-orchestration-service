@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -12,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.Intention;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CallbackRequestWithoutMap;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 
 import java.util.ArrayList;
@@ -21,7 +19,7 @@ import java.util.Optional;
 
 @Slf4j
 @Service
-public class AmendApplicationAboutToStartHandler extends FinremCaseDetailsCallbackHandler {
+public class AmendApplicationAboutToStartHandler extends FinremCallbackHandler {
 
     public AmendApplicationAboutToStartHandler(ObjectMapper mapper) {
         super(mapper);
@@ -35,7 +33,7 @@ public class AmendApplicationAboutToStartHandler extends FinremCaseDetailsCallba
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(CallbackRequestWithoutMap callbackRequest,
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
         log.info("Handling amend application about to start callback for case id: {}", callbackRequest.getCaseDetails().getId());
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
