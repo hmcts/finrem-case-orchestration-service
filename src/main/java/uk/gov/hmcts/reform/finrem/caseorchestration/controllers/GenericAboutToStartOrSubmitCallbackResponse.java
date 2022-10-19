@@ -12,11 +12,12 @@ import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder(toBuilder = true)
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
- public class GenericAboutToStartOrSubmitCallbackResponse<D> {
+public class GenericAboutToStartOrSubmitCallbackResponse<D> {
 
-    D data;
+    private D data;
 
     @JsonProperty("data_classification")
     private Map<String, Object> dataClassification;

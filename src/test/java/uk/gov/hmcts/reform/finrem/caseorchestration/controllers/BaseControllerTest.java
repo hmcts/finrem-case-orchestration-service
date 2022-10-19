@@ -24,8 +24,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public abstract class BaseControllerTest extends BaseTest {
 
-    @Autowired protected WebApplicationContext applicationContext;
-    @Autowired protected ObjectMapper objectMapper;
+    @Autowired
+    protected WebApplicationContext applicationContext;
+    @Autowired
+    protected ObjectMapper objectMapper;
 
     protected MockMvc mvc;
     protected JsonNode requestContent;

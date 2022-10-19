@@ -5,16 +5,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 
-import java.io.InputStream;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -25,7 +23,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REJECT_REASON;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RejectGeneralApplicationAboutToStartHandlerTest {
+public class RejectGeneralApplicationAboutToStartHandlerTest extends BaseHandlerTest {
 
     private RejectGeneralApplicationAboutToStartHandler handler;
     private GeneralApplicationHelper helper;
@@ -41,7 +39,7 @@ public class RejectGeneralApplicationAboutToStartHandlerTest {
     public void setup() {
         objectMapper = new ObjectMapper();
         helper = new GeneralApplicationHelper(objectMapper);
-        handler  = new RejectGeneralApplicationAboutToStartHandler(helper);
+        handler = new RejectGeneralApplicationAboutToStartHandler(helper);
     }
 
     @Test
@@ -54,7 +52,7 @@ public class RejectGeneralApplicationAboutToStartHandlerTest {
     @Test
     public void givenCase_whenInCorrectConfigCaseTypeSupplied_thenHandlerCanHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.GENERAL_APPLICATION),
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.CREATE_GENERAL_APPLICATION),
             is(false));
     }
 
@@ -68,14 +66,14 @@ public class RejectGeneralApplicationAboutToStartHandlerTest {
     @Test
     public void givenCase_whenInCorrectConfigCallbackTypeSupplied_thenHandlerCanHandle() {
         assertThat(handler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.GENERAL_APPLICATION),
+                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.CREATE_GENERAL_APPLICATION),
             is(false));
     }
 
     @Test
     public void givenCase_whenExistingGeneAppNonCollection_thenCreateSelectionList() {
         CallbackRequest callbackRequest = buildCallbackRequest(GA_NON_COLL_JSON);
-        AboutToStartOrSubmitCallbackResponse handle = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle = handler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = handle.getData();
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_LIST));
@@ -87,7 +85,7 @@ public class RejectGeneralApplicationAboutToStartHandlerTest {
     @Test
     public void givenCase_whenExistingGeneAppAsACollection_thenCreateSelectionList() {
         CallbackRequest callbackRequest = buildCallbackRequest(GA_JSON);
-        AboutToStartOrSubmitCallbackResponse handle = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle = handler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = handle.getData();
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_LIST));
@@ -100,7 +98,7 @@ public class RejectGeneralApplicationAboutToStartHandlerTest {
     @Test
     public void givenCase_whenNoExistingGeneApp_thenHandle() {
         CallbackRequest callbackRequest = buildCallbackRequest(NO_GA_JSON);
-        AboutToStartOrSubmitCallbackResponse handle = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle = handler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = handle.getData();
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_LIST));
@@ -109,12 +107,4 @@ public class RejectGeneralApplicationAboutToStartHandlerTest {
         assertNull(caseData.get(GENERAL_APPLICATION_REJECT_REASON));
     }
 
-    private CallbackRequest buildCallbackRequest(String path)  {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(path)) {
-            CaseDetails caseDetails = objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-            return CallbackRequest.builder().caseDetails(caseDetails).build();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

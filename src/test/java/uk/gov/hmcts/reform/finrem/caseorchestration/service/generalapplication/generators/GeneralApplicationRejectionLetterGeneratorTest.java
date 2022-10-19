@@ -69,8 +69,8 @@ public class GeneralApplicationRejectionLetterGeneratorTest {
         caseData.put(CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME, "Contested");
         caseData.put(CONTESTED_RESPONDENT_LAST_NAME, "Respondent");
         caseData.put(APPLICANT_ADDRESS, Address.builder()
-                .addressLine1("50 Applicant Street")
-                .postCode("SE12 9SA")
+            .addressLine1("50 Applicant Street")
+            .postCode("SE12 9SA")
             .build());
         caseData.put(RESPONDENT_ADDRESS, Address.builder()
             .addressLine1("50 Respondent Street")

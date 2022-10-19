@@ -56,8 +56,8 @@ public class RejectGeneralApplicationDocumentServiceTest extends BaseServiceTest
         documentConfiguration = new DocumentConfiguration();
 
         rejectGeneralApplicationDocumentService = new RejectGeneralApplicationDocumentService(generalApplicationRejectionLetterGenerator,
-                genericDocumentService,
-                documentConfiguration);
+            genericDocumentService,
+            documentConfiguration);
     }
 
     @Test

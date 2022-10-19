@@ -11,9 +11,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
@@ -58,11 +58,11 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
     private CaseDetails caseDetails;
 
 
-
     @Before
     public void setup() {
         callbackRequest = CallbackRequest.builder().build();
-        caseDetails = CaseDetails.builder().data(new HashMap<>()).build();
+        caseDetails = CaseDetails.builder().build();
+        caseDetails.setData(new HashMap<>());
         callbackRequest.setCaseDetails(caseDetails);
 
         ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
@@ -155,6 +155,11 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
                 .build()
         );
         caseData.put(GENERAL_APPLICATION_COLLECTION, rejectedGeneralApplicationData);
-        return CaseDetails.builder().data(caseData).build();
+        CaseDetails caseDetails = CaseDetails.builder()
+            .caseTypeId(uk.gov.hmcts.reform.finrem.ccd.domain.CaseType.CONSENTED.getCcdType())
+            .id(12345L)
+            .build();
+        caseDetails.setData(caseData);
+        return caseDetails;
     }
 }

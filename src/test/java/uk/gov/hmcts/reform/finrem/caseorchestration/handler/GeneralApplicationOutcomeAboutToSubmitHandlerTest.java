@@ -5,18 +5,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 
-import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -31,7 +29,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_OUTCOME_LIST;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GeneralApplicationOutcomeAboutToSubmitHandlerTest {
+public class GeneralApplicationOutcomeAboutToSubmitHandlerTest extends BaseHandlerTest {
 
     private GeneralApplicationOutcomeAboutToStartHandler startHandler;
     private GeneralApplicationOutcomeAboutToSubmitHandler submitHandler;
@@ -46,8 +44,8 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest {
     public void setup() {
         objectMapper = new ObjectMapper();
         helper = new GeneralApplicationHelper(objectMapper);
-        startHandler  = new GeneralApplicationOutcomeAboutToStartHandler(helper);
-        submitHandler  = new GeneralApplicationOutcomeAboutToSubmitHandler(helper);
+        startHandler = new GeneralApplicationOutcomeAboutToStartHandler(helper);
+        submitHandler = new GeneralApplicationOutcomeAboutToSubmitHandler(helper);
     }
 
     @Test
@@ -81,15 +79,16 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest {
     //This senario should not come
     @Test
     public void givenCase_whenNonCollectionApproveAnApplication_thenMigratedAndUpdateStatusApproved() {
-        CallbackRequest callbackRequest = buildCallbackRequest(GA_NON_COLL_JSON);
-        AboutToStartOrSubmitCallbackResponse startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
+        CallbackRequest callbackRequest =
+            buildCallbackRequest(GA_NON_COLL_JSON);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = startHandle.getData();
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_OUTCOME_LIST));
         assertEquals(1, dynamicList.getListItems().size());
 
         callbackRequest.getCaseDetails().getData().put(GENERAL_APPLICATION_OUTCOME_DECISION, APPROVED.getId());
-        AboutToStartOrSubmitCallbackResponse submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> data = submitHandle.getData();
         List<GeneralApplicationCollectionData> generalApplicationCollectionData
@@ -106,13 +105,13 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest {
     public void givenCase_whenApproveAnApplication_thenUpdateStatusApproved() {
         CallbackRequest callbackRequest = buildCallbackRequest(GA_JSON);
 
-        AboutToStartOrSubmitCallbackResponse startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = startHandle.getData();
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_OUTCOME_LIST));
         assertEquals(2, dynamicList.getListItems().size());
         callbackRequest.getCaseDetails().getData().put(GENERAL_APPLICATION_OUTCOME_DECISION, "Approved");
-        AboutToStartOrSubmitCallbackResponse submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> data = submitHandle.getData();
         List<GeneralApplicationCollectionData> generalApplicationCollectionData
@@ -129,13 +128,13 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest {
     public void givenCase_whenNotApproveAnApplication_thenUpdateStatusNotApproved() {
         CallbackRequest callbackRequest = buildCallbackRequest(GA_JSON);
 
-        AboutToStartOrSubmitCallbackResponse startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = startHandle.getData();
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_OUTCOME_LIST));
         assertEquals(2, dynamicList.getListItems().size());
         callbackRequest.getCaseDetails().getData().put(GENERAL_APPLICATION_OUTCOME_DECISION, "Not Approved");
-        AboutToStartOrSubmitCallbackResponse submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> data = submitHandle.getData();
         List<GeneralApplicationCollectionData> generalApplicationCollectionData
@@ -151,13 +150,13 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest {
     public void givenCase_whenOtherAnApplication_thenUpdateStatusOther() {
         CallbackRequest callbackRequest = buildCallbackRequest(GA_JSON);
 
-        AboutToStartOrSubmitCallbackResponse startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = startHandle.getData();
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_OUTCOME_LIST));
         assertEquals(2, dynamicList.getListItems().size());
         callbackRequest.getCaseDetails().getData().put(GENERAL_APPLICATION_OUTCOME_DECISION, "Other");
-        AboutToStartOrSubmitCallbackResponse submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> data = submitHandle.getData();
         List<GeneralApplicationCollectionData> generalApplicationCollectionData
@@ -173,7 +172,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest {
     public void givenCase_whenUnknowAnApplication_thenThrowException() {
         CallbackRequest callbackRequest = buildCallbackRequest(GA_JSON);
 
-        AboutToStartOrSubmitCallbackResponse startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = startHandle.getData();
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_OUTCOME_LIST));
@@ -185,14 +184,5 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest {
         var expectedMessage = "Unexpected value: UNKNOWN";
         var actualMessage = exception.getMessage();
         assertEquals(expectedMessage, actualMessage);
-    }
-
-    private CallbackRequest buildCallbackRequest(String testJson)  {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(testJson)) {
-            CaseDetails caseDetails = objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-            return CallbackRequest.builder().caseDetails(caseDetails).build();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 }

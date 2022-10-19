@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model;
 
 import lombok.RequiredArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.EventType;
 
 import java.util.Arrays;
 

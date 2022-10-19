@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ClientDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
@@ -363,5 +364,53 @@ public class TestSetUpUtils {
             }
         });
         return caseData;
+    }
+
+    public static CaseDocument newDocument(String documentName,
+                                                                             String filename,
+                                                                             String binaryUrl) {
+        return CaseDocument.builder()
+            .documentFilename(filename)
+            .documentUrl(documentName)
+            .documentBinaryUrl(binaryUrl)
+            .build();
+    }
+
+    public static uk.gov.hmcts.reform.finrem.ccd.domain.Document newDocument() {
+        uk.gov.hmcts.reform.finrem.ccd.domain.Document caseDocument =
+            new uk.gov.hmcts.reform.finrem.ccd.domain.Document();
+        caseDocument.setUrl(DOC_URL);
+        caseDocument.setFilename(FILE_NAME);
+        caseDocument.setBinaryUrl(BINARY_URL);
+
+        return caseDocument;
+    }
+
+    public static ClientDocument newDocumentClientDocument() {
+        ClientDocument caseDocument =
+            new ClientDocument();
+        caseDocument.setUrl(DOC_URL);
+        caseDocument.setFileName(FILE_NAME);
+        caseDocument.setBinaryUrl(BINARY_URL);
+
+        return caseDocument;
+    }
+
+    public static uk.gov.hmcts.reform.finrem.ccd.domain.Document wordDoc() {
+        uk.gov.hmcts.reform.finrem.ccd.domain.Document caseDocument =
+            new uk.gov.hmcts.reform.finrem.ccd.domain.Document();
+        caseDocument.setUrl(DOC_URL);
+        caseDocument.setFilename("doc.docx");
+        caseDocument.setBinaryUrl(BINARY_URL);
+
+        return caseDocument;
+    }
+
+    public static ClientDocument docClientWordDocument() {
+        return ClientDocument.builder()
+            .url(DOC_URL)
+            .fileName("doc.docx")
+            .binaryUrl(BINARY_URL)
+            .build();
     }
 }

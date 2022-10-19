@@ -3,13 +3,13 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REFERRED_DETAIL;
@@ -29,7 +30,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class GeneralApplicationReferToJudgeAboutToStartHandler implements CallbackHandler, GeneralApplicationHandler {
+public class GeneralApplicationReferToJudgeAboutToStartHandler
+    implements CallbackHandler<Map<String, Object>>, GeneralApplicationHandler {
 
     private final GeneralApplicationHelper helper;
 
@@ -41,8 +43,9 @@ public class GeneralApplicationReferToJudgeAboutToStartHandler implements Callba
     }
 
     @Override
-    public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
-                                                       String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(
+        CallbackRequest callbackRequest,
+        String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received on start request to refer general application for Case ID: {}", caseDetails.getId());
 
@@ -58,7 +61,7 @@ public class GeneralApplicationReferToJudgeAboutToStartHandler implements Callba
             if (existingGeneralApplicationList.isEmpty() && judgeEmail != null) {
                 List<DynamicListElement> dynamicListElements = getDynamicListElements(existingGeneralApplicationList, index);
                 if (dynamicListElements.isEmpty()) {
-                    return AboutToStartOrSubmitCallbackResponse.builder().data(caseData)
+                    return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData)
                         .errors(List.of("There are no general application available to refer.")).build();
                 }
             }
@@ -69,7 +72,7 @@ public class GeneralApplicationReferToJudgeAboutToStartHandler implements Callba
             log.info("setting refer list for Case ID: {}", caseDetails.getId());
             List<DynamicListElement> dynamicListElements = getDynamicListElements(existingGeneralApplicationList, index);
             if (dynamicListElements.isEmpty()) {
-                return AboutToStartOrSubmitCallbackResponse.builder().data(caseData)
+                return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData)
                     .errors(List.of("There are no general application available to refer.")).build();
             }
             DynamicList dynamicList = generateAvailableGeneralApplicationAsDynamicList(dynamicListElements);
@@ -77,14 +80,14 @@ public class GeneralApplicationReferToJudgeAboutToStartHandler implements Callba
         }
         caseData.remove(GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL);
         caseData.remove(GENERAL_APPLICATION_REFERRED_DETAIL);
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).build();
     }
 
     private List<DynamicListElement> getDynamicListElements(List<GeneralApplicationCollectionData> existingGeneralApplicationList,
                                                             AtomicInteger index) {
         return existingGeneralApplicationList.stream()
             .map(ga -> getDynamicListElements(ga.getId(), getLabel(ga.getGeneralApplicationItems(), index.incrementAndGet())))
-            .toList();
+            .collect(Collectors.toList());
     }
 
     private void setReferListForNonCollectionGeneralApplication(Map<String, Object> caseData, AtomicInteger index) {

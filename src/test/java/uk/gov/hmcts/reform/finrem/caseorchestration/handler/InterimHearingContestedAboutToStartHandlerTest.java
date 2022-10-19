@@ -5,19 +5,17 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.InterimHearingHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.InterimHearingItemMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingBulkPrintDocumentsData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollectionItemData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
 
-import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +26,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 @RunWith(MockitoJUnitRunner.class)
-public class InterimHearingContestedAboutToStartHandlerTest {
+public class InterimHearingContestedAboutToStartHandlerTest extends BaseHandlerTest {
 
     private InterimHearingContestedAboutToStartHandler interimHearingContestedAboutToStartHandler;
 
@@ -42,13 +40,12 @@ public class InterimHearingContestedAboutToStartHandlerTest {
     private static final String TEST_NEW_JSON_NO_UPLOADED_DOC = "/fixtures/contested/interim-hearing-nouploaded-doc.json";
 
 
-
     @Before
     public void setup() {
         objectMapper = new ObjectMapper();
         interimHearingHelper = new InterimHearingHelper(objectMapper);
         InterimHearingItemMapper interimHearingItemMapper = new InterimHearingItemMapper(interimHearingHelper);
-        interimHearingContestedAboutToStartHandler  =
+        interimHearingContestedAboutToStartHandler =
             new InterimHearingContestedAboutToStartHandler(interimHearingHelper, interimHearingItemMapper);
     }
 
@@ -82,8 +79,10 @@ public class InterimHearingContestedAboutToStartHandlerTest {
 
     @Test
     public void givenCase_WhenInterimHearingPresent_ThenMigrateToInterimHearingCollection() {
-        CallbackRequest callbackRequest = buildCallbackRequest(CONTESTED_INTERIM_HEARING_JSON);
-        AboutToStartOrSubmitCallbackResponse handle = interimHearingContestedAboutToStartHandler.handle(callbackRequest, AUTH_TOKEN);
+        CallbackRequest callbackRequest =
+            buildCallbackRequest(CONTESTED_INTERIM_HEARING_JSON);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>>
+            handle = interimHearingContestedAboutToStartHandler.handle(callbackRequest, AUTH_TOKEN);
         Map<String, Object> caseData = handle.getData();
 
         List<InterimHearingData> interimHearingList = interimHearingHelper.isThereAnExistingInterimHearing(caseData);
@@ -102,7 +101,8 @@ public class InterimHearingContestedAboutToStartHandlerTest {
     @Test
     public void givenCase_WhenMigrateToInterimHearingCollectionButNoUploadedDocAndNoBulkPrintDoc_ThenItShouldMigratedSuccessfully() {
         CallbackRequest callbackRequest = buildCallbackRequest(TEST_NEW_JSON_NO_UPLOADED_DOC);
-        AboutToStartOrSubmitCallbackResponse handle = interimHearingContestedAboutToStartHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>>
+            handle = interimHearingContestedAboutToStartHandler.handle(callbackRequest, AUTH_TOKEN);
         Map<String, Object> caseData = handle.getData();
 
         final List<InterimHearingData> interimHearingList = interimHearingHelper.isThereAnExistingInterimHearing(caseData);
@@ -119,7 +119,8 @@ public class InterimHearingContestedAboutToStartHandlerTest {
     @Test
     public void givenCase_WhenInterimHearingPresent_ThenNothingToMigrateInInterimHearingCollection() {
         CallbackRequest callbackRequest = buildCallbackRequest(TEST_NEW_JSON);
-        AboutToStartOrSubmitCallbackResponse handle = interimHearingContestedAboutToStartHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>>
+            handle = interimHearingContestedAboutToStartHandler.handle(callbackRequest, AUTH_TOKEN);
         Map<String, Object> caseData = handle.getData();
 
         List<InterimHearingData> interimHearingList = interimHearingHelper.isThereAnExistingInterimHearing(caseData);
@@ -131,12 +132,4 @@ public class InterimHearingContestedAboutToStartHandlerTest {
         assertThat(trackingList, is(Collections.emptyList()));
     }
 
-    private CallbackRequest buildCallbackRequest(final String path)  {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(path)) {
-            CaseDetails caseDetails = objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-            return CallbackRequest.builder().caseDetails(caseDetails).build();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

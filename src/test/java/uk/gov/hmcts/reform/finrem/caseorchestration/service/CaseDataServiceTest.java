@@ -51,9 +51,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER;
 
-public class  CaseDataServiceTest extends BaseServiceTest {
+public class CaseDataServiceTest extends BaseServiceTest {
 
-    @Autowired CaseDataService caseDataService;
+    @Autowired
+    CaseDataService caseDataService;
 
     @Test
     public void isRespondentSolicitorResponsibleToDraftOrder_shouldReturnTrue() {
@@ -81,7 +82,7 @@ public class  CaseDataServiceTest extends BaseServiceTest {
 
         caseDataService.moveCollection(caseData, HEARING_ORDER_COLLECTION, "uploadHearingOrderRO");
 
-        assertThat(((Collection<CaseDocument>)caseData.get("uploadHearingOrderRO")), hasSize(3));
+        assertThat(((Collection<CaseDocument>) caseData.get("uploadHearingOrderRO")), hasSize(3));
         assertThat(caseData.get(HEARING_ORDER_COLLECTION), Matchers.nullValue());
     }
 
@@ -91,7 +92,7 @@ public class  CaseDataServiceTest extends BaseServiceTest {
         caseData.put("uploadHearingOrderRO", null);
         caseDataService.moveCollection(caseData, HEARING_ORDER_COLLECTION, "uploadHearingOrderRO");
 
-        assertThat(((Collection<CaseDocument>)caseData.get("uploadHearingOrderRO")), hasSize(1));
+        assertThat(((Collection<CaseDocument>) caseData.get("uploadHearingOrderRO")), hasSize(1));
         assertThat(caseData.get(HEARING_ORDER_COLLECTION), Matchers.nullValue());
     }
 
@@ -101,7 +102,7 @@ public class  CaseDataServiceTest extends BaseServiceTest {
         caseData.put(HEARING_ORDER_COLLECTION, "nonarrayValue");
         caseDataService.moveCollection(caseData, HEARING_ORDER_COLLECTION, "uploadHearingOrderRO");
 
-        assertThat(((Collection<CaseDocument>)caseData.get("uploadHearingOrderRO")), hasSize(2));
+        assertThat(((Collection<CaseDocument>) caseData.get("uploadHearingOrderRO")), hasSize(2));
         assertThat(caseData.get(HEARING_ORDER_COLLECTION), Matchers.is("nonarrayValue"));
     }
 
@@ -112,7 +113,7 @@ public class  CaseDataServiceTest extends BaseServiceTest {
         caseDataService.moveCollection(caseData, HEARING_ORDER_COLLECTION, "uploadHearingOrderRO");
 
         assertThat(caseData.get("uploadHearingOrderRO"), Matchers.is("nonarrayValue"));
-        assertThat(((Collection<CaseDocument>)caseData.get(HEARING_ORDER_COLLECTION)), hasSize(1));
+        assertThat(((Collection<CaseDocument>) caseData.get(HEARING_ORDER_COLLECTION)), hasSize(1));
     }
 
     @Test
@@ -121,19 +122,19 @@ public class  CaseDataServiceTest extends BaseServiceTest {
         caseData.put(HEARING_ORDER_COLLECTION, null);
         caseDataService.moveCollection(caseData, HEARING_ORDER_COLLECTION, "uploadHearingOrderRO");
 
-        assertThat(((Collection<CaseDocument>)caseData.get("uploadHearingOrderRO")), hasSize(2));
+        assertThat(((Collection<CaseDocument>) caseData.get("uploadHearingOrderRO")), hasSize(2));
         assertThat(caseData.get(HEARING_ORDER_COLLECTION), Matchers.nullValue());
     }
 
     @Test
     public void shouldOverwriteTargetCollection() {
         Map<String, Object> caseData = TestSetUpUtils.caseDataWithUploadHearingOrder();
-        assertThat(((Collection<CaseDocument>)caseData.get(HEARING_ORDER_COLLECTION)), hasSize(1));
-        assertThat(((Collection<CaseDocument>)caseData.get("uploadHearingOrderRO")), hasSize(2));
+        assertThat(((Collection<CaseDocument>) caseData.get(HEARING_ORDER_COLLECTION)), hasSize(1));
+        assertThat(((Collection<CaseDocument>) caseData.get("uploadHearingOrderRO")), hasSize(2));
 
         caseDataService.overwriteCollection(caseData, HEARING_ORDER_COLLECTION, "uploadHearingOrderRO");
 
-        assertThat(((Collection<CaseDocument>)caseData.get("uploadHearingOrderRO")), hasSize(1));
+        assertThat(((Collection<CaseDocument>) caseData.get("uploadHearingOrderRO")), hasSize(1));
     }
 
     @Test

@@ -8,13 +8,13 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
@@ -27,8 +27,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationSer
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -235,7 +235,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         mockDocumentHelperToReturnDefaultExpectedDocuments();
         when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN))).thenReturn(caseDocument());
 
-        AboutToStartOrSubmitCallbackResponse response =
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response =
             sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 
         verify(genericDocumentService).stampDocument(caseDocument(), AUTH_TOKEN);
@@ -249,9 +249,8 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
 
     @Test
     public void givenFinalOrderSuccessWithoutAnyHearingOrder_WhenHandle_ThenStampFinalOrder() {
-        CaseDetails caseDetails = CaseDetails.builder().data(new HashMap<>()).build();
 
-        AboutToStartOrSubmitCallbackResponse response =
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response =
             sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 
         assertThat(response.getData(), not(hasKey(FINAL_ORDER_COLLECTION)));
@@ -263,7 +262,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         when(documentHelper.getFinalOrderDocuments(any())).thenReturn(new ArrayList<>(List.of(HearingOrderCollectionData.builder().build())));
         when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN))).thenReturn(caseDocument());
 
-        AboutToStartOrSubmitCallbackResponse response =
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response =
             sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 
         verify(genericDocumentService).stampDocument(caseDocument(), AUTH_TOKEN);
@@ -302,10 +301,8 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
     }
 
     private CallbackRequest getEmptyCallbackRequest() {
-        return CallbackRequest
-            .builder()
-            .caseDetails(CaseDetails.builder().data(new HashMap<>()).build())
-            .build();
+        return CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().build()).build();
 
     }
 }

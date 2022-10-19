@@ -44,17 +44,24 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
     private static final String ACA_ENDPOINT = TEST_URL + "?use_user_token=true";
     private static final String TEST_S2S_TOKEN = "someS2SToken";
 
-    @Autowired private AssignCaseAccessService assignCaseAccessService;
+    @Autowired
+    private AssignCaseAccessService assignCaseAccessService;
 
-    @MockBean private AssignCaseAccessServiceConfiguration assignCaseAccessServiceConfiguration;
-    @MockBean private AssignCaseAccessRequestMapper assignCaseAccessRequestMapper;
-    @MockBean private IdamService idamService;
-    @MockBean private RestService restService;
-    @MockBean private FeatureToggleService featureToggleService;
+    @MockBean
+    private AssignCaseAccessServiceConfiguration assignCaseAccessServiceConfiguration;
+    @MockBean
+    private AssignCaseAccessRequestMapper assignCaseAccessRequestMapper;
+    @MockBean
+    private IdamService idamService;
+    @MockBean
+    private RestService restService;
+    @MockBean
+    private FeatureToggleService featureToggleService;
 
     @ClassRule
     public static WireMockClassRule caseDataApi = new WireMockClassRule(4452);
-    @MockBean private SystemUserService systemUserService;
+    @MockBean
+    private SystemUserService systemUserService;
 
     AssignCaseAccessRequest assignCaseAccessRequest;
 

@@ -3,15 +3,14 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -43,9 +42,9 @@ public class CallbackDispatchServiceTest extends BaseServiceTest {
     @Mock
     private CallbackRequest callbackRequest;
     @Mock
-    private AboutToStartOrSubmitCallbackResponse response1;
+    private GenericAboutToStartOrSubmitCallbackResponse response1;
     @Mock
-    private AboutToStartOrSubmitCallbackResponse response2;
+    private GenericAboutToStartOrSubmitCallbackResponse response2;
 
     private CallbackDispatchService callbackDispatchService;
 
@@ -89,8 +88,8 @@ public class CallbackDispatchServiceTest extends BaseServiceTest {
     public void givenOneHandlerCanHandle_WhenDispatchToHandlers_ThenOnlyAbleHandlerAreCalled() {
 
         when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
-        when(caseDetails.getCaseTypeId()).thenReturn(CaseType.CONTESTED.getCcdType());
-        when(callbackRequest.getEventId()).thenReturn(EventType.SEND_ORDER.getCcdType());
+        when(caseDetails.getCaseTypeId()).thenReturn(uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.CaseType.CONSENTED.getCcdType());
+        when(callbackRequest.getEventId()).thenReturn(uk.gov.hmcts.reform.finrem.ccd.domain.EventType.SEND_ORDER.getCcdType());
 
         when(handler1.canHandle(any(CallbackType.class), any(CaseType.class), any(EventType.class))).thenReturn(true);
         when(handler1.handle(any(CallbackRequest.class), anyString())).thenReturn(response1);

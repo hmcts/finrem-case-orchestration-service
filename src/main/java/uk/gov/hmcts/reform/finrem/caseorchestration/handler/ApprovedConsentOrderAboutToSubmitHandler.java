@@ -6,13 +6,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
@@ -38,7 +38,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler {
+public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler<Map<String, Object>> {
 
     private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     private final GenericDocumentService genericDocumentService;
@@ -53,12 +53,12 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
                              final EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && EventType.APPROVE_ORDER.equals(eventType);
+            && EventType.APPROVE_APPLICATION.equals(eventType);
     }
 
     @Override
-    public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
-                                                       String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
+                                                                                   String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("ConsentOrderApprovedAboutToSubmitHandle handle case Id {}", caseDetails.getId());
 
@@ -70,7 +70,7 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
             log.info("Failed to handle 'Consent Order Approved' callback because 'latestConsentOrder' is empty for case: {}",
                 caseDetails.getId());
         }
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseDetails.getData()).build();
     }
 
 
@@ -133,11 +133,13 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
     }
 
     private CaseDocument getLatestConsentOrder(Map<String, Object> caseData) {
-        return mapper.convertValue(caseData.get(LATEST_CONSENT_ORDER), new TypeReference<>() {});
+        return mapper.convertValue(caseData.get(LATEST_CONSENT_ORDER), new TypeReference<>() {
+        });
     }
 
     private List<PensionCollectionData> getPensionDocuments(Map<String, Object> caseData) {
-        return mapper.convertValue(caseData.get(PENSION_DOCS_COLLECTION), new TypeReference<>() {});
+        return mapper.convertValue(caseData.get(PENSION_DOCS_COLLECTION), new TypeReference<>() {
+        });
     }
 
     private Boolean pensionDocumentsExists(Map<String, Object> caseData) {

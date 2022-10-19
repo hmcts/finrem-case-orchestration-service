@@ -10,6 +10,7 @@ import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -121,6 +122,18 @@ public class DocumentHelper {
             .orElseGet(() -> convertToCaseDocument(caseData.get(LATEST_CONSENT_ORDER)));
     }
 
+    public CaseDocument getLatestAmendedConsentOrder(FinremCaseData caseData) {
+        Optional<AmendedConsentOrderData> reduce = ofNullable(caseData.getAmendedConsentOrderCollection())
+            .map(this::convertToAmendedConsentOrderDataList)
+            .orElse(emptyList())
+            .stream()
+            .reduce((first, second) -> second);
+        return reduce
+            .map(consentOrderData -> consentOrderData.getConsentOrder().getAmendedConsentOrder())
+            .orElseGet(() -> convertToCaseDocument(caseData.getLatestConsentOrder()));
+    }
+
+
     public List<CaseDocument> getPensionDocumentsData(Map<String, Object> caseData) {
         return ofNullable(caseData.get(PENSION_DOCS_COLLECTION))
             .map(this::convertToPensionCollectionDataList)
@@ -177,6 +190,10 @@ public class DocumentHelper {
         return objectMapper.convertValue(object, CaseDocument.class);
     }
 
+    public CaseDocument convertToCaseDocument(Object object, Class<CaseDocument> toValueType) {
+        return objectMapper.convertValue(object, toValueType);
+    }
+
     private List<AmendedConsentOrderData> convertToAmendedConsentOrderDataList(Object object) {
         return objectMapper.convertValue(object, new TypeReference<>() {
         });
@@ -209,6 +226,21 @@ public class DocumentHelper {
 
     public Optional<CaseDocument> getLatestRespondToOrderDocuments(Map<String, Object> caseData) {
         Optional<RespondToOrderData> respondToOrderData = ofNullable(caseData.get(RESPOND_TO_ORDER_DOCUMENTS))
+            .map(this::convertToRespondToOrderDataList)
+            .orElse(emptyList())
+            .stream()
+            .filter(caseDataService::isAmendedConsentOrderType)
+            .reduce((first, second) -> second);
+        if (respondToOrderData.isPresent()) {
+            return respondToOrderData
+                .map(respondToOrderData1 -> respondToOrderData.get().getRespondToOrder().getDocumentLink());
+        }
+
+        return Optional.empty();
+    }
+
+    public Optional<CaseDocument> getLatestRespondToOrderDocuments(FinremCaseData caseData) {
+        Optional<RespondToOrderData> respondToOrderData = ofNullable(caseData.getRespondToOrderDocuments())
             .map(this::convertToRespondToOrderDataList)
             .orElse(emptyList())
             .stream()
@@ -270,7 +302,8 @@ public class DocumentHelper {
         return prepareLetterTemplateData(caseDetailsCopy, reference, addresseeName, addressToSendTo, isConsentedApplication);
     }
 
-    private CaseDetails prepareLetterTemplateData(CaseDetails caseDetailsCopy, String reference, String addresseeName, Map addressToSendTo,
+    private CaseDetails prepareLetterTemplateData(CaseDetails caseDetailsCopy, String reference, String addresseeName,
+                                                  Map addressToSendTo,
                                                   boolean isConsentedApplication) {
 
         Map<String, Object> caseData = caseDetailsCopy.getData();

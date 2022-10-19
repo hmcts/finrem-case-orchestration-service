@@ -108,7 +108,8 @@ public class CcdCallbackController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200",
             description = "Callback was processed successfully or in case of an error message is attached to the case",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = GenericAboutToStartOrSubmitCallbackResponse.class))}),
+            content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = GenericAboutToStartOrSubmitCallbackResponse.class))}),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<GenericAboutToStartOrSubmitCallbackResponse> ccdSubmittedEvent(
@@ -133,8 +134,8 @@ public class CcdCallbackController {
     }
 
     private ResponseEntity<GenericAboutToStartOrSubmitCallbackResponse> performRequest(CallbackType callbackType,
-                                                                                CallbackRequest callbackRequest,
-                                                                                String userAuthorisation) {
+                                                                                       CallbackRequest callbackRequest,
+                                                                                       String userAuthorisation) {
 
         GenericAboutToStartOrSubmitCallbackResponse callbackResponse =
             callbackDispatchService.dispatchToHandlers(callbackType, callbackRequest, userAuthorisation);

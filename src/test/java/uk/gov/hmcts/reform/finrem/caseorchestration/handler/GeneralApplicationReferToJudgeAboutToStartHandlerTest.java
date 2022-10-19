@@ -5,16 +5,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 
-import java.io.InputStream;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -26,7 +24,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GeneralApplicationReferToJudgeAboutToStartHandlerTest {
+public class GeneralApplicationReferToJudgeAboutToStartHandlerTest extends BaseHandlerTest {
 
     private GeneralApplicationReferToJudgeAboutToStartHandler handler;
     private GeneralApplicationHelper helper;
@@ -41,7 +39,7 @@ public class GeneralApplicationReferToJudgeAboutToStartHandlerTest {
     public void setup() {
         objectMapper = new ObjectMapper();
         helper = new GeneralApplicationHelper(objectMapper);
-        handler  = new GeneralApplicationReferToJudgeAboutToStartHandler(helper);
+        handler = new GeneralApplicationReferToJudgeAboutToStartHandler(helper);
     }
 
     @Test
@@ -74,18 +72,19 @@ public class GeneralApplicationReferToJudgeAboutToStartHandlerTest {
 
     @Test
     public void givenContestedCase_whenNonCollectionGeneralApplicationExistAndAlreadyReferred_thenReturnError() {
-        CallbackRequest callbackRequest = buildCallbackRequest(GA_NON_COLL_JSON);
+        CallbackRequest callbackRequest =
+            buildCallbackRequest(GA_NON_COLL_JSON);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         caseData.put(GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL, "judge@mailinator.com");
 
-        AboutToStartOrSubmitCallbackResponse startHandle = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> startHandle = handler.handle(callbackRequest, AUTH_TOKEN);
         assertTrue(startHandle.getErrors().contains("There are no general application available to refer."));
     }
 
     @Test
     public void givenCase_whenExistingGeneAppNonCollection_thenCreateSelectionList() {
         CallbackRequest callbackRequest = buildCallbackRequest(GA_NON_COLL_JSON);
-        AboutToStartOrSubmitCallbackResponse handle = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle = handler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = handle.getData();
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_REFER_LIST));
@@ -97,7 +96,7 @@ public class GeneralApplicationReferToJudgeAboutToStartHandlerTest {
     @Test
     public void givenCase_whenExistingGeneAppAsACollection_thenCreateSelectionList() {
         CallbackRequest callbackRequest = buildCallbackRequest(GA_JSON);
-        AboutToStartOrSubmitCallbackResponse handle = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle = handler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = handle.getData();
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_REFER_LIST));
@@ -105,13 +104,4 @@ public class GeneralApplicationReferToJudgeAboutToStartHandlerTest {
         assertEquals(2, dynamicList.getListItems().size());
     }
 
-
-    private CallbackRequest buildCallbackRequest(String path)  {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(path)) {
-            CaseDetails caseDetails = objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-            return CallbackRequest.builder().caseDetails(caseDetails).build();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

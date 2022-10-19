@@ -6,12 +6,12 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedGeneralDocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralUploadedDocumentData;
 
@@ -28,7 +28,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UploadGeneralDocumentsAboutToSubmitHandler implements CallbackHandler {
+public class UploadGeneralDocumentsAboutToSubmitHandler
+    implements CallbackHandler<Map<String, Object>> {
 
     private final ObjectMapper objectMapper;
     private final UploadedGeneralDocumentHelper uploadedGeneralDocumentHelper;
@@ -40,7 +41,8 @@ public class UploadGeneralDocumentsAboutToSubmitHandler implements CallbackHandl
     }
 
     @Override
-    public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest, String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
+                                                                                   String userAuthorisation) {
 
         Map<String, Object> caseData = uploadedGeneralDocumentHelper.addUploadDateToNewDocuments(
             callbackRequest.getCaseDetails().getData(),
@@ -53,8 +55,8 @@ public class UploadGeneralDocumentsAboutToSubmitHandler implements CallbackHandl
             comparing(GeneralUploadedDocument::getGeneralDocumentUploadDateTime, nullsLast(Comparator.reverseOrder()))));
 
         caseData.put(GENERAL_UPLOADED_DOCUMENTS, uploadedDocuments);
-        return AboutToStartOrSubmitCallbackResponse
-            .builder()
+        return GenericAboutToStartOrSubmitCallbackResponse
+            .<Map<String, Object>>builder()
             .data(caseData)
             .build();
     }
@@ -63,7 +65,8 @@ public class UploadGeneralDocumentsAboutToSubmitHandler implements CallbackHandl
         objectMapper.registerModule(new JavaTimeModule());
 
         List<GeneralUploadedDocumentData> generalDocuments = objectMapper.convertValue(
-            caseData.get(GENERAL_UPLOADED_DOCUMENTS), new TypeReference<>() {});
+            caseData.get(GENERAL_UPLOADED_DOCUMENTS), new TypeReference<>() {
+            });
 
         return Optional.ofNullable(generalDocuments).orElse(Collections.emptyList());
     }

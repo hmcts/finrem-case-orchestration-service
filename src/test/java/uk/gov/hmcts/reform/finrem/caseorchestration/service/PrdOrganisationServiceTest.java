@@ -22,10 +22,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_UR
 
 public class PrdOrganisationServiceTest extends BaseServiceTest {
 
-    @Autowired PrdOrganisationService prdOrganisationService;
+    @Autowired
+    PrdOrganisationService prdOrganisationService;
 
-    @MockBean RestService restService;
-    @MockBean PrdOrganisationConfiguration prdOrganisationConfiguration;
+    @MockBean
+    RestService restService;
+    @MockBean
+    PrdOrganisationConfiguration prdOrganisationConfiguration;
 
     @Test
     public void whenRetrieveOrganisationData_thenRestTemplateIsCalledWithExpectedParameters() {

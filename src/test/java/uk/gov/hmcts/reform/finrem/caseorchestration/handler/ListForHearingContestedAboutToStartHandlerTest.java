@@ -3,12 +3,12 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,12 +23,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class ListForHearingContestedAboutToStartHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
-    private final ListForHearingContestedAboutToStartHandler handler =  new ListForHearingContestedAboutToStartHandler();
+    private final ListForHearingContestedAboutToStartHandler handler = new ListForHearingContestedAboutToStartHandler();
 
     @Test
     public void givenContestedCase_whenEventIsListForHearing_thenHandlerCanHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.LIST_FOR_HEARING),
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.ADD_LIST_FOR_INTERIM_HEARING_INFO),
             is(true));
     }
 
@@ -42,14 +42,14 @@ public class ListForHearingContestedAboutToStartHandlerTest {
     @Test
     public void givenContestedCase_whenCallbackIsSubmit_thenHandlerCanNotHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.LIST_FOR_HEARING),
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.ADD_LIST_FOR_INTERIM_HEARING_INFO),
             is(false));
     }
 
     @Test
     public void givenConsentCase_whenEventIsListForHearing_thenHandlerCanNotHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.LIST_FOR_HEARING),
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.ADD_LIST_FOR_INTERIM_HEARING_INFO),
             is(false));
     }
 
@@ -57,13 +57,15 @@ public class ListForHearingContestedAboutToStartHandlerTest {
     @Test
     public void givenCase_whenEventStart_thenSetDefaultOptionToNo() {
         CallbackRequest callbackRequest = buildCallbackRequest();
-        AboutToStartOrSubmitCallbackResponse response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
         assertEquals(NO_VALUE, response.getData().get(ADDITIONAL_HEARING_DOCUMENTS_OPTION));
     }
 
     private CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
-        return CallbackRequest.builder().eventId("SomeEventId").caseDetails(caseDetails).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(123L).build();
+        caseDetails.setData(caseData);
+        return CallbackRequest.builder().eventId(uk.gov.hmcts.reform.finrem.ccd.domain.EventType.AMEND_CASE.getCcdType())
+            .caseDetails(caseDetails).build();
     }
 }

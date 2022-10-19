@@ -21,7 +21,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element.ele
 
 public class ChangeOfRepresentationServiceTest extends BaseServiceTest {
 
-    @Autowired private ChangeOfRepresentationService changeOfRepresentationService;
+    @Autowired
+    private ChangeOfRepresentationService changeOfRepresentationService;
 
     private ChangeOfRepresentationRequest request;
 

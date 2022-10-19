@@ -7,13 +7,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDi
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -50,7 +51,7 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
     public void setup() {
         objectMapper = new ObjectMapper();
         helper = new GeneralApplicationHelper(objectMapper);
-        handler  = new GeneralApplicationDirectionsAboutToStartHandler(helper, service);
+        handler = new GeneralApplicationDirectionsAboutToStartHandler(helper, service);
     }
 
     @Test
@@ -84,7 +85,7 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
     @Test
     public void givenCase_whenExistingGeneAppNonCollection_thenCreateSelectionList() {
         CallbackRequest callbackRequest = buildCallbackRequest(GA_NON_COLL_JSON);
-        AboutToStartOrSubmitCallbackResponse handle = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle = handler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = handle.getData();
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_DIRECTIONS_LIST));
@@ -96,7 +97,7 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
     @Test
     public void givenCase_whenExistingGeneAppAsACollection_thenCreateSelectionList() {
         CallbackRequest callbackRequest = buildCallbackRequest(GA_JSON);
-        AboutToStartOrSubmitCallbackResponse handle = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle = handler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = handle.getData();
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_DIRECTIONS_LIST));
@@ -110,11 +111,11 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
         CallbackRequest callbackRequest = buildCallbackRequest(GA_JSON);
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(callbackRequest.getCaseDetails().getData());
         List<GeneralApplicationCollectionData> updatedList
-            = existingList.stream().map(obj -> updateStatus(obj)).toList();
+            = existingList.stream().map(obj -> updateStatus(obj)).collect(Collectors.toList());
         callbackRequest.getCaseDetails().getData().put(GENERAL_APPLICATION_COLLECTION, updatedList);
         callbackRequest.getCaseDetails().getData().remove(GENERAL_APPLICATION_CREATED_BY);
 
-        AboutToStartOrSubmitCallbackResponse handle = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle = handler.handle(callbackRequest, AUTH_TOKEN);
         assertThat(handle.getErrors(), CoreMatchers.hasItem("There are no general application available for issue direction."));
         verify(service).startGeneralApplicationDirections(any());
     }
@@ -126,9 +127,10 @@ public class GeneralApplicationDirectionsAboutToStartHandlerTest {
         return obj;
     }
 
-    private CallbackRequest buildCallbackRequest(String path)  {
+    private CallbackRequest buildCallbackRequest(String path) {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(path)) {
-            CaseDetails caseDetails = objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+            CaseDetails caseDetails =
+                objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
             return CallbackRequest.builder().caseDetails(caseDetails).build();
         } catch (Exception e) {
             throw new RuntimeException(e);
