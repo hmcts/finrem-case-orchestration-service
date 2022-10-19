@@ -6,7 +6,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -54,9 +53,9 @@ public class ManageBarristerSubmittedHandlerTest {
     @Test
     public void givenHandlerCanHandleCallback_whenCanHandle_thenReturnTrue() {
         assertThat(manageBarristerSubmittedHandler.canHandle(
-                CallbackType.SUBMITTED,
-                CaseType.CONTESTED,
-                EventType.MANAGE_BARRISTER),
+            CallbackType.SUBMITTED,
+            CaseType.CONTESTED,
+            EventType.MANAGE_BARRISTER),
             is(true));
     }
 
@@ -96,9 +95,9 @@ public class ManageBarristerSubmittedHandlerTest {
             .thenReturn(barristerCollection);
         List<Barrister> barristers = getBarristers().stream().map(BarristerData::getBarrister).toList();
 
-        AboutToStartOrSubmitCallbackResponse response = manageBarristerSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
+        manageBarristerSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(manageBarristerService).notifyBarristerAccess(callbackRequest.getCaseDetails(), barristers, barristers);
+        verify(manageBarristerService).notifyBarristerAccess(callbackRequest.getCaseDetails(), barristers, barristers, AUTH_TOKEN);
     }
 
 
