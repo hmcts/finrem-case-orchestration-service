@@ -59,8 +59,6 @@ public class CcdService {
                 .id(startEventResponse.getEventId())
                 .build())
             .data(caseData)
-            .supplementaryDataRequest(
-                Collections.singletonMap("$set", Collections.singletonMap("HMCTSServiceId", "BBA3")))
             .build();
     }
 }
