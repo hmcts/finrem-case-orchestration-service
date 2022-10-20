@@ -14,8 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceCo
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
 import java.io.IOException;
 import java.net.URI;
@@ -53,8 +52,7 @@ public class NotificationService {
     private final ObjectMapper objectMapper;
     private final NotificationRequestMapper notificationRequestMapper;
     private final CaseDataService caseDataService;
-    private final CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
-    private final CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
+    private final CheckSolicitorIsDigitalService checkSolicitorIsDigitalService;
 
     public void sendConsentedHWFSuccessfulConfirmationEmail(CaseDetails caseDetails) {
         URI uri = buildUri(notificationServiceConfiguration.getHwfSuccessful());
@@ -452,12 +450,12 @@ public class NotificationService {
 
     public boolean isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(CaseDetails caseDetails) {
         return caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)
-            && checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails);
+            && checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString());
     }
 
     public boolean isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(CaseDetails caseDetails) {
         return shouldEmailRespondentSolicitor(caseDetails.getData())
-            && checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails);
+            && checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
     }
 
     public boolean isContestedApplicationAndApplicantOrRespondentSolicitorsIsNotRegisteredOrAcceptingEmails(CaseDetails caseDetails) {
@@ -500,13 +498,13 @@ public class NotificationService {
         URI uri) {
 
         if (isApplicantNoticeOfChangeRequest(notificationRequest, caseDetails)) {
-            if (checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)) {
+            if (checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString())) {
                 sendNotificationEmail(notificationRequest, uri);
             }
             return;
         }
 
-        if (checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)) {
+        if (checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString())) {
             sendNotificationEmail(notificationRequest, uri);
         }
     }

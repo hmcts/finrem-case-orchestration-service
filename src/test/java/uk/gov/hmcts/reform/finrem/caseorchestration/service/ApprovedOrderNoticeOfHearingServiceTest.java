@@ -17,8 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
 import java.util.List;
 import java.util.Map;
@@ -47,6 +46,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element.element;
 
 public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
+
     private static final String LATEST_DRAFT_ORDER_DOCUMENT_BIN_URL = "http://dm-store/1frea-ldo-doc/binary";
     private static final String GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL = "http://dm-store/1f3a-gads-doc/binary";
     static final String CASE_DATA = "case_data";
@@ -66,9 +66,7 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     @MockBean
     private GenericDocumentService genericDocumentService;
     @MockBean
-    private CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
-    @MockBean
-    private CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
+    private CheckSolicitorIsDigitalService checkSolicitorIsDigitalService;
     @MockBean
     private CaseDataService caseDataService;
     @MockBean
@@ -129,8 +127,8 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     @Test
     public void givenSubmittedCallbackReceived_whenSubmitNotice_thenSendNoticeOfHearingToAppAndResp() {
         caseDetails.getData().put(HEARING_NOTICE_DOCUMENT_PACK, buildHearingNoticePack());
-        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(false);
-        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(false);
+        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString())).thenReturn(false);
+        when(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString())).thenReturn(false);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)).thenReturn(true);
         when(caseDataService.isRespondentSolicitorAgreeToReceiveEmails(caseDetails)).thenReturn(true);
         when(documentHelper.getCaseDocumentsAsBulkPrintDocuments(any())).thenReturn(List.of(BulkPrintDocument
@@ -159,8 +157,8 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     @Test
     public void givenSubmittedCallbackReceived_whenSubmitNotice_thenSendNoticeOfHearingEmailToAppAndResp() {
         caseDetails.getData().put(HEARING_NOTICE_DOCUMENT_PACK, buildHearingNoticePack());
-        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(true);
-        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(true);
+        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString())).thenReturn(true);
+        when(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString())).thenReturn(true);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)).thenReturn(true);
         when(caseDataService.isRespondentSolicitorAgreeToReceiveEmails(caseDetails)).thenReturn(true);
         approvedOrderNoticeOfHearingService.printHearingNoticePackAndSendToApplicantAndRespondent(caseDetails, AUTH_TOKEN);

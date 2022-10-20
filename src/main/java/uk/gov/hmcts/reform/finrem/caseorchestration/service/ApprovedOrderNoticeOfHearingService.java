@@ -14,8 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -54,8 +53,7 @@ public class ApprovedOrderNoticeOfHearingService {
     private final DocumentConfiguration documentConfiguration;
     private final ObjectMapper objectMapper;
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
-    private final CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
-    private final CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
+    private final CheckSolicitorIsDigitalService checkSolicitorIsDigitalService;
     private final NotificationService notificationService;
     private final CaseDataService caseDataService;
 
@@ -84,7 +82,7 @@ public class ApprovedOrderNoticeOfHearingService {
     }
 
     private void notifyApplicant(CaseDetails caseDetails, String authorisationToken, List<BulkPrintDocument> documentsToPrint) {
-        if (checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)
+        if (checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString())
             && caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
 
             notificationService.sendPrepareForHearingEmailApplicant(caseDetails);
@@ -94,7 +92,7 @@ public class ApprovedOrderNoticeOfHearingService {
     }
 
     private void notifyRespondent(CaseDetails caseDetails, String authorisationToken, List<BulkPrintDocument> documentsToPrint) {
-        if (checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)
+        if (checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString())
             && caseDataService.isRespondentSolicitorAgreeToReceiveEmails(caseDetails)) {
             notificationService.sendPrepareForHearingEmailRespondent(caseDetails);
         } else {
