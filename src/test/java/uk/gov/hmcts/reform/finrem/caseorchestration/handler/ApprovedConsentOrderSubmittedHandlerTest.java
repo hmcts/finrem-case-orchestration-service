@@ -159,7 +159,7 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
         caseData.put("natureOfApplication2", natureOfApplication);
         return CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
-                .caseTypeId(uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.CaseType.CONSENTED.getCcdType())
+                .caseTypeId(CASE_TYPE_ID_CONSENTED)
                 .id(12345L)
                 .data(caseData)
                 .build())

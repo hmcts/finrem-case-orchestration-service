@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertFalse;
@@ -1260,11 +1261,11 @@ public class NotificationServiceTest extends BaseServiceTest {
             .map(this::convertToInterimHearingDataList).orElse(Collections.emptyList());
 
         List<InterimHearingItem> interimHearingItems
-            = interimHearingList.stream().map(InterimHearingData::getValue).toList();
+            = interimHearingList.stream().map(InterimHearingData::getValue).collect(Collectors.toList());
 
         List<Map<String, Object>> interimDataMap = interimHearingItems.stream()
             .map(obj -> new ObjectMapper().convertValue(obj, new TypeReference<Map<String, Object>>() {
-            })).toList();
+            })).collect(Collectors.toList());
 
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_INTERIM_HEARING))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
@@ -1287,11 +1288,11 @@ public class NotificationServiceTest extends BaseServiceTest {
             .map(this::convertToInterimHearingDataList).orElse(Collections.emptyList());
 
         List<InterimHearingItem> interimHearingItems
-            = interimHearingList.stream().map(InterimHearingData::getValue).toList();
+            = interimHearingList.stream().map(InterimHearingData::getValue).collect(Collectors.toList());
 
         List<Map<String, Object>> interimDataMap = interimHearingItems.stream()
             .map(obj -> new ObjectMapper().convertValue(obj, new TypeReference<Map<String, Object>>() {
-            })).toList();
+            })).collect(Collectors.toList());
 
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_INTERIM_HEARING))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))

@@ -140,6 +140,8 @@ public enum EventType {
     INTERIM_HEARING("FR_listForInterimHearing"),
     UPLOAD_APPROVED_ORDER("FR_uploadApprovedOrder"),
     MANAGE_CASE_DOCUMENTS("FR_manageCaseDocuments"),
+    LIST_FOR_HEARING_CONSENTED("FR_listForHearing"),
+    MANAGE_BARRISTER("FR_manageBarrister"),
     @JsonEnumDefaultValue
     NONE("");
 

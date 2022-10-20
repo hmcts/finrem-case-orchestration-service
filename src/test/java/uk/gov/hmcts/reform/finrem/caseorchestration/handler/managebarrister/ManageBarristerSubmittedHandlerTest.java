@@ -9,8 +9,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBar
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -93,7 +94,7 @@ public class ManageBarristerSubmittedHandlerTest {
             .thenReturn(barristerCollection);
         when(manageBarristerService.getBarristersForParty(callbackRequest.getCaseDetailsBefore(), AUTH_TOKEN))
             .thenReturn(barristerCollection);
-        List<Barrister> barristers = getBarristers().stream().map(BarristerData::getBarrister).toList();
+        List<Barrister> barristers = getBarristers().stream().map(BarristerData::getBarrister).collect(Collectors.toList());
 
         manageBarristerSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 

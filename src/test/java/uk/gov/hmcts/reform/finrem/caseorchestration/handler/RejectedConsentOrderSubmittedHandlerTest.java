@@ -184,11 +184,6 @@ public class RejectedConsentOrderSubmittedHandlerTest {
             "A settlement or a transfer of property",
             "Property Adjustment Order");
         caseData.put("natureOfApplication2", natureOfApplication);
-        CaseDetails caseDetails = CaseDetails.builder()
-            .caseTypeId(uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.CaseType.CONSENTED.getCcdType())
-            .id(12345L)
-            .build();
-        caseDetails.setData(caseData);
         return CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();

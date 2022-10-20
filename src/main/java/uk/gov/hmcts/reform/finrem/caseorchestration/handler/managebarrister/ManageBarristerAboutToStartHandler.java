@@ -3,13 +3,13 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.managebarrister;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 
@@ -21,7 +21,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ManageBarristerAboutToStartHandler implements CallbackHandler {
+public class ManageBarristerAboutToStartHandler implements CallbackHandler<Map<String, Object>> {
 
     private final CaseAssignedRoleService caseAssignedRoleService;
 
@@ -33,8 +33,8 @@ public class ManageBarristerAboutToStartHandler implements CallbackHandler {
     }
 
     @Override
-    public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
-                                                       String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
+                                                                                   String userAuthorisation) {
         log.info("In Manage barrister about to start callback for case {}", callbackRequest.getCaseDetails().getId());
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
@@ -48,7 +48,7 @@ public class ManageBarristerAboutToStartHandler implements CallbackHandler {
 
         log.info("current user case role is {} for case {}", caseData.get(CASE_ROLE), caseDetails.getId());
 
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).build();
     }
 
 }

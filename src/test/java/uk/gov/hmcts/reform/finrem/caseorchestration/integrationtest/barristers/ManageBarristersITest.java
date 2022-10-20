@@ -19,7 +19,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.CaseDataApiV2;
@@ -29,6 +28,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.PrdOrganisationConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.CcdCallbackController;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.IntegrationTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -61,6 +61,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -158,12 +159,13 @@ public class ManageBarristersITest implements IntegrationTest {
 
         CallbackRequest request = buildCallbackRequest();
 
-        ResponseEntity<AboutToStartOrSubmitCallbackResponse> response =
+        ResponseEntity<GenericAboutToStartOrSubmitCallbackResponse> response =
             ccdCallbackController.ccdAboutToStart(AUTH_TOKEN, request);
 
         verify(dataStoreClient).getUserRoles(AUTH_TOKEN, SERVICE_AUTH_TOKEN, CASE_ID, USER_ID);
         assertNotNull(response.getBody());
-        String caseRole = Objects.toString(response.getBody().getData().get(CASE_ROLE), StringUtils.EMPTY);
+        Map<String, Object> data = (Map<String, Object>) response.getBody().getData();
+        String caseRole = Objects.toString(data.get(CASE_ROLE), StringUtils.EMPTY);
         assertThat(caseRole, is(APP_SOLICITOR_POLICY));
     }
 
@@ -185,11 +187,12 @@ public class ManageBarristersITest implements IntegrationTest {
         CallbackRequest request = buildCallbackRequest();
         request.getCaseDetails().getData().put(APPLICANT_BARRISTER_COLLECTION, applicantBarristerCollection());
 
-        ResponseEntity<AboutToStartOrSubmitCallbackResponse> response =
+        ResponseEntity<GenericAboutToStartOrSubmitCallbackResponse> response =
             ccdCallbackController.ccdMidEvent(AUTH_TOKEN, request);
 
         assertNotNull(response.getBody());
-        assertThat(response.getBody().getErrors(), hasSize(0));
+        List errors = response.getBody().getErrors();
+        assertThat(errors.size(), is(0));
     }
 
     @Test
@@ -206,14 +209,15 @@ public class ManageBarristersITest implements IntegrationTest {
         CallbackRequest request = buildCallbackRequest();
         request.getCaseDetails().getData().put(APPLICANT_BARRISTER_COLLECTION, applicantBarristerCollection());
 
-        ResponseEntity<AboutToStartOrSubmitCallbackResponse> response =
+        ResponseEntity<GenericAboutToStartOrSubmitCallbackResponse> response =
             ccdCallbackController.ccdMidEvent(AUTH_TOKEN, request);
 
         assertNotNull(response.getBody());
-        assertThat(response.getBody().getErrors(), hasSize(1));
-        assertThat(response.getBody().getErrors().get(0), is(""" 
-                Email address for Barrister is not registered with myHMCTS.
-                They can register at https://manage-org.platform.hmcts.net/register-org/register"""));
+        List errors = response.getBody().getErrors();
+        assertThat(errors.size(), is(1));
+        assertThat(errors.get(0), is(""" 
+            Email address for Barrister is not registered with myHMCTS.
+            They can register at https://manage-org.platform.hmcts.net/register-org/register"""));
     }
 
     @Test
@@ -234,7 +238,7 @@ public class ManageBarristersITest implements IntegrationTest {
         CallbackRequest request = buildCallbackRequest();
         request.getCaseDetails().getData().put(APPLICANT_BARRISTER_COLLECTION, applicantBarristerCollection());
 
-        ResponseEntity<AboutToStartOrSubmitCallbackResponse> response =
+        ResponseEntity<GenericAboutToStartOrSubmitCallbackResponse> response =
             ccdCallbackController.ccdMidEvent(AUTH_TOKEN, request);
 
         assertNotNull(response.getBody());
@@ -257,14 +261,16 @@ public class ManageBarristersITest implements IntegrationTest {
         CallbackRequest request = buildCallbackRequest();
         request.getCaseDetails().getData().put(RESPONDENT_BARRISTER_COLLECTION, respondentBarristerCollection());
 
-        ResponseEntity<AboutToStartOrSubmitCallbackResponse> response =
+        ResponseEntity<GenericAboutToStartOrSubmitCallbackResponse> response =
             ccdCallbackController.ccdAboutToSubmit(AUTH_TOKEN, request);
 
         verify(caseDataApiV2).addCaseUserRoles(SYS_USER_TOKEN, SERVICE_AUTH_TOKEN, caseAssignmentUserRolesRequest());
 
         assertNotNull(response.getBody());
+        Map<String, Object> data = (Map<String, Object>) response.getBody().getData();
         List<Element<RepresentationUpdate>> representationUpdateHistory = objectMapper
-            .convertValue(response.getBody().getData().get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {});
+            .convertValue(data.get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {
+            });
 
         assertThat(representationUpdateHistory, hasSize(1));
         RepresentationUpdate update = representationUpdateHistory.get(0).getValue();
@@ -295,14 +301,16 @@ public class ManageBarristersITest implements IntegrationTest {
         request.getCaseDetails().getData().put(CASE_ROLE, CASEWORKER_ROLE);
         request.getCaseDetails().getData().put(MANAGE_BARRISTER_PARTY, RESPONDENT);
 
-        ResponseEntity<AboutToStartOrSubmitCallbackResponse> response =
+        ResponseEntity<GenericAboutToStartOrSubmitCallbackResponse> response =
             ccdCallbackController.ccdAboutToSubmit(AUTH_TOKEN, request);
 
         verify(caseDataApiV2).addCaseUserRoles(SYS_USER_TOKEN, SERVICE_AUTH_TOKEN, caseAssignmentUserRolesRequest());
 
         assertNotNull(response.getBody());
+        Map<String, Object> data = (Map<String, Object>) response.getBody().getData();
         List<Element<RepresentationUpdate>> representationUpdateHistory = objectMapper
-            .convertValue(response.getBody().getData().get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {});
+            .convertValue(data.get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {
+            });
 
         assertThat(representationUpdateHistory, hasSize(1));
         RepresentationUpdate update = representationUpdateHistory.get(0).getValue();
@@ -407,11 +415,11 @@ public class ManageBarristersITest implements IntegrationTest {
 
     private List<BarristerData> applicantBarristerCollection() {
         return List.of(BarristerData.builder()
-                .barrister(Barrister.builder()
-                    .name(APP_BARRISTER_NAME)
-                    .email(APP_BARRISTER_EMAIL_ONE)
-                    .organisation(Organisation.builder().organisationID(APP_BARR_ORG_ID).build())
-                    .build())
+            .barrister(Barrister.builder()
+                .name(APP_BARRISTER_NAME)
+                .email(APP_BARRISTER_EMAIL_ONE)
+                .organisation(Organisation.builder().organisationID(APP_BARR_ORG_ID).build())
+                .build())
             .build());
     }
 
