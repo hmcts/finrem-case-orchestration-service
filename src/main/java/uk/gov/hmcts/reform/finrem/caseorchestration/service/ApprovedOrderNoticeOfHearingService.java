@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.ApprovedOrderNoticeOfHearingCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -52,6 +53,9 @@ public class ApprovedOrderNoticeOfHearingService {
     private final ObjectMapper objectMapper;
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
     private final ApprovedOrderNoticeOfHearingCorresponder approvedOrderNoticeOfHearingCorresponder;
+    private final CheckSolicitorIsDigitalService checkSolicitorIsDigitalService;
+    private final NotificationService notificationService;
+    private final CaseDataService caseDataService;
 
     public void createAndStoreHearingNoticeDocumentPack(CaseDetails caseDetails,
                                                         String authToken) {
