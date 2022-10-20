@@ -51,7 +51,7 @@ public class RejectGeneralApplicationAboutToStartHandler
         List<GeneralApplicationCollectionData> existingGeneralApplicationList = helper.getReadyForRejectOrReadyForReferList(caseData);
         AtomicInteger index = new AtomicInteger(0);
         if (existingGeneralApplicationList.isEmpty() && caseData.get(GENERAL_APPLICATION_CREATED_BY) != null) {
-            setNonCollectionGeneralApplication(caseData, index);
+            setNonCollectionGeneralApplication(caseData, index, userAuthorisation);
         } else {
             List<DynamicListElement> dynamicListElements = existingGeneralApplicationList.stream()
                 .map(ga -> getDynamicListElements(ga.getId(), getLabel(ga.getGeneralApplicationItems(), index.incrementAndGet())))
@@ -71,8 +71,10 @@ public class RejectGeneralApplicationAboutToStartHandler
         return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).build();
     }
 
-    private void setNonCollectionGeneralApplication(Map<String, Object> caseData, AtomicInteger index) {
-        GeneralApplicationItems applicationItems = helper.getApplicationItems(caseData);
+    private void setNonCollectionGeneralApplication(Map<String, Object> caseData,
+                                                    AtomicInteger index,
+                                                    String userAuthorisation) {
+        GeneralApplicationItems applicationItems = helper.getApplicationItems(caseData, userAuthorisation);
         DynamicListElement dynamicListElements
             = getDynamicListElements(applicationItems.getGeneralApplicationCreatedBy(), getLabel(applicationItems, index.incrementAndGet()));
 

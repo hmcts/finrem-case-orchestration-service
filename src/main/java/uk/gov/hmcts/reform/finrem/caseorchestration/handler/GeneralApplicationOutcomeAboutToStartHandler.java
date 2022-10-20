@@ -60,7 +60,7 @@ public class GeneralApplicationOutcomeAboutToStartHandler
                     .errors(List.of("There are no general application available for decision.")).build();
             }
             log.info("setting outcome list if existing ga not moved to collection for Case ID: {}", caseDetails.getId());
-            setOutcomeListForNonCollectionGeneralApplication(caseData, index);
+            setOutcomeListForNonCollectionGeneralApplication(caseData, index, userAuthorisation);
         } else {
             if (referredList.isEmpty()) {
                 return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData)
@@ -78,8 +78,10 @@ public class GeneralApplicationOutcomeAboutToStartHandler
         return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).build();
     }
 
-    private void setOutcomeListForNonCollectionGeneralApplication(Map<String, Object> caseData, AtomicInteger index) {
-        GeneralApplicationItems applicationItems = helper.getApplicationItems(caseData);
+    private void setOutcomeListForNonCollectionGeneralApplication(Map<String, Object> caseData,
+                                                                  AtomicInteger index,
+                                                                  String userAuthorisation) {
+        GeneralApplicationItems applicationItems = helper.getApplicationItems(caseData, userAuthorisation);
         DynamicListElement dynamicListElements
             = getDynamicListElements(applicationItems.getGeneralApplicationCreatedBy(), getLabel(applicationItems, index.incrementAndGet()));
 

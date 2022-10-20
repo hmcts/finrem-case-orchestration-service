@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,6 +47,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class GeneralApplicationAboutToSubmitHandlerTest {
 
     private GeneralApplicationAboutToSubmitHandler handler;
+    @Mock
+    private GenericDocumentService documentService;
     private ObjectMapper objectMapper;
     private GeneralApplicationHelper helper;
     @Mock
@@ -58,7 +61,7 @@ public class GeneralApplicationAboutToSubmitHandlerTest {
     @Before
     public void setup() {
         objectMapper = new ObjectMapper();
-        helper = new GeneralApplicationHelper(objectMapper);
+        helper = new GeneralApplicationHelper(objectMapper, documentService);
         handler = new GeneralApplicationAboutToSubmitHandler(service, helper);
     }
 

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -15,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStat
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.util.List;
 import java.util.Map;
@@ -25,6 +28,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_OUTCOME_DECISION;
@@ -33,6 +37,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class GeneralApplicationAboutToStartHandlerTest extends BaseHandlerTest {
 
     private GeneralApplicationAboutToStartHandler handler;
+    @Mock
+    private GenericDocumentService service;
     private ObjectMapper objectMapper;
     private GeneralApplicationHelper helper;
 
@@ -43,8 +49,13 @@ public class GeneralApplicationAboutToStartHandlerTest extends BaseHandlerTest {
     @Before
     public void setup() {
         objectMapper = new ObjectMapper();
-        helper = new GeneralApplicationHelper(objectMapper);
+        helper = new GeneralApplicationHelper(objectMapper, service);
         handler = new GeneralApplicationAboutToStartHandler(helper);
+        when(service.convertDocumentIfNotPdfAlready(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(
+            CaseDocument.builder().documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary")
+                .documentFilename("InterimHearingNotice.pdf")
+                .documentUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e").build()
+        );
     }
 
     @Test

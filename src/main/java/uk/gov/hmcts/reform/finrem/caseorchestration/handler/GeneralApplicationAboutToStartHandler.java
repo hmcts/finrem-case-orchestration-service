@@ -39,7 +39,7 @@ public class GeneralApplicationAboutToStartHandler implements CallbackHandler<Ma
         Map<String, Object> caseData = caseDetails.getData();
 
         List<GeneralApplicationCollectionData> existingGeneralApplication = helper.getGeneralApplicationList(caseData);
-        GeneralApplicationCollectionData data = helper.migrateExistingGeneralApplication(caseData);
+        GeneralApplicationCollectionData data = helper.migrateExistingGeneralApplication(caseData, userAuthorisation);
 
         if (data != null) {
             existingGeneralApplication.add(data);

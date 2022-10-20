@@ -5,6 +5,7 @@ import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -14,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHel
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.util.List;
 import java.util.Map;
@@ -34,6 +36,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class GeneralApplicationOutcomeAboutToStartHandlerTest extends BaseHandlerTest {
 
     private GeneralApplicationOutcomeAboutToStartHandler handler;
+    @Mock
+    private GenericDocumentService service;
     private GeneralApplicationHelper helper;
     private ObjectMapper objectMapper;
 
@@ -45,7 +49,7 @@ public class GeneralApplicationOutcomeAboutToStartHandlerTest extends BaseHandle
     @Before
     public void setup() {
         objectMapper = new ObjectMapper();
-        helper = new GeneralApplicationHelper(objectMapper);
+        helper = new GeneralApplicationHelper(objectMapper, service);
         handler = new GeneralApplicationOutcomeAboutToStartHandler(helper);
     }
 

@@ -66,7 +66,7 @@ public class GeneralApplicationReferToJudgeAboutToStartHandler
                 }
             }
             log.info("setting refer list if existing ga not moved to collection for Case ID: {}", caseDetails.getId());
-            setReferListForNonCollectionGeneralApplication(caseData, index);
+            setReferListForNonCollectionGeneralApplication(caseData, index, userAuthorisation);
 
         } else {
             log.info("setting refer list for Case ID: {}", caseDetails.getId());
@@ -90,8 +90,10 @@ public class GeneralApplicationReferToJudgeAboutToStartHandler
             .collect(Collectors.toList());
     }
 
-    private void setReferListForNonCollectionGeneralApplication(Map<String, Object> caseData, AtomicInteger index) {
-        GeneralApplicationItems applicationItems = helper.getApplicationItems(caseData);
+    private void setReferListForNonCollectionGeneralApplication(Map<String, Object> caseData,
+                                                                AtomicInteger index,
+                                                                String userAuthorisation) {
+        GeneralApplicationItems applicationItems = helper.getApplicationItems(caseData, userAuthorisation);
         DynamicListElement dynamicListElements
             = getDynamicListElements(applicationItems.getGeneralApplicationCreatedBy(), getLabel(applicationItems, index.incrementAndGet()));
 

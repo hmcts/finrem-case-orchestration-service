@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -14,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.util.List;
 import java.util.Map;
@@ -33,6 +35,8 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest extends BaseHandl
 
     private GeneralApplicationOutcomeAboutToStartHandler startHandler;
     private GeneralApplicationOutcomeAboutToSubmitHandler submitHandler;
+    @Mock
+    private GenericDocumentService service;
     private GeneralApplicationHelper helper;
     private ObjectMapper objectMapper;
 
@@ -43,7 +47,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest extends BaseHandl
     @Before
     public void setup() {
         objectMapper = new ObjectMapper();
-        helper = new GeneralApplicationHelper(objectMapper);
+        helper = new GeneralApplicationHelper(objectMapper, service);
         startHandler = new GeneralApplicationOutcomeAboutToStartHandler(helper);
         submitHandler = new GeneralApplicationOutcomeAboutToSubmitHandler(helper);
     }
