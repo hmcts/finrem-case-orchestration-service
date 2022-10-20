@@ -67,7 +67,7 @@ public class UpdateFrcInfoRespondentServiceTest extends BaseUpdateFrcInfoDocumen
             eq(LIT_DOC_TEMPLATE),
             eq(LIT_DOC_FILENAME)))
             .thenReturn(new CaseDocument(RESP_LITIGANT_URL, LIT_DOC_FILENAME, null));
-        when(updateFrcInfoLetterDetailsGenerator.generate(any(), any())).thenReturn(updateFrcInfoLetterDetails);
+        when(updateFrcInfoLetterDetailsGenerator.generate(any(), any(), any())).thenReturn(updateFrcInfoLetterDetails);
     }
 
     private void setUpSolicitorMockContext() {
@@ -80,7 +80,7 @@ public class UpdateFrcInfoRespondentServiceTest extends BaseUpdateFrcInfoDocumen
             eq(SOL_DOC_TEMPLATE),
             eq(SOL_DOC_FILENAME)))
             .thenReturn(new CaseDocument(RESP_SOLICITOR_URL, SOL_DOC_FILENAME, null));
-        when(updateFrcInfoLetterDetailsGenerator.generate(any(), any())).thenReturn(updateFrcInfoLetterDetails);
+        when(updateFrcInfoLetterDetailsGenerator.generate(any(), any(), any())).thenReturn(updateFrcInfoLetterDetails);
     }
 
     private void setUpNoLetterMockContext() {

@@ -6,11 +6,15 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchUserException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.BarristerUpdateDifferenceCalculator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChange;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChangeType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerLetterTuple;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
@@ -21,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessServ
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 
@@ -32,6 +37,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChangeType.ADDED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.BarristerChangeType.REMOVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_BARRISTER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_BARRISTER_ROLE;
@@ -52,13 +59,15 @@ public class ManageBarristerService {
 
     public static final String MANAGE_BARRISTERS = "Manage Barristers";
 
+    private final AssignCaseAccessService assignCaseAccessService;
+    private final BarristerLetterService barristerLetterService;
     private final BarristerUpdateDifferenceCalculator barristerUpdateDifferenceCalculator;
     private final CaseAssignedRoleService caseAssignedRoleService;
-    private final AssignCaseAccessService assignCaseAccessService;
-    private final PrdOrganisationService organisationService;
-    private final IdamService idamService;
     private final CaseDataService caseDataService;
+    private final IdamService idamService;
+    private final NotificationService notificationService;
     private final ObjectMapper objectMapper;
+    private final PrdOrganisationService organisationService;
     private final SystemUserService systemUserService;
 
     public List<BarristerData> getBarristersForParty(CaseDetails caseDetails, String authToken) {
@@ -78,8 +87,34 @@ public class ManageBarristerService {
 
         log.info("changed barristers: {}", barristerChange.toString());
         barristerChange.getAdded().forEach(userToBeAdded -> addUser(caseDetails, authToken, caseRole, userToBeAdded));
+        barristerChange.getRemoved().forEach(userToBeRemoved -> removeUser(caseDetails, authToken, caseRole, userToBeRemoved));
 
         return updateRepresentationUpdateHistoryForCase(caseDetails, barristerChange, authToken);
+    }
+
+    public void notifyBarristerAccess(CaseDetails caseDetails,
+                                      List<Barrister> barristers,
+                                      List<Barrister> barristersBeforeEvent,
+                                      String authToken) {
+        BarristerChange barristerChange = barristerUpdateDifferenceCalculator.calculate(barristersBeforeEvent, barristers);
+        List<Barrister> addedBarristers = barristerChange.getAdded().stream().toList();
+        List<Barrister> removedBarristers = barristerChange.getRemoved().stream().toList();
+
+        addedBarristers.forEach(barrister -> sendNotifications(caseDetails, barrister, Pair.of(authToken, ADDED)));
+        removedBarristers.forEach(barrister -> sendNotifications(caseDetails, barrister, Pair.of(authToken, REMOVED)));
+    }
+
+    private void sendNotifications(CaseDetails caseDetails,
+                                   Barrister barrister,
+                                   Pair<String, BarristerChangeType> letterData) {
+        if (letterData.getRight().equals(ADDED)) {
+            notificationService.sendBarristerAddedEmail(caseDetails, barrister);
+        } else {
+            notificationService.sendBarristerRemovedEmail(caseDetails, barrister);
+        }
+
+        DocumentHelper.PaperNotificationRecipient recipient = getPaperNotificationRecipient(caseDetails, letterData);
+        barristerLetterService.sendBarristerLetter(caseDetails, barrister, BarristerLetterTuple.of(letterData, recipient));
     }
 
     public String getCaseRole(CaseDetails caseDetails, String authToken) {
@@ -101,7 +136,7 @@ public class ManageBarristerService {
 
     /*Below is temporary solution while ref data has code freeze - findUserByEmail endpoint is secured
     Finrem's system user has required roles, so below can be permanent solution but not preferred
-    Todo: create Ref Data (RDCC) Jira ticket to add finrem's caseworker to list of secured roles.*/
+    TODO: create Ref Data (RDCC) Jira ticket to add finrem's caseworker to list of secured roles.*/
     public String getAuthTokenToUse(CaseDetails caseDetails, String authToken) {
         String caseworkerParty = Objects.toString(caseDetails.getData().get(MANAGE_BARRISTER_PARTY), StringUtils.EMPTY);
         return caseworkerParty.isEmpty() ? authToken : systemUserService.getSysUserToken();
@@ -116,6 +151,15 @@ public class ManageBarristerService {
             );
     }
 
+    private void removeUser(CaseDetails caseDetails, String authToken, String caseRole, Barrister userToBeRemoved) {
+        String orgId = userToBeRemoved.getOrganisation().getOrganisationID();
+        organisationService.findUserByEmail(userToBeRemoved.getEmail(), getAuthTokenToUse(caseDetails, authToken))
+            .ifPresentOrElse(
+                userId -> assignCaseAccessService.removeCaseRoleToUser(caseDetails.getId(), userId, caseRole, orgId),
+                throwNoSuchUserException(userToBeRemoved)
+            );
+    }
+
     private Map<String, Object> updateRepresentationUpdateHistoryForCase(CaseDetails caseDetails,
                                                                          BarristerChange barristerChange,
                                                                          String authToken) {
@@ -123,6 +167,10 @@ public class ManageBarristerService {
 
         barristerChange.getAdded().forEach(addedUser -> representationUpdateHistory.add(
             element(UUID.randomUUID(), buildRepresentationUpdate(caseDetails, authToken, addedUser, null)))
+        );
+
+        barristerChange.getRemoved().forEach(removedUser -> representationUpdateHistory.add(
+            element(UUID.randomUUID(), buildRepresentationUpdate(caseDetails, authToken, null, removedUser)))
         );
 
         caseDetails.getData().put(REPRESENTATION_UPDATE_HISTORY, representationUpdateHistory);
@@ -175,6 +223,13 @@ public class ManageBarristerService {
 
     private String getManageBarristerParty(CaseDetails caseDetails, String authToken) {
         return APP_SOLICITOR_POLICY.equals(getCaseRole(caseDetails, authToken)) ? APPLICANT : RESPONDENT;
+    }
+
+    private DocumentHelper.PaperNotificationRecipient getPaperNotificationRecipient(CaseDetails caseDetails,
+                                                                                    Pair<String, BarristerChangeType> letterData) {
+        return APP_SOLICITOR_POLICY.equals(getCaseRole(caseDetails, letterData.getLeft()))
+            ? DocumentHelper.PaperNotificationRecipient.APPLICANT
+            : DocumentHelper.PaperNotificationRecipient.RESPONDENT;
     }
 
     private List<BarristerData> getBarristerCollection(CaseDetails caseDetails, String caseRole) {

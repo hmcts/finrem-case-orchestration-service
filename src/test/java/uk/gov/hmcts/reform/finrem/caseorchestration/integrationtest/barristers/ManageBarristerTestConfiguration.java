@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.AssignCaseAccessServi
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.AssignCaseAccessRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.RestService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
@@ -43,9 +42,6 @@ public class ManageBarristerTestConfiguration {
 
     @MockBean
     private FeatureToggleService featureToggleService;
-
-    @MockBean
-    private GenericDocumentService genericDocumentService;
 
     @MockBean
     private CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
