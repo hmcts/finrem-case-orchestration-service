@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
@@ -28,7 +29,7 @@ public class ConsentOrderService {
         return getCaseDocument(caseDetails, callbackRequest.getEventId());
     }
 
-    public CaseDocument getLatestConsentOrderData(FinremCallbackRequest callbackRequest) {
+    public Document getLatestConsentOrderData(FinremCallbackRequest callbackRequest) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         return getCaseDocument(caseDetails, callbackRequest.getEventType().getCcdType());
     }
@@ -46,15 +47,15 @@ public class ConsentOrderService {
         }
     }
 
-    private CaseDocument getCaseDocument(FinremCaseDetails caseDetails, String eventId) {
+    private Document getCaseDocument(FinremCaseDetails caseDetails, String eventId) {
         FinremCaseData caseData = caseDetails.getData();
         if (FR_RESPOND_TO_ORDER.equalsIgnoreCase(eventId)) {
             return documentHelper.getLatestRespondToOrderDocuments(caseData)
-                .orElseGet(() -> documentHelper.convertToCaseDocument(caseData.getLatestConsentOrder()));
+                .orElseGet(() -> caseData.getLatestConsentOrder());
         } else if (FR_AMENDED_CONSENT_ORDER.equalsIgnoreCase(eventId)) {
             return documentHelper.getLatestAmendedConsentOrder(caseData);
         } else {
-            return documentHelper.convertToCaseDocument(caseData.getConsentOrder());
+            return caseData.getConsentOrder();
         }
     }
 }

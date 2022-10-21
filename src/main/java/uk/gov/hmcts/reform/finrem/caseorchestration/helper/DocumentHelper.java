@@ -10,7 +10,10 @@ import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.AmendedConsentOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.RespondToOrderDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -122,15 +125,14 @@ public class DocumentHelper {
             .orElseGet(() -> convertToCaseDocument(caseData.get(LATEST_CONSENT_ORDER)));
     }
 
-    public CaseDocument getLatestAmendedConsentOrder(FinremCaseData caseData) {
-        Optional<AmendedConsentOrderData> reduce = ofNullable(caseData.getAmendedConsentOrderCollection())
-            .map(this::convertToAmendedConsentOrderDataList)
+    public Document getLatestAmendedConsentOrder(FinremCaseData caseData) {
+        Optional<AmendedConsentOrderCollection> reduce = ofNullable(caseData.getAmendedConsentOrderCollection())
             .orElse(emptyList())
             .stream()
             .reduce((first, second) -> second);
         return reduce
-            .map(consentOrderData -> consentOrderData.getConsentOrder().getAmendedConsentOrder())
-            .orElseGet(() -> convertToCaseDocument(caseData.getLatestConsentOrder()));
+            .map(consentOrderData -> consentOrderData.getValue().getAmendedConsentOrder())
+            .orElseGet(() -> caseData.getLatestConsentOrder());
     }
 
 
@@ -239,18 +241,16 @@ public class DocumentHelper {
         return Optional.empty();
     }
 
-    public Optional<CaseDocument> getLatestRespondToOrderDocuments(FinremCaseData caseData) {
-        Optional<RespondToOrderData> respondToOrderData = ofNullable(caseData.getRespondToOrderDocuments())
-            .map(this::convertToRespondToOrderDataList)
+    public Optional<Document> getLatestRespondToOrderDocuments(FinremCaseData caseData) {
+        Optional<RespondToOrderDocumentCollection> respondToOrderDocumentCollection = ofNullable(caseData.getRespondToOrderDocuments())
             .orElse(emptyList())
             .stream()
-            .filter(caseDataService::isAmendedConsentOrderType)
+            .filter(caseDataService::isAmendedConsentOrderTypeFR)
             .reduce((first, second) -> second);
-        if (respondToOrderData.isPresent()) {
-            return respondToOrderData
-                .map(respondToOrderData1 -> respondToOrderData.get().getRespondToOrder().getDocumentLink());
+        if (respondToOrderDocumentCollection.isPresent()) {
+            return respondToOrderDocumentCollection.map(
+                respondToOrderDataCollection1 -> respondToOrderDocumentCollection.get().getValue().getDocumentLink());
         }
-
         return Optional.empty();
     }
 

@@ -6,6 +6,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.RespondToOrderDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 
 import java.util.ArrayList;
@@ -171,6 +172,10 @@ public class CaseDataService {
 
     public boolean isAmendedConsentOrderType(RespondToOrderData respondToOrderData) {
         return AMENDED_CONSENT_ORDER.equalsIgnoreCase(respondToOrderData.getRespondToOrder().getDocumentType());
+    }
+
+    public boolean isAmendedConsentOrderTypeFR(RespondToOrderDocumentCollection respondToOrderDocumentCollection) {
+        return AMENDED_CONSENT_ORDER.equalsIgnoreCase(respondToOrderDocumentCollection.getValue().getDocumentType().getValue());
     }
 
     public boolean isApplicantSolicitorResponsibleToDraftOrder(Map<String, Object> caseData) {

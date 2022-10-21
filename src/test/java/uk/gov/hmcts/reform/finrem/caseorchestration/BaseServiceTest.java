@@ -275,4 +275,13 @@ public abstract class BaseServiceTest extends BaseTest {
         });
     }
 
+    protected CallbackRequest buildCallbackRequest(String testJson) {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(testJson)) {
+            CaseDetails caseDetails =
+                mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+            return CallbackRequest.builder().caseDetails(caseDetails).build();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

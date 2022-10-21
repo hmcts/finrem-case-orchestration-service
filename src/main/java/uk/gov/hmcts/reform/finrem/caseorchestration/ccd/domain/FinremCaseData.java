@@ -30,7 +30,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.wrapper.NatureApp
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.wrapper.ReferToJudgeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.wrapper.UploadCaseDocumentWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
 
 import java.math.BigDecimal;
@@ -57,11 +56,11 @@ public class FinremCaseData {
     private CaseType ccdCaseType;
     private String divorceCaseNumber;
     private StageReached divorceStageReached;
-    private CaseDocument divorceUploadEvidence1;
+    private Document divorceUploadEvidence1;
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate divorceDecreeNisiDate;
-    private CaseDocument divorceUploadEvidence2;
+    private Document divorceUploadEvidence2;
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate divorceDecreeAbsoluteDate;
@@ -77,14 +76,14 @@ public class FinremCaseData {
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate authorisation3;
-    private CaseDocument miniFormA;
-    private CaseDocument consentOrder;
-    private CaseDocument consentOrderText;
-    private CaseDocument latestConsentOrder;
+    private Document miniFormA;
+    private Document consentOrder;
+    private Document consentOrderText;
+    private Document latestConsentOrder;
     private YesOrNo d81Question;
-    private CaseDocument d81Joint;
-    private CaseDocument d81Applicant;
-    private CaseDocument d81Respondent;
+    private Document d81Joint;
+    private Document d81Applicant;
+    private Document d81Respondent;
     private List<PensionTypeCollection> pensionCollection;
     private List<PensionTypeCollection> consentPensionCollection;
     private List<PaymentDocumentCollection> copyOfPaperFormA;
@@ -100,7 +99,7 @@ public class FinremCaseData {
     private String pbaReference;
     private String pbaPaymentReference;
     private OrderDirection orderDirection;
-    private CaseDocument orderDirectionOpt1;
+    private Document orderDirectionOpt1;
     private String orderDirectionOpt2;
     private YesOrNo orderDirectionAbsolute;
     private YesOrNo servePensionProvider;
@@ -114,7 +113,7 @@ public class FinremCaseData {
     private String orderDirectionAddComments;
     private List<OrderRefusalCollection> orderRefusalCollection;
     private List<OrderRefusalCollection> orderRefusalCollectionNew;
-    private CaseDocument orderRefusalPreviewDocument;
+    private Document orderRefusalPreviewDocument;
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate dueDate;
@@ -133,10 +132,10 @@ public class FinremCaseData {
     private String state;
     private List<ScannedDocumentCollection> scannedDocuments;
     private YesOrNo evidenceHandled;
-    private CaseDocument approvedConsentOrderLetter;
-    private CaseDocument bulkPrintCoverSheetRes;
+    private Document approvedConsentOrderLetter;
+    private Document bulkPrintCoverSheetRes;
     private String bulkPrintLetterIdRes;
-    private CaseDocument bulkPrintCoverSheetApp;
+    private Document bulkPrintCoverSheetApp;
     private String bulkPrintLetterIdApp;
     private List<ConsentOrderCollection> approvedOrderCollection;
     private ApplicantRole divRoleOfFrApplicant;
@@ -146,7 +145,7 @@ public class FinremCaseData {
     private AuthorisationSignedBy authorisationSignedBy;
     private String bulkScanCaseReference;
     private List<ChildrenInfoCollection> childrenInfo;
-    private CaseDocument formA;
+    private Document formA;
     private List<DocumentCollection> scannedD81s;
     private String generalEmailRecipient;
     private String generalEmailCreatedBy;
@@ -160,8 +159,8 @@ public class FinremCaseData {
     @JsonProperty("RepresentationUpdateHistory")
     private List<RepresentationUpdateHistoryCollection> representationUpdateHistory;
     private YesOrNo paperApplication;
-    private CaseDocument bulkPrintCoverSheetAppConfidential;
-    private CaseDocument bulkPrintCoverSheetResConfidential;
+    private Document bulkPrintCoverSheetAppConfidential;
+    private Document bulkPrintCoverSheetResConfidential;
     @JsonProperty("RespSolNotificationsEmailConsent")
     private YesOrNo respSolNotificationsEmailConsent;
     @JsonSerialize(using = LocalDateSerializer.class)
@@ -171,7 +170,7 @@ public class FinremCaseData {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate dateOfSepration;
     private String nameOfCourtDivorceCentre;
-    private CaseDocument divorceUploadPetition;
+    private Document divorceUploadPetition;
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate divorcePetitionIssuedDate;
@@ -219,8 +218,8 @@ public class FinremCaseData {
     private YesOrNo caseAllocatedTo;
     private JudgeTimeEstimate judgeTimeEstimate;
     private String judgeTimeEstimateTextArea;
-    private CaseDocument formC;
-    private CaseDocument formG;
+    private Document formC;
+    private Document formG;
     private List<UploadGeneralDocumentCollection> uploadGeneralDocuments;
     private AssignToJudgeReason assignToJudgeReason;
     private String assignToJudgeText;
@@ -244,19 +243,19 @@ public class FinremCaseData {
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate refusalOrderDate;
-    private CaseDocument refusalOrderPreviewDocument;
+    private Document refusalOrderPreviewDocument;
     private List<RefusalOrderCollection> refusalOrderCollection;
-    private CaseDocument latestRefusalOrder;
-    private CaseDocument refusalOrderAdditionalDocument;
+    private Document latestRefusalOrder;
+    private Document refusalOrderAdditionalDocument;
     private String hiddenTabValue;
-    private CaseDocument latestDraftHearingOrder;
+    private Document latestDraftHearingOrder;
     private String orderApprovedJudgeName;
     private JudgeType orderApprovedJudgeType;
     private List<UploadAdditionalDocumentCollection> uploadAdditionalDocument;
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate orderApprovedDate;
-    private CaseDocument orderApprovedCoverLetter;
+    private Document orderApprovedCoverLetter;
     private String hearingDetails;
     private YesOrNo applicantShareDocs;
     private YesOrNo respondentShareDocs;
@@ -270,7 +269,7 @@ public class FinremCaseData {
     @JsonProperty("RespondentOrganisationPolicy")
     private OrganisationPolicy respondentOrganisationPolicy;
     private CaseRole currentUserCaseRole;
-    private CaseDocument outOfFamilyCourtResolution;
+    private Document outOfFamilyCourtResolution;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private RegionWrapper regionWrapper;
