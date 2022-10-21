@@ -7,10 +7,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -18,7 +17,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
-import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -39,7 +37,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_TIME_ESTIMATE;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RejectGeneralApplicationAboutToSubmitHandlerTest {
+public class RejectGeneralApplicationAboutToSubmitHandlerTest extends BaseHandlerTest {
 
     private RejectGeneralApplicationAboutToStartHandler startHandler;
     private RejectGeneralApplicationAboutToSubmitHandler submitHandler;
@@ -57,8 +55,8 @@ public class RejectGeneralApplicationAboutToSubmitHandlerTest {
     public void setup() {
         objectMapper = new ObjectMapper();
         helper = new GeneralApplicationHelper(objectMapper, service);
-        startHandler  = new RejectGeneralApplicationAboutToStartHandler(helper);
-        submitHandler  = new RejectGeneralApplicationAboutToSubmitHandler(helper);
+        startHandler = new RejectGeneralApplicationAboutToStartHandler(helper);
+        submitHandler = new RejectGeneralApplicationAboutToSubmitHandler(helper);
     }
 
     @Test
@@ -93,14 +91,14 @@ public class RejectGeneralApplicationAboutToSubmitHandlerTest {
     public void givenCase_whenRejectingAnApplication_thenRemoveElementFromCollection() {
         CallbackRequest callbackRequest = buildCallbackRequest(GA_JSON);
 
-        AboutToStartOrSubmitCallbackResponse startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = startHandle.getData();
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_LIST));
         assertEquals(2, dynamicList.getListItems().size());
         assertNull(caseData.get(GENERAL_APPLICATION_REJECT_REASON));
 
-        AboutToStartOrSubmitCallbackResponse submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> data = submitHandle.getData();
         List<GeneralApplicationCollectionData> generalApplicationCollectionData
@@ -113,14 +111,14 @@ public class RejectGeneralApplicationAboutToSubmitHandlerTest {
     public void givenCase_whenNoApplicationAvailableToReject_thenReturnError() {
         CallbackRequest callbackRequest = buildCallbackRequest(NO_GA_JSON);
 
-        AboutToStartOrSubmitCallbackResponse startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = startHandle.getData();
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_LIST));
         assertNull(dynamicList);
         assertNull(caseData.get(GENERAL_APPLICATION_REJECT_REASON));
 
-        AboutToStartOrSubmitCallbackResponse submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
         assertThat(submitHandle.getErrors(), CoreMatchers.hasItem("There is no general application available to reject."));
 
     }
@@ -129,14 +127,14 @@ public class RejectGeneralApplicationAboutToSubmitHandlerTest {
     public void givenCase_whenRejectingAnExistinNonCollApplication_thenRemoveGeneralApplicationData() {
         CallbackRequest callbackRequest = buildCallbackRequest(GA_NON_COLL_JSON);
 
-        AboutToStartOrSubmitCallbackResponse startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = startHandle.getData();
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_LIST));
         assertEquals(1, dynamicList.getListItems().size());
         assertNull(caseData.get(GENERAL_APPLICATION_REJECT_REASON));
 
-        AboutToStartOrSubmitCallbackResponse submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> data = submitHandle.getData();
         assertExistingGeneralApplication(data);
@@ -154,12 +152,4 @@ public class RejectGeneralApplicationAboutToSubmitHandlerTest {
         assertNull(caseData.get(GENERAL_APPLICATION_DOCUMENT_LATEST_DATE));
     }
 
-    private CallbackRequest buildCallbackRequest(String path)  {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(path)) {
-            CaseDetails caseDetails = objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-            return CallbackRequest.builder().caseDetails(caseDetails).build();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

@@ -31,8 +31,10 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
 
     private static final String PBA_CONFIRMATION_URL = "/case-orchestration/payment-confirmation";
 
-    @MockBean private PaymentConfirmationService paymentConfirmationService;
-    @MockBean private CaseDataService caseDataService;
+    @MockBean
+    private PaymentConfirmationService paymentConfirmationService;
+    @MockBean
+    private CaseDataService caseDataService;
 
     @Before
     public void setUp() {
@@ -74,9 +76,9 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
     public void shouldReturnBadRequestWhenCaseDataIsMissingInRequest() throws Exception {
         doEmptyCaseDataSetUp();
         mvc.perform(post(PBA_CONFIRMATION_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest())
             .andExpect(content().string(startsWith(GlobalExceptionHandler.SERVER_ERROR_MSG)));
     }
@@ -87,9 +89,9 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
 
         mvc.perform(post(PBA_CONFIRMATION_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.confirmation_header", is(emptyOrNullString())))
             .andExpect(jsonPath("$.confirmation_body", is("consented_hwf_confirmation_markup")));
@@ -102,9 +104,9 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
 
         mvc.perform(post(PBA_CONFIRMATION_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.confirmation_header", is(emptyOrNullString())))
             .andExpect(jsonPath("$.confirmation_body", is("consented_pba_confirmation_markup")));
@@ -117,9 +119,9 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
         when(caseDataService.isConsentedApplication(any())).thenReturn(false);
 
         mvc.perform(post(PBA_CONFIRMATION_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.confirmation_header", is(emptyOrNullString())))
             .andExpect(jsonPath("$.confirmation_body", is("contested_hwf_confirmation_markup")));
@@ -132,9 +134,9 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
         when(caseDataService.isConsentedApplication(any())).thenReturn(false);
 
         mvc.perform(post(PBA_CONFIRMATION_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.confirmation_header", is(emptyOrNullString())))
             .andExpect(jsonPath("$.confirmation_body", is("contested_pba_confirmation_markup")));

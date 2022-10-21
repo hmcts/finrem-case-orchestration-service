@@ -25,9 +25,11 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
 
     private static final String REMOVE_DETAILS_URL = "/case-orchestration/remove-details";
 
-    @MockBean protected UpdateRepresentationWorkflowService handleNocWorkflowService;
+    @MockBean
+    protected UpdateRepresentationWorkflowService handleNocWorkflowService;
 
-    @MockBean protected FeatureToggleService featureToggleService;
+    @MockBean
+    protected FeatureToggleService featureToggleService;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -38,9 +40,9 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
         when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(true);
 
         mvc.perform(post(REMOVE_DETAILS_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.data.applicantRepresented", is(NO_VALUE)))
             .andExpect(jsonPath("$.data.applicantAddress", is(notNullValue())))
             .andExpect(jsonPath("$.data.applicantPhone", is("89897876765")))
@@ -65,9 +67,9 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
         when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(true);
 
         mvc.perform(post(REMOVE_DETAILS_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.data.applicantRepresented", is(YES_VALUE)))
             .andExpect(jsonPath("$.data.applicantAddress").doesNotExist())
             .andExpect(jsonPath("$.data.applicantPhone").doesNotExist())

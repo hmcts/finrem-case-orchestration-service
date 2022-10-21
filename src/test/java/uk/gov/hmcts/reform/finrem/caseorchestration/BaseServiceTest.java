@@ -8,6 +8,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
 
@@ -56,11 +57,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @DirtiesContext
 public abstract class BaseServiceTest extends BaseTest {
 
-    @Autowired protected ObjectMapper mapper;
+    @Autowired
+    protected ObjectMapper mapper;
 
     protected CaseDetails buildCaseDetails() {
         Map<String, Object> caseData = new HashMap<>();
-        List<String> natureOfApplication =  List.of("Lump Sum Order",
+        List<String> natureOfApplication = List.of("Lump Sum Order",
             "Periodical Payment Order",
             "Pension Sharing Order",
             "Pension Attachment Order",
@@ -69,7 +71,7 @@ public abstract class BaseServiceTest extends BaseTest {
             "A settlement or a transfer of property",
             "Property Adjustment Order");
         caseData.put("natureOfApplication2", natureOfApplication);
-        return CaseDetails.builder().id(Long.valueOf(123)).caseTypeId(CASE_TYPE_ID_CONTESTED).data(caseData).build();
+        return CaseDetails.builder().id(Long.valueOf(123)).caseTypeId(CaseType.CONSENTED.getCcdType()).data(caseData).build();
     }
 
     protected CallbackRequest getConsentedCallbackRequestForVariationOrder() {
@@ -85,7 +87,7 @@ public abstract class BaseServiceTest extends BaseTest {
         caseData.put(RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_NAME);
         caseData.put(RESP_SOLICITOR_REFERENCE, TEST_RESP_SOLICITOR_REFERENCE);
         caseData.put(DIVORCE_CASE_NUMBER, TEST_DIVORCE_CASE_NUMBER);
-        List<String> natureOfApplication =  List.of("Lump Sum Order",
+        List<String> natureOfApplication = List.of("Lump Sum Order",
             "Periodical Payment Order",
             "Pension Sharing Order",
             "Pension Attachment Order",
@@ -117,7 +119,7 @@ public abstract class BaseServiceTest extends BaseTest {
         caseData.put(RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_NAME);
         caseData.put(RESP_SOLICITOR_REFERENCE, TEST_RESP_SOLICITOR_REFERENCE);
         caseData.put(DIVORCE_CASE_NUMBER, TEST_DIVORCE_CASE_NUMBER);
-        List<String> natureOfApplication =  List.of("Lump Sum Order",
+        List<String> natureOfApplication = List.of("Lump Sum Order",
             "Periodical Payment Order",
             "Pension Sharing Order",
             "Pension Attachment Order",
@@ -149,7 +151,7 @@ public abstract class BaseServiceTest extends BaseTest {
         caseData.put(RESP_SOLICITOR_REFERENCE, TEST_RESP_SOLICITOR_REFERENCE);
         caseData.put(DIVORCE_CASE_NUMBER, TEST_DIVORCE_CASE_NUMBER);
         caseData.put(INCLUDES_REPRESENTATIVE_UPDATE, YES_VALUE);
-        List<String> natureOfApplication =  List.of("Lump Sum Order",
+        List<String> natureOfApplication = List.of("Lump Sum Order",
             "Periodical Payment Order",
             "Pension Sharing Order",
             "Pension Attachment Order",
@@ -272,4 +274,5 @@ public abstract class BaseServiceTest extends BaseTest {
         return mapper.convertValue(object, new TypeReference<>() {
         });
     }
+
 }

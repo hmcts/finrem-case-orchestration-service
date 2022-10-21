@@ -31,12 +31,17 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @WebMvcTest(HearingOrderController.class)
 public class HearingOrderControllerTest extends BaseControllerTest {
 
-    @Autowired HearingOrderController hearingOrderController;
+    @Autowired
+    HearingOrderController hearingOrderController;
 
-    @MockBean private HearingOrderService hearingOrderService;
-    @MockBean private ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
-    @MockBean private IdamService idamService;
-    @MockBean private CaseDataService caseDataService;
+    @MockBean
+    private HearingOrderService hearingOrderService;
+    @MockBean
+    private ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
+    @MockBean
+    private IdamService idamService;
+    @MockBean
+    private CaseDataService caseDataService;
 
     @Test
     public void whenStoreHearingOrder_expectedServicesAreInvoked() {

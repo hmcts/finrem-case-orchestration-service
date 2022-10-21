@@ -6,9 +6,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDirectionsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -139,7 +139,7 @@ public class UploadApprovedOrderServiceTest extends BaseServiceTest {
             .createAndStoreAdditionalHearingDocumentsFromApprovedOrder(AUTH_TOKEN, caseDetails);
 
         caseDetails.getData().put(HEARING_ORDER_COLLECTION, getDirectionOrderCollection());
-        AboutToStartOrSubmitCallbackResponse response = uploadApprovedOrderService
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = uploadApprovedOrderService
             .handleUploadApprovedOrderAboutToSubmit(caseDetails, AUTH_TOKEN);
 
         assertThat(response.getErrors(), hasSize(1));

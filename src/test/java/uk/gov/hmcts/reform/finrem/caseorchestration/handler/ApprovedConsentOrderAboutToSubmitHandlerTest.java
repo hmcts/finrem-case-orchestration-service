@@ -8,10 +8,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.OngoingStubbing;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentServi
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.io.InputStream;
+import java.util.Map;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -80,21 +81,21 @@ public class ApprovedConsentOrderAboutToSubmitHandlerTest {
     @Test
     public void given_case_whenEvent_type_is_approveOrder_thenCanHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.APPROVE_ORDER),
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.APPROVE_APPLICATION),
             is(true));
     }
 
     @Test
     public void given_case_when_wrong_callback_then_case_can_not_handle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.APPROVE_ORDER),
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.APPROVE_APPLICATION),
             is(false));
     }
 
     @Test
     public void given_case_when_wrong_casetype_then_case_can_not_handle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.APPROVE_ORDER),
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.APPROVE_APPLICATION),
             is(false));
     }
 
@@ -108,9 +109,10 @@ public class ApprovedConsentOrderAboutToSubmitHandlerTest {
 
     @Test
     public void given_case_when_consent_order_requested_then_create_consent_order() {
-        CallbackRequest callbackRequest = doValidCaseDataSetUp(APPROVE_ORDER_VALID_JSON);
+        CallbackRequest callbackRequest =
+            doValidCaseDataSetUp(APPROVE_ORDER_VALID_JSON);
 
-        AboutToStartOrSubmitCallbackResponse response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
         assertNotNull(response.getData().get("otherCollection"));
 
         verify(consentOrderApprovedDocumentService).generateApprovedConsentOrderLetter(any(), any());
@@ -124,19 +126,21 @@ public class ApprovedConsentOrderAboutToSubmitHandlerTest {
 
     @Test(expected = FeignException.InternalServerError.class)
     public void given_case_when_failed_to_generate_doc_then_should_throw_error() {
-        CallbackRequest callbackRequest = doValidCaseDataSetUp(APPROVE_ORDER_VALID_JSON);
+        CallbackRequest callbackRequest =
+            doValidCaseDataSetUp(APPROVE_ORDER_VALID_JSON);
         whenServiceGeneratesDocument().thenThrow(feignError());
 
         handler.handle(callbackRequest, AUTH_TOKEN);
     }
 
     @Test
-    public void given_case_when_NotPaperApplication_then_shouldNotTriggerConsentOrderApprovedNotificationLetter()  {
+    public void given_case_when_NotPaperApplication_then_shouldNotTriggerConsentOrderApprovedNotificationLetter() {
         whenServiceGeneratesDocument().thenReturn(caseDocument());
         whenAnnexStampingDocument().thenReturn(caseDocument());
         when(documentHelper.getPensionDocumentsData(any())).thenReturn(singletonList(caseDocument()));
 
-        CallbackRequest callbackRequest = doValidCaseDataSetUp(APPROVE_ORDER_VALID_JSON);
+        CallbackRequest callbackRequest =
+            doValidCaseDataSetUp(APPROVE_ORDER_VALID_JSON);
         handler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(consentOrderApprovedDocumentService, never()).generateApprovedConsentOrderCoverLetter(any(), any());
@@ -144,13 +148,14 @@ public class ApprovedConsentOrderAboutToSubmitHandlerTest {
 
     @Test
     public void givenCase_whenNoPendsion_thenShouldUpdateStateToConsentOrderMadeAndBulkPrint() {
-        CallbackRequest callbackRequest = doValidCaseDataSetUp(NO_PENSION_VALID_JSON);
+        CallbackRequest callbackRequest =
+            doValidCaseDataSetUp(NO_PENSION_VALID_JSON);
         whenServiceGeneratesDocument().thenReturn(caseDocument());
         whenAnnexStampingDocument().thenReturn(caseDocument());
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
 
-        AboutToStartOrSubmitCallbackResponse response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertEquals(response.getData().get(STATE), CONSENT_ORDER_MADE.toString());
 
@@ -162,13 +167,14 @@ public class ApprovedConsentOrderAboutToSubmitHandlerTest {
 
     @Test
     public void shouldUpdateStateToConsentOrderMadeAndBulkPrint_noEmails() {
-        CallbackRequest callbackRequest = doValidCaseDataSetUp(APPROVE_ORDER_NO_PENSION_VALID_JSON);
+        CallbackRequest callbackRequest =
+            doValidCaseDataSetUp(APPROVE_ORDER_NO_PENSION_VALID_JSON);
         whenServiceGeneratesDocument().thenReturn(caseDocument());
         whenAnnexStampingDocument().thenReturn(caseDocument());
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
 
-        AboutToStartOrSubmitCallbackResponse response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertEquals(response.getData().get(STATE), CONSENT_ORDER_MADE.toString());
 
@@ -178,7 +184,7 @@ public class ApprovedConsentOrderAboutToSubmitHandlerTest {
         verify(notificationService, never()).sendConsentOrderAvailableEmailToRespondentSolicitor(any());
     }
 
-    private CallbackRequest doValidCaseDataSetUp(final String path)  {
+    private CallbackRequest doValidCaseDataSetUp(final String path) {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(path)) {
             return objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         } catch (Exception e) {

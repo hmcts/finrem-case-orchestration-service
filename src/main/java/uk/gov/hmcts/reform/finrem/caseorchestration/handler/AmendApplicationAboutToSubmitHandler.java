@@ -1,63 +1,54 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import lombok.RequiredArgsConstructor;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.NatureApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.StageReached;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
-import static java.util.Objects.nonNull;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.NoCSolicitorDetailsHelper.removeApplicantSolicitorAddress;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.NoCSolicitorDetailsHelper.removeRespondentSolicitorAddress;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_PHONE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_PHONE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
-public class AmendApplicationAboutToSubmitHandler implements CallbackHandler {
+public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler {
+
+    private final ConsentOrderService consentOrderService;
 
     @Autowired
-    private ConsentOrderService consentOrderService;
-
-    private static final String DIVORCE_STAGE_REACHED = "divorceStageReached";
-    private static final String DIVORCE_UPLOAD_EVIDENCE_2 = "divorceUploadEvidence2";
-    private static final String DIVORCE_DECREE_ABSOLUTE_DATE = "divorceDecreeAbsoluteDate";
-    private static final String DIVORCE_UPLOAD_EVIDENCE_1 = "divorceUploadEvidence1";
-    private static final String DIVORCE_DECREE_NISI_DATE = "divorceDecreeNisiDate";
+    public AmendApplicationAboutToSubmitHandler(ObjectMapper mapper,
+                                                ConsentOrderService consentOrderService) {
+        super(mapper);
+        this.consentOrderService = consentOrderService;
+    }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && (EventType.AMEND_APP_DETAILS.equals(eventType));
+            && (EventType.AMEND_APPLICATION_DETAILS.equals(eventType));
     }
 
     @Override
-    public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
-                                                       String userAuthorisation) {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
+                                                                              String userAuthorisation) {
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request to update consented case with Case ID: {}", caseDetails.getId());
 
-        Map<String, Object> caseData = caseDetails.getData();
+        FinremCaseData caseData = caseDetails.getData();
 
         updateDivorceDetails(caseData);
         updatePeriodicPaymentData(caseData);
@@ -67,105 +58,97 @@ public class AmendApplicationAboutToSubmitHandler implements CallbackHandler {
         updateApplicantOrSolicitorContactDetails(caseData);
         updateLatestConsentOrder(callbackRequest);
 
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 
-    private void updateLatestConsentOrder(CallbackRequest callbackRequest) {
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        caseData.put(LATEST_CONSENT_ORDER, consentOrderService.getLatestConsentOrderData(callbackRequest));
+    private void updateLatestConsentOrder(FinremCallbackRequest callbackRequest) {
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        caseData.setLatestConsentOrder(consentOrderService.getLatestConsentOrderData(callbackRequest));
     }
 
-    private void updateDivorceDetails(Map<String, Object> caseData) {
-        if (caseData.get(DIVORCE_STAGE_REACHED).equals("Decree Nisi")) {
-            // remove Decree Absolute details
-            caseData.put(DIVORCE_UPLOAD_EVIDENCE_2, null);
-            caseData.put(DIVORCE_DECREE_ABSOLUTE_DATE, null);
+    private void updateDivorceDetails(FinremCaseData caseData) {
+        if (StageReached.DECREE_NISI.equals(caseData.getDivorceStageReached())) {
+            caseData.setDivorceUploadEvidence2(null);
+            caseData.setDivorceDecreeAbsoluteDate(null);
         } else {
-            // remove Decree Nisi details
-            caseData.put(DIVORCE_UPLOAD_EVIDENCE_1, null);
-            caseData.put(DIVORCE_DECREE_NISI_DATE, null);
+            caseData.setDivorceUploadEvidence1(null);
+            caseData.setDivorceDecreeNisiDate(null);
         }
     }
 
-    private void updatePeriodicPaymentData(Map<String, Object> caseData) {
-        List<String> natureOfApplication2 = (List<String>) caseData.get("natureOfApplication2");
+    private void updatePeriodicPaymentData(FinremCaseData caseData) {
+        List<NatureApplication> natureOfApplication2 =
+            Optional.ofNullable(caseData.getNatureApplicationWrapper().getNatureOfApplication2()).orElse(new ArrayList<>());
 
-        if (hasNotSelected(natureOfApplication2, "Periodical Payment Order")) {
+        if (!natureOfApplication2.contains(NatureApplication.CONSENTED_PERIODICAL_PAYMENT_ORDER)) {
             removePeriodicPaymentData(caseData);
         } else {
             // if written agreement for order for children
-            if (equalsTo((String) caseData.get("natureOfApplication5"), "Yes")) {
-                caseData.put("natureOfApplication6", null);
-                caseData.put("natureOfApplication7", null);
+            if (YesOrNo.YES.equals(caseData.getNatureApplicationWrapper().getNatureOfApplication5())) {
+                caseData.getNatureApplicationWrapper().setNatureOfApplication6(null);
+                caseData.getNatureApplicationWrapper().setNatureOfApplication7(null);
             }
         }
     }
 
-    private void updatePropertyDetails(Map<String, Object> caseData) {
-        List<String> natureOfApplication2 = (List) caseData.get("natureOfApplication2");
+    private void updatePropertyDetails(FinremCaseData caseData) {
+        List<NatureApplication> natureOfApplication2 =
+            Optional.ofNullable(caseData.getNatureApplicationWrapper().getNatureOfApplication2()).orElse(new ArrayList<>());
 
-        if (hasNotSelected(natureOfApplication2, "Property Adjustment Order")) {
+        if (!natureOfApplication2.contains(NatureApplication.CONSENTED_PROPERTY_ADJUSTMENT_ORDER)) {
             removePropertyAdjustmentDetails(caseData);
         }
     }
 
-    private void updateD81Details(Map<String, Object> caseData) {
-        if (equalsTo((String) caseData.get("d81Question"), "Yes")) {
-            caseData.put("d81Applicant", null);
-            caseData.put("d81Respondent", null);
+    private void updateD81Details(FinremCaseData caseData) {
+        if (YesOrNo.YES.equals(caseData.getD81Question())) {
+            caseData.setD81Applicant(null);
+            caseData.setD81Respondent(null);
         } else {
-            caseData.put("d81Joint", null);
+            caseData.setD81Joint(null);
         }
     }
 
-    private void updateRespondentSolicitorAddress(Map<String, Object> caseData) {
-        if (NO_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(CONSENTED_RESPONDENT_REPRESENTED)))) {
+    private void updateRespondentSolicitorAddress(FinremCaseData caseData) {
+        if (YesOrNo.NO.equals(caseData.getContactDetailsWrapper().getConsentedRespondentRepresented())) {
             removeRespondentSolicitorAddress(caseData);
         } else {
             removeRespondentAddress(caseData);
         }
     }
 
-    private void removePeriodicPaymentData(Map<String, Object> caseData) {
-        caseData.put("natureOfApplication5", null);
-        caseData.put("natureOfApplication6", null);
-        caseData.put("natureOfApplication7", null);
-        caseData.put("orderForChildrenQuestion1", null);
+    private void removePeriodicPaymentData(FinremCaseData caseData) {
+        caseData.getNatureApplicationWrapper().setNatureOfApplication5(null);
+        caseData.getNatureApplicationWrapper().setNatureOfApplication6(null);
+        caseData.getNatureApplicationWrapper().setNatureOfApplication7(null);
+        caseData.getNatureApplicationWrapper().setOrderForChildrenQuestion1(null);
     }
 
-    private void removePropertyAdjustmentDetails(Map<String, Object> caseData) {
-        caseData.put("natureOfApplication3a", null);
-        caseData.put("natureOfApplication3b", null);
+    private void removePropertyAdjustmentDetails(FinremCaseData caseData) {
+        caseData.getNatureApplicationWrapper().setNatureOfApplication3a(null);
+        caseData.getNatureApplicationWrapper().setNatureOfApplication3b(null);
     }
 
 
-    private void updateApplicantOrSolicitorContactDetails(Map<String, Object> caseData) {
-        if (equalsTo((String) caseData.get(APPLICANT_REPRESENTED), "No")) {
-            removeApplicantSolicitorAddress(caseData, false);
+    private void updateApplicantOrSolicitorContactDetails(FinremCaseData caseData) {
+        if (YesOrNo.NO.equals(caseData.getContactDetailsWrapper().getApplicantRepresented())) {
+            removeApplicantSolicitorAddress(caseData);
         } else {
             removeApplicantAddress(caseData);
         }
     }
 
 
-    private void removeApplicantAddress(Map<String, Object> caseData) {
-        caseData.put(APPLICANT_ADDRESS, null);
-        caseData.put(APPLICANT_PHONE, null);
-        caseData.put(APPLICANT_EMAIL, null);
+    private void removeApplicantAddress(FinremCaseData caseData) {
+        caseData.getContactDetailsWrapper().setApplicantAddress(null);
+        caseData.getContactDetailsWrapper().setApplicantPhone(null);
+        caseData.getContactDetailsWrapper().setApplicantEmail(null);
     }
 
-    private void removeRespondentAddress(Map<String, Object> caseData) {
-        caseData.put(RESPONDENT_ADDRESS, null);
-        caseData.put(RESPONDENT_PHONE, null);
-        caseData.put(RESPONDENT_EMAIL, null);
-    }
-
-    private boolean equalsTo(String fieldData, String value) {
-        return nonNull(fieldData) && value.equalsIgnoreCase(fieldData.trim());
-    }
-
-    private boolean hasNotSelected(List<String> list, String option) {
-        return !list.isEmpty() && !list.contains(option);
+    private void removeRespondentAddress(FinremCaseData caseData) {
+        caseData.getContactDetailsWrapper().setRespondentAddress(null);
+        caseData.getContactDetailsWrapper().setRespondentPhone(null);
+        caseData.getContactDetailsWrapper().setRespondentEmail(null);
     }
 
 }

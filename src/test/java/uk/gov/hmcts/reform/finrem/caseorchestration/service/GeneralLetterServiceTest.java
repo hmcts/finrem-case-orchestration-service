@@ -136,11 +136,11 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
     public void whenGeneralLetterAddressToChanges_differentNamesAreUsed() {
         AtomicInteger invocationCounter = new AtomicInteger(1);
         ImmutableMap.of(
-            "applicantSolicitor", "Solictor",
-            "respondentSolicitor", "Ms Patel",
-            "respondent", "test Korivi",
-            "other", "Mr Rajesh Kuthrappali"
-        ).entrySet().stream()
+                "applicantSolicitor", "Solictor",
+                "respondentSolicitor", "Ms Patel",
+                "respondent", "test Korivi",
+                "other", "Mr Rajesh Kuthrappali"
+            ).entrySet().stream()
             .forEach(entry -> assertNameUsedForGeneralLetterAddressTo(invocationCounter.getAndIncrement(), entry.getKey(), entry.getValue()));
     }
 

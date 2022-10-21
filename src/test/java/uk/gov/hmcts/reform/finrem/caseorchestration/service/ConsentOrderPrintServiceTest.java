@@ -53,14 +53,21 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
     private final ArgumentCaptor<BulkPrintRequest> bulkPrintRequestArgumentCaptor = ArgumentCaptor.forClass(BulkPrintRequest.class);
     private final CaseDocument caseDocument = TestSetUpUtils.caseDocument();
 
-    @Autowired private ObjectMapper mapper;
-    @Autowired private ConsentOrderPrintService consentOrderPrintService;
-    @Autowired private EvidenceManagementClient evidenceManagementClientMock;
+    @Autowired
+    private ObjectMapper mapper;
+    @Autowired
+    private ConsentOrderPrintService consentOrderPrintService;
+    @Autowired
+    private EvidenceManagementClient evidenceManagementClientMock;
 
-    @MockBean private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
-    @MockBean private GenerateCoverSheetService coverSheetService;
-    @MockBean private GenericDocumentService genericDocumentService;
-    @MockBean private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
+    @MockBean
+    private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
+    @MockBean
+    private GenerateCoverSheetService coverSheetService;
+    @MockBean
+    private GenericDocumentService genericDocumentService;
+    @MockBean
+    private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
 
     @Before
     public void init() {

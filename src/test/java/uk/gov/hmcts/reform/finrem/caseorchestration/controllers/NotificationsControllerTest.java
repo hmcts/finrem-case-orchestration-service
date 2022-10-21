@@ -44,17 +44,28 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @WebMvcTest(NotificationsController.class)
 public class NotificationsControllerTest extends BaseControllerTest {
 
-    @Autowired private NotificationsController notificationsController;
-    @MockBean private NocLetterNotificationService nocLetterNotificationService;
-    @MockBean private NotificationService notificationService;
-    @MockBean private PaperNotificationService paperNotificationService;
-    @MockBean private GeneralEmailService generalEmailService;
-    @MockBean private HelpWithFeesDocumentService helpWithFeesDocumentService;
-    @MockBean private CaseDataService caseDataService;
-    @MockBean private TransferCourtService transferCourtService;
-    @MockBean private FeatureToggleService featureToggleService;
-    @MockBean private CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
-    @MockBean private CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
+    @Autowired
+    private NotificationsController notificationsController;
+    @MockBean
+    private NocLetterNotificationService nocLetterNotificationService;
+    @MockBean
+    private NotificationService notificationService;
+    @MockBean
+    private PaperNotificationService paperNotificationService;
+    @MockBean
+    private GeneralEmailService generalEmailService;
+    @MockBean
+    private HelpWithFeesDocumentService helpWithFeesDocumentService;
+    @MockBean
+    private CaseDataService caseDataService;
+    @MockBean
+    private TransferCourtService transferCourtService;
+    @MockBean
+    private FeatureToggleService featureToggleService;
+    @MockBean
+    private CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
+    @MockBean
+    private CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
 
     @Test
     public void sendHwfSuccessfulConfirmationEmailIfDigitalCase() {

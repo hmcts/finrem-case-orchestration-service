@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.model.pba.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.model.pba.validation.DxAddressResponse;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;

@@ -50,8 +50,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @ActiveProfiles("test-mock-feign-clients")
 public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
 
-    @Autowired private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
-    @Autowired private DocumentClient documentClientMock;
+    @Autowired
+    private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
+    @Autowired
+    private DocumentClient documentClientMock;
 
     private CaseDetails caseDetails;
 

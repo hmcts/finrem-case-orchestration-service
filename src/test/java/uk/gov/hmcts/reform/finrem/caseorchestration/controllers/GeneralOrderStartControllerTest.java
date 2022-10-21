@@ -48,9 +48,9 @@ public class GeneralOrderStartControllerTest extends BaseControllerTest {
         when(idamService.getIdamFullName(bearerToken)).thenReturn("Integration Test");
 
         mvc.perform(post("/case-orchestration/general-order-start")
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, bearerToken)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, bearerToken)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data." + GENERAL_ORDER_ADDRESS_TO, is(nullValue())))
             .andExpect(jsonPath("$.data." + GENERAL_ORDER_DATE, is(nullValue())))
@@ -67,9 +67,9 @@ public class GeneralOrderStartControllerTest extends BaseControllerTest {
         doEmptyCaseDataSetUp();
 
         mvc.perform(post("/case-orchestration/general-order-start")
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, bearerToken)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, bearerToken)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest());
     }
 
@@ -80,9 +80,9 @@ public class GeneralOrderStartControllerTest extends BaseControllerTest {
             .thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
         mvc.perform(post("/case-orchestration/general-order-start")
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, bearerToken)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, bearerToken)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isInternalServerError());
     }
 
