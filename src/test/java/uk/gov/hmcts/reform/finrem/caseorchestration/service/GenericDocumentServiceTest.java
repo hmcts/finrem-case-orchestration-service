@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import org.hamcrest.MatcherAssert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -66,9 +67,9 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
         assertCaseDocument(document);
         verify(documentClientMock, times(1)).generatePdf(documentGenerationRequestCaptor.capture(), eq(AUTH_TOKEN));
 
-        assertThat(documentGenerationRequestCaptor.getValue().getTemplate(), is(templateName));
-        assertThat(documentGenerationRequestCaptor.getValue().getFileName(), is(fileName));
-        assertThat(documentGenerationRequestCaptor.getValue().getValues().get("caseDetails"), is(defaultContestedCaseDetails()));
+        MatcherAssert.assertThat(documentGenerationRequestCaptor.getValue().getTemplate(), is(templateName));
+        MatcherAssert.assertThat(documentGenerationRequestCaptor.getValue().getFileName(), is(fileName));
+        MatcherAssert.assertThat(documentGenerationRequestCaptor.getValue().getValues().get("caseDetails"), is(defaultContestedCaseDetails()));
     }
 
     @Test
