@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CASE_NUMBER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
+
 
 @Service
 @RequiredArgsConstructor
