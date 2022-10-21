@@ -107,11 +107,6 @@ public class PaperNotificationService {
             CaseDocument applicantManualPaymentLetter = manualPaymentDocumentService.generateManualPaymentLetter(caseDetails, authToken, APPLICANT);
             bulkPrintService.sendDocumentForPrint(applicantManualPaymentLetter, caseDetails);
         }
-
-        if (caseDataService.isContestedApplication(caseDetails) && shouldPrintNotificationForRespondentSolicitor(caseDetails)) {
-            CaseDocument respondentManualPaymentLetter = manualPaymentDocumentService.generateManualPaymentLetter(caseDetails, authToken, RESPONDENT);
-            bulkPrintService.sendDocumentForPrint(respondentManualPaymentLetter, caseDetails);
-        }
     }
 
     public void printUpdateFrcInformationNotification(CaseDetails caseDetails, String authToken) {
