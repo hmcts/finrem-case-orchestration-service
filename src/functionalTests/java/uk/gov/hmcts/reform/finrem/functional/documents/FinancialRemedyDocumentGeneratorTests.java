@@ -21,7 +21,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     private static final String APPLICANT_NAME = "Williams";
     private static final String DIVORCE_CASENO = "DD12D12345";
-    private static final String CASENO = "1665-4898-1670-6187";
+    private static final String CASENO = "1665489816706187";
     private static final String SOLICITOR_FIRM = "Michael Jones & Partners";
     private static final String SOLICITOR_NAME = "Jane Smith";
     private static final String SOLICITOR_REF = "JAW052018";
