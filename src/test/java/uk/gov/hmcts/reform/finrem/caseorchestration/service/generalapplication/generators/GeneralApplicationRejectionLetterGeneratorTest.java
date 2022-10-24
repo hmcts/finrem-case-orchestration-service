@@ -107,7 +107,7 @@ public class GeneralApplicationRejectionLetterGeneratorTest {
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
 
         GeneralApplicationRejectionLetterDetails letterDetails = generalApplicationRejectionLetterGenerator
-            .generate(caseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT);
+            .generate(caseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT, null);
 
         assertThat(letterDetails.getLetterDate(), is(String.valueOf(LocalDate.now())));
         assertThat(letterDetails.getAddressee().getName(), is("Poor Guy"));
@@ -130,7 +130,7 @@ public class GeneralApplicationRejectionLetterGeneratorTest {
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
 
         GeneralApplicationRejectionLetterDetails letterDetails = generalApplicationRejectionLetterGenerator
-            .generate(caseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT);
+            .generate(caseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT, null);
 
         assertThat(letterDetails.getAddressee().getName(), is(TEST_SOLICITOR_NAME));
         assertThat(letterDetails.getAddressee().getFormattedAddress(), containsString("50 Applicant Solicitor Street"));
@@ -145,7 +145,7 @@ public class GeneralApplicationRejectionLetterGeneratorTest {
         when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
 
         GeneralApplicationRejectionLetterDetails letterDetails = generalApplicationRejectionLetterGenerator
-            .generate(caseDetails, DocumentHelper.PaperNotificationRecipient.RESPONDENT);
+            .generate(caseDetails, DocumentHelper.PaperNotificationRecipient.RESPONDENT, null);
 
         assertThat(letterDetails.getAddressee().getName(), is("Contested Respondent"));
         assertThat(letterDetails.getAddressee().getFormattedAddress(), containsString("50 Respondent Street"));
@@ -161,7 +161,7 @@ public class GeneralApplicationRejectionLetterGeneratorTest {
         when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
 
         GeneralApplicationRejectionLetterDetails letterDetails = generalApplicationRejectionLetterGenerator
-            .generate(caseDetails, DocumentHelper.PaperNotificationRecipient.RESPONDENT);
+            .generate(caseDetails, DocumentHelper.PaperNotificationRecipient.RESPONDENT, null);
 
         assertThat(letterDetails.getAddressee().getName(), is(TEST_RESP_SOLICITOR_NAME));
         assertThat(letterDetails.getAddressee().getFormattedAddress(), containsString("50 Respondent Solicitor Street"));

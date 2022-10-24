@@ -14,5 +14,6 @@ public class ChangeOfRepresentationRequest {
     ChangedRepresentative addedRepresentative;
     ChangedRepresentative removedRepresentative;
     String by;
+    String via;
 
 }
