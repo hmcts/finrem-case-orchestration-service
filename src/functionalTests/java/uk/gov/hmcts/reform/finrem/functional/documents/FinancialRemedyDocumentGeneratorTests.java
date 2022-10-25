@@ -21,7 +21,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     private static final String APPLICANT_NAME = "Williams";
     private static final String DIVORCE_CASENO = "DD12D12345";
-    private static final String CASE_NUMBER = "12345678";
     private static final String SOLICITOR_FIRM = "Michael Jones & Partners";
     private static final String SOLICITOR_NAME = "Jane Smith";
     private static final String SOLICITOR_REF = "JAW052018";
@@ -198,7 +197,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         assertTrue(documentContent.contains(SOLICITOR_FIRM));
         assertTrue(documentContent.contains(SOLICITOR_NAME));
         assertTrue(documentContent.contains(APPLICANT_NAME));
-        assertTrue(documentContent.contains(CASE_NUMBER));
+        assertTrue(documentContent.contains(DIVORCE_CASENO));
         assertTrue(documentContent.contains(SOLICITOR_REF));
     }
 
