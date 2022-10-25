@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationH
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -151,5 +152,9 @@ public class OnlineFormDocumentService {
         } else {
             caseData.put(ORDER_TYPE, CONSENT);
         }
+    }
+
+    public List<String> getNatureOfApplicationList(Object obj) {
+        return documentHelper.convertToList(obj);
     }
 }

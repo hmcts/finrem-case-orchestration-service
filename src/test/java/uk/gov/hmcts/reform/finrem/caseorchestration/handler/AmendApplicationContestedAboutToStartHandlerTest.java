@@ -1,14 +1,15 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
+
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,33 +20,29 @@ import static org.junit.Assert.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
 
-@RunWith(MockitoJUnitRunner.class)
-public class DefaultValueAboutToStartHandlerTest {
+public class AmendApplicationContestedAboutToStartHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
-    private final DefaultValueAboutToStartHandler handler =  new DefaultValueAboutToStartHandler();
+    private AmendApplicationContestedAboutToStartHandler handler;
 
-    @Test
-    public void givenConsentedCase_whenEventIsAmend_thenHandlerCanHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.AMEND_CASE),
-            is(true));
+    @Before
+    public void setup() {
+        handler =  new AmendApplicationContestedAboutToStartHandler(new OnStartDefaultValueService());
     }
 
     @Test
-    public void givenConsentedCase_whenEventIsSolCreate_thenHandlerCanHandle() {
+    public void givenContestedCase_whenEventIsAmendAndCallbackIsSubmitted_thenHandlerCanNotHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.SOLICITOR_CREATE),
-            is(true));
+                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.AMEND_CONTESTED_APP_DETAILS),
+            is(false));
     }
 
     @Test
     public void givenContestedCase_whenEventIsAmend_thenHandlerCanHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.SOLICITOR_CREATE),
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.AMEND_CONTESTED_APP_DETAILS),
             is(true));
     }
-
 
     @Test
     public void handle() {
@@ -59,5 +56,4 @@ public class DefaultValueAboutToStartHandlerTest {
         CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
         return CallbackRequest.builder().eventId("SomeEventId").caseDetails(caseDetails).build();
     }
-
 }

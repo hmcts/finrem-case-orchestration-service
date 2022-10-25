@@ -512,6 +512,8 @@ public class CCDConfigConstant {
 
     //NFD
     public static final String CIVIL_PARTNERSHIP = "civilPartnership";
+    public static final String TYPE_OF_APPLICATION = "typeOfApplication";
+    public static final String TYPE_OF_APPLICATION_DEFAULT_TO = "In connection to matrimonial and civil partnership proceedings";
 
     //Get user based on role i.e applicant or respondent
     public static final String CASE_ROLE = "currentUserCaseRole";
