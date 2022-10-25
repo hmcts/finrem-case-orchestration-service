@@ -5,6 +5,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -61,14 +62,16 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
 
         when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
 
-        CaseDocument document = genericDocumentService.generateDocument(AUTH_TOKEN, defaultContestedCaseDetails(), templateName, fileName);
+        CaseDetails caseDetails = defaultContestedCaseDetails();
+        CaseDocument document = genericDocumentService.generateDocument(AUTH_TOKEN, caseDetails, templateName, fileName);
 
         assertCaseDocument(document);
         verify(documentClientMock, times(1)).generatePdf(documentGenerationRequestCaptor.capture(), eq(AUTH_TOKEN));
 
         assertThat(documentGenerationRequestCaptor.getValue().getTemplate(), is(templateName));
         assertThat(documentGenerationRequestCaptor.getValue().getFileName(), is(fileName));
-        assertThat(documentGenerationRequestCaptor.getValue().getValues().get("caseDetails"), is(defaultContestedCaseDetails()));
+        caseDetails.getData().put("caseNumber", caseDetails.getId());
+        assertThat(documentGenerationRequestCaptor.getValue().getValues().get("caseDetails"), is(caseDetails));
     }
 
     @Test
