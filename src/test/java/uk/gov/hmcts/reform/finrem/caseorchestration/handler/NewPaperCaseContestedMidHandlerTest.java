@@ -43,6 +43,14 @@ public class NewPaperCaseContestedMidHandlerTest {
     }
 
     @Test
+    public void givenConsentedCase_whenEventIsAIssueAppAndCallbackIsSubmitted_thenHandlerCanNotHandle() {
+        assertThat(handler
+                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.ISSUE_APPLICATION),
+            is(false));
+    }
+
+
+    @Test
     public void givenContestedCase_whenEventIsAmend_thenHandlerCanHandle() {
         assertThat(handler
                 .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.CONTESTED_NEW_PAPER_CASE),

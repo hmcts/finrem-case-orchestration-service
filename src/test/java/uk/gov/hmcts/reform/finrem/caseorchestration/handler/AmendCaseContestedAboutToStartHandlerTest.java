@@ -37,9 +37,24 @@ public class AmendCaseContestedAboutToStartHandlerTest {
     }
 
     @Test
+    public void givenConsentedCase_whenEventIsIssueApplication_thenHandlerCanNotCanHandle() {
+        assertThat(handler
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.ISSUE_APPLICATION),
+            is(false));
+    }
+
+
+    @Test
     public void givenConsentedCase_whenEventIsAmendAndCallbackIsSubmitted_thenHandlerCanNotHandle() {
         assertThat(handler
                 .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.AMEND_CASE),
+            is(false));
+    }
+
+    @Test
+    public void givenConsentedCase_whenEventIsAmendAndCaseTypeIsConsented_thenHandlerCanNotHandle() {
+        assertThat(handler
+                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.AMEND_CASE),
             is(false));
     }
 
