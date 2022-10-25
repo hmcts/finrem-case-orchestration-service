@@ -18,13 +18,9 @@ public enum EventType {
     UPLOAD_GENERAL_DOCUMENT("FR_uploadGeneralDocument"),
     INTERIM_HEARING("FR_listForInterimHearing"),
     SOLICITOR_CREATE("FR_solicitorCreate"),
-    AMEND_APP_DETAILS("FR_amendApplicationDetails"),
     AMEND_CONTESTED_APP_DETAILS("FR_amendApplication"),
-    AMEND_CONSENT_ORDER("FR_amendedConsentOrder"),
     RESPOND_TO_ORDER("FR_respondToOrder"),
     AMEND_CASE("FR_amendCase"),
-    APPROVE_ORDER("FR_approveApplication"),
-    REJECT_ORDER("FR_orderRefusal"),
     CONSENT_ORDER_NOT_APPROVED("FR_consentOrderNotApproved"),
     GENERAL_APPLICATION("createGeneralApplication"),
     REJECT_GENERAL_APPLICATION("rejectGeneralApplication"),
@@ -39,11 +35,9 @@ public enum EventType {
     MANAGE_BARRISTER("FR_manageBarrister"),
     @JsonEnumDefaultValue
     NONE(""),
-
     MIGRATE_CASE("FR_migrateCase"),
     MIGRATE_Frc_CASE("FR_migrateFrcCase"),
     CASE_NOTES("FR_caseNotes"),
-
     AMENDED_CONSENT_ORDER("FR_amendedConsentOrder"),
     UPDATE_CONTACT_DETAILS("FR_updateContactDetails"),
     UPDATE_DUE_DATE("FR_updateDueDate"),
@@ -53,7 +47,6 @@ public enum EventType {
     REFUND("FR_refund"),
     ATTACH_SCANNED_DOCS("attachScannedDocs"),
     HANDLE_EVIDENCE("handleEvidence"),
-
     APPLICATION_PAYMENT_SUBMISSION("FR_applicationPaymentSubmission"),
     HWF_DECISION("FR_HWFDecision"),
     PAYMENT_REQUIRED("FR_paymentRequired"),
@@ -77,7 +70,6 @@ public enum EventType {
     REFER_TO_JUDGE_FROM_AWAITING_RESPONSE("FR_referToJudgeFromAwaitingResponse"),
     REFER_TO_JUDGE_FROM_RESPOND_TO_ORDER("FR_referToJudgeFromRespondToOrder"),
     REFER_TO_JUDGE_FROM_CLOSE("FR_referToJudgeFromClose"),
-
     SEND_ORDER_FOR_APPROVED("FR_sendOrderForApproved"),
     GENERAL_LETTER("FR_generalLetter"),
     CALLBACK_REJECTED_ORDER("FR_callbackRejectedOrder"),
@@ -154,7 +146,6 @@ public enum EventType {
     ADD_LIST_FOR_INTERIM_HEARING_INFO("FR_addListForInterimHearingInfo"),
     UPDATE_Frc_INFORMATION("FR_updateFrcInformation"),
     MANAGE_HEARING_BUNDLES("FR_manageHearingBundles");
-
 
     private final String ccdType;
 
