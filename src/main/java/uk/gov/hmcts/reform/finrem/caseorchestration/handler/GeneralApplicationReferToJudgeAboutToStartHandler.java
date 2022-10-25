@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REFERRED_DETAIL;
@@ -87,7 +86,7 @@ public class GeneralApplicationReferToJudgeAboutToStartHandler
                                                             AtomicInteger index) {
         return existingGeneralApplicationList.stream()
             .map(ga -> getDynamicListElements(ga.getId(), getLabel(ga.getGeneralApplicationItems(), index.incrementAndGet())))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private void setReferListForNonCollectionGeneralApplication(Map<String, Object> caseData,

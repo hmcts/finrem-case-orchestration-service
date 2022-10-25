@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.CREATED;
@@ -64,19 +63,19 @@ public class GeneralApplicationHelper {
     public List<GeneralApplicationCollectionData> getReadyForRejectOrReadyForReferList(Map<String, Object> caseData) {
         return getGeneralApplicationList(caseData).stream()
             .filter(obj -> Objects.equals(obj.getGeneralApplicationItems().getGeneralApplicationStatus(), CREATED.getId()))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     public List<GeneralApplicationCollectionData> getReferredList(Map<String, Object> caseData) {
         return getGeneralApplicationList(caseData).stream()
             .filter(obj -> Objects.equals(obj.getGeneralApplicationItems().getGeneralApplicationStatus(), REFERRED.getId()))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     public List<GeneralApplicationCollectionData> getOutcomeList(Map<String, Object> caseData) {
         return getGeneralApplicationList(caseData).stream()
             .filter(this::isEquals)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private boolean isEquals(GeneralApplicationCollectionData obj) {

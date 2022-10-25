@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_LIST;
@@ -62,7 +61,7 @@ public class GeneralApplicationDirectionsAboutToStartHandler implements Callback
             List<DynamicListElement> dynamicListElements = outcomeList.stream()
                 .map(ga -> getDynamicListElements(ga.getId() + "#" + ga.getGeneralApplicationItems().getGeneralApplicationStatus(),
                     getLabel(ga.getGeneralApplicationItems(), index.incrementAndGet())))
-                .collect(Collectors.toList());
+                .toList();
 
             DynamicList dynamicList = generateAvailableGeneralApplicationAsDynamicList(dynamicListElements);
             caseData.put(GENERAL_APPLICATION_DIRECTIONS_LIST, dynamicList);
