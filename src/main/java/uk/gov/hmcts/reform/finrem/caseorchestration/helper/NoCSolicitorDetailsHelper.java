@@ -1,9 +1,9 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.CaseRole;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.util.Map;
 

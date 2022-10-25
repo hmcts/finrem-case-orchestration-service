@@ -8,8 +8,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
 
 import java.io.InputStream;
@@ -262,7 +262,7 @@ public abstract class BaseServiceTest extends BaseTest {
         return document;
     }
 
-    protected CallbackRequest buildHearingCallbackRequest(String payloadJson)  {
+    protected CallbackRequest buildHearingCallbackRequest(String payloadJson) {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(payloadJson)) {
             return mapper.readValue(resourceAsStream, CallbackRequest.class);
         } catch (Exception e) {

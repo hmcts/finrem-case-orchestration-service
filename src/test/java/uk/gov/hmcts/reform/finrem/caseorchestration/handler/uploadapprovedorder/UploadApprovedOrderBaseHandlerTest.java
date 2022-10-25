@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler.uploadapprovedorder
 import org.junit.Before;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 
 import java.util.HashMap;
 import java.util.Map;

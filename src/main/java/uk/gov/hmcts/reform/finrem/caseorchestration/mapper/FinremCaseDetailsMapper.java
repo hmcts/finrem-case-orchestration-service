@@ -5,10 +5,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.State;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 
 @Component
 @Slf4j

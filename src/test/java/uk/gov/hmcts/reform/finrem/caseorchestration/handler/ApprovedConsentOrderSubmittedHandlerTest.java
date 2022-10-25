@@ -159,7 +159,7 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
         caseData.put("natureOfApplication2", natureOfApplication);
         return CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
-                .caseTypeId(uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.CaseType.CONSENTED.getCcdType())
+                .caseTypeId(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED.getCcdType())
                 .id(12345L)
                 .data(caseData)
                 .build())
@@ -187,7 +187,7 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
         caseData.put("natureOfApplication2", natureOfApplication);
         return CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
-                .caseTypeId(uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.CaseType.CONSENTED.getCcdType())
+                .caseTypeId(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED.getCcdType())
                 .id(12345L)
                 .data(caseData)
                 .build())

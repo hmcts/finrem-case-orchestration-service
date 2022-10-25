@@ -4,12 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.Document;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.util.Map;
 
@@ -29,7 +28,7 @@ public class ConsentOrderService {
         return getCaseDocument(caseDetails, callbackRequest.getEventId());
     }
 
-    public Document getLatestConsentOrderData(FinremCallbackRequest callbackRequest) {
+    public CaseDocument getLatestConsentOrderData(FinremCallbackRequest callbackRequest) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         return getCaseDocument(caseDetails, callbackRequest.getEventType().getCcdType());
     }
@@ -47,7 +46,7 @@ public class ConsentOrderService {
         }
     }
 
-    private Document getCaseDocument(FinremCaseDetails caseDetails, String eventId) {
+    private CaseDocument getCaseDocument(FinremCaseDetails caseDetails, String eventId) {
         FinremCaseData caseData = caseDetails.getData();
         if (FR_RESPOND_TO_ORDER.equalsIgnoreCase(eventId)) {
             return documentHelper.getLatestRespondToOrderDocuments(caseData)

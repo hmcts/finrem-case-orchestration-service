@@ -10,19 +10,18 @@ import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.AmendedConsentOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.Document;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.RespondToOrderDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
@@ -125,7 +124,7 @@ public class DocumentHelper {
             .orElseGet(() -> convertToCaseDocument(caseData.get(LATEST_CONSENT_ORDER)));
     }
 
-    public Document getLatestAmendedConsentOrder(FinremCaseData caseData) {
+    public CaseDocument getLatestAmendedConsentOrder(FinremCaseData caseData) {
         Optional<AmendedConsentOrderCollection> reduce = ofNullable(caseData.getAmendedConsentOrderCollection())
             .orElse(emptyList())
             .stream()
@@ -241,7 +240,7 @@ public class DocumentHelper {
         return Optional.empty();
     }
 
-    public Optional<Document> getLatestRespondToOrderDocuments(FinremCaseData caseData) {
+    public Optional<CaseDocument> getLatestRespondToOrderDocuments(FinremCaseData caseData) {
         Optional<RespondToOrderDocumentCollection> respondToOrderDocumentCollection = ofNullable(caseData.getRespondToOrderDocuments())
             .orElse(emptyList())
             .stream()

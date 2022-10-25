@@ -88,7 +88,7 @@ public class CallbackDispatchServiceTest extends BaseServiceTest {
     public void givenOneHandlerCanHandle_WhenDispatchToHandlers_ThenOnlyAbleHandlerAreCalled() {
 
         when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
-        when(caseDetails.getCaseTypeId()).thenReturn(uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.CaseType.CONSENTED.getCcdType());
+        when(caseDetails.getCaseTypeId()).thenReturn(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED.getCcdType());
         when(callbackRequest.getEventId()).thenReturn(EventType.SEND_ORDER.getCcdType());
 
         when(handler1.canHandle(any(CallbackType.class), any(CaseType.class), any(EventType.class))).thenReturn(true);

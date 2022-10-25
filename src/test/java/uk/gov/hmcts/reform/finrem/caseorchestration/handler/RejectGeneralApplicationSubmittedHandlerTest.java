@@ -156,7 +156,7 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
         );
         caseData.put(GENERAL_APPLICATION_COLLECTION, rejectedGeneralApplicationData);
         CaseDetails caseDetails = CaseDetails.builder()
-            .caseTypeId(uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.CaseType.CONSENTED.getCcdType())
+            .caseTypeId(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED.getCcdType())
             .id(12345L)
             .build();
         caseDetails.setData(caseData);

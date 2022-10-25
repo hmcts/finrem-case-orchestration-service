@@ -4,12 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.domain.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 
 @RequiredArgsConstructor
 public abstract class FinremCallbackHandler implements CallbackHandler<FinremCaseData> {
