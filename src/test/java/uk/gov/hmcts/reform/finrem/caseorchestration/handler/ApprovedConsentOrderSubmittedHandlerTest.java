@@ -23,7 +23,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_EMAIL;
@@ -60,21 +59,21 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
     @Test
     public void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanHandle() {
         assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.APPROVE_ORDER),
+                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.APPROVE_APPLICATION),
             is(true));
     }
 
     @Test
     public void givenACcdCallbackConsentedCase_WhenAnAboutToSubmitCallback_thenHandlerCanNotHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.APPROVE_ORDER),
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.APPROVE_APPLICATION),
             is(false));
     }
 
     @Test
     public void givenACcdCallbackConsentedCase_WhenContestedCaseType_thenHandlerCanNotHandle() {
         assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.APPROVE_ORDER),
+                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.APPROVE_APPLICATION),
             is(false));
     }
 
@@ -161,7 +160,7 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
         caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, YES_VALUE);
 
         caseData.put(DIVORCE_CASE_NUMBER, TEST_DIVORCE_CASE_NUMBER);
-        List<String> natureOfApplication =  List.of("Lump Sum Order",
+        List<String> natureOfApplication = List.of("Lump Sum Order",
             "Periodical Payment Order",
             "Pension Sharing Order",
             "Pension Attachment Order",
@@ -172,7 +171,7 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
         caseData.put("natureOfApplication2", natureOfApplication);
         return CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
-                .caseTypeId(CASE_TYPE_ID_CONSENTED)
+                .caseTypeId(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED.getCcdType())
                 .id(12345L)
                 .data(caseData)
                 .build())
@@ -188,7 +187,7 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
         caseData.put(RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_NAME);
         caseData.put(RESP_SOLICITOR_REFERENCE, TEST_RESP_SOLICITOR_REFERENCE);
         caseData.put(DIVORCE_CASE_NUMBER, TEST_DIVORCE_CASE_NUMBER);
-        List<String> natureOfApplication =  List.of("Lump Sum Order",
+        List<String> natureOfApplication = List.of("Lump Sum Order",
             "Periodical Payment Order",
             "Pension Sharing Order",
             "Pension Attachment Order",
@@ -200,7 +199,7 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
         caseData.put("natureOfApplication2", natureOfApplication);
         return CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
-                .caseTypeId(CASE_TYPE_ID_CONSENTED)
+                .caseTypeId(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED.getCcdType())
                 .id(12345L)
                 .data(caseData)
                 .build())

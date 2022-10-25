@@ -7,10 +7,9 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -20,7 +19,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
-import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -36,7 +34,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_OUTCOME_DECISION;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GeneralApplicationAboutToStartHandlerTest {
+public class GeneralApplicationAboutToStartHandlerTest extends BaseHandlerTest {
 
     private GeneralApplicationAboutToStartHandler handler;
     @Mock
@@ -52,7 +50,7 @@ public class GeneralApplicationAboutToStartHandlerTest {
     public void setup() {
         objectMapper = new ObjectMapper();
         helper = new GeneralApplicationHelper(objectMapper, service);
-        handler  = new GeneralApplicationAboutToStartHandler(helper);
+        handler = new GeneralApplicationAboutToStartHandler(helper);
         when(service.convertDocumentIfNotPdfAlready(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(
             CaseDocument.builder().documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary")
                 .documentFilename("InterimHearingNotice.pdf")
@@ -63,14 +61,14 @@ public class GeneralApplicationAboutToStartHandlerTest {
     @Test
     public void canHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.GENERAL_APPLICATION),
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.CREATE_GENERAL_APPLICATION),
             is(true));
     }
 
     @Test
     public void canNotHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.GENERAL_APPLICATION),
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.CREATE_GENERAL_APPLICATION),
             is(false));
     }
 
@@ -84,14 +82,14 @@ public class GeneralApplicationAboutToStartHandlerTest {
     @Test
     public void canNotHandleWrongCallbackType() {
         assertThat(handler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.GENERAL_APPLICATION),
+                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.CREATE_GENERAL_APPLICATION),
             is(false));
     }
 
     @Test
     public void givenCase_whenExistingGeneApp_thenSetcreatedBy() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        AboutToStartOrSubmitCallbackResponse handle = handler.handle(callbackRequest, AUTH_TOKEN);
+        CallbackRequest callbackRequest = buildCallbackRequest(GA_JSON);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle = handler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = handle.getData();
         List<GeneralApplicationCollectionData> generalApplicationList = helper.getGeneralApplicationList(caseData);
@@ -100,11 +98,11 @@ public class GeneralApplicationAboutToStartHandlerTest {
 
     @Test
     public void givenContestedCase_whenExistingGeneAppAndDirectionGiven_thenMigrateToCollection() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
+        CallbackRequest callbackRequest = buildCallbackRequest(GA_JSON);
         Map<String, Object> data = callbackRequest.getCaseDetails().getData();
         data.put(GENERAL_APPLICATION_OUTCOME_DECISION, GeneralApplicationStatus.APPROVED.getId());
         data.put(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED, YES_VALUE);
-        AboutToStartOrSubmitCallbackResponse handle = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle = handler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = handle.getData();
         List<GeneralApplicationCollectionData> generalApplicationList = helper.getGeneralApplicationList(caseData);
@@ -115,7 +113,7 @@ public class GeneralApplicationAboutToStartHandlerTest {
         assertEquals("applicant", generalApplicationItems.getGeneralApplicationReceivedFrom());
         assertEquals("Claire Mumford", generalApplicationItems.getGeneralApplicationCreatedBy());
         assertEquals("No", generalApplicationItems.getGeneralApplicationHearingRequired());
-        String directionGiven = Objects.toString(caseData.get(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED),null);
+        String directionGiven = Objects.toString(caseData.get(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED), null);
         assertEquals(directionGiven == null
                 ? GeneralApplicationStatus.CREATED.getId() : GeneralApplicationStatus.DIRECTION_APPROVED.getId(),
             generalApplicationItems.getGeneralApplicationStatus());
@@ -133,12 +131,4 @@ public class GeneralApplicationAboutToStartHandlerTest {
         assertNull(generalApplicationItems.getGeneralApplicationDraftOrder());
     }
 
-    private CallbackRequest buildCallbackRequest()  {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(GA_JSON)) {
-            CaseDetails caseDetails = objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-            return CallbackRequest.builder().caseDetails(caseDetails).build();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

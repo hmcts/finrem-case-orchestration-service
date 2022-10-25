@@ -120,9 +120,9 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
         whenRevokeCreatorCaseAccessValid().thenReturn(null);
 
         mvc.perform(post(updateEndpoint())
-            .contentType(MediaType.APPLICATION_JSON)
-            .header(AUTHORIZATION_HEADER, VALID_AUTH_TOKEN)
-            .content(requestContent.toString()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(AUTHORIZATION_HEADER, VALID_AUTH_TOKEN)
+                .content(requestContent.toString()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.RepresentationUpdateHistory[0].value.by",
                 is("Test Applicant Solicitor")))
@@ -162,9 +162,9 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
         when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(true);
 
         mvc.perform(post(setDefaultsEndpoint())
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.updateIncludesRepresentativeChange", is(emptyOrNullString())))
             .andExpect(jsonPath("$.data.nocParty", is(emptyOrNullString())));

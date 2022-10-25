@@ -359,7 +359,8 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
 
     private List<Element<RepresentationUpdate>> convertToChangeOfRepresentation(Map<String, Object> data) {
         return mapper.convertValue(data.get(REPRESENTATION_UPDATE_HISTORY),
-            new TypeReference<>() {});
+            new TypeReference<>() {
+            });
     }
 
     private void setUpDefaultMockContext() throws Exception {
@@ -447,7 +448,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
             .organisation(applicantOrg)
             .build();
         LocalDateTime date = LocalDateTime.of(LocalDate.of(2020, 6, 1),
-            LocalTime.of(15,0));
+            LocalTime.of(15, 0));
         return RepresentationUpdateHistory.builder().representationUpdateHistory(
             List.of(element(UUID.randomUUID(),
                 RepresentationUpdate.builder()
@@ -468,19 +469,19 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
             .organisation(respondentOrg)
             .build();
         LocalDateTime date = LocalDateTime.of(LocalDate.of(2020, 6, 1),
-            LocalTime.of(15,0));
+            LocalTime.of(15, 0));
 
         return RepresentationUpdateHistory.builder().representationUpdateHistory(
             List.of(element(UUID.randomUUID(),
                 RepresentationUpdate.builder()
-                .party("respondent")
-                .clientName("Jane Smith")
-                .date(date)
-                .added(added)
-                .removed(null)
-                .by(testRespSolicitor.getFullName())
-                .via(NOTICE_OF_CHANGE)
-                .build()))).build();
+                    .party("respondent")
+                    .clientName("Jane Smith")
+                    .date(date)
+                    .added(added)
+                    .removed(null)
+                    .by(testRespSolicitor.getFullName())
+                    .via(NOTICE_OF_CHANGE)
+                    .build()))).build();
     }
 
     private RepresentationUpdateHistory getChangeOfRepsReplacingApplicant(UserDetails testAppSolicitorReplacing,
@@ -498,7 +499,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
             .build();
 
         LocalDateTime date = LocalDateTime.of(LocalDate.of(2020, 6, 1),
-            LocalTime.of(15,0));
+            LocalTime.of(15, 0));
 
         return RepresentationUpdateHistory.builder().representationUpdateHistory(
             List.of(element(UUID.randomUUID(),
