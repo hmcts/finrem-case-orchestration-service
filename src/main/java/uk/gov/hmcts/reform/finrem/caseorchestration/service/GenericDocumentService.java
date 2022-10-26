@@ -14,8 +14,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CASE_NUMBER;
-
 
 @Service
 @RequiredArgsConstructor
@@ -27,10 +25,8 @@ public class GenericDocumentService {
 
     public CaseDocument generateDocument(String authorisationToken, CaseDetails caseDetails,
                                          String template, String fileName) {
-        caseDetails.getData().put(CASE_NUMBER, CaseDataService.nullToEmpty(caseDetails.getId()));
         Map<String, Object> caseDetailsMap = Collections.singletonMap(DOCUMENT_CASE_DETAILS_JSON_KEY, caseDetails);
         return generateDocumentFromPlaceholdersMap(authorisationToken, caseDetailsMap, template, fileName);
-
     }
 
     public CaseDocument generateDocumentFromPlaceholdersMap(String authorisationToken, Map placeholders,
