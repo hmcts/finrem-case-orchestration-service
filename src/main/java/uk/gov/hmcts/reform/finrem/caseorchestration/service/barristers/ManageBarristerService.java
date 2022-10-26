@@ -100,6 +100,7 @@ public class ManageBarristerService {
         List<Barrister> addedBarristers = barristerChange.getAdded().stream().toList();
         List<Barrister> removedBarristers = barristerChange.getRemoved().stream().toList();
 
+        log.info("About to send notifications for barrister access for {}", caseDetails.getId());
         addedBarristers.forEach(barrister -> sendNotifications(caseDetails, barrister, Pair.of(authToken, ADDED)));
         removedBarristers.forEach(barrister -> sendNotifications(caseDetails, barrister, Pair.of(authToken, REMOVED)));
     }
@@ -108,8 +109,10 @@ public class ManageBarristerService {
                                    Barrister barrister,
                                    Pair<String, BarristerChangeType> letterData) {
         if (letterData.getRight().equals(ADDED)) {
+            log.info("calling notification-cos service Barrister Added Email for {}", caseDetails.getId());
             notificationService.sendBarristerAddedEmail(caseDetails, barrister);
         } else {
+            log.info("calling notification-cos service Barrister Removed Email for {}", caseDetails.getId());
             notificationService.sendBarristerRemovedEmail(caseDetails, barrister);
         }
 

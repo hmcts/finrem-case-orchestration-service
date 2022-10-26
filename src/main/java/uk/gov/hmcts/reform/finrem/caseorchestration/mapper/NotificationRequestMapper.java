@@ -165,6 +165,7 @@ public class NotificationRequestMapper {
 
     public NotificationRequest buildNotificationRequest(CaseDetails caseDetails, Barrister barrister) {
 
+        log.info("building notification request for barrister access on {}", caseDetails.getId());
         String appName = caseDataService.buildFullName(caseDetails.getData(), APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME);
         return NotificationRequest.builder()
             .name(barrister.getName())

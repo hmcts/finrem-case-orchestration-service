@@ -409,12 +409,14 @@ public class NotificationService {
     public void sendBarristerAddedEmail(CaseDetails caseDetails, Barrister barrister) {
         URI uri = buildUri(notificationServiceConfiguration.getAddedBarrister());
         NotificationRequest notificationRequest = notificationRequestMapper.buildNotificationRequest(caseDetails, barrister);
+        log.info("sending email to {}", notificationRequest.getNotificationEmail());
         sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendBarristerRemovedEmail(CaseDetails caseDetails, Barrister barrister) {
         URI uri = buildUri(notificationServiceConfiguration.getRemovedBarrister());
         NotificationRequest notificationRequest = notificationRequestMapper.buildNotificationRequest(caseDetails, barrister);
+        log.info("sending email to {}", notificationRequest.getNotificationEmail());
         sendNotificationEmail(notificationRequest, uri);
     }
 
