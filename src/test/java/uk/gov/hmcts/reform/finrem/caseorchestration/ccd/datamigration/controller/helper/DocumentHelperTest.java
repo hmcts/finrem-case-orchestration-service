@@ -1,15 +1,19 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.controller.helper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Before;
 import org.junit.Test;
 import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 
 import java.io.InputStream;
@@ -48,11 +52,14 @@ public class DocumentHelperTest {
 
     private ObjectMapper objectMapper;
     private DocumentHelper documentHelper;
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @Before
     public void setup() {
         objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
         CaseDataService caseDataService = new CaseDataService();
+        finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
         documentHelper = new DocumentHelper(objectMapper, caseDataService);
     }
 
@@ -62,7 +69,16 @@ public class DocumentHelperTest {
         CaseDocument latestAmendedConsentOrder = documentHelper.getLatestAmendedConsentOrder(
             callbackRequest.getCaseDetails().getData());
         assertThat(latestAmendedConsentOrder.getDocumentBinaryUrl(),
-            is("http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary"));
+            is("http://doc1.binary"));
+    }
+
+    @Test
+    public void shouldGetLatestFinremAmendedConsentOrder() throws Exception {
+        FinremCallbackRequest callbackRequest = prepareFinremCallbackRequestForLatestConsentedConsentOrder("amend-consent-order-by-caseworker.json");
+        CaseDocument latestAmendedConsentOrder = documentHelper.getLatestAmendedConsentOrder(
+            callbackRequest.getCaseDetails().getData());
+        assertThat(latestAmendedConsentOrder.getDocumentBinaryUrl(),
+            is("http://doc1.binary"));
     }
 
     @Test
@@ -287,6 +303,17 @@ public class DocumentHelperTest {
     private CallbackRequest prepareCallbackRequestForLatestConsentedConsentOrder(String fileName) throws Exception {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH + fileName)) {
             return objectMapper.readValue(resourceAsStream, CallbackRequest.class);
+        }
+    }
+
+    private FinremCallbackRequest prepareFinremCallbackRequestForLatestConsentedConsentOrder(String fileName) throws Exception {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH + fileName)) {
+
+            CallbackRequest callbackRequest = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
+            FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetails());
+            return FinremCallbackRequest.builder()
+                .caseDetails(finremCaseDetails)
+                .build();
         }
     }
 }

@@ -10,6 +10,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -41,6 +42,7 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTest {
     private static final String D81_INDIVIUAL_JSON = "/fixtures/updatecase/amend-divorce-details-d81-individual.json";
     private static final String PAYMENT_UNCHECKED_JSON = "/fixtures/updatecase/amend-remove-periodic-payment-order.json";
     private static final String RES_SOL_JSON = "/fixtures/updatecase/remove-respondent-solicitor-details.json";
+    private static final String APP_SOL_JSON = "/fixtures/updatecase/remove-applicant-solicitor-details.json";
 
 
     private AmendApplicationAboutToSubmitHandler handler;
@@ -49,7 +51,9 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTest {
 
     @Before
     public void setUp() {
-        handler = new AmendApplicationAboutToSubmitHandler(new ObjectMapper().registerModule(new JavaTimeModule()), consentOrderService);
+        FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
+        handler = new AmendApplicationAboutToSubmitHandler(finremCaseDetailsMapper,
+            consentOrderService);
         lenient().when(consentOrderService.getLatestConsentOrderData(isA(CallbackRequest.class)))
             .thenReturn(newDocument(DOC_URL, BINARY_URL, FILE_NAME));
     }
@@ -202,6 +206,23 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTest {
         assertNull(responseData.getContactDetailsWrapper().getRespondentSolicitorDxNumber());
         assertNull(responseData.getContactDetailsWrapper().getRespondentSolicitorEmail());
         assertNull(responseData.getContactDetailsWrapper().getRespondentSolicitorPhone());
+    }
+
+
+    @Test
+    public void givenCase_whenApplicantNotRepresentedBySolicitor_thenShouldDeleteApplicantSolicitorDetails() {
+        CallbackRequest callbackRequest = doValidCaseDataSetUp(APP_SOL_JSON);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        final FinremCaseData responseData = response.getData();
+        assertNull(responseData.getContactDetailsWrapper().getSolicitorFirm());
+        assertNull(responseData.getContactDetailsWrapper().getSolicitorName());
+        assertNull(responseData.getContactDetailsWrapper().getSolicitorReference());
+        assertNull(responseData.getContactDetailsWrapper().getSolicitorAddress());
+        assertNull(responseData.getContactDetailsWrapper().getSolicitorDxNumber());
+        assertNull(responseData.getContactDetailsWrapper().getSolicitorEmail());
+        assertNull(responseData.getContactDetailsWrapper().getSolicitorPhone());
     }
 
     private CallbackRequest doValidCaseDataSetUp(final String path) {

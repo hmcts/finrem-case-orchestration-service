@@ -48,19 +48,6 @@ public class NoCSolicitorDetailsHelper {
         return caseData;
     }
 
-    public static FinremCaseData removeSolicitorAddress(FinremCaseDetails caseDetails) {
-        FinremCaseData caseData = caseDetails.getData();
-
-        if (caseData.getCurrentUserCaseRole().equals(CaseRole.APP_SOLICITOR)) {
-            removeApplicantSolicitorAddress(caseData);
-        } else if (caseData.getCurrentUserCaseRole().equals(CaseRole.RESP_SOLICITOR)) {
-            removeRespondentSolicitorAddress(caseData);
-        }
-
-        caseData.setCurrentUserCaseRole(null);
-        return caseData;
-    }
-
     public static void removeApplicantSolicitorAddress(Map<String, Object> caseData, boolean isContested) {
         caseData.put(isContested ? CONTESTED_SOLICITOR_NAME : CONSENTED_SOLICITOR_NAME, null);
         caseData.put(isContested ? CONTESTED_SOLICITOR_FIRM : CONSENTED_SOLICITOR_FIRM, null);
@@ -76,29 +63,6 @@ public class NoCSolicitorDetailsHelper {
 
     }
 
-    public static void removeApplicantSolicitorAddress(FinremCaseData caseData) {
-        caseData.getContactDetailsWrapper().setSolicitorReference(null);
-
-        if (caseData.isConsentedApplication()) {
-            caseData.getContactDetailsWrapper().setSolicitorName(null);
-            caseData.getContactDetailsWrapper().setSolicitorFirm(null);
-            caseData.getContactDetailsWrapper().setSolicitorAddress(null);
-            caseData.getContactDetailsWrapper().setSolicitorPhone(null);
-            caseData.getContactDetailsWrapper().setSolicitorEmail(null);
-            caseData.getContactDetailsWrapper().setSolicitorAgreeToReceiveEmails(null);
-            caseData.getContactDetailsWrapper().setSolicitorDxNumber(null);
-        }
-
-        if (caseData.isContestedApplication()) {
-            caseData.getContactDetailsWrapper().setApplicantSolicitorName(null);
-            caseData.getContactDetailsWrapper().setApplicantSolicitorFirm(null);
-            caseData.getContactDetailsWrapper().setApplicantSolicitorAddress(null);
-            caseData.getContactDetailsWrapper().setApplicantSolicitorPhone(null);
-            caseData.getContactDetailsWrapper().setApplicantSolicitorEmail(null);
-            caseData.getContactDetailsWrapper().setApplicantSolicitorConsentForEmails(null);
-        }
-    }
-
     public static void removeRespondentSolicitorAddress(Map<String, Object> caseData) {
         caseData.put(RESP_SOLICITOR_NAME, null);
         caseData.put(RESP_SOLICITOR_FIRM, null);
@@ -108,16 +72,5 @@ public class NoCSolicitorDetailsHelper {
         caseData.put(RESP_SOLICITOR_EMAIL, null);
         caseData.put(RESP_SOLICITOR_DX_NUMBER, null);
         caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, null);
-    }
-
-    public static void removeRespondentSolicitorAddress(FinremCaseData caseData) {
-        caseData.getContactDetailsWrapper().setRespondentSolicitorName(null);
-        caseData.getContactDetailsWrapper().setRespondentSolicitorFirm(null);
-        caseData.getContactDetailsWrapper().setRespondentSolicitorReference(null);
-        caseData.getContactDetailsWrapper().setRespondentSolicitorAddress(null);
-        caseData.getContactDetailsWrapper().setRespondentSolicitorPhone(null);
-        caseData.getContactDetailsWrapper().setRespondentSolicitorEmail(null);
-        caseData.getContactDetailsWrapper().setRespondentSolicitorDxNumber(null);
-        caseData.setRespSolNotificationsEmailConsent(null);
     }
 }

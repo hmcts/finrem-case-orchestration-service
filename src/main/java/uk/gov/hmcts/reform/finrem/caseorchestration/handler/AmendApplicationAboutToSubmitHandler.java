@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -19,8 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.NoCSolicitorDetailsHelper.removeApplicantSolicitorAddress;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.NoCSolicitorDetailsHelper.removeRespondentSolicitorAddress;
 
 @Slf4j
 @Service
@@ -29,7 +28,7 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
     private final ConsentOrderService consentOrderService;
 
     @Autowired
-    public AmendApplicationAboutToSubmitHandler(ObjectMapper mapper,
+    public AmendApplicationAboutToSubmitHandler(FinremCaseDetailsMapper mapper,
                                                 ConsentOrderService consentOrderService) {
         super(mapper);
         this.consentOrderService = consentOrderService;
@@ -151,4 +150,27 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
         caseData.getContactDetailsWrapper().setRespondentEmail(null);
     }
 
+
+    private void removeApplicantSolicitorAddress(FinremCaseData caseData) {
+        caseData.getContactDetailsWrapper().setSolicitorReference(null);
+        caseData.getContactDetailsWrapper().setSolicitorName(null);
+        caseData.getContactDetailsWrapper().setSolicitorFirm(null);
+        caseData.getContactDetailsWrapper().setSolicitorAddress(null);
+        caseData.getContactDetailsWrapper().setSolicitorPhone(null);
+        caseData.getContactDetailsWrapper().setSolicitorEmail(null);
+        caseData.getContactDetailsWrapper().setSolicitorAgreeToReceiveEmails(null);
+        caseData.getContactDetailsWrapper().setSolicitorDxNumber(null);
+
+    }
+
+    private void removeRespondentSolicitorAddress(FinremCaseData caseData) {
+        caseData.getContactDetailsWrapper().setRespondentSolicitorName(null);
+        caseData.getContactDetailsWrapper().setRespondentSolicitorFirm(null);
+        caseData.getContactDetailsWrapper().setRespondentSolicitorReference(null);
+        caseData.getContactDetailsWrapper().setRespondentSolicitorAddress(null);
+        caseData.getContactDetailsWrapper().setRespondentSolicitorPhone(null);
+        caseData.getContactDetailsWrapper().setRespondentSolicitorEmail(null);
+        caseData.getContactDetailsWrapper().setRespondentSolicitorDxNumber(null);
+        caseData.setRespSolNotificationsEmailConsent(null);
+    }
 }

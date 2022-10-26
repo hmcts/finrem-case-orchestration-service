@@ -31,6 +31,7 @@
         "document_filename": "file1",
         "document_binary_url": "http://file1.binary"
       },
+      "applicantRepresented": "No",
       "solicitorFirm": "FirmA",
       "solicitorName": "Solictor",
       "applicantLName": "Guy",
@@ -55,21 +56,6 @@
       "respondentEmail": "test@test.com",
       "respondentPhone": "9963472494",
       "appRespondentRep": "No",
-      "rSolicitorAddress": {
-        "AddressLine1": "Line1",
-        "AddressLine2": "Line2",
-        "AddressLine3": "Lne3",
-        "Country": "UK",
-        "County": "Surrey",
-        "PostCode": "CR5 2JX",
-        "PostTown": "Purley"
-      },
-      "rSolicitorDXnumber": "DX123",
-      "rSolicitorEmail": "rsolemail@email",
-      "rSolicitorFirm": "rsolfirm",
-      "rSolicitorName": "rsolname",
-      "rSolicitorPhone": "1234567812",
-      "rSolicitorReference": "rsolRef",
       "consentOrderText": {
         "document_url": "http://file1",
         "document_filename": "file1",

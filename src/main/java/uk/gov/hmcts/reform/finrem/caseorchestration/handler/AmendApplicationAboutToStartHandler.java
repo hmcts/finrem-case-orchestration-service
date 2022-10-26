@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -21,7 +22,7 @@ import java.util.Optional;
 @Service
 public class AmendApplicationAboutToStartHandler extends FinremCallbackHandler {
 
-    public AmendApplicationAboutToStartHandler(ObjectMapper mapper) {
+    public AmendApplicationAboutToStartHandler(FinremCaseDetailsMapper mapper) {
         super(mapper);
     }
 
