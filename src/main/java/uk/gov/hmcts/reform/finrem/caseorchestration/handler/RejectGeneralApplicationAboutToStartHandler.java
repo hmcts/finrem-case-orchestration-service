@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_LIST;
@@ -54,7 +55,7 @@ public class RejectGeneralApplicationAboutToStartHandler
         } else {
             List<DynamicListElement> dynamicListElements = existingGeneralApplicationList.stream()
                 .map(ga -> getDynamicListElements(ga.getId(), getLabel(ga.getGeneralApplicationItems(), index.incrementAndGet())))
-                .toList();
+                .collect(Collectors.toList());
 
             if (dynamicListElements.isEmpty()) {
                 return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData)

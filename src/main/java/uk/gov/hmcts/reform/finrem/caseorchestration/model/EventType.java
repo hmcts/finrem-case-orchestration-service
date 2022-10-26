@@ -35,9 +35,11 @@ public enum EventType {
     MANAGE_BARRISTER("FR_manageBarrister"),
     @JsonEnumDefaultValue
     NONE(""),
+
     MIGRATE_CASE("FR_migrateCase"),
     MIGRATE_Frc_CASE("FR_migrateFrcCase"),
     CASE_NOTES("FR_caseNotes"),
+
     AMENDED_CONSENT_ORDER("FR_amendedConsentOrder"),
     UPDATE_CONTACT_DETAILS("FR_updateContactDetails"),
     UPDATE_DUE_DATE("FR_updateDueDate"),
@@ -47,6 +49,7 @@ public enum EventType {
     REFUND("FR_refund"),
     ATTACH_SCANNED_DOCS("attachScannedDocs"),
     HANDLE_EVIDENCE("handleEvidence"),
+
     APPLICATION_PAYMENT_SUBMISSION("FR_applicationPaymentSubmission"),
     HWF_DECISION("FR_HWFDecision"),
     PAYMENT_REQUIRED("FR_paymentRequired"),
@@ -70,6 +73,7 @@ public enum EventType {
     REFER_TO_JUDGE_FROM_AWAITING_RESPONSE("FR_referToJudgeFromAwaitingResponse"),
     REFER_TO_JUDGE_FROM_RESPOND_TO_ORDER("FR_referToJudgeFromRespondToOrder"),
     REFER_TO_JUDGE_FROM_CLOSE("FR_referToJudgeFromClose"),
+
     SEND_ORDER_FOR_APPROVED("FR_sendOrderForApproved"),
     GENERAL_LETTER("FR_generalLetter"),
     CALLBACK_REJECTED_ORDER("FR_callbackRejectedOrder"),

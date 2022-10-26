@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
@@ -57,7 +58,7 @@ public class RejectGeneralApplicationAboutToSubmitHandler
             final String valueCode = dynamicList.getValueCode();
             log.info("selected dynamic list code : {}", valueCode);
             final List<GeneralApplicationCollectionData> applicationCollectionDataList
-                = existingList.stream().filter(ga -> !ga.getId().equals(valueCode)).sorted(helper::getCompareTo).toList();
+                = existingList.stream().filter(ga -> !ga.getId().equals(valueCode)).sorted(helper::getCompareTo).collect(Collectors.toList());
             log.info("applicationCollectionDataList : {}", applicationCollectionDataList.size());
             caseData.put(GENERAL_APPLICATION_COLLECTION, applicationCollectionDataList);
         }

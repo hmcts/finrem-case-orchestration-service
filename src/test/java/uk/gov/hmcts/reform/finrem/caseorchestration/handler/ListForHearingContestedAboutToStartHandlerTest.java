@@ -28,7 +28,7 @@ public class ListForHearingContestedAboutToStartHandlerTest {
     @Test
     public void givenContestedCase_whenEventIsListForHearing_thenHandlerCanHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.LIST_FOR_HEARING),
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.ADD_LIST_FOR_INTERIM_HEARING_INFO),
             is(true));
     }
 

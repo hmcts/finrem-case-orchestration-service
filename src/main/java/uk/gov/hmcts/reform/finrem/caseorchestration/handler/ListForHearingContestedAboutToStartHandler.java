@@ -25,7 +25,7 @@ public class ListForHearingContestedAboutToStartHandler
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_START.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.LIST_FOR_HEARING.equals(eventType);
+            && EventType.ADD_LIST_FOR_INTERIM_HEARING_INFO.equals(eventType);
     }
 
     @Override

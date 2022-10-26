@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.REFERRED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
@@ -70,7 +71,7 @@ public class GeneralApplicationReferToJudgeAboutToSubmitHandler
         caseData.put(GENERAL_APPLICATION_REFERRED_DETAIL, referredApplicationDetails);
 
         final List<GeneralApplicationCollectionData> applicationCollectionDataList
-            = existingList.stream().map(ga -> setStatus(ga, valueCode)).sorted(helper::getCompareTo).toList();
+            = existingList.stream().map(ga -> setStatus(ga, valueCode)).sorted(helper::getCompareTo).collect(Collectors.toList());
 
         caseData.put(GENERAL_APPLICATION_COLLECTION, applicationCollectionDataList);
     }
