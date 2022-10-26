@@ -29,6 +29,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.DIRECTION_APPROVED;
@@ -153,6 +155,8 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
             list.get(1).getGeneralApplicationItems().getGeneralApplicationStatus());
         assertNull(data.get(GENERAL_APPLICATION_DIRECTIONS_LIST));
         assertNull(data.get(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT));
+
+        verify(service).submitCollectionGeneralApplicationDirections(any(), any(), any());
     }
 
 
