@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -137,7 +138,7 @@ public class ContestedOrderController extends BaseController {
     }
 
     private CaseDocument getBundleDocuments(HearingUploadBundle hdi, List<String> errors) {
-        if (!hdi.getValue().getBundleDocuments().getDocumentFilename().toUpperCase().endsWith(".PDF")) {
+        if (!hdi.getValue().getBundleDocuments().getDocumentFilename().toUpperCase(Locale.ENGLISH).endsWith(".PDF")) {
             errors.add(String.format("Uploaded bundle %s is not in expected format. Please upload bundle in pdf format.",
                 hdi.getValue().getBundleDocuments().getDocumentFilename()));
         }
