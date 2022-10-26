@@ -12,4 +12,5 @@ import lombok.EqualsAndHashCode;
 public class BulkPrintDocument {
 
     private String binaryFileUrl;
+    private String fileName;
 }

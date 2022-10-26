@@ -218,7 +218,10 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
 
     protected BulkPrintRequest bulkPrintRequest() {
         List<BulkPrintDocument> caseDocuments = new ArrayList<>();
-        caseDocuments.add(BulkPrintDocument.builder().binaryFileUrl("http://dm-store/lhjbyuivu87y989hijbb/binary").build());
+        caseDocuments.add(BulkPrintDocument.builder()
+            .binaryFileUrl("http://dm-store/lhjbyuivu87y989hijbb/binary")
+            .fileName("app_docs.pdf")
+            .build());
         return BulkPrintRequest.builder()
             .caseId("123")
             .letterType("FINANCIAL_REMEDY_PACK")
