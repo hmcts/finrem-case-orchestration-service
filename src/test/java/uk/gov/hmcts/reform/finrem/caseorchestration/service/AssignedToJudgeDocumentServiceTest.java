@@ -50,10 +50,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @ActiveProfiles("test-mock-feign-clients")
 public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
 
-    @Autowired
-    private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
-    @Autowired
-    private DocumentClient documentClientMock;
+    @Autowired private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
+    @Autowired private DocumentClient documentClientMock;
 
     private CaseDetails caseDetails;
 
@@ -125,11 +123,11 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
 
         CaseDetails caseDetails = (CaseDetails) documentGenerationRequestCaptor.getValue().getValues().get("caseDetails");
 
-        Addressee addressee = mapper.convertValue(caseDetails.getData().get("addressee"), Addressee.class);
+        Addressee addressee = (Addressee) caseDetails.getData().get("addressee");
         assertThat(addressee.getName(), is("James Joyce"));
         assertThat(addressee.getFormattedAddress(), is("50 Applicant Street\nSecond Address Line\nLondon\nLondon\nSW1"));
 
-        CtscContactDetails ctscContactDetails = mapper.convertValue(caseDetails.getData().get("ctscContactDetails"), CtscContactDetails.class);
+        CtscContactDetails ctscContactDetails = (CtscContactDetails) caseDetails.getData().get("ctscContactDetails");
         assertThat(ctscContactDetails.getServiceCentre(), is("Courts and Tribunals Service Centre"));
 
         assertThat(caseDetails.getData().get("letterDate"), is(String.valueOf(LocalDate.now())));
@@ -171,12 +169,11 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
 
         CaseDetails caseDetails = (CaseDetails) documentGenerationRequestCaptor.getValue().getValues().get("caseDetails");
 
-        Addressee addressee = mapper.convertValue(caseDetails.getData().get("addressee"), Addressee.class);
+        Addressee addressee = (Addressee) caseDetails.getData().get("addressee");
         assertThat(addressee.getName(), is("Saul Goodman"));
         assertThat(addressee.getFormattedAddress(), is("123 Applicant Solicitor Street\nSecond Address Line\nLondon\nLondon\nSE1"));
 
-        CtscContactDetails ctscContactDetails = mapper.convertValue(caseDetails.getData().get("ctscContactDetails"), CtscContactDetails.class);
-
+        CtscContactDetails ctscContactDetails = (CtscContactDetails) caseDetails.getData().get("ctscContactDetails");
         assertThat(ctscContactDetails.getServiceCentre(), is("Courts and Tribunals Service Centre"));
 
         assertThat(caseDetails.getData().get("letterDate"), is(String.valueOf(LocalDate.now())));
@@ -203,12 +200,11 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
 
         CaseDetails caseDetails = (CaseDetails) documentGenerationRequestCaptor.getValue().getValues().get("caseDetails");
 
-        Addressee addressee = mapper.convertValue(caseDetails.getData().get("addressee"), Addressee.class);
+        Addressee addressee = (Addressee) caseDetails.getData().get("addressee");
         assertThat(addressee.getName(), is("Jane Doe"));
         assertThat(addressee.getFormattedAddress(), is("50 Respondent Street\nContested\nLondon\nLondon\nSW1"));
 
-
-        CtscContactDetails ctscContactDetails = mapper.convertValue(caseDetails.getData().get("ctscContactDetails"), CtscContactDetails.class);
+        CtscContactDetails ctscContactDetails = (CtscContactDetails) caseDetails.getData().get("ctscContactDetails");
         assertThat(ctscContactDetails.getServiceCentre(), is("Courts and Tribunals Service Centre"));
 
         assertThat(caseDetails.getData().get("letterDate"), is(String.valueOf(LocalDate.now())));
@@ -250,11 +246,11 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
 
         CaseDetails caseDetails = (CaseDetails) documentGenerationRequestCaptor.getValue().getValues().get("caseDetails");
 
-        Addressee addressee = mapper.convertValue(caseDetails.getData().get("addressee"), Addressee.class);
+        Addressee addressee = (Addressee) caseDetails.getData().get("addressee");
         assertThat(addressee.getName(), is("Saul Goodman"));
         assertThat(addressee.getFormattedAddress(), is("123 Respondent Solicitor Street\nSecond Address Line\nLondon\nLondon\nSE1"));
 
-        CtscContactDetails ctscContactDetails = mapper.convertValue(caseDetails.getData().get("ctscContactDetails"), CtscContactDetails.class);
+        CtscContactDetails ctscContactDetails = (CtscContactDetails) caseDetails.getData().get("ctscContactDetails");
         assertThat(ctscContactDetails.getServiceCentre(), is("Courts and Tribunals Service Centre"));
 
         assertThat(caseDetails.getData().get("letterDate"), is(String.valueOf(LocalDate.now())));

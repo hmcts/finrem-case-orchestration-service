@@ -4,7 +4,6 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
@@ -31,12 +30,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.docume
 @ActiveProfiles("test-mock-feign-clients")
 public class GenericDocumentServiceTest extends BaseServiceTest {
 
-    @Autowired
-    private GenericDocumentService genericDocumentService;
-    @Autowired
-    private DocumentClient documentClientMock;
-    @MockBean
-    protected DocumentHelper documentHelperMock;
+    @Autowired private GenericDocumentService genericDocumentService;
+    @Autowired private DocumentClient documentClientMock;
 
     @Captor
     private ArgumentCaptor<DocumentGenerationRequest> documentGenerationRequestCaptor;
@@ -65,11 +60,10 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
     public void shouldGenerateDocument() {
         final String templateName = "template name";
         final String fileName = "file name";
-        CaseDetails caseDetails = defaultContestedCaseDetails();
 
         when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
-        when(documentHelperMock.deepCopy(caseDetails, CaseDetails.class)).thenReturn(caseDetails);
 
+        CaseDetails caseDetails = defaultContestedCaseDetails();
         CaseDocument document = genericDocumentService.generateDocument(AUTH_TOKEN, caseDetails, templateName, fileName);
 
         assertCaseDocument(document);
@@ -77,6 +71,7 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
 
         assertThat(documentGenerationRequestCaptor.getValue().getTemplate(), is(templateName));
         assertThat(documentGenerationRequestCaptor.getValue().getFileName(), is(fileName));
+        caseDetails.getData().put(DocumentHelper.CASE_NUMBER, caseDetails.getId());
         assertThat(documentGenerationRequestCaptor.getValue().getValues().get("caseDetails"), is(caseDetails));
     }
 

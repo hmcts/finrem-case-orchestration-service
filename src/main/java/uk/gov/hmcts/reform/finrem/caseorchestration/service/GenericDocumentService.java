@@ -22,14 +22,12 @@ public class GenericDocumentService {
     private static final String DOCUMENT_CASE_DETAILS_JSON_KEY = "caseDetails";
 
     private final DocumentClient documentClient;
-    private final DocumentHelper documentHelper;
 
-    public CaseDocument generateDocument(String authorisationToken, CaseDetails caseDetails,
+    public CaseDocument generateDocument(String authorisationToken, CaseDetails caseDetailsCopy,
                                          String template, String fileName) {
-        CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         Map<String, Object> caseData = caseDetailsCopy.getData();
         if (caseData.get(DocumentHelper.CASE_NUMBER) == null) {
-            caseData.put(DocumentHelper.CASE_NUMBER, caseDetails.getId());
+            caseData.put(DocumentHelper.CASE_NUMBER, caseDetailsCopy.getId());
         }
         Map<String, Object> caseDetailsMap = Collections.singletonMap(DOCUMENT_CASE_DETAILS_JSON_KEY, caseDetailsCopy);
         return generateDocumentFromPlaceholdersMap(authorisationToken, caseDetailsMap, template, fileName);
