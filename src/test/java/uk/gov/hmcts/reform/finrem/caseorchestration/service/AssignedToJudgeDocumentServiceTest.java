@@ -50,8 +50,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @ActiveProfiles("test-mock-feign-clients")
 public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
 
-    @Autowired private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
-    @Autowired private DocumentClient documentClientMock;
+    @Autowired
+    private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
+    @Autowired
+    private DocumentClient documentClientMock;
 
     private CaseDetails caseDetails;
 
@@ -169,11 +171,12 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
 
         CaseDetails caseDetails = (CaseDetails) documentGenerationRequestCaptor.getValue().getValues().get("caseDetails");
 
-        Addressee addressee = (Addressee) caseDetails.getData().get("addressee");
+        Addressee addressee = mapper.convertValue(caseDetails.getData().get("addressee"), Addressee.class);
         assertThat(addressee.getName(), is("Saul Goodman"));
         assertThat(addressee.getFormattedAddress(), is("123 Applicant Solicitor Street\nSecond Address Line\nLondon\nLondon\nSE1"));
 
-        CtscContactDetails ctscContactDetails = (CtscContactDetails) caseDetails.getData().get("ctscContactDetails");
+        CtscContactDetails ctscContactDetails = mapper.convertValue(caseDetails.getData().get("ctscContactDetails"), CtscContactDetails.class);
+
         assertThat(ctscContactDetails.getServiceCentre(), is("Courts and Tribunals Service Centre"));
 
         assertThat(caseDetails.getData().get("letterDate"), is(String.valueOf(LocalDate.now())));
