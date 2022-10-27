@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
@@ -14,7 +15,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 
-
 @Service
 @RequiredArgsConstructor
 public class GenericDocumentService {
@@ -22,10 +22,16 @@ public class GenericDocumentService {
     private static final String DOCUMENT_CASE_DETAILS_JSON_KEY = "caseDetails";
 
     private final DocumentClient documentClient;
+    private final DocumentHelper documentHelper;
 
     public CaseDocument generateDocument(String authorisationToken, CaseDetails caseDetails,
                                          String template, String fileName) {
-        Map<String, Object> caseDetailsMap = Collections.singletonMap(DOCUMENT_CASE_DETAILS_JSON_KEY, caseDetails);
+        CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
+        Map<String, Object> caseData = caseDetailsCopy.getData();
+        if (caseData.get(DocumentHelper.CASE_NUMBER) == null) {
+            caseData.put(DocumentHelper.CASE_NUMBER, caseDetails.getId());
+        }
+        Map<String, Object> caseDetailsMap = Collections.singletonMap(DOCUMENT_CASE_DETAILS_JSON_KEY, caseDetailsCopy);
         return generateDocumentFromPlaceholdersMap(authorisationToken, caseDetailsMap, template, fileName);
     }
 

@@ -4,10 +4,13 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
@@ -33,6 +36,8 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
     private GenericDocumentService genericDocumentService;
     @Autowired
     private DocumentClient documentClientMock;
+    @MockBean
+    protected DocumentHelper documentHelperMock;
 
     @Captor
     private ArgumentCaptor<DocumentGenerationRequest> documentGenerationRequestCaptor;
@@ -61,10 +66,11 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
     public void shouldGenerateDocument() {
         final String templateName = "template name";
         final String fileName = "file name";
+        CaseDetails caseDetails = defaultContestedCaseDetails();
 
         when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
+        when(documentHelperMock.deepCopy(caseDetails, CaseDetails.class)).thenReturn(caseDetails);
 
-        CaseDetails caseDetails = defaultContestedCaseDetails();
         CaseDocument document = genericDocumentService.generateDocument(AUTH_TOKEN, caseDetails, templateName, fileName);
 
         assertCaseDocument(document);
