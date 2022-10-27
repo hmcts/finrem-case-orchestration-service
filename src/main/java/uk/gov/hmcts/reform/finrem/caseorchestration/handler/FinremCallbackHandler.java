@@ -22,6 +22,9 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
         return handle(callbackRequestWithFinremCaseDetails, userAuthorisation);
     }
 
+    public abstract GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequestWithFinremCaseDetails,
+                                                                                       String userAuthorisation);
+
     private FinremCallbackRequest mapToFinremCallbackRequest(CallbackRequest callbackRequest) {
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetails());
         FinremCaseDetails finremCaseDetailsBefore = null;
@@ -35,9 +38,5 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
             .build();
         return callbackRequestWithFinremCaseDetails;
     }
-
-    public abstract GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequestWithFinremCaseDetails,
-                                                                                       String userAuthorisation);
-
 
 }
