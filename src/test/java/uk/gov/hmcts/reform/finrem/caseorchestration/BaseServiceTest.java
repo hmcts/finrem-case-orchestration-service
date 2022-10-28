@@ -8,8 +8,12 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
 
 import java.io.InputStream;
@@ -59,6 +63,8 @@ public abstract class BaseServiceTest extends BaseTest {
 
     @Autowired
     protected ObjectMapper mapper;
+    @Autowired
+    protected FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     protected CaseDetails buildCaseDetails() {
         Map<String, Object> caseData = new HashMap<>();
@@ -282,6 +288,18 @@ public abstract class BaseServiceTest extends BaseTest {
             return CallbackRequest.builder().caseDetails(caseDetails).build();
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    protected FinremCallbackRequest buildFinremCallbackRequest(String testJson) throws Exception {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(testJson)) {
+
+            CallbackRequest callbackRequest = mapper.readValue(resourceAsStream, CallbackRequest.class);
+            FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetails());
+            return FinremCallbackRequest.builder()
+                .caseDetails(finremCaseDetails)
+                .eventType(EventType.getEventType(callbackRequest.getEventId()))
+                .build();
         }
     }
 }

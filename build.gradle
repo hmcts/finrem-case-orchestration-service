@@ -181,7 +181,10 @@ sonarqube {
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/handler/RejectedConsentOrderSubmittedHandler.java',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/CaseOrchestrationApplication',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/service/payments/config/**',
-                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/service/payments/model/**']
+                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/service/payments/model/**',
+                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/handler/FinremCallbackRequest.java',
+                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/controllers/GenericAboutToStartOrSubmitCallbackResponse.java'
+        ]
 
     properties {
         property "sonar.projectKey", "finrem-case-orchestration"

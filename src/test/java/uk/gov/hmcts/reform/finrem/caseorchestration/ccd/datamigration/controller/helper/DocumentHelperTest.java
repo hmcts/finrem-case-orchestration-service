@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 
@@ -89,6 +90,7 @@ public class DocumentHelperTest {
         assertThat(pensionDocuments.size(), is(2));
     }
 
+
     @Test
     public void shouldGetFormADocuments() throws Exception {
         CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("validate-form-a-collection.json");
@@ -154,8 +156,26 @@ public class DocumentHelperTest {
     }
 
     @Test
+    public void shouldGetFinremRespondToOrderDocuments() throws Exception {
+        FinremCallbackRequest callbackRequest = prepareFinremCallbackRequestForLatestConsentedConsentOrder("respond-to-order-solicitor.json");
+        Optional<CaseDocument> latestRespondToOrderDocuments = documentHelper.getLatestRespondToOrderDocuments(
+            callbackRequest.getCaseDetails().getData());
+        assertThat(latestRespondToOrderDocuments.isPresent(), is(true));
+        assertThat(latestRespondToOrderDocuments.get().getDocumentBinaryUrl(), is("http://doc2/binary"));
+    }
+
+    @Test
     public void shouldNotGetRespondToOrderDocuments() throws Exception {
         CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("respond-to-order-without-consent-order.json");
+        Optional<CaseDocument> latestRespondToOrderDocuments = documentHelper.getLatestRespondToOrderDocuments(
+            callbackRequest.getCaseDetails().getData());
+        assertThat(latestRespondToOrderDocuments.isPresent(), is(false));
+    }
+
+    @Test
+    public void shouldNotGetFinremRespondToOrderDocuments() throws Exception {
+        FinremCallbackRequest callbackRequest =
+            prepareFinremCallbackRequestForLatestConsentedConsentOrder("respond-to-order-without-consent-order.json");
         Optional<CaseDocument> latestRespondToOrderDocuments = documentHelper.getLatestRespondToOrderDocuments(
             callbackRequest.getCaseDetails().getData());
         assertThat(latestRespondToOrderDocuments.isPresent(), is(false));
@@ -167,6 +187,18 @@ public class DocumentHelperTest {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> data = caseDetails.getData();
         CaseDocument caseDocument = documentHelper.convertToCaseDocument(data.get(CONSENT_ORDER));
+
+        assertThat(caseDocument.getDocumentBinaryUrl(), is("http://file1.binary"));
+        assertThat(caseDocument.getDocumentUrl(), is("http://file1"));
+        assertThat(caseDocument.getDocumentFilename(), is("file1"));
+    }
+
+    @Test
+    public void shouldGetFinremCaseDocument() throws Exception {
+        FinremCallbackRequest callbackRequest = prepareFinremCallbackRequestForLatestConsentedConsentOrder("draft-consent-order.json");
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+        CaseDocument caseDocument = documentHelper.convertToCaseDocument(data.getConsentOrder());
 
         assertThat(caseDocument.getDocumentBinaryUrl(), is("http://file1.binary"));
         assertThat(caseDocument.getDocumentUrl(), is("http://file1"));
