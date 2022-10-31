@@ -20,7 +20,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     private static final String APPLICANT_NAME = "Williams";
-    private static final String DIVORCE_CASENO = "DD12D12345";
     private static final String CASE_NUMBER = "12345678";
     private static final String SOLICITOR_FIRM = "Michael Jones & Partners";
     private static final String SOLICITOR_NAME = "Jane Smith";
@@ -220,7 +219,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
 
         assertTrue(documentContent.contains(APPLICANT_NAME));
-        assertTrue(documentContent.contains(DIVORCE_CASENO));
+        assertTrue(documentContent.contains(CASE_NUMBER));
     }
 
     @Test
@@ -232,7 +231,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
 
         assertTrue(documentContent.contains(APPLICANT_NAME_HEARING));
-        assertTrue(documentContent.contains(DIVORCE_CASENO));
+        assertTrue(documentContent.contains(CASE_NUMBER));
         assertTrue(documentContent.contains(SOLICITOR_REF_HEARING));
     }
 
@@ -245,7 +244,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
 
         assertTrue(documentContent.contains(APPLICANT_NAME_HEARING));
-        assertTrue(documentContent.contains(DIVORCE_CASENO));
+        assertTrue(documentContent.contains(CASE_NUMBER));
         assertTrue(documentContent.contains(SOLICITOR_REF_HEARING));
     }
 
