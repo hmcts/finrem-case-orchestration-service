@@ -33,9 +33,9 @@ public enum EventType {
     GENERAL_APPLICATION_DIRECTIONS("FR_GeneralApplicationDirections"),
     LIST_FOR_HEARING_CONSENTED("FR_listForHearing"),
     MANAGE_BARRISTER("FR_manageBarrister"),
+
     @JsonEnumDefaultValue
     NONE(""),
-
     MIGRATE_CASE("FR_migrateCase"),
     MIGRATE_Frc_CASE("FR_migrateFrcCase"),
     CASE_NOTES("FR_caseNotes"),
