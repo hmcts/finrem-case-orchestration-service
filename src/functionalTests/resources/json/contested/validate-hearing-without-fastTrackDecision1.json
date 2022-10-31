@@ -1,7 +1,7 @@
 {
   "event_id": "some_event_id",
   "case_details": {
-    "id": "12345678",
+    "id": "123",
     "jurisdiction": "DIVORCE",
     "state": "applicationDrafted",
     "case_type_id": "FinancialRemedyContested",
