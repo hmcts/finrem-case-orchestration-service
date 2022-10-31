@@ -66,7 +66,8 @@ public class GeneralOrderService {
     public BulkPrintDocument getLatestGeneralOrderAsBulkPrintDocument(Map<String, Object> caseData) {
         CaseDocument latestGeneralOrder = documentHelper.getLatestGeneralOrder(caseData);
         return latestGeneralOrder != null
-            ? BulkPrintDocument.builder().binaryFileUrl(latestGeneralOrder.getDocumentBinaryUrl()).build()
+            ? BulkPrintDocument.builder().binaryFileUrl(latestGeneralOrder.getDocumentBinaryUrl())
+            .fileName(latestGeneralOrder.getDocumentFilename()).build()
             : null;
     }
 
