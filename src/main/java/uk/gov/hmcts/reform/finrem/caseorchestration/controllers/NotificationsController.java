@@ -339,16 +339,18 @@ public class NotificationsController extends BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @RequestBody CallbackRequest callbackRequest) {
 
-        log.info("Received request to send email for 'Prepare for Hearing' for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        log.info("Received request for 'Prepare for Hearing' for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         if (notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
-            log.info("Sending email notification to Applicant Solicitor for 'Prepare for Hearing'");
+            log.info("Sending email notification to Applicant Solicitor for 'Prepare for Hearing' for Case ID: {}",
+                callbackRequest.getCaseDetails().getId());
             notificationService.sendPrepareForHearingEmailApplicant(caseDetails);
         }
         if (notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
-            log.info("Sending email notification to Respondent Solicitor for 'Prepare for Hearing'");
+            log.info("Sending email notification to Respondent Solicitor for 'Prepare for Hearing' for Case ID: {}",
+                callbackRequest.getCaseDetails().getId());
             notificationService.sendPrepareForHearingEmailRespondent(caseDetails);
         }
 
