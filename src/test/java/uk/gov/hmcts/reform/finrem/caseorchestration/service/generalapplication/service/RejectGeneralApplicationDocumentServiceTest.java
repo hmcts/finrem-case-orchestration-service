@@ -62,7 +62,7 @@ public class RejectGeneralApplicationDocumentServiceTest extends BaseServiceTest
 
     @Test
     public void givenValidCaseData_whenGenerateGeneralApplicationRejectionLetter_thenGenerateLetter() {
-        when(generalApplicationRejectionLetterGenerator.generate(any(), any())).thenReturn(letterDetails());
+        when(generalApplicationRejectionLetterGenerator.generate(any(), any(), any())).thenReturn(letterDetails());
         when(genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), any(),
             eq(documentConfiguration.getGeneralApplicationRejectionTemplate()),
             eq(documentConfiguration.getGeneralApplicationRejectionFileName()))).thenReturn(expectedCaseDocument());

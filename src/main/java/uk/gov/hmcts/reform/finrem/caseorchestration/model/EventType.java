@@ -38,6 +38,9 @@ public enum EventType {
     CONSENTED_UPDATE_COURT_INFO("FR_updateCourtInfo"),
     UPDATE_FRC_INFORMATION("FR_updateFRCInformation"),
     GIVE_ALLOCATION_DIRECTIONS("FR_giveAllocationDirections"),
+    LIST_FOR_HEARING_CONSENTED("FR_listForHearing"),
+    MANAGE_BARRISTER("FR_manageBarrister"),
+    ISSUE_APPLICATION("FR_issueApplication"),
     NONE("");
 
     private final String ccdType;

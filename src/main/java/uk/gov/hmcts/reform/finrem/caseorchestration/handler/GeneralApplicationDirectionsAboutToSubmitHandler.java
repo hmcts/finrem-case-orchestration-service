@@ -77,7 +77,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
                                             String userAuthorisation) {
         Map<String, Object> caseData = caseDetails.getData();
         List<GeneralApplicationCollectionData> existingGeneralApplication = helper.getGeneralApplicationList(caseData);
-        GeneralApplicationCollectionData data = helper.migrateExistingGeneralApplication(caseData);
+        GeneralApplicationCollectionData data = helper.migrateExistingGeneralApplication(caseData, userAuthorisation);
         if (data != null) {
             String status = Objects.toString(caseData.get(GENERAL_APPLICATION_OUTCOME_DECISION), null);
             log.info("In migration outcome decision {} for general application for Case ID: {} Event type {}",
@@ -146,17 +146,20 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
 
         final BulkPrintDocument bpDoc = BulkPrintDocument.builder()
             .binaryFileUrl(items.getGeneralApplicationDirectionsDocument().getDocumentBinaryUrl())
+            .fileName(items.getGeneralApplicationDirectionsDocument().getDocumentFilename())
             .build();
         bulkPrintDocuments.add(bpDoc);
 
         final BulkPrintDocument genDoc = BulkPrintDocument.builder()
             .binaryFileUrl(items.getGeneralApplicationDocument().getDocumentBinaryUrl())
+            .fileName(items.getGeneralApplicationDocument().getDocumentFilename())
             .build();
         bulkPrintDocuments.add(genDoc);
 
         if (items.getGeneralApplicationDraftOrder() != null) {
             final BulkPrintDocument draftDoc = BulkPrintDocument.builder()
                 .binaryFileUrl(items.getGeneralApplicationDraftOrder().getDocumentBinaryUrl())
+                .fileName(items.getGeneralApplicationDraftOrder().getDocumentFilename())
                 .build();
             bulkPrintDocuments.add(draftDoc);
         }
