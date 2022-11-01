@@ -41,7 +41,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RE
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REFERRED_DETAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REPRESENTATION_UPDATE_HISTORY;
@@ -371,24 +370,6 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
                 is("cfc")));
         assertEquals("Lee Powers Mcbride", notificationRequest.getRespondentName());
         assertEquals("Austin Bates Porter", notificationRequest.getApplicantName());
-    }
-
-    @Test
-    public void givenContestedCase_whenReferToJudgeInvoked_thenEmailBodyContainsDetails() {
-        CallbackRequest callbackRequest = getContestedCallbackRequest();
-        callbackRequest.getCaseDetails().getData().put(GENERAL_APPLICATION_REFERRED_DETAIL,
-            "Application 1 - Received From - Applicant");
-        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForRespondentSolicitor(
-            callbackRequest.getCaseDetails());
-
-        assertEquals("12345", notificationRequest.getCaseReferenceNumber());
-        assertEquals(TEST_RESP_SOLICITOR_REFERENCE, notificationRequest.getSolicitorReferenceNumber());
-        assertEquals(TEST_DIVORCE_CASE_NUMBER, notificationRequest.getDivorceCaseNumber());
-        assertEquals(TEST_RESP_SOLICITOR_NAME, notificationRequest.getName());
-        assertEquals(TEST_RESP_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
-        assertEquals("Application 1 - Received From - Applicant", notificationRequest.getGeneralEmailBody());
-        assertEquals("contested", notificationRequest.getCaseType());
-        assertEquals("nottingham", notificationRequest.getSelectedCourt());
     }
 
     @Test
