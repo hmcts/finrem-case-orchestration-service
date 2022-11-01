@@ -31,8 +31,6 @@ public class HandlerConflictsTest {
                         .map(handler -> handler.getClass().getSimpleName())
                         .toList();
 
-                    System.out.println(couldBeHandled);
-
                     assertTrue(couldBeHandled.size() <= 1);
                 }
             }
