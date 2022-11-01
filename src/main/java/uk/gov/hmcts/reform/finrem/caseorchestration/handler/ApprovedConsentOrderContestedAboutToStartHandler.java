@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueS
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ApprovedConsentOrderAboutToStartHandler implements CallbackHandler {
+public class ApprovedConsentOrderContestedAboutToStartHandler implements CallbackHandler {
 
     private final OnStartDefaultValueService onStartDefaultValueService;
 
@@ -22,15 +22,15 @@ public class ApprovedConsentOrderAboutToStartHandler implements CallbackHandler 
     public boolean canHandle(final CallbackType callbackType, final CaseType caseType,
                              final EventType eventType) {
         return CallbackType.ABOUT_TO_START.equals(callbackType)
-            && CaseType.CONSENTED.equals(caseType)
+            && CaseType.CONTESTED.equals(caseType)
             && EventType.APPROVE_ORDER.equals(eventType);
     }
 
     @Override
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
                                                        String userAuthorisation) {
-        onStartDefaultValueService.defaultConsentedOrderJudgeName(callbackRequest, userAuthorisation);
-        onStartDefaultValueService.defaultConsentedOrderDate(callbackRequest);
+        onStartDefaultValueService.defaultContestedOrderJudgeName(callbackRequest, userAuthorisation);
+        onStartDefaultValueService.defaultContestedOrderDate(callbackRequest);
         return AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build();
     }
 }
