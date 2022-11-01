@@ -23,15 +23,15 @@ public class HandlerConflictsTest {
 
     @Test
     public void givenAllPossibleParams_whenCanHandleCalledOnHandlers_thenOnlyOneHandlerCanHandle() {
-
         for (CallbackType callbackType : CallbackType.values()) {
             for (EventType eventType : EventType.values()) {
                 for (CaseType caseType : CaseType.values()) {
-
                     List<String> couldBeHandled = handlers.stream()
                         .filter(handler -> handler.canHandle(callbackType, caseType, eventType))
                         .map(handler -> handler.getClass().getSimpleName())
                         .toList();
+
+                    System.out.println(couldBeHandled);
 
                     assertTrue(couldBeHandled.size() <= 1);
                 }

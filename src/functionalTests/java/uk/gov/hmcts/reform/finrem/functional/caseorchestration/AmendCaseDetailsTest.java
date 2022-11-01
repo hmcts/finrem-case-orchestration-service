@@ -152,30 +152,6 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyDeleteDecreeNisiWhenSolicitorChooseToDecreeAbsoluteForContested() {
-        jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl, contestedDir,
-            "amend-divorce-details-decree-nisi-handler.json");
-
-        if (jsonPathEvaluator.get("divorceUploadEvidence2") != null
-            || jsonPathEvaluator.get("divorceDecreeAbsoluteDate") != null) {
-
-            Assert.fail("The decree nisi file is still showing in the result.");
-        }
-    }
-
-    @Test
-    public void verifyDeleteDecreeAbsoluteWhenSolicitorChooseToDecreeNisiForContested() {
-        jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl, contestedDir,
-            "amend-divorce-details-decree-absolute-handler.json");
-
-        if (jsonPathEvaluator.get("divorceUploadEvidence1") != null
-            || jsonPathEvaluator.get("divorceDecreeNisiDate") != null) {
-
-            Assert.fail("The decree Absolute file is still showing in the result.");
-        }
-    }
-
-    @Test
     public void verifyRemovePropertyAdjustmentOrderDetailsWhenSolicitorUncheckedForContested() {
 
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl, contestedDir,
