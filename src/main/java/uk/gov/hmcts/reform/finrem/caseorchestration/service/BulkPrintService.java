@@ -34,7 +34,9 @@ public class BulkPrintService {
 
     public UUID sendDocumentForPrint(final CaseDocument document, CaseDetails caseDetails) {
         List<BulkPrintDocument> bulkPrintDocument = Collections.singletonList(
-            BulkPrintDocument.builder().binaryFileUrl(document.getDocumentBinaryUrl()).build());
+            BulkPrintDocument.builder().binaryFileUrl(document.getDocumentBinaryUrl())
+                .fileName(document.getDocumentFilename())
+                .build());
 
         return bulkPrintDocuments(caseDetails.getId(), FINANCIAL_REMEDY_GENERAL_LETTER, bulkPrintDocument);
     }
