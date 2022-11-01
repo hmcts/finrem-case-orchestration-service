@@ -40,23 +40,9 @@ public class ConsentedCaseManagementLocationMidEventHandlerTest {
     private CallbackRequest callbackRequest;
 
     @Test
-    public void givenCallbackCanBeHandledCreateCase_whenCanHandleCalled_thenReturnTrue() {
-        assertThat(consentedCaseManagementLocationMidEventHandler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.AMEND_APP_DETAILS),
-            is(true));
-    }
-
-    @Test
     public void givenCallbackCanBeHandledUpdateFrcInfo_whenCanHandleCalled_thenReturnTrue() {
         assertThat(consentedCaseManagementLocationMidEventHandler
                 .canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.CONSENTED_UPDATE_COURT_INFO),
-            is(true));
-    }
-
-    @Test
-    public void givenCallbackCanBeHandledPaperCase_whenCanHandleCalled_thenReturnTrue() {
-        assertThat(consentedCaseManagementLocationMidEventHandler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.AMEND_APP_DETAILS),
             is(true));
     }
 

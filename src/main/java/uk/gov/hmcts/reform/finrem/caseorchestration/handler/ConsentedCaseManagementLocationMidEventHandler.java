@@ -21,8 +21,7 @@ public class ConsentedCaseManagementLocationMidEventHandler implements CallbackH
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.MID_EVENT.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && (EventType.AMEND_APP_DETAILS.equals(eventType)
-            || EventType.CONSENTED_UPDATE_COURT_INFO.equals(eventType));
+            && EventType.CONSENTED_UPDATE_COURT_INFO.equals(eventType);
     }
 
     @Override

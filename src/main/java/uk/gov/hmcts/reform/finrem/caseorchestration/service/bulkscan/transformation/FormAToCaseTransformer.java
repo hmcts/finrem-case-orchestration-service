@@ -76,7 +76,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         ocrToCCDMapping = formAExceptionRecordToCcdMap();
     }
 
-    private final CaseDataService caseDataService = new CaseDataService();
+    private final CaseDataService caseDataService;
 
     private static Map<String, String> formAExceptionRecordToCcdMap() {
         Map<String, String> exceptionRecordToCcdFieldsMap = new HashMap<>();
