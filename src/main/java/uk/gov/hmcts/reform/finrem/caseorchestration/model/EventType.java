@@ -35,6 +35,7 @@ public enum EventType {
     GENERAL_APPLICATION_DIRECTIONS("FR_GeneralApplicationDirections"),
     LIST_FOR_HEARING_CONSENTED("FR_listForHearing"),
     MANAGE_BARRISTER("FR_manageBarrister"),
+    ISSUE_APPLICATION("FR_issueApplication"),
     CONSENT_APPLICATION_APPROVED_IN_CONTESTED("FR_consentOrderApproved"),
     NONE("");
 
