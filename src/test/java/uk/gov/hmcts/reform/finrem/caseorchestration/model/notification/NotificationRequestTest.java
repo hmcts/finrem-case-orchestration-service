@@ -69,6 +69,7 @@ public class NotificationRequestTest {
         underTest.setPhoneOpeningHours(CTSC_OPENING_HOURS);
         underTest.setApplicantName("Victoria Goodman");
         underTest.setRespondentName("Victor Goodman");
+        underTest.setHearingType("First Directions Appointment (FDA)");
         assertEquals("54321", underTest.getCaseReferenceNumber());
         assertEquals("67891", underTest.getSolicitorReferenceNumber());
         assertEquals("D456", underTest.getDivorceCaseNumber());
@@ -80,5 +81,6 @@ public class NotificationRequestTest {
         assertEquals(CTSC_OPENING_HOURS, underTest.getPhoneOpeningHours());
         assertEquals("Victoria Goodman", underTest.getApplicantName());
         assertEquals("Victor Goodman", underTest.getRespondentName());
+        assertEquals("First Directions Appointment (FDA)", underTest.getHearingType());
     }
 }

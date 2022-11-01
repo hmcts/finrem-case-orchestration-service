@@ -146,17 +146,20 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
 
         final BulkPrintDocument bpDoc = BulkPrintDocument.builder()
             .binaryFileUrl(items.getGeneralApplicationDirectionsDocument().getDocumentBinaryUrl())
+            .fileName(items.getGeneralApplicationDirectionsDocument().getDocumentFilename())
             .build();
         bulkPrintDocuments.add(bpDoc);
 
         final BulkPrintDocument genDoc = BulkPrintDocument.builder()
             .binaryFileUrl(items.getGeneralApplicationDocument().getDocumentBinaryUrl())
+            .fileName(items.getGeneralApplicationDocument().getDocumentFilename())
             .build();
         bulkPrintDocuments.add(genDoc);
 
         if (items.getGeneralApplicationDraftOrder() != null) {
             final BulkPrintDocument draftDoc = BulkPrintDocument.builder()
                 .binaryFileUrl(items.getGeneralApplicationDraftOrder().getDocumentBinaryUrl())
+                .fileName(items.getGeneralApplicationDraftOrder().getDocumentFilename())
                 .build();
             bulkPrintDocuments.add(draftDoc);
         }

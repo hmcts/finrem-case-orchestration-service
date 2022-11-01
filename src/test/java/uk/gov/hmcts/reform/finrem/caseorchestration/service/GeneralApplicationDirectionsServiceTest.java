@@ -293,7 +293,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         List<BulkPrintDocument> documentsToPrint = printDocumentsRequestDocumentListCaptor.getValue();
         assertThat(documentsToPrint, containsInAnyOrder(Stream.of(
             GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL)
-            .map(binaryFileUrl -> BulkPrintDocument.builder().binaryFileUrl(binaryFileUrl).build())
+            .map(binaryFileUrl -> BulkPrintDocument.builder().binaryFileUrl(binaryFileUrl).fileName("app_docs.pdf").build())
             .toArray()));
     }
 
@@ -302,6 +302,9 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     }
 
     private BulkPrintDocument getCaseDocumentAsBulkPrintDocument(CaseDocument caseDocument) {
-        return BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl()).build();
+        return BulkPrintDocument.builder()
+            .binaryFileUrl(caseDocument.getDocumentBinaryUrl())
+            .fileName(caseDocument.getDocumentFilename())
+            .build();
     }
 }
