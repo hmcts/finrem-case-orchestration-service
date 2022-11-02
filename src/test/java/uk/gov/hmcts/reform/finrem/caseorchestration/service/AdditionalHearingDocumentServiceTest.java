@@ -472,4 +472,21 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         verify(bulkPrintService, timeout(100).times(1))
             .printApplicantDocuments(any(), any(), any());
     }
+
+    @Test
+    public void shouldNotPrintIfAdditionalHearingDocumentsIsNull() throws JsonProcessingException {
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
+        additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
+
+        caseDetails.getData().put(ADDITIONAL_HEARING_DOCUMENT_COLLECTION, null);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(false);
+        when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(true);
+
+        additionalHearingDocumentService.bulkPrintAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
+
+        verify(bulkPrintService, timeout(100).times(0))
+            .printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService, timeout(100).times(1))
+            .printApplicantDocuments(any(), any(), any());
+    }
 }

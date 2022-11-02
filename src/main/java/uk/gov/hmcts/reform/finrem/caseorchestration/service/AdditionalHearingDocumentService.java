@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
@@ -97,9 +98,9 @@ public class AdditionalHearingDocumentService {
                                                  String authorisationToken) {
         hearingOrderCollectionData.forEach(element -> convertHearingOrderCollectionDocumentsToPdf(element, authorisationToken));
         caseDetails.getData().put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
-        caseDetails.getData().put(LATEST_DRAFT_HEARING_ORDER,
+        caseDetails.getData().put(LATEST_DRAFT_HEARING_ORDER, (!CollectionUtils.isEmpty(hearingOrderCollectionData)) ?
             hearingOrderCollectionData.get(hearingOrderCollectionData.size() - 1)
-                .getHearingOrderDocuments().getUploadDraftDocument());
+                .getHearingOrderDocuments().getUploadDraftDocument() : new ArrayList<>());
     }
 
     public void createAndStoreAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails)
@@ -217,8 +218,6 @@ public class AdditionalHearingDocumentService {
             documentHelper.convertToAdditionalHearingDocumentData(
                 caseDetails.getData().get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION));
 
-        AdditionalHearingDocumentData additionalHearingDocument = additionalHearingDocumentData.get(additionalHearingDocumentData.size() - 1);
-
         List<BulkPrintDocument> document = new ArrayList<>();
         if (caseDetails.getData().get(HEARING_ADDITIONAL_DOC) != null) {
             BulkPrintDocument additionalUploadedDoc
@@ -227,10 +226,12 @@ public class AdditionalHearingDocumentService {
             document.add(additionalUploadedDoc);
         }
 
-        BulkPrintDocument additionalDoc
-            = documentHelper.getBulkPrintDocumentFromCaseDocument(additionalHearingDocument.getAdditionalHearingDocument().getDocument());
-
-        document.add(additionalDoc);
+        if (!CollectionUtils.isEmpty(additionalHearingDocumentData)) {
+            AdditionalHearingDocumentData additionalHearingDocument = additionalHearingDocumentData.get(additionalHearingDocumentData.size() - 1);
+            BulkPrintDocument additionalDoc
+                = documentHelper.getBulkPrintDocumentFromCaseDocument(additionalHearingDocument.getAdditionalHearingDocument().getDocument());
+            document.add(additionalDoc);
+        }
 
         if (!notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
             bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, document);
