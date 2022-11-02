@@ -9,6 +9,7 @@ import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchDocumentExistsException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentData;
@@ -227,10 +228,15 @@ public class AdditionalHearingDocumentService {
         }
 
         if (!CollectionUtils.isEmpty(additionalHearingDocumentData)) {
+            log.info("Found additional hearing documents {}",additionalHearingDocumentData.size());
             AdditionalHearingDocumentData additionalHearingDocument = additionalHearingDocumentData.get(additionalHearingDocumentData.size() - 1);
             BulkPrintDocument additionalDoc
                 = documentHelper.getBulkPrintDocumentFromCaseDocument(additionalHearingDocument.getAdditionalHearingDocument().getDocument());
             document.add(additionalDoc);
+        } else {
+            String message = "Additional Hearing Document doesn't exists";
+            log.error(message);
+            throw new NoSuchDocumentExistsException(message);
         }
 
         if (!notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {

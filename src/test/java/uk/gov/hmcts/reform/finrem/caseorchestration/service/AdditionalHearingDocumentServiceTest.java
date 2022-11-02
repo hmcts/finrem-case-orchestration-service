@@ -11,6 +11,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchDocumentExistsException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
@@ -473,7 +474,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
             .printApplicantDocuments(any(), any(), any());
     }
 
-    @Test
+    @Test(expected = NoSuchDocumentExistsException.class)
     public void shouldNotPrintIfAdditionalHearingDocumentsIsNull() throws JsonProcessingException {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
         additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
@@ -483,10 +484,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(true);
 
         additionalHearingDocumentService.bulkPrintAdditionalHearingDocuments(caseDetails, AUTH_TOKEN);
-
-        verify(bulkPrintService, timeout(100).times(0))
-            .printRespondentDocuments(any(), any(), any());
-        verify(bulkPrintService, timeout(100).times(1))
-            .printApplicantDocuments(any(), any(), any());
+        // if exception then following line should not be called
+        assertTrue(false);
     }
 }
