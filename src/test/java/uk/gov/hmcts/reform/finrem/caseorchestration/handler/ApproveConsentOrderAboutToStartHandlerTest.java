@@ -1,16 +1,17 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueService;
 
 import java.util.HashMap;
@@ -20,20 +21,18 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.*;
+import static org.mockito.Mockito.verify;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_DIRECTION_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_DIRECTION_JUDGE_NAME;
 
+@RunWith(MockitoJUnitRunner.class)
 public class ApproveConsentOrderAboutToStartHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
+    @InjectMocks
     private ApprovedConsentOrderAboutToStartHandler handler;
     @Mock
-    private IdamService service;
-
-    @Before
-    public void setup() {
-        handler =  new ApprovedConsentOrderAboutToStartHandler(new OnStartDefaultValueService());
-    }
+    private OnStartDefaultValueService onStartDefaultValueService;
 
     @Test
     public void givenConsentedCase_whenEventIsApproveAndCallbackIsSubmitted_thenHandlerCanNotHandle() {
@@ -53,7 +52,7 @@ public class ApproveConsentOrderAboutToStartHandlerTest {
     public void givenContestedCase_whenUseApproveOrder_thenDefaultOrderDateSetToCurrentDate() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         AboutToStartOrSubmitCallbackResponse response = handler.handle(callbackRequest, AUTH_TOKEN);
-        assertNotNull(response.getData().get(CONSENTED_ORDER_DIRECTION_DATE));
+        verify(onStartDefaultValueService).defaultConsentedOrderDate(callbackRequest);
     }
 
     @Test
@@ -67,10 +66,8 @@ public class ApproveConsentOrderAboutToStartHandlerTest {
     @Test
     public void givenContestedCase_whenUseApproveOrder_thenDefaultJudgeNameSetToUser() {
         CallbackRequest callbackRequest = buildCallbackRequest();
-        when(service.getIdamFullName(AUTH_TOKEN)).thenReturn("Test Name");
         AboutToStartOrSubmitCallbackResponse response = handler.handle(callbackRequest, AUTH_TOKEN);
-        assertNotNull(response.getData().get(CONSENTED_ORDER_DIRECTION_JUDGE_NAME));
-        assertEquals("Test Name", response.getData().get(CONSENTED_ORDER_DIRECTION_JUDGE_NAME));
+        verify(onStartDefaultValueService).defaultConsentedOrderJudgeName(callbackRequest, AUTH_TOKEN);
     }
 
     @Test
@@ -85,6 +82,6 @@ public class ApproveConsentOrderAboutToStartHandlerTest {
     private CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
         CaseDetails caseDetails = CaseDetails.builder().id(123L).caseTypeId(CaseType.CONSENTED.getCcdType()). data(caseData).build();
-        return CallbackRequest.builder().eventId(EventType.ISSUE_APPLICATION.getCcdType()).caseDetails(caseDetails).build();
+        return CallbackRequest.builder().eventId(EventType.APPROVE_ORDER.getCcdType()).caseDetails(caseDetails).build();
     }
 }
