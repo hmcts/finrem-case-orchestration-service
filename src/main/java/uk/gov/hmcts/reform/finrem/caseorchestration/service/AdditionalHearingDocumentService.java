@@ -98,9 +98,9 @@ public class AdditionalHearingDocumentService {
                                                  String authorisationToken) {
         hearingOrderCollectionData.forEach(element -> convertHearingOrderCollectionDocumentsToPdf(element, authorisationToken));
         caseDetails.getData().put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
-        caseDetails.getData().put(LATEST_DRAFT_HEARING_ORDER, (!CollectionUtils.isEmpty(hearingOrderCollectionData)) ?
+        caseDetails.getData().put(LATEST_DRAFT_HEARING_ORDER,
             hearingOrderCollectionData.get(hearingOrderCollectionData.size() - 1)
-                .getHearingOrderDocuments().getUploadDraftDocument() : new ArrayList<>());
+                .getHearingOrderDocuments().getUploadDraftDocument());
     }
 
     public void createAndStoreAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails)
