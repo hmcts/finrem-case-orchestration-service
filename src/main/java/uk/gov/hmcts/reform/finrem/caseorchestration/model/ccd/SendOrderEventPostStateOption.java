@@ -27,7 +27,7 @@ public enum SendOrderEventPostStateOption {
 
     public static SendOrderEventPostStateOption forValue(String value) {
         return Arrays.stream(SendOrderEventPostStateOption.values())
-            .filter(option -> value.equalsIgnoreCase(option.getValue()))
+            .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
 }

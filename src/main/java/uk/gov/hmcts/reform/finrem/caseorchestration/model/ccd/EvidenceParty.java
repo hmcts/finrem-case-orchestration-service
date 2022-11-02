@@ -23,7 +23,7 @@ public enum EvidenceParty {
 
     public static EvidenceParty forValue(String value) {
         return Arrays.stream(EvidenceParty.values())
-            .filter(option -> value.equalsIgnoreCase(option.getValue()))
+            .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
 }

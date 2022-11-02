@@ -21,7 +21,7 @@ public enum PeriodicalPaymentSubstitute {
 
     public static PeriodicalPaymentSubstitute forValue(String value) {
         return Arrays.stream(PeriodicalPaymentSubstitute.values())
-            .filter(option -> value.equalsIgnoreCase(option.getValue()))
+            .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
 }

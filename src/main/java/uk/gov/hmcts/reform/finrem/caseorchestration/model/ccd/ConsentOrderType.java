@@ -22,7 +22,7 @@ public enum ConsentOrderType {
 
     public static ConsentOrderType forValue(String value) {
         return Arrays.stream(ConsentOrderType.values())
-            .filter(option -> value.equalsIgnoreCase(option.getValue()))
+            .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
 }

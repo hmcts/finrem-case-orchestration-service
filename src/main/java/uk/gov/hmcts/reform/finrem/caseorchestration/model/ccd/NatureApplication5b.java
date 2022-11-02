@@ -23,7 +23,7 @@ public enum NatureApplication5b {
 
     public static NatureApplication5b forValue(String value) {
         return Arrays.stream(NatureApplication5b.values())
-            .filter(option -> value.equalsIgnoreCase(option.getValue()))
+            .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
 }

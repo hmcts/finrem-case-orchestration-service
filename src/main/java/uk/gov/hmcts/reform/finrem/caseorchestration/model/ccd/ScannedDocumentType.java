@@ -24,7 +24,7 @@ public enum ScannedDocumentType {
 
     public static ScannedDocumentType forValue(String value) {
         return Arrays.stream(ScannedDocumentType.values())
-            .filter(option -> value.equalsIgnoreCase(option.getValue()))
+            .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
 }

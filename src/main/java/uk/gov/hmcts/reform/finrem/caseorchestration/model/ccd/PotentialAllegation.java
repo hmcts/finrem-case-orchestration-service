@@ -52,7 +52,7 @@ public enum PotentialAllegation {
 
     public static PotentialAllegation forValue(String value) {
         return Arrays.stream(PotentialAllegation.values())
-            .filter(option -> value.equalsIgnoreCase(option.getValue()))
+            .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
 }

@@ -20,7 +20,7 @@ public enum CaseRole {
 
     public static CaseRole forValue(String value) {
         return Arrays.stream(CaseRole.values())
-            .filter(option -> value.equalsIgnoreCase(option.getValue()))
+            .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
 }

@@ -21,7 +21,7 @@ public enum RegionLondonFrc {
 
     public static RegionLondonFrc forValue(String value) {
         return Arrays.stream(RegionLondonFrc.values())
-            .filter(option -> value.equalsIgnoreCase(option.getValue()))
+            .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
 }

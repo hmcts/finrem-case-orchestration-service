@@ -26,7 +26,7 @@ public enum AdditionalDocumentType {
 
     public static AdditionalDocumentType forValue(String value) {
         return Arrays.stream(AdditionalDocumentType.values())
-            .filter(option -> value.equalsIgnoreCase(option.getValue()))
+            .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
 }

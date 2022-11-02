@@ -25,7 +25,7 @@ public enum UploadConsentOrderDocumentType {
 
     public static UploadConsentOrderDocumentType forValue(String value) {
         return Arrays.stream(UploadConsentOrderDocumentType.values())
-            .filter(option -> value.equalsIgnoreCase(option.getValue()))
+            .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
 }

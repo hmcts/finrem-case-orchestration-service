@@ -22,7 +22,7 @@ public enum NoticeOfChangeParty {
 
     public static NoticeOfChangeParty forValue(String value) {
         return Arrays.stream(NoticeOfChangeParty.values())
-            .filter(option -> value.equalsIgnoreCase(option.getValue()))
+            .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
 }

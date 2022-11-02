@@ -97,7 +97,7 @@ public enum MiamDomesticViolence {
 
     public static MiamDomesticViolence forValue(String value) {
         return Arrays.stream(MiamDomesticViolence.values())
-            .filter(option -> value.equalsIgnoreCase(option.getValue()))
+            .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
 }

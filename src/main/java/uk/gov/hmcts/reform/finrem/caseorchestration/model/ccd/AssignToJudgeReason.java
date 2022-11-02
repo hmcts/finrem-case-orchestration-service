@@ -23,7 +23,7 @@ public enum AssignToJudgeReason {
 
     public static AssignToJudgeReason forValue(String value) {
         return Arrays.stream(AssignToJudgeReason.values())
-            .filter(option -> value.equalsIgnoreCase(option.getValue()))
+            .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
 }

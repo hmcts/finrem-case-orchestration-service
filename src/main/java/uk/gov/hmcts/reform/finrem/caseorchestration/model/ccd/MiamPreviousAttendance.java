@@ -41,7 +41,7 @@ public enum MiamPreviousAttendance {
 
     public static MiamPreviousAttendance forValue(String value) {
         return Arrays.stream(MiamPreviousAttendance.values())
-            .filter(option -> value.equalsIgnoreCase(option.getValue()))
+            .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
 }

@@ -25,7 +25,7 @@ public enum JudgeType {
 
     public static JudgeType forValue(String value) {
         return Arrays.stream(JudgeType.values())
-            .filter(option -> value.equalsIgnoreCase(option.getValue()))
+            .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
 }

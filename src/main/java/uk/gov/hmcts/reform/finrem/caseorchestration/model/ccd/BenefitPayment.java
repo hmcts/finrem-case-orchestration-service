@@ -37,7 +37,7 @@ public enum BenefitPayment {
 
     public static BenefitPayment forValue(String value) {
         return Arrays.stream(BenefitPayment.values())
-            .filter(option -> value.equalsIgnoreCase(option.getValue()))
+            .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
 }

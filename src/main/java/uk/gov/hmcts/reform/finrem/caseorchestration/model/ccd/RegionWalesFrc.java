@@ -23,7 +23,7 @@ public enum RegionWalesFrc {
 
     public static RegionWalesFrc forValue(String value) {
         return Arrays.stream(RegionWalesFrc.values())
-            .filter(option -> value.equalsIgnoreCase(option.getValue()))
+            .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
 }

@@ -40,7 +40,7 @@ public enum NatureApplication {
 
     public static NatureApplication forValue(String value) {
         return Arrays.stream(NatureApplication.values())
-            .filter(option -> value.equalsIgnoreCase(option.getValue()))
+            .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
 }

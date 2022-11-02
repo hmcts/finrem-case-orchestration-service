@@ -23,7 +23,7 @@ public enum Gender {
 
     public static Gender forValue(String value) {
         return Arrays.stream(Gender.values())
-            .filter(option -> value.equalsIgnoreCase(option.getValue()))
+            .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
 }

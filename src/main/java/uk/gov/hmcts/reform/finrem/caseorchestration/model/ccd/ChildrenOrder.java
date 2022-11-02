@@ -26,7 +26,7 @@ public enum ChildrenOrder {
 
     public static ChildrenOrder forValue(String value) {
         return Arrays.stream(ChildrenOrder.values())
-            .filter(option -> value.equalsIgnoreCase(option.getValue()))
+            .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
 }

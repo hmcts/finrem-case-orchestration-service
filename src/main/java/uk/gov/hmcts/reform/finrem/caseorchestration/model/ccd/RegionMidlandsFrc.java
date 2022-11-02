@@ -22,7 +22,7 @@ public enum RegionMidlandsFrc {
 
     public static RegionMidlandsFrc forValue(String value) {
         return Arrays.stream(RegionMidlandsFrc.values())
-            .filter(option -> value.equalsIgnoreCase(option.getValue()))
+            .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
 }

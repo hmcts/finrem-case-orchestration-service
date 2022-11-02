@@ -60,7 +60,7 @@ public enum MiamOtherGrounds {
 
     public static MiamOtherGrounds forValue(String value) {
         return Arrays.stream(MiamOtherGrounds.values())
-            .filter(option -> value.equalsIgnoreCase(option.getValue()))
+            .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
 }

@@ -39,7 +39,7 @@ public enum MiamUrgencyReason {
 
     public static MiamUrgencyReason forValue(String value) {
         return Arrays.stream(MiamUrgencyReason.values())
-            .filter(option -> value.equalsIgnoreCase(option.getValue()))
+            .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
 }
