@@ -77,6 +77,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
                                             String userAuthorisation) {
         Map<String, Object> caseData = caseDetails.getData();
         List<GeneralApplicationCollectionData> existingGeneralApplication = helper.getGeneralApplicationList(caseData);
+        log.info("Migrating existing general application to collection for case id {}", caseDetails.getId());
         GeneralApplicationCollectionData data = helper.migrateExistingGeneralApplication(caseData, userAuthorisation);
         if (data != null) {
             String status = Objects.toString(caseData.get(GENERAL_APPLICATION_OUTCOME_DECISION), null);
@@ -149,6 +150,8 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
             .fileName(items.getGeneralApplicationDirectionsDocument().getDocumentFilename())
             .build();
         bulkPrintDocuments.add(bpDoc);
+
+        log.info("items getGeneralApplicationDocument {}, for caseId {}", items.getGeneralApplicationDocument(), caseDetails.getId());
 
         final BulkPrintDocument genDoc = BulkPrintDocument.builder()
             .binaryFileUrl(items.getGeneralApplicationDocument().getDocumentBinaryUrl())
