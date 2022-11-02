@@ -328,20 +328,24 @@ public class DocumentHelper {
     }
 
     public BulkPrintDocument getCaseDocumentAsBulkPrintDocument(CaseDocument caseDocument) {
-        return BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl()).build();
+        return BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl())
+            .fileName(caseDocument.getDocumentFilename())
+            .build();
     }
 
     public List<BulkPrintDocument> getCaseDocumentsAsBulkPrintDocuments(List<CaseDocument> caseDocuments) {
         return caseDocuments.stream()
-            .map(caseDocument -> BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl()).build())
-            .collect(Collectors.toList());
+            .map(caseDocument -> BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl())
+                .fileName(caseDocument.getDocumentFilename())
+                .build())
+            .toList();
     }
 
     public Optional<BulkPrintDocument> getDocumentLinkAsBulkPrintDocument(Map<String, Object> data, String documentName) {
-        Map<String, String> documentLink = (Map<String, String>) data.get(documentName);
-
-        return documentLink != null
-            ? Optional.of(BulkPrintDocument.builder().binaryFileUrl(documentLink.get(DOCUMENT_BINARY_URL)).build())
+        CaseDocument caseDocument = nullCheckAndConvertToCaseDocument(data.get(documentName));
+        return caseDocument != null
+            ? Optional.of(BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl())
+                .fileName(caseDocument.getDocumentFilename()).build())
             : Optional.empty();
     }
 
@@ -412,7 +416,9 @@ public class DocumentHelper {
     }
 
     public BulkPrintDocument getBulkPrintDocumentFromCaseDocument(CaseDocument caseDocument) {
-        return BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl()).build();
+        return BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl())
+            .fileName(caseDocument.getDocumentFilename())
+            .build();
     }
 
     public List<CaseDocument> getHearingNoticeDocuments(Map<String, Object> caseData) {
@@ -423,5 +429,12 @@ public class DocumentHelper {
 
     public enum PaperNotificationRecipient {
         APPLICANT, RESPONDENT, SOLICITOR
+    }
+
+    public CaseDocument nullCheckAndConvertToCaseDocument(Object object) {
+        if (object != null) {
+            return objectMapper.convertValue(object, CaseDocument.class);
+        }
+        return null;
     }
 }
