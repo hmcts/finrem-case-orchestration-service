@@ -38,7 +38,7 @@ def versions = [
 
 project.ext {
     pactVersion = getCheckedOutGitCommitHash()
-    springCloudBomVersion = "2021.0.3"
+    springCloudBomVersion = "2021.0.4"
     restAssuredBomVersion = "5.1.1"
 }
 
@@ -299,16 +299,19 @@ dependencyManagement {
         mavenBom "io.rest-assured:rest-assured-bom:${restAssuredBomVersion}"
     }
     dependencies {
-        //CVE-2022-23181
+        //CVE-2022-42252
         dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.68') {
             entry 'tomcat-embed-core'
             entry 'tomcat-embed-websocket'
+        }
+        //VE-2022-31692, CVE-2022-31690
+        dependencySet(group: 'org.springframework.security', version: '5.7.5') {
+            entry 'spring-security-crypto'
         }
     }
 }
 
 dependencies {
-
     implementation group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
