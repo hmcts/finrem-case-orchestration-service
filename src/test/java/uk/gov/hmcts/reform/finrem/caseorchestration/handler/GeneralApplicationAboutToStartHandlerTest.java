@@ -130,7 +130,14 @@ public class GeneralApplicationAboutToStartHandlerTest {
             generalApplicationDocument.getDocumentFilename());
         assertEquals("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary",
             generalApplicationDocument.getDocumentBinaryUrl());
-        assertNull(generalApplicationItems.getGeneralApplicationDraftOrder());
+        CaseDocument generalApplicationDraftOrderDocument = generalApplicationItems.getGeneralApplicationDocument();
+        assertNotNull(generalApplicationDraftOrderDocument);
+        assertEquals("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e",
+            generalApplicationDraftOrderDocument.getDocumentUrl());
+        assertEquals("InterimHearingNotice.pdf",
+            generalApplicationDraftOrderDocument.getDocumentFilename());
+        assertEquals("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary",
+            generalApplicationDraftOrderDocument.getDocumentBinaryUrl());
     }
 
     private CallbackRequest buildCallbackRequest()  {
