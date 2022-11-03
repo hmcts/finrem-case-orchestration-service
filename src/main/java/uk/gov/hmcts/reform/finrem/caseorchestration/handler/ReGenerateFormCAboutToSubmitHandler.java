@@ -15,7 +15,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentServi
 import java.util.Collections;
 import java.util.Map;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.*;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
+
 
 @Slf4j
 @Service
@@ -40,13 +41,13 @@ public class ReGenerateFormCAboutToSubmitHandler implements CallbackHandler {
 
         Map<String, Object> caseData = caseDetails.getData();
 
-        if(caseData.containsKey(HEARING_DATE) && StringUtils.isNotBlank(caseData.get(HEARING_DATE).toString())){
+        if (caseData.containsKey(HEARING_DATE) && StringUtils.isNotBlank(caseData.get(HEARING_DATE).toString())) {
 
             caseDetails.getData().putAll(
                 hearingDocumentService.generateHearingDocuments(userAuthorisation, caseDetails));
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
-        }else{
+        } else {
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseData)
                 .errors(Collections.singletonList(THERE_IS_NO_HEARING_ON_THE_CASE_ERROR_MESSAGE)).build();
         }
