@@ -31,6 +31,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.APPROVED;
@@ -42,6 +43,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicat
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_OUTCOME_DECISION;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -121,6 +124,11 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         List<GeneralApplicationCollectionData> list
             = helper.covertToGeneralApplicationData(data.get(GENERAL_APPLICATION_COLLECTION));
         assertEquals(1, list.size());
+
+        assertEquals("InterimHearingNotice.pdf", list.get(0).getGeneralApplicationItems()
+            .getGeneralApplicationDocument().getDocumentFilename());
+        assertEquals("InterimHearingNotice.pdf", list.get(0).getGeneralApplicationItems()
+            .getGeneralApplicationDraftOrder().getDocumentFilename());
 
         assertEquals(DIRECTION_APPROVED.getId(),
             list.get(0).getGeneralApplicationItems().getGeneralApplicationStatus());
