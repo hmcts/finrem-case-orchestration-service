@@ -298,14 +298,16 @@ dependencyManagement {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudBomVersion}"
         mavenBom "io.rest-assured:rest-assured-bom:${restAssuredBomVersion}"
     }
+    dependencies {
+        //CVE-2022-23181
+        dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.68') {
+            entry 'tomcat-embed-core'
+            entry 'tomcat-embed-websocket'
+        }
+    }
 }
 
 dependencies {
-    //CVE-2022-23181
-    dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.68') {
-        entry 'tomcat-embed-core'
-        entry 'tomcat-embed-websocket'
-    }
 
     implementation group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
