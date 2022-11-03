@@ -18,7 +18,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 public class OnStartDefaultValueService {
 
-    private IdamService idamService;
+    private final IdamService idamService;
 
     public void defaultIssueDate(CallbackRequest callbackRequest) {
         callbackRequest.getCaseDetails().getData().putIfAbsent(ISSUE_DATE, LocalDate.now());

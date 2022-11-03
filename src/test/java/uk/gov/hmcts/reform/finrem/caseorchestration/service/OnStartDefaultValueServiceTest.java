@@ -26,10 +26,13 @@ public class OnStartDefaultValueServiceTest  extends BaseServiceTest {
     public static final String AUTH_TOKEN = "tokien:)";
 
     @InjectMocks
-    private final OnStartDefaultValueService service =  new OnStartDefaultValueService();
+    private OnStartDefaultValueService service;
 
     @Mock
     private IdamService idamService;
+
+    public OnStartDefaultValueServiceTest() {
+    }
 
     @Test
     public void setDefaultDate() {
