@@ -36,6 +36,7 @@ public enum EventType {
     LIST_FOR_HEARING_CONSENTED("FR_listForHearing"),
     MANAGE_BARRISTER("FR_manageBarrister"),
     ISSUE_APPLICATION("FR_issueApplication"),
+    REGENERATE_FORM_C("FR_regenerateFormC"),
     NONE("");
 
     private final String ccdType;
