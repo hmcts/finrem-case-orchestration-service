@@ -22,13 +22,13 @@ public class HandlerConflictsTest {
     private List<CallbackHandler> handlers;
 
     @Test
-    public void givenAllPossibleParams_whenCanHandleCalledOnHandlers_thenOnlyOneHandlerCanHandle() {
+    public void givenAllPossibleParams_whenCanHandle_thenOnlyOneHandlerCanHandle() {
         for (CallbackType callbackType : CallbackType.values()) {
             for (EventType eventType : EventType.values()) {
                 for (CaseType caseType : CaseType.values()) {
                     List<String> couldBeHandled = handlers.stream()
                         .filter(handler -> handler.canHandle(callbackType, caseType, eventType))
-                        .map(handler -> handler.getClass().getSimpleName())
+                        .map(handler -> handler.getClass().getSimpleName()) //for debugging if there's a clash
                         .toList();
 
                     assertTrue(couldBeHandled.size() <= 1);

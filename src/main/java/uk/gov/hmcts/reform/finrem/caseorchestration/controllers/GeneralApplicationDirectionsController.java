@@ -25,15 +25,21 @@ import javax.validation.constraints.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.REGION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_HEARING_REGION;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
 @RequiredArgsConstructor
 @Slf4j
 public class GeneralApplicationDirectionsController extends BaseController {
+
+    private static final String HEARING_LOCATION_ERROR = "Hearing Location region must match the administrative region.\n"
+        + "If you wish to change the administrative region please run the Update FRC Information event";
 
     private final GeneralApplicationDirectionsService generalApplicationDirectionsService;
 
@@ -54,10 +60,17 @@ public class GeneralApplicationDirectionsController extends BaseController {
         validateCaseData(callback);
 
         List<String> errors = new ArrayList<>();
-        try {
-            generalApplicationDirectionsService.submitGeneralApplicationDirections(caseDetails, authorisationToken);
-        } catch (InvalidCaseDataException invalidCaseDataException) {
-            errors.add(invalidCaseDataException.getMessage());
+
+        if (!Objects.toString(caseDetails.getData().get(REGION))
+            .equals(Objects.toString(caseDetails.getData().get(GENERAL_APPLICATION_DIRECTIONS_HEARING_REGION)))) {
+            log.error("General Application hearing region did not match administrative region for case {}", caseDetails.getId());
+            errors.add(HEARING_LOCATION_ERROR);
+        } else {
+            try {
+                generalApplicationDirectionsService.submitGeneralApplicationDirections(caseDetails, authorisationToken);
+            } catch (InvalidCaseDataException invalidCaseDataException) {
+                errors.add(invalidCaseDataException.getMessage());
+            }
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse

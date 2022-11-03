@@ -9,8 +9,6 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDirectionsCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 
 import java.util.ArrayList;
@@ -24,7 +22,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DIRECTION_DETAILS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NOTICE_DOCUMENT_PACK;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +31,6 @@ public class UploadApprovedOrderService {
     private final HearingOrderService hearingOrderService;
     private final ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
-    private final GenericDocumentService genericDocumentService;
     private final ApprovedOrderNoticeOfHearingService approvedOrderNoticeOfHearingService;
 
     public Map<String, Object> prepareFieldsForOrderApprovedCoverLetter(CaseDetails caseDetails) {
@@ -82,21 +78,5 @@ public class UploadApprovedOrderService {
         return additionalHearingDetailsCollection != null && !additionalHearingDetailsCollection.isEmpty()
             ? Optional.of(additionalHearingDetailsCollection.get(additionalHearingDetailsCollection.size() - 1).getValue())
             : Optional.empty();
-    }
-
-    private Optional<CollectionElement<DirectionOrder>> getLatestHearingOrder(List<CollectionElement<DirectionOrder>> directionOrders) {
-        return directionOrders.isEmpty()
-            ? Optional.empty()
-            : Optional.of(directionOrders.get(directionOrders.size() - 1));
-    }
-
-    private List<CollectionElement<DirectionOrder>> getHearingOrderList(Map<String, Object> caseData) {
-        return Optional.ofNullable(caseData.get(HEARING_ORDER_COLLECTION))
-            .map(this::convertToListOfHearingOrder)
-            .orElse(new ArrayList<>());
-    }
-
-    private List<CollectionElement<DirectionOrder>> convertToListOfHearingOrder(Object value) {
-        return new ObjectMapper().convertValue(value, new TypeReference<>() {});
     }
 }

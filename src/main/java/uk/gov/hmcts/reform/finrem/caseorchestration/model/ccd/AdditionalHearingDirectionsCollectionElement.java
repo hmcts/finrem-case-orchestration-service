@@ -11,24 +11,26 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.Objects;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION_CT;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Data
 @Builder
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class InterimHearingData implements HearingLocationCollection {
+public class AdditionalHearingDirectionsCollectionElement implements HearingLocationCollection {
     @JsonProperty("id")
     private String id;
     @JsonProperty("value")
-    private InterimHearingItem value;
+    private AdditionalHearingDirectionsCollection additionalHearingDirections;
 
     @Override
     @JsonIgnore
     public String getRegion() {
-        if (value == null) {
+        if (additionalHearingDirections == null) {
             return StringUtils.EMPTY;
         }
 
-        return Objects.toString(value.getInterimRegionList(), StringUtils.EMPTY);
+        return Objects.toString(additionalHearingDirections.getLocalCourt().get(REGION_CT), StringUtils.EMPTY);
     }
 }
