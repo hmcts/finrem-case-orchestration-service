@@ -166,9 +166,9 @@ public class TestSetUpUtils {
         return caseDocument;
     }
 
-    public static CaseDocument caseDocument(String documentName, String filename, String binaryUrl) {
+    public static CaseDocument caseDocument(String documentUrl, String filename, String binaryUrl) {
         CaseDocument caseDocument = new CaseDocument();
-        caseDocument.setDocumentUrl(documentName);
+        caseDocument.setDocumentUrl(documentUrl);
         caseDocument.setDocumentFilename(filename);
         caseDocument.setDocumentBinaryUrl(binaryUrl);
 
