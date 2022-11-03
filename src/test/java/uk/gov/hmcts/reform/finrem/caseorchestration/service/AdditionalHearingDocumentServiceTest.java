@@ -11,7 +11,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
-import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchDocumentExistsException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchDocumentFoundException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
@@ -474,7 +474,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
             .printApplicantDocuments(any(), any(), any());
     }
 
-    @Test(expected = NoSuchDocumentExistsException.class)
+    @Test(expected = NoSuchDocumentFoundException.class)
     public void shouldNotPrintIfAdditionalHearingDocumentsIsNull() throws JsonProcessingException {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
         additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
