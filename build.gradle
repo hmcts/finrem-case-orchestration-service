@@ -301,6 +301,11 @@ dependencyManagement {
 }
 
 dependencies {
+    //CVE-2022-23181
+    dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.68') {
+        entry 'tomcat-embed-core'
+        entry 'tomcat-embed-websocket'
+    }
 
     implementation group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
