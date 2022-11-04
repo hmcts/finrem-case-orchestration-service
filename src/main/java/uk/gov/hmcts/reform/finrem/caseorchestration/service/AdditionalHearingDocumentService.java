@@ -76,7 +76,8 @@ public class AdditionalHearingDocumentService {
         addAdditionalHearingDocumentToCaseData(caseDetails, document);
     }
 
-    public void sendAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
+    public void sendAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails)
+        throws NoSuchDocumentFoundException {
         bulkPrintAdditionalHearingDocuments(caseDetails, authorisationToken);
     }
 
@@ -214,7 +215,8 @@ public class AdditionalHearingDocumentService {
         caseData.put(ADDITIONAL_HEARING_DOCUMENT_COLLECTION, additionalHearingDocumentDataList);
     }
 
-    public void bulkPrintAdditionalHearingDocuments(CaseDetails caseDetails, String authorisationToken) {
+    public void bulkPrintAdditionalHearingDocuments(CaseDetails caseDetails, String authorisationToken)
+        throws NoSuchDocumentFoundException {
         List<AdditionalHearingDocumentData> additionalHearingDocumentData =
             documentHelper.convertToAdditionalHearingDocumentData(
                 caseDetails.getData().get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION));

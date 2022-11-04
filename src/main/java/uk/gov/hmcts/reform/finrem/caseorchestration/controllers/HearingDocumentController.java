@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -21,6 +22,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchDocumentFoundException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
@@ -95,7 +97,13 @@ public class HearingDocumentController extends BaseController {
             CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
             if (caseDetailsBefore != null && hearingDocumentService.alreadyHadFirstHearing(caseDetailsBefore)) {
                 log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
-                additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, caseDetails);
+                try {
+                    additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, caseDetails);
+                } catch (NoSuchDocumentFoundException e) {
+                    return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
+                        .errors(ImmutableList.of(e.getMessage()))
+                        .build());
+                }
             } else {
                 log.info("Sending Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
                 hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, authorisationToken);

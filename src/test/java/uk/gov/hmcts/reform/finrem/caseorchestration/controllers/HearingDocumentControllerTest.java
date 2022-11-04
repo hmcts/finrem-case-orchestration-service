@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchDocumentFoundException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
@@ -333,6 +334,27 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
+
+        verify(additionalHearingDocumentService).sendAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
+    }
+
+    @Test
+    public void shouldThrowErrorWhenAdditionalHearingDocumentNotFound() throws Exception {
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
+        doThrow(new NoSuchDocumentFoundException("Additional Hearing Document could not be found"))
+            .when(additionalHearingDocumentService).sendAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
+
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/contested/hearing-with-case-details-before.json").toURI()));
+        mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(jsonPath("$.errors[0]",
+                Matchers.is("Additional Hearing Document could not be found")));
 
         verify(additionalHearingDocumentService).sendAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
     }
