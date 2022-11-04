@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import javax.validation.constraints.NotNull;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -61,7 +62,7 @@ public class GeneralOrderStartController extends BaseController {
 
         Map<String, Object> caseData = caseDetails.getData();
         caseData.put(GENERAL_ORDER_ADDRESS_TO, null);
-        caseData.put(GENERAL_ORDER_DATE, null);
+        caseData.put(GENERAL_ORDER_DATE, LocalDate.now());
         caseData.put(GENERAL_ORDER_BODY_TEXT, null);
         caseData.put(GENERAL_ORDER_PREVIEW_DOCUMENT, null);
         caseData.put(GENERAL_ORDER_RECITALS, null);

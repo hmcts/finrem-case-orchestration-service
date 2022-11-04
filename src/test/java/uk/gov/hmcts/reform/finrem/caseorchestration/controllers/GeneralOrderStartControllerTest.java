@@ -12,9 +12,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.LocalDate;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -53,7 +56,7 @@ public class GeneralOrderStartControllerTest extends BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data." + GENERAL_ORDER_ADDRESS_TO, is(nullValue())))
-            .andExpect(jsonPath("$.data." + GENERAL_ORDER_DATE, is(nullValue())))
+            .andExpect(jsonPath("$.data." + GENERAL_ORDER_DATE, is(notNullValue())))
             .andExpect(jsonPath("$.data." + GENERAL_ORDER_BODY_TEXT, is(nullValue())))
             .andExpect(jsonPath("$.data." + GENERAL_ORDER_CREATED_BY, is("Integration Test")))
             .andExpect(jsonPath("$.data." + GENERAL_ORDER_PREVIEW_DOCUMENT, is(nullValue())))
