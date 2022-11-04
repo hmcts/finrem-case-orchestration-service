@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
@@ -17,6 +18,11 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_HEARING_REQUIRED;
@@ -135,11 +141,24 @@ public class GeneralApplicationHelperTest {
         assertEquals("Other", itemsDefault2.getGeneralApplicationStatus());
     }
 
+    @Test
+    public void giveCase_whenCaseDocumentIsNotPdf_thenConvertToPdf() {
+        CallbackRequest callbackRequest = callbackRequest();
+        GeneralApplicationHelper helper = new GeneralApplicationHelper(new ObjectMapper(), service);
+        CaseDocument docxDocment = helper.convertToCaseDocument(callbackRequest.getCaseDetails().getData().get("caseDocument"));
+        when(service.convertDocumentIfNotPdfAlready(docxDocment, AUTH_TOKEN)).thenReturn(caseDocument());
+        Map<String, Object> data = callbackRequest.getCaseDetails().getData();
+        CaseDocument caseDocument = helper.getPdfDocument(helper.convertToCaseDocument(data.get("caseDocument")), AUTH_TOKEN);
+        assertEquals(FILE_NAME, caseDocument.getDocumentFilename());
+    }
+
     private CallbackRequest callbackRequest() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("caseDocument", caseDocument(DOC_URL,"app_docs.docx", BINARY_URL));
         return CallbackRequest
             .builder()
             .caseDetails(CaseDetails.builder()
-                .data(new HashMap<>()).build())
+                .data(caseData).build())
             .build();
     }
 }
