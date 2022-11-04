@@ -12,12 +12,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.time.LocalDate;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
