@@ -56,6 +56,16 @@
         "document_filename": "InterimHearingNotice.pdf",
         "document_binary_url": "http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary"
       },
+      "generalApplicationDraftOrder": {
+        "document_url": "http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e",
+        "document_filename": "InterimHearingNotice.pdf",
+        "document_binary_url": "http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary"
+      },
+      "generalApplicationDirectionsDocument": {
+        "document_url": "http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e",
+        "document_filename": "InterimHearingNotice.pdf",
+        "document_binary_url": "http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary"
+      },
       "propertyAddress": "26 Riverside gardens, SW10XE",
       "applicantSolicitorConsentForEmails": "Yes",
       "isAdmin": "No",
