@@ -82,7 +82,7 @@ public class HearingDocumentController extends BaseController {
         }
 
         if (hearingDocumentService.alreadyHadFirstHearing(caseDetails)) {
-            if (caseDataService.isContestedPaperApplication(caseDetails)) {
+            if (caseDataService.isContestedApplication(caseDetails)) {
                 additionalHearingDocumentService.createAdditionalHearingDocuments(authorisationToken, caseDetails);
             }
         } else {

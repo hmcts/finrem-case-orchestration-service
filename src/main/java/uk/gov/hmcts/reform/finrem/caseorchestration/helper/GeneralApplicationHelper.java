@@ -147,18 +147,27 @@ public class GeneralApplicationHelper {
 
         CaseDocument caseDocument = convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DOCUMENT));
         if (caseDocument != null) {
-            builder.generalApplicationDocument(service.convertDocumentIfNotPdfAlready(caseDocument, userAuthorisation));
+            log.info("General Application Document before converting to Pdf {}", caseDocument);
+            CaseDocument pdfCaseDocument = getPdfDocument(caseDocument, userAuthorisation);
+            builder.generalApplicationDocument(pdfCaseDocument);
+            log.info("General Application Document after converting to Pdf {}", pdfCaseDocument);
         }
 
         CaseDocument draftDocument = convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DRAFT_ORDER));
         if (draftDocument != null) {
-            builder.generalApplicationDraftOrder(service.convertDocumentIfNotPdfAlready(draftDocument, userAuthorisation));
+            log.info("General Application Draft Document before converting to Pdf {}", draftDocument);
+            CaseDocument draftCaseDocument = getPdfDocument(draftDocument, userAuthorisation);
+            builder.generalApplicationDraftOrder(draftCaseDocument);
+            log.info("General Application Draft Document after converting to Pdf {}", draftCaseDocument);
         }
         builder.generalApplicationCreatedDate(objectToDateTime(caseData.get(GENERAL_APPLICATION_DOCUMENT_LATEST_DATE)));
         builder.generalApplicationOutcomeOther(Objects.toString(caseData.get(GENERAL_APPLICATION_OUTCOME_OTHER), null));
         CaseDocument directionDocument = convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT));
         if (directionDocument != null) {
-            builder.generalApplicationDirectionsDocument(service.convertDocumentIfNotPdfAlready(directionDocument, userAuthorisation));
+            log.info("General Application Direction Document before converting to Pdf {}", directionDocument);
+            CaseDocument directionCaseDocument = getPdfDocument(directionDocument, userAuthorisation);
+            builder.generalApplicationDirectionsDocument(directionCaseDocument);
+            log.info("General Application Direction Document after converting to Pdf {}", directionCaseDocument);
         }
         String outcome = Objects.toString(caseData.get(GENERAL_APPLICATION_OUTCOME_DECISION), null);
         String directionGiven = Objects.toString(caseData.get(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED),null);
@@ -222,5 +231,9 @@ public class GeneralApplicationHelper {
             caseData.remove(GENERAL_APPLICATION_OUTCOME_DECISION);
             caseData.remove(GENERAL_APPLICATION_OUTCOME_OTHER);
         }
+    }
+
+    public CaseDocument getPdfDocument(CaseDocument document, String userAuthorisation) {
+        return service.convertDocumentIfNotPdfAlready(document, userAuthorisation);
     }
 }

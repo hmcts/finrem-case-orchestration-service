@@ -128,7 +128,22 @@ public class GeneralApplicationAboutToStartHandlerTest extends BaseHandlerTest {
             generalApplicationDocument.getDocumentFilename());
         assertEquals("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary",
             generalApplicationDocument.getDocumentBinaryUrl());
-        assertNull(generalApplicationItems.getGeneralApplicationDraftOrder());
+        CaseDocument generalApplicationDraftOrderDocument = generalApplicationItems.getGeneralApplicationDocument();
+        assertNotNull(generalApplicationDraftOrderDocument);
+        assertEquals("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e",
+            generalApplicationDraftOrderDocument.getDocumentUrl());
+        assertEquals("InterimHearingNotice.pdf",
+            generalApplicationDraftOrderDocument.getDocumentFilename());
+        assertEquals("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary",
+            generalApplicationDraftOrderDocument.getDocumentBinaryUrl());
+        CaseDocument generalApplicationDirectionOrderDocument = generalApplicationItems.getGeneralApplicationDirectionsDocument();
+        assertNotNull(generalApplicationDirectionOrderDocument);
+        assertEquals("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e",
+            generalApplicationDirectionOrderDocument.getDocumentUrl());
+        assertEquals("InterimHearingNotice.pdf",
+            generalApplicationDirectionOrderDocument.getDocumentFilename());
+        assertEquals("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary",
+            generalApplicationDirectionOrderDocument.getDocumentBinaryUrl());
     }
 
 }
