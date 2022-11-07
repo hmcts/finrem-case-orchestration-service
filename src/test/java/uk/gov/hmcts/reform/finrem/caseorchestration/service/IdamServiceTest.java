@@ -77,6 +77,7 @@ public class IdamServiceTest extends BaseServiceTest {
         String userEmailId = idamService.getUserEmailId("azsssfsdffsafa");
         assertThat(userEmailId, is("test@test.com"));
     }
+
     @Test
     public void retrieveUserSurname() {
         mockServer.expect(requestTo(toUri()))
@@ -86,6 +87,7 @@ public class IdamServiceTest extends BaseServiceTest {
         String userSurname = idamService.getIdamSurname("azsssfsdffsafa");
         assertThat(userSurname, is("surname"));
     }
+
     private String toUri() {
         return "http://localhost:4501/details";
     }
