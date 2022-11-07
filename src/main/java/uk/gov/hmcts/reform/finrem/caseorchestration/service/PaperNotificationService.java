@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.generalapplication.service.RejectGeneralApplicationDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.service.UpdateFrcInfoApplicantDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.service.UpdateFrcInfoRespondentDocumentService;
 
@@ -32,30 +33,19 @@ public class PaperNotificationService {
     private final RejectGeneralApplicationDocumentService rejectGeneralApplicationDocumentService;
     private final BulkPrintService bulkPrintService;
     private final CaseDataService caseDataService;
+    private final CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
 
     public void printHwfSuccessfulNotification(CaseDetails caseDetails, String authToken) {
         log.info("Sending Consented HWF Successful notification letter for bulk print");
+        // Generate PDF notification letter
+        CaseDocument hwfSuccessfulNotificationLetter = helpWithFeesDocumentService.generateHwfSuccessfulNotificationLetter(
+            caseDetails, authToken, APPLICANT);
 
-        Map<String, Object> caseData = caseDetails.getData();
-        if (caseDataService.isPaperApplication(caseData)) {
-            log.info("Case is paper application");
+        // Send notification letter to Bulk Print
+        bulkPrintService.sendDocumentForPrint(hwfSuccessfulNotificationLetter, caseDetails);
+        log.info("Applicant notification letter sent to Bulk Print: {} for Case ID: {}", hwfSuccessfulNotificationLetter,
+            caseDetails.getId());
 
-            // Generate PDF notification letter
-            CaseDocument hwfSuccessfulNotificationLetter = helpWithFeesDocumentService.generateHwfSuccessfulNotificationLetter(
-                caseDetails, authToken, APPLICANT);
-
-            // Send notification letter to Bulk Print
-            bulkPrintService.sendDocumentForPrint(hwfSuccessfulNotificationLetter, caseDetails);
-            log.info("Applicant notification letter sent to Bulk Print: {} for Case ID: {}", hwfSuccessfulNotificationLetter,
-                caseDetails.getId());
-        }
-
-        if (shouldPrintNotificationForRespondentSolicitor(caseDetails)) {
-            UUID respondentLetterId = bulkPrintService.sendDocumentForPrint(
-                helpWithFeesDocumentService.generateHwfSuccessfulNotificationLetter(caseDetails, authToken, RESPONDENT),
-                caseDetails);
-            log.info("Respondent notification letter sent to Bulk Print: {} for Case ID: {}", respondentLetterId, caseDetails.getId());
-        }
     }
 
     public void printAssignToJudgeNotification(CaseDetails caseDetails, String authToken) {
