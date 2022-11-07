@@ -190,7 +190,6 @@ public class GeneralApplicationDirectionsService {
         Map<String, Object> caseData = caseDetails.getData();
         try {
             Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
-            log.info("Interim hearing courtDetailsMap :{}", courtDetailsMap);
             String selectedCourtIH = getSelectedCourtIH(caseData);
             log.info("Interim hearing selectedCourtIH :{}", selectedCourtIH);
             String courtDetailsObj = (String) caseData.get(selectedCourtIH);
@@ -234,6 +233,8 @@ public class GeneralApplicationDirectionsService {
     private void printDocumentPackAndSendToApplicantAndRespondent(CaseDetails caseDetails, String authorisationToken,
                                                                   List<BulkPrintDocument> documents) {
         bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
+        log.info("Sending {} document(s) to applicant via bulk print for Case {}, document(s) are {}", documents.size(), caseDetails.getId(),
+            documents);
         bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documents);
     }
 

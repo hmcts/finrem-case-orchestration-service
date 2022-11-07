@@ -82,7 +82,7 @@ public class HearingDocumentController extends BaseController {
         }
 
         if (hearingDocumentService.alreadyHadFirstHearing(caseDetails)) {
-            if (caseDataService.isContestedPaperApplication(caseDetails)) {
+            if (caseDataService.isContestedApplication(caseDetails)) {
                 additionalHearingDocumentService.createAdditionalHearingDocuments(authorisationToken, caseDetails);
             }
         } else {
@@ -91,7 +91,7 @@ public class HearingDocumentController extends BaseController {
 
         List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
 
-        if (caseDataService.isContestedPaperApplication(caseDetails)) {
+        if (caseDataService.isContestedApplication(caseDetails)) {
             CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
             if (caseDetailsBefore != null && hearingDocumentService.alreadyHadFirstHearing(caseDetailsBefore)) {
                 log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
