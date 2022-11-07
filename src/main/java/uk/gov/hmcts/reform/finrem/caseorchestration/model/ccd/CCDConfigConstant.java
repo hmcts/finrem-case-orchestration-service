@@ -29,7 +29,7 @@ public class CCDConfigConstant {
     public static final String RESPONDENT_PHONE = "respondentPhone";
     public static final String RESPONDENT_EMAIL = "respondentEmail";
     public static final String RESPONDENT = "Respondent";
-    public static final String URGENT_CASE_QUESTION = "promptForUrgentCaseQuestion";
+
 
     //Applicant Solicitor related
     public static final String SOLICITOR_REFERENCE = "solicitorReference";
@@ -254,6 +254,7 @@ public class CCDConfigConstant {
     public static final String CONSENT_D81_QUESTION = "consentD81Question";
 
     //Nature of Application
+    public static final String URGENT_CASE_QUESTION = "promptForUrgentCaseQuestion";
     public static final String CONSENTED_NATURE_OF_APPLICATION = "natureOfApplication2";
     public static final String CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION = "consentNatureOfApplicationChecklist";
     public static final String CONSENTED_NATURE_OF_APPLICATION_3A = "natureOfApplication3a";
