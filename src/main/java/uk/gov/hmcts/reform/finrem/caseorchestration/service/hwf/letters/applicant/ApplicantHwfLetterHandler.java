@@ -14,9 +14,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.Check
 @RequiredArgsConstructor
 public class ApplicantHwfLetterHandler implements HwfNotificationsHandler {
 
-    private CaseDataService caseDataService;
-    private CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
-    private PaperNotificationService paperNotificationService;
+    private final CaseDataService caseDataService;
+    private final CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
+    private final PaperNotificationService paperNotificationService;
 
     @Override
     public void sendNotification(CaseDetails caseDetails, String authToken) {
