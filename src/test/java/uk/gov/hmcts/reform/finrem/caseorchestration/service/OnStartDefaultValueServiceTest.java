@@ -44,7 +44,7 @@ public class OnStartDefaultValueServiceTest  extends BaseServiceTest {
     @Test
     public void setDefaultConsentedJudgeName() {
         CallbackRequest callbackRequest = buildCallbackRequest();
-        when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn("test name");
+        when(idamService.getIdamSurname(AUTH_TOKEN)).thenReturn("test name");
         service.defaultConsentedOrderJudgeName(callbackRequest, AUTH_TOKEN);
         assertNotNull(callbackRequest.getCaseDetails().getData().get(CONSENTED_ORDER_DIRECTION_JUDGE_NAME));
     }
@@ -52,7 +52,7 @@ public class OnStartDefaultValueServiceTest  extends BaseServiceTest {
     @Test
     public void setDefaultContestedJudgeName() {
         CallbackRequest callbackRequest = buildCallbackRequest();
-        when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn("test name");
+        when(idamService.getIdamSurname(AUTH_TOKEN)).thenReturn("test name");
         service.defaultContestedOrderJudgeName(callbackRequest, AUTH_TOKEN);
         assertNotNull(callbackRequest.getCaseDetails().getData().get(CONTESTED_ORDER_APPROVED_JUDGE_NAME));
     }

@@ -66,7 +66,7 @@ public class GeneralOrderStartController extends BaseController {
         caseData.put(GENERAL_ORDER_BODY_TEXT, null);
         caseData.put(GENERAL_ORDER_PREVIEW_DOCUMENT, null);
         caseData.put(GENERAL_ORDER_RECITALS, null);
-        caseData.put(GENERAL_ORDER_JUDGE_NAME, service.getIdamFullName(authorisationToken));
+        caseData.put(GENERAL_ORDER_JUDGE_NAME, service.getIdamSurname(authorisationToken));
         caseData.put(GENERAL_ORDER_JUDGE_TYPE, null);
         caseData.put(GENERAL_ORDER_CREATED_BY, service.getIdamFullName(authorisationToken));
 

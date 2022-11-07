@@ -47,6 +47,8 @@ public class GeneralOrderStartControllerTest extends BaseControllerTest {
     public void initialiseGeneralOrderPropertiesSuccess() throws Exception {
         generalOrderStartControllerSetUp();
         when(idamService.getIdamFullName(bearerToken)).thenReturn("Integration Test");
+        when(idamService.getIdamSurname(bearerToken)).thenReturn("Integration Test");
+
 
         mvc.perform(post("/case-orchestration/general-order-start")
             .content(requestContent.toString())

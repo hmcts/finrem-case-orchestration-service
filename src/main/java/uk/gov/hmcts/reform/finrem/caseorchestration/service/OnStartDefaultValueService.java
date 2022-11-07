@@ -28,12 +28,12 @@ public class OnStartDefaultValueService {
 
     public void defaultConsentedOrderJudgeName(CallbackRequest callbackRequest, String userAuthorisation) {
         callbackRequest.getCaseDetails().getData().put(CONSENTED_ORDER_DIRECTION_JUDGE_NAME,
-            idamService.getIdamFullName(userAuthorisation));
+            idamService.getIdamSurname(userAuthorisation));
     }
 
     public void defaultContestedOrderJudgeName(CallbackRequest callbackRequest, String userAuthorisation) {
         callbackRequest.getCaseDetails().getData().put(CONTESTED_ORDER_APPROVED_JUDGE_NAME,
-            idamService.getIdamFullName(userAuthorisation));
+            idamService.getIdamSurname(userAuthorisation));
     }
 
     public void defaultConsentedOrderDate(CallbackRequest callbackRequest) {
