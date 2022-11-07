@@ -75,4 +75,10 @@ public class DocumentConfiguration {
     private String updateFRCInformationSolicitorFilename;
     private String updateFRCInformationLitigantTemplate;
     private String updateFRCInformationLitigantFilename;
+    private String hearingNoticeConsentedTemplate;
+    private String hearingNoticeConsentedFileName;
+    private String barristerAddedTemplate;
+    private String barristerAddedFilename;
+    private String barristerRemovedTemplate;
+    private String barristerRemovedFilename;
 }
