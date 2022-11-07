@@ -18,6 +18,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.URGENT_CASE_QUESTION;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultValueAboutToStartHandlerTest {
@@ -52,6 +53,8 @@ public class DefaultValueAboutToStartHandlerTest {
         CallbackRequest callbackRequest = buildCallbackRequest();
         AboutToStartOrSubmitCallbackResponse response = handler.handle(callbackRequest, AUTH_TOKEN);
         assertEquals(NO_VALUE, response.getData().get(CIVIL_PARTNERSHIP));
+        assertEquals(NO_VALUE, response.getData().get(URGENT_CASE_QUESTION));
+
     }
 
     private CallbackRequest buildCallbackRequest() {

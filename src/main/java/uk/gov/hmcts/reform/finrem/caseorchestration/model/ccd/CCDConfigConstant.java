@@ -29,6 +29,7 @@ public class CCDConfigConstant {
     public static final String RESPONDENT_PHONE = "respondentPhone";
     public static final String RESPONDENT_EMAIL = "respondentEmail";
     public static final String RESPONDENT = "Respondent";
+    public static final String URGENT_CASE_QUESTION = "promptForUrgentCaseQuestion";
 
     //Applicant Solicitor related
     public static final String SOLICITOR_REFERENCE = "solicitorReference";

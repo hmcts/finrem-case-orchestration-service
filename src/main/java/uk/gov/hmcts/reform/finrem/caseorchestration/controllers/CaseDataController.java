@@ -42,6 +42,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.URGENT_CASE_QUESTION;
 
 @RestController
 @RequiredArgsConstructor
@@ -119,6 +120,7 @@ public class CaseDataController extends BaseController {
         validateCaseData(callbackRequest);
         setOrganisationPolicyForNewPaperCase(callbackRequest.getCaseDetails());
         callbackRequest.getCaseDetails().getData().putIfAbsent(CIVIL_PARTNERSHIP, NO_VALUE);
+        callbackRequest.getCaseDetails().getData().putIfAbsent(URGENT_CASE_QUESTION, NO_VALUE);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build());
     }
 
@@ -145,6 +147,7 @@ public class CaseDataController extends BaseController {
 
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         caseData.putIfAbsent(CIVIL_PARTNERSHIP, NO_VALUE);
+        caseData.putIfAbsent(URGENT_CASE_QUESTION, NO_VALUE);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 

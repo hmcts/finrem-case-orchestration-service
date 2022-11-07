@@ -13,6 +13,7 @@ import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.URGENT_CASE_QUESTION;
 
 @Slf4j
 @Service
@@ -33,6 +34,7 @@ public class DefaultValueAboutToStartHandler implements CallbackHandler {
                                                        String userAuthorisation) {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         caseData.putIfAbsent(CIVIL_PARTNERSHIP, NO_VALUE);
+        caseData.putIfAbsent(URGENT_CASE_QUESTION, NO_VALUE);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
     }
 }

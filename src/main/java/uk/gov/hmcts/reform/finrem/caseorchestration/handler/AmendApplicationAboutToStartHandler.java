@@ -19,6 +19,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.VARIATION_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.URGENT_CASE_QUESTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_NATURE_OF_APPLICATION;
 
 @Slf4j
@@ -54,6 +55,7 @@ public class AmendApplicationAboutToStartHandler implements CallbackHandler {
             log.info("paper case {} marked as variation order",caseDetails.getId());
         }
         caseData.putIfAbsent(CIVIL_PARTNERSHIP, NO_VALUE);
+        caseData.putIfAbsent(URGENT_CASE_QUESTION, NO_VALUE);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
     }
 }
