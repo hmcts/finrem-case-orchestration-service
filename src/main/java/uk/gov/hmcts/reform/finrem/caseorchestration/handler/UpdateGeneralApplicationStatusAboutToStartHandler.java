@@ -21,7 +21,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class MigrateGeneralApplicationAboutToStartHandler implements CallbackHandler {
+public class UpdateGeneralApplicationStatusAboutToStartHandler implements CallbackHandler {
 
     private final GeneralApplicationHelper helper;
 
@@ -29,14 +29,14 @@ public class MigrateGeneralApplicationAboutToStartHandler implements CallbackHan
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_START.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.MIGRATE_GENERAL_APPLICATION.equals(eventType);
+            && EventType.UPDATE_CONTESTED_GENERAL_APPLICATION.equals(eventType);
     }
 
     @Override
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
                                                        String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Start callback event type {} for case id: {}", EventType.MIGRATE_GENERAL_APPLICATION, caseDetails.getId());
+        log.info("Start callback event type {} for case id: {}", EventType.UPDATE_CONTESTED_GENERAL_APPLICATION, caseDetails.getId());
         Map<String, Object> caseData = caseDetails.getData();
 
         List<GeneralApplicationCollectionData> existingGeneralApplication = helper.getGeneralApplicationList(caseData);

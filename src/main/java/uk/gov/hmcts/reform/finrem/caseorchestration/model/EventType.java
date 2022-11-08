@@ -36,7 +36,7 @@ public enum EventType {
     LIST_FOR_HEARING_CONSENTED("FR_listForHearing"),
     MANAGE_BARRISTER("FR_manageBarrister"),
     ISSUE_APPLICATION("FR_issueApplication"),
-    MIGRATE_GENERAL_APPLICATION("migrateGeneralApplication"),
+    UPDATE_CONTESTED_GENERAL_APPLICATION("updateGeneralApplication"),
     NONE("");
 
     private final String ccdType;

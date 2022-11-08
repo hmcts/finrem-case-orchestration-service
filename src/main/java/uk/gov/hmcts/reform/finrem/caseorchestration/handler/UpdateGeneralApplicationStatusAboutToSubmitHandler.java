@@ -22,7 +22,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class MigrateGeneralApplicationAboutToSubmitHandler implements CallbackHandler {
+public class UpdateGeneralApplicationStatusAboutToSubmitHandler implements CallbackHandler {
 
     private final GeneralApplicationService service;
     private final GeneralApplicationHelper helper;
@@ -31,14 +31,14 @@ public class MigrateGeneralApplicationAboutToSubmitHandler implements CallbackHa
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.MIGRATE_GENERAL_APPLICATION.equals(eventType);
+            && EventType.UPDATE_CONTESTED_GENERAL_APPLICATION.equals(eventType);
     }
 
     @Override
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
                                                        String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("About to Submit callback event type {} for case id: {}", EventType.MIGRATE_GENERAL_APPLICATION, caseDetails.getId());
+        log.info("About to Submit callback event type {} for case id: {}", EventType.UPDATE_CONTESTED_GENERAL_APPLICATION, caseDetails.getId());
 
         Map<String, Object> caseData
             = service.updateGeneralApplications(callbackRequest, userAuthorisation);
