@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 
 import static org.hamcrest.Matchers.is;
@@ -16,6 +17,8 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -24,6 +27,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assert
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultContestedCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.docxCaseDocument;
 
 @ActiveProfiles("test-mock-feign-clients")
 public class GenericDocumentServiceTest extends BaseServiceTest {
@@ -35,13 +39,28 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
     private ArgumentCaptor<DocumentGenerationRequest> documentGenerationRequestCaptor;
 
     @Test
-    public void shouldStampDocument() {
+    public void shouldStampPdfDocument() {
         when(documentClientMock.stampDocument(any(), anyString())).thenReturn(document());
 
         CaseDocument stampDocument = genericDocumentService.stampDocument(caseDocument(), AUTH_TOKEN);
 
         assertCaseDocument(stampDocument);
+        verify(documentClientMock, never()).convertDocumentToPdf(eq(AUTH_TOKEN), any());
         verify(documentClientMock, times(1)).stampDocument(any(), eq(AUTH_TOKEN));
+    }
+
+    @Test
+    public void shouldConvertDocumentIfNotPdfAlreadyThenStampDocument() {
+        Document pdfDocument = document();
+        when(documentClientMock.convertDocumentToPdf(anyString(),any())).thenReturn(pdfDocument);
+        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(pdfDocument);
+        CaseDocument caseDocument = genericDocumentService.toCaseDocument(docxCaseDocument());
+
+        CaseDocument stampDocument = genericDocumentService.stampDocument(caseDocument, AUTH_TOKEN);
+
+        assertCaseDocument(stampDocument);
+        verify(documentClientMock, atLeastOnce()).stampDocument(any(), eq(AUTH_TOKEN));
+        verify(documentClientMock, atLeastOnce()).convertDocumentToPdf(eq(AUTH_TOKEN), any());
     }
 
     @Test
