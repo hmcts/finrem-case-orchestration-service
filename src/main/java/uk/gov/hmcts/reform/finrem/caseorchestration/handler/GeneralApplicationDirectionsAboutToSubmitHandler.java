@@ -69,6 +69,14 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
         } catch (InvalidCaseDataException invalidCaseDataException) {
             errors.add(invalidCaseDataException.getMessage());
         }
+
+        String postState = service.getEventPostState(caseDetails, userAuthorisation);
+
+        log.info("Post state {} for caseId {}", postState, caseDetails.getId());
+        if (postState != null) {
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseData)
+                .errors(errors).state(postState).build();
+        }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build();
     }
 
@@ -86,7 +94,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
             setStatusForNonCollAndBulkPrintDouments(caseDetails,
                 data, bulkPrintDocuments, status, userAuthorisation);
             existingGeneralApplication.add(data);
-            caseData.put(GENERAL_APPLICATION_COLLECTION,existingGeneralApplication);
+            caseData.put(GENERAL_APPLICATION_COLLECTION, existingGeneralApplication);
         }
         helper.deleteNonCollectionGeneralApplication(caseData);
         caseData.remove(GENERAL_APPLICATION_DIRECTIONS_LIST);
@@ -97,8 +105,8 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(caseData);
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_DIRECTIONS_LIST));
 
-        String[] choice =  dynamicList.getValueCode().split("#");
-        final String status  = choice[1];
+        String[] choice = dynamicList.getValueCode().split("#");
+        final String status = choice[1];
         final String valueCode = choice[0];
 
         final List<GeneralApplicationCollectionData> applicationCollectionDataList
@@ -118,29 +126,30 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
                                                                            List<BulkPrintDocument> bulkPrintDocuments,
                                                                            String userAuthorisation) {
         if (code.equals(data.getId())) {
-            return setStatusForNonCollAndBulkPrintDouments(caseDetails, data, bulkPrintDocuments,status, userAuthorisation);
+            return setStatusForNonCollAndBulkPrintDouments(caseDetails, data, bulkPrintDocuments, status, userAuthorisation);
         }
         return data;
     }
 
     private GeneralApplicationCollectionData setStatusForNonCollAndBulkPrintDouments(CaseDetails caseDetails,
-                                                                           GeneralApplicationCollectionData data,
-                                                                           List<BulkPrintDocument> bulkPrintDocuments,
-                                                                           String status,
-                                                                           String userAuthorisation) {
+                                                                                     GeneralApplicationCollectionData data,
+                                                                                     List<BulkPrintDocument> bulkPrintDocuments,
+                                                                                     String status,
+                                                                                     String userAuthorisation) {
 
         GeneralApplicationItems items = data.getGeneralApplicationItems();
         CaseDocument caseDocument = service.getBulkPrintDocument(caseDetails, userAuthorisation);
         items.setGeneralApplicationDirectionsDocument(caseDocument);
         items.setGeneralApplicationOutcomeOther(Objects.toString(caseDetails.getData().get(GENERAL_APPLICATION_OUTCOME_OTHER), null));
-        String gaElementStatus =  status != null ? status : items.getGeneralApplicationStatus();
+        String gaElementStatus = status != null ? status : items.getGeneralApplicationStatus();
 
         log.info("status {} for general application for Case ID: {} Event type {}",
             status, caseDetails.getId(), EventType.GENERAL_APPLICATION_DIRECTIONS);
 
         switch (gaElementStatus) {
             case "Approved" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_APPROVED.getId());
-            case "Not Approved" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_NOT_APPROVED.getId());
+            case "Not Approved" ->
+                items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_NOT_APPROVED.getId());
             case "Other" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_OTHER.getId());
             default -> throw new IllegalStateException("Unexpected value: " + items.getGeneralApplicationStatus());
         }
@@ -154,7 +163,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
         log.info("items getGeneralApplicationDocument {}, for caseId {}", items.getGeneralApplicationDocument(), caseDetails.getId());
 
         if (items.getGeneralApplicationDocument() != null) {
-            items.setGeneralApplicationDocument(helper.getPdfDocument(items.getGeneralApplicationDocument(),userAuthorisation));
+            items.setGeneralApplicationDocument(helper.getPdfDocument(items.getGeneralApplicationDocument(), userAuthorisation));
             final BulkPrintDocument genDoc = BulkPrintDocument.builder()
                 .binaryFileUrl(items.getGeneralApplicationDocument().getDocumentBinaryUrl())
                 .fileName(items.getGeneralApplicationDocument().getDocumentFilename())
@@ -165,7 +174,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
         }
 
         if (items.getGeneralApplicationDraftOrder() != null) {
-            items.setGeneralApplicationDraftOrder(helper.getPdfDocument(items.getGeneralApplicationDraftOrder(),userAuthorisation));
+            items.setGeneralApplicationDraftOrder(helper.getPdfDocument(items.getGeneralApplicationDraftOrder(), userAuthorisation));
             final BulkPrintDocument draftDoc = BulkPrintDocument.builder()
                 .binaryFileUrl(items.getGeneralApplicationDraftOrder().getDocumentBinaryUrl())
                 .fileName(items.getGeneralApplicationDraftOrder().getDocumentFilename())
