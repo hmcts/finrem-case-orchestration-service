@@ -38,11 +38,15 @@ public class NocRequestAboutToStartHandler implements CallbackHandler {
     public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest, String userAuthorisation) {
         List<String> errors = newArrayList();
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        log.info("About to start handling noc request barrister validation for case {}",
+            callbackRequest.getCaseDetails().getId());
 
         String userId = idamService.getIdamUserId(userAuthorisation);
         UserDetails invokerDetails = idamAuthService.getUserByUserId(userAuthorisation, userId);
+        log.info("User details for case {} :: {}", callbackRequest.getCaseDetails().getId(), invokerDetails);
 
         if (barristerRepresentationChecker.hasUserBeenBarristerOnCase(caseData, invokerDetails)) {
+            log.info("User has represented litigant as Barrister for case {}", callbackRequest.getCaseDetails().getId());
             errors.add(String.format("User has represented litigant as Barrister for case %s",
                 callbackRequest.getCaseDetails().getId()));
         }
