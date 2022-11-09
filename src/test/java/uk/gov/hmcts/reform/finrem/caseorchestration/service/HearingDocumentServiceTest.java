@@ -210,7 +210,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyCourtDetailsFields(
             "Canterbury Family Court Hearing Centre", "The Law Courts, Chaucer Road, Canterbury, CT1 1ZA",
-            "01634 887900", "FRCKSS@justice.gov.uk");
+            "01634 887900", "Family.canterbury.countycourt@justice.gov.uk");
     }
 
     @Test
