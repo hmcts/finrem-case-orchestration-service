@@ -61,7 +61,8 @@ public class OnlineFormDocumentService {
     public CaseDocument generateMiniFormA(String authorisationToken, CaseDetails caseDetails) {
 
         log.info("Generating Consented Mini Form A for Case ID : {}", caseDetails.getId());
-        return genericDocumentService.generateDocument(authorisationToken, caseDetails,
+        CaseDetails  caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
+        return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
             documentConfiguration.getMiniFormTemplate(),
             documentConfiguration.getMiniFormFileName());
     }
