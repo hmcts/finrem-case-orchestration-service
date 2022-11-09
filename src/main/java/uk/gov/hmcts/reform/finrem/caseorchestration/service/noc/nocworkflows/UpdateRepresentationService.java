@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.error.IllegalUserException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
@@ -20,7 +19,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ChangeOfRepresentati
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateSolicitorDetailsService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerRepresentationChecker;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.AddedSolicitorService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.RemovedSolicitorService;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -58,7 +56,6 @@ public class UpdateRepresentationService {
     private final ChangeOfRepresentationService changeOfRepresentationService;
     private final AddedSolicitorService addedSolicitorService;
     private final RemovedSolicitorService removedSolicitorService;
-    private final BarristerRepresentationChecker barristerRepresentationChecker;
 
     public Map<String, Object> updateRepresentationAsSolicitor(CaseDetails caseDetails,
                                                                String authToken) {
@@ -66,7 +63,6 @@ public class UpdateRepresentationService {
         log.info("Updating representation for case ID {}", caseDetails.getId());
 
         final UserDetails solicitorToAdd = getInvokerDetails(authToken, caseDetails);
-        checkUserHasBeenBarristerOnCase(caseDetails, solicitorToAdd);
         final ChangeOrganisationRequest changeRequest = getChangeOrganisationRequest(caseDetails);
 
         final ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsSolicitor(solicitorToAdd,
@@ -77,7 +73,10 @@ public class UpdateRepresentationService {
         log.info("About to start updating solicitor details in the case data for caseId: {}", caseDetails.getId());
         caseDetails.getData().putAll(updateCaseDataWithNewSolDetails(caseDetails, addedSolicitor, changeRequest));
 
-        return updateRepresentationUpdateHistory(caseDetails, addedSolicitor, removedSolicitor, changeRequest);
+        Map<String, Object> updatedCaseData = updateRepresentationUpdateHistory(caseDetails, addedSolicitor,
+            removedSolicitor, changeRequest);
+
+        return updatedCaseData;
     }
 
     private UserDetails getInvokerDetails(String authToken, CaseDetails caseDetails) {
@@ -85,15 +84,6 @@ public class UpdateRepresentationService {
             .orElseThrow(() -> new IllegalStateException(String.format("Could not find %s event in audit", NOC_EVENT)));
 
         return idamClient.getUserByUserId(authToken, auditEvent.getUserId());
-    }
-
-    private void checkUserHasBeenBarristerOnCase(CaseDetails caseDetails, UserDetails solicitor) {
-        Map<String, Object> caseData = caseDetails.getData();
-
-        if (barristerRepresentationChecker.hasUserBeenBarristerOnCase(caseData, solicitor)) {
-            caseData.put(CHANGE_ORGANISATION_REQUEST, ChangeOrganisationRequest.builder().build());
-            throw new IllegalUserException(String.format("User has represented litigant as Barrister for case %s", caseDetails.getId()));
-        }
     }
 
     private Map<String, Object> updateRepresentationUpdateHistory(CaseDetails caseDetails,
