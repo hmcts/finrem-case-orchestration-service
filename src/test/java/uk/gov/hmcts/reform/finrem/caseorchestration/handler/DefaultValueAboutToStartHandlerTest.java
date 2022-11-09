@@ -57,6 +57,13 @@ public class DefaultValueAboutToStartHandlerTest {
 
     }
 
+    @Test
+    public void givenContestedCase_whenEventIsAmendPaper_thenHandlerCanHandle() {
+        assertThat(handler
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.AMEND_CONTESTED_PAPER_APP_DETAILS),
+            is(true));
+    }
+
     private CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
         CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
