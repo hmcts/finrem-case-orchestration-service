@@ -43,7 +43,7 @@ The best way to develop and test services in Financial Remedy is to use `rse-cft
 ```
 
 This will spin up finrem-case-orchestration along with the base CCD services 
-and a few docker containers for Postgres, ES, LS and XUI :
+and a few docker containers for Postgres, ES, LS and XUI:
 
 on `build.gradle` you can find our customisation for the plugin task on `bootWithCCD`:
 
