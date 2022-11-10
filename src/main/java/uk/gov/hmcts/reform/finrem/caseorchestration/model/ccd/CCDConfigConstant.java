@@ -575,6 +575,7 @@ public class CCDConfigConstant {
     public static final String INCLUDES_REPRESENTATIVE_UPDATE = "updateIncludesRepresentativeChange";
     public static final String UPDATE_CONTACT_DETAILS_EVENT = "FR_updateContactDetails";
     public static final String NOTICE_OF_CHANGE = "Notice of Change";
+    public static final String IS_NOC_REJECTED = "isNocRejected";
 
     public static final String HEARING_UPLOAD_BUNDLE_COLLECTION = "hearingUploadBundle";
     public static final String SEND_ORDER_POST_STATE_OPTION_FIELD = "sendOrderPostStateOption";
