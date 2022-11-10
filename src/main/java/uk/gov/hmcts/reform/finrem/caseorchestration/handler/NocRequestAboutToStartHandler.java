@@ -43,7 +43,7 @@ public class NocRequestAboutToStartHandler implements CallbackHandler {
 
         String userId = idamService.getIdamUserId(userAuthorisation);
         UserDetails invokerDetails = idamAuthService.getUserByUserId(userAuthorisation, userId);
-        log.info("User details for case {} :: {}", callbackRequest.getCaseDetails().getId(), invokerDetails);
+        log.info("User details for case {} :: {}", callbackRequest.getCaseDetails().getId(), invokerDetails.toString());
 
         if (barristerRepresentationChecker.hasUserBeenBarristerOnCase(caseData, invokerDetails)) {
             log.info("User has represented litigant as Barrister for case {}", callbackRequest.getCaseDetails().getId());

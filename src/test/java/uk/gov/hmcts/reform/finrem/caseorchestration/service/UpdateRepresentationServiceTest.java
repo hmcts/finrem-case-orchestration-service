@@ -9,6 +9,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationApprovalStatus;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
@@ -17,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpda
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.events.AuditEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationContactInformation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerRepresentationChecker;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.AddedSolicitorService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.RemovedSolicitorService;
@@ -33,14 +36,18 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_DX_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
@@ -100,6 +107,9 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
 
     @MockBean
     private RemovedSolicitorService removedSolicitorService;
+
+    @MockBean
+    private BarristerRepresentationChecker barristerRepresentationChecker;
 
     private UserDetails testAppSolicitor;
     private UserDetails testRespSolicitor;
@@ -355,6 +365,24 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         assertEquals(solicitorAddress.getCounty(), COUNTY);
         assertEquals(solicitorAddress.getCountry(), COUNTRY);
         assertEquals(solicitorAddress.getPostCode(), POSTCODE);
+    }
+
+    @Test
+    public void givenUserHasRepresentedLitigantAsBarrister_whenUpdateRepresentation_thenRejectChangeOrgRequest() throws Exception {
+        when(auditEventService.getLatestAuditEventByName(any(), eq(NOC_EVENT))).thenReturn(Optional.of(testAuditEvent));
+        when(idamClient.getUserByUserId(any(), eq(testAuditEvent.getUserId()))).thenReturn(testAppSolicitor);
+        when(barristerRepresentationChecker.hasUserBeenBarristerOnCase(any(), eq(testAppSolicitor))).thenReturn(true);
+
+        InputStream resourceAsStream = getClass().getResourceAsStream(PATH
+            + "contestedAppSolicitorAdding/change-of-representatives-before.json");
+        initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+
+        Map<String, Object> actualData = updateRepresentationService.updateRepresentationAsSolicitor(initialDetails, AUTH_TOKEN);
+
+        ChangeOrganisationRequest changeOrganisationRequest =
+            mapper.convertValue(actualData.get(CHANGE_ORGANISATION_REQUEST), ChangeOrganisationRequest.class);
+
+        assertThat(changeOrganisationRequest.getApprovalStatus(), is(ChangeOrganisationApprovalStatus.REJECTED));
     }
 
     private List<Element<RepresentationUpdate>> convertToChangeOfRepresentation(Map<String, Object> data) {

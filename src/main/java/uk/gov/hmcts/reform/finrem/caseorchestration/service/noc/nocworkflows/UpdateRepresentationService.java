@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationApprovalStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistory;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ChangeOfRepresentati
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateSolicitorDetailsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerRepresentationChecker;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.AddedSolicitorService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.RemovedSolicitorService;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -56,6 +58,7 @@ public class UpdateRepresentationService {
     private final ChangeOfRepresentationService changeOfRepresentationService;
     private final AddedSolicitorService addedSolicitorService;
     private final RemovedSolicitorService removedSolicitorService;
+    private final BarristerRepresentationChecker barristerRepresentationChecker;
 
     public Map<String, Object> updateRepresentationAsSolicitor(CaseDetails caseDetails,
                                                                String authToken) {
@@ -64,6 +67,14 @@ public class UpdateRepresentationService {
 
         final UserDetails solicitorToAdd = getInvokerDetails(authToken, caseDetails);
         final ChangeOrganisationRequest changeRequest = getChangeOrganisationRequest(caseDetails);
+
+        if (barristerRepresentationChecker.hasUserBeenBarristerOnCase(caseDetails.getData(), solicitorToAdd)) {
+            log.error("User has represented litigant as Barrister for case {}, REJECTING COR", caseDetails.getId());
+            changeRequest.setApprovalStatus(ChangeOrganisationApprovalStatus.REJECTED);
+            Map<String, Object> caseData = caseDetails.getData();
+            caseData.put(CHANGE_ORGANISATION_REQUEST, changeRequest);
+            return caseData;
+        }
 
         final ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsSolicitor(solicitorToAdd,
             changeRequest);
