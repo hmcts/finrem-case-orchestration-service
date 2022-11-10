@@ -42,7 +42,6 @@ public class AmendApplicationAboutToStartHandler implements CallbackHandler {
         log.info("Received request to set nature of application for consented case with Case ID: {}", caseDetails.getId());
 
         Map<String, Object> caseData = caseDetails.getData();
-        log.info("caseData ={}= for case id {}", caseData, caseDetails.getId());
         final String intends = Objects.toString(caseData.get(APPLICANT_INTENDS), "");
         log.info("Applicant intends to {} for case id: {}",intends, caseDetails.getId());
 
