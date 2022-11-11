@@ -34,7 +34,9 @@ public class DefaultValueAboutToStartHandler implements CallbackHandler {
                                                        String userAuthorisation) {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         caseData.putIfAbsent(CIVIL_PARTNERSHIP, NO_VALUE);
-        caseData.putIfAbsent(URGENT_CASE_QUESTION, NO_VALUE);
+        if (CaseType.CONTESTED.equals(callbackRequest.getCaseDetails().getCaseTypeId())) {
+            caseData.putIfAbsent(URGENT_CASE_QUESTION, NO_VALUE);
+        }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
     }
 }
