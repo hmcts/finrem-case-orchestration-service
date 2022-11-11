@@ -101,7 +101,7 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
         assertThat(frcCourtDetails, is(notNullValue()));
         assertThat(frcCourtDetails.getCourtName(), is("Horsham County Court And Family Court"));
         assertThat(frcCourtDetails.getCourtAddress(), is("The Law Courts, Hurst Road, Horsham, RH12 2ET"));
-        assertThat(frcCourtDetails.getPhoneNumber(), is("01634 887900"));
+        assertThat(frcCourtDetails.getPhoneNumber(), is("0300 1235577"));
         assertThat(frcCourtDetails.getEmail(), is("sussexfamily@Justice.gov.uk"));
     }
 
