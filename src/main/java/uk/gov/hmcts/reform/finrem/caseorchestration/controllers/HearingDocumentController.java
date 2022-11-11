@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchDocumentFoundException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
@@ -45,6 +46,7 @@ import java.util.stream.Collectors;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ADDITIONAL_DOC;
 
 @RestController
 @RequiredArgsConstructor
@@ -81,6 +83,13 @@ public class HearingDocumentController extends BaseController {
             return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
                 .errors(errors)
                 .build());
+        }
+
+        if (caseDetails.getData().get(HEARING_ADDITIONAL_DOC) != null) {
+            CaseDocument caseDocument = objectMapper.convertValue(caseDetails.getData().get(HEARING_ADDITIONAL_DOC),
+                CaseDocument.class);
+            CaseDocument pdfDocument = additionalHearingDocumentService.convertToPdf(caseDocument, authorisationToken);
+            callbackRequest.getCaseDetails().getData().put(HEARING_ADDITIONAL_DOC, pdfDocument);
         }
 
         if (hearingDocumentService.alreadyHadFirstHearing(caseDetails)) {
