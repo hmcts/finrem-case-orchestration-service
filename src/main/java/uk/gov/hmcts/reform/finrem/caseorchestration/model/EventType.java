@@ -19,6 +19,8 @@ public enum EventType {
     INTERIM_HEARING("FR_listForInterimHearing"),
     SOLICITOR_CREATE("FR_solicitorCreate"),
     AMEND_CONTESTED_APP_DETAILS("FR_amendApplication"),
+    AMEND_CONTESTED_PAPER_APP_DETAILS("FR_amendPaperApplication"),
+    AMEND_CONSENT_ORDER("FR_amendedConsentOrder"),
     RESPOND_TO_ORDER("FR_respondToOrder"),
     AMEND_CASE("FR_amendCase"),
     CONSENT_ORDER_NOT_APPROVED("FR_consentOrderNotApproved"),
@@ -61,6 +63,7 @@ public enum EventType {
     HWF_DECISION_MADE_FROM_AWAITING_PAYMENT("FR_HWFDecisionMadeFromAwaitingPayment"),
     PAYMENT_MADE_FROM_AWAITING_PAYMENT("FR_paymentMadeFromAwaitingPayment"),
     ISSUE_APPLICATION("FR_issueApplication"),
+    
     REFER_TO_JUDGE("FR_referToJudge"),
     GENERAL_ORDER("FR_generalOrder"),
     ORDER_REFUSAL("FR_orderRefusal"),
@@ -149,7 +152,8 @@ public enum EventType {
     REVERT_TO_PREPARE_FOR_HEARING("FR_revertToPrepareForHearing"),
     ADD_LIST_FOR_INTERIM_HEARING_INFO("FR_addListForInterimHearingInfo"),
     UPDATE_Frc_INFORMATION("FR_updateFrcInformation"),
-    MANAGE_HEARING_BUNDLES("FR_manageHearingBundles");
+    MANAGE_HEARING_BUNDLES("FR_manageHearingBundles")
+    CONSENT_APPLICATION_APPROVED_IN_CONTESTED("FR_consentOrderApproved");
 
     private final String ccdType;
 

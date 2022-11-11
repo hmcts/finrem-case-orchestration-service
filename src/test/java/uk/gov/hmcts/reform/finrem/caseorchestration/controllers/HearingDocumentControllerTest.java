@@ -340,6 +340,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
             .andExpect(status().isOk());
 
         verify(additionalHearingDocumentService).sendAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
+        verify(additionalHearingDocumentService).convertToPdf(any(), eq(AUTH_TOKEN));
     }
 
     @Test
