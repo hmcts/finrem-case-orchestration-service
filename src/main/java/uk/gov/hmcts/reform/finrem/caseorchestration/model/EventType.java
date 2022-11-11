@@ -20,7 +20,6 @@ public enum EventType {
     SOLICITOR_CREATE("FR_solicitorCreate"),
     AMEND_CONTESTED_APP_DETAILS("FR_amendApplication"),
     AMEND_CONTESTED_PAPER_APP_DETAILS("FR_amendPaperApplication"),
-    AMEND_CONSENT_ORDER("FR_amendedConsentOrder"),
     RESPOND_TO_ORDER("FR_respondToOrder"),
     AMEND_CASE("FR_amendCase"),
     CONSENT_ORDER_NOT_APPROVED("FR_consentOrderNotApproved"),
