@@ -18,6 +18,7 @@ public enum EventType {
     SOLICITOR_CREATE("FR_solicitorCreate"),
     AMEND_APP_DETAILS("FR_amendApplicationDetails"),
     AMEND_CONTESTED_APP_DETAILS("FR_amendApplication"),
+    AMEND_CONTESTED_PAPER_APP_DETAILS("FR_amendPaperApplication"),
     AMEND_CONSENT_ORDER("FR_amendedConsentOrder"),
     RESPOND_TO_ORDER("FR_respondToOrder"),
     AMEND_CASE("FR_amendCase"),
@@ -36,6 +37,7 @@ public enum EventType {
     LIST_FOR_HEARING_CONSENTED("FR_listForHearing"),
     MANAGE_BARRISTER("FR_manageBarrister"),
     ISSUE_APPLICATION("FR_issueApplication"),
+    CONSENT_APPLICATION_APPROVED_IN_CONTESTED("FR_consentOrderApproved"),
     UPDATE_CONTESTED_GENERAL_APPLICATION("updateGeneralApplication"),
     NONE("");
 
