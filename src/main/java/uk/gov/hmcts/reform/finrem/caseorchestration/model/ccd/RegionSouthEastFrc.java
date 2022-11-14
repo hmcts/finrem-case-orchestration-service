@@ -11,7 +11,7 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public enum RegionSouthEastFrc {
     KENT("kent"),
-    BEDFORDSHIRE("bedforshire"),
+    BEDFORDSHIRE("bedfordshire"),
     THAMES_VALLEY("thamesvalley");
 
     private final String value;
