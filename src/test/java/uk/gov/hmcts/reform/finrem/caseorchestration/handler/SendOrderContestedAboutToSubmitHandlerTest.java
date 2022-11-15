@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -44,10 +45,12 @@ import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
@@ -130,6 +133,24 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
 
         verify(bulkPrintService, never()).printApplicantDocuments(any(), any(), any());
         verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
+    }
+
+    @Test
+    public void givenShouldThrowErrorAndNotPrintPackForResondent_whenPrintAndMailGeneralOrderTriggeredAndAddressIsNotPresent() {
+        when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
+
+        doThrow(new InvalidCaseDataException(BAD_REQUEST.value(), "CCD address field applicantAddress"
+            + " needs to contain both first line of address and postcode")).when(bulkPrintService).printApplicantDocuments(any(), any(), any());
+
+        CallbackRequest callbackRequest =
+            CallbackRequest.builder().caseDetails(generalOrderContestedCaseDetailsWithoutSolicitorAddress()).build();
+        AboutToStartOrSubmitCallbackResponse response = sendOrderContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getErrors().size(), is(1));
+        assertThat(response.getErrors().get(0), is("CCD address field applicantAddress"
+            + " needs to contain both first line of address and postcode"));
+        verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService, never()).printRespondentDocuments(any(), any(), any());
     }
 
     @Test
@@ -307,5 +328,17 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
             .caseDetails(CaseDetails.builder().data(new HashMap<>()).build())
             .build();
 
+    }
+
+    private CaseDetails generalOrderContestedCaseDetailsWithoutSolicitorAddress() {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/general-order-contested.json")) {
+            CaseDetails caseDetails = objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+            caseDetails.getData().remove("respondentAddress");
+            caseDetails.getData().remove("applicantAddress");
+            caseDetails.getData().remove("solicitorAddress");
+            return caseDetails;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

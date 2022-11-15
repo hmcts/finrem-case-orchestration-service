@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
+import com.google.common.collect.ImmutableList;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -7,6 +8,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -59,9 +61,13 @@ public class SendOrderContestedAboutToSubmitHandler implements CallbackHandler {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        printAndMailGeneralOrderToParties(caseDetails, userAuthorisation);
-        printAndMailHearingDocuments(caseDetails, userAuthorisation);
-        stampFinalOrder(caseDetails, userAuthorisation);
+        try {
+            printAndMailGeneralOrderToParties(caseDetails, userAuthorisation);
+            printAndMailHearingDocuments(caseDetails, userAuthorisation);
+            stampFinalOrder(caseDetails, userAuthorisation);
+        } catch (InvalidCaseDataException e) {
+            return AboutToStartOrSubmitCallbackResponse.builder().errors(ImmutableList.of(e.getMessage())).build();
+        }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build();
     }

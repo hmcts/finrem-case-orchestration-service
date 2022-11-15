@@ -91,6 +91,8 @@ public class GenerateCoverSheetService {
 
         if (addressFoundInCaseData == AddressFoundInCaseData.NONE) {
             String offendingCcdField = isRepresentedByASolicitor ? solicitorAddressCcdFieldName : partyAddressCcdFieldName;
+            log.error("Case {} address field {} needs to contain "
+                + "both first line of address and postcode", caseDetails.getId(), offendingCcdField);
             throw new InvalidCaseDataException(BAD_REQUEST.value(), "CCD address field " + offendingCcdField
                 + " needs to contain both first line of address and postcode");
         } else {
