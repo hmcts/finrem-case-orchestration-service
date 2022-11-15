@@ -37,6 +37,7 @@ public enum EventType {
     LIST_FOR_HEARING_CONSENTED("FR_listForHearing"),
     MANAGE_BARRISTER("FR_manageBarrister"),
     ISSUE_APPLICATION("FR_issueApplication"),
+    CONSENT_APPLICATION_APPROVED_IN_CONTESTED("FR_consentOrderApproved"),
     CONTESTED_NEW_PAPER_CASE("FR_newPaperCase"),
     NONE("");
 
