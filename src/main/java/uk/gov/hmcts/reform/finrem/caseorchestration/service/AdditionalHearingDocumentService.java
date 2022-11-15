@@ -251,8 +251,12 @@ public class AdditionalHearingDocumentService {
 
     private void convertHearingOrderCollectionDocumentsToPdf(HearingOrderCollectionData element,
                                                              String authorisationToken) {
-        CaseDocument pdfApprovedOrder = genericDocumentService.convertDocumentIfNotPdfAlready(
-            element.getHearingOrderDocuments().getUploadDraftDocument(), authorisationToken);
+        CaseDocument pdfApprovedOrder = convertToPdf(element.getHearingOrderDocuments().getUploadDraftDocument(),
+            authorisationToken);
         element.getHearingOrderDocuments().setUploadDraftDocument(pdfApprovedOrder);
+    }
+
+    public CaseDocument convertToPdf(CaseDocument document,String authorisationToken) {
+        return genericDocumentService.convertDocumentIfNotPdfAlready(document, authorisationToken);
     }
 }
