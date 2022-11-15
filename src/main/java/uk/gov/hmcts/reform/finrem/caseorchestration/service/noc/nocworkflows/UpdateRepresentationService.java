@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationApprovalStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistory;
@@ -41,6 +40,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_FIRM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationApprovalStatus.REJECTED;
 
 @Slf4j
 @Service
@@ -50,6 +50,7 @@ public class UpdateRepresentationService {
     private static final String CHANGE_ORGANISATION_REQUEST = "changeOrganisationRequestField";
     private static final String NOC_EVENT = "nocRequest";
     private static final String REPRESENTATION_UPDATE_HISTORY = "RepresentationUpdateHistory";
+
     private final AuditEventService auditEventService;
     private final IdamAuthService idamClient;
     private final ObjectMapper objectMapper;
@@ -71,7 +72,7 @@ public class UpdateRepresentationService {
 
         if (barristerRepresentationChecker.hasUserBeenBarristerOnCase(caseDetails.getData(), solicitorToAdd)) {
             log.error("User has represented litigant as Barrister for case {}, REJECTING COR", caseDetails.getId());
-            changeRequest.setApprovalStatus(ChangeOrganisationApprovalStatus.REJECTED);
+            changeRequest.setApprovalStatus(REJECTED);
             Map<String, Object> caseData = caseDetails.getData();
             caseData.put(CHANGE_ORGANISATION_REQUEST, changeRequest);
             caseData.put(IS_NOC_REJECTED, YES_VALUE);
