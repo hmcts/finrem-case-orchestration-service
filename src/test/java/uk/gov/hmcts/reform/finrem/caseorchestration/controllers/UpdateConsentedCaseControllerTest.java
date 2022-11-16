@@ -309,6 +309,27 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
+    public void shouldDeleteApplicantDetailsIfApplicantRepresentedIsYes() throws Exception {
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/updatecase/remove-respondent-solicitor-details.json").toURI()));
+
+        assertEquals(requestContent.get("case_details").get("case_data").get("applicantRepresented").asText(), "No");
+        JsonNode removedNode = ((ObjectNode) requestContent.get("case_details").get("case_data"))
+            .put("applicantRepresented", "Yes");
+        assertEquals(requestContent.get("case_details").get("case_data").get("applicantRepresented").asText(), "Yes");
+
+        mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CASE)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.applicantAddress").doesNotExist())
+            .andExpect(jsonPath("$.data.applicantEmail").doesNotExist())
+            .andExpect(jsonPath("$.data.applicantPhone").doesNotExist());
+    }
+
+    @Test
     public void givenValidData_whenUpdateCaseDetails_thenShouldPreserveOrgPolicies() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/updatecase/amend-divorce-details-d81-joint.json").toURI()));
