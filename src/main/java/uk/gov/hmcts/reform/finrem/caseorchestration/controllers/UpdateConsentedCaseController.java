@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.Upd
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Objects.nonNull;
@@ -221,7 +222,7 @@ public class UpdateConsentedCaseController extends BaseController {
 
     private void updateApplicantOrSolicitorContactDetails(Map<String, Object> caseData) {
         Object applicantRepresented = caseData.get(APPLICANT_REPRESENTED);
-        if (equalsTo(applicantRepresented != null ? (String) applicantRepresented : "No", "No")) {
+        if (equalsTo(applicantRepresented != null ? Objects.toString(applicantRepresented) : "No", "No")) {
             removeApplicantSolicitorAddress(caseData, false);
         } else {
             removeApplicantAddress(caseData);
