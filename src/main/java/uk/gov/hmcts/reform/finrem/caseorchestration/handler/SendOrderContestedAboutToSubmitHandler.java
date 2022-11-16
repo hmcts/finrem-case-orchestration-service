@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import com.google.common.collect.ImmutableList;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -66,7 +65,7 @@ public class SendOrderContestedAboutToSubmitHandler implements CallbackHandler {
             printAndMailHearingDocuments(caseDetails, userAuthorisation);
             stampFinalOrder(caseDetails, userAuthorisation);
         } catch (InvalidCaseDataException e) {
-            return AboutToStartOrSubmitCallbackResponse.builder().errors(ImmutableList.of(e.getMessage())).build();
+            return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(e.getMessage())).build();
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build();
