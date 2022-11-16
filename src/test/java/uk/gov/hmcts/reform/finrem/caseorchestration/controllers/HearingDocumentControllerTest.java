@@ -143,7 +143,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
         doValidCaseDataSetUpForAdditionalHearing();
 
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
-        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
 
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
                 .content(requestContent.toString())
@@ -260,8 +260,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void givenNoPreviousHearing_shouldPrintHearingDocumentsForRespondentSolicitor() throws Exception {
-        // TODO: After testing change back to isContestedApplication
-        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(false);
 
         requestContent = objectMapper.readTree(new File(getClass()
@@ -277,8 +276,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void givenNoPreviousHearing_shouldPrintHearingDocumentsForApplicantSolicitor() throws Exception {
-        // TODO: After testing change back to isContestedApplication
-        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(false);
 
         requestContent = objectMapper.readTree(new File(getClass()
@@ -294,8 +292,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void givenNoPreviousHearing_shouldPrintHearingDocumentsForApplicantSolicitorForPaperCase() throws Exception {
-        // TODO: After testing change back to isContestedApplication
-        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(false);
 
         requestContent = objectMapper.readTree(new File(getClass()
@@ -311,8 +308,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void givenHadPreviousHearing_thenPrintAdditionalHearingDocumentsForRespondentSolicitor() throws Exception {
-        // TODO: After testing change back to isContestedApplication
-        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
 
         requestContent = objectMapper.readTree(new File(getClass()
@@ -328,8 +324,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void givenHadPreviousHearing_thenPrintAdditionalHearingDocumentsForApplicantSolicitor() throws Exception {
-        // TODO: After testing change back to isContestedApplication
-        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
 
         requestContent = objectMapper.readTree(new File(getClass()
@@ -346,8 +341,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldThrowErrorWhenAdditionalHearingDocumentNotFound() throws Exception {
-        // TODO: After testing change back to isContestedApplication
-        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
         doThrow(new NoSuchDocumentFoundException("Additional Hearing Document could not be found"))
             .when(additionalHearingDocumentService).sendAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
