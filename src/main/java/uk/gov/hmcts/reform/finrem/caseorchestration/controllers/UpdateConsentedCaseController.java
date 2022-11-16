@@ -221,8 +221,8 @@ public class UpdateConsentedCaseController extends BaseController {
 
 
     private void updateApplicantOrSolicitorContactDetails(Map<String, Object> caseData) {
-        Object applicantRepresented = caseData.get(APPLICANT_REPRESENTED);
-        if (equalsTo(applicantRepresented != null ? Objects.toString(applicantRepresented) : "No", "No")) {
+        Optional<Object> applicantRepresented = Optional.ofNullable(caseData.get(APPLICANT_REPRESENTED));
+        if (applicantRepresented.isPresent() && equalsTo(Objects.toString(applicantRepresented), "No")) {
             removeApplicantSolicitorAddress(caseData, false);
         } else {
             removeApplicantAddress(caseData);
