@@ -1,8 +1,11 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -17,18 +20,18 @@ import java.util.Map;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ISSUE_DATE;
 
+@RunWith(MockitoJUnitRunner.class)
 public class IssueApplicationContestedAboutToStartHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
+    @InjectMocks
     private IssueApplicationContestedAboutToStartHandler handler;
 
-    @Before
-    public void setup() {
-        handler =  new IssueApplicationContestedAboutToStartHandler(new OnStartDefaultValueService());
-    }
+    @Mock
+    private OnStartDefaultValueService onStartDefaultValueService;
 
     @Test
     public void givenContestedCase_whenEventIsAmendAndCallbackIsSubmitted_thenHandlerCanNotHandle() {
@@ -48,7 +51,7 @@ public class IssueApplicationContestedAboutToStartHandlerTest {
     public void givenContestedCase_whenUseIssueApplication_thenDefaultIssueDateSetToCurrentDate() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         AboutToStartOrSubmitCallbackResponse response = handler.handle(callbackRequest, AUTH_TOKEN);
-        assertNotNull(response.getData().get(ISSUE_DATE));
+        verify(onStartDefaultValueService).defaultIssueDate(callbackRequest);
     }
 
     @Test
