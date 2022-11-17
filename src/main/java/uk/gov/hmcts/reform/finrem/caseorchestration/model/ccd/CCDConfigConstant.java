@@ -602,4 +602,10 @@ public class CCDConfigConstant {
     public static final String MANAGE_BARRISTER_PARTY = "barristerParty";
 
 
+    //Hearing Events
+    public static final String LIST_FOR_HEARING = "List for Hearing";
+    public static final String LIST_FOR_INTERIM_HEARING = "List for Interim Hearing";
+
+    //Hearing State
+    public static final String PREPARE_FOR_HEARING_STATE = "prepareForHearing";
 }
