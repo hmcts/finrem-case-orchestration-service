@@ -1,9 +1,9 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -25,32 +25,29 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OUT_OF_FAMILY_COURT_RESOLUTION;
 
 @Component
-@RequiredArgsConstructor
 @Slf4j
-public class FormCandGDocumentsLetterHandler {
+public class FormCandGCorresponder extends HearingCorresponder {
 
     private final DocumentHelper documentHelper;
-    private final BulkPrintService bulkPrintService;
-    private final NotificationService notificationService;
     private final ObjectMapper objectMapper;
 
-    public void sendFormCAndGForBulkPrint(CaseDetails caseDetails, String authorisationToken) {
-        String caseId = caseDetails.getId() == null ? "noId" : caseDetails.getId().toString();
-        List<BulkPrintDocument> caseDocuments = getHearingCaseDocuments(caseDetails.getData(), caseId);
-
-        if (!notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
-            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, caseDocuments);
-        }
-        if (!notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
-            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, caseDocuments);
-        }
+    @Autowired
+    public FormCandGCorresponder(BulkPrintService bulkPrintService,
+                                 NotificationService notificationService,
+                                 DocumentHelper documentHelper, ObjectMapper objectMapper) {
+        super(bulkPrintService, notificationService);
+        this.documentHelper = documentHelper;
+        this.objectMapper = objectMapper;
     }
 
+    @Override
+    public List<BulkPrintDocument> getDocumentsToPrint(CaseDetails caseDetails) {
+        String caseId = caseDetails.getId() == null ? "noId" : caseDetails.getId().toString();
+        return getHearingCaseDocuments(caseDetails.getData(), caseId);
+    }
 
     private List<BulkPrintDocument> getHearingCaseDocuments(Map<String, Object> caseData, String caseId) {
         List<BulkPrintDocument> caseDocuments = new ArrayList<>();
-
-        // Render Case Data with @JSONProperty names
         try {
             caseData = objectMapper.readValue(objectMapper.writeValueAsString(caseData), HashMap.class);
         } catch (JsonProcessingException e) {
@@ -70,4 +67,6 @@ public class FormCandGDocumentsLetterHandler {
 
         return caseDocuments;
     }
+
+
 }

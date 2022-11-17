@@ -21,7 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.Upd
 
 @TestConfiguration
 @ComponentScan(basePackages = {"uk.gov.hmcts.reform.finrem.caseorchestration.service.noc",
-    "uk.gov.hmcts.reform.finrem.caseorchestration.helper"})
+    "uk.gov.hmcts.reform.finrem.caseorchestration.helper", "uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence"})
 public class NocTestConfig {
 
     @Bean

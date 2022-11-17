@@ -104,7 +104,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.formC.document_filename", is(FILE_NAME)))
             .andExpect(jsonPath("$.data.formC.document_binary_url", is(BINARY_URL)));
 
-        verify(hearingDocumentService, never()).sendFormCAndGForBulkPrint(any(), any());
+        verify(hearingDocumentService, never()).sendInitialHearingCorrespondence(any(), any());
     }
 
     @Test
@@ -270,7 +270,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(hearingDocumentService).sendFormCAndGForBulkPrint(any(), eq(AUTH_TOKEN));
+        verify(hearingDocumentService).sendInitialHearingCorrespondence(any(), eq(AUTH_TOKEN));
     }
 
     @Test
@@ -286,7 +286,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(hearingDocumentService).sendFormCAndGForBulkPrint(any(), eq(AUTH_TOKEN));
+        verify(hearingDocumentService).sendInitialHearingCorrespondence(any(), eq(AUTH_TOKEN));
     }
 
     @Test
@@ -302,7 +302,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(hearingDocumentService).sendFormCAndGForBulkPrint(any(), eq(AUTH_TOKEN));
+        verify(hearingDocumentService).sendInitialHearingCorrespondence(any(), eq(AUTH_TOKEN));
     }
 
     @Test

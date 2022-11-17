@@ -1,6 +1,5 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,20 +18,20 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @Component
 @Slf4j
-public class AdditionalHearingDocumentsBulkPrintHandler  extends BulkPrintDocumentHandler {
+public class AdditionalHearingCorresponder extends HearingCorresponder {
 
     private final DocumentHelper documentHelper;
 
     @Autowired
-    public AdditionalHearingDocumentsBulkPrintHandler(BulkPrintService bulkPrintService,
-                                                      NotificationService notificationService,
-                                                      DocumentHelper documentHelper) {
+    public AdditionalHearingCorresponder(BulkPrintService bulkPrintService,
+                                         NotificationService notificationService,
+                                         DocumentHelper documentHelper) {
         super(bulkPrintService, notificationService);
         this.documentHelper = documentHelper;
     }
 
     @Override
-    List<BulkPrintDocument> getDocumentsToPrint(CaseDetails caseDetails) {
+    public List<BulkPrintDocument> getDocumentsToPrint(CaseDetails caseDetails) {
         List<AdditionalHearingDocumentData> additionalHearingDocumentData =
             documentHelper.convertToAdditionalHearingDocumentData(
                 caseDetails.getData().get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION));
@@ -53,4 +52,5 @@ public class AdditionalHearingDocumentsBulkPrintHandler  extends BulkPrintDocume
         documents.add(additionalDoc);
         return documents;
     }
+
 }

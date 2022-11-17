@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCo
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.AdditionalHearingCorresponder;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -56,6 +57,7 @@ public class AdditionalHearingDocumentService {
     private final BulkPrintService bulkPrintService;
     private final CaseDataService caseDataService;
     private final NotificationService notificationService;
+    private final AdditionalHearingCorresponder additionalHearingCorresponder;
 
 
     public void createAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) throws JsonProcessingException {
@@ -75,7 +77,7 @@ public class AdditionalHearingDocumentService {
     }
 
     public void sendAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
-        bulkPrintAdditionalHearingDocuments(caseDetails, authorisationToken);
+        additionalHearingCorresponder.sendApplicantAndRespondentCorrespondence(authorisationToken, caseDetails);
     }
 
     public void createAndStoreAdditionalHearingDocumentsFromApprovedOrder(String authorisationToken, CaseDetails caseDetails) {
