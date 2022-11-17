@@ -4,7 +4,18 @@ import net.serenitybdd.junit.runners.SerenityRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResource;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
+
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 
 @RunWith(SerenityRunner.class)
 public class NotificationTests extends IntegrationTestBase {
@@ -39,11 +50,14 @@ public class NotificationTests extends IntegrationTestBase {
     @Value("${cos.notification.contest-draft-order.api}")
     private String contestDraftOrderApiUri;
 
-    @Value("${case.orchestration.api}/notify/update-frc")
+    @Value(" /notify/update-frc")
     private String updateFrcInfoUri;
 
     private final String consentedDir = "/json/consented/";
     private final String contestedDir = "/json/contested/";
+
+    @MockBean
+    AssignCaseAccessService assignCaseAccessService;
 
     @Test
     public void verifyNotifyAssignToJudgeTestIsOkay() {
@@ -76,6 +90,10 @@ public class NotificationTests extends IntegrationTestBase {
     @Test
     public void verifyNotifyHwfSuccessfulTestIsOkay() {
 
+        when(assignCaseAccessService.getUserRoles(any())).thenReturn(CaseAssignmentUserRolesResource.builder()
+            .caseAssignmentUserRoles(List.of(CaseAssignmentUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build(),
+                CaseAssignmentUserRole.builder().caseRole(RESP_SOLICITOR_POLICY).build()))
+            .build());
         utils.validatePostSuccess(hwfSuccessfulApiUri,
             "ccd-request-with-solicitor-hwfSuccessfulEmail1.json", consentedDir);
     }
