@@ -15,10 +15,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_PRE_STATE;
 
 @Slf4j
 @Service
@@ -59,6 +61,8 @@ public class RejectGeneralApplicationAboutToSubmitHandler implements CallbackHan
             log.info("applicationCollectionDataList : {}", applicationCollectionDataList.size());
             caseData.put(GENERAL_APPLICATION_COLLECTION, applicationCollectionDataList);
         }
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
+        String previousState = Objects.toString(caseDetails.getData().get(GENERAL_APPLICATION_PRE_STATE), caseDetails.getState());
+        log.info("Previous state : {} for caseId {}", previousState, caseDetails.getId());
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).state(previousState).build();
     }
 }
