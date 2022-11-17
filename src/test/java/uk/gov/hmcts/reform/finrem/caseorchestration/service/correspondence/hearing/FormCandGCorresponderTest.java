@@ -28,7 +28,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OUT_OF_FAMILY_COURT_RESOLUTION;
 
 @RunWith(MockitoJUnitRunner.class)
-public class FormCandGCorrespondenceHandlerTest extends HearingCorrespondenceHandlerBaseTest {
+public class FormCandGCorresponderTest extends HearingCorrespondenceBaseTest {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 

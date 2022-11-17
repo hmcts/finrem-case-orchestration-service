@@ -16,7 +16,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-public abstract class HearingCorrespondenceHandlerBaseTest {
+public abstract class HearingCorrespondenceBaseTest {
 
     @Mock
     NotificationService notificationService;
