@@ -298,20 +298,17 @@ dependencyManagement {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudBomVersion}"
         mavenBom "io.rest-assured:rest-assured-bom:${restAssuredBomVersion}"
     }
-
     dependencies {
         //CVE-2022-42252
         dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.68') {
             entry 'tomcat-embed-core'
             entry 'tomcat-embed-websocket'
         }
-
         //VE-2022-31692, CVE-2022-31690
         dependencySet(group: 'org.springframework.security', version: '5.7.5') {
             entry 'spring-security-crypto'
         }
     }
-
 }
 
 dependencies {
