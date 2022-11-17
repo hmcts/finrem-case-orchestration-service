@@ -1,0 +1,84 @@
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing;
+
+import org.junit.Test;
+import org.mockito.Mock;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.MultiLetterAndEmailAllLitigantsCorresponder;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
+
+public abstract class HearingCorrespondenceHandlerBaseTest {
+
+    @Mock
+    NotificationService notificationService;
+    @Mock
+    BulkPrintService bulkPrintService;
+
+    @Mock
+    DocumentHelper documentHelper;
+    CaseDetails caseDetails;
+    MultiLetterAndEmailAllLitigantsCorresponder applicantAndRespondentMultiLetterCorresponder;
+
+
+    @Test
+    public void shouldEmailApplicantAndRespondent() {
+
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)).thenReturn(true);
+        when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)).thenReturn(true);
+
+        applicantAndRespondentMultiLetterCorresponder.sendApplicantAndRespondentCorrespondence("authToken", caseDetails);
+
+        verify(notificationService).sendPrepareForHearingEmailRespondent(caseDetails);
+        verify(notificationService).sendPrepareForHearingEmailApplicant(caseDetails);
+        verifyNoInteractions(bulkPrintService);
+    }
+
+    @Test
+    public void shouldSendLettersToApplicantAndRespondent() {
+
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)).thenReturn(false);
+        when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)).thenReturn(false);
+
+        applicantAndRespondentMultiLetterCorresponder.sendApplicantAndRespondentCorrespondence("authToken", caseDetails);
+
+        verify(bulkPrintService).printRespondentDocuments(any(CaseDetails.class), anyString(), anyList());
+    }
+
+    @Test
+    public void shouldSendLettersToApplicantAndEmailToRespondent() {
+
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)).thenReturn(false);
+        when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)).thenReturn(true);
+
+        applicantAndRespondentMultiLetterCorresponder.sendApplicantAndRespondentCorrespondence("authToken", caseDetails);
+
+        verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), anyString(), anyList());
+        verify(notificationService).sendPrepareForHearingEmailRespondent(caseDetails);
+    }
+
+
+    @Test
+    public void shouldEmailToApplicantAndSendLetterToRespondent() {
+
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)).thenReturn(true);
+        when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)).thenReturn(false);
+
+        applicantAndRespondentMultiLetterCorresponder.sendApplicantAndRespondentCorrespondence("authToken", caseDetails);
+
+        verify(bulkPrintService).printRespondentDocuments(any(CaseDetails.class), anyString(), anyList());
+        verify(notificationService).sendPrepareForHearingEmailApplicant(caseDetails);
+    }
+
+    protected BulkPrintDocument getBulkPrintDocument() {
+        return BulkPrintDocument.builder().build();
+    }
+}

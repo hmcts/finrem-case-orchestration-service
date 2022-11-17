@@ -141,7 +141,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     public void sendToBulkPrint() {
         CaseDetails caseDetails = caseDetails(NO_VALUE);
 
-        hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, AUTH_TOKEN);
+        hearingDocumentService.sendInitialHearingCorrespondence(caseDetails, AUTH_TOKEN);
 
         verify(bulkPrintService).printApplicantDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
         verify(bulkPrintService).printRespondentDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
@@ -156,7 +156,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         caseDetails.getData().put(FORM_A_COLLECTION, asList(pensionDocumentData(), pensionDocumentData(), pensionDocumentData()));
 
-        hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, AUTH_TOKEN);
+        hearingDocumentService.sendInitialHearingCorrespondence(caseDetails, AUTH_TOKEN);
 
         when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(false);
         when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(true);

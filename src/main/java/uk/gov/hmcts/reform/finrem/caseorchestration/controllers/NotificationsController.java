@@ -24,9 +24,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 
 import java.io.IOException;
 import java.util.Map;
@@ -51,8 +50,8 @@ public class NotificationsController extends BaseController {
     private final TransferCourtService transferCourtService;
     private final FeatureToggleService featureToggleService;
     private final NocLetterNotificationService nocLetterNotificationService;
-    private final CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
-    private final CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
+    private final HwfCorrespondenceService hwfNotificationsService;
+
 
     @PostMapping(value = "/hwf-successful", consumes = APPLICATION_JSON_VALUE)
     @Operation(summary = "Notify Applicant/Applicant Solicitor of HWF Successful by email or letter.")
@@ -69,19 +68,7 @@ public class NotificationsController extends BaseController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
-        if (caseDataService.isConsentedApplication(callbackRequest.getCaseDetails())) {
-            paperNotificationService.printHwfSuccessfulNotification(caseDetails, authToken);
-
-            if (!caseDataService.isPaperApplication(caseData)
-                && caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-                log.info("Sending Consented HWF Successful email notification to Solicitor");
-                notificationService.sendConsentedHWFSuccessfulConfirmationEmail(caseDetails);
-            }
-        } else if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-            log.info("Sending Contested HWF Successful email notification to Solicitor");
-            notificationService.sendContestedHwfSuccessfulConfirmationEmail(caseDetails);
-        }
-
+        hwfNotificationsService.sendCorrespondence(caseDetails, authToken);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 

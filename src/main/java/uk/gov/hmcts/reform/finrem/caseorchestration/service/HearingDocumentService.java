@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
@@ -10,22 +8,17 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.FormCandGCorresponder;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ADDITIONAL_DOC;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OUT_OF_FAMILY_COURT_RESOLUTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.addFastTrackFields;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.addNonFastTrackFields;
@@ -40,10 +33,7 @@ public class HearingDocumentService {
     private final GenericDocumentService genericDocumentService;
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
-    private final ObjectMapper objectMapper;
-    private final BulkPrintService bulkPrintService;
-    private final NotificationService notificationService;
-
+    private final FormCandGCorresponder formCandGCorresponder;
 
     public Map<String, CaseDocument> generateHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
         CaseDetails courtDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
@@ -78,8 +68,8 @@ public class HearingDocumentService {
 
     private Map<String, CaseDocument> createDocumentMap(CaseDocument formC, CaseDocument formG) {
         Map<String, CaseDocument> documentMap = new HashMap<>();
-        documentMap.put(FORM_C,formC);
-        documentMap.put(FORM_G,formG);
+        documentMap.put(FORM_C, formC);
+        documentMap.put(FORM_G, formG);
         return documentMap;
     }
 
@@ -107,16 +97,8 @@ public class HearingDocumentService {
         return caseDetails;
     }
 
-    public void sendFormCAndGForBulkPrint(CaseDetails caseDetails, String authorisationToken) {
-        String caseId = caseDetails.getId() == null ? "noId" : caseDetails.getId().toString();
-        List<BulkPrintDocument> caseDocuments = getHearingCaseDocuments(caseDetails.getData(), caseId);
-
-        if (!notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
-            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, caseDocuments);
-        }
-        if (!notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
-            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, caseDocuments);
-        }
+    public void sendInitialHearingCorrespondence(CaseDetails caseDetails, String authorisationToken) {
+        formCandGCorresponder.sendApplicantAndRespondentCorrespondence(authorisationToken, caseDetails);
     }
 
     /**
@@ -130,27 +112,4 @@ public class HearingDocumentService {
         return caseDetails.getData().containsKey(FORM_C);
     }
 
-    private List<BulkPrintDocument> getHearingCaseDocuments(Map<String, Object> caseData, String caseId) {
-        List<BulkPrintDocument> caseDocuments = new ArrayList<>();
-
-        // Render Case Data with @JSONProperty names
-        try {
-            caseData = objectMapper.readValue(objectMapper.writeValueAsString(caseData), HashMap.class);
-        } catch (JsonProcessingException e) {
-            return caseDocuments;
-        }
-
-        log.info("Fetching Contested Paper Case bulk print document for caseId {}", caseId);
-
-        documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, FORM_C).ifPresent(caseDocuments::add);
-        documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, FORM_G).ifPresent(caseDocuments::add);
-        documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, MINI_FORM_A).ifPresent(caseDocuments::add);
-        documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, OUT_OF_FAMILY_COURT_RESOLUTION).ifPresent(caseDocuments::add);
-        documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, HEARING_ADDITIONAL_DOC).ifPresent(caseDocuments::add);
-
-        List<CaseDocument> formACaseDocuments = documentHelper.getFormADocumentsData(caseData);
-        caseDocuments.addAll(formACaseDocuments.stream().map(documentHelper::getCaseDocumentAsBulkPrintDocument).collect(Collectors.toList()));
-
-        return caseDocuments;
-    }
 }
