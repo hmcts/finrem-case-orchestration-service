@@ -35,18 +35,6 @@ public class PaperNotificationService {
     private final CaseDataService caseDataService;
     private final CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
 
-    public void printHwfSuccessfulNotification(CaseDetails caseDetails, String authToken) {
-        log.info("Sending Consented HWF Successful notification letter for bulk print");
-        // Generate PDF notification letter
-        CaseDocument hwfSuccessfulNotificationLetter = helpWithFeesDocumentService.generateHwfSuccessfulNotificationLetter(
-            caseDetails, authToken, APPLICANT);
-
-        // Send notification letter to Bulk Print
-        bulkPrintService.sendDocumentForPrint(hwfSuccessfulNotificationLetter, caseDetails);
-        log.info("Applicant notification letter sent to Bulk Print: {} for Case ID: {}", hwfSuccessfulNotificationLetter,
-            caseDetails.getId());
-
-    }
 
     public void printAssignToJudgeNotification(CaseDetails caseDetails, String authToken) {
         log.info("Sending AssignedToJudge notification letter for bulk print for Case ID: {}", caseDetails.getId());
