@@ -5,6 +5,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.ccd.client.CaseEventsApi;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
@@ -27,6 +28,8 @@ public class CcdServiceTest {
     @Mock
     private CoreCaseDataApi coreCaseDataApi;
     @Mock
+    private CaseEventsApi caseEventsApi;
+    @Mock
     private SystemUserService systemUserService;
     @InjectMocks
     private CcdService ccdService;
@@ -41,6 +44,17 @@ public class CcdServiceTest {
 
         verify(coreCaseDataApi).startEventForCaseWorker(any(), any(), any(), any(), any(), any(), any());
         verify(coreCaseDataApi).submitEventForCaseWorker(any(), any(), any(), any(), any(), any(), anyBoolean(), any());
+    }
+
+    @Test
+    public void givenCallback_WhenExecuteGetEvents_ThenCcdApiCalled() {
+        when(caseEventsApi.findEventDetailsForCase(any(), any(), any(), any(), any(), any()))
+            .thenReturn(any());
+        when(systemUserService.getIdamToken(AUTH_TOKEN)).thenReturn(IdamToken.builder().build());
+
+        ccdService.getCcdEventDetailsOnCase(AUTH_TOKEN, buildCaseDetails(), EventType.CLOSE.getCcdType());
+
+        verify(caseEventsApi).findEventDetailsForCase(any(), any(), any(), any(), any(), any());
     }
 
     private CaseDetails buildCaseDetails() {
