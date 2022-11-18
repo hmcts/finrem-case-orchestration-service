@@ -441,8 +441,7 @@ public class NotificationService {
 
     public boolean shouldEmailRespondentSolicitor(Map<String, Object> caseData) {
         return caseDataService.isRespondentRepresentedByASolicitor(caseData)
-            && caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData)
-            && !NO_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT)));
+            && caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData);
     }
 
     public boolean isContestedApplicantSolicitorEmailCommunicationEnabled(Map<String, Object> caseData) {
@@ -453,11 +452,21 @@ public class NotificationService {
     }
 
     public boolean isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(CaseDetails caseDetails) {
-        return caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)
+        return caseDataService.isApplicantSolicitorEmailPopulated(caseDetails)
+            && checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString());
+    }
+
+    public boolean isApplicantSolicitorRegisteredAndEmailPopulated(CaseDetails caseDetails) {
+        return caseDataService.isApplicantSolicitorEmailPopulated(caseDetails)
             && checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString());
     }
 
     public boolean isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(CaseDetails caseDetails) {
+        return shouldEmailRespondentSolicitor(caseDetails.getData())
+            && checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
+    }
+
+    public boolean isRespondentSolicitorRegisteredAndEmailPopulated(CaseDetails caseDetails) {
         return shouldEmailRespondentSolicitor(caseDetails.getData())
             && checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
     }

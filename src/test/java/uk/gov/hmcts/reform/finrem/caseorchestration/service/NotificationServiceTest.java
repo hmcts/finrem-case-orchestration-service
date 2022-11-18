@@ -1137,9 +1137,9 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void shouldEmailApplicantSolicitorWhenApplicantSolicitorIsRegisteredAndAcceptingEmails() {
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorEmailPopulated(any())).thenReturn(true);
 
-        assertTrue(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(CaseDetails.builder()
+        assertTrue(notificationService.isApplicantSolicitorRegisteredAndEmailPopulated(CaseDetails.builder()
             .id(123450L).build()));
     }
 

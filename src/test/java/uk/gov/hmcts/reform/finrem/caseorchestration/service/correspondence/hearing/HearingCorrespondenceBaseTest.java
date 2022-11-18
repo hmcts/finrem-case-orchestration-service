@@ -32,8 +32,8 @@ public abstract class HearingCorrespondenceBaseTest {
     @Test
     public void shouldEmailApplicantAndRespondent() {
 
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)).thenReturn(true);
-        when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)).thenReturn(true);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailPopulated(caseDetails)).thenReturn(true);
+        when(notificationService.isRespondentSolicitorRegisteredAndEmailPopulated(caseDetails)).thenReturn(true);
 
         applicantAndRespondentMultiLetterCorresponder.sendApplicantAndRespondentCorrespondence("authToken", caseDetails);
 
@@ -45,8 +45,8 @@ public abstract class HearingCorrespondenceBaseTest {
     @Test
     public void shouldSendLettersToApplicantAndRespondent() {
 
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)).thenReturn(false);
-        when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)).thenReturn(false);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailPopulated(caseDetails)).thenReturn(false);
+        when(notificationService.isRespondentSolicitorRegisteredAndEmailPopulated(caseDetails)).thenReturn(false);
 
         applicantAndRespondentMultiLetterCorresponder.sendApplicantAndRespondentCorrespondence("authToken", caseDetails);
 
@@ -56,8 +56,8 @@ public abstract class HearingCorrespondenceBaseTest {
     @Test
     public void shouldSendLettersToApplicantAndEmailToRespondent() {
 
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)).thenReturn(false);
-        when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)).thenReturn(true);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailPopulated(caseDetails)).thenReturn(false);
+        when(notificationService.isRespondentSolicitorRegisteredAndEmailPopulated(caseDetails)).thenReturn(true);
 
         applicantAndRespondentMultiLetterCorresponder.sendApplicantAndRespondentCorrespondence("authToken", caseDetails);
 
@@ -69,8 +69,8 @@ public abstract class HearingCorrespondenceBaseTest {
     @Test
     public void shouldEmailToApplicantAndSendLetterToRespondent() {
 
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)).thenReturn(true);
-        when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)).thenReturn(false);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailPopulated(caseDetails)).thenReturn(true);
+        when(notificationService.isRespondentSolicitorRegisteredAndEmailPopulated(caseDetails)).thenReturn(false);
 
         applicantAndRespondentMultiLetterCorresponder.sendApplicantAndRespondentCorrespondence("authToken", caseDetails);
 

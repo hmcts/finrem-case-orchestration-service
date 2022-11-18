@@ -55,7 +55,7 @@ public class HwfConsentedApplicantCorresponderTest {
     @Test
     public void shouldSendLetterToApplicant() {
 
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)).thenReturn(false);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailPopulated(caseDetails)).thenReturn(false);
         hwfConsentedApplicantCorresponder.sendApplicantCorrespondence(AUTHORISATION_TOKEN, caseDetails);
         verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails);
     }
@@ -63,7 +63,7 @@ public class HwfConsentedApplicantCorresponderTest {
     @Test
     public void shouldSendEmailToApplicant() {
 
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)).thenReturn(true);
+        when(notificationService.isApplicantSolicitorRegisteredAndEmailPopulated(caseDetails)).thenReturn(true);
         hwfConsentedApplicantCorresponder.sendApplicantCorrespondence(AUTHORISATION_TOKEN, caseDetails);
         verify(notificationService).sendConsentedHWFSuccessfulConfirmationEmail(caseDetails);
     }
