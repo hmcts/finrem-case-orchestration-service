@@ -179,11 +179,7 @@ public class ApprovedOrderNoticeOfHearingService {
         placeholdersMap.put("CCDCaseNumber", caseDetails.getId());
         placeholdersMap.put("DivorceCaseNumber", nullToEmpty(caseDetails.getData().get(DIVORCE_CASE_NUMBER)));
         placeholdersMap.put("ApplicantName", documentHelper.getApplicantFullName(caseDetails));
-        if (caseDataService.isConsentedApplication(caseDetails)) {
-            placeholdersMap.put("RespondentName",  documentHelper.getRespondentFullNameConsented(caseDetails));
-        } else {
-            placeholdersMap.put("RespondentName", documentHelper.getRespondentFullNameContested(caseDetails));
-        }
+        placeholdersMap.put("RespondentName",  caseDataService.buildFullRespondentName(caseDetails));
 
         return placeholdersMap;
     }

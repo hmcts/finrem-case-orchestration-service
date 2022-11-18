@@ -95,7 +95,7 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     @Test
     public void givenHearingRequired_whenSubmitNoticeOfHearing_thenHearingNoticeIsPrintedForContestedCase() {
         when(documentHelper.getApplicantFullName(caseDetails)).thenReturn("Poor Guy");
-        when(documentHelper.getRespondentFullNameContested(caseDetails)).thenReturn("test Korivi");
+        when(caseDataService.buildFullRespondentName(caseDetails)).thenReturn("test Korivi");
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(false);
 
         caseDetails.getData().put(ANOTHER_HEARING_TO_BE_LISTED, YES_VALUE);
@@ -113,7 +113,7 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     @Test
     public void givenHearingRequired_whenSubmitNoticeOfHearing_thenHearingNoticeIsPrintedForConsentedCase() {
         when(documentHelper.getApplicantFullName(caseDetails)).thenReturn("Poor Guy");
-        when(documentHelper.getRespondentFullNameConsented(caseDetails)).thenReturn("test Korivi");
+        when(caseDataService.buildFullRespondentName(caseDetails)).thenReturn("test Korivi");
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
 
         caseDetails.getData().put(ANOTHER_HEARING_TO_BE_LISTED, YES_VALUE);
@@ -131,7 +131,7 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     @Test
     public void givenDraftHearingOrderIsUploaded_whenSubmitNoticeOfHearing_thenOrderIsPrinted() {
         when(documentHelper.getApplicantFullName(caseDetails)).thenReturn("Poor Guy");
-        when(documentHelper.getRespondentFullNameContested(caseDetails)).thenReturn("test Korivi");
+        when(caseDataService.buildFullRespondentName(caseDetails)).thenReturn("test Korivi");
 
         caseDetails.getData().put(ANOTHER_HEARING_TO_BE_LISTED, YES_VALUE);
         caseDetails.getData().put(LATEST_DRAFT_HEARING_ORDER, CaseDocument.builder().documentBinaryUrl(LATEST_DRAFT_ORDER_DOCUMENT_BIN_URL).build());
