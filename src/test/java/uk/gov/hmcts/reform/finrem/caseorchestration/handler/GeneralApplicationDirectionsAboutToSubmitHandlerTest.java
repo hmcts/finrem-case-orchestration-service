@@ -233,13 +233,13 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
             = existingList.stream().map(obj -> updateStatus(obj, APPROVED)).toList();
         callbackRequest.getCaseDetails().getData().put(GENERAL_APPLICATION_COLLECTION, updatedList);
 
-        AboutToStartOrSubmitCallbackResponse startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = startHandle.getData();
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_DIRECTIONS_LIST));
         assertEquals(1, dynamicList.getListItems().size());
 
-        AboutToStartOrSubmitCallbackResponse submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
         Map<String, Object> data = submitHandle.getData();
 
         List<GeneralApplicationCollectionData> list

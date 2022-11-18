@@ -75,7 +75,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
 
         log.info("Post state {} for caseId {}", postState, caseDetails.getId());
         if (postState != null) {
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseData)
+            return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData)
                 .errors(errors).state(postState).build();
         }
         return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).errors(errors).build();
@@ -149,8 +149,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
 
         switch (gaElementStatus) {
             case "Approved" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_APPROVED.getId());
-            case "Not Approved" ->
-                items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_NOT_APPROVED.getId());
+            case "Not Approved" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_NOT_APPROVED.getId());
             case "Other" -> items.setGeneralApplicationStatus(GeneralApplicationStatus.DIRECTION_OTHER.getId());
             default -> throw new IllegalStateException("Unexpected value: " + items.getGeneralApplicationStatus());
         }
