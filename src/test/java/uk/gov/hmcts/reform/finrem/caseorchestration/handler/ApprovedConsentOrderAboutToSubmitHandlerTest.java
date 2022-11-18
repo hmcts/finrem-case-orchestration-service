@@ -16,11 +16,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.io.InputStream;
 import java.util.Map;
@@ -51,11 +49,7 @@ public class ApprovedConsentOrderAboutToSubmitHandlerTest {
     @Mock
     private GenericDocumentService genericDocumentService;
     @Mock
-    private CaseDataService caseDataService;
-    @Mock
     private ConsentOrderPrintService consentOrderPrintService;
-    @Mock
-    private NotificationService notificationService;
     @Mock
     private DocumentHelper documentHelper;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -72,8 +66,6 @@ public class ApprovedConsentOrderAboutToSubmitHandlerTest {
         handler = new ApprovedConsentOrderAboutToSubmitHandler(consentOrderApprovedDocumentService,
             genericDocumentService,
             consentOrderPrintService,
-            notificationService,
-            caseDataService,
             documentHelper,
             objectMapper);
     }
@@ -119,9 +111,6 @@ public class ApprovedConsentOrderAboutToSubmitHandlerTest {
         verify(genericDocumentService).annexStampDocument(any(), any());
         verify(documentHelper, times(2)).getPensionDocumentsData(any());
         verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), any());
-        verify(notificationService).sendConsentOrderAvailableCtscEmail(any());
-        verify(caseDataService).isApplicantSolicitorAgreeToReceiveEmails(any());
-        verify(notificationService).isRespondentSolicitorEmailCommunicationEnabled(any());
     }
 
     @Test(expected = FeignException.InternalServerError.class)
@@ -152,17 +141,12 @@ public class ApprovedConsentOrderAboutToSubmitHandlerTest {
             doValidCaseDataSetUp(NO_PENSION_VALID_JSON);
         whenServiceGeneratesDocument().thenReturn(caseDocument());
         whenAnnexStampingDocument().thenReturn(caseDocument());
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
 
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertEquals(response.getData().get(STATE), CONSENT_ORDER_MADE.toString());
 
         verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), any());
-        verify(notificationService).sendConsentOrderAvailableCtscEmail(any());
-        verify(notificationService).sendConsentOrderAvailableEmailToApplicantSolicitor(any());
-        verify(notificationService).sendConsentOrderAvailableEmailToRespondentSolicitor(any());
     }
 
     @Test
@@ -171,17 +155,12 @@ public class ApprovedConsentOrderAboutToSubmitHandlerTest {
             doValidCaseDataSetUp(APPROVE_ORDER_NO_PENSION_VALID_JSON);
         whenServiceGeneratesDocument().thenReturn(caseDocument());
         whenAnnexStampingDocument().thenReturn(caseDocument());
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
 
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertEquals(response.getData().get(STATE), CONSENT_ORDER_MADE.toString());
 
         verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), any());
-        verify(notificationService).sendConsentOrderAvailableCtscEmail(any());
-        verify(notificationService, never()).sendConsentOrderAvailableEmailToApplicantSolicitor(any());
-        verify(notificationService, never()).sendConsentOrderAvailableEmailToRespondentSolicitor(any());
     }
 
     private CallbackRequest doValidCaseDataSetUp(final String path) {

@@ -147,7 +147,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
         doValidCaseDataSetUpForAdditionalHearing();
 
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
-        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
 
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
                 .content(requestContent.toString())
@@ -340,6 +340,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
             .andExpect(status().isOk());
 
         verify(additionalHearingDocumentService).sendAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
+        verify(additionalHearingDocumentService).convertToPdf(any(), eq(AUTH_TOKEN));
     }
 
     @Test

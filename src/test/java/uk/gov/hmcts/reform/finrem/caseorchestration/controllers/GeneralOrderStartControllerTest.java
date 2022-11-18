@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -46,6 +47,8 @@ public class GeneralOrderStartControllerTest extends BaseControllerTest {
     public void initialiseGeneralOrderPropertiesSuccess() throws Exception {
         generalOrderStartControllerSetUp();
         when(idamService.getIdamFullName(bearerToken)).thenReturn("Integration Test");
+        when(idamService.getIdamSurname(bearerToken)).thenReturn("Integration Test");
+
 
         mvc.perform(post("/case-orchestration/general-order-start")
                 .content(requestContent.toString())
@@ -53,12 +56,12 @@ public class GeneralOrderStartControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data." + GENERAL_ORDER_ADDRESS_TO, is(nullValue())))
-            .andExpect(jsonPath("$.data." + GENERAL_ORDER_DATE, is(nullValue())))
+            .andExpect(jsonPath("$.data." + GENERAL_ORDER_DATE, is(notNullValue())))
             .andExpect(jsonPath("$.data." + GENERAL_ORDER_BODY_TEXT, is(nullValue())))
             .andExpect(jsonPath("$.data." + GENERAL_ORDER_CREATED_BY, is("Integration Test")))
             .andExpect(jsonPath("$.data." + GENERAL_ORDER_PREVIEW_DOCUMENT, is(nullValue())))
             .andExpect(jsonPath("$.data." + GENERAL_ORDER_RECITALS, is(nullValue())))
-            .andExpect(jsonPath("$.data." + GENERAL_ORDER_JUDGE_NAME, is(nullValue())))
+            .andExpect(jsonPath("$.data." + GENERAL_ORDER_JUDGE_NAME, is("Integration Test")))
             .andExpect(jsonPath("$.data." + GENERAL_ORDER_JUDGE_TYPE, is(nullValue())));
     }
 

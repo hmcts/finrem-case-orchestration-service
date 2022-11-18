@@ -32,10 +32,33 @@ public class ApprovedConsentOrderSubmittedHandler implements CallbackHandler<Map
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
                                                                                    String userAuthorisation) {
-
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
+        sendConsentOrderAvailableEmailNotifications(caseDetails, caseData);
+        sendConsentOrderMadeEmailNotifications(caseDetails, caseData);
+
+        return GenericAboutToStartOrSubmitCallbackResponse
+            .<Map<String, Object>>builder()
+            .data(callbackRequest.getCaseDetails().getData())
+            .build();
+    }
+
+
+    private void sendConsentOrderAvailableEmailNotifications(CaseDetails caseDetails, Map<String, Object> caseData) {
+        notificationService.sendConsentOrderAvailableCtscEmail(caseDetails);
+
+        if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
+            log.info("case - {}: Sending email notification for to Applicant Solicitor for 'Consent Order Available'", caseDetails.getId());
+            notificationService.sendConsentOrderAvailableEmailToApplicantSolicitor(caseDetails);
+        }
+        if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData)) {
+            log.info("case - {}: Sending email notification to Respondent Solicitor for 'Consent Order Available'", caseDetails.getId());
+            notificationService.sendConsentOrderAvailableEmailToRespondentSolicitor(caseDetails);
+        }
+    }
+
+    private void sendConsentOrderMadeEmailNotifications(CaseDetails caseDetails, Map<String, Object> caseData) {
         if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)
             && caseDataService.isConsentedApplication(caseDetails)) {
             log.info("Sending email notification to Applicant Solicitor for 'Consent Order Made'");
@@ -46,10 +69,5 @@ public class ApprovedConsentOrderSubmittedHandler implements CallbackHandler<Map
             log.info("Sending email notification to Respondent Solicitor for 'Consent Order Made'");
             notificationService.sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(caseDetails);
         }
-
-        return GenericAboutToStartOrSubmitCallbackResponse
-            .<Map<String, Object>>builder()
-            .data(callbackRequest.getCaseDetails().getData())
-            .build();
     }
 }
