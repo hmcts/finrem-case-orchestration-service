@@ -136,7 +136,11 @@ public class ConsentHearingService {
         caseData.put("ccdCaseNumber", caseDetailsCopy.getId());
         caseData.put("courtDetails", buildFrcCourtDetails(hearingCaseData));
         caseData.put("applicantName", documentHelper.getApplicantFullName(caseDetailsCopy));
-        caseData.put("respondentName", documentHelper.getRespondentFullNameContested(caseDetailsCopy));
+        if (caseDataService.isConsentedApplication(caseDetails)) {
+            caseData.put("respondentName", documentHelper.getRespondentFullNameConsented(caseDetails));
+        } else {
+            caseData.put("respondentName", documentHelper.getRespondentFullNameContested(caseDetailsCopy));
+        }
         addHearingVenueDetails(caseDetailsCopy, hearingCaseData);
         caseData.put("letterDate", String.valueOf(LocalDate.now()));
         caseData.put("hearingType", hearingCaseData.get("hearingType"));

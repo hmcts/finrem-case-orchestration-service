@@ -50,6 +50,7 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
 
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
+        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
 
         service.submitHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
@@ -67,6 +68,7 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
 
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
+        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
 
         service.submitHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
@@ -82,6 +84,7 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
     public void givenConsentedMultipleHearing_whenOneExistingHearingAndAddedAnotherOne_thenItShouldSendAllToBulkPrint() {
         CaseDetails caseDetails = buildCaseDetails(MULTIPLE_HEARING_TEST_PAYLOAD);
         CaseDetails caseDetailsBefore = buildCaseDetails(SINGLE_HEARING_TEST_PAYLOAD);
+        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
 
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());

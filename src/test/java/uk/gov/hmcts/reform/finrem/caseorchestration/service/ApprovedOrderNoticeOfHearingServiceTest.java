@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
@@ -34,6 +35,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
@@ -91,12 +94,31 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenHearingRequired_whenSubmitNoticeOfHearing_thenHearingNoticeIsPrinted() {
+    public void givenHearingRequired_whenSubmitNoticeOfHearing_thenHearingNoticeIsPrintedForContestedCase() {
         when(documentHelper.getApplicantFullName(caseDetails)).thenReturn("Poor Guy");
         when(documentHelper.getRespondentFullNameContested(caseDetails)).thenReturn("test Korivi");
-
+        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(false);
 
         caseDetails.getData().put(ANOTHER_HEARING_TO_BE_LISTED, YES_VALUE);
+        caseDetails.setCaseTypeId(CASE_TYPE_ID_CONTESTED);
+        approvedOrderNoticeOfHearingService.createAndStoreHearingNoticeDocumentPack(caseDetails, AUTH_TOKEN);
+
+        assertCaseDataHasHearingNoticesCollection();
+        assertDocumentServiceInteraction();
+
+        Map<String, Object> caseDetailsMap = (Map) placeholdersMapCaptor.getValue().get(CASE_DETAILS);
+        Map<String, Object> data = (Map) caseDetailsMap.get(CASE_DATA);
+        assertCaseData(data);
+    }
+
+    @Test
+    public void givenHearingRequired_whenSubmitNoticeOfHearing_thenHearingNoticeIsPrintedForConsentedCase() {
+        when(documentHelper.getApplicantFullName(caseDetails)).thenReturn("Poor Guy");
+        when(documentHelper.getRespondentFullNameConsented(caseDetails)).thenReturn("test Korivi");
+        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
+
+        caseDetails.getData().put(ANOTHER_HEARING_TO_BE_LISTED, YES_VALUE);
+        caseDetails.setCaseTypeId(CASE_TYPE_ID_CONSENTED);
         approvedOrderNoticeOfHearingService.createAndStoreHearingNoticeDocumentPack(caseDetails, AUTH_TOKEN);
 
         assertCaseDataHasHearingNoticesCollection();
