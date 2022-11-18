@@ -155,7 +155,7 @@ public enum EventType {
     ADD_LIST_FOR_INTERIM_HEARING_INFO("FR_addListForInterimHearingInfo"),
     UPDATE_Frc_INFORMATION("FR_updateFrcInformation"),
     MANAGE_HEARING_BUNDLES("FR_manageHearingBundles"),
-    CONSENT_APPLICATION_APPROVED_IN_CONTESTED("FR_consentOrderApproved"),;
+    CONSENT_APPLICATION_APPROVED_IN_CONTESTED("FR_consentOrderApproved");
 
 
     private final String ccdType;
