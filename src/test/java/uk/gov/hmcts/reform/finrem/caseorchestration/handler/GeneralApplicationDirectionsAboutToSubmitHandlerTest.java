@@ -42,6 +42,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_OUTCOME_DECISION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PREPARE_FOR_HEARING_STATE;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHandlerTest {
@@ -220,6 +221,37 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHa
             list.get(1).getGeneralApplicationItems().getGeneralApplicationStatus());
         assertNull(data.get(GENERAL_APPLICATION_DIRECTIONS_LIST));
         assertNull(data.get(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT));
+    }
+
+    @Test
+    public void givenCase_whenApproveAnApplication_thenUpdateStatusApprovedCompletedAndReturnToPostState() {
+        CallbackRequest callbackRequest = buildCallbackRequest(GA_JSON);
+        when(service.getBulkPrintDocument(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(caseDocument);
+        when(service.getEventPostState(any(), any())).thenReturn(PREPARE_FOR_HEARING_STATE);
+        List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(callbackRequest.getCaseDetails().getData());
+        List<GeneralApplicationCollectionData> updatedList
+            = existingList.stream().map(obj -> updateStatus(obj, APPROVED)).toList();
+        callbackRequest.getCaseDetails().getData().put(GENERAL_APPLICATION_COLLECTION, updatedList);
+
+        AboutToStartOrSubmitCallbackResponse startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        Map<String, Object> caseData = startHandle.getData();
+        DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_DIRECTIONS_LIST));
+        assertEquals(1, dynamicList.getListItems().size());
+
+        AboutToStartOrSubmitCallbackResponse submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
+        Map<String, Object> data = submitHandle.getData();
+
+        List<GeneralApplicationCollectionData> list
+            = helper.covertToGeneralApplicationData(data.get(GENERAL_APPLICATION_COLLECTION));
+        assertEquals(2, list.size());
+
+        assertEquals(DIRECTION_APPROVED.getId(),
+            list.get(1).getGeneralApplicationItems().getGeneralApplicationStatus());
+        assertNull(data.get(GENERAL_APPLICATION_DIRECTIONS_LIST));
+        assertNull(data.get(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT));
+        assertEquals(PREPARE_FOR_HEARING_STATE, submitHandle.getState());
+        verify(service).submitCollectionGeneralApplicationDirections(any(), any(), any());
     }
 
     private GeneralApplicationCollectionData updateStatus(GeneralApplicationCollectionData obj, GeneralApplicationStatus status) {

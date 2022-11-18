@@ -10,8 +10,10 @@ import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
@@ -27,6 +29,8 @@ import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -79,7 +83,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_WALES_FRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_WALES_OTHER_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_PRE_STATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PREPARE_FOR_HEARING_STATE;
 
 public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
 
@@ -97,6 +103,8 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     private BulkPrintService bulkPrintService;
     @MockBean
     private GenericDocumentService genericDocumentService;
+    @MockBean
+    private CcdService ccdService;
 
     @Captor
     ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
@@ -110,6 +118,52 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         caseDetails = caseDetailsFromResource("/fixtures/general-application-directions.json", objectMapper);
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument(DOC_URL, FILE_NAME,
             GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL));
+    }
+
+    @Test
+    public void givenContestedCase_whenDirectionEventExecutedReturnNoPreviousStateFound_thenHandlerReturnsPostStateNull() {
+        when(ccdService.getCcdEventDetailsOnCase(any(), any(), any())).thenReturn(new ArrayList<>());
+        caseDetails.getData().put(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED, NO_VALUE);
+        assertNull(generalApplicationDirectionsService.getEventPostState(caseDetails, AUTH_TOKEN));
+    }
+
+    @Test
+    public void givenContestedCase_whenDirectionEventExecutedReturnPreviousStateFound_thenHandlerReturnsPreviousPostState() {
+        caseDetails.getData().put(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED, NO_VALUE);
+        caseDetails.getData().put(GENERAL_APPLICATION_PRE_STATE, "applicationIssued");
+        when(ccdService.getCcdEventDetailsOnCase(any(), any(), any())).thenReturn(new ArrayList<>());
+
+        assertEquals("applicationIssued", generalApplicationDirectionsService.getEventPostState(caseDetails, AUTH_TOKEN));
+    }
+
+    @Test
+    public void givenContestedCase_whenDirectionEventExecutedAndAnySortOfHearingGoingOn_thenHandlerReturnsPostState() {
+        List<CaseEventDetail> list = new ArrayList<>();
+        CaseEventDetail.CaseEventDetailBuilder builder = CaseEventDetail.builder();
+        builder.eventName("General Application Outcome");
+        list.add(builder.build());
+
+        builder = CaseEventDetail.builder();
+        builder.eventName("List for Hearing");
+        list.add(builder.build());
+
+        caseDetails.getData().put(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED, NO_VALUE);
+        caseDetails.getData().put(GENERAL_APPLICATION_PRE_STATE, "applicationIssued");
+        when(ccdService.getCcdEventDetailsOnCase(AUTH_TOKEN, caseDetails, EventType.GENERAL_APPLICATION_DIRECTIONS.getCcdType()))
+            .thenReturn(list);
+
+        assertEquals(PREPARE_FOR_HEARING_STATE, generalApplicationDirectionsService.getEventPostState(caseDetails, AUTH_TOKEN));
+    }
+
+    private void buildCase() {
+        List<CaseEventDetail> list = new ArrayList<>();
+        CaseEventDetail.CaseEventDetailBuilder builder = CaseEventDetail.builder();
+        builder.eventName("General Application Outcome");
+        list.add(builder.build());
+
+        builder = CaseEventDetail.builder();
+        builder.eventName("List for Hearing");
+        list.add(builder.build());
     }
 
     @Test

@@ -104,7 +104,7 @@ public class RejectGeneralApplicationAboutToSubmitHandlerTest extends BaseHandle
         List<GeneralApplicationCollectionData> generalApplicationCollectionData
             = helper.covertToGeneralApplicationData(data.get(GENERAL_APPLICATION_COLLECTION));
         assertEquals(1, generalApplicationCollectionData.size());
-
+        assertEquals("applicationIssued", submitHandle.getState());
     }
 
     @Test

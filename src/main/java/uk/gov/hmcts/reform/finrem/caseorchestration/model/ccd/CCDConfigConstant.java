@@ -106,6 +106,7 @@ public class CCDConfigConstant {
     public static final String DORSET = "dorset";
     public static final String HSYORKSHIRE = "hsyorkshire";
     public static final String KENT = "kentfrc";
+    public static final String KENTFRC = "kent";
     public static final String LANCASHIRE = "lancashire";
     public static final String LIVERPOOL = "liverpool";
     public static final String MANCHESTER = "manchester";
@@ -212,6 +213,9 @@ public class CCDConfigConstant {
     public static final String PRESTATYN = "FR_northwalesList_3";
     public static final String WELSHPOOL = "FR_northwalesList_4";
     public static final String MOLD = "FR_northwalesList_5";
+
+    //SouthEast Kent
+    public static final String KENT_DARTFORD_COURTS = "FR_kent_surrey_hc_list_3";
 
     public static final String COURT_DETAILS_NAME_KEY = "courtName";
     public static final String COURT_DETAILS_ADDRESS_KEY = "courtAddress";
@@ -597,4 +601,10 @@ public class CCDConfigConstant {
     public static final String MANAGE_BARRISTER_PARTY = "barristerParty";
 
 
+    //Hearing Events
+    public static final String LIST_FOR_HEARING = "List for Hearing";
+    public static final String LIST_FOR_INTERIM_HEARING = "List for Interim Hearing";
+
+    //Hearing State
+    public static final String PREPARE_FOR_HEARING_STATE = "prepareForHearing";
 }
