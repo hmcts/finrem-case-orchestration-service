@@ -28,7 +28,7 @@ public class ListForHearingContestedAboutToStartHandlerTest {
     @Test
     public void givenContestedCase_whenEventIsListForHearing_thenHandlerCanHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.ADD_LIST_FOR_INTERIM_HEARING_INFO),
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.LIST_FOR_HEARING),
             is(true));
     }
 
@@ -42,14 +42,14 @@ public class ListForHearingContestedAboutToStartHandlerTest {
     @Test
     public void givenContestedCase_whenCallbackIsSubmit_thenHandlerCanNotHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.ADD_LIST_FOR_INTERIM_HEARING_INFO),
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.LIST_FOR_HEARING),
             is(false));
     }
 
     @Test
     public void givenConsentCase_whenEventIsListForHearing_thenHandlerCanNotHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.ADD_LIST_FOR_INTERIM_HEARING_INFO),
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.LIST_FOR_HEARING),
             is(false));
     }
 

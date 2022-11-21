@@ -62,21 +62,21 @@ public class AmendApplicationAboutToSubmitHandlerTest extends BaseHandlerTest {
     @Test
     public void givenCase_whenEventIsAmendApplication_thenCanHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.AMEND_APPLICATION_DETAILS),
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.AMEND_APP_DETAILS),
             is(true));
     }
 
     @Test
     public void given_case_when_wrong_callback_then_case_can_not_handle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.AMEND_APPLICATION_DETAILS),
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.AMEND_APP_DETAILS),
             is(false));
     }
 
     @Test
     public void given_case_when_wrong_casetype_then_case_can_not_handle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.AMEND_APPLICATION_DETAILS),
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.AMEND_APP_DETAILS),
             is(false));
     }
 

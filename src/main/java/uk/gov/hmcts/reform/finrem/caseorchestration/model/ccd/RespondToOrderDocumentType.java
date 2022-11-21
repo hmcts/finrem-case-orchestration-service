@@ -9,7 +9,7 @@ import java.util.Arrays;
 public enum RespondToOrderDocumentType {
     APPLICANT_LETTER_EMAIL("ApplicantLetterEmail"),
     RESPONDENT_LETTER_EMAIL("RespondentLetterEmail"),
-    AMENDED_CONSENT_ORDER("AmendedConsentOrder"),
+    AMEND_CONSENT_ORDER("AmendedConsentOrder"),
     STATEMENT_REPORT("StatementReport"),
     OTHER("Other");
 

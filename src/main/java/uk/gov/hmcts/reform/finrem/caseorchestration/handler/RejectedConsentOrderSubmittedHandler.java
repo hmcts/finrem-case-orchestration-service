@@ -27,7 +27,7 @@ public class RejectedConsentOrderSubmittedHandler
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.SUBMITTED.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && EventType.ORDER_REFUSAL.equals(eventType);
+            && EventType.REJECT_ORDER.equals(eventType);
     }
 
     @Override

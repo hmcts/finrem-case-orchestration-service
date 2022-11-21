@@ -26,14 +26,14 @@ public class GeneralApplicationAboutToSubmitHandler implements CallbackHandler<M
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.CREATE_GENERAL_APPLICATION.equals(eventType);
+            && EventType.GENERAL_APPLICATION.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
                                                                                    String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("About to Submit callback event type {} for case id: {}", EventType.CREATE_GENERAL_APPLICATION, caseDetails.getId());
+        log.info("About to Submit callback event type {} for case id: {}", EventType.GENERAL_APPLICATION, caseDetails.getId());
 
         Map<String, Object> caseData
             = service.updateGeneralApplications(callbackRequest, userAuthorisation);

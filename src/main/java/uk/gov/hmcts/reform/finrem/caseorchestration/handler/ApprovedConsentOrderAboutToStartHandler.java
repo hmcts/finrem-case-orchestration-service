@@ -25,7 +25,7 @@ public class ApprovedConsentOrderAboutToStartHandler implements CallbackHandler 
                              final EventType eventType) {
         return CallbackType.ABOUT_TO_START.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && EventType.APPROVE_APPLICATION.equals(eventType);
+            && EventType.APPROVE_ORDER.equals(eventType);
     }
 
     @Override

@@ -62,7 +62,7 @@ public class SolicitorCreateConsentedAboutToSubmitHandlerTest {
     @Test
     public void given_case_whenEvent_type_is_amend_consent_order_thenCanHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.AMENDED_CONSENT_ORDER),
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.AMEND_CONSENT_ORDER),
             is(true));
     }
 

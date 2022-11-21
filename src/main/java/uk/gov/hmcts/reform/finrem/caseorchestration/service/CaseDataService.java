@@ -22,7 +22,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMENDED_CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMEND_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CONFIDENTIAL_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
@@ -171,11 +171,11 @@ public class CaseDataService {
     }
 
     public boolean isAmendedConsentOrderType(RespondToOrderData respondToOrderData) {
-        return AMENDED_CONSENT_ORDER.equalsIgnoreCase(respondToOrderData.getRespondToOrder().getDocumentType());
+        return AMEND_CONSENT_ORDER.equalsIgnoreCase(respondToOrderData.getRespondToOrder().getDocumentType());
     }
 
     public boolean isAmendedConsentOrderTypeFR(RespondToOrderDocumentCollection respondToOrderDocumentCollection) {
-        return AMENDED_CONSENT_ORDER.equalsIgnoreCase(respondToOrderDocumentCollection.getValue().getDocumentType().getValue());
+        return AMEND_CONSENT_ORDER.equalsIgnoreCase(respondToOrderDocumentCollection.getValue().getDocumentType().getValue());
     }
 
     public boolean isApplicantSolicitorResponsibleToDraftOrder(Map<String, Object> caseData) {

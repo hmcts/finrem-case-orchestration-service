@@ -61,14 +61,14 @@ public class GeneralApplicationAboutToStartHandlerTest extends BaseHandlerTest {
     @Test
     public void canHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.CREATE_GENERAL_APPLICATION),
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.GENERAL_APPLICATION),
             is(true));
     }
 
     @Test
     public void canNotHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.CREATE_GENERAL_APPLICATION),
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.GENERAL_APPLICATION),
             is(false));
     }
 
@@ -82,7 +82,7 @@ public class GeneralApplicationAboutToStartHandlerTest extends BaseHandlerTest {
     @Test
     public void canNotHandleWrongCallbackType() {
         assertThat(handler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.CREATE_GENERAL_APPLICATION),
+                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.GENERAL_APPLICATION),
             is(false));
     }
 

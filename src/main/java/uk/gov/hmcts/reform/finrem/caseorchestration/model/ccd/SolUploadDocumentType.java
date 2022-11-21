@@ -12,7 +12,7 @@ public enum SolUploadDocumentType {
     LETTER_EMAIL("Letter / Email"),
     SCHEDULE_OF_ASSETS("Schedule Of Assets"),
     UPDATED_D81("Updated D81"),
-    AMENDED_CONSENT_ORDER("Amended Consent Order");
+    AMEND_CONSENT_ORDER("Amended Consent Order");
 
     private final String id;
 

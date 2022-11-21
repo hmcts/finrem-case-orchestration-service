@@ -49,7 +49,7 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
                              final EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && EventType.APPROVE_APPLICATION.equals(eventType);
+            && EventType.APPROVE_ORDER.equals(eventType);
     }
 
     @Override

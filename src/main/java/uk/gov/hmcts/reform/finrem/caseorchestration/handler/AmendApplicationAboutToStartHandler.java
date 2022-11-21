@@ -29,7 +29,7 @@ public class AmendApplicationAboutToStartHandler extends FinremCallbackHandler {
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_START.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && (EventType.AMEND_APPLICATION_DETAILS.equals(eventType));
+            && (EventType.AMEND_APP_DETAILS.equals(eventType));
     }
 
     @Override

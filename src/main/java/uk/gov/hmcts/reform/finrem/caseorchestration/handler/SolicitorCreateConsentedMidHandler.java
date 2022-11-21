@@ -30,7 +30,7 @@ public class SolicitorCreateConsentedMidHandler
         return CallbackType.MID_EVENT.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
             && (EventType.SOLICITOR_CREATE.equals(eventType)
-            || EventType.AMEND_APPLICATION_DETAILS.equals(eventType));
+            || EventType.AMEND_APP_DETAILS.equals(eventType));
     }
 
     @Override

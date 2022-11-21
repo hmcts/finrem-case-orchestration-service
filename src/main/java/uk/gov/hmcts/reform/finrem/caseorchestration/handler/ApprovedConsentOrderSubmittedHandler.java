@@ -26,7 +26,7 @@ public class ApprovedConsentOrderSubmittedHandler implements CallbackHandler<Map
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.SUBMITTED.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
-            && EventType.APPROVE_APPLICATION.equals(eventType);
+            && EventType.APPROVE_ORDER.equals(eventType);
     }
 
     @Override

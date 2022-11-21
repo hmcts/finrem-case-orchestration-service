@@ -37,14 +37,14 @@ public class ApproveConsentOrderAboutToStartHandlerTest {
     @Test
     public void givenConsentedCase_whenEventIsApproveAndCallbackIsSubmitted_thenHandlerCanNotHandle() {
         assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.APPROVE_APPLICATION),
+                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.APPROVE_ORDER),
             is(false));
     }
 
     @Test
     public void givenConsentedCase_whenEventIsApproveOrder_thenHandlerCanHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.APPROVE_APPLICATION),
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.APPROVE_ORDER),
             is(true));
     }
 
@@ -82,6 +82,6 @@ public class ApproveConsentOrderAboutToStartHandlerTest {
     private CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
         CaseDetails caseDetails = CaseDetails.builder().id(123L).caseTypeId(CaseType.CONSENTED.getCcdType()).data(caseData).build();
-        return CallbackRequest.builder().eventId(EventType.APPROVE_APPLICATION.getCcdType()).caseDetails(caseDetails).build();
+        return CallbackRequest.builder().eventId(EventType.APPROVE_ORDER.getCcdType()).caseDetails(caseDetails).build();
     }
 }

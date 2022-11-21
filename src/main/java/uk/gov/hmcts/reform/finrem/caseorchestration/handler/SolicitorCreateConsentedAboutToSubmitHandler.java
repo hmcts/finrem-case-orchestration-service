@@ -32,7 +32,7 @@ public class SolicitorCreateConsentedAboutToSubmitHandler
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
             && (EventType.SOLICITOR_CREATE.equals(eventType)
-            || EventType.AMENDED_CONSENT_ORDER.equals(eventType)
+            || EventType.AMEND_CONSENT_ORDER.equals(eventType)
             || EventType.RESPOND_TO_ORDER.equals(eventType));
     }
 

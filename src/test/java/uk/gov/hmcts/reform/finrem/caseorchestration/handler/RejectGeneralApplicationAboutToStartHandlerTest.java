@@ -56,7 +56,7 @@ public class RejectGeneralApplicationAboutToStartHandlerTest extends BaseHandler
     @Test
     public void givenCase_whenInCorrectConfigCaseTypeSupplied_thenHandlerCanHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.CREATE_GENERAL_APPLICATION),
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.GENERAL_APPLICATION),
             is(false));
     }
 
@@ -70,7 +70,7 @@ public class RejectGeneralApplicationAboutToStartHandlerTest extends BaseHandler
     @Test
     public void givenCase_whenInCorrectConfigCallbackTypeSupplied_thenHandlerCanHandle() {
         assertThat(handler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.CREATE_GENERAL_APPLICATION),
+                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.GENERAL_APPLICATION),
             is(false));
     }
 

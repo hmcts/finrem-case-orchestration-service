@@ -28,14 +28,14 @@ public class GeneralApplicationAboutToStartHandler implements CallbackHandler<Ma
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_START.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && EventType.CREATE_GENERAL_APPLICATION.equals(eventType);
+            && EventType.GENERAL_APPLICATION.equals(eventType);
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
                                                                                    String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Start callback event type {} for case id: {}", EventType.CREATE_GENERAL_APPLICATION, caseDetails.getId());
+        log.info("Start callback event type {} for case id: {}", EventType.GENERAL_APPLICATION, caseDetails.getId());
         Map<String, Object> caseData = caseDetails.getData();
 
         List<GeneralApplicationCollectionData> existingGeneralApplication = helper.getGeneralApplicationList(caseData);

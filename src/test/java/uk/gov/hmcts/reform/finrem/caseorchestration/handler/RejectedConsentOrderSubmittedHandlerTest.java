@@ -59,21 +59,21 @@ public class RejectedConsentOrderSubmittedHandlerTest {
     @Test
     public void givenACcdCallbackConsentCase_WhenSubmitEventRejectOrder_thenHandlerCanHandle() {
         assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.ORDER_REFUSAL),
+                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.REJECT_ORDER),
             is(true));
     }
 
     @Test
     public void givenACcdCallbackConsentedCase_WhenAnAboutToSubmitCallback_thenHandlerCanNotHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.ORDER_REFUSAL),
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.REJECT_ORDER),
             is(false));
     }
 
     @Test
     public void givenACcdCallbackConsentedCase_WhenContestedCaseType_thenHandlerCanNotHandle() {
         assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.ORDER_REFUSAL),
+                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.REJECT_ORDER),
             is(false));
     }
 

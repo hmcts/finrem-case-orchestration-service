@@ -37,7 +37,7 @@ public class RejectedConsentOrderAboutToSubmitHandlerTest {
     @Test
     public void given_case_whenEventRejectedOrder_thenCanHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.ORDER_REFUSAL),
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.REJECT_ORDER),
             is(true));
     }
 
@@ -51,7 +51,7 @@ public class RejectedConsentOrderAboutToSubmitHandlerTest {
     @Test
     public void given_case_when_wrong_callback_then_case_can_not_handle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.ORDER_REFUSAL),
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.REJECT_ORDER),
             is(false));
     }
 
