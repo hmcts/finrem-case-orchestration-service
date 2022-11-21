@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.io.InputStream;
 import java.util.List;
@@ -35,6 +37,8 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest {
 
     private GeneralApplicationOutcomeAboutToStartHandler startHandler;
     private GeneralApplicationOutcomeAboutToSubmitHandler submitHandler;
+    @Mock
+    private GenericDocumentService service;
     private GeneralApplicationHelper helper;
     private ObjectMapper objectMapper;
 
@@ -45,7 +49,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest {
     @Before
     public void setup() {
         objectMapper = new ObjectMapper();
-        helper = new GeneralApplicationHelper(objectMapper);
+        helper = new GeneralApplicationHelper(objectMapper, service);
         startHandler  = new GeneralApplicationOutcomeAboutToStartHandler(helper);
         submitHandler  = new GeneralApplicationOutcomeAboutToSubmitHandler(helper);
     }
@@ -78,17 +82,17 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest {
             is(false));
     }
 
+    //This senario should not come
     @Test
     public void givenCase_whenNonCollectionApproveAnApplication_thenMigratedAndUpdateStatusApproved() {
         CallbackRequest callbackRequest = buildCallbackRequest(GA_NON_COLL_JSON);
-        callbackRequest.getCaseDetails().getData().put(GENERAL_APPLICATION_OUTCOME_DECISION, APPROVED.getId());
-
         AboutToStartOrSubmitCallbackResponse startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = startHandle.getData();
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_OUTCOME_LIST));
         assertEquals(1, dynamicList.getListItems().size());
 
+        callbackRequest.getCaseDetails().getData().put(GENERAL_APPLICATION_OUTCOME_DECISION, APPROVED.getId());
         AboutToStartOrSubmitCallbackResponse submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> data = submitHandle.getData();
@@ -99,6 +103,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest {
         assertEquals(GeneralApplicationStatus.APPROVED.getId(),
             generalApplicationCollectionData.get(0).getGeneralApplicationItems().getGeneralApplicationStatus());
         assertNull(data.get(GENERAL_APPLICATION_OUTCOME_LIST));
+        assertNull(data.get(GENERAL_APPLICATION_OUTCOME_DECISION));
     }
 
     @Test
@@ -121,6 +126,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandlerTest {
         assertEquals(GeneralApplicationStatus.APPROVED.getId(),
             generalApplicationCollectionData.get(1).getGeneralApplicationItems().getGeneralApplicationStatus());
         assertNull(data.get(GENERAL_APPLICATION_OUTCOME_LIST));
+        assertNull(data.get(GENERAL_APPLICATION_OUTCOME_DECISION));
     }
 
     @Test

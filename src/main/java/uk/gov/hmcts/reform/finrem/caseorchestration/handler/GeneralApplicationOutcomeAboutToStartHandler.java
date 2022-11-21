@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
@@ -48,8 +49,15 @@ public class GeneralApplicationOutcomeAboutToStartHandler implements CallbackHan
         List<GeneralApplicationCollectionData> referredList = helper.getReferredList(caseData);
         AtomicInteger index = new AtomicInteger(0);
         if (referredList.isEmpty() && caseData.get(GENERAL_APPLICATION_CREATED_BY) != null) {
+            String outcome = Objects.toString(caseData.get(GENERAL_APPLICATION_OUTCOME_DECISION), null);
+            log.info("general application has outcomed {} while existing ga not moved to collection for Case ID: {}",
+                outcome, caseDetails.getId());
+            if (referredList.isEmpty() && outcome != null) {
+                return AboutToStartOrSubmitCallbackResponse.builder().data(caseData)
+                    .errors(List.of("There are no general application available for decision.")).build();
+            }
             log.info("setting outcome list if existing ga not moved to collection for Case ID: {}", caseDetails.getId());
-            setOutcomeListForNonCollectionGeneralApplication(caseData, index);
+            setOutcomeListForNonCollectionGeneralApplication(caseData, index, userAuthorisation);
         } else {
             if (referredList.isEmpty()) {
                 return AboutToStartOrSubmitCallbackResponse.builder().data(caseData)
@@ -67,8 +75,10 @@ public class GeneralApplicationOutcomeAboutToStartHandler implements CallbackHan
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
     }
 
-    private void setOutcomeListForNonCollectionGeneralApplication(Map<String, Object> caseData, AtomicInteger index) {
-        GeneralApplicationItems applicationItems = helper.getApplicationItems(caseData);
+    private void setOutcomeListForNonCollectionGeneralApplication(Map<String, Object> caseData,
+                                                                  AtomicInteger index,
+                                                                  String userAuthorisation) {
+        GeneralApplicationItems applicationItems = helper.getApplicationItems(caseData, userAuthorisation);
         DynamicListElement dynamicListElements
             = getDynamicListElements(applicationItems.getGeneralApplicationCreatedBy(), getLabel(applicationItems, index.incrementAndGet()));
 

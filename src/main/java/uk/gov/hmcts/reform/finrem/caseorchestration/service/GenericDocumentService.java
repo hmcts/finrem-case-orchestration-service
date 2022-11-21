@@ -4,6 +4,8 @@ import com.google.common.io.Files;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
@@ -25,11 +27,14 @@ public class GenericDocumentService {
     private final DocumentConversionService documentConversionService;
     private final PdfStampingService pdfStampingService;
 
-    public CaseDocument generateDocument(String authorisationToken, CaseDetails caseDetails,
+    public CaseDocument generateDocument(String authorisationToken, CaseDetails caseDetailsCopy,
                                          String template, String fileName) {
-        Map<String, Object> caseDetailsMap = Collections.singletonMap(DOCUMENT_CASE_DETAILS_JSON_KEY, caseDetails);
+        Map<String, Object> caseData = caseDetailsCopy.getData();
+        if (caseData.get(DocumentHelper.CASE_NUMBER) == null) {
+            caseData.put(DocumentHelper.CASE_NUMBER, caseDetailsCopy.getId());
+        }
+        Map<String, Object> caseDetailsMap = Collections.singletonMap(DOCUMENT_CASE_DETAILS_JSON_KEY, caseDetailsCopy);
         return generateDocumentFromPlaceholdersMap(authorisationToken, caseDetailsMap, template, fileName);
-
     }
 
     public CaseDocument generateDocumentFromPlaceholdersMap(String authorisationToken, Map placeholders,

@@ -9,6 +9,8 @@ public class CCDConfigConstant {
     //Case related
     public static final String STATE = "state";
     public static final String DIVORCE_CASE_NUMBER = "divorceCaseNumber";
+    public static final String CASE_DETAILS = "caseDetails";
+    public static final String CASE_DATA = "case_data";
 
     public static final String APPLICANT_FIRST_MIDDLE_NAME = "applicantFMName";
     public static final String APPLICANT_LAST_NAME = "applicantLName";
@@ -104,6 +106,7 @@ public class CCDConfigConstant {
     public static final String DORSET = "dorset";
     public static final String HSYORKSHIRE = "hsyorkshire";
     public static final String KENT = "kentfrc";
+    public static final String KENTFRC = "kent";
     public static final String LANCASHIRE = "lancashire";
     public static final String LIVERPOOL = "liverpool";
     public static final String MANCHESTER = "manchester";
@@ -211,6 +214,9 @@ public class CCDConfigConstant {
     public static final String WELSHPOOL = "FR_northwalesList_4";
     public static final String MOLD = "FR_northwalesList_5";
 
+    //SouthEast Kent
+    public static final String KENT_DARTFORD_COURTS = "FR_kent_surrey_hc_list_3";
+
     public static final String COURT_DETAILS_NAME_KEY = "courtName";
     public static final String COURT_DETAILS_ADDRESS_KEY = "courtAddress";
     public static final String COURT_DETAILS_PHONE_KEY = "phoneNumber";
@@ -274,6 +280,8 @@ public class CCDConfigConstant {
     public static final String FORM_C = "formC";
     public static final String FORM_G = "formG";
     public static final String OUT_OF_FAMILY_COURT_RESOLUTION = "outOfFamilyCourtResolution";
+    public static final String HEARING_ADDITIONAL_DOC = "additionalListOfHearingDocuments";
+    public static final String ADDITIONAL_HEARING_DOCUMENTS_OPTION = "additionalHearingDocumentsOption";
     public static final String OTHER_DOCS_COLLECTION = "otherCollection";
     public static final String GENERAL_LETTER = "generalLetterCollection";
     public static final String GENERAL_LETTER_BODY = "generalLetterBody";
@@ -323,6 +331,9 @@ public class CCDConfigConstant {
     public static final String FR_AMENDED_CONSENT_ORDER = "FR_amendedConsentOrder";
     public static final String FR_CONSENT_ORDER = "FR_consentOrder";
     public static final String FR_RESPOND_TO_CONSENT_ORDER = "FR_respondToConsentOrder";
+
+    //general document
+    public static final String GENERAL_UPLOADED_DOCUMENTS = "uploadGeneralDocuments";
 
     //general email
     public static final String GENERAL_EMAIL_COLLECTION = "generalEmailCollection";
@@ -574,4 +585,26 @@ public class CCDConfigConstant {
     //Upload Approved Order
     public static final String HEARING_DIRECTION_DETAILS_COLLECTION = "hearingDirectionDetailsCollection";
     public static final String HEARING_NOTICE_DOCUMENT_PACK = "hearingNoticeDocumentPack";
+
+    //Consented List for hearings
+    public static final String LIST_FOR_HEARING_COLLECTION_CONSENTED = "listForHearings";
+    public static final String HEARING_PROMPT_FOR_DOCUMENT = "promptForAnyDocument";
+    public static final String HEARING_UPLOADED_DOCUMENT = "uploadAdditionalDocument";
+    public static final String HEARING_NOTICE_DOCUMENT = "hearingNotice";
+
+    //Manage Barristers
+    public static final String APPLICANT_BARRISTER_COLLECTION = "appBarristerCollection";
+    public static final String RESPONDENT_BARRISTER_COLLECTION = "respBarristerCollection";
+    public static final String APPLICANT_BARRISTER_ROLE = "[APPBARRISTER]";
+    public static final String RESPONDENT_BARRISTER_ROLE = "[RESPBARRISTER]";
+    public static final String CASEWORKER_ROLE = "[CASEWORKER]";
+    public static final String MANAGE_BARRISTER_PARTY = "barristerParty";
+
+
+    //Hearing Events
+    public static final String LIST_FOR_HEARING = "List for Hearing";
+    public static final String LIST_FOR_INTERIM_HEARING = "List for Interim Hearing";
+
+    //Hearing State
+    public static final String PREPARE_FOR_HEARING_STATE = "prepareForHearing";
 }

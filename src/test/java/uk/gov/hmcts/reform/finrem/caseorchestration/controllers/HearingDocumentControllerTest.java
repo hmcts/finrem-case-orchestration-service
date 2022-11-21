@@ -142,7 +142,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
         doValidCaseDataSetUpForAdditionalHearing();
 
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
-        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
 
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
                 .content(requestContent.toString())
@@ -259,7 +259,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void givenNoPreviousHearing_shouldPrintHearingDocumentsForRespondentSolicitor() throws Exception {
-        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(false);
 
         requestContent = objectMapper.readTree(new File(getClass()
@@ -275,7 +275,23 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void givenNoPreviousHearing_shouldPrintHearingDocumentsForApplicantSolicitor() throws Exception {
-        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(false);
+
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/contested/hearing-with-case-details-before.json").toURI()));
+        mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verify(hearingDocumentService).sendFormCAndGForBulkPrint(any(), eq(AUTH_TOKEN));
+    }
+
+    @Test
+    public void givenNoPreviousHearing_shouldPrintHearingDocumentsForApplicantSolicitorForPaperCase() throws Exception {
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(false);
 
         requestContent = objectMapper.readTree(new File(getClass()
@@ -291,7 +307,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void givenHadPreviousHearing_thenPrintAdditionalHearingDocumentsForRespondentSolicitor() throws Exception {
-        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
 
         requestContent = objectMapper.readTree(new File(getClass()
@@ -307,7 +323,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void givenHadPreviousHearing_thenPrintAdditionalHearingDocumentsForApplicantSolicitor() throws Exception {
-        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
 
         requestContent = objectMapper.readTree(new File(getClass()
@@ -319,6 +335,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
             .andExpect(status().isOk());
 
         verify(additionalHearingDocumentService).sendAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
+        verify(additionalHearingDocumentService).convertToPdf(any(), eq(AUTH_TOKEN));
     }
 
     @Test

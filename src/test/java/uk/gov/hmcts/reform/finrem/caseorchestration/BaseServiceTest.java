@@ -263,8 +263,8 @@ public abstract class BaseServiceTest extends BaseTest {
         return document;
     }
 
-    protected CallbackRequest buildInterimHearingCallbackRequest()  {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(TEST_JSON)) {
+    protected CallbackRequest buildHearingCallbackRequest(String payloadJson)  {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(payloadJson)) {
             return mapper.readValue(resourceAsStream, CallbackRequest.class);
         } catch (Exception e) {
             throw new RuntimeException(e);

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.io.InputStream;
 import java.util.List;
@@ -28,6 +30,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus.DIRECTION_APPROVED;
@@ -39,6 +43,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_OUTCOME_DECISION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PREPARE_FOR_HEARING_STATE;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
@@ -49,6 +54,8 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
     private final CaseDocument caseDocument = TestSetUpUtils.caseDocument();
     @Mock
     private GeneralApplicationDirectionsService service;
+    @Mock
+    private GenericDocumentService documentService;
     private ObjectMapper objectMapper;
 
     public static final String AUTH_TOKEN = "tokien:)";
@@ -58,9 +65,15 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
     @Before
     public void setup() {
         objectMapper = new ObjectMapper();
-        helper = new GeneralApplicationHelper(objectMapper);
+        helper = new GeneralApplicationHelper(objectMapper, documentService);
         startHandler  = new GeneralApplicationDirectionsAboutToStartHandler(helper, service);
         submitHandler  = new GeneralApplicationDirectionsAboutToSubmitHandler(helper, service);
+
+        when(documentService.convertDocumentIfNotPdfAlready(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(
+            CaseDocument.builder().documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary")
+                .documentFilename("InterimHearingNotice.pdf")
+                .documentUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e").build()
+        );
     }
 
     @Test
@@ -110,10 +123,17 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
             = helper.covertToGeneralApplicationData(data.get(GENERAL_APPLICATION_COLLECTION));
         assertEquals(1, list.size());
 
+        assertEquals("InterimHearingNotice.pdf", list.get(0).getGeneralApplicationItems()
+            .getGeneralApplicationDocument().getDocumentFilename());
+        assertEquals("InterimHearingNotice.pdf", list.get(0).getGeneralApplicationItems()
+            .getGeneralApplicationDraftOrder().getDocumentFilename());
+        assertEquals("app_docs.pdf", list.get(0).getGeneralApplicationItems()
+            .getGeneralApplicationDirectionsDocument().getDocumentFilename());
+
         assertEquals(DIRECTION_APPROVED.getId(),
             list.get(0).getGeneralApplicationItems().getGeneralApplicationStatus());
         assertNull(data.get(GENERAL_APPLICATION_DIRECTIONS_LIST));
-        assertNull(data.get(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT));
+        assertNull(data.get(GENERAL_APPLICATION_OUTCOME_DECISION));
     }
 
     @Test
@@ -142,6 +162,8 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
             list.get(1).getGeneralApplicationItems().getGeneralApplicationStatus());
         assertNull(data.get(GENERAL_APPLICATION_DIRECTIONS_LIST));
         assertNull(data.get(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT));
+
+        verify(service).submitCollectionGeneralApplicationDirections(any(), any(), any());
     }
 
 
@@ -199,6 +221,37 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
             list.get(1).getGeneralApplicationItems().getGeneralApplicationStatus());
         assertNull(data.get(GENERAL_APPLICATION_DIRECTIONS_LIST));
         assertNull(data.get(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT));
+    }
+
+    @Test
+    public void givenCase_whenApproveAnApplication_thenUpdateStatusApprovedCompletedAndReturnToPostState() {
+        CallbackRequest callbackRequest = buildCallbackRequest(GA_JSON);
+        when(service.getBulkPrintDocument(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(caseDocument);
+        when(service.getEventPostState(any(), any())).thenReturn(PREPARE_FOR_HEARING_STATE);
+        List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(callbackRequest.getCaseDetails().getData());
+        List<GeneralApplicationCollectionData> updatedList
+            = existingList.stream().map(obj -> updateStatus(obj, APPROVED)).toList();
+        callbackRequest.getCaseDetails().getData().put(GENERAL_APPLICATION_COLLECTION, updatedList);
+
+        AboutToStartOrSubmitCallbackResponse startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        Map<String, Object> caseData = startHandle.getData();
+        DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_DIRECTIONS_LIST));
+        assertEquals(1, dynamicList.getListItems().size());
+
+        AboutToStartOrSubmitCallbackResponse submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
+        Map<String, Object> data = submitHandle.getData();
+
+        List<GeneralApplicationCollectionData> list
+            = helper.covertToGeneralApplicationData(data.get(GENERAL_APPLICATION_COLLECTION));
+        assertEquals(2, list.size());
+
+        assertEquals(DIRECTION_APPROVED.getId(),
+            list.get(1).getGeneralApplicationItems().getGeneralApplicationStatus());
+        assertNull(data.get(GENERAL_APPLICATION_DIRECTIONS_LIST));
+        assertNull(data.get(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT));
+        assertEquals(PREPARE_FOR_HEARING_STATE, submitHandle.getState());
+        verify(service).submitCollectionGeneralApplicationDirections(any(), any(), any());
     }
 
     private GeneralApplicationCollectionData updateStatus(GeneralApplicationCollectionData obj, GeneralApplicationStatus status) {

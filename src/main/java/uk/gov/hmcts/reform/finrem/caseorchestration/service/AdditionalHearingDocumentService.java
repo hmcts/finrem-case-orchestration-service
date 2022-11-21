@@ -24,9 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
-import static java.util.Collections.singletonList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENT_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_ADDRESS_KEY;
@@ -35,6 +33,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_PHONE_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ADDITIONAL_DOC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ADDITIONAL_INFO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
@@ -220,23 +219,35 @@ public class AdditionalHearingDocumentService {
 
         AdditionalHearingDocumentData additionalHearingDocument = additionalHearingDocumentData.get(additionalHearingDocumentData.size() - 1);
 
-        List<BulkPrintDocument> document = singletonList(documentHelper.getBulkPrintDocumentFromCaseDocument(
-            additionalHearingDocument.getAdditionalHearingDocument().getDocument()));
-
-        if (!notificationService.isContestedApplicantSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
-            CompletableFuture.runAsync(() ->
-                bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, document));
+        List<BulkPrintDocument> document = new ArrayList<>();
+        if (caseDetails.getData().get(HEARING_ADDITIONAL_DOC) != null) {
+            BulkPrintDocument additionalUploadedDoc
+                = documentHelper.getBulkPrintDocumentFromCaseDocument(documentHelper
+                .convertToCaseDocument(caseDetails.getData().get(HEARING_ADDITIONAL_DOC)));
+            document.add(additionalUploadedDoc);
         }
-        if (!notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
-            CompletableFuture.runAsync(() ->
-                bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, document));
+
+        BulkPrintDocument additionalDoc
+            = documentHelper.getBulkPrintDocumentFromCaseDocument(additionalHearingDocument.getAdditionalHearingDocument().getDocument());
+
+        document.add(additionalDoc);
+
+        if (!notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
+            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, document);
+        }
+        if (!notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
+            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, document);
         }
     }
 
     private void convertHearingOrderCollectionDocumentsToPdf(HearingOrderCollectionData element,
                                                              String authorisationToken) {
-        CaseDocument pdfApprovedOrder = genericDocumentService.convertDocumentIfNotPdfAlready(
-            element.getHearingOrderDocuments().getUploadDraftDocument(), authorisationToken);
+        CaseDocument pdfApprovedOrder = convertToPdf(element.getHearingOrderDocuments().getUploadDraftDocument(),
+            authorisationToken);
         element.getHearingOrderDocuments().setUploadDraftDocument(pdfApprovedOrder);
+    }
+
+    public CaseDocument convertToPdf(CaseDocument document,String authorisationToken) {
+        return genericDocumentService.convertDocumentIfNotPdfAlready(document, authorisationToken);
     }
 }

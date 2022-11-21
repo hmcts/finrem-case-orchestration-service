@@ -21,7 +21,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFu
 
 @Component
 @Slf4j
-public class UpdateFrcInfoLetterDetailsGenerator extends BaseContestedLetterDetailsGenerator {
+public class UpdateFrcInfoLetterDetailsGenerator extends BaseContestedLetterDetailsGenerator<String> {
 
     public static final String LETTER_DATE_FORMAT = "yyyy-MM-dd";
 
@@ -31,7 +31,9 @@ public class UpdateFrcInfoLetterDetailsGenerator extends BaseContestedLetterDeta
 
     @Override
     public UpdateFrcInfoLetterDetails generate(CaseDetails caseDetails,
-                                               DocumentHelper.PaperNotificationRecipient recipient) {
+                                               DocumentHelper.PaperNotificationRecipient recipient,
+                                               String additionalData) {
+
         return UpdateFrcInfoLetterDetails.builder()
             .courtDetails(buildFrcCourtDetails(caseDetails.getData()))
             .reference(getSolicitorReference(caseDetails, recipient))

@@ -5,7 +5,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
@@ -82,14 +85,20 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
         when(docmosisPdfGenerationServiceMock
             .generateDocFrom(any(), any())).thenReturn("".getBytes(StandardCharsets.UTF_8));
 
-        CaseDocument document = genericDocumentService.generateDocument(AUTH_TOKEN, defaultContestedCaseDetails(), templateName, fileName);
+        CaseDetails caseDetails = defaultContestedCaseDetails();
+        CaseDocument document = genericDocumentService.generateDocument(AUTH_TOKEN, caseDetails, templateName, fileName);
 
         assertCaseDocument(document);
         verify(docmosisPdfGenerationServiceMock, times(1))
             .generateDocFrom(templateNameCaptor.capture(), mapCaptor.capture());
 
+
         assertThat(templateNameCaptor.getValue(), is(templateName));
         assertThat(mapCaptor.getValue().get("caseDetails"), is(defaultContestedCaseDetails()));
+        assertThat(documentGenerationRequestCaptor.getValue().getTemplate(), is(templateName));
+        assertThat(documentGenerationRequestCaptor.getValue().getFileName(), is(fileName));
+        caseDetails.getData().put(DocumentHelper.CASE_NUMBER, caseDetails.getId());
+        assertThat(documentGenerationRequestCaptor.getValue().getValues().get("caseDetails"), is(caseDetails));
     }
 
     @Test
