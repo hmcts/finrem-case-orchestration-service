@@ -77,12 +77,12 @@ public class UpdateContestedCaseController extends BaseController {
 
         Map<String, Object> caseData = caseDetails.getData();
         String typeOfApplication = Objects.toString(caseData.get(TYPE_OF_APPLICATION), null);
-        if (typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)) {
+        if (typeOfApplication != null &&  typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)) {
             updateDivorceDetailsForContestedCase(caseData);
         }
         updateContestedRespondentDetails(caseData);
         updateContestedPeriodicPaymentOrder(caseData, typeOfApplication);
-        if (typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)) {
+        if (typeOfApplication != null && typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)) {
             updateContestedPropertyAdjustmentOrder(caseData);
         }
         updateContestedFastTrackProcedureDetail(caseData);
@@ -237,33 +237,49 @@ public class UpdateContestedCaseController extends BaseController {
         ArrayList natureOfApplicationList = typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)
             ? (ArrayList) caseData.get("natureOfApplicationChecklist") : (ArrayList) caseData.get("natureOfApplicationChecklistSchedule");
         if (hasNotSelected(natureOfApplicationList, "periodicalPaymentOrder")) {
-            removeContestedPeriodicalPaymentOrderDetails(caseData);
+            removeContestedPeriodicalPaymentOrderDetails(caseData, typeOfApplication);
         } else {
-            updateContestedPeriodicPaymentDetails(caseData);
+            updateContestedPeriodicPaymentDetails(caseData, typeOfApplication);
         }
     }
 
-    private void updateContestedPeriodicPaymentDetails(Map<String, Object> caseData) {
-        log.info("RISHI  222222");
-        if (equalsTo((String) caseData.get("paymentForChildrenDecision"), NO_VALUE)) {
-            log.info("RISHI  33333");
-            removeBenefitsDetails(caseData);
+    private void updateContestedPeriodicPaymentDetails(Map<String, Object> caseData, String typeOfApplication) {
+        String paymentForChildrenDecisionObj = Objects.toString(caseData.get("paymentForChildrenDecision"));
+
+        if (equalsTo(paymentForChildrenDecisionObj, NO_VALUE)) {
+            removeBenefitsDetails(caseData, typeOfApplication);
         } else {
-            if (equalsTo((String) caseData.get("benefitForChildrenDecision"), YES_VALUE)) {
-                log.info("RISHI 44444 {}",caseData.get("benefitForChildrenDecision"));
-                caseData.put("benefitPaymentChecklist", null);
+            if (equalsTo(paymentForChildrenDecisionObj, YES_VALUE)) {
+                removeBenefitPaymentChecklist(caseData, typeOfApplication);
             }
         }
     }
 
-    private void removeBenefitsDetails(Map<String, Object> caseData) {
-        caseData.put("benefitForChildrenDecision", null);
-        caseData.put("benefitPaymentChecklist", null);
+    private void removeBenefitPaymentChecklist(Map<String, Object> caseData, String typeOfApplication) {
+        if (typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)) {
+            caseData.put("benefitPaymentChecklist", null);
+        } else {
+            caseData.put("benefitPaymentChecklistSchedule", null);
+        }
     }
 
-    private void removeContestedPeriodicalPaymentOrderDetails(Map<String, Object> caseData) {
+    private void removeBenefitsDetails(Map<String, Object> caseData, String typeOfApplication) {
+        if (typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)) {
+            caseData.put("benefitForChildrenDecision", null);
+            caseData.put("benefitPaymentChecklist", null);
+            caseData.put("benefitForChildrenDecisionSchedule", null);
+            caseData.put("benefitPaymentChecklistSchedule", null);
+        } else {
+            caseData.put("benefitForChildrenDecisionSchedule", null);
+            caseData.put("benefitPaymentChecklistSchedule", null);
+            caseData.put("benefitForChildrenDecisionScheduleSchedule", null);
+            caseData.put("benefitPaymentChecklistScheduleSchedule", null);
+        }
+    }
+
+    private void removeContestedPeriodicalPaymentOrderDetails(Map<String, Object> caseData, String typeOfApplication) {
         caseData.put("paymentForChildrenDecision", null);
-        removeBenefitsDetails(caseData);
+        removeBenefitsDetails(caseData, typeOfApplication);
     }
 
     private void updateContestedPropertyAdjustmentOrder(Map<String, Object> caseData) {

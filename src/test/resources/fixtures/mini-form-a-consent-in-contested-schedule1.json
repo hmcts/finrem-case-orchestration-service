@@ -7,7 +7,7 @@
     "state": "consentedOrderSubmitted",
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
-      "typeOfApplication": "In connection to matrimonial and civil partnership proceedings",
+      "typeOfApplication": "Under paragraph 1 or 2 of schedule 1 children act 1989",
       "PBANumber": "PBA123456",
       "d81Question": "No",
       "consentD81Question": "No",
@@ -38,7 +38,7 @@
       "applicantFMName": "Poor",
       "applicantLName": "Guy",
       "authorisation2b": "test",
-      "consentNatureOfApplicationChecklist": [
+      "consentNatureOfApplicationChecklistSchedule": [
         "periodicalPaymentOrder",
         "Lump Sum Order",
         "propertyAdjustmentOrder"

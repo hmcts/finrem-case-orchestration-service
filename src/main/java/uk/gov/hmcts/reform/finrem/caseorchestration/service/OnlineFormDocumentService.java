@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -37,6 +38,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_5;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_6;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_7;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_SCHEDULE_1;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_IN_CONTESTED_ORDER_FOR_CHILDREN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_AUTHORISATION_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
@@ -46,6 +48,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION_DEFAULT_TO;
 
 @Service
 @RequiredArgsConstructor
@@ -78,9 +82,16 @@ public class OnlineFormDocumentService {
     public CaseDocument generateDraftContestedMiniFormA(String authorisationToken, CaseDetails caseDetails) {
 
         log.info("Generating Draft Contested Mini Form A for Case ID : {}", caseDetails.getId());
-        CaseDocument caseDocument = genericDocumentService.generateDocument(authorisationToken, translateOptions(caseDetails),
-            documentConfiguration.getContestedDraftMiniFormTemplate(),
-            documentConfiguration.getContestedDraftMiniFormFileName());
+        String contestedDraftMiniFormTemplate;
+        String typeOfApplication = Objects.toString(caseDetails.getData().get(TYPE_OF_APPLICATION), null);
+        if (typeOfApplication != null &&  typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)) {
+            contestedDraftMiniFormTemplate = documentConfiguration.getContestedDraftMiniFormTemplate();
+        } else {
+            contestedDraftMiniFormTemplate = documentConfiguration.getContestedDraftMiniFormTemplateSchedule();
+        }
+        CaseDocument caseDocument = genericDocumentService.generateDocument(authorisationToken,
+            translateOptions(caseDetails),
+            contestedDraftMiniFormTemplate, documentConfiguration.getContestedDraftMiniFormFileName());
 
         Optional.ofNullable(miniFormData(caseDetails)).ifPresent(data -> deleteOldMiniFormA(data, authorisationToken));
         return caseDocument;
@@ -138,7 +149,12 @@ public class OnlineFormDocumentService {
         caseData.put(CONSENTED_RESPONDENT_REPRESENTED, caseData.remove(CONTESTED_RESPONDENT_REPRESENTED));
 
         //Checklist
-        caseData.put(CONSENTED_NATURE_OF_APPLICATION, caseData.remove(CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION));
+        String typeOfApplication = Objects.toString(caseData.get(TYPE_OF_APPLICATION), null);
+        if (typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)) {
+            caseData.put(CONSENTED_NATURE_OF_APPLICATION, caseData.remove(CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION));
+        } else {
+            caseData.put(CONSENTED_NATURE_OF_APPLICATION, caseData.remove(CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_SCHEDULE_1));
+        }
         caseData.put(CONSENTED_NATURE_OF_APPLICATION_3A, caseData.remove(CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_3A));
         caseData.put(CONSENTED_NATURE_OF_APPLICATION_3B, caseData.remove(CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_3B));
 

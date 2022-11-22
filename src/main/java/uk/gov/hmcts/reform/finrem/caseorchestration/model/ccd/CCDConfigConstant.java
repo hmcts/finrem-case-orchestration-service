@@ -255,6 +255,7 @@ public class CCDConfigConstant {
     //Nature of Application
     public static final String CONSENTED_NATURE_OF_APPLICATION = "natureOfApplication2";
     public static final String CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION = "consentNatureOfApplicationChecklist";
+    public static final String CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_SCHEDULE_1 = "consentNatureOfApplicationChecklistSchedule";
     public static final String CONSENTED_NATURE_OF_APPLICATION_3A = "natureOfApplication3a";
     public static final String CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_3A = "consentNatureOfApplicationAddress";
     public static final String CONSENTED_NATURE_OF_APPLICATION_3B = "natureOfApplication3b";
