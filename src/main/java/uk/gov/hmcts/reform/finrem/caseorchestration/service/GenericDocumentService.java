@@ -4,7 +4,6 @@ import com.google.common.io.Files;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
@@ -46,8 +45,7 @@ public class GenericDocumentService {
 
     public UUID bulkPrint(BulkPrintRequest bulkPrintRequest) {
         final List<byte[]> documents = bulkPrintDocumentService.downloadDocuments(bulkPrintRequest);
-        return bulkPrintDocumentGeneratorService.send(bulkPrintRequest.getCaseId(), bulkPrintRequest.getLetterType(),
-            documents);
+        return bulkPrintDocumentGeneratorService.send(bulkPrintRequest, documents);
     }
 
     public void deleteDocument(String documentUrl, String authorisationToken) {

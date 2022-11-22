@@ -24,7 +24,8 @@ public class BulkPrintDocumentService {
         List<byte[]> documents = bulkPrintRequest.getBulkPrintDocuments().stream().map(bulkPrintDocument -> {
             ResponseEntity<byte[]> response = service.download(bulkPrintDocument.getBinaryFileUrl());
             if (response.getStatusCode() != HttpStatus.OK) {
-                log.error("Download failed for url {} ", bulkPrintDocument.getBinaryFileUrl());
+                log.error("Download failed for url {}, filename {} ", bulkPrintDocument.getBinaryFileUrl(),
+                    bulkPrintDocument.getFileName());
                 throw new RuntimeException(String.format("Unexpected error DM store: %s ", response.getStatusCode()));
             }
             return response.getBody();

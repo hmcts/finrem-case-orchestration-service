@@ -24,6 +24,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
@@ -52,8 +54,8 @@ public class HelpWithFeesDocumentServiceTest extends BaseServiceTest {
         when(evidenceManagementUploadService.upload(any(), any()))
             .thenReturn(Collections.singletonList(
                 FileUploadResponse.builder()
-                    .fileName("app_docs.pdf")
-                    .fileUrl("http://dm-store/lhjbyuivu87y989hijbb")
+                    .fileName(FILE_NAME)
+                    .fileUrl(DOC_URL)
                     .build()));
 
         caseDetails = defaultConsentedCaseDetails();

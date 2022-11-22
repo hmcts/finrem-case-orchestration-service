@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.sendletter.api.LetterWithPdfsRequest;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterApi;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
@@ -26,34 +28,45 @@ public class BulkPrintDocumentGeneratorService {
     private static final String CASE_REFERENCE_NUMBER_KEY = "caseReferenceNumber";
     private static final String CASE_IDENTIFIER_KEY = "caseIdentifier";
 
+    private static final String FILE_NAMES = "fileNames";
+
     private final AuthTokenGenerator authTokenGenerator;
     private final SendLetterApi sendLetterApi;
 
     /**
      * Note: the order of documents you send to this service is the order in which they will print.
      */
-    public UUID send(final String caseId, final String letterType, final List<byte[]> listOfDocumentsAsByteArray) {
-        log.info("Request for bulk print of {} for case {}", letterType, caseId);
-        final List<String> stringifiedDocuments = listOfDocumentsAsByteArray.stream()
+
+
+    public UUID send(final BulkPrintRequest bulkPrintRequest, final List<byte[]> listOfDocumentsAsByteArray) {
+
+        String letterType = bulkPrintRequest.getLetterType();
+        String caseId = bulkPrintRequest.getCaseId();
+
+        log.info("Sending {} for case {}", letterType, caseId);
+
+        final List<String> documents = listOfDocumentsAsByteArray.stream()
             .map(getEncoder()::encodeToString)
             .collect(toList());
-        return send(authTokenGenerator.generate(), caseId, letterType, stringifiedDocuments);
-    }
 
-    private UUID send(final String authToken, final String caseId, final String letterType,
-                      final List<String> documents) {
-        log.info("Sending {} for case {}", letterType, caseId);
-        SendLetterResponse sendLetterResponse = sendLetterApi.sendLetter(authToken,
-            new LetterWithPdfsRequest(documents, XEROX_TYPE_PARAMETER, getAdditionalData(caseId, letterType)));
+        SendLetterResponse sendLetterResponse = sendLetterApi.sendLetter(authTokenGenerator.generate(),
+            new LetterWithPdfsRequest(documents, XEROX_TYPE_PARAMETER, getAdditionalData(caseId, letterType, bulkPrintRequest)));
+
         log.info("Letter service produced the following letter Id {} for case {}", sendLetterResponse.letterId, caseId);
         return sendLetterResponse.letterId;
     }
 
-    private Map<String, Object> getAdditionalData(final String caseId, final String letterType) {
+
+    private Map<String, Object> getAdditionalData(final String caseId, final String letterType, final BulkPrintRequest bulkPrintRequest) {
         final Map<String, Object> additionalData = new HashMap<>();
         additionalData.put(LETTER_TYPE_KEY, letterType);
         additionalData.put(CASE_IDENTIFIER_KEY, caseId);
         additionalData.put(CASE_REFERENCE_NUMBER_KEY, caseId);
+        additionalData.put(FILE_NAMES, getFileNames(bulkPrintRequest));
         return additionalData;
+    }
+
+    private List<String> getFileNames(BulkPrintRequest bulkPrintRequest) {
+        return bulkPrintRequest.getBulkPrintDocuments().stream().map(BulkPrintDocument::getFileName).collect(toList());
     }
 }

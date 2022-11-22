@@ -62,6 +62,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
@@ -240,8 +242,8 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
     protected BulkPrintRequest bulkPrintRequest() {
         List<BulkPrintDocument> caseDocuments = new ArrayList<>();
         caseDocuments.add(BulkPrintDocument.builder()
-            .binaryFileUrl("http://dm-store/lhjbyuivu87y989hijbb/binary")
-            .fileName("app_docs.pdf")
+            .binaryFileUrl(BINARY_URL)
+            .fileName(FILE_NAME)
             .build());
         return BulkPrintRequest.builder()
             .caseId("123")

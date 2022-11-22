@@ -25,10 +25,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.PdfDocumentRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OptionIdToValueTranslator;
+import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Paths;
+import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.delete;
@@ -44,6 +48,7 @@ import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 
 @RunWith(SpringRunner.class)
@@ -56,6 +61,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.docume
 public abstract class AbstractDocumentTest extends BaseTest {
 
     protected static final String GENERATE_DOCUMENT_CONTEXT_PATH = "/rs/render";
+    protected static final String SEND_LETTERS_CONTEXT_PATH = "/letters";
 
     protected static final String UPLOAD_DOCUMENT_CONTEXT_PATH = "/documents";
     private static final String TEMP_URL = "http://doc1";
@@ -81,10 +87,13 @@ public abstract class AbstractDocumentTest extends BaseTest {
     public static WireMockClassRule documentGeneratorService = new WireMockClassRule(4001);
 
     @ClassRule
-    public static WireMockClassRule evidenceUploadService = new WireMockClassRule(3405);
+    public static WireMockClassRule evidenceManagementService = new WireMockClassRule(3405);
 
     @ClassRule
     public static WireMockClassRule idamService = new WireMockClassRule(4501);
+
+    @ClassRule
+    public static WireMockClassRule sendLetterService = new WireMockClassRule(4002);
 
     protected CallbackRequest request;
 
@@ -116,7 +125,7 @@ public abstract class AbstractDocumentTest extends BaseTest {
     }
 
     void generateEvidenceUploadServiceSuccessStub() throws IOException {
-        evidenceUploadService.stubFor(post(urlPathEqualTo(UPLOAD_DOCUMENT_CONTEXT_PATH))
+        evidenceManagementService.stubFor(post(urlPathEqualTo(UPLOAD_DOCUMENT_CONTEXT_PATH))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
@@ -147,6 +156,14 @@ public abstract class AbstractDocumentTest extends BaseTest {
                 .willReturn(aResponse().withStatus(status.value())));
     }
 
+    void downloadDocumentServiceStubWith(HttpStatus status) throws JsonProcessingException, URISyntaxException {
+        evidenceManagementService.stubFor(
+            get(urlMatching(new URI(BINARY_URL).getPath()))
+                .willReturn(aResponse()
+                    .withBody(objectMapper.writeValueAsString(document()))
+                    .withStatus(status.value())));
+    }
+
     private void generateDocumentServiceErrorStub() throws JsonProcessingException {
         documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
             .withRequestBody(equalToJson(objectMapper.writeValueAsString(pdfRequest()), true, true))
@@ -154,6 +171,13 @@ public abstract class AbstractDocumentTest extends BaseTest {
             .willReturn(aResponse()
                 .withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)));
+    }
+
+    public void generateSendLetterServiceStub() throws JsonProcessingException {
+        sendLetterService.stubFor(post(urlPathEqualTo(SEND_LETTERS_CONTEXT_PATH))
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withBody(objectMapper.writeValueAsString(new SendLetterResponse(UUID.randomUUID())))));
     }
 
     void idamServiceStub() {

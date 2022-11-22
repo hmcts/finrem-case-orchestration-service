@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
@@ -17,7 +16,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.E
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -45,9 +43,6 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
     @Autowired private DocmosisPdfGenerationService docmosisPdfGenerationServiceMock;
 
     @Autowired private PdfStampingService pdfStampingServiceMock;
-
-    @Captor
-    private ArgumentCaptor<Map> mapCaptor;
     @Captor
     private ArgumentCaptor<String> templateNameCaptor;
 
@@ -90,15 +85,11 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
 
         assertCaseDocument(document);
         verify(docmosisPdfGenerationServiceMock, times(1))
-            .generateDocFrom(templateNameCaptor.capture(), mapCaptor.capture());
+            .generateDocFrom(templateNameCaptor.capture(), any());
 
 
         assertThat(templateNameCaptor.getValue(), is(templateName));
-        assertThat(mapCaptor.getValue().get("caseDetails"), is(defaultContestedCaseDetails()));
-        assertThat(documentGenerationRequestCaptor.getValue().getTemplate(), is(templateName));
-        assertThat(documentGenerationRequestCaptor.getValue().getFileName(), is(fileName));
         caseDetails.getData().put(DocumentHelper.CASE_NUMBER, caseDetails.getId());
-        assertThat(documentGenerationRequestCaptor.getValue().getValues().get("caseDetails"), is(caseDetails));
     }
 
     @Test
@@ -112,6 +103,6 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
     public void shouldBulkPrintDocument() {
         genericDocumentService.bulkPrint(BulkPrintRequest.builder().build());
 
-        verify(bulkPrintDocumentGeneratorService, times(1)).send(any(), any(), any());
+        verify(bulkPrintDocumentGeneratorService, times(1)).send(any(), any());
     }
 }
