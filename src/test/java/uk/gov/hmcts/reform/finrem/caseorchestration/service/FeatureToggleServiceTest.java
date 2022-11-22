@@ -23,7 +23,6 @@ public class FeatureToggleServiceTest {
 
     @RunWith(SpringRunner.class)
     @SpringBootTest(properties = {
-        "feature.toggle.respondent_journey=true",
         "feature.toggle.send_to_frc=true",
         "feature.toggle.assign_case_access=true",
         "feature.toggle.pba_case_type=true"
@@ -32,11 +31,6 @@ public class FeatureToggleServiceTest {
 
         @Autowired
         private FeatureToggleService featureToggleService;
-
-        @Test
-        public void isRespondentSolicitorEmailNotificationEnabledReturnsTrue() {
-            assertThat(featureToggleService.isRespondentJourneyEnabled(), is(true));
-        }
 
         @Test
         public void getFieldsIgnoredDuringSerialisationEmptyWhenFeaturesEnabled() {
@@ -61,7 +55,6 @@ public class FeatureToggleServiceTest {
 
     @RunWith(SpringRunner.class)
     @SpringBootTest(properties = {
-        "feature.toggle.respondent_journey=false",
         "feature.toggle.send_to_frc=false",
         "feature.toggle.assign_case_access=false",
         "feature.toggle.pba_case_type=false"
@@ -70,11 +63,6 @@ public class FeatureToggleServiceTest {
 
         @Autowired
         private FeatureToggleService featureToggleService;
-
-        @Test
-        public void isRespondentSolicitorEmailNotificationEnabledReturnsFalse() {
-            assertThat(featureToggleService.isRespondentJourneyEnabled(), is(false));
-        }
 
         @Test
         public void getFieldsIgnoredDuringSerialisationContainsElementsWhenFeaturesDisabled() {

@@ -45,7 +45,6 @@ public class ManageCaseDocumentsServiceTest extends BaseServiceTest {
     @Before
     public void setUp() {
         when(featureToggleService.isManageBundleEnabled()).thenReturn(false);
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         caseDetails = buildCaseDetails();
         caseDetailsBefore = buildCaseDetails();
         caseData = caseDetails.getData();
