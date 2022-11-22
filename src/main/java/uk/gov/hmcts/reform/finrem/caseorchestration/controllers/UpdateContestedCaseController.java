@@ -76,13 +76,13 @@ public class UpdateContestedCaseController extends BaseController {
         validateCaseData(ccdRequest);
 
         Map<String, Object> caseData = caseDetails.getData();
-        String typeOfApplication = Objects.toString(caseData.get(TYPE_OF_APPLICATION), null);
-        if (typeOfApplication != null &&  typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)) {
+        String typeOfApplication = Objects.toString(caseData.get(TYPE_OF_APPLICATION));
+        if (typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)) {
             updateDivorceDetailsForContestedCase(caseData);
         }
         updateContestedRespondentDetails(caseData);
         updateContestedPeriodicPaymentOrder(caseData, typeOfApplication);
-        if (typeOfApplication != null && typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)) {
+        if (typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)) {
             updateContestedPropertyAdjustmentOrder(caseData);
         }
         updateContestedFastTrackProcedureDetail(caseData);
@@ -267,13 +267,9 @@ public class UpdateContestedCaseController extends BaseController {
         if (typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)) {
             caseData.put("benefitForChildrenDecision", null);
             caseData.put("benefitPaymentChecklist", null);
-            caseData.put("benefitForChildrenDecisionSchedule", null);
-            caseData.put("benefitPaymentChecklistSchedule", null);
         } else {
             caseData.put("benefitForChildrenDecisionSchedule", null);
             caseData.put("benefitPaymentChecklistSchedule", null);
-            caseData.put("benefitForChildrenDecisionScheduleSchedule", null);
-            caseData.put("benefitPaymentChecklistScheduleSchedule", null);
         }
     }
 
