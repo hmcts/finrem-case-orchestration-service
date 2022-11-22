@@ -106,6 +106,7 @@ public class CCDConfigConstant {
     public static final String DORSET = "dorset";
     public static final String HSYORKSHIRE = "hsyorkshire";
     public static final String KENT = "kentfrc";
+    public static final String KENTFRC = "kent";
     public static final String LANCASHIRE = "lancashire";
     public static final String LIVERPOOL = "liverpool";
     public static final String MANCHESTER = "manchester";
@@ -212,6 +213,9 @@ public class CCDConfigConstant {
     public static final String PRESTATYN = "FR_northwalesList_3";
     public static final String WELSHPOOL = "FR_northwalesList_4";
     public static final String MOLD = "FR_northwalesList_5";
+
+    //SouthEast Kent
+    public static final String KENT_DARTFORD_COURTS = "FR_kent_surrey_hc_list_3";
 
     public static final String COURT_DETAILS_NAME_KEY = "courtName";
     public static final String COURT_DETAILS_ADDRESS_KEY = "courtAddress";
@@ -574,6 +578,8 @@ public class CCDConfigConstant {
     public static final String REPRESENTATION_UPDATE_HISTORY = "RepresentationUpdateHistory";
     public static final String INCLUDES_REPRESENTATIVE_UPDATE = "updateIncludesRepresentativeChange";
     public static final String UPDATE_CONTACT_DETAILS_EVENT = "FR_updateContactDetails";
+    public static final String NOTICE_OF_CHANGE = "Notice of Change";
+    public static final String IS_NOC_REJECTED = "isNocRejected";
 
     public static final String HEARING_UPLOAD_BUNDLE_COLLECTION = "hearingUploadBundle";
     public static final String SEND_ORDER_POST_STATE_OPTION_FIELD = "sendOrderPostStateOption";
@@ -595,6 +601,13 @@ public class CCDConfigConstant {
     public static final String RESPONDENT_BARRISTER_ROLE = "[RESPBARRISTER]";
     public static final String CASEWORKER_ROLE = "[CASEWORKER]";
     public static final String MANAGE_BARRISTER_PARTY = "barristerParty";
+    public static final String MANAGE_BARRISTERS = "Manage Barristers";
 
 
+    //Hearing Events
+    public static final String LIST_FOR_HEARING = "List for Hearing";
+    public static final String LIST_FOR_INTERIM_HEARING = "List for Interim Hearing";
+
+    //Hearing State
+    public static final String PREPARE_FOR_HEARING_STATE = "prepareForHearing";
 }
