@@ -40,6 +40,7 @@ public enum EventType {
     MANAGE_BARRISTER("FR_manageBarrister"),
     ISSUE_APPLICATION("FR_issueApplication"),
     CONSENT_APPLICATION_APPROVED_IN_CONTESTED("FR_consentOrderApproved"),
+    NOC_REQUEST("nocRequest"),
     @JsonEnumDefaultValue
     NONE("");
 
