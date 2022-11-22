@@ -37,6 +37,7 @@ public enum EventType {
     LIST_FOR_HEARING_CONSENTED("FR_listForHearing"),
     MANAGE_BARRISTER("FR_manageBarrister"),
     ISSUE_APPLICATION("FR_issueApplication"),
+    REGENERATE_FORM_C("FR_regenerateFormC"),
     CONSENT_APPLICATION_APPROVED_IN_CONTESTED("FR_consentOrderApproved"),
     NOC_REQUEST("nocRequest"),
     NONE("");
