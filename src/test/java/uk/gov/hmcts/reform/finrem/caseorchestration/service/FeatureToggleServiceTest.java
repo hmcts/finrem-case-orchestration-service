@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.anEmptyMap;
 import static org.hamcrest.core.Is.is;
 
 @RunWith(Enclosed.class)
@@ -31,11 +30,6 @@ public class FeatureToggleServiceTest {
 
         @Autowired
         private FeatureToggleService featureToggleService;
-
-        @Test
-        public void getFieldsIgnoredDuringSerialisationEmptyWhenFeaturesEnabled() {
-            assertThat(featureToggleService.getFieldsIgnoredDuringSerialisation(), is(anEmptyMap()));
-        }
 
         @Test
         public void isSendToFRCEnabledReturnsTrue() {

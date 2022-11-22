@@ -247,15 +247,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldNotPopulateApplicantSolicitorAddressContested_toggledOff() {
-        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
-
-        caseDataController.setContestedDefaultValues(AUTH_TOKEN, buildCallbackRequest());
-
-        verifyNoInteractions(updateSolicitorDetailsService);
-    }
-
-    @Test
     public void shouldNotPopulateApplicantSolicitorAddressContested_notRepresented() {
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
 
@@ -273,15 +264,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
         caseDataController.setConsentedDefaultValues(AUTH_TOKEN, callbackRequest);
 
         verify(updateSolicitorDetailsService, times(1)).setApplicantSolicitorOrganisationDetails(AUTH_TOKEN, callbackRequest.getCaseDetails());
-    }
-
-    @Test
-    public void shouldNotPopulateApplicantSolicitorAddressConsented_toggledOff() {
-        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
-
-        caseDataController.setConsentedDefaultValues(AUTH_TOKEN, buildCallbackRequest());
-
-        verifyNoInteractions(updateSolicitorDetailsService);
     }
 
     @Test
