@@ -5,10 +5,10 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -62,7 +62,7 @@ public class ReGenerateFormCAboutToSubmitHandlerTest {
         CallbackRequest callbackRequest =
             CallbackRequest.builder().caseDetails(getCaseDetailsTest()).caseDetailsBefore(getCaseDetailsTest()).build();
 
-        AboutToStartOrSubmitCallbackResponse response = reGenerateFormCAboutToSubmitHandler.handle(callbackRequest, AUTH);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = reGenerateFormCAboutToSubmitHandler.handle(callbackRequest, AUTH);
 
         assertThat(response.getErrors().get(0), is(THERE_IS_NO_HEARING_ON_THE_CASE_ERROR_MESSAGE));
     }
@@ -74,7 +74,7 @@ public class ReGenerateFormCAboutToSubmitHandlerTest {
         when(hearingDocumentService.generateHearingDocuments(any(), any())).thenReturn(new HashMap<>());
         callbackRequest.getCaseDetails().getData().put(HEARING_DATE, "2019-06-24");
 
-        AboutToStartOrSubmitCallbackResponse response = reGenerateFormCAboutToSubmitHandler.handle(callbackRequest, AUTH);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = reGenerateFormCAboutToSubmitHandler.handle(callbackRequest, AUTH);
 
         assertThat(response.getErrors(), is(nullValue()));
     }
@@ -87,7 +87,7 @@ public class ReGenerateFormCAboutToSubmitHandlerTest {
             .thenReturn(getTestFormCAndG(NEW_FORM_C_FILE_NAME, NEW_FORM_G_FILE_NAME));
         callbackRequest.getCaseDetails().getData().put(HEARING_DATE, "2019-06-24");
 
-        AboutToStartOrSubmitCallbackResponse response = reGenerateFormCAboutToSubmitHandler.handle(callbackRequest, AUTH);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = reGenerateFormCAboutToSubmitHandler.handle(callbackRequest, AUTH);
 
         assertThat(((CaseDocument) response.getData().get(FORM_C)).getDocumentFilename(), is(NEW_FORM_C_FILE_NAME));
         assertThat(((CaseDocument) response.getData().get(FORM_G)).getDocumentFilename(), is(NEW_FORM_G_FILE_NAME));
@@ -102,7 +102,7 @@ public class ReGenerateFormCAboutToSubmitHandlerTest {
             .thenReturn(getTestFormCAndG(NEW_FORM_C_FILE_NAME, NEW_FORM_G_FILE_NAME));
         callbackRequest.getCaseDetails().getData().put(HEARING_DATE, "2019-06-24");
 
-        AboutToStartOrSubmitCallbackResponse response = reGenerateFormCAboutToSubmitHandler.handle(callbackRequest, AUTH);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = reGenerateFormCAboutToSubmitHandler.handle(callbackRequest, AUTH);
 
         assertThat(((CaseDocument) response.getData().get(FORM_C)).getDocumentFilename(), is(not(OLD_FORM_C_FILE_NAME)));
         assertThat(((CaseDocument) response.getData().get(FORM_G)).getDocumentFilename(), is(not(OLD_FORM_G_FILE_NAME)));
