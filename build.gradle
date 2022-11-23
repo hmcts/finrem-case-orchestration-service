@@ -135,6 +135,7 @@ tasks.withType(Test) {
 }
 
 test {
+    maxHeapSize = "2g"
     failFast = true
 }
 
