@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model;
 
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,18 +42,20 @@ public enum EventType {
     REGENERATE_FORM_C("FR_regenerateFormC"),
     CONSENT_APPLICATION_APPROVED_IN_CONTESTED("FR_consentOrderApproved"),
     NOC_REQUEST("nocRequest"),
+    @JsonEnumDefaultValue
     NONE("");
 
     private final String ccdType;
+
+    @JsonValue
+    public String getCcdType() {
+        return ccdType;
+    }
 
     public static EventType getEventType(String ccdType) {
         log.info("Event type to process {}", ccdType);
         return Arrays.stream(EventType.values())
             .filter(eventTypeValue -> eventTypeValue.ccdType.equals(ccdType))
             .findFirst().orElseThrow(IllegalArgumentException::new);
-    }
-
-    public String getCcdType() {
-        return ccdType;
     }
 }

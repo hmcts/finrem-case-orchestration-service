@@ -48,12 +48,18 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @WebMvcTest(ConsentOrderApprovedController.class)
 public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
 
-    @MockBean private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
-    @MockBean private GenericDocumentService genericDocumentService;
-    @MockBean private ConsentOrderPrintService consentOrderPrintService;
-    @MockBean private NotificationService notificationService;
-    @MockBean private DocumentHelper documentHelper;
-    @MockBean private CaseDataService caseDataService;
+    @MockBean
+    private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
+    @MockBean
+    private GenericDocumentService genericDocumentService;
+    @MockBean
+    private ConsentOrderPrintService consentOrderPrintService;
+    @MockBean
+    private NotificationService notificationService;
+    @MockBean
+    private DocumentHelper documentHelper;
+    @MockBean
+    private CaseDataService caseDataService;
 
     public String consentOrderApprovedEndpoint() {
         return "/case-orchestration/documents/consent-order-approved";
@@ -72,9 +78,9 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         doEmptyCaseDataSetUp();
 
         mvc.perform(post(consentOrderApprovedEndpoint())
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest());
     }
 
@@ -84,9 +90,9 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenServiceGeneratesDocument().thenThrow(feignError());
 
         mvc.perform(post(consentOrderApprovedEndpoint())
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isInternalServerError());
     }
 
@@ -228,9 +234,9 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         doValidCaseDataSetUp();
 
         mvc.perform(post(contestedConsentOrderApprovedEndpoint())
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
         verify(consentOrderApprovedDocumentService, times(1)).stampAndPopulateContestedConsentApprovedOrderCollection(any(), eq(AUTH_TOKEN));
@@ -242,9 +248,9 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         doValidConsentInContestWithPensionData();
 
         mvc.perform(post(contestedConsentOrderApprovedEndpoint())
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
         verify(consentOrderApprovedDocumentService).stampAndPopulateContestedConsentApprovedOrderCollection(any(), eq(AUTH_TOKEN));
@@ -255,9 +261,9 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         doValidCaseDataSetUp();
 
         mvc.perform(post(contestedConsentSendOrderEndpoint())
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
         verify(consentOrderApprovedDocumentService, never()).generateApprovedConsentOrderLetter(any(), eq(AUTH_TOKEN));

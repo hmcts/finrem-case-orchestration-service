@@ -25,7 +25,7 @@ public class OrderRefusalTranslatorServiceTest extends BaseServiceTest {
 
     private void setUpCaseDetails(String fileName) throws Exception {
         try (InputStream resourceAsStream =
-                     getClass().getResourceAsStream(fileName)) {
+                 getClass().getResourceAsStream(fileName)) {
             caseDetails = mapper.readValue(resourceAsStream, CaseDetails.class);
         }
     }
@@ -40,11 +40,11 @@ public class OrderRefusalTranslatorServiceTest extends BaseServiceTest {
         List<String> orderRefusal = orderRefusalData.get(0).getOrderRefusal().getOrderRefusal();
 
         assertThat(orderRefusal, hasItems(
-                "Insufficient information provided – A",
-                "Insufficient information provided – B",
-                "Transferred to Applicant home Court - A",
-                "Transferred to Applicant home Court - B",
-                "Other"));
+            "Insufficient information provided – A",
+            "Insufficient information provided – B",
+            "Transferred to Applicant home Court - A",
+            "Transferred to Applicant home Court - B",
+            "Other"));
     }
 
     @Test
@@ -58,11 +58,11 @@ public class OrderRefusalTranslatorServiceTest extends BaseServiceTest {
 
         assertThat(orderRefusalData.size(), is(2));
         assertThat(orderRefusal, hasItems(
-                "Insufficient information provided – A",
-                "Insufficient information provided – B",
-                "Transferred to Applicant’s home Court - A",
-                "Transferred to Applicant's home Court - B",
-                "Other"));
+            "Insufficient information provided – A",
+            "Insufficient information provided – B",
+            "Transferred to Applicant’s home Court - A",
+            "Transferred to Applicant's home Court - B",
+            "Other"));
     }
 
     @Test
@@ -76,14 +76,15 @@ public class OrderRefusalTranslatorServiceTest extends BaseServiceTest {
 
         assertThat(orderRefusalData.size(), is(1));
         assertThat(orderRefusal, hasItems(
-                "Insufficient information provided – A",
-                "Insufficient information provided – B",
-                "Transferred to Applicant’s home Court - A",
-                "Transferred to Applicant's home Court - B",
-                "Other"));
+            "Insufficient information provided – A",
+            "Insufficient information provided – B",
+            "Transferred to Applicant’s home Court - A",
+            "Transferred to Applicant's home Court - B",
+            "Other"));
     }
 
     private List<OrderRefusalData> orderRefusalDataList(Map<String, Object> data, String field) {
-        return mapper.convertValue(data.get(field), new TypeReference<>() {});
+        return mapper.convertValue(data.get(field), new TypeReference<>() {
+        });
     }
 }
