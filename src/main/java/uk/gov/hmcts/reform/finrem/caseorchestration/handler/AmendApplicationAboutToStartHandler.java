@@ -55,8 +55,10 @@ public class AmendApplicationAboutToStartHandler extends FinremCallbackHandler {
         if (caseData.getCivilPartnership() == null) {
             caseData.setCivilPartnership(YesOrNo.NO);
         }
-    
-        //caseData.putIfAbsent(URGENT_CASE_QUESTION, NO_VALUE);
+
+        if (caseData.getPromptForUrgentCaseQuestion() == null) {
+            caseData.setPromptForUrgentCaseQuestion(YesOrNo.NO);
+        }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }

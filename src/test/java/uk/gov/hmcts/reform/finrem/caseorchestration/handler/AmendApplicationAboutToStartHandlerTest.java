@@ -103,6 +103,7 @@ public class AmendApplicationAboutToStartHandlerTest {
             NatureApplication.LUMP_SUM_ORDER));
         assertThat(natureOfApplication2, hasSize(2));
         assertEquals(YesOrNo.NO, responseData.getCivilPartnership());
+        assertEquals(YesOrNo.NO, responseData.getPromptForUrgentCaseQuestion());
     }
 
     @Test
@@ -120,6 +121,7 @@ public class AmendApplicationAboutToStartHandlerTest {
         assertThat(natureOfApplication2, hasItems(NatureApplication.VARIATION_ORDER));
         assertThat(natureOfApplication2, hasSize(1));
         assertEquals(YesOrNo.NO, responseData.getCivilPartnership());
+        assertEquals(YesOrNo.NO, responseData.getPromptForUrgentCaseQuestion());
     }
 
     private FinremCallbackRequest callbackRequest() {
