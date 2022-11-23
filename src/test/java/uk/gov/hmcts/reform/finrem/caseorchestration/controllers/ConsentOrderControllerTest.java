@@ -52,9 +52,9 @@ public class ConsentOrderControllerTest extends BaseControllerTest {
         when(consentOrderService.getLatestConsentOrderData(any(CallbackRequest.class))).thenReturn(getCaseDocument());
         when(idamService.isUserRoleAdmin(any())).thenReturn(true);
         mvc.perform(post(UPDATE_LATEST_CONSENT_ORDER_JSON)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.latestConsentOrder").exists())
@@ -67,9 +67,9 @@ public class ConsentOrderControllerTest extends BaseControllerTest {
         when(consentOrderService.getLatestConsentOrderData(any(CallbackRequest.class))).thenReturn(getCaseDocument());
         when(idamService.isUserRoleAdmin(any())).thenReturn(false);
         mvc.perform(post(UPDATE_LATEST_CONSENT_ORDER_JSON)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.latestConsentOrder").exists())
@@ -80,9 +80,9 @@ public class ConsentOrderControllerTest extends BaseControllerTest {
     @Test
     public void shouldThrowHttpError400() throws Exception {
         mvc.perform(post(UPDATE_LATEST_CONSENT_ORDER_JSON)
-            .content("kwuilebge")
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content("kwuilebge")
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest());
     }
 

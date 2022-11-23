@@ -71,10 +71,14 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     private static final String CONSENT_ORDER_URL = "consentOrderUrl";
     private static final String PENSION_DOCUMENT_URL = "pensionDocumentUrl";
 
-    @Autowired private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
-    @Autowired private ObjectMapper mapper;
-    @Autowired private DocumentHelper documentHelper;
-    @Autowired private DocumentClient documentClientMock;
+    @Autowired
+    private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
+    @Autowired
+    private ObjectMapper mapper;
+    @Autowired
+    private DocumentHelper documentHelper;
+    @Autowired
+    private DocumentClient documentClientMock;
 
     @Value("${document.bulkPrintTemplate}")
     private String documentBulkPrintTemplate;
@@ -281,7 +285,8 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     }
 
     private List<CaseDocument> getDocumentList(Map<String, Object> data) {
-        return mapper.convertValue(data.get(CONTESTED_CONSENT_ORDER_COLLECTION), new TypeReference<>() {});
+        return mapper.convertValue(data.get(CONTESTED_CONSENT_ORDER_COLLECTION), new TypeReference<>() {
+        });
     }
 
     private void addConsentOrderApprovedDataToCaseDetails(CaseDetails caseDetails) throws Exception {

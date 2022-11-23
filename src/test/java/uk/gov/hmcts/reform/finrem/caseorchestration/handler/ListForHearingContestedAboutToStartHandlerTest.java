@@ -3,10 +3,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 
@@ -23,7 +23,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class ListForHearingContestedAboutToStartHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
-    private final ListForHearingContestedAboutToStartHandler handler =  new ListForHearingContestedAboutToStartHandler();
+    private final ListForHearingContestedAboutToStartHandler handler = new ListForHearingContestedAboutToStartHandler();
 
     @Test
     public void givenContestedCase_whenEventIsListForHearing_thenHandlerCanHandle() {
@@ -57,13 +57,15 @@ public class ListForHearingContestedAboutToStartHandlerTest {
     @Test
     public void givenCase_whenEventStart_thenSetDefaultOptionToNo() {
         CallbackRequest callbackRequest = buildCallbackRequest();
-        AboutToStartOrSubmitCallbackResponse response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
         assertEquals(NO_VALUE, response.getData().get(ADDITIONAL_HEARING_DOCUMENTS_OPTION));
     }
 
     private CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
-        return CallbackRequest.builder().eventId("SomeEventId").caseDetails(caseDetails).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(123L).build();
+        caseDetails.setData(caseData);
+        return CallbackRequest.builder().eventId(EventType.AMEND_CASE.getCcdType())
+            .caseDetails(caseDetails).build();
     }
 }

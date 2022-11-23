@@ -31,7 +31,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignE
 @WebMvcTest(GeneralOrderController.class)
 public class GeneralOrderControllerTest extends BaseControllerTest {
 
-    @MockBean private GeneralOrderService documentService;
+    @MockBean
+    private GeneralOrderService documentService;
 
     public String generateEndpoint() {
         return "/case-orchestration/documents/preview-general-order";
@@ -47,9 +48,9 @@ public class GeneralOrderControllerTest extends BaseControllerTest {
         whenServiceGeneratesDocument().thenReturn(caseDataWithGeneralOrder());
 
         mvc.perform(post(generateEndpoint())
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(
                 jsonPath("$.data.generalOrderPreviewDocument.document_url", is(DOC_URL)))
@@ -67,9 +68,9 @@ public class GeneralOrderControllerTest extends BaseControllerTest {
         doEmptyCaseDataSetUp();
 
         mvc.perform(post(generateEndpoint())
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest());
     }
 
@@ -79,9 +80,9 @@ public class GeneralOrderControllerTest extends BaseControllerTest {
         whenServiceGeneratesDocument().thenThrow(feignError());
 
         mvc.perform(post(generateEndpoint())
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isInternalServerError());
     }
 
@@ -91,9 +92,9 @@ public class GeneralOrderControllerTest extends BaseControllerTest {
         whenServicePopulatesCollection().thenReturn(caseDataWithGeneralOrder());
 
         mvc.perform(post(submitEndpoint())
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
         verify(documentService, times(1)).populateGeneralOrderCollection(any(CaseDetails.class));
     }

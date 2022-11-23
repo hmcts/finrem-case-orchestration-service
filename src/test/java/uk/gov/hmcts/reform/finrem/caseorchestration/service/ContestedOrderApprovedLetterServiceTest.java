@@ -37,12 +37,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class ContestedOrderApprovedLetterServiceTest extends BaseServiceTest {
 
-    @Autowired private ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
-    @Autowired private DocumentConfiguration documentConfiguration;
+    @Autowired
+    private ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
+    @Autowired
+    private DocumentConfiguration documentConfiguration;
 
-    @MockBean private GenericDocumentService genericDocumentService;
+    @MockBean
+    private GenericDocumentService genericDocumentService;
 
-    @Captor private ArgumentCaptor<CaseDetails> caseDetailsArgumentCaptor;
+    @Captor
+    private ArgumentCaptor<CaseDetails> caseDetailsArgumentCaptor;
 
     @Test
     public void whenContestedApprovedOrderLetterGenerated_thenTemplateVarsPopulatedAndDocumentCreatedAndStoredInCaseDetails() {

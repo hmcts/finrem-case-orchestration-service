@@ -37,13 +37,19 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintServ
 
 public class BulkPrintServiceTest extends BaseServiceTest {
 
-    @Autowired private BulkPrintService bulkPrintService;
-    @Autowired private ObjectMapper mapper;
-    @Autowired private DocumentHelper documentHelper;
+    @Autowired
+    private BulkPrintService bulkPrintService;
+    @Autowired
+    private ObjectMapper mapper;
+    @Autowired
+    private DocumentHelper documentHelper;
 
-    @MockBean private GenerateCoverSheetService coverSheetService;
-    @MockBean private GenericDocumentService genericDocumentService;
-    @MockBean private PaperNotificationService paperNotificationService;
+    @MockBean
+    private GenerateCoverSheetService coverSheetService;
+    @MockBean
+    private GenericDocumentService genericDocumentService;
+    @MockBean
+    private PaperNotificationService paperNotificationService;
 
     private final CaseDocument caseDocument = TestSetUpUtils.caseDocument();
     private UUID letterId;

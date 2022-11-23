@@ -148,8 +148,10 @@ public class SendOrderContestedSubmittedHandlerTest {
 
     private CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
-        return CallbackRequest.builder().eventId("SomeEventId").caseDetails(caseDetails).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(123L).build();
+        caseDetails.setData(caseData);
+        return CallbackRequest.builder().eventId(EventType.SEND_ORDER.getCcdType())
+            .caseDetails(caseDetails).build();
     }
 
     private CallbackRequest createCallbackRequestWithFinalOrder() {

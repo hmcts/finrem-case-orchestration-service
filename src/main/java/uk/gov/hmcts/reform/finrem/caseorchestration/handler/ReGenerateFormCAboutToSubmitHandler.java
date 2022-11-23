@@ -4,10 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
@@ -35,7 +35,7 @@ public class ReGenerateFormCAboutToSubmitHandler implements CallbackHandler {
     }
 
     @Override
-    public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest, String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest, String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request to re-generate Form C on case with Case ID: {}", caseDetails.getId());
 
@@ -46,9 +46,9 @@ public class ReGenerateFormCAboutToSubmitHandler implements CallbackHandler {
             caseDetails.getData().putAll(
                 hearingDocumentService.generateHearingDocuments(userAuthorisation, caseDetails));
 
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
+            return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).build();
         } else {
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseData)
+            return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData)
                 .errors(Collections.singletonList(THERE_IS_NO_HEARING_ON_THE_CASE_ERROR_MESSAGE)).build();
         }
     }
