@@ -190,7 +190,8 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     private void assertCaseDataHasHearingNoticesCollection() {
         assertThat(caseDetails.getData(), hasKey(ADDITIONAL_HEARING_DOCUMENT_COLLECTION));
         List<Element<AdditionalHearingDocument>> additionalHearingDocuments = objectMapper.convertValue(
-            caseDetails.getData().get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION), new TypeReference<>() {});
+            caseDetails.getData().get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION), new TypeReference<>() {
+            });
         assertThat(additionalHearingDocuments.size(), is(1));
         assertThat(additionalHearingDocuments.get(0).getValue().getDocument().getDocumentBinaryUrl(),
             is(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL));
@@ -212,7 +213,7 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
 
     private List<Element<CaseDocument>> buildHearingNoticePack() {
         return List.of(element(UUID.randomUUID(), CaseDocument.builder()
-            .documentBinaryUrl(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL)
+                .documentBinaryUrl(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL)
                 .build()),
             element(UUID.randomUUID(), CaseDocument.builder()
                 .documentBinaryUrl(LATEST_DRAFT_ORDER_DOCUMENT_BIN_URL)

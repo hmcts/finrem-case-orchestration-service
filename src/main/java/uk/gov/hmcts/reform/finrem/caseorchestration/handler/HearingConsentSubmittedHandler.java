@@ -3,18 +3,20 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentHearingService;
 
+import java.util.Map;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class HearingConsentSubmittedHandler implements CallbackHandler {
+public class HearingConsentSubmittedHandler implements CallbackHandler<Map<String, Object>> {
 
     private final ConsentHearingService service;
 
@@ -26,15 +28,15 @@ public class HearingConsentSubmittedHandler implements CallbackHandler {
     }
 
     @Override
-    public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
-                                                       String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
+                                                                                   String userAuthorisation) {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
 
         service.sendNotification(caseDetails, caseDetailsBefore);
 
-        return AboutToStartOrSubmitCallbackResponse.builder()
+        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder()
             .data(callbackRequest.getCaseDetails().getData()).build();
     }
 }

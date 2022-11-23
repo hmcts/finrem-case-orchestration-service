@@ -71,7 +71,7 @@ public class RejectedConsentOrderAboutToSubmitHandlerTest {
         verify(refusalOrderDocumentService).generateConsentOrderNotApproved(any(), any());
     }
 
-    private CallbackRequest doValidCaseDataSetUp()  {
+    private CallbackRequest doValidCaseDataSetUp() {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(REJECT_ORDER_VALID_JSON)) {
             return objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         } catch (Exception e) {

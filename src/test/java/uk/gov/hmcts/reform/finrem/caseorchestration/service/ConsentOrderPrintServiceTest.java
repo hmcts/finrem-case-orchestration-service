@@ -57,10 +57,14 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
     @Autowired private ConsentOrderPrintService consentOrderPrintService;
     @MockBean private EvidenceManagementAuditService evidenceManagementAuditService;
 
-    @MockBean private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
-    @MockBean private GenerateCoverSheetService coverSheetService;
-    @MockBean private GenericDocumentService genericDocumentService;
-    @MockBean private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
+    @MockBean
+    private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
+    @MockBean
+    private GenerateCoverSheetService coverSheetService;
+    @MockBean
+    private GenericDocumentService genericDocumentService;
+    @MockBean
+    private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
 
     @Before
     public void init() {

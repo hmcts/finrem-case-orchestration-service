@@ -49,7 +49,7 @@ public class DocumentOrderingServiceTest extends BaseServiceTest {
     @Test
     public void givenCheckingForDocumentOrder_whenDocumentAModifiedDateIsLater_thenTruthIsReturned() {
         mockEvidenceManagementClientToReturnFirstDocumentIsLater();
-        
+
         boolean isDocumentModifiedLater = documentOrderingService.isDocumentModifiedLater(anyCaseDocument(), anyCaseDocument(), AUTH_TOKEN);
 
         assertThat(isDocumentModifiedLater, is(true));

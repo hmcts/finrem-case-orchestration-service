@@ -325,7 +325,8 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     }
 
     private List<CaseDocument> getDocumentList(Map<String, Object> data) {
-        return mapper.convertValue(data.get(CONTESTED_CONSENT_ORDER_COLLECTION), new TypeReference<>() {});
+        return mapper.convertValue(data.get(CONTESTED_CONSENT_ORDER_COLLECTION), new TypeReference<>() {
+        });
     }
 
     private void addConsentOrderApprovedDataToCaseDetails(CaseDetails caseDetails) throws Exception {

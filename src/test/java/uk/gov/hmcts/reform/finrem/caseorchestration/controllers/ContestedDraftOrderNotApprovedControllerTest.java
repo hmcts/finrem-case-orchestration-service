@@ -48,11 +48,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @WebMvcTest(ContestedDraftOrderNotApprovedController.class)
 public class ContestedDraftOrderNotApprovedControllerTest extends BaseControllerTest {
 
-    @MockBean private ContestedDraftOrderNotApprovedService contestedDraftOrderNotApprovedService;
-    @MockBean private BulkPrintService bulkPrintService;
-    @MockBean private PaperNotificationService paperNotificationService;
-    @MockBean private IdamService idamService;
-    @MockBean private DocumentHelper documentHelper;
+    @MockBean
+    private ContestedDraftOrderNotApprovedService contestedDraftOrderNotApprovedService;
+    @MockBean
+    private BulkPrintService bulkPrintService;
+    @MockBean
+    private PaperNotificationService paperNotificationService;
+    @MockBean
+    private IdamService idamService;
+    @MockBean
+    private DocumentHelper documentHelper;
 
     private static final String START_REFUSAL_ORDER_URL = "/case-orchestration/contested-application-not-approved-start";
     private static final String PREVIEW_REFUSAL_ORDER_URL = "/case-orchestration/documents/preview-refusal-order";
@@ -71,9 +76,9 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
         when(idamService.getIdamFullName(BEARER_TOKEN)).thenReturn("User Name");
 
         mvc.perform(post(START_REFUSAL_ORDER_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, BEARER_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data." + CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_TYPE, is(nullValue())))
             .andExpect(jsonPath("$.data." + CONTESTED_APPLICATION_NOT_APPROVED_DATE, is(nullValue())))
@@ -86,9 +91,9 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
         doEmptyCaseDataSetUp();
 
         mvc.perform(post(START_REFUSAL_ORDER_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, BEARER_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest());
     }
 
@@ -99,9 +104,9 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
             .thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
         mvc.perform(post(START_REFUSAL_ORDER_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, BEARER_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isInternalServerError());
     }
 
@@ -117,9 +122,9 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
         whenServiceGeneratesDocument().thenReturn(caseDataWithRefusalOrder());
 
         mvc.perform(post(PREVIEW_REFUSAL_ORDER_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(
                 jsonPath("$.data.refusalOrderPreviewDocument.document_url", is(DOC_URL)))
@@ -136,9 +141,9 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
         doEmptyCaseDataSetUp();
 
         mvc.perform(post(PREVIEW_REFUSAL_ORDER_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest());
     }
 
@@ -148,9 +153,9 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
         whenServiceGeneratesDocument().thenThrow(feignError());
 
         mvc.perform(post(PREVIEW_REFUSAL_ORDER_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isInternalServerError());
     }
 
@@ -164,9 +169,9 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
         whenServicePopulatesCollection().thenReturn(caseDataWithRefusalOrder());
 
         mvc.perform(post(SUBMIT_REFUSAL_ORDER_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
         verify(contestedDraftOrderNotApprovedService).populateRefusalOrderCollection(any(CaseDetails.class));
     }
@@ -176,9 +181,9 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
         doEmptyCaseDataSetUp();
 
         mvc.perform(post(SUBMIT_REFUSAL_ORDER_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest());
     }
 
@@ -189,9 +194,9 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
         when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
         when(paperNotificationService.shouldPrintForRespondent(any())).thenReturn(true);
         mvc.perform(post(SUBMIT_REFUSAL_REASON_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
         verify(contestedDraftOrderNotApprovedService).getLatestRefusalReason(any());
         verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
@@ -205,9 +210,9 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
         when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(false);
         when(paperNotificationService.shouldPrintForRespondent(any())).thenReturn(false);
         mvc.perform(post(SUBMIT_REFUSAL_REASON_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
         verify(contestedDraftOrderNotApprovedService).getLatestRefusalReason(any());
         verify(bulkPrintService, never()).printApplicantDocuments(any(), any(), any());
@@ -218,9 +223,9 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
     public void submitSendRefusalReasonWithNotRefusalReasonNotPrint() throws Exception {
         doValidCaseDataSetUpForPaperApplication();
         mvc.perform(post(SUBMIT_REFUSAL_REASON_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
         verify(contestedDraftOrderNotApprovedService).getLatestRefusalReason(any());
         verify(bulkPrintService, never()).printApplicantDocuments(any(), any(), any());

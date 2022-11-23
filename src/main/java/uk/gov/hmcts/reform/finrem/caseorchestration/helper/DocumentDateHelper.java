@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiPredicate;
+import java.util.stream.Collectors;
 
 public abstract class DocumentDateHelper<T extends CaseDocumentTabData> {
 
@@ -35,7 +36,7 @@ public abstract class DocumentDateHelper<T extends CaseDocumentTabData> {
 
         List<T> modifiedDocuments = allDocuments.stream()
             .peek(document -> addDateToNewDocuments(documentsBeforeEvent, document))
-            .toList();
+            .collect(Collectors.toList());
 
         caseData.put(documentCollection, modifiedDocuments);
         return caseData;
@@ -48,7 +49,7 @@ public abstract class DocumentDateHelper<T extends CaseDocumentTabData> {
     }
 
     private List<T> getDocumentCollection(Map<String, Object> caseData,
-                                            String documentCollection) {
+                                          String documentCollection) {
         List<T> documentList = mapper.convertValue(caseData.get(documentCollection),
             TypeFactory.defaultInstance().constructCollectionType(ArrayList.class, documentType));
 
