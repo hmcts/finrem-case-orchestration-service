@@ -57,4 +57,21 @@ public class EvidenceManagementAuditServiceTest {
         return ResponseEntity.ok().body(new ObjectMapper()
             .readTree(new String(readAllBytes(get("src/test/resources/fixtures/fileauditresponse.json")))));
     }
+
+    @Test
+    public void whenAuditRequested_thenDocumentManagementResponseIsProcessedEvenLastupdatedByNotPresent() {
+        when(idamAuthService.getUserDetails(any())).thenReturn(UserDetails.builder().build());
+        when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(), eq(JsonNode.class))).thenReturn(jsonNodeV2());
+
+        List<FileUploadResponse> response = evidenceManagementAuditService.audit(singletonList("mockFileUrl"), "mockToken");
+
+        assertThat(response, hasSize(1));
+        assertThat(response.get(0).getFileName(), is("PNGFile.png"));
+    }
+
+    @SneakyThrows
+    private ResponseEntity<JsonNode> jsonNodeV2() {
+        return ResponseEntity.ok().body(new ObjectMapper().readTree(new String(readAllBytes(get("src/test/resources"
+            + "/fileauditresponseV2.txt")))));
+    }
 }

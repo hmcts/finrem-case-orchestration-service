@@ -65,7 +65,7 @@ public class EvidenceManagementAuditService {
             .fileName(document.get("originalDocumentName").asText())
             .createdBy(document.get("createdBy").asText())
             .createdOn(document.get("createdOn").asText())
-            .lastModifiedBy(document.get("lastModifiedBy").asText())
+            .lastModifiedBy(document.get("lastModifiedBy") != null ? document.get("lastModifiedBy").asText() : "")
             .modifiedOn(document.get("modifiedOn").asText())
             .mimeType(document.get("mimeType").asText())
             .build();
