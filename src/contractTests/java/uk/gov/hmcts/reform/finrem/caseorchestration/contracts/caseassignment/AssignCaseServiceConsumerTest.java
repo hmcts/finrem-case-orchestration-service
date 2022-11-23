@@ -89,7 +89,8 @@ public class AssignCaseServiceConsumerTest extends BaseTest {
         given(authTokenGenerator.generate()).willReturn(someServiceAuthToken);
 
         assignCaseAccessService
-            .assignCaseAccess(CaseDetails.builder().id(Long.parseLong(CASE_ID)).caseTypeId(CASE_TYPE_ID_CONTESTED).build(), authorizationToken);
+            .assignCaseAccess(CaseDetails.builder().id(Long.parseLong(CASE_ID)).caseTypeId(CASE_TYPE_ID_CONTESTED).build(),
+                authorizationToken);
 
     }
 

@@ -110,8 +110,10 @@ public class UploadGeneralDocumentsAboutToSubmitHandlerTest {
     private CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
         Map<String, Object> caseDataBefore = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
-        CaseDetails caseDetailsBefore = CaseDetails.builder().id(123L).data(caseDataBefore).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(123L).build();
+        caseDetails.setData(caseData);
+        CaseDetails caseDetailsBefore = CaseDetails.builder().id(123L).build();
+        caseDetailsBefore.setData(caseDataBefore);
         return CallbackRequest.builder().eventId(EventType.UPLOAD_GENERAL_DOCUMENT.getCcdType())
             .caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
     }

@@ -62,14 +62,20 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
 
-    @Autowired private AdditionalHearingDocumentService additionalHearingDocumentService;
-    @Autowired private ObjectMapper objectMapper;
+    @Autowired
+    private AdditionalHearingDocumentService additionalHearingDocumentService;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    @Captor private ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
+    @Captor
+    private ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
 
-    @MockBean GenericDocumentService genericDocumentService;
-    @MockBean BulkPrintService bulkPrintService;
-    @MockBean NotificationService notificationService;
+    @MockBean
+    GenericDocumentService genericDocumentService;
+    @MockBean
+    BulkPrintService bulkPrintService;
+    @MockBean
+    NotificationService notificationService;
 
     @Before
     public void setUp() {

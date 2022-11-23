@@ -44,9 +44,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class GeneralOrderServiceTest extends BaseServiceTest {
 
-    @Autowired private GeneralOrderService generalOrderService;
-    @Autowired private ObjectMapper objectMapper;
-    @Autowired private DocumentConfiguration documentConfiguration;
+    @Autowired
+    private GeneralOrderService generalOrderService;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
+    private DocumentConfiguration documentConfiguration;
 
     @MockBean
     private GenericDocumentService genericDocumentService;
@@ -223,7 +226,8 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     public void getsCorrectGeneralOrdersForPrintingConsented() throws Exception {
         CaseDetails details = consentedCaseDetails();
         BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(details.getData());
-        assertThat(latestGeneralOrder.getBinaryFileUrl(), is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
+        assertThat(latestGeneralOrder.getBinaryFileUrl(),
+            is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
     }
 
     @Test

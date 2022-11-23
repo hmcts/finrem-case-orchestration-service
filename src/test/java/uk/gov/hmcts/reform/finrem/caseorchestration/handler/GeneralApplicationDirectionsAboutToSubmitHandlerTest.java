@@ -7,11 +7,10 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -22,9 +21,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
-import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -46,7 +45,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PREPARE_FOR_HEARING_STATE;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
+public class GeneralApplicationDirectionsAboutToSubmitHandlerTest extends BaseHandlerTest {
 
     private GeneralApplicationDirectionsAboutToStartHandler startHandler;
     private GeneralApplicationDirectionsAboutToSubmitHandler submitHandler;
@@ -66,8 +65,8 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
     public void setup() {
         objectMapper = new ObjectMapper();
         helper = new GeneralApplicationHelper(objectMapper, documentService);
-        startHandler  = new GeneralApplicationDirectionsAboutToStartHandler(helper, service);
-        submitHandler  = new GeneralApplicationDirectionsAboutToSubmitHandler(helper, service);
+        startHandler = new GeneralApplicationDirectionsAboutToStartHandler(helper, service);
+        submitHandler = new GeneralApplicationDirectionsAboutToSubmitHandler(helper, service);
 
         when(documentService.convertDocumentIfNotPdfAlready(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(
             CaseDocument.builder().documentBinaryUrl("http://dm-store/documents/b067a2dd-657a-4ed2-98c3-9c3159d1482e/binary")
@@ -106,17 +105,18 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
 
     @Test
     public void givenCase_whenExistingApplication_thenMigratedAndUpdateStatusApprovedCompleted() {
-        CallbackRequest callbackRequest = buildCallbackRequest(GA_NON_COLL_JSON);
+        CallbackRequest callbackRequest =
+            buildCallbackRequest(GA_NON_COLL_JSON);
         when(service.getBulkPrintDocument(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(caseDocument);
         callbackRequest.getCaseDetails().getData().put(GENERAL_APPLICATION_OUTCOME_DECISION, APPROVED.getId());
 
-        AboutToStartOrSubmitCallbackResponse startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = startHandle.getData();
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_DIRECTIONS_LIST));
         assertEquals(1, dynamicList.getListItems().size());
 
-        AboutToStartOrSubmitCallbackResponse submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
         Map<String, Object> data = submitHandle.getData();
 
         List<GeneralApplicationCollectionData> list
@@ -142,16 +142,16 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         when(service.getBulkPrintDocument(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(caseDocument);
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(callbackRequest.getCaseDetails().getData());
         List<GeneralApplicationCollectionData> updatedList
-            = existingList.stream().map(obj -> updateStatus(obj, APPROVED)).toList();
+            = existingList.stream().map(obj -> updateStatus(obj, APPROVED)).collect(Collectors.toList());
         callbackRequest.getCaseDetails().getData().put(GENERAL_APPLICATION_COLLECTION, updatedList);
 
-        AboutToStartOrSubmitCallbackResponse startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = startHandle.getData();
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_DIRECTIONS_LIST));
         assertEquals(1, dynamicList.getListItems().size());
 
-        AboutToStartOrSubmitCallbackResponse submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
         Map<String, Object> data = submitHandle.getData();
 
         List<GeneralApplicationCollectionData> list
@@ -173,16 +173,16 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         when(service.getBulkPrintDocument(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(caseDocument);
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(callbackRequest.getCaseDetails().getData());
         List<GeneralApplicationCollectionData> updatedList
-            = existingList.stream().map(obj -> updateStatus(obj, NOT_APPROVED)).toList();
+            = existingList.stream().map(obj -> updateStatus(obj, NOT_APPROVED)).collect(Collectors.toList());
         callbackRequest.getCaseDetails().getData().put(GENERAL_APPLICATION_COLLECTION, updatedList);
 
-        AboutToStartOrSubmitCallbackResponse startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = startHandle.getData();
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_DIRECTIONS_LIST));
         assertEquals(1, dynamicList.getListItems().size());
 
-        AboutToStartOrSubmitCallbackResponse submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
         Map<String, Object> data = submitHandle.getData();
 
         List<GeneralApplicationCollectionData> list
@@ -201,16 +201,16 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         when(service.getBulkPrintDocument(callbackRequest.getCaseDetails(), AUTH_TOKEN)).thenReturn(caseDocument);
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(callbackRequest.getCaseDetails().getData());
         List<GeneralApplicationCollectionData> updatedList
-            = existingList.stream().map(obj -> updateStatus(obj, OTHER)).toList();
+            = existingList.stream().map(obj -> updateStatus(obj, OTHER)).collect(Collectors.toList());
         callbackRequest.getCaseDetails().getData().put(GENERAL_APPLICATION_COLLECTION, updatedList);
 
-        AboutToStartOrSubmitCallbackResponse startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = startHandle.getData();
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_DIRECTIONS_LIST));
         assertEquals(1, dynamicList.getListItems().size());
 
-        AboutToStartOrSubmitCallbackResponse submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
         Map<String, Object> data = submitHandle.getData();
 
         List<GeneralApplicationCollectionData> list
@@ -233,13 +233,13 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
             = existingList.stream().map(obj -> updateStatus(obj, APPROVED)).toList();
         callbackRequest.getCaseDetails().getData().put(GENERAL_APPLICATION_COLLECTION, updatedList);
 
-        AboutToStartOrSubmitCallbackResponse startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> startHandle = startHandler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = startHandle.getData();
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_DIRECTIONS_LIST));
         assertEquals(1, dynamicList.getListItems().size());
 
-        AboutToStartOrSubmitCallbackResponse submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> submitHandle = submitHandler.handle(callbackRequest, AUTH_TOKEN);
         Map<String, Object> data = submitHandle.getData();
 
         List<GeneralApplicationCollectionData> list
@@ -261,12 +261,4 @@ public class GeneralApplicationDirectionsAboutToSubmitHandlerTest {
         return obj;
     }
 
-    private CallbackRequest buildCallbackRequest(String testJson)  {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(testJson)) {
-            CaseDetails caseDetails = objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-            return CallbackRequest.builder().caseDetails(caseDetails).build();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

@@ -6,10 +6,10 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRole;
@@ -57,9 +57,9 @@ public class ManageBarristerAboutToStartHandlerTest {
     @Test
     public void givenHandlerCanHandleCallback_whenCanHandle_thenReturnTrue() {
         assertThat(manageBarristerAboutToStartHandler.canHandle(
-            CallbackType.ABOUT_TO_START,
-            CaseType.CONTESTED,
-            EventType.MANAGE_BARRISTER),
+                CallbackType.ABOUT_TO_START,
+                CaseType.CONTESTED,
+                EventType.MANAGE_BARRISTER),
             is(true));
     }
 
@@ -95,7 +95,8 @@ public class ManageBarristerAboutToStartHandlerTest {
         when(caseAssignedRoleService.getCaseAssignedUserRole(callbackRequest.getCaseDetails(), AUTH_TOKEN))
             .thenReturn(getCaseAssignedUserRolesResource(APP_SOLICITOR_POLICY));
 
-        AboutToStartOrSubmitCallbackResponse response = manageBarristerAboutToStartHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>>
+            response = manageBarristerAboutToStartHandler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response.getData().get(CASE_ROLE), is(APP_SOLICITOR_POLICY));
     }
@@ -105,7 +106,8 @@ public class ManageBarristerAboutToStartHandlerTest {
         when(caseAssignedRoleService.getCaseAssignedUserRole(callbackRequest.getCaseDetails(), AUTH_TOKEN))
             .thenReturn(getCaseAssignedUserRolesResource(RESP_SOLICITOR_POLICY));
 
-        AboutToStartOrSubmitCallbackResponse response = manageBarristerAboutToStartHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>>
+            response = manageBarristerAboutToStartHandler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response.getData().get(CASE_ROLE), is(RESP_SOLICITOR_POLICY));
     }
@@ -115,7 +117,8 @@ public class ManageBarristerAboutToStartHandlerTest {
         when(caseAssignedRoleService.getCaseAssignedUserRole(callbackRequest.getCaseDetails(), AUTH_TOKEN))
             .thenReturn(CaseAssignedUserRolesResource.builder().build());
 
-        AboutToStartOrSubmitCallbackResponse response = manageBarristerAboutToStartHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>>
+            response = manageBarristerAboutToStartHandler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response.getData().get(CASE_ROLE), is(CASEWORKER_POLICY));
     }
