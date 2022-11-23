@@ -36,8 +36,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 
 public class GenerateCoverSheetServiceTest extends BaseServiceTest {
 
-    @Autowired private GenerateCoverSheetService generateCoverSheetService;
-    @Autowired private ObjectMapper mapper;
+    @Autowired
+    private GenerateCoverSheetService generateCoverSheetService;
+    @Autowired
+    private ObjectMapper mapper;
 
     @Rule
     public ExpectedException expectedException = none();

@@ -3,9 +3,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
@@ -30,14 +30,14 @@ public class ConsentApplicationApprovedInContestedAboutToStartHandler implements
     }
 
     @Override
-    public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
-                                                       String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
+                                                                                   String userAuthorisation) {
         log.info("Received request for {} caseId {}", EventType.CONSENT_APPLICATION_APPROVED_IN_CONTESTED,
             callbackRequest.getCaseDetails().getId());
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         if (Objects.isNull(caseData.get(CONTESTED_ORDER_DIRECTION_JUDGE_NAME))) {
             caseData.put(CONTESTED_ORDER_DIRECTION_JUDGE_NAME, service.getIdamFullName(userAuthorisation));
         }
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).build();
     }
 }

@@ -3,10 +3,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -25,7 +25,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class RejectGeneralApplicationAboutToSubmitHandler implements CallbackHandler {
+public class RejectGeneralApplicationAboutToSubmitHandler
+    implements CallbackHandler<Map<String, Object>> {
 
     private final GeneralApplicationHelper helper;
 
@@ -37,8 +38,9 @@ public class RejectGeneralApplicationAboutToSubmitHandler implements CallbackHan
     }
 
     @Override
-    public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
-                                                       String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(
+        CallbackRequest callbackRequest,
+        String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received on submit request to reject general application for Case ID: {}", caseDetails.getId());
         Map<String, Object> caseData = caseDetails.getData();
@@ -47,7 +49,7 @@ public class RejectGeneralApplicationAboutToSubmitHandler implements CallbackHan
 
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_LIST));
         if (dynamicList == null) {
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseData)
+            return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData)
                 .errors(List.of("There is no general application available to reject.")).build();
         }
 
@@ -63,6 +65,6 @@ public class RejectGeneralApplicationAboutToSubmitHandler implements CallbackHan
         }
         String previousState = Objects.toString(caseDetails.getData().get(GENERAL_APPLICATION_PRE_STATE), caseDetails.getState());
         log.info("Previous state : {} for caseId {}", previousState, caseDetails.getId());
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).state(previousState).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).state(previousState).build();
     }
 }

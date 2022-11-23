@@ -474,7 +474,7 @@ public class CCDConfigConstant {
 
     public static final String CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION = "manageCaseDocumentCollection";
 
-    public static final String AMENDED_CONSENT_ORDER = "AmendedConsentOrder";
+    public static final String AMEND_CONSENT_ORDER = "AmendedConsentOrder";
 
     //organisation policy
     public static final String ORGANISATION_POLICY_APPLICANT = "ApplicantOrganisationPolicy";

@@ -53,9 +53,9 @@ public class ManageBarristerSubmittedHandlerTest {
     @Test
     public void givenHandlerCanHandleCallback_whenCanHandle_thenReturnTrue() {
         assertThat(manageBarristerSubmittedHandler.canHandle(
-            CallbackType.SUBMITTED,
-            CaseType.CONTESTED,
-            EventType.MANAGE_BARRISTER),
+                CallbackType.SUBMITTED,
+                CaseType.CONTESTED,
+                EventType.MANAGE_BARRISTER),
             is(true));
     }
 
