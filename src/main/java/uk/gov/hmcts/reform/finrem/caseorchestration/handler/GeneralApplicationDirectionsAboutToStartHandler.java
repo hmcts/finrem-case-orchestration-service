@@ -3,10 +3,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_LIST;
@@ -27,7 +28,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class GeneralApplicationDirectionsAboutToStartHandler implements CallbackHandler, GeneralApplicationHandler {
+public class GeneralApplicationDirectionsAboutToStartHandler implements CallbackHandler<Map<String, Object>>, GeneralApplicationHandler {
 
     private final GeneralApplicationHelper helper;
     private final GeneralApplicationDirectionsService service;
@@ -40,8 +41,8 @@ public class GeneralApplicationDirectionsAboutToStartHandler implements Callback
     }
 
     @Override
-    public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
-                                                       String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
+                                                                                   String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("About to Start callback event type {} for case id: {}", EventType.GENERAL_APPLICATION_DIRECTIONS, caseDetails.getId());
 
@@ -55,18 +56,18 @@ public class GeneralApplicationDirectionsAboutToStartHandler implements Callback
             setDirectionListForNonCollectionGeneralApplication(caseData, index, userAuthorisation);
         } else {
             if (outcomeList.isEmpty()) {
-                return AboutToStartOrSubmitCallbackResponse.builder().data(caseData)
+                return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData)
                     .errors(List.of("There are no general application available for issue direction.")).build();
             }
             List<DynamicListElement> dynamicListElements = outcomeList.stream()
                 .map(ga -> getDynamicListElements(ga.getId() + "#" + ga.getGeneralApplicationItems().getGeneralApplicationStatus(),
                     getLabel(ga.getGeneralApplicationItems(), index.incrementAndGet())))
-                .toList();
+                .collect(Collectors.toList());
 
             DynamicList dynamicList = generateAvailableGeneralApplicationAsDynamicList(dynamicListElements);
             caseData.put(GENERAL_APPLICATION_DIRECTIONS_LIST, dynamicList);
         }
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).build();
     }
 
     private void setDirectionListForNonCollectionGeneralApplication(Map<String, Object> caseData,

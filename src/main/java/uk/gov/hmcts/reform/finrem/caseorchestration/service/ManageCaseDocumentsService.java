@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandler;
@@ -150,7 +151,7 @@ public class ManageCaseDocumentsService {
 
     public Map<String, Object> setCaseDataBeforeManageCaseDocumentCollection(Map<String, Object> caseData, Map<String, Object> caseDataBefore) {
         List<String> manageCaseDocumentCollectionIds = getAllDocumentsInCollection(caseData, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION)
-            .stream().map(ContestedUploadedDocumentData::getId).toList();
+            .stream().map(ContestedUploadedDocumentData::getId).collect(Collectors.toList());
 
         List<ContestedUploadedDocumentData> caseDataBeforeManagedCaseDocumentCollection = new ArrayList<>();
         for (ContestedUploadCaseFilesCollectionType collectionType : ContestedUploadCaseFilesCollectionType.values()) {
@@ -160,7 +161,7 @@ public class ManageCaseDocumentsService {
                 List<ContestedUploadedDocumentData> documentData = docsInCollection.stream()
                     .filter(document -> manageCaseDocumentCollectionIds.stream()
                         .anyMatch(caseDocumentId -> document.getId().equals(caseDocumentId)))
-                    .toList();
+                    .collect(Collectors.toList());
 
                 caseDataBeforeManagedCaseDocumentCollection.addAll(documentData);
             }

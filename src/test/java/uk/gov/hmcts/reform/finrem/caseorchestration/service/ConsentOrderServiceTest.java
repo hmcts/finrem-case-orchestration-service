@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
 import java.io.InputStream;
@@ -39,6 +40,15 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void shouldSetLatestDraftConsentOrderWhenAFinremCaseIsCreated() throws Exception {
+        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest(PATH + "draft-consent-order.json");
+        CaseDocument latestConsentOrderData = consentOrderService.getLatestConsentOrderData(finremCallbackRequest);
+        assertThat(latestConsentOrderData.getDocumentBinaryUrl(), is("http://file1.binary"));
+        assertThat(latestConsentOrderData.getDocumentFilename(), is("file1"));
+        assertThat(latestConsentOrderData.getDocumentUrl(), is("http://file1"));
+    }
+
+    @Test
     public void shouldUpdateLatestDraftConsentOrderWhenACaseIsAmended() throws Exception {
         setUpCaseDetails("amend-consent-order-by-solicitor.json");
         CaseDocument latestConsentOrderData = consentOrderService.getLatestConsentOrderData(callbackRequest);
@@ -48,9 +58,31 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void shouldUpdateLatestDraftConsentOrderWhenAFinremCaseIsAmended() throws Exception {
+        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest(PATH + "amend-consent-order-by-solicitor.json");
+        CaseDocument latestConsentOrderData = consentOrderService.getLatestConsentOrderData(finremCallbackRequest);
+        assertThat(latestConsentOrderData.getDocumentBinaryUrl(), is("http://file2.binary"));
+        assertThat(latestConsentOrderData.getDocumentFilename(), is("file2"));
+        assertThat(latestConsentOrderData.getDocumentUrl(), is("http://file2"));
+    }
+
+
+    @Test
     public void shouldReturnLatestAmendedConsentOrderWhenACaseIsAmendedByCaseWorker() throws Exception {
         setUpCaseDetails("amend-consent-order-by-caseworker.json");
         CaseDocument latestConsentOrderData = consentOrderService.getLatestConsentOrderData(callbackRequest);
+        assertThat(latestConsentOrderData.getDocumentUrl(),
+            is("http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838"));
+        assertThat(latestConsentOrderData.getDocumentFilename(),
+            is("Notification for ABC - Contested.docx"));
+        assertThat(latestConsentOrderData.getDocumentBinaryUrl(),
+            is("http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary"));
+    }
+
+    @Test
+    public void shouldReturnLatestAmendedConsentOrderWhenAFinremCaseIsAmendedByCaseWorker() throws Exception {
+        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest(PATH + "amend-consent-order-by-caseworker.json");
+        CaseDocument latestConsentOrderData = consentOrderService.getLatestConsentOrderData(finremCallbackRequest);
         assertThat(latestConsentOrderData.getDocumentUrl(),
             is("http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838"));
         assertThat(latestConsentOrderData.getDocumentFilename(),
@@ -67,4 +99,14 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
         assertThat(latestConsentOrderData.getDocumentFilename(), is("doc2"));
         assertThat(latestConsentOrderData.getDocumentBinaryUrl(), is("http://doc2/binary"));
     }
+
+    @Test
+    public void shouldReturnLatestAmendedConsentOrderWhenAFinremCaseIsRespondedBySolicitor() throws Exception {
+        FinremCallbackRequest finremCallbackRequest = buildFinremCallbackRequest(PATH + "respond-to-order-solicitor.json");
+        CaseDocument latestConsentOrderData = consentOrderService.getLatestConsentOrderData(finremCallbackRequest);
+        assertThat(latestConsentOrderData.getDocumentUrl(), is("http://doc2"));
+        assertThat(latestConsentOrderData.getDocumentFilename(), is("doc2"));
+        assertThat(latestConsentOrderData.getDocumentBinaryUrl(), is("http://doc2/binary"));
+    }
+
 }

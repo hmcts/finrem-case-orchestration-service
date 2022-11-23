@@ -58,11 +58,11 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
     private CaseDetails caseDetails;
 
 
-
     @Before
     public void setup() {
         callbackRequest = CallbackRequest.builder().build();
-        caseDetails = CaseDetails.builder().data(new HashMap<>()).build();
+        caseDetails = CaseDetails.builder().build();
+        caseDetails.setData(new HashMap<>());
         callbackRequest.setCaseDetails(caseDetails);
 
         ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
@@ -155,6 +155,11 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
                 .build()
         );
         caseData.put(GENERAL_APPLICATION_COLLECTION, rejectedGeneralApplicationData);
-        return CaseDetails.builder().data(caseData).build();
+        CaseDetails caseDetails = CaseDetails.builder()
+            .caseTypeId(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED.getCcdType())
+            .id(12345L)
+            .build();
+        caseDetails.setData(caseData);
+        return caseDetails;
     }
 }

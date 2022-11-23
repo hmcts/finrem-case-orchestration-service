@@ -6,9 +6,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedDocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -27,7 +27,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UploadContestedCaseDocumentsAboutToSubmitHandler implements CallbackHandler {
+public class UploadContestedCaseDocumentsAboutToSubmitHandler
+    implements CallbackHandler<Map<String, Object>> {
 
     private final List<CaseDocumentHandler> caseDocumentHandlers;
     private final ObjectMapper objectMapper;
@@ -41,7 +42,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler implements Callbac
     }
 
     @Override
-    public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest, String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
+                                                                                   String userAuthorisation) {
 
         Map<String, Object> caseData = uploadedDocumentHelper.addUploadDateToNewDocuments(
             callbackRequest.getCaseDetails().getData(),
@@ -53,8 +55,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler implements Callbac
                 ContestedUploadedDocument::getCaseDocumentUploadDateTime, Comparator.nullsLast(
                     Comparator.reverseOrder()))));
         caseData.put(CONTESTED_UPLOADED_DOCUMENTS, uploadedDocuments);
-        return AboutToStartOrSubmitCallbackResponse
-            .builder()
+        return GenericAboutToStartOrSubmitCallbackResponse
+            .<Map<String, Object>>builder()
             .data(caseData)
             .build();
     }
@@ -63,7 +65,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler implements Callbac
         objectMapper.registerModule(new JavaTimeModule());
 
         List<ContestedUploadedDocumentData> contestedUploadDocuments = objectMapper.convertValue(
-            caseData.get(CONTESTED_UPLOADED_DOCUMENTS), new TypeReference<>() {});
+            caseData.get(CONTESTED_UPLOADED_DOCUMENTS), new TypeReference<>() {
+            });
 
         return Optional.ofNullable(contestedUploadDocuments).orElse(new ArrayList<>());
     }
