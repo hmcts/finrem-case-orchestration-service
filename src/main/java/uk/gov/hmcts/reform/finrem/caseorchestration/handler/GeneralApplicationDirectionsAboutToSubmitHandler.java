@@ -3,10 +3,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
@@ -33,7 +34,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class GeneralApplicationDirectionsAboutToSubmitHandler implements CallbackHandler {
+public class GeneralApplicationDirectionsAboutToSubmitHandler implements CallbackHandler<Map<String, Object>> {
 
     private final GeneralApplicationHelper helper;
     private final GeneralApplicationDirectionsService service;
@@ -46,8 +47,8 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
     }
 
     @Override
-    public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
-                                                       String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
+                                                                                   String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Processing About to Submit callback for event {} with Case ID : {}",
             EventType.GENERAL_APPLICATION_DIRECTIONS, callbackRequest.getCaseDetails().getId());
@@ -69,7 +70,15 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
         } catch (InvalidCaseDataException invalidCaseDataException) {
             errors.add(invalidCaseDataException.getMessage());
         }
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build();
+
+        String postState = service.getEventPostState(caseDetails, userAuthorisation);
+
+        log.info("Post state {} for caseId {}", postState, caseDetails.getId());
+        if (postState != null) {
+            return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData)
+                .errors(errors).state(postState).build();
+        }
+        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).errors(errors).build();
     }
 
     private void migrateExistingApplication(CaseDetails caseDetails,
@@ -86,7 +95,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
             setStatusForNonCollAndBulkPrintDouments(caseDetails,
                 data, bulkPrintDocuments, status, userAuthorisation);
             existingGeneralApplication.add(data);
-            caseData.put(GENERAL_APPLICATION_COLLECTION,existingGeneralApplication);
+            caseData.put(GENERAL_APPLICATION_COLLECTION, existingGeneralApplication);
         }
         helper.deleteNonCollectionGeneralApplication(caseData);
         caseData.remove(GENERAL_APPLICATION_DIRECTIONS_LIST);
@@ -97,14 +106,14 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
         List<GeneralApplicationCollectionData> existingList = helper.getGeneralApplicationList(caseData);
         DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_DIRECTIONS_LIST));
 
-        String[] choice =  dynamicList.getValueCode().split("#");
-        final String status  = choice[1];
+        String[] choice = dynamicList.getValueCode().split("#");
+        final String status = choice[1];
         final String valueCode = choice[0];
 
         final List<GeneralApplicationCollectionData> applicationCollectionDataList
             = existingList.stream().map(ga -> setStatusAndBulkPrintDouments(caseDetails,
                 ga, valueCode, status, bulkPrintDocuments, userAuthorisation))
-            .sorted(helper::getCompareTo).toList();
+            .sorted(helper::getCompareTo).collect(Collectors.toList());
 
         log.info("applicationCollectionDataList : {} caseId {}", applicationCollectionDataList.size(), caseDetails.getId());
         caseData.put(GENERAL_APPLICATION_COLLECTION, applicationCollectionDataList);
@@ -118,22 +127,22 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
                                                                            List<BulkPrintDocument> bulkPrintDocuments,
                                                                            String userAuthorisation) {
         if (code.equals(data.getId())) {
-            return setStatusForNonCollAndBulkPrintDouments(caseDetails, data, bulkPrintDocuments,status, userAuthorisation);
+            return setStatusForNonCollAndBulkPrintDouments(caseDetails, data, bulkPrintDocuments, status, userAuthorisation);
         }
         return data;
     }
 
     private GeneralApplicationCollectionData setStatusForNonCollAndBulkPrintDouments(CaseDetails caseDetails,
-                                                                           GeneralApplicationCollectionData data,
-                                                                           List<BulkPrintDocument> bulkPrintDocuments,
-                                                                           String status,
-                                                                           String userAuthorisation) {
+                                                                                     GeneralApplicationCollectionData data,
+                                                                                     List<BulkPrintDocument> bulkPrintDocuments,
+                                                                                     String status,
+                                                                                     String userAuthorisation) {
 
         GeneralApplicationItems items = data.getGeneralApplicationItems();
         CaseDocument caseDocument = service.getBulkPrintDocument(caseDetails, userAuthorisation);
         items.setGeneralApplicationDirectionsDocument(caseDocument);
         items.setGeneralApplicationOutcomeOther(Objects.toString(caseDetails.getData().get(GENERAL_APPLICATION_OUTCOME_OTHER), null));
-        String gaElementStatus =  status != null ? status : items.getGeneralApplicationStatus();
+        String gaElementStatus = status != null ? status : items.getGeneralApplicationStatus();
 
         log.info("status {} for general application for Case ID: {} Event type {}",
             status, caseDetails.getId(), EventType.GENERAL_APPLICATION_DIRECTIONS);
@@ -154,7 +163,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
         log.info("items getGeneralApplicationDocument {}, for caseId {}", items.getGeneralApplicationDocument(), caseDetails.getId());
 
         if (items.getGeneralApplicationDocument() != null) {
-            items.setGeneralApplicationDocument(helper.getPdfDocument(items.getGeneralApplicationDocument(),userAuthorisation));
+            items.setGeneralApplicationDocument(helper.getPdfDocument(items.getGeneralApplicationDocument(), userAuthorisation));
             final BulkPrintDocument genDoc = BulkPrintDocument.builder()
                 .binaryFileUrl(items.getGeneralApplicationDocument().getDocumentBinaryUrl())
                 .fileName(items.getGeneralApplicationDocument().getDocumentFilename())
@@ -165,7 +174,7 @@ public class GeneralApplicationDirectionsAboutToSubmitHandler implements Callbac
         }
 
         if (items.getGeneralApplicationDraftOrder() != null) {
-            items.setGeneralApplicationDraftOrder(helper.getPdfDocument(items.getGeneralApplicationDraftOrder(),userAuthorisation));
+            items.setGeneralApplicationDraftOrder(helper.getPdfDocument(items.getGeneralApplicationDraftOrder(), userAuthorisation));
             final BulkPrintDocument draftDoc = BulkPrintDocument.builder()
                 .binaryFileUrl(items.getGeneralApplicationDraftOrder().getDocumentBinaryUrl())
                 .fileName(items.getGeneralApplicationDraftOrder().getDocumentFilename())

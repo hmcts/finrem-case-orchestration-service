@@ -7,16 +7,15 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.InterimHearingHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InterimHearingService;
 
-import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -61,7 +60,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_WALES_FRC_COURT_LIST;
 
 @RunWith(MockitoJUnitRunner.class)
-public class InterimHearingContestedAboutToSubmitHandlerTest {
+public class InterimHearingContestedAboutToSubmitHandlerTest extends BaseHandlerTest {
 
     @InjectMocks
     private InterimHearingContestedAboutToSubmitHandler interimHearingContestedAboutToSubmitHandler;
@@ -109,8 +108,8 @@ public class InterimHearingContestedAboutToSubmitHandlerTest {
 
     @Test
     public void givenContestedCase_WhenMultipleInterimHearing_ThenHearingsShouldBePresentInChronologicalOrder() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        AboutToStartOrSubmitCallbackResponse handle =
+        CallbackRequest callbackRequest = buildCallbackRequest(TEST_JSON);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle =
             interimHearingContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = handle.getData();
@@ -159,11 +158,4 @@ public class InterimHearingContestedAboutToSubmitHandlerTest {
         assertNull(data.get(INTERIM_HEARING_UPLOADED_DOCUMENT));
     }
 
-    private CallbackRequest buildCallbackRequest()  {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(TEST_JSON)) {
-            return objectMapper.readValue(resourceAsStream, CallbackRequest.class);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

@@ -35,6 +35,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INCLUDES_REPRESENTATIVE_UPDATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IS_NOC_REJECTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOC_PARTY;
 
 @RestController
@@ -592,9 +593,11 @@ public class NotificationsController extends BaseController {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        notificationService.sendNoticeOfChangeEmail(caseDetails);
-        log.info("Call the noc letter service");
-        nocLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, callbackRequest.getCaseDetailsBefore(), authorisationToken);
+        if (!YES_VALUE.equals(caseDetails.getData().get(IS_NOC_REJECTED))) {
+            notificationService.sendNoticeOfChangeEmail(caseDetails);
+            log.info("Call the noc letter service");
+            nocLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, callbackRequest.getCaseDetailsBefore(), authorisationToken);
+        }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }

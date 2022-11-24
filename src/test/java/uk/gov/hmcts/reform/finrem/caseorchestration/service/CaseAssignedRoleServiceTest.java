@@ -52,7 +52,7 @@ public class CaseAssignedRoleServiceTest {
     private CaseAssignedUserRole caseAssignedUserRole;
 
     @Mock
-    private  AuthTokenGenerator authTokenGenerator;
+    private AuthTokenGenerator authTokenGenerator;
 
     @Mock
     private IdamService idamService;
@@ -84,7 +84,7 @@ public class CaseAssignedRoleServiceTest {
         Map<String, Object> returnedValue = caseAssignedRoleService.setCaseAssignedUserRole(caseDetails, AUTH_TOKEN);
         assertEquals(2, returnedValue.size());
         assertEquals(YES_VALUE, returnedValue.get(CONSENTED_RESPONDENT_REPRESENTED));
-        assertEquals(RESP_SOLICITOR_POLICY,returnedValue.get(CASE_ROLE));
+        assertEquals(RESP_SOLICITOR_POLICY, returnedValue.get(CASE_ROLE));
     }
 
     @Test

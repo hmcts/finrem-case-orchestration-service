@@ -26,12 +26,17 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class CcdDataStoreServiceTest extends BaseServiceTest {
 
-    @Autowired private CcdDataStoreService ccdDataStoreService;
+    @Autowired
+    private CcdDataStoreService ccdDataStoreService;
 
-    @MockBean private CcdDataStoreServiceConfiguration ccdDataStoreServiceConfiguration;
-    @MockBean private RemoveUserRolesRequestMapper removeUserRolesRequestMapper;
-    @MockBean private IdamService idamService;
-    @MockBean private RestService restService;
+    @MockBean
+    private CcdDataStoreServiceConfiguration ccdDataStoreServiceConfiguration;
+    @MockBean
+    private RemoveUserRolesRequestMapper removeUserRolesRequestMapper;
+    @MockBean
+    private IdamService idamService;
+    @MockBean
+    private RestService restService;
 
     RemoveUserRolesRequest removeUserRolesRequest;
 

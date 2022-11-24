@@ -76,9 +76,12 @@ public class NotificationServiceTest extends BaseServiceTest {
     private static final String END_POINT_CONTESTED_CONSENT_GENERAL_ORDER = "http://localhost:8086/notify/contested/consent-general-order";
     private static final String END_POINT_CONTESTED_GENERAL_ORDER = "http://localhost:8086/notify/contested/general-order";
     private static final String END_POINT_CONSENTED_GENERAL_ORDER = "http://localhost:8086/notify/general-order";
-    private static final String END_POINT_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE = "http://localhost:8086/notify/contested/general-application-refer-to-judge";
-    private static final String END_POINT_CONTESTED_GENERAL_APPLICATION_REJECTED = "http://localhost:8086/notify/contested/general-application-rejected";
-    private static final String END_POINT_CONTESTED_GENERAL_APPLICATION_OUTCOME = "http://localhost:8086/notify/contested/general-application-outcome";
+    private static final String END_POINT_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE =
+        "http://localhost:8086/notify/contested/general-application-refer-to-judge";
+    private static final String END_POINT_CONTESTED_GENERAL_APPLICATION_REJECTED =
+        "http://localhost:8086/notify/contested/general-application-rejected";
+    private static final String END_POINT_CONTESTED_GENERAL_APPLICATION_OUTCOME =
+        "http://localhost:8086/notify/contested/general-application-outcome";
     private static final String END_POINT_CONTESTED_CONSENT_ORDER_NOT_APPROVED = "http://localhost:8086/notify/contested/consent-order-not-approved";
     private static final String END_POINT_CONTESTED_INTERIM_HEARING = "http://localhost:8086/notify/contested/prepare-for-interim-hearing-sent";
     private static final String END_POINT_TRANSFER_TO_LOCAL_COURT = "http://localhost:8086/notify/transfer-to-local-court";
@@ -96,15 +99,22 @@ public class NotificationServiceTest extends BaseServiceTest {
     private static final String INTERIM_HEARING_JSON = "/fixtures/contested/interim-hearing-two-collection.json";
     private static final String CONSENTED_HEARING_JSON = "/fixtures/consented.listOfHearing/list-for-hearing.json";
 
-    @Autowired private NotificationService notificationService;
-    @Autowired private RestTemplate restTemplate;
+    @Autowired
+    private NotificationService notificationService;
+    @Autowired
+    private RestTemplate restTemplate;
     @Autowired private ConsentedHearingHelper helper;
 
-    @MockBean private FeatureToggleService featureToggleService;
-    @MockBean private RestTemplate mockRestTemplate;
-    @MockBean private NotificationRequestMapper notificationRequestMapper;
-    @MockBean private CheckSolicitorIsDigitalService checkSolicitorIsDigitalService;
-    @MockBean private CaseDataService caseDataService;
+    @MockBean
+    private FeatureToggleService featureToggleService;
+    @MockBean
+    private RestTemplate mockRestTemplate;
+    @MockBean
+    private NotificationRequestMapper notificationRequestMapper;
+    @MockBean
+    private CheckSolicitorIsDigitalService checkSolicitorIsDigitalService;
+    @MockBean
+    private CaseDataService caseDataService;
     @SpyBean
     private NotificationServiceConfiguration notificationServiceConfiguration;
 
@@ -495,8 +505,8 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void sendSolicitorToDraftOrderEmailRespondent() {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_DRAFT_ORDER))
-                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-                .andRespond(MockRestResponseCreators.withNoContent());
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendSolicitorToDraftOrderEmailRespondent(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
@@ -505,8 +515,8 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void throwExceptionWhenSendSolicitorToDraftOrderEmailRespondentIsRequested() {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_DRAFT_ORDER))
-                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-                .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
         try {
             notificationService.sendSolicitorToDraftOrderEmailRespondent(callbackRequest.getCaseDetails());
         } catch (Exception ex) {

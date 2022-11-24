@@ -24,15 +24,16 @@ public class BulkPrintControllerTest extends BaseControllerTest {
     private static final String CONSENTED_BULK_PRINT_CONSENT_ORDER_NOT_APPROVED_JSON
         = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
 
-    @MockBean private ConsentOrderPrintService consentOrderPrintService;
+    @MockBean
+    private ConsentOrderPrintService consentOrderPrintService;
 
     @Test
     public void shouldSendForBulkPrint() throws Exception {
         mvc.perform(
-            post(BULK_PRINT_URI)
-                .content(resourceContentAsString(CONSENTED_BULK_PRINT_CONSENT_ORDER_NOT_APPROVED_JSON))
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                post(BULK_PRINT_URI)
+                    .content(resourceContentAsString(CONSENTED_BULK_PRINT_CONSENT_ORDER_NOT_APPROVED_JSON))
+                    .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                    .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
         verify(consentOrderPrintService, times(1)).sendConsentOrderToBulkPrint(any(), any());
@@ -43,10 +44,10 @@ public class BulkPrintControllerTest extends BaseControllerTest {
         doThrow(feignError()).when(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), any());
 
         mvc.perform(
-            post(BULK_PRINT_URI)
-                .content(resourceContentAsString(CONTESTED_HWF_JSON))
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                post(BULK_PRINT_URI)
+                    .content(resourceContentAsString(CONTESTED_HWF_JSON))
+                    .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                    .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isInternalServerError());
         verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), any());
     }
