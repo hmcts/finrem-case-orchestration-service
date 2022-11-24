@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.contracts.ccddatastore;
 
+import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.junit.PactProviderRule;
 import au.com.dius.pact.consumer.junit.PactVerification;
@@ -23,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
+import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonBody;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CREATOR_USER_ROLE;
@@ -89,4 +91,5 @@ public class CaseDataStoreServiceConsumerContractTest extends BaseTest {
     private String createJsonObject(Object obj) throws IOException {
         return objectMapper.writeValueAsString(obj);
     }
+    
 }
