@@ -52,6 +52,7 @@ public class ApprovedOrderNoticeOfHearingService {
     private final ObjectMapper objectMapper;
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
     private final ApprovedOrderNoticeOfHearingCorresponder approvedOrderNoticeOfHearingCorresponder;
+    private final CaseDataService caseDataService;
 
     public void createAndStoreHearingNoticeDocumentPack(CaseDetails caseDetails,
                                                         String authToken) {
@@ -172,14 +173,4 @@ public class ApprovedOrderNoticeOfHearingService {
             .collect(Collectors.toList());
     }
 
-    private List<CaseDocument> getHearingNoticeDocumentPackFromCaseData(CaseDetails caseDetails) {
-        List<Element<CaseDocument>> hearingNoticePack = objectMapper.convertValue(
-            caseDetails.getData().get(HEARING_NOTICE_DOCUMENT_PACK),
-            new TypeReference<>() {
-            });
-
-        return hearingNoticePack.stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-    }
 }
