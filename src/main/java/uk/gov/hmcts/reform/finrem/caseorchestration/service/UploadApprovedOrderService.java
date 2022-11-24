@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDirectionsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
@@ -43,8 +43,8 @@ public class UploadApprovedOrderService {
         return caseData;
     }
 
-    public AboutToStartOrSubmitCallbackResponse handleUploadApprovedOrderAboutToSubmit(CaseDetails caseDetails,
-                                                                                       String authorisationToken) {
+    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handleUploadApprovedOrderAboutToSubmit(CaseDetails caseDetails,
+                                                                                                                   String authorisationToken) {
         List<String> errors = new ArrayList<>();
         contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, authorisationToken);
 
@@ -53,14 +53,14 @@ public class UploadApprovedOrderService {
         } catch (CourtDetailsParseException e) {
             log.error(e.getMessage());
             errors.add(e.getMessage());
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).errors(errors).build();
+            return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseDetails.getData()).errors(errors).build();
         }
 
         hearingOrderService.appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(caseDetails);
         if (isAnotherHearingToBeListed(caseDetails)) {
             approvedOrderNoticeOfHearingService.createAndStoreHearingNoticeDocumentPack(caseDetails, authorisationToken);
         }
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseDetails.getData()).build();
     }
 
     private boolean isAnotherHearingToBeListed(CaseDetails caseDetails) {
@@ -73,7 +73,8 @@ public class UploadApprovedOrderService {
     private Optional<AdditionalHearingDirectionsCollection> getLatestAdditionalHearingDirections(CaseDetails caseDetails) {
         List<Element<AdditionalHearingDirectionsCollection>> additionalHearingDetailsCollection =
             new ObjectMapper().convertValue(caseDetails.getData().get(HEARING_DIRECTION_DETAILS_COLLECTION),
-                new TypeReference<>() {});
+                new TypeReference<>() {
+                });
 
         return additionalHearingDetailsCollection != null && !additionalHearingDetailsCollection.isEmpty()
             ? Optional.of(additionalHearingDetailsCollection.get(additionalHearingDetailsCollection.size() - 1).getValue())

@@ -3,10 +3,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.InterimHearingHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.InterimHearingItemMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
@@ -27,7 +27,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class InterimHearingContestedAboutToStartHandler implements CallbackHandler {
+public class InterimHearingContestedAboutToStartHandler
+    implements CallbackHandler<Map<String, Object>> {
 
     private final InterimHearingHelper interimHearingHelper;
     private final InterimHearingItemMapper interimHearingItemMapper;
@@ -40,15 +41,16 @@ public class InterimHearingContestedAboutToStartHandler implements CallbackHandl
     }
 
     @Override
-    public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
-                                                       String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(
+        CallbackRequest callbackRequest,
+        String userAuthorisation) {
         log.info("In Interim hearing about to start callback");
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
         loadInterimHearing(caseData);
 
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseDetails.getData()).build();
     }
 
     private void loadInterimHearing(Map<String, Object> caseData) {
@@ -65,8 +67,8 @@ public class InterimHearingContestedAboutToStartHandler implements CallbackHandl
             builder.id(collectionId);
             builder.value(interimHearingItemMapper.loadInterimHearingData(caseData));
             InterimHearingData interimHearingData = builder.build();
-            interimHearingList.add(0,interimHearingData);
-            caseData.put(INTERIM_HEARING_COLLECTION,interimHearingList);
+            interimHearingList.add(0, interimHearingData);
+            caseData.put(INTERIM_HEARING_COLLECTION, interimHearingList);
 
             interimHearingItemMapper.loadBulkPrintDocuments(caseData);
         } else {
@@ -80,13 +82,13 @@ public class InterimHearingContestedAboutToStartHandler implements CallbackHandl
 
     private List<InterimHearingCollectionItemData> setTrackingForBulkPrintAndNotification(Map<String, Object> caseData,
                                                                                           String collectionId) {
-        List<InterimHearingCollectionItemData> list  = interimHearingHelper.getInterimHearingTrackingList(caseData);
+        List<InterimHearingCollectionItemData> list = interimHearingHelper.getInterimHearingTrackingList(caseData);
         list.add(getTrackingObject(collectionId));
         return list;
     }
 
     private InterimHearingCollectionItemData getTrackingObject(String collectionId) {
         return InterimHearingCollectionItemData.builder().id(UUID.randomUUID().toString())
-                .value(InterimHearingCollectionItemIds.builder().ihItemIds(collectionId).build()).build();
+            .value(InterimHearingCollectionItemIds.builder().ihItemIds(collectionId).build()).build();
     }
 }

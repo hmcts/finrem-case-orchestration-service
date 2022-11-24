@@ -4,8 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.util.Map;
 
@@ -22,8 +25,17 @@ public class ConsentOrderService {
 
     public CaseDocument getLatestConsentOrderData(CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        return getCaseDocument(caseDetails, callbackRequest.getEventId());
+    }
+
+    public CaseDocument getLatestConsentOrderData(FinremCallbackRequest callbackRequest) {
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        return getCaseDocument(caseDetails, callbackRequest.getEventType().getCcdType());
+    }
+
+    private CaseDocument getCaseDocument(CaseDetails caseDetails, String callbackRequest) {
         Map<String, Object> caseData = caseDetails.getData();
-        String eventId = callbackRequest.getEventId();
+        String eventId = callbackRequest;
         if (FR_RESPOND_TO_ORDER.equalsIgnoreCase(eventId)) {
             return documentHelper.getLatestRespondToOrderDocuments(caseData)
                 .orElseGet(() -> documentHelper.convertToCaseDocument(caseData.get(LATEST_CONSENT_ORDER)));
@@ -34,4 +46,15 @@ public class ConsentOrderService {
         }
     }
 
+    private CaseDocument getCaseDocument(FinremCaseDetails caseDetails, String eventId) {
+        FinremCaseData caseData = caseDetails.getData();
+        if (FR_RESPOND_TO_ORDER.equalsIgnoreCase(eventId)) {
+            return documentHelper.getLatestRespondToOrderDocuments(caseData)
+                .orElseGet(() -> caseData.getLatestConsentOrder());
+        } else if (FR_AMENDED_CONSENT_ORDER.equalsIgnoreCase(eventId)) {
+            return documentHelper.getLatestAmendedConsentOrder(caseData);
+        } else {
+            return caseData.getConsentOrder();
+        }
+    }
 }

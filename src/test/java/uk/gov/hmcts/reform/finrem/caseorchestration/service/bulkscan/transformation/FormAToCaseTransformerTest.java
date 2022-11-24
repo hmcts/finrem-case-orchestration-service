@@ -416,8 +416,10 @@ public class FormAToCaseTransformerTest {
     @Test
     public void shouldTransformScannedDocuments() {
         List<InputScannedDoc> scannedDocuments = new ArrayList<>();
-        scannedDocuments.add(InputScannedDoc.builder().subtype(D81_DOCUMENT).document(new InputScannedDocUrl("http://url/d81-1", "http://binUrl/d81-1/binary", "d81-1.pdf")).build());
-        scannedDocuments.add(InputScannedDoc.builder().subtype(D81_DOCUMENT).document(new InputScannedDocUrl("http://url/d81-2", "http://binUrl/d81-2/binary", "d81-2.pdf")).build());
+        scannedDocuments.add(InputScannedDoc.builder().subtype(D81_DOCUMENT)
+            .document(new InputScannedDocUrl("http://url/d81-1", "http://binUrl/d81-1/binary", "d81-1.pdf")).build());
+        scannedDocuments.add(InputScannedDoc.builder().subtype(D81_DOCUMENT)
+            .document(new InputScannedDocUrl("http://url/d81-2", "http://binUrl/d81-2/binary", "d81-2.pdf")).build());
         scannedDocuments.add(createDoc(FORM_A_DOCUMENT));
         scannedDocuments.add(createDoc(P1_DOCUMENT));
         scannedDocuments.add(createDoc(PPF1_DOCUMENT));
@@ -508,7 +510,8 @@ public class FormAToCaseTransformerTest {
     }
 
     private InputScannedDoc createDoc(String formSubType) {
-        return InputScannedDoc.builder().subtype(formSubType).document(new InputScannedDocUrl("http://url/" + formSubType, "http://binUrl/" + formSubType + "/binary", formSubType + ".pdf")).build();
+        return InputScannedDoc.builder().subtype(formSubType)
+            .document(new InputScannedDocUrl("http://url/" + formSubType, "http://binUrl/" + formSubType + "/binary", formSubType + ".pdf")).build();
     }
 
     private void assertOnSingleFieldTransformationResult(String ocrFieldName, String ocrFieldValue, String ccdFieldName, String ccdFieldValue) {

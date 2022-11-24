@@ -66,6 +66,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_SOUTHWEST_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_WALES_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENTFRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENTFRC_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LANCASHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LANCASHIRE_COURTLIST;
@@ -202,7 +203,7 @@ public final class CaseHearingFunctions {
 
     private static String getSouthEastFRC(Map mapOfCaseData, String frcListName) {
         String southEastList = Objects.toString(mapOfCaseData.get(frcListName), StringUtils.EMPTY);
-        if (KENT.equalsIgnoreCase(southEastList)) {
+        if (KENT.equalsIgnoreCase(southEastList) || KENTFRC.equalsIgnoreCase(southEastList)) {
             return KENTFRC_COURTLIST;
         } else if (BEDFORDSHIRE.equalsIgnoreCase(southEastList)) {
             return BEDFORDSHIRE_COURTLIST;

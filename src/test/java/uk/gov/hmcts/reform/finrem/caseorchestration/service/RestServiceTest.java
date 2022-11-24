@@ -34,12 +34,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_US
 
 public class RestServiceTest extends BaseServiceTest {
 
-    @Autowired private RestService restService;
+    @Autowired
+    private RestService restService;
 
-    @MockBean private RestTemplate restTemplate;
+    @MockBean
+    private RestTemplate restTemplate;
 
-    @Captor private ArgumentCaptor<URI> uriCaptor;
-    @Captor private ArgumentCaptor<HttpEntity> authRequestCaptor;
+    @Captor
+    private ArgumentCaptor<URI> uriCaptor;
+    @Captor
+    private ArgumentCaptor<HttpEntity> authRequestCaptor;
 
     private AssignCaseAccessRequest body;
     private ResponseEntity<Map> mockResponse;

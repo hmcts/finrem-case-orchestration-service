@@ -217,7 +217,6 @@ public class AdditionalHearingDocumentService {
             documentHelper.convertToAdditionalHearingDocumentData(
                 caseDetails.getData().get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION));
 
-        AdditionalHearingDocumentData additionalHearingDocument = additionalHearingDocumentData.get(additionalHearingDocumentData.size() - 1);
 
         List<BulkPrintDocument> document = new ArrayList<>();
         if (caseDetails.getData().get(HEARING_ADDITIONAL_DOC) != null) {
@@ -226,6 +225,8 @@ public class AdditionalHearingDocumentService {
                 .convertToCaseDocument(caseDetails.getData().get(HEARING_ADDITIONAL_DOC)));
             document.add(additionalUploadedDoc);
         }
+
+        AdditionalHearingDocumentData additionalHearingDocument = additionalHearingDocumentData.get(additionalHearingDocumentData.size() - 1);
 
         BulkPrintDocument additionalDoc
             = documentHelper.getBulkPrintDocumentFromCaseDocument(additionalHearingDocument.getAdditionalHearingDocument().getDocument());
@@ -242,8 +243,12 @@ public class AdditionalHearingDocumentService {
 
     private void convertHearingOrderCollectionDocumentsToPdf(HearingOrderCollectionData element,
                                                              String authorisationToken) {
-        CaseDocument pdfApprovedOrder = genericDocumentService.convertDocumentIfNotPdfAlready(
-            element.getHearingOrderDocuments().getUploadDraftDocument(), authorisationToken);
+        CaseDocument pdfApprovedOrder = convertToPdf(element.getHearingOrderDocuments().getUploadDraftDocument(),
+            authorisationToken);
         element.getHearingOrderDocuments().setUploadDraftDocument(pdfApprovedOrder);
+    }
+
+    public CaseDocument convertToPdf(CaseDocument document,String authorisationToken) {
+        return genericDocumentService.convertDocumentIfNotPdfAlready(document, authorisationToken);
     }
 }

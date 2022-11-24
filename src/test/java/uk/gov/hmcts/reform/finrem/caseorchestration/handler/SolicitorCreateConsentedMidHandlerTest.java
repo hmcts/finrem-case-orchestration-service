@@ -8,10 +8,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -83,13 +83,16 @@ public class SolicitorCreateConsentedMidHandlerTest {
     @Test
     public void given_case_when_natureOfApplicationIsVariation_thenReturnVariationOrderLabels() {
         CallbackRequest callbackRequest = buildCallbackRequest();
-        List<String> orderList  = List.of("Variation Order", "Property Adjustment Order");
+        List<String> orderList = List.of("Variation Order", "Property Adjustment Order");
         callbackRequest.getCaseDetails().getData().put("natureOfApplication2", orderList);
 
         when(caseManagementLocationService.setCaseManagementLocation(any()))
             .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().build());
 
         solicitorCreateConsentedMidHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response =
+            solicitorCreateConsentedMidHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(caseManagementLocationService).setCaseManagementLocation(requestCaptor.capture());
 
@@ -106,13 +109,15 @@ public class SolicitorCreateConsentedMidHandlerTest {
     @Test
     public void given_case_when_natureOfApplicationDoNotContainsVariation_thenReturnConsentOrderLabels() {
         CallbackRequest callbackRequest = buildCallbackRequest();
-        List<String> orderList  = List.of("Property Adjustment Order");
+        List<String> orderList = List.of("Property Adjustment Order");
         callbackRequest.getCaseDetails().getData().put("natureOfApplication2", orderList);
 
         when(caseManagementLocationService.setCaseManagementLocation(any()))
             .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().build());
 
         solicitorCreateConsentedMidHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response =
+            solicitorCreateConsentedMidHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(caseManagementLocationService).setCaseManagementLocation(requestCaptor.capture());
 
@@ -128,7 +133,9 @@ public class SolicitorCreateConsentedMidHandlerTest {
 
     private CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
-        return CallbackRequest.builder().eventId("SomeEventId").caseDetails(caseDetails).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(123L).build();
+        caseDetails.setData(caseData);
+        return CallbackRequest.builder().eventId(EventType.SOLICITOR_CREATE.getCcdType())
+            .caseDetails(caseDetails).build();
     }
 }
