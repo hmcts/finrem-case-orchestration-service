@@ -166,7 +166,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         hearingDocumentService.sendInitialHearingCorrespondence(caseDetails, AUTH_TOKEN);
 
         when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(false);
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any())).thenReturn(true);
 
         verify(bulkPrintService).printApplicantDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
 

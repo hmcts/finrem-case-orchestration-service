@@ -178,8 +178,8 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     @Test
     public void givenSubmittedCallbackReceived_whenSubmitNotice_thenSendNoticeOfHearingEmailToAppAndResp() {
         caseDetails.getData().put(HEARING_NOTICE_DOCUMENT_PACK, buildHearingNoticePack());
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailPopulated(caseDetails)).thenReturn(true);
-        when(notificationService.isRespondentSolicitorRegisteredAndEmailPopulated(caseDetails)).thenReturn(true);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
         approvedOrderNoticeOfHearingService.printHearingNoticePackAndSendToApplicantAndRespondent(caseDetails, AUTH_TOKEN);
 
         assertNotificationServiceInteraction();

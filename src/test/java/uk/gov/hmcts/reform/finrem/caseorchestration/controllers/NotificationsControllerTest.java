@@ -80,7 +80,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @Test
     public void sendHwfSuccessfulConfirmationEmailIfDigitalCase() {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailPopulated(any())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any())).thenReturn(true);
 
         notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
 
@@ -91,22 +91,22 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @Test
     public void shouldNotSendHwfSuccessfulConfirmationEmail() {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailPopulated(any())).thenReturn(false);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any())).thenReturn(false);
 
         notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
 
-        verify(notificationService).isApplicantSolicitorRegisteredAndEmailPopulated(any());
+        verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(any());
         verifyNoMoreInteractions(notificationService);
     }
 
     @Test
     public void sendHwfSuccessfulNotificationLetterIfIsConsentedAndIsPaperApplication() {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailPopulated(any())).thenReturn(false);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any())).thenReturn(false);
 
         notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
 
-        verify(notificationService).isApplicantSolicitorRegisteredAndEmailPopulated(any());
+        verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(any());
         verifyNoMoreInteractions(notificationService);
         verify(bulkPrintService).sendDocumentForPrint(any(), any());
     }
@@ -226,7 +226,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @Test
     public void sendContestedHwfSuccessfulConfirmationEmail() {
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailPopulated(any())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any())).thenReturn(true);
         notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
 
         verify(notificationService).sendContestedHwfSuccessfulConfirmationEmail(any());
@@ -235,7 +235,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @Test
     public void shouldNotSendContestedHwfSuccessfulEmail() {
         when(caseDataService.isConsentedApplication(any())).thenReturn(false);
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any())).thenReturn(true);
 
         notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
 
@@ -244,7 +244,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void givenApplicantSolicitorIsRegisteredAndAgreedToEmails_shouldSendPrepareForHearingEmail() {
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any())).thenReturn(true);
 
         notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
 

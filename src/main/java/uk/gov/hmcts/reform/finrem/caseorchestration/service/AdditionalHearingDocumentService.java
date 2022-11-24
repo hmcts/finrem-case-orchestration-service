@@ -235,7 +235,7 @@ public class AdditionalHearingDocumentService {
 
         document.add(additionalDoc);
 
-        if (!notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
+        if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)) {
             bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, document);
         }
         if (!notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {

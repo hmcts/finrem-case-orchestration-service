@@ -91,7 +91,7 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
     public void givenApplicantSolicitorDigital_whenHandle_thenSendEmailToAppSolicitor() {
         callbackRequest.setCaseDetailsBefore(caseDetailsBefore(APPLICANT));
         when(generalApplicationHelper.objectToDynamicList(any())).thenReturn(generalApplicationDynamicList());
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails))
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails))
             .thenReturn(true);
         submittedHandler.handle(callbackRequest, AUTH_TOKEN);
         verify(notificationService).sendGeneralApplicationRejectionEmailToAppSolicitor(caseDetails);
@@ -111,7 +111,7 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
     public void givenApplicantSolicitorNotDigital_whenHandle_thenSendLetterToAppSolicitor() {
         callbackRequest.setCaseDetailsBefore(caseDetailsBefore(APPLICANT));
         when(generalApplicationHelper.objectToDynamicList(any())).thenReturn(generalApplicationDynamicList());
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails))
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails))
             .thenReturn(false);
         submittedHandler.handle(callbackRequest, AUTH_TOKEN);
         verify(paperNotificationService).printApplicantRejectionGeneralApplication(caseDetails, AUTH_TOKEN);

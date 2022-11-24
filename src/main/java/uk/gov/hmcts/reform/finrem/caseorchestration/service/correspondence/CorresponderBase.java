@@ -14,10 +14,10 @@ public abstract class CorresponderBase {
     protected final NotificationService notificationService;
 
     protected boolean shouldSendApplicantSolicitorEmail(CaseDetails caseDetails) {
-        return notificationService.isApplicantSolicitorRegisteredAndEmailPopulated(caseDetails);
+        return notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);
     }
 
     protected boolean shouldSendRespondentSolicitorEmail(CaseDetails caseDetails) {
-        return notificationService.isRespondentSolicitorRegisteredAndEmailPopulated(caseDetails);
+        return notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails);
     }
 }

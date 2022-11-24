@@ -451,14 +451,14 @@ public class NotificationService {
             && YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED)));
     }
 
-    public boolean isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(CaseDetails caseDetails) {
+    public boolean isApplicantSolicitorDigitalAndEmailPopulated(CaseDetails caseDetails) {
         return caseDataService.isApplicantSolicitorEmailPopulated(caseDetails)
             && checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString());
     }
 
-    public boolean isApplicantSolicitorRegisteredAndEmailPopulated(CaseDetails caseDetails) {
-        return caseDataService.isApplicantSolicitorEmailPopulated(caseDetails)
-            && checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString());
+    public boolean isRespondentSolicitorDigitalAndEmailPopulated(CaseDetails caseDetails) {
+        return caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseDetails.getData())
+            && checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
     }
 
     public boolean isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(CaseDetails caseDetails) {
@@ -466,14 +466,9 @@ public class NotificationService {
             && checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
     }
 
-    public boolean isRespondentSolicitorRegisteredAndEmailPopulated(CaseDetails caseDetails) {
-        return shouldEmailRespondentSolicitor(caseDetails.getData())
-            && checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
-    }
-
     public boolean isContestedApplicationAndApplicantOrRespondentSolicitorsIsNotRegisteredOrAcceptingEmails(CaseDetails caseDetails) {
         return caseDataService.isContestedPaperApplication(caseDetails)
-            && (!isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)
+            && (!isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)
             || !isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails));
     }
 

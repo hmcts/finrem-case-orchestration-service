@@ -30,17 +30,17 @@ public class HwfContestedApplicantCorresponderTest {
 
     @Test
     public void shouldEmailApplicant() {
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailPopulated(caseDetails)).thenReturn(true);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
         hwfContestedApplicantCorresponder.sendApplicantEmail(caseDetails);
-        verify(notificationService).isApplicantSolicitorRegisteredAndEmailPopulated(caseDetails);
+        verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);
         verify(notificationService).sendContestedHwfSuccessfulConfirmationEmail(caseDetails);
     }
 
     @Test
     public void shouldNotEmailApplicant() {
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailPopulated(caseDetails)).thenReturn(false);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         hwfContestedApplicantCorresponder.sendApplicantEmail(caseDetails);
-        verify(notificationService).isApplicantSolicitorRegisteredAndEmailPopulated(caseDetails);
+        verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);
         verifyNoMoreInteractions(notificationService);
     }
 }
