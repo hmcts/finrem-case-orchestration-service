@@ -102,6 +102,7 @@ public class CCDConfigConstant {
     public static final String BRISTOLFRC = "bristol";
     public static final String CFC = "cfc";
     public static final String CLEAVELAND = "cleaveland";
+    public static final String CLEVELAND = "cleveland";
     public static final String DEVON = "devon";
     public static final String DORSET = "dorset";
     public static final String HSYORKSHIRE = "hsyorkshire";
