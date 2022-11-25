@@ -12,7 +12,15 @@ import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseLocation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.LondonCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionLondonFrc;
 
 import java.util.HashMap;
 import java.util.List;
@@ -53,12 +61,22 @@ public class CaseManagementLocationServiceTest {
     private CaseDetails caseDetails;
     private Map<String, Object> caseData;
 
+    private FinremCallbackRequest finremCallbackRequest;
+    private FinremCaseDetails finremCaseDetails;
+    private FinremCaseData finremCaseData;
+
     @Before
     public void setUp() {
         caseData = new HashMap<>();
         caseDetails = CaseDetails.builder().id(CASE_ID).data(caseData).build();
         callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         ReflectionTestUtils.setField(caseManagementLocationService, "courtIdMappingJsonFile", "/json/court-id-mappings.json");
+
+        finremCaseData = new FinremCaseData();
+        finremCaseDetails =  FinremCaseDetails.builder().data(finremCaseData).build();
+        finremCallbackRequest = FinremCallbackRequest.builder()
+            .caseDetails(finremCaseDetails)
+            .build();
     }
 
     @Test
@@ -115,5 +133,37 @@ public class CaseManagementLocationServiceTest {
         List<String> errors = response.getErrors();
         assertThat(errors, hasSize(1));
         assertThat(errors, contains(COURT_ID_MISSING_ERROR));
+    }
+
+    @Test
+    public void givenContestedCaseAndValidRequest_whenSetCaseManagementLocationFinrem_thenSetCaseManagementLocation() {
+        finremCaseData.getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.LONDON);
+        finremCaseData.getRegionWrapper().getDefaultRegionWrapper().setLondonFrcList(RegionLondonFrc.LONDON);
+        finremCaseData.getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
+            .setCfcCourtList(CfcCourt.CENTRAL_FAMILY_COURT);
+        finremCaseData.setCcdCaseType(CaseType.CONTESTED);
+
+        FinremCaseData responseData = caseManagementLocationService.setCaseManagementLocation(finremCallbackRequest).getData();
+
+        assertThat(responseData.getWorkAllocationWrapper().getCaseManagementLocation().getBaseLocation(),
+            is(String.valueOf(FAMILY_COURT_EPIMMS_ID)));
+        assertThat(responseData.getWorkAllocationWrapper().getCaseManagementLocation().getRegion(),
+            is(String.valueOf(FAMILY_COURT_REGION_ID)));
+    }
+
+    @Test
+    public void givenConsentedCaseAndValidRequest_whenSetCaseManagementLocationFinrem_thenSetCaseManagementLocation() {
+        finremCaseData.getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.LONDON);
+        finremCaseData.getRegionWrapper().getDefaultRegionWrapper().setLondonFrcList(RegionLondonFrc.LONDON);
+        finremCaseData.getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
+            .setLondonCourtList(LondonCourt.CENTRAL_FAMILY_COURT);
+        finremCaseData.setCcdCaseType(CaseType.CONSENTED);
+
+        FinremCaseData responseData = caseManagementLocationService.setCaseManagementLocation(finremCallbackRequest).getData();
+
+        assertThat(responseData.getWorkAllocationWrapper().getCaseManagementLocation().getBaseLocation(),
+            is(String.valueOf(FAMILY_COURT_EPIMMS_ID)));
+        assertThat(responseData.getWorkAllocationWrapper().getCaseManagementLocation().getRegion(),
+            is(String.valueOf(FAMILY_COURT_REGION_ID)));
     }
 }
