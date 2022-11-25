@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureAppl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ReferToJudgeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.WorkAllocationWrapper;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -305,6 +306,9 @@ public class FinremCaseData {
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private ConsentOrderWrapper consentOrderWrapper;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private WorkAllocationWrapper workAllocationWrapper;
 
     @JsonIgnore
     public MiamWrapper getMiamWrapper() {
@@ -402,6 +406,15 @@ public class FinremCaseData {
         }
 
         return consentOrderWrapper;
+    }
+
+    @JsonIgnore
+    public WorkAllocationWrapper getWorkAllocationWrapper() {
+        if (workAllocationWrapper == null) {
+            this.workAllocationWrapper = new WorkAllocationWrapper();
+        }
+
+        return workAllocationWrapper;
     }
 
     @JsonIgnore

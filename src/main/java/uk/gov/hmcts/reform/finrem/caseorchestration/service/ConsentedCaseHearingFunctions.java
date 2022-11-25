@@ -1,5 +1,16 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CourtList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionMidlandsFrc;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionNorthEastFrc;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionNorthWestFrc;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionSouthEastFrc;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionSouthWestFrc;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionWalesFrc;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCourtListWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
+
 import java.util.Map;
 import java.util.Objects;
 
@@ -79,6 +90,19 @@ public class ConsentedCaseHearingFunctions {
         };
     }
 
+    public static CourtList getSelectedCourt(FinremCaseData caseData) {
+        RegionWrapper courtInfo = caseData.getRegionWrapper();
+        return switch (courtInfo.getDefaultRegionWrapper().getRegionList()) {
+            case SOUTHWEST -> getSouthWestFRC(caseData);
+            case MIDLANDS -> getMidlandFRC(caseData);
+            case NORTHWEST -> getNorthWestFRC(caseData);
+            case LONDON -> getLondonFRC(caseData);
+            case NORTHEAST -> getNorthEastFRC(caseData);
+            case WALES -> getWalesFRC(caseData);
+            case SOUTHEAST -> getSouthEastFRC(caseData);
+        };
+    }
+
     private static String getSouthWestFRC(Map<String, Object> caseData) {
         return switch (Objects.toString(caseData.get(SOUTHWEST_FRC_LIST), EMPTY)) {
             case OTHER -> Objects.toString(caseData.get(SWOTHER_COURTLIST), EMPTY);
@@ -86,6 +110,16 @@ public class ConsentedCaseHearingFunctions {
             case DORSET -> Objects.toString(caseData.get(DORSET_COURTLIST), "");
             case BRISTOLFRC -> Objects.toString(caseData.get(BRISTOL_COURTLIST), "");
             default -> EMPTY;
+        };
+    }
+
+    private static CourtList getSouthWestFRC(FinremCaseData caseData) {
+        RegionSouthWestFrc southWestFrc = caseData.getRegionWrapper().getDefaultRegionWrapper().getSouthWestFrcList();
+        DefaultCourtListWrapper courts = caseData.getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper();
+        return switch (southWestFrc) {
+            case DEVON -> courts.getDevonCourtList();
+            case DORSET -> courts.getDorsetCourtList();
+            case BRISTOL -> courts.getBristolCourt();
         };
     }
 
@@ -99,6 +133,17 @@ public class ConsentedCaseHearingFunctions {
         };
     }
 
+    private static CourtList getSouthEastFRC(FinremCaseData caseData) {
+        RegionSouthEastFrc southEastFrcList = caseData.getRegionWrapper().getDefaultRegionWrapper().getSouthEastFrcList();
+        DefaultCourtListWrapper courts = caseData.getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper();
+
+        return switch (southEastFrcList) {
+            case KENT -> courts.getKentSurreyCourt();
+            case BEDFORDSHIRE -> courts.getBedfordshireCourt();
+            case THAMES_VALLEY -> courts.getThamesValleyCourt();
+        };
+    }
+
     private static String getWalesFRC(Map<String, Object> caseData) {
         return switch (Objects.toString(caseData.get(WALES_FRC_LIST), EMPTY)) {
             case NEWPORT -> Objects.toString(caseData.get(NEWPORT_COURTLIST), EMPTY);
@@ -106,6 +151,17 @@ public class ConsentedCaseHearingFunctions {
             case OTHER -> Objects.toString(caseData.get(WALES_OTHER_COURTLIST), EMPTY);
             case NORTHWALES ->  Objects.toString(caseData.get(NORTH_WALES_COURTLIST), EMPTY);
             default -> EMPTY;
+        };
+    }
+
+    private static CourtList getWalesFRC(FinremCaseData caseData) {
+        RegionWalesFrc walesFrc = caseData.getRegionWrapper().getDefaultRegionWrapper().getWalesFrcList();
+        DefaultCourtListWrapper courts = caseData.getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper();
+
+        return switch (walesFrc) {
+            case NORTH_WALES -> courts.getNorthWalesCourt();
+            case NEWPORT -> courts.getNewportCourt();
+            case SWANSEA -> courts.getSwanseaCourt();
         };
     }
 
@@ -119,12 +175,27 @@ public class ConsentedCaseHearingFunctions {
         };
     }
 
+    private static CourtList getNorthWestFRC(FinremCaseData caseData) {
+        RegionNorthWestFrc northWestFrc = caseData.getRegionWrapper().getDefaultRegionWrapper().getNorthWestFrcList();
+        DefaultCourtListWrapper courts = caseData.getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper();
+
+        return switch (northWestFrc) {
+            case LIVERPOOL -> courts.getLiverpoolCourt();
+            case LANCASHIRE -> courts.getLancashireCourt();
+            case MANCHESTER -> courts.getManchesterCourt();
+        };
+    }
+
     private static String getLondonFRC(Map<String, Object> caseData) {
         String londonList = Objects.toString(caseData.get(LONDON_FRC_LIST), EMPTY);
         if (LONDON.equalsIgnoreCase(londonList)) {
             return Objects.toString(caseData.get(LONDON_COURTLIST), EMPTY);
         }
         return EMPTY;
+    }
+
+    private static CourtList getLondonFRC(FinremCaseData caseData) {
+        return caseData.getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper().getLondonCourtList();
     }
 
     private static String getNorthEastFRC(Map<String, Object> caseData) {
@@ -136,11 +207,32 @@ public class ConsentedCaseHearingFunctions {
         };
     }
 
+    private static CourtList getNorthEastFRC(FinremCaseData caseData) {
+        RegionNorthEastFrc northEastFrcList = caseData.getRegionWrapper().getDefaultRegionWrapper().getNorthEastFrcList();
+        DefaultCourtListWrapper courts = caseData.getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper();
+
+        return switch (northEastFrcList) {
+            case CLEVELAND -> courts.getClevelandCourt(true);
+            case NW_YORKSHIRE -> courts.getNwYorkshireCourt();
+            case HS_YORKSHIRE -> courts.getHumberCourt();
+        };
+    }
+
     private static String getMidlandFRC(Map<String, Object> caseData) {
         return switch (Objects.toString(caseData.get(MIDLANDS_FRC_LIST), EMPTY)) {
             case NOTTINGHAM -> Objects.toString(caseData.get(NOTTINGHAM_COURTLIST), EMPTY);
             case BIRMINGHAM -> Objects.toString(caseData.get(BIRMINGHAM_COURTLIST), EMPTY);
             default -> EMPTY;
+        };
+    }
+
+    private static CourtList getMidlandFRC(FinremCaseData caseData) {
+        RegionMidlandsFrc midlandsFrcList = caseData.getRegionWrapper().getDefaultRegionWrapper().getMidlandsFrcList();
+        DefaultCourtListWrapper courts = caseData.getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper();
+
+        return switch (midlandsFrcList) {
+            case BIRMINGHAM -> courts.getBirminghamCourt();
+            case NOTTINGHAM -> courts.getNottinghamCourt();
         };
     }
 }

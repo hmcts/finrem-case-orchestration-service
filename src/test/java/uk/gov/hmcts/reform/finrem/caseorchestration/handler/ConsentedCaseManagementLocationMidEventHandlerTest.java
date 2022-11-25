@@ -5,13 +5,17 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseLocation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseManagementLocationService;
 
 import java.util.HashMap;
@@ -23,7 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_MANAGEMENT_LOCATION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.GIVE_ALLOCATION_DIRECTIONS;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ConsentedCaseManagementLocationMidEventHandlerTest {
@@ -33,6 +37,9 @@ public class ConsentedCaseManagementLocationMidEventHandlerTest {
 
     @Mock
     private CaseManagementLocationService caseManagementLocationService;
+
+    @Mock
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @InjectMocks
     private ConsentedCaseManagementLocationMidEventHandler consentedCaseManagementLocationMidEventHandler;
@@ -71,21 +78,34 @@ public class ConsentedCaseManagementLocationMidEventHandlerTest {
     public void givenValidRequest_whenHandle_thenReturnExpectedResponse() {
         Map<String, Object> caseData = new HashMap<>();
         CaseDetails caseDetails = CaseDetails.builder().data(caseData).build();
-        callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        callbackRequest = CallbackRequest.builder().eventId(GIVE_ALLOCATION_DIRECTIONS.getCcdType())
+            .caseDetails(caseDetails).build();
+        FinremCaseDetails finremCaseDetails = buildFinremCaseDetails();
 
-        when(caseManagementLocationService.setCaseManagementLocation(any()))
+        when(finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails)).thenReturn(finremCaseDetails);
+        when(caseManagementLocationService.setCaseManagementLocation(any(FinremCallbackRequest.class)))
             .thenReturn(aboutToStartOrSubmitCallbackResponse());
 
-        AboutToStartOrSubmitCallbackResponse response = consentedCaseManagementLocationMidEventHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            consentedCaseManagementLocationMidEventHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(caseManagementLocationService).setCaseManagementLocation(callbackRequest);
+        verify(caseManagementLocationService).setCaseManagementLocation(finremCallbackRequest(finremCaseDetails));
 
-        assertThat(response.getData().get(CASE_MANAGEMENT_LOCATION), is(caseLocation()));
+        assertThat(response.getData().getWorkAllocationWrapper().getCaseManagementLocation(), is(caseLocation()));
     }
 
-    private AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse() {
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(Map.of(CASE_MANAGEMENT_LOCATION, caseLocation()))
+    private FinremCaseDetails buildFinremCaseDetails() {
+        return FinremCaseDetails.builder().id(1234567890L)
+            .caseType(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED)
+            .state(State.CONSENT_ORDER_MADE)
+            .data(new FinremCaseData()).build();
+    }
+
+    private GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> aboutToStartOrSubmitCallbackResponse() {
+        FinremCaseData caseData = new FinremCaseData();
+        caseData.getWorkAllocationWrapper().setCaseManagementLocation(caseLocation());
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+            .data(caseData)
             .build();
     }
 
@@ -93,6 +113,14 @@ public class ConsentedCaseManagementLocationMidEventHandlerTest {
         return CaseLocation.builder()
             .baseLocation(BASE_LOCATION)
             .region(REGION)
+            .build();
+    }
+
+    private FinremCallbackRequest finremCallbackRequest(FinremCaseDetails caseDetails) {
+        return FinremCallbackRequest
+            .builder()
+            .caseDetails(caseDetails)
+            .eventType(GIVE_ALLOCATION_DIRECTIONS)
             .build();
     }
 }

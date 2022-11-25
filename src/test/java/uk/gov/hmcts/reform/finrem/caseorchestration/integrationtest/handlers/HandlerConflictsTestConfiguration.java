@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.InterimHearingHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedConfidentialDocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedDocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedGeneralDocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.InterimHearingItemMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ApprovedOrderNoticeOfHearingService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -27,6 +28,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDi
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InterimHearingService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ManageCaseDocumentsService;
@@ -149,4 +151,10 @@ public class HandlerConflictsTestConfiguration {
 
     @MockBean
     UploadedGeneralDocumentHelper uploadedGeneralDocumentHelper;
+
+    @MockBean
+    FinremCaseDetailsMapper finremCaseDetailsMapper;
+
+    @MockBean
+    HearingDocumentService hearingDocumentService;
 }

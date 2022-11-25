@@ -8,11 +8,15 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseLocation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CourtList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,7 +47,7 @@ public class CaseManagementLocationService {
         this.caseDataService = caseDataService;
     }
 
-    public AboutToStartOrSubmitCallbackResponse setCaseManagementLocation(CallbackRequest callbackRequest) {
+    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> setCaseManagementLocation(CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
         List<String> errors = new ArrayList<>();
@@ -52,7 +56,7 @@ public class CaseManagementLocationService {
 
         if (StringUtils.isBlank(selectedCourtId)) {
             errors.add("Selected court data is missing from caseData");
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build();
+            return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).errors(errors).build();
         }
 
         try {
@@ -64,7 +68,27 @@ public class CaseManagementLocationService {
             errors.add(String.format("Error parsing court Ids: %s", e.getMessage()));
         }
 
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).errors(errors).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).errors(errors).build();
+    }
+
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> setCaseManagementLocation(FinremCallbackRequest callbackRequest) {
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData caseData = caseDetails.getData();
+        List<String> errors = new ArrayList<>();
+
+        CourtList selectedCourtId = getSelectedCourtId(caseDetails);
+
+        try {
+            Map<String, Object> courtIdMap = objectMapper.readValue(getCourtIdMappingsString(),
+                TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, Object.class));
+            String courtId = selectedCourtId.getSelectedCourtId();
+            CaseLocation caseManagementLocation = objectMapper.convertValue(courtIdMap.get(courtId), CaseLocation.class);
+            caseData.getWorkAllocationWrapper().setCaseManagementLocation(caseManagementLocation);
+        } catch (JsonProcessingException e) {
+            errors.add(String.format("Error parsing court Ids: %s", e.getMessage()));
+        }
+
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).errors(errors).build();
     }
 
     private String getCourtIdMappingsString() {
@@ -81,5 +105,13 @@ public class CaseManagementLocationService {
         return caseDataService.isConsentedApplication(caseDetails)
             ? ConsentedCaseHearingFunctions.getSelectedCourt(caseData)
             : Objects.toString(caseData.get(getSelectedCourt(caseData)), StringUtils.EMPTY);
+    }
+
+    private CourtList getSelectedCourtId(FinremCaseDetails caseDetails) {
+        FinremCaseData caseData = caseDetails.getData();
+
+        return caseData.isConsentedApplication()
+            ? ConsentedCaseHearingFunctions.getSelectedCourt(caseData)
+            : getSelectedCourt(caseData);
     }
 }

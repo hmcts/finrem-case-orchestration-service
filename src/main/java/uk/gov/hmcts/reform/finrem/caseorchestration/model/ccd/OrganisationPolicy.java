@@ -23,5 +23,4 @@ public class OrganisationPolicy {
 
     @JsonProperty("OrgPolicyReference")
     private String orgPolicyReference;
-
 }

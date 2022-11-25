@@ -67,14 +67,14 @@ public class SolicitorCreateConsentedMidHandlerTest {
     }
 
     @Test
-    public void given_case_when_wrong_casetype_then_case_can_not_handle() {
+    public void given_case_when_wrong_caseType_then_case_can_not_handle() {
         assertThat(solicitorCreateConsentedMidHandler
                 .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.SOLICITOR_CREATE),
             is(false));
     }
 
     @Test
-    public void given_case_when_wrong_eventtype_then_case_can_not_handle() {
+    public void given_case_when_wrong_eventType_then_case_can_not_handle() {
         assertThat(solicitorCreateConsentedMidHandler
                 .canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.CLOSE),
             is(false));
@@ -86,13 +86,10 @@ public class SolicitorCreateConsentedMidHandlerTest {
         List<String> orderList = List.of("Variation Order", "Property Adjustment Order");
         callbackRequest.getCaseDetails().getData().put("natureOfApplication2", orderList);
 
-        when(caseManagementLocationService.setCaseManagementLocation(any()))
-            .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().build());
+        when(caseManagementLocationService.setCaseManagementLocation(any(CallbackRequest.class)))
+            .thenReturn(GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().build());
 
         solicitorCreateConsentedMidHandler.handle(callbackRequest, AUTH_TOKEN);
-
-        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response =
-            solicitorCreateConsentedMidHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(caseManagementLocationService).setCaseManagementLocation(requestCaptor.capture());
 
@@ -112,12 +109,10 @@ public class SolicitorCreateConsentedMidHandlerTest {
         List<String> orderList = List.of("Property Adjustment Order");
         callbackRequest.getCaseDetails().getData().put("natureOfApplication2", orderList);
 
-        when(caseManagementLocationService.setCaseManagementLocation(any()))
-            .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().build());
+        when(caseManagementLocationService.setCaseManagementLocation(any(CallbackRequest.class)))
+            .thenReturn(GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().build());
 
         solicitorCreateConsentedMidHandler.handle(callbackRequest, AUTH_TOKEN);
-        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response =
-            solicitorCreateConsentedMidHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(caseManagementLocationService).setCaseManagementLocation(requestCaptor.capture());
 

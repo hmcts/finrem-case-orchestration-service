@@ -9,9 +9,9 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseLocation;
 
 import java.util.HashMap;
@@ -97,7 +97,8 @@ public class CaseManagementLocationServiceTest {
     public void givenConsentedInvalidRequest_whenSetCaseManagementLocation_thenReturnError() {
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
 
-        AboutToStartOrSubmitCallbackResponse response = caseManagementLocationService.setCaseManagementLocation(callbackRequest);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response =
+            caseManagementLocationService.setCaseManagementLocation(callbackRequest);
 
         List<String> errors = response.getErrors();
         assertThat(errors, hasSize(1));
@@ -108,7 +109,8 @@ public class CaseManagementLocationServiceTest {
     public void givenContestedInvalidRequest_whenSetCaseManagementLocation_thenReturnError() {
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(false);
 
-        AboutToStartOrSubmitCallbackResponse response = caseManagementLocationService.setCaseManagementLocation(callbackRequest);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response =
+            caseManagementLocationService.setCaseManagementLocation(callbackRequest);
 
         List<String> errors = response.getErrors();
         assertThat(errors, hasSize(1));
