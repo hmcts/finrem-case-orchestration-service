@@ -50,8 +50,10 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
     private static final String COVER_LETTER_URL = "cover_letter_url";
     private static final String GENERAL_ORDER_URL = "general_letter_url";
 
-    @Autowired private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
-    @Autowired private DocumentClient documentClientMock;
+    @Autowired
+    private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
+    @Autowired
+    private DocumentClient documentClientMock;
 
     private CaseDetails caseDetails;
 

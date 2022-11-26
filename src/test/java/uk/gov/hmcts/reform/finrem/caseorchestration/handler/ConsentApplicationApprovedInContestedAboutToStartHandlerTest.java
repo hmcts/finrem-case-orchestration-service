@@ -5,10 +5,10 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
@@ -62,14 +62,14 @@ public class ConsentApplicationApprovedInContestedAboutToStartHandlerTest {
     @Test
     public void givenContestedCase_whenEventExecuted_thenSetTheLoggedInUserIfNull() {
         when(service.getIdamFullName(AUTH_TOKEN)).thenReturn("Moj Judge");
-        AboutToStartOrSubmitCallbackResponse response = handler.handle(buildCallbackRequest(null), AUTH_TOKEN);
-        assertEquals("Moj Judge",response.getData().get(CONTESTED_ORDER_DIRECTION_JUDGE_NAME));
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(buildCallbackRequest(null), AUTH_TOKEN);
+        assertEquals("Moj Judge", response.getData().get(CONTESTED_ORDER_DIRECTION_JUDGE_NAME));
     }
 
     @Test
     public void givenContestedCase_whenEventExecuted_thenDoNotSetIfUserIsAlreadyThere() {
-        AboutToStartOrSubmitCallbackResponse response = handler.handle(buildCallbackRequest("HM Moj Judge"), AUTH_TOKEN);
-        assertEquals("HM Moj Judge",response.getData().get(CONTESTED_ORDER_DIRECTION_JUDGE_NAME));
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(buildCallbackRequest("HM Moj Judge"), AUTH_TOKEN);
+        assertEquals("HM Moj Judge", response.getData().get(CONTESTED_ORDER_DIRECTION_JUDGE_NAME));
     }
 
     private CallbackRequest buildCallbackRequest(String judgeName) {
@@ -78,6 +78,6 @@ public class ConsentApplicationApprovedInContestedAboutToStartHandlerTest {
         CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CaseType.CONTESTED.getCcdType())
             .id(123L).data(caseData).build();
         return CallbackRequest.builder()
-                .eventId(EventType.CONSENT_APPLICATION_APPROVED_IN_CONTESTED.getCcdType()).caseDetails(caseDetails).build();
+            .eventId(EventType.CONSENT_APPLICATION_APPROVED_IN_CONTESTED.getCcdType()).caseDetails(caseDetails).build();
     }
 }

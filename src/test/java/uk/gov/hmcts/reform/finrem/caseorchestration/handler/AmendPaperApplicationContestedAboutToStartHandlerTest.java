@@ -3,10 +3,13 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueService;
@@ -51,16 +54,18 @@ public class AmendPaperApplicationContestedAboutToStartHandlerTest {
             is(true));
     }
 
+
     @Test
     public void handle() {
         CallbackRequest callbackRequest = buildCallbackRequest();
-        AboutToStartOrSubmitCallbackResponse response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
         assertEquals(NO_VALUE, response.getData().get(CIVIL_PARTNERSHIP));
     }
 
     private CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
         CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
-        return CallbackRequest.builder().eventId("SomeEventId").caseDetails(caseDetails).build();
+        return CallbackRequest.builder()
+            .eventId(EventType.AMEND_CASE.getCcdType()).caseDetails(caseDetails).build();
     }
 }

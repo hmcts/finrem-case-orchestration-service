@@ -59,7 +59,8 @@ public class GeneralApplicationServiceTest {
     public static final String DOC_UPLOADED_NAME = "app_docs";
     public static final String WORD_FORMAT_EXTENSION = ".doc";
     public static final String PDF_FORMAT_EXTENSION = ".pdf";
-    public static final String DOC_IN_EXISTING_COLLECTION_URL = "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-c06d1e6344ee";
+    public static final String DOC_IN_EXISTING_COLLECTION_URL =
+        "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-c06d1e6344ee";
     public static final String USER_NAME = "Tony";
     private static final String GA_SINGLE_JSON = "/fixtures/contested/general-application-single.json";
     private static final String GA_DOUBLE_JSON = "/fixtures/contested/general-application-double.json";
@@ -107,7 +108,7 @@ public class GeneralApplicationServiceTest {
         assertEquals(2, generalApplicationCollectionDataList.size());
         assertEquals(LocalDate.now(),
             generalApplicationCollectionDataList.get(0).getGeneralApplicationItems().getGeneralApplicationCreatedDate());
-        assertEquals(LocalDate.of(2022,8,2),
+        assertEquals(LocalDate.of(2022, 8, 2),
             generalApplicationCollectionDataList.get(1).getGeneralApplicationItems().getGeneralApplicationCreatedDate());
 
         verify(idamService).getIdamFullName(any());
@@ -171,7 +172,7 @@ public class GeneralApplicationServiceTest {
         generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
 
         List<GeneralApplicationData> generalApplicationDataList = objectMapper.convertValue(caseDetails.getData()
-            .get(GENERAL_APPLICATION_DOCUMENT_COLLECTION), new TypeReference<>(){});
+            .get(GENERAL_APPLICATION_DOCUMENT_COLLECTION), new TypeReference<>() {});
         assertThat(generalApplicationDataList, hasSize(1));
         assertThat(
             matchesUploadedDocumentFields(
@@ -196,7 +197,7 @@ public class GeneralApplicationServiceTest {
         generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, AUTH_TOKEN);
 
         List<GeneralApplicationData> generalApplicationDataList = objectMapper.convertValue(caseDetails.getData()
-                .get(GENERAL_APPLICATION_DOCUMENT_COLLECTION), new TypeReference<>(){});
+            .get(GENERAL_APPLICATION_DOCUMENT_COLLECTION), new TypeReference<>() {});
         assertThat(generalApplicationDataList, hasSize(2));
         assertThat(generalApplicationDataList.get(0).getGeneralApplication().getGeneralApplicationDocument().getDocumentUrl(),
             is(DOC_IN_EXISTING_COLLECTION_URL));
@@ -230,9 +231,8 @@ public class GeneralApplicationServiceTest {
         when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn(USER_NAME);
         generalApplicationService.updateCaseDataStart(caseDetails.getData(), AUTH_TOKEN);
 
-        assertThat(caseDetails.getData().get(GENERAL_APPLICATION_CREATED_BY),is(USER_NAME));
+        assertThat(caseDetails.getData().get(GENERAL_APPLICATION_CREATED_BY), is(USER_NAME));
     }
-
 
 
     private List<GeneralApplicationData> getGeneralApplicationDataList() {
@@ -276,7 +276,7 @@ public class GeneralApplicationServiceTest {
         return CaseDetails.builder().state("applicationIssued").build();
     }
 
-    private CaseDetails buildCaseDetails(String path)  {
+    private CaseDetails buildCaseDetails(String path) {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(path)) {
             CaseDetails caseDetails = objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
             return CallbackRequest.builder().caseDetails(caseDetails).build().getCaseDetails();

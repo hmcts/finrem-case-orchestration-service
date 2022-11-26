@@ -102,6 +102,7 @@ public class CCDConfigConstant {
     public static final String BRISTOLFRC = "bristol";
     public static final String CFC = "cfc";
     public static final String CLEAVELAND = "cleaveland";
+    public static final String CLEVELAND = "cleveland";
     public static final String DEVON = "devon";
     public static final String DORSET = "dorset";
     public static final String HSYORKSHIRE = "hsyorkshire";
@@ -475,7 +476,7 @@ public class CCDConfigConstant {
 
     public static final String CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION = "manageCaseDocumentCollection";
 
-    public static final String AMENDED_CONSENT_ORDER = "AmendedConsentOrder";
+    public static final String AMEND_CONSENT_ORDER = "AmendedConsentOrder";
 
     //organisation policy
     public static final String ORGANISATION_POLICY_APPLICANT = "ApplicantOrganisationPolicy";
@@ -584,6 +585,8 @@ public class CCDConfigConstant {
     public static final String REPRESENTATION_UPDATE_HISTORY = "RepresentationUpdateHistory";
     public static final String INCLUDES_REPRESENTATIVE_UPDATE = "updateIncludesRepresentativeChange";
     public static final String UPDATE_CONTACT_DETAILS_EVENT = "FR_updateContactDetails";
+    public static final String NOTICE_OF_CHANGE = "Notice of Change";
+    public static final String IS_NOC_REJECTED = "isNocRejected";
 
     public static final String HEARING_UPLOAD_BUNDLE_COLLECTION = "hearingUploadBundle";
     public static final String SEND_ORDER_POST_STATE_OPTION_FIELD = "sendOrderPostStateOption";
@@ -605,6 +608,7 @@ public class CCDConfigConstant {
     public static final String RESPONDENT_BARRISTER_ROLE = "[RESPBARRISTER]";
     public static final String CASEWORKER_ROLE = "[CASEWORKER]";
     public static final String MANAGE_BARRISTER_PARTY = "barristerParty";
+    public static final String MANAGE_BARRISTERS = "Manage Barristers";
 
 
     //Hearing Events
