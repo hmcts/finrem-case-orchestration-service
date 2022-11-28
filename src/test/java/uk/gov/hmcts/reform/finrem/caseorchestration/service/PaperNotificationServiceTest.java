@@ -26,11 +26,16 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
     @Autowired
     private PaperNotificationService paperNotificationService;
 
-    @MockBean private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
-    @MockBean private ManualPaymentDocumentService manualPaymentDocumentService;
-    @MockBean private BulkPrintService bulkPrintService;
-    @MockBean private CaseDataService caseDataService;
-    @MockBean private RejectGeneralApplicationDocumentService rejectGeneralApplicationDocumentService;
+    @MockBean
+    private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
+    @MockBean
+    private ManualPaymentDocumentService manualPaymentDocumentService;
+    @MockBean
+    private BulkPrintService bulkPrintService;
+    @MockBean
+    private CaseDataService caseDataService;
+    @MockBean
+    private RejectGeneralApplicationDocumentService rejectGeneralApplicationDocumentService;
 
     @Test
     public void sendAssignToJudgeNotificationLetterIfIsPaperApplication() {

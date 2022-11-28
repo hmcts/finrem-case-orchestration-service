@@ -62,14 +62,14 @@ public class GeneralApplicationService {
         List<GeneralApplicationCollectionData> generalApplicationListBefore = helper.getGeneralApplicationList(caseDetailsBefore.getData());
         List<GeneralApplicationCollectionData> generalApplicationList = helper.getGeneralApplicationList(caseDetails.getData());
 
-        String initialCollectionId  = Objects.toString(caseDetails.getData().get(GENERAL_APPLICATION_TRACKING), null);
+        String initialCollectionId = Objects.toString(caseDetails.getData().get(GENERAL_APPLICATION_TRACKING), null);
 
         List<GeneralApplicationCollectionData> interimGeneralApplicationList = generalApplicationList.stream()
             .filter(f -> generalApplicationListBefore.stream().map(GeneralApplicationCollectionData::getId)
-                .noneMatch(i -> i.equals(f.getId()))).toList();
+                .noneMatch(i -> i.equals(f.getId()))).collect(Collectors.toList());
 
         List<GeneralApplicationCollectionData> processableList = interimGeneralApplicationList.stream()
-            .filter(f -> !(initialCollectionId != null && initialCollectionId.equals(f.getId()))).toList();
+            .filter(f -> !(initialCollectionId != null && initialCollectionId.equals(f.getId()))).collect(Collectors.toList());
 
         Map<String, Object> caseData = caseDetails.getData();
         caseData.put(GENERAL_APPLICATION_PRE_STATE, caseDetailsBefore.getState());
@@ -91,12 +91,11 @@ public class GeneralApplicationService {
 
         List<GeneralApplicationCollectionData> applicationCollectionDataList = generalApplicationCollectionDataList.stream()
             .sorted(helper::getCompareTo)
-            .toList();
+            .collect(Collectors.toList());
 
         caseData.put(GENERAL_APPLICATION_COLLECTION, applicationCollectionDataList);
         return caseData;
     }
-
 
 
     private GeneralApplicationCollectionData setUserAndDate(CaseDetails caseDetails,
@@ -117,7 +116,7 @@ public class GeneralApplicationService {
         List<GeneralApplicationSupportingDocumentData> gaSupportDocuments = generalApplicationItems.getGaSupportDocuments();
         if (gaSupportDocuments != null && !gaSupportDocuments.isEmpty()) {
             List<GeneralApplicationSupportingDocumentData> generalApplicationSupportingDocumentDataList
-                = gaSupportDocuments.stream().map(sd -> processSupportingDocuments(sd.getValue(), userAuthorisation)).toList();
+                = gaSupportDocuments.stream().map(sd -> processSupportingDocuments(sd.getValue(), userAuthorisation)).collect(Collectors.toList());
             generalApplicationItems.setGaSupportDocuments(generalApplicationSupportingDocumentDataList);
         }
 
@@ -144,7 +143,6 @@ public class GeneralApplicationService {
         return genericDocumentService.convertDocumentIfNotPdfAlready(
             documentHelper.convertToCaseDocument(caseDocument), userAuthorisation);
     }
-
 
 
     public void updateCaseDataSubmit(Map<String, Object> caseData, CaseDetails caseDetailsBefore, String authorisationToken) {

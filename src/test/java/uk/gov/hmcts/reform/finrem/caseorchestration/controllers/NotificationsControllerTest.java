@@ -36,25 +36,38 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IS_NOC_REJECTED;
 
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(NotificationsController.class)
 public class NotificationsControllerTest extends BaseControllerTest {
 
-    @Autowired private NotificationsController notificationsController;
-    @MockBean private NocLetterNotificationService nocLetterNotificationService;
-    @MockBean private NotificationService notificationService;
-    @MockBean private PaperNotificationService paperNotificationService;
-    @MockBean private GeneralEmailService generalEmailService;
-    @MockBean private HelpWithFeesDocumentService helpWithFeesDocumentService;
-    @MockBean private CaseDataService caseDataService;
-    @MockBean private TransferCourtService transferCourtService;
-    @MockBean private FeatureToggleService featureToggleService;
-    @MockBean private CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
-    @MockBean private CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
+    @Autowired
+    private NotificationsController notificationsController;
+    @MockBean
+    private NocLetterNotificationService nocLetterNotificationService;
+    @MockBean
+    private NotificationService notificationService;
+    @MockBean
+    private PaperNotificationService paperNotificationService;
+    @MockBean
+    private GeneralEmailService generalEmailService;
+    @MockBean
+    private HelpWithFeesDocumentService helpWithFeesDocumentService;
+    @MockBean
+    private CaseDataService caseDataService;
+    @MockBean
+    private TransferCourtService transferCourtService;
+    @MockBean
+    private FeatureToggleService featureToggleService;
+    @MockBean
+    private CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
+    @MockBean
+    private CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
 
     @Test
     public void sendHwfSuccessfulConfirmationEmailIfDigitalCase() {
@@ -737,12 +750,22 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void givenNoticeOfChangeWhenSendNoticeOfChangeNotificationsThenSendNoticeOfChangeServiceCalled() {
-
         notificationsController.sendNoticeOfChangeNotifications("authToken", buildCallbackRequestWithBeforeCaseDetails());
 
         verify(notificationService, times(1)).sendNoticeOfChangeEmail(any());
 
         verify(nocLetterNotificationService, times(1)).sendNoticeOfChangeLetters(any(CaseDetails.class), any(CaseDetails.class), anyString());
+    }
+
+    @Test
+    public void givenNoticeOfChangeRejected_whenSendNoticeOfChangeNotifications_thenSendNoticeOfChangeServiceNotCalled() {
+        CallbackRequest callbackRequest = buildCallbackRequestWithBeforeCaseDetails();
+        callbackRequest.getCaseDetails().getData().put(IS_NOC_REJECTED, YES_VALUE);
+        notificationsController.sendNoticeOfChangeNotifications("authToken", callbackRequest);
+
+        verify(notificationService, never()).sendNoticeOfChangeEmail(any());
+
+        verify(nocLetterNotificationService, never()).sendNoticeOfChangeLetters(any(CaseDetails.class), any(CaseDetails.class), anyString());
     }
 
     @Test

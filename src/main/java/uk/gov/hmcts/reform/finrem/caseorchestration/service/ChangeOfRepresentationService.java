@@ -23,7 +23,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element.ele
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ChangeOfRepresentationService {
 
-    private static final String NOTICE_OF_CHANGE = "Notice of Change";
+    public static final String NOTICE_OF_CHANGE = "Notice of Change";
 
     public RepresentationUpdateHistory generateRepresentationUpdateHistory(
         ChangeOfRepresentationRequest changeOfRepresentationRequest) {

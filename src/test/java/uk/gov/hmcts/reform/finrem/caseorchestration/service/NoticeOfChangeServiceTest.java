@@ -41,15 +41,20 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
     private static final String PATH = "/fixtures/noticeOfChange/caseworkerNoc/";
     private static final String REPRESENTATION_UPDATE_HISTORY = "RepresentationUpdateHistory";
 
-    @Autowired private NoticeOfChangeService noticeOfChangeService;
+    @Autowired
+    private NoticeOfChangeService noticeOfChangeService;
 
-    @MockBean private CaseDataService mockCaseDataService;
+    @MockBean
+    private CaseDataService mockCaseDataService;
 
-    @MockBean private IdamService mockIdamService;
+    @MockBean
+    private IdamService mockIdamService;
 
-    @MockBean private AddedSolicitorService addedSolicitorService;
+    @MockBean
+    private AddedSolicitorService addedSolicitorService;
 
-    @MockBean private RemovedSolicitorService removedSolicitorService;
+    @MockBean
+    private RemovedSolicitorService removedSolicitorService;
 
     private CallbackRequest callbackRequest;
 
@@ -106,7 +111,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldUpdateRepresentationAndUpdateRepresentationUpdateHistory_whenChangeAlreadyPopulated() throws Exception  {
+    public void shouldUpdateRepresentationAndUpdateRepresentationUpdateHistory_whenChangeAlreadyPopulated() throws Exception {
         setUpCaseDetails("change-of-representatives.json");
         setUpHelper();
 
@@ -174,7 +179,7 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void inConsented_shouldUpdateRepresentationUpdateHistory_whenChangeCurrentlyPopulated() throws Exception  {
+    public void inConsented_shouldUpdateRepresentationUpdateHistory_whenChangeCurrentlyPopulated() throws Exception {
         setUpCaseDetails("consented-change-of-reps.json");
         setUpHelper();
 
@@ -366,13 +371,14 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
         currentDetails = noticeOfChangeService.persistOriginalOrgPoliciesWhenRevokingAccess(currentDetails,
             originalDetails);
         OrganisationPolicy actualPolicy = mapper.convertValue(currentDetails.getData()
-                .get(RESPONDENT_ORGANISATION_POLICY), OrganisationPolicy.class);
+            .get(RESPONDENT_ORGANISATION_POLICY), OrganisationPolicy.class);
         assertThat(actualPolicy).isEqualTo(appSolicitorPolicy);
     }
 
     private List<Element<RepresentationUpdate>> convertToUpdateHistory(Map<String, Object> data) {
         return mapper.convertValue(data.get(REPRESENTATION_UPDATE_HISTORY),
-            new TypeReference<>() {});
+            new TypeReference<>() {
+            });
     }
 
     private void setUpHelper() {
