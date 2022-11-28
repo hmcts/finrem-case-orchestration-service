@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.wrapper.IdamToken;
 
-import java.util.Collections;
 import java.util.List;
 
 @Service
