@@ -12,6 +12,9 @@ public class CCDConfigConstant {
     public static final String CASE_DETAILS = "caseDetails";
     public static final String CASE_DATA = "case_data";
 
+    public static final String HMCTS_SERVICE_ID = "HMCTSServiceId";
+
+    public static final String SUPPLEMENTARY_DATA_UPDATES = "supplementary_data_updates";
     public static final String APPLICANT_FIRST_MIDDLE_NAME = "applicantFMName";
     public static final String APPLICANT_LAST_NAME = "applicantLName";
     public static final String APPLICANT_ADDRESS = "applicantAddress";
