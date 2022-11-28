@@ -3,9 +3,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedChildrenDetailDataWrapper;
@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedChildrenSer
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -53,7 +54,7 @@ public class AmendPaperApplicationContestedMidHandlerTest {
     @Test
     public void givenContestedPaperCase_whenChildLivesOutsideEnglandOrWales_thenHandlerRejectsAndReturnError() {
         CallbackRequest callbackRequest = buildCallbackRequest();
-        AboutToStartOrSubmitCallbackResponse response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
         assertTrue(response.getErrors().get(0)
             .contains("The court does not have jurisdiction as the child is not habitually resident in England or Wales"));
     }
@@ -64,7 +65,7 @@ public class AmendPaperApplicationContestedMidHandlerTest {
         List<ContestedChildrenDetailDataWrapper> children = service.getChildren(callbackRequest.getCaseDetails().getData());
         children.forEach(child -> child.getValue().setChildrenLivesInEnglandOrWales(YES_VALUE));
         callbackRequest.getCaseDetails().getData().put(CHILDREN_COLLECTION, children);
-        AboutToStartOrSubmitCallbackResponse response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
         assertEquals(0, response.getErrors().size());
     }
 

@@ -3,9 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -66,6 +63,6 @@ public class AmendPaperApplicationContestedAboutToStartHandlerTest {
         Map<String, Object> caseData = new HashMap<>();
         CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
         return CallbackRequest.builder()
-            .eventId(EventType.AMEND_CASE.getCcdType()).caseDetails(caseDetails).build();
+            .eventId(EventType.AMEND_CONTESTED_PAPER_APP_DETAILS.getCcdType()).caseDetails(caseDetails).build();
     }
 }

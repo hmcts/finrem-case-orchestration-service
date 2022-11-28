@@ -10,10 +10,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueService;
 
+import java.util.Map;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class AmendApplicationContestedAboutToStartHandler implements CallbackHandler {
+public class AmendApplicationContestedAboutToStartHandler implements CallbackHandler<Map<String, Object>> {
 
     private final OnStartDefaultValueService service;
 
@@ -25,9 +27,10 @@ public class AmendApplicationContestedAboutToStartHandler implements CallbackHan
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest, service.defaultCivilPartnershipField(callbackRequest);
-
-    service.defaultCivilPartnershipField(callbackRequest);
-        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).build();
+    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
+                                                                                   String userAuthorisation) {
+        service.defaultCivilPartnershipField(callbackRequest);
+        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder()
+            .data(callbackRequest.getCaseDetails().getData()).build();
     }
 }
