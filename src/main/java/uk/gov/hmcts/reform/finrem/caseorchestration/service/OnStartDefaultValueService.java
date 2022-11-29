@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 
 import java.time.LocalDate;
 
@@ -12,7 +14,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_DIRECTION_JUDGE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ISSUE_DATE;
 
 @Service
 @RequiredArgsConstructor
@@ -22,8 +23,11 @@ public class OnStartDefaultValueService {
     @Autowired
     private IdamService idamService;
 
-    public void defaultIssueDate(CallbackRequest callbackRequest) {
-        callbackRequest.getCaseDetails().getData().putIfAbsent(ISSUE_DATE, LocalDate.now());
+    public void defaultIssueDate(FinremCallbackRequest callbackRequest) {
+        FinremCaseData data = callbackRequest.getCaseDetails().getData();
+        if (data.getIssueDate() == null) {
+            data.setIssueDate(LocalDate.now());
+        }
     }
 
     public void defaultConsentedOrderJudgeName(CallbackRequest callbackRequest, String userAuthorisation) {
