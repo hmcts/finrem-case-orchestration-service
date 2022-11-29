@@ -34,6 +34,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
@@ -91,12 +93,31 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenHearingRequired_whenSubmitNoticeOfHearing_thenHearingNoticeIsPrinted() {
+    public void givenHearingRequired_whenSubmitNoticeOfHearing_thenHearingNoticeIsPrintedForContestedCase() {
         when(documentHelper.getApplicantFullName(caseDetails)).thenReturn("Poor Guy");
-        when(documentHelper.getRespondentFullNameContested(caseDetails)).thenReturn("test Korivi");
-
+        when(caseDataService.buildFullRespondentName(caseDetails)).thenReturn("test Korivi");
+        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(false);
 
         caseDetails.getData().put(ANOTHER_HEARING_TO_BE_LISTED, YES_VALUE);
+        caseDetails.setCaseTypeId(CASE_TYPE_ID_CONTESTED);
+        approvedOrderNoticeOfHearingService.createAndStoreHearingNoticeDocumentPack(caseDetails, AUTH_TOKEN);
+
+        assertCaseDataHasHearingNoticesCollection();
+        assertDocumentServiceInteraction();
+
+        Map<String, Object> caseDetailsMap = (Map) placeholdersMapCaptor.getValue().get(CASE_DETAILS);
+        Map<String, Object> data = (Map) caseDetailsMap.get(CASE_DATA);
+        assertCaseData(data);
+    }
+
+    @Test
+    public void givenHearingRequired_whenSubmitNoticeOfHearing_thenHearingNoticeIsPrintedForConsentedCase() {
+        when(documentHelper.getApplicantFullName(caseDetails)).thenReturn("Poor Guy");
+        when(caseDataService.buildFullRespondentName(caseDetails)).thenReturn("test Korivi");
+        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
+
+        caseDetails.getData().put(ANOTHER_HEARING_TO_BE_LISTED, YES_VALUE);
+        caseDetails.setCaseTypeId(CASE_TYPE_ID_CONSENTED);
         approvedOrderNoticeOfHearingService.createAndStoreHearingNoticeDocumentPack(caseDetails, AUTH_TOKEN);
 
         assertCaseDataHasHearingNoticesCollection();
@@ -110,7 +131,7 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     @Test
     public void givenDraftHearingOrderIsUploaded_whenSubmitNoticeOfHearing_thenOrderIsPrinted() {
         when(documentHelper.getApplicantFullName(caseDetails)).thenReturn("Poor Guy");
-        when(documentHelper.getRespondentFullNameContested(caseDetails)).thenReturn("test Korivi");
+        when(caseDataService.buildFullRespondentName(caseDetails)).thenReturn("test Korivi");
 
         caseDetails.getData().put(ANOTHER_HEARING_TO_BE_LISTED, YES_VALUE);
         caseDetails.getData().put(LATEST_DRAFT_HEARING_ORDER, CaseDocument.builder().documentBinaryUrl(LATEST_DRAFT_ORDER_DOCUMENT_BIN_URL).build());
@@ -190,7 +211,8 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     private void assertCaseDataHasHearingNoticesCollection() {
         assertThat(caseDetails.getData(), hasKey(ADDITIONAL_HEARING_DOCUMENT_COLLECTION));
         List<Element<AdditionalHearingDocument>> additionalHearingDocuments = objectMapper.convertValue(
-            caseDetails.getData().get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION), new TypeReference<>() {});
+            caseDetails.getData().get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION), new TypeReference<>() {
+            });
         assertThat(additionalHearingDocuments.size(), is(1));
         assertThat(additionalHearingDocuments.get(0).getValue().getDocument().getDocumentBinaryUrl(),
             is(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL));
@@ -212,7 +234,7 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
 
     private List<Element<CaseDocument>> buildHearingNoticePack() {
         return List.of(element(UUID.randomUUID(), CaseDocument.builder()
-            .documentBinaryUrl(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL)
+                .documentBinaryUrl(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL)
                 .build()),
             element(UUID.randomUUID(), CaseDocument.builder()
                 .documentBinaryUrl(LATEST_DRAFT_ORDER_DOCUMENT_BIN_URL)

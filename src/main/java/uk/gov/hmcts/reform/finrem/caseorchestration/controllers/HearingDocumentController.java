@@ -120,7 +120,7 @@ public class HearingDocumentController extends BaseController {
             content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateHearingDocumentDirectionOrder(
+    public ResponseEntity<GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>>> generateHearingDocumentDirectionOrder(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callback) {
         CaseDetails caseDetails = callback.getCaseDetails();
@@ -137,8 +137,8 @@ public class HearingDocumentController extends BaseController {
             errors.add(e.getMessage());
         }
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
-            .builder()
+        return ResponseEntity.ok(GenericAboutToStartOrSubmitCallbackResponse
+            .<Map<String, Object>>builder()
             .data(caseData)
             .errors(errors)
             .build());

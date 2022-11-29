@@ -44,9 +44,9 @@ public class GeneralLetterControllerTest extends BaseControllerTest {
         doValidCaseDataSetUp();
 
         mvc.perform(post(GENERAL_LETTER_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
         verify(generalLetterService, times(1)).createGeneralLetter(any(), any());
@@ -57,9 +57,9 @@ public class GeneralLetterControllerTest extends BaseControllerTest {
         doEmptyCaseDataSetUp();
 
         mvc.perform(post(GENERAL_LETTER_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest());
     }
 
@@ -69,9 +69,9 @@ public class GeneralLetterControllerTest extends BaseControllerTest {
         doThrow(feignError()).when(generalLetterService).createGeneralLetter(eq(AUTH_TOKEN), isA(CaseDetails.class));
 
         mvc.perform(post(GENERAL_LETTER_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isInternalServerError());
     }
 
@@ -80,9 +80,9 @@ public class GeneralLetterControllerTest extends BaseControllerTest {
         when(idamService.getIdamFullName(AUTH_TOKEN)).thenReturn("Integration Test");
 
         mvc.perform(post(START_GENERAL_LETTER_URL)
-            .content(resourceContentAsString("/fixtures/general-letter.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(resourceContentAsString("/fixtures/general-letter.json"))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.generalLetterAddressTo", is(nullValue())))
             .andExpect(jsonPath("$.data.generalLetterRecipient", is(nullValue())))
@@ -96,9 +96,9 @@ public class GeneralLetterControllerTest extends BaseControllerTest {
         doEmptyCaseDataSetUp();
 
         mvc.perform(post(START_GENERAL_LETTER_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest());
     }
 
@@ -108,9 +108,9 @@ public class GeneralLetterControllerTest extends BaseControllerTest {
             .thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
         mvc.perform(post(START_GENERAL_LETTER_URL)
-            .content(resourceContentAsString("/fixtures/general-letter.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(resourceContentAsString("/fixtures/general-letter.json"))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isInternalServerError());
     }
 
@@ -119,9 +119,9 @@ public class GeneralLetterControllerTest extends BaseControllerTest {
         doValidCaseDataSetUp();
 
         mvc.perform(post(PREVIEW_GENERAL_LETTER_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
         verify(generalLetterService, times(1)).previewGeneralLetter(any(), any());

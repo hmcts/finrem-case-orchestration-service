@@ -18,7 +18,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class GeneralEmailServiceTest extends BaseServiceTest {
 
-    @Autowired private GeneralEmailService generalEmailService;
+    @Autowired
+    private GeneralEmailService generalEmailService;
 
     @Test
     public void generateGeneralEmailConsented() throws Exception {

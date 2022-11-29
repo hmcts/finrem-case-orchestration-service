@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model;
 
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,6 +32,7 @@ public enum EventType {
     CLOSE("FR_close"),
     MANAGE_CASE_DOCUMENTS("FR_manageCaseDocuments"),
     UPLOAD_APPROVED_ORDER("FR_uploadApprovedOrder"),
+    NEW_PAPER_CASE("FR_newPaperCase"),
     LIST_FOR_HEARING("FR_addSchedulingListingInfo"),
     GENERAL_APPLICATION_REFER_TO_JUDGE("FR_generalApplicationReferToJudge"),
     GENERAL_APPLICATION_OUTCOME("FR_GeneralApplicationOutcome"),
@@ -37,18 +40,23 @@ public enum EventType {
     LIST_FOR_HEARING_CONSENTED("FR_listForHearing"),
     MANAGE_BARRISTER("FR_manageBarrister"),
     ISSUE_APPLICATION("FR_issueApplication"),
+    REGENERATE_FORM_C("FR_regenerateFormC"),
+    CONSENT_APPLICATION_APPROVED_IN_CONTESTED("FR_consentOrderApproved"),
+    NOC_REQUEST("nocRequest"),
+    @JsonEnumDefaultValue
     NONE("");
 
     private final String ccdType;
+
+    @JsonValue
+    public String getCcdType() {
+        return ccdType;
+    }
 
     public static EventType getEventType(String ccdType) {
         log.info("Event type to process {}", ccdType);
         return Arrays.stream(EventType.values())
             .filter(eventTypeValue -> eventTypeValue.ccdType.equals(ccdType))
             .findFirst().orElseThrow(IllegalArgumentException::new);
-    }
-
-    public String getCcdType() {
-        return ccdType;
     }
 }

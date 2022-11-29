@@ -31,9 +31,9 @@ public class GeneralApplicationDirectionsControllerTest extends BaseControllerTe
     @Test
     public void startGeneralApplicationDirectionsSuccess() throws Exception {
         mvc.perform(post(START_GENERAL_APPLICATION_URL)
-            .content(resourceContentAsString("/fixtures/general-application.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(resourceContentAsString("/fixtures/general-application.json"))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
         verify(generalApplicationDirectionsService, times(1)).startGeneralApplicationDirections(isA(CaseDetails.class));
@@ -42,9 +42,9 @@ public class GeneralApplicationDirectionsControllerTest extends BaseControllerTe
     @Test
     public void submitGeneralApplicationDirectionsSuccess() throws Exception {
         mvc.perform(post(SUBMIT_GENERAL_APPLICATION_URL)
-            .content(resourceContentAsString("/fixtures/general-application.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(resourceContentAsString("/fixtures/general-application.json"))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
         verify(generalApplicationDirectionsService, times(1)).submitGeneralApplicationDirections(isA(CaseDetails.class), eq(AUTH_TOKEN));
@@ -55,9 +55,9 @@ public class GeneralApplicationDirectionsControllerTest extends BaseControllerTe
         doEmptyCaseDataSetUp();
 
         mvc.perform(post(START_GENERAL_APPLICATION_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest());
     }
 
@@ -67,9 +67,9 @@ public class GeneralApplicationDirectionsControllerTest extends BaseControllerTe
         doThrow(feignError()).when(generalApplicationDirectionsService).startGeneralApplicationDirections(isA(CaseDetails.class));
 
         mvc.perform(post(START_GENERAL_APPLICATION_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isInternalServerError());
     }
 
@@ -78,9 +78,9 @@ public class GeneralApplicationDirectionsControllerTest extends BaseControllerTe
         doEmptyCaseDataSetUp();
 
         mvc.perform(post(SUBMIT_GENERAL_APPLICATION_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest());
     }
 
@@ -90,9 +90,9 @@ public class GeneralApplicationDirectionsControllerTest extends BaseControllerTe
         doThrow(feignError()).when(generalApplicationDirectionsService).submitGeneralApplicationDirections(isA(CaseDetails.class), eq(AUTH_TOKEN));
 
         mvc.perform(post(SUBMIT_GENERAL_APPLICATION_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isInternalServerError());
     }
 

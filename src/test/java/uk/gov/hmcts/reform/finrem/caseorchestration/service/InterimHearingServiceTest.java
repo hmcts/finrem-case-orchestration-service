@@ -59,7 +59,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_UPLOADED_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_WALES_FRC_COURT_LIST;
 
-public class InterimHearingServiceTest extends BaseServiceTest  {
+public class InterimHearingServiceTest extends BaseServiceTest {
 
     @Autowired
     private InterimHearingService interimHearingService;
@@ -87,7 +87,6 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
     private static final String TEST_NEW_JSON = "/fixtures/contested/interim-hearing-three-collection-no-track.json";
 
 
-
     @Test
     public void givenContestedPaperCaseWithBeforeMigrationToHearingCollection_WhenModifiedDuringMigration_ThenItShouldSendToBulkPrint() {
         CaseDetails caseDetails = buildCaseDetails(BEFORE_MIGRATION_TEST_JSON);
@@ -96,7 +95,7 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
 
-        interimHearingService.submitInterimHearing(caseDetails,caseDetailsBefore, AUTH_TOKEN);
+        interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
         verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
         verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
@@ -122,7 +121,7 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
 
-        interimHearingService.submitInterimHearing(caseDetails,caseDetailsBefore, AUTH_TOKEN);
+        interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
         verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
         verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
@@ -148,7 +147,7 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
 
-        interimHearingService.submitInterimHearing(caseDetails,caseDetailsBefore, AUTH_TOKEN);
+        interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
         verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
         verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
@@ -248,10 +247,10 @@ public class InterimHearingServiceTest extends BaseServiceTest  {
         verify(caseDataService, times(3)).isApplicantSolicitorAgreeToReceiveEmails(any());
         verify(notificationService, times(3)).isRespondentSolicitorEmailCommunicationEnabled(any());
         verify(notificationService, times(3)).sendInterimHearingNotificationEmailToApplicantSolicitor(any(), anyMap());
-        verify(notificationService,times(3)).sendInterimHearingNotificationEmailToRespondentSolicitor(any(), anyMap());
+        verify(notificationService, times(3)).sendInterimHearingNotificationEmailToRespondentSolicitor(any(), anyMap());
     }
 
-    private CaseDetails buildCaseDetails(String path)  {
+    private CaseDetails buildCaseDetails(String path) {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(path)) {
             return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         } catch (Exception e) {

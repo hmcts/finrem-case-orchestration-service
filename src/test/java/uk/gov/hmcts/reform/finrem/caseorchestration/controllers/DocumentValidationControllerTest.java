@@ -42,7 +42,6 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
         = "/fixtures/latestConsentedConsentOrder/amend-consent-order-by-solicitor-contested.json";
 
 
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -79,11 +78,11 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
         when(documentValidationService.validateDocument(any(CallbackRequest.class), anyString(), anyString()))
             .thenReturn(response);
         this.mockMvc.perform(MockMvcRequestBuilders
-            .post("/case-orchestration/field/consentOrder/file-upload-check")
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .post("/case-orchestration/field/consentOrder/file-upload-check")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors").doesNotExist());
@@ -100,11 +99,11 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
         when(documentValidationService.validateDocument(any(CallbackRequest.class), anyString(), anyString()))
             .thenReturn(response);
         this.mockMvc.perform(MockMvcRequestBuilders
-            .post("/case-orchestration/field/consentOrder/file-upload-check")
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .post("/case-orchestration/field/consentOrder/file-upload-check")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors").exists());
@@ -119,11 +118,11 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
         when(documentValidationService.validateDocument(any(CallbackRequest.class), anyString(), anyString()))
             .thenReturn(response);
         this.mockMvc.perform(MockMvcRequestBuilders
-            .post("/case-orchestration/field/yyyyy/file-upload-check")
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .post("/case-orchestration/field/yyyyy/file-upload-check")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors").doesNotExist());

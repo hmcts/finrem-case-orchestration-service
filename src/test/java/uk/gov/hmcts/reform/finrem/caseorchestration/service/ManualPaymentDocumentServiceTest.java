@@ -34,10 +34,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 
 public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
 
-    @Autowired private ManualPaymentDocumentService manualPaymentDocumentService;
-    @Autowired private ObjectMapper mapper;
+    @Autowired
+    private ManualPaymentDocumentService manualPaymentDocumentService;
+    @Autowired
+    private ObjectMapper mapper;
 
-    @MockBean private GenericDocumentService genericDocumentService;
+    @MockBean
+    private GenericDocumentService genericDocumentService;
 
     @Captor
     ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
