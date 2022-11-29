@@ -164,7 +164,7 @@ public class CaseHearingFunctionsTest {
         assertThat(stringObjectMap.get(COURT_DETAILS_NAME_KEY), is("Dartford County Court And Family Court"));
         assertThat(stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY), is("Home Gardens, Dartford, DA1 1DX"));
         assertThat(stringObjectMap.get(COURT_DETAILS_PHONE_KEY), is("01634 887900"));
-        assertThat(stringObjectMap.get(COURT_DETAILS_EMAIL_KEY), is("FRCKSS@justice.gov.uk"));
+        assertThat(stringObjectMap.get(COURT_DETAILS_EMAIL_KEY), is("family.dartford.countycourt@justice.gov.uk"));
     }
 
     @Test
