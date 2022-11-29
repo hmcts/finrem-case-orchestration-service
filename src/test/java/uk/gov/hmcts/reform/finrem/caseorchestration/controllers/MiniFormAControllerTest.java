@@ -41,9 +41,12 @@ public class MiniFormAControllerTest extends BaseControllerTest {
 
     protected JsonNode requestContent;
 
-    @MockBean protected OnlineFormDocumentService documentService;
-    @MockBean protected IdamService idamService;
-    @MockBean protected CaseDataService caseDataService;
+    @MockBean
+    protected OnlineFormDocumentService documentService;
+    @MockBean
+    protected IdamService idamService;
+    @MockBean
+    protected CaseDataService caseDataService;
 
     @MockBean
     protected DefaultsConfiguration defaultsConfiguration;
@@ -77,9 +80,9 @@ public class MiniFormAControllerTest extends BaseControllerTest {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
 
         mvc.perform(post(endpoint())
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.miniFormA.document_url", is(DOC_URL)))
             .andExpect(jsonPath("$.data.miniFormA.document_filename", is(FILE_NAME)))
@@ -96,9 +99,9 @@ public class MiniFormAControllerTest extends BaseControllerTest {
     public void generateMiniFormAHttpError400() throws Exception {
         doRequestSetUpConsented();
         mvc.perform(post(endpoint())
-            .content("kwuilebge")
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content("kwuilebge")
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest());
     }
 
@@ -108,9 +111,9 @@ public class MiniFormAControllerTest extends BaseControllerTest {
         whenServiceGeneratesDocument().thenThrow(feignError());
 
         mvc.perform(post(endpoint())
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isInternalServerError());
     }
 
@@ -121,9 +124,9 @@ public class MiniFormAControllerTest extends BaseControllerTest {
         when(caseDataService.isConsentedInContestedCase(any())).thenReturn(true);
 
         mvc.perform(post(endpoint())
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.consentMiniFormA.document_url", is(DOC_URL)))
             .andExpect(jsonPath("$.data.consentMiniFormA.document_filename", is(FILE_NAME)))

@@ -5,13 +5,14 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadApprovedOrderService;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -50,9 +51,9 @@ public class UploadApprovedOrderAboutToSubmitHandlerTest extends UploadApprovedO
     public void givenContestedCase_whenAboutToSubmitUploadApprovedOrderAndNoErrors_thenHandle() {
         when(uploadApprovedOrderService
             .handleUploadApprovedOrderAboutToSubmit(callbackRequest.getCaseDetails(), AUTH_TOKEN))
-            .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+            .thenReturn(GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).build());
 
-        AboutToStartOrSubmitCallbackResponse response = uploadApprovedOrderAboutToSubmitHandler
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = uploadApprovedOrderAboutToSubmitHandler
             .handle(callbackRequest, AUTH_TOKEN);
 
         assertTrue(response.getData().containsKey(SUCCESS_KEY));
@@ -64,9 +65,9 @@ public class UploadApprovedOrderAboutToSubmitHandlerTest extends UploadApprovedO
     public void givenContestedCase_whenAboutToSubmitUploadApprovedOrderAndErrors_thenHandle() {
         when(uploadApprovedOrderService
             .handleUploadApprovedOrderAboutToSubmit(callbackRequest.getCaseDetails(), AUTH_TOKEN))
-            .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("ERROR")).build());
+            .thenReturn(GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().errors(List.of("ERROR")).build());
 
-        AboutToStartOrSubmitCallbackResponse response = uploadApprovedOrderAboutToSubmitHandler
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = uploadApprovedOrderAboutToSubmitHandler
             .handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response.getErrors(), hasSize(1));

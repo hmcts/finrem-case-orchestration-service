@@ -15,7 +15,8 @@ import static org.junit.Assert.assertThat;
 
 public class CourtDetailsMigrationTest extends BaseServiceTest {
 
-    @Autowired private ObjectMapper mapper;
+    @Autowired
+    private ObjectMapper mapper;
 
     @Test
     public void shouldMigrateCase_newport() {

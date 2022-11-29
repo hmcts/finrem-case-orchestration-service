@@ -39,9 +39,11 @@ public class HearingOrderServiceTest extends BaseServiceTest {
     private static final String DRAFT_DIRECTION_ORDER_BIN_URL = "anyDraftDirectionOrderBinaryUrl";
     private static final String FILENAME_ENDING_WITH_DOCX = "filename_ending_with.docx";
 
-    @Autowired HearingOrderService hearingOrderService;
+    @Autowired
+    HearingOrderService hearingOrderService;
 
-    @MockBean private GenericDocumentService genericDocumentService;
+    @MockBean
+    private GenericDocumentService genericDocumentService;
 
     @Test
     public void convertPdfDocument() {
@@ -105,7 +107,7 @@ public class HearingOrderServiceTest extends BaseServiceTest {
 
         hearingOrderService.appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(CaseDetails.builder().data(caseData).build());
 
-        assertThat(((List<CollectionElement>)caseData.get(JUDGES_AMENDED_DIRECTION_ORDER_COLLECTION)).get(0).getValue(),
+        assertThat(((List<CollectionElement>) caseData.get(JUDGES_AMENDED_DIRECTION_ORDER_COLLECTION)).get(0).getValue(),
             is(latestDraftDirectionOrder));
     }
 

@@ -6,10 +6,10 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueService;
@@ -52,22 +52,23 @@ public class ApproveConsentOrderContestedAboutToStartHandlerTest {
     @Test
     public void givenContestedCase_whenUseApproveOrder_thenDefaultOrderDateSetToCurrentDate() {
         CallbackRequest callbackRequest = buildCallbackRequest();
-        AboutToStartOrSubmitCallbackResponse response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>>
+            response = handler.handle(callbackRequest, AUTH_TOKEN);
         verify(onStartDefaultValueService).defaultContestedOrderDate(callbackRequest);
     }
 
     @Test
     public void givenContestedCase_whenUseApproveOrderAndOrderDateEnteredManually_thenHandle() {
         CallbackRequest callbackRequest = buildCallbackRequest();
-        callbackRequest.getCaseDetails().getData().put(CONTESTED_ORDER_APPROVED_DATE,"10-10-2000");
-        AboutToStartOrSubmitCallbackResponse response = handler.handle(callbackRequest, AUTH_TOKEN);
+        callbackRequest.getCaseDetails().getData().put(CONTESTED_ORDER_APPROVED_DATE, "10-10-2000");
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
         assertEquals("10-10-2000", response.getData().get(CONTESTED_ORDER_APPROVED_DATE));
     }
 
     @Test
     public void givenContestedCase_whenUseApproveOrder_thenDefaultJudgeNameSetToUser() {
         CallbackRequest callbackRequest = buildCallbackRequest();
-        AboutToStartOrSubmitCallbackResponse response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
         verify(onStartDefaultValueService).defaultContestedOrderJudgeName(callbackRequest, AUTH_TOKEN);
     }
 
@@ -75,14 +76,14 @@ public class ApproveConsentOrderContestedAboutToStartHandlerTest {
     public void givenContestedCase_whenUseApproveOrderAndJudgeNameEnteredManually_thenHandle() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         callbackRequest.getCaseDetails().getData().put(CONTESTED_ORDER_APPROVED_JUDGE_NAME, "Test Judge");
-        AboutToStartOrSubmitCallbackResponse response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
         assertNotNull(response.getData().get(CONTESTED_ORDER_APPROVED_JUDGE_NAME));
         assertEquals("Test Judge", response.getData().get(CONTESTED_ORDER_APPROVED_JUDGE_NAME));
     }
 
     private CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder().id(123L).caseTypeId(CaseType.CONSENTED.getCcdType()). data(caseData).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(123L).caseTypeId(CaseType.CONSENTED.getCcdType()).data(caseData).build();
         return CallbackRequest.builder().eventId(EventType.APPROVE_ORDER.getCcdType()).caseDetails(caseDetails).build();
     }
 }

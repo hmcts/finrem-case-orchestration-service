@@ -35,9 +35,9 @@ public class GeneralApplicationControllerTest extends BaseControllerTest {
         doEmptyCaseDataSetUp();
 
         mvc.perform(post(SUBMIT_GENERAL_APPLICATION_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest());
     }
 
@@ -48,18 +48,18 @@ public class GeneralApplicationControllerTest extends BaseControllerTest {
             isA(Map.class), isA(CaseDetails.class), isA(String.class));
 
         mvc.perform(post(SUBMIT_GENERAL_APPLICATION_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isInternalServerError());
     }
 
     @Test
     public void submitGeneralApplicationSuccess() throws Exception {
         mvc.perform(post(SUBMIT_GENERAL_APPLICATION_URL)
-            .content(resourceContentAsString("/fixtures/general-application.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(resourceContentAsString("/fixtures/general-application.json"))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
         verify(generalApplicationService, times(1)).updateCaseDataSubmit(any(), any(), any());
@@ -70,9 +70,9 @@ public class GeneralApplicationControllerTest extends BaseControllerTest {
         doEmptyCaseDataSetUp();
 
         mvc.perform(post(START_GENERAL_APPLICATION_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest());
     }
 
@@ -82,18 +82,18 @@ public class GeneralApplicationControllerTest extends BaseControllerTest {
         doThrow(feignError()).when(generalApplicationService).updateCaseDataStart(isA(Map.class), eq(AUTH_TOKEN));
 
         mvc.perform(post(START_GENERAL_APPLICATION_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isInternalServerError());
     }
 
     @Test
     public void startGeneralApplicationSuccess() throws Exception {
         mvc.perform(post(START_GENERAL_APPLICATION_URL)
-            .content(resourceContentAsString("/fixtures/general-application.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(resourceContentAsString("/fixtures/general-application.json"))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
         verify(generalApplicationService, times(1)).updateCaseDataStart(isA(Map.class), eq(AUTH_TOKEN));

@@ -8,10 +8,10 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -144,7 +145,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
 
         CallbackRequest callbackRequest =
             CallbackRequest.builder().caseDetails(generalOrderContestedCaseDetailsWithoutSolicitorAddress()).build();
-        AboutToStartOrSubmitCallbackResponse response = sendOrderContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = sendOrderContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response.getErrors().size(), is(1));
         assertThat(response.getErrors().get(0), is("CCD address field applicantAddress"
@@ -256,7 +257,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         mockDocumentHelperToReturnDefaultExpectedDocuments();
         when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN))).thenReturn(caseDocument());
 
-        AboutToStartOrSubmitCallbackResponse response =
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response =
             sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 
         verify(genericDocumentService).stampDocument(caseDocument(), AUTH_TOKEN);
@@ -270,9 +271,8 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
 
     @Test
     public void givenFinalOrderSuccessWithoutAnyHearingOrder_WhenHandle_ThenStampFinalOrder() {
-        CaseDetails caseDetails = CaseDetails.builder().data(new HashMap<>()).build();
 
-        AboutToStartOrSubmitCallbackResponse response =
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response =
             sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 
         assertThat(response.getData(), not(hasKey(FINAL_ORDER_COLLECTION)));
@@ -284,7 +284,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         when(documentHelper.getFinalOrderDocuments(any())).thenReturn(new ArrayList<>(List.of(HearingOrderCollectionData.builder().build())));
         when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN))).thenReturn(caseDocument());
 
-        AboutToStartOrSubmitCallbackResponse response =
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response =
             sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 
         verify(genericDocumentService).stampDocument(caseDocument(), AUTH_TOKEN);

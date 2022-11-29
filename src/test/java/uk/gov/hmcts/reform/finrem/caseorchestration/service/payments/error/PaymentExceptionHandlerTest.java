@@ -90,37 +90,37 @@ public class PaymentExceptionHandlerTest {
 
     private PaymentException duplicatePaymentError() {
         return new PaymentException(
-                new HttpClientErrorException(BAD_REQUEST, "",
-                        "duplicate payment".getBytes(), UTF_8)
+            new HttpClientErrorException(BAD_REQUEST, "",
+                "duplicate payment".getBytes(), UTF_8)
         );
 
     }
 
     private PaymentException paymentApi422Error() {
         return new PaymentException(
-                new HttpClientErrorException(UNPROCESSABLE_ENTITY, "",
-                        "Invalid or missing attribute".getBytes(), UTF_8)
+            new HttpClientErrorException(UNPROCESSABLE_ENTITY, "",
+                "Invalid or missing attribute".getBytes(), UTF_8)
         );
     }
 
     private PaymentException paymentApi404Error() {
         return new PaymentException(
-                new HttpClientErrorException(NOT_FOUND, "",
-                        "Account information could not be found".getBytes(), UTF_8)
+            new HttpClientErrorException(NOT_FOUND, "",
+                "Account information could not be found".getBytes(), UTF_8)
         );
     }
 
     private PaymentException paymentApi401Error() {
         return new PaymentException(
-                new HttpClientErrorException(FORBIDDEN, "",
-                        paymentResponseErrorToString().getBytes(), UTF_8)
+            new HttpClientErrorException(FORBIDDEN, "",
+                paymentResponseErrorToString().getBytes(), UTF_8)
         );
     }
 
     private PaymentException paymentApi403ValidationError() {
         return new PaymentException(
-                new HttpClientErrorException(FORBIDDEN, "",
-                        paymentResponseErrorToString().getBytes(), UTF_8)
+            new HttpClientErrorException(FORBIDDEN, "",
+                paymentResponseErrorToString().getBytes(), UTF_8)
         );
     }
 }
