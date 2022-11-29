@@ -9,7 +9,12 @@ public class CCDConfigConstant {
     //Case related
     public static final String STATE = "state";
     public static final String DIVORCE_CASE_NUMBER = "divorceCaseNumber";
+    public static final String CASE_DETAILS = "caseDetails";
+    public static final String CASE_DATA = "case_data";
 
+    public static final String HMCTS_SERVICE_ID = "HMCTSServiceId";
+
+    public static final String SUPPLEMENTARY_DATA_UPDATES = "supplementary_data_updates";
     public static final String APPLICANT_FIRST_MIDDLE_NAME = "applicantFMName";
     public static final String APPLICANT_LAST_NAME = "applicantLName";
     public static final String APPLICANT_ADDRESS = "applicantAddress";
@@ -100,10 +105,12 @@ public class CCDConfigConstant {
     public static final String BRISTOLFRC = "bristol";
     public static final String CFC = "cfc";
     public static final String CLEAVELAND = "cleaveland";
+    public static final String CLEVELAND = "cleveland";
     public static final String DEVON = "devon";
     public static final String DORSET = "dorset";
     public static final String HSYORKSHIRE = "hsyorkshire";
     public static final String KENT = "kentfrc";
+    public static final String KENTFRC = "kent";
     public static final String LANCASHIRE = "lancashire";
     public static final String LIVERPOOL = "liverpool";
     public static final String MANCHESTER = "manchester";
@@ -200,12 +207,19 @@ public class CCDConfigConstant {
     public static final String BATH = "FR_bristolList_5";
     public static final String WESTON = "FR_bristolList_6";
 
+    public static final String BRISTOL_MAGISTRATES = "FR_bristolList_7";
+
+    public static final String SWINDON_MAGISTRATES = "FR_bristolList_8";
+
     //North Wales Court List
     public static final String WREXHAM = "FR_northwalesList_1";
     public static final String CAERNARFON = "FR_northwalesList_2";
     public static final String PRESTATYN = "FR_northwalesList_3";
     public static final String WELSHPOOL = "FR_northwalesList_4";
     public static final String MOLD = "FR_northwalesList_5";
+
+    //SouthEast Kent
+    public static final String KENT_DARTFORD_COURTS = "FR_kent_surrey_hc_list_3";
 
     public static final String COURT_DETAILS_NAME_KEY = "courtName";
     public static final String COURT_DETAILS_ADDRESS_KEY = "courtAddress";
@@ -269,6 +283,9 @@ public class CCDConfigConstant {
     public static final String FORM_A_COLLECTION = "copyOfPaperFormA";
     public static final String FORM_C = "formC";
     public static final String FORM_G = "formG";
+    public static final String OUT_OF_FAMILY_COURT_RESOLUTION = "outOfFamilyCourtResolution";
+    public static final String HEARING_ADDITIONAL_DOC = "additionalListOfHearingDocuments";
+    public static final String ADDITIONAL_HEARING_DOCUMENTS_OPTION = "additionalHearingDocumentsOption";
     public static final String OTHER_DOCS_COLLECTION = "otherCollection";
     public static final String GENERAL_LETTER = "generalLetterCollection";
     public static final String GENERAL_LETTER_BODY = "generalLetterBody";
@@ -287,6 +304,7 @@ public class CCDConfigConstant {
     public static final String APPROVED_ORDER_COLLECTION = "approvedOrderCollection";
     public static final String FINAL_ORDER_COLLECTION = "finalOrderCollection";
     public static final String HEARING_ORDER_COLLECTION = "uploadHearingOrder";
+    public static final String HEARING_NOTICES_COLLECTION = "hearingNoticesDocumentCollection";
     public static final String RESPOND_TO_ORDER_DOCUMENTS = "respondToOrderDocuments";
     public static final String CONSENT_ORDER = "consentOrder";
     public static final String CONSENT_ORDER_FRC_NAME = "consentOrderFRCName";
@@ -318,6 +336,9 @@ public class CCDConfigConstant {
     public static final String FR_CONSENT_ORDER = "FR_consentOrder";
     public static final String FR_RESPOND_TO_CONSENT_ORDER = "FR_respondToConsentOrder";
 
+    //general document
+    public static final String GENERAL_UPLOADED_DOCUMENTS = "uploadGeneralDocuments";
+
     //general email
     public static final String GENERAL_EMAIL_COLLECTION = "generalEmailCollection";
     public static final String GENERAL_EMAIL_RECIPIENT = "generalEmailRecipient";
@@ -325,6 +346,15 @@ public class CCDConfigConstant {
     public static final String GENERAL_EMAIL_BODY = "generalEmailBody";
 
     // General application
+    public static final String GENERAL_APPLICATION_REFERRED_DETAIL = "generalApplicationReferDetail";
+    public static final String GENERAL_APPLICATION_REJECT_REASON = "generalApplicationRejectReason";
+    public static final String GENERAL_APPLICATION_REFER_LIST = "generalApplicationReferList";
+    public static final String GENERAL_APPLICATION_OUTCOME_LIST = "generalApplicationOutcomeList";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_LIST = "generalApplicationDirectionsList";
+    public static final String GENERAL_APPLICATION_OUTCOME_DECISION = "generalApplicationOutcome";
+    public static final String GENERAL_APPLICATION_LIST = "generalApplicationList";
+    public static final String GENERAL_APPLICATION_TRACKING = "generalApplicationTracking";
+    public static final String GENERAL_APPLICATION_COLLECTION = "generalApplications";
     public static final String GENERAL_APPLICATION_DOCUMENT_LATEST = "generalApplicationLatestDocument";
     public static final String GENERAL_APPLICATION_DOCUMENT = "generalApplicationDocument";
     public static final String GENERAL_APPLICATION_RECEIVED_FROM = "generalApplicationReceivedFrom";
@@ -337,6 +367,7 @@ public class CCDConfigConstant {
     public static final String GENERAL_APPLICATION_DOCUMENT_LATEST_DATE = "generalApplicationLatestDocumentDate";
     public static final String GENERAL_APPLICATION_PRE_STATE = "generalApplicationPreState";
     public static final String GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL = "generalApplicationReferToJudgeEmail";
+    public static final String GENERAL_APPLICATION_OUTCOME_OTHER = "generalApplicationOutcomeOther";
 
     // General application directions
     public static final String GENERAL_APPLICATION_DIRECTIONS_ADDITIONAL_INFORMATION = "generalApplicationDirectionsAdditionalInformation";
@@ -445,8 +476,9 @@ public class CCDConfigConstant {
     public static final String RESP_CORRESPONDENCE_COLLECTION = "respCorrespondenceDocsColl";
     public static final String RESP_OTHER_COLLECTION = "respOtherCollection";
 
+    public static final String CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION = "manageCaseDocumentCollection";
 
-    public static final String AMENDED_CONSENT_ORDER = "AmendedConsentOrder";
+    public static final String AMEND_CONSENT_ORDER = "AmendedConsentOrder";
 
     //organisation policy
     public static final String ORGANISATION_POLICY_APPLICANT = "ApplicantOrganisationPolicy";
@@ -477,6 +509,8 @@ public class CCDConfigConstant {
     public static final String HEARING_ORDER_OTHER_COLLECTION = "hearingOrderOtherDocuments";
     public static final String LATEST_DRAFT_DIRECTION_ORDER = "latestDraftDirectionOrder";
     public static final String JUDGES_AMENDED_DIRECTION_ORDER_COLLECTION = "judgesAmendedOrderCollection";
+    public static final String LATEST_DIRECTION_ORDER_IS_FINAL = "finalOrderYN";
+    public static final String ANOTHER_HEARING_TO_BE_LISTED = "anotherHearingYN";
 
     //transfer to local courts
     public static final String TRANSFER_COURTS_COLLECTION = "transferLocalCourtEmailCollection";
@@ -501,6 +535,43 @@ public class CCDConfigConstant {
     public static final String INTERIM_WALES_FRC_LIST = "interim_walesFRCList";
 
     //Interim Documents
+    public static final String INTERIM_HEARING_COLLECTION = "interimHearings";
+    public static final String INTERIM_HEARING_TYPE = "interimHearingType";
+    public static final String INTERIM_HEARING_DATE = "interimHearingDate";
+    public static final String INTERIM_HEARING_TIME = "interimHearingTime";
+    public static final String INTERIM_HEARING_TIME_ESTIMATE = "interimTimeEstimate";
+    public static final String INTERIM_HEARING_REGION_LIST = "interim_regionList";
+    public static final String INTERIM_HEARING_CFC_COURT_LIST = "interim_cfcCourtList";
+    public static final String INTERIM_HEARING_WALES_FRC_COURT_LIST = "interim_walesFRCList";
+    public static final String INTERIM_HEARING_LONDON_FRC_COURT_LIST = "interim_londonFRCList";
+    public static final String INTERIM_HEARING_DEVON_COURT_LIST = "interim_devonCourtList";
+    public static final String INTERIM_HEARING_DORSET_COURT_LIST = "interim_dorsetCourtList";
+    public static final String INTERIM_HEARING_HUMBER_COURT_LIST = "interim_humberCourtList";
+    public static final String INTERIM_HEARING_MIDLANDS_FRC_COURT_LIST = "interim_midlandsFRCList";
+    public static final String INTERIM_HEARING_BRISTOL_COURT_LIST = "interim_bristolCourtList";
+    public static final String INTERIM_HEARING_NEWPORT_COURT_LIST = "interim_newportCourtList";
+    public static final String INTERIM_HEARING_NORTHEAST_COURT_LIST = "interim_northEastFRCList";
+    public static final String INTERIM_HEARING_NORTHWEST_COURT_LIST = "interim_northWestFRCList";
+    public static final String INTERIM_HEARING_SOUTHEAST_COURT_LIST = "interim_southEastFRCList";
+    public static final String INTERIM_HEARING_SOUTHWEST_COURT_LIST = "interim_southWestFRCList";
+    public static final String INTERIM_HEARING_SWANSEA_COURT_LIST = "interim_swanseaCourtList";
+    public static final String INTERIM_HEARING_LIVERPOOL_COURT_LIST = "interim_liverpoolCourtList";
+    public static final String INTERIM_HEARING_BIRMINGHAM_COURT_LIST = "interim_birminghamCourtList";
+    public static final String INTERIM_HEARING_CLEAVELAND_COURT_LIST = "interim_cleavelandCourtList";
+    public static final String INTERIM_HEARING_KENT_SURREY_COURT_LIST = "interim_kentSurreyCourtList";
+    public static final String INTERIM_HEARING_LANCASHIRE_COURT_LIST = "interim_lancashireCourtList";
+    public static final String INTERIM_HEARING_MANCHESTER_COURT_LIST = "interim_manchesterCourtList";
+    public static final String INTERIM_HEARING_NORTHWALES_COURT_LIST = "interim_northWalesCourtList";
+    public static final String INTERIM_HEARING_NOTTINGHAM_COURT_LIST = "interim_nottinghamCourtList";
+    public static final String INTERIM_HEARING_NWYORKSHIRE_COURT_LIST = "interim_nwyorkshireCourtList";
+    public static final String INTERIM_HEARING_BEDFORDSHIRE_COURT_LIST = "interim_bedfordshireCourtList";
+    public static final String INTERIM_HEARING_THAMESVALLEY_COURT_LIST = "interim_thamesvalleyCourtList";
+    public static final String INTERIM_HEARING_ADDITIONAL_INFO = "interimAdditionalInformationAboutHearing";
+    public static final String INTERIM_HEARING_PROMPT_FOR_DOCUMENT = "interimPromptForAnyDocument";
+    public static final String INTERIM_HEARING_TRACKING = "iHCollectionItemIds";
+
+    public static final String INTERIM_HEARING_ALL_DOCUMENT = "interimHearingDocuments";
+
     public static final String INTERIM_HEARING_DOCUMENT = "interimHearingDirectionsDocument";
     public static final String INTERIM_HEARING_UPLOADED_DOCUMENT = "interimUploadAdditionalDocument";
 
@@ -509,10 +580,38 @@ public class CCDConfigConstant {
     public static final String CHANGE_ORGANISATION_REQUEST = "changeOrganisationRequestField";
     public static final String INCLUDES_REPRESENTATION_CHANGE = "updateIncludesRepresentativeChange";
     public static final String REPRESENTATION_UPDATE_HISTORY = "RepresentationUpdateHistory";
-    public static final String CHANGE_REQUEST_FIELD = "changeOrganisationRequestField";
     public static final String INCLUDES_REPRESENTATIVE_UPDATE = "updateIncludesRepresentativeChange";
     public static final String UPDATE_CONTACT_DETAILS_EVENT = "FR_updateContactDetails";
+    public static final String NOTICE_OF_CHANGE = "Notice of Change";
+    public static final String IS_NOC_REJECTED = "isNocRejected";
 
     public static final String HEARING_UPLOAD_BUNDLE_COLLECTION = "hearingUploadBundle";
     public static final String SEND_ORDER_POST_STATE_OPTION_FIELD = "sendOrderPostStateOption";
+
+    //Upload Approved Order
+    public static final String HEARING_DIRECTION_DETAILS_COLLECTION = "hearingDirectionDetailsCollection";
+    public static final String HEARING_NOTICE_DOCUMENT_PACK = "hearingNoticeDocumentPack";
+
+    //Consented List for hearings
+    public static final String LIST_FOR_HEARING_COLLECTION_CONSENTED = "listForHearings";
+    public static final String HEARING_PROMPT_FOR_DOCUMENT = "promptForAnyDocument";
+    public static final String HEARING_UPLOADED_DOCUMENT = "uploadAdditionalDocument";
+    public static final String HEARING_NOTICE_DOCUMENT = "hearingNotice";
+
+    //Manage Barristers
+    public static final String APPLICANT_BARRISTER_COLLECTION = "appBarristerCollection";
+    public static final String RESPONDENT_BARRISTER_COLLECTION = "respBarristerCollection";
+    public static final String APPLICANT_BARRISTER_ROLE = "[APPBARRISTER]";
+    public static final String RESPONDENT_BARRISTER_ROLE = "[RESPBARRISTER]";
+    public static final String CASEWORKER_ROLE = "[CASEWORKER]";
+    public static final String MANAGE_BARRISTER_PARTY = "barristerParty";
+    public static final String MANAGE_BARRISTERS = "Manage Barristers";
+
+
+    //Hearing Events
+    public static final String LIST_FOR_HEARING = "List for Hearing";
+    public static final String LIST_FOR_INTERIM_HEARING = "List for Interim Hearing";
+
+    //Hearing State
+    public static final String PREPARE_FOR_HEARING_STATE = "prepareForHearing";
 }

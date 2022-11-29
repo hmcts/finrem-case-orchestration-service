@@ -70,7 +70,7 @@ public class HearingOrderService {
         Map<String, Object> caseData = caseDetails.getData();
 
         List<CollectionElement<DraftDirectionOrder>> judgesAmendedDirectionOrders = Optional.ofNullable(caseData.get(
-            JUDGES_AMENDED_DIRECTION_ORDER_COLLECTION))
+                JUDGES_AMENDED_DIRECTION_ORDER_COLLECTION))
             .map(this::convertToListOfDraftDirectionOrder)
             .orElse(new ArrayList<>());
 
@@ -87,7 +87,7 @@ public class HearingOrderService {
 
     public Optional<DraftDirectionOrder> draftDirectionOrderCollectionTail(CaseDetails caseDetails) {
         List<CollectionElement<DraftDirectionOrder>> draftDirectionOrders = Optional.ofNullable(caseDetails.getData()
-            .get(DRAFT_DIRECTION_ORDER_COLLECTION))
+                .get(DRAFT_DIRECTION_ORDER_COLLECTION))
             .map(this::convertToListOfDraftDirectionOrder)
             .orElse(emptyList());
 
@@ -123,7 +123,7 @@ public class HearingOrderService {
         caseData.put(LATEST_DRAFT_HEARING_ORDER, stampedHearingOrder);
     }
 
-    private void updateCaseDataForLatestHearingOrderCollection(Map<String, Object> caseData, CaseDocument stampedHearingOrder) {
+    public void updateCaseDataForLatestHearingOrderCollection(Map<String, Object> caseData, CaseDocument stampedHearingOrder) {
         List<HearingOrderCollectionData> finalOrderCollection = Optional.ofNullable(documentHelper.getFinalOrderDocuments(caseData))
             .orElse(new ArrayList<>());
 
@@ -137,14 +137,17 @@ public class HearingOrderService {
     }
 
     private DraftDirectionOrder convertToDraftDirectionOrder(Object value) {
-        return objectMapper.convertValue(value, new TypeReference<>() {});
+        return objectMapper.convertValue(value, new TypeReference<>() {
+        });
     }
 
     private List<CollectionElement<DraftDirectionOrder>> convertToListOfDraftDirectionOrder(Object value) {
-        return objectMapper.convertValue(value, new TypeReference<>() {});
+        return objectMapper.convertValue(value, new TypeReference<>() {
+        });
     }
 
     private List<CollectionElement<DirectionOrder>> convertToListOfDirectionOrder(Object value) {
-        return objectMapper.convertValue(value, new TypeReference<>() {});
+        return objectMapper.convertValue(value, new TypeReference<>() {
+        });
     }
 }

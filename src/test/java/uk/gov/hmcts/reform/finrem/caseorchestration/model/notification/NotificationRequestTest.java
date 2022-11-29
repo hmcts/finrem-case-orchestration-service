@@ -11,9 +11,22 @@ public class NotificationRequestTest {
 
     @Test
     public void shouldReturnNotificationRequestData() {
-        underTest = new NotificationRequest("12345", "67890", "D123",
-            "Padmaja", "test@test.com", "nottingham", "consented", "general body",
-            CTSC_OPENING_HOURS);
+        underTest = NotificationRequest.builder()
+            .caseReferenceNumber("12345")
+            .solicitorReferenceNumber("67890")
+            .divorceCaseNumber("D123")
+            .name("Padmaja")
+            .notificationEmail("test@test.com")
+            .selectedCourt("nottingham")
+            .caseType("consented")
+            .generalEmailBody("general body")
+            .phoneOpeningHours(CTSC_OPENING_HOURS)
+            .caseOrderType("consent")
+            .camelCaseOrderType("Consent")
+            .applicantName("Victoria Goodman")
+            .respondentName("Victor Goodman")
+            .build();
+
         assertEquals("12345", underTest.getCaseReferenceNumber());
         assertEquals("67890", underTest.getSolicitorReferenceNumber());
         assertEquals("D123", underTest.getDivorceCaseNumber());
@@ -23,6 +36,10 @@ public class NotificationRequestTest {
         assertEquals("consented", underTest.getCaseType());
         assertEquals("general body", underTest.getGeneralEmailBody());
         assertEquals(CTSC_OPENING_HOURS, underTest.getPhoneOpeningHours());
+        assertEquals("consent", underTest.getCaseOrderType());
+        assertEquals("Consent", underTest.getCamelCaseOrderType());
+        assertEquals("Victoria Goodman", underTest.getApplicantName());
+        assertEquals("Victor Goodman", underTest.getRespondentName());
     }
 
     @Test
@@ -50,6 +67,9 @@ public class NotificationRequestTest {
         underTest.setCaseType("consented");
         underTest.setGeneralEmailBody("general body");
         underTest.setPhoneOpeningHours(CTSC_OPENING_HOURS);
+        underTest.setApplicantName("Victoria Goodman");
+        underTest.setRespondentName("Victor Goodman");
+        underTest.setHearingType("First Directions Appointment (FDA)");
         assertEquals("54321", underTest.getCaseReferenceNumber());
         assertEquals("67891", underTest.getSolicitorReferenceNumber());
         assertEquals("D456", underTest.getDivorceCaseNumber());
@@ -59,5 +79,8 @@ public class NotificationRequestTest {
         assertEquals("consented", underTest.getCaseType());
         assertEquals("general body", underTest.getGeneralEmailBody());
         assertEquals(CTSC_OPENING_HOURS, underTest.getPhoneOpeningHours());
+        assertEquals("Victoria Goodman", underTest.getApplicantName());
+        assertEquals("Victor Goodman", underTest.getRespondentName());
+        assertEquals("First Directions Appointment (FDA)", underTest.getHearingType());
     }
 }

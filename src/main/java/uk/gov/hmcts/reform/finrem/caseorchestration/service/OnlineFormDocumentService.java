@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
@@ -12,6 +13,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CONSENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ORDER_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.VARIATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_AUTHORISATION_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_NATURE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_NATURE_OF_APPLICATION_3A;
@@ -51,11 +55,13 @@ public class OnlineFormDocumentService {
     private final DocumentConfiguration documentConfiguration;
     private final OptionIdToValueTranslator optionIdToValueTranslator;
     private final DocumentHelper documentHelper;
+    private final ConsentedApplicationHelper consentedApplicationHelper;
 
     public CaseDocument generateMiniFormA(String authorisationToken, CaseDetails caseDetails) {
 
         log.info("Generating Consented Mini Form A for Case ID : {}", caseDetails.getId());
-        return genericDocumentService.generateDocument(authorisationToken, caseDetails,
+        CaseDetails  caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
+        return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
             documentConfiguration.getMiniFormTemplate(),
             documentConfiguration.getMiniFormFileName());
     }
@@ -140,5 +146,11 @@ public class OnlineFormDocumentService {
         caseData.put(CONSENTED_NATURE_OF_APPLICATION_5, caseData.remove(CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_5));
         caseData.put(CONSENTED_NATURE_OF_APPLICATION_6, caseData.remove(CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_6));
         caseData.put(CONSENTED_NATURE_OF_APPLICATION_7, caseData.remove(CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_7));
+
+        if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(caseDetails.getData()))) {
+            caseData.put(ORDER_TYPE, VARIATION);
+        } else {
+            caseData.put(ORDER_TYPE, CONSENT);
+        }
     }
 }

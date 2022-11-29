@@ -46,8 +46,6 @@ public class GenerateCoverSheetService {
     private final DocumentHelper documentHelper;
     private final CaseDataService caseDataService;
 
-    private enum AddressFoundInCaseData { SOLICITOR, PARTY, NONE }
-
     public CaseDocument generateApplicantCoverSheet(final CaseDetails caseDetails, final String authorisationToken) {
         log.info("Generating Applicant cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
             documentConfiguration.getBulkPrintTemplate());
@@ -128,13 +126,17 @@ public class GenerateCoverSheetService {
 
     private AddressFoundInCaseData checkAddress(Map<String, Object> caseData, String partyAddressCcdFieldName,
                                                 String solicitorAddressCcdFieldName, boolean isRepresentedByASolicitor) {
-        return isRepresentedByASolicitor && caseDataService.addressLineOneAndPostCodeAreBothNotEmpty((Map) caseData.get(solicitorAddressCcdFieldName))
+        return isRepresentedByASolicitor && caseDataService.addressLineOneNotEmpty((Map) caseData.get(solicitorAddressCcdFieldName))
             ? AddressFoundInCaseData.SOLICITOR
-            : caseDataService.addressLineOneAndPostCodeAreBothNotEmpty((Map) caseData.get(partyAddressCcdFieldName)) ? AddressFoundInCaseData.PARTY
+            : caseDataService.addressLineOneNotEmpty((Map) caseData.get(partyAddressCcdFieldName)) ? AddressFoundInCaseData.PARTY
             : AddressFoundInCaseData.NONE;
     }
 
     private String partyName(Object partyFirstMiddleName, Object partyLastName) {
         return StringUtils.joinWith(" ", partyFirstMiddleName, partyLastName).trim();
+    }
+
+    private enum AddressFoundInCaseData {
+        SOLICITOR, PARTY, NONE
     }
 }

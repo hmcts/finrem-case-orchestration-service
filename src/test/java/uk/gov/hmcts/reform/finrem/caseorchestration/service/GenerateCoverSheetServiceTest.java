@@ -36,8 +36,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 
 public class GenerateCoverSheetServiceTest extends BaseServiceTest {
 
-    @Autowired private GenerateCoverSheetService generateCoverSheetService;
-    @Autowired private ObjectMapper mapper;
+    @Autowired
+    private GenerateCoverSheetService generateCoverSheetService;
+    @Autowired
+    private ObjectMapper mapper;
 
     @Rule
     public ExpectedException expectedException = none();
@@ -92,6 +94,14 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void shouldGenerateRespCoverSheetWithRespAddressWhenRespPostcodeIsEmptyAndRespSolAddressIsEmpty() throws Exception {
+        CaseDetails caseDetails = caseDetailsWithEmptySolAddressAndEmptyPostcode();
+        generateCoverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
+
+        assertCoversheetAddress("51 Respondent Street\nLondon");
+    }
+
+    @Test
     public void shouldGenerateApplicantCoverSheetUsingApplicantSolicitorAddress() throws Exception {
         CaseDetails caseDetails = caseDetailsWithSolicitors();
         generateCoverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
@@ -139,6 +149,13 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
     private CaseDetails caseDetailsWithEmptySolAddress() throws Exception {
         try (InputStream resourceAsStream =
                  getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print-empty-solicitor-address.json")) {
+            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+        }
+    }
+
+    private CaseDetails caseDetailsWithEmptySolAddressAndEmptyPostcode() throws Exception {
+        try (InputStream resourceAsStream =
+                 getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print-empty-solicitor-address-and-empty-postcode.json")) {
             return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         }
     }

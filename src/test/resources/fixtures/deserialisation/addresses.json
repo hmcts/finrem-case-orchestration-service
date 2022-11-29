@@ -1,0 +1,37 @@
+{
+  "case_details": {
+    "id": "12345678",
+    "jurisdiction": "divorce",
+    "state": "scheduleRaiseDirectionsOrder",
+    "case_type_id": "FinancialRemedyContested",
+    "case_data": {
+      "applicantSolicitorAddress": {
+        "AddressLine1": "Line1",
+        "AddressLine2": "Line2",
+        "AddressLine3": "Line3",
+        "Country": "UK",
+        "County": "Surrey",
+        "PostCode": "CR5 2JX",
+        "PostTown": "Purley"
+      },
+      "respondentAddress": {
+        "AddressLine1": "line2",
+        "AddressLine2": "line1",
+        "AddressLine3": "lin3",
+        "Country": "UK",
+        "County": "Surrey",
+        "PostCode": "CR52JL",
+        "PostTown": "Coulsdon"
+      },
+      "solicitorAddress": {
+        "County": "essex",
+        "Country": "UK",
+        "PostCode": "b1 1ab",
+        "PostTown": "london",
+        "AddressLine1": "line1",
+        "AddressLine2": "line2",
+        "AddressLine3": "line3"
+      }
+    }
+  }
+}

@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ClientDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
@@ -63,6 +64,7 @@ public class TestSetUpUtils {
     public static final String DOC_URL = "http://dm-store/lhjbyuivu87y989hijbb";
     public static final String BINARY_URL = DOC_URL + "/binary";
     public static final String FILE_NAME = "app_docs.pdf";
+    public static final String VARIATION_FILE_NAME = "ApprovedVariationOrderLetter.pdf";
     public static final String INTE_DOC_URL = "http://dm-store/documents/e9ca7c4a-1f75-4b46-b0dc-744abc2dc0d3";
     public static final String INTE_BINARY_URL = INTE_DOC_URL + "/binary";
     public static final String INTE_FILE_NAME = "dummy1.pdf";
@@ -148,6 +150,14 @@ public class TestSetUpUtils {
         return document;
     }
 
+    public static Document variationDocument() {
+        Document document = new Document();
+        document.setBinaryUrl(BINARY_URL);
+        document.setFileName(VARIATION_FILE_NAME);
+        document.setUrl(DOC_URL);
+        return document;
+    }
+
     public static CaseDocument caseDocument() {
         CaseDocument caseDocument = new CaseDocument();
         caseDocument.setDocumentUrl(DOC_URL);
@@ -157,9 +167,9 @@ public class TestSetUpUtils {
         return caseDocument;
     }
 
-    public static CaseDocument caseDocument(String documentName, String filename, String binaryUrl) {
+    public static CaseDocument caseDocument(String documentUrl, String filename, String binaryUrl) {
         CaseDocument caseDocument = new CaseDocument();
-        caseDocument.setDocumentUrl(documentName);
+        caseDocument.setDocumentUrl(documentUrl);
         caseDocument.setDocumentFilename(filename);
         caseDocument.setDocumentBinaryUrl(binaryUrl);
 
@@ -194,6 +204,37 @@ public class TestSetUpUtils {
 
     public static CaseDetails defaultConsentedCaseDetails() {
         Map<String, Object> caseData = new HashMap<>();
+        List<String> natureOfApplication = List.of("Lump Sum Order",
+            "Periodical Payment Order",
+            "Pension Sharing Order",
+            "Pension Attachment Order",
+            "Pension Compensation Sharing Order",
+            "Pension Compensation Attachment Order",
+            "A settlement or a transfer of property",
+            "Property Adjustment Order");
+        caseData.put("natureOfApplication2", natureOfApplication);
+        populateApplicantNameAndAddress(caseData);
+        populateRespondentNameAndAddressConsented(caseData);
+
+        return CaseDetails.builder()
+            .caseTypeId(CASE_TYPE_ID_CONSENTED)
+            .id(123456789L)
+            .data(caseData)
+            .build();
+    }
+
+    public static CaseDetails defaultConsentedCaseDetailsForVariationOrder() {
+        Map<String, Object> caseData = new HashMap<>();
+        List<String> natureOfApplication = List.of("Lump Sum Order",
+            "Periodical Payment Order",
+            "Pension Sharing Order",
+            "Pension Attachment Order",
+            "Pension Compensation Sharing Order",
+            "Pension Compensation Attachment Order",
+            "A settlement or a transfer of property",
+            "Variation Order",
+            "Property Adjustment Order");
+        caseData.put("natureOfApplication2", natureOfApplication);
         populateApplicantNameAndAddress(caseData);
         populateRespondentNameAndAddressConsented(caseData);
 
@@ -206,6 +247,15 @@ public class TestSetUpUtils {
 
     public static CaseDetails defaultContestedCaseDetails() {
         Map<String, Object> caseData = new HashMap<>();
+        List<String> natureOfApplication = List.of("Lump Sum Order",
+            "Periodical Payment Order",
+            "Pension Sharing Order",
+            "Pension Attachment Order",
+            "Pension Compensation Sharing Order",
+            "Pension Compensation Attachment Order",
+            "A settlement or a transfer of property",
+            "Property Adjustment Order");
+        caseData.put("natureOfApplication2", natureOfApplication);
         populateApplicantNameAndAddress(caseData);
         populateRespondentNameAndAddressContested(caseData);
         populateCourtDetails(caseData);
@@ -296,7 +346,8 @@ public class TestSetUpUtils {
 
     public static List<BulkPrintDocument> bulkPrintDocumentList() {
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
-        bulkPrintDocuments.add(BulkPrintDocument.builder().binaryFileUrl("http://dm-store-aat.service.core-compute-aat.internal/documents/967103ad-0b95-4f0f-9712-4bf5770fb196/binary").build());
+        bulkPrintDocuments.add(BulkPrintDocument.builder()
+            .binaryFileUrl("http://dm-store-aat.service.core-compute-aat.internal/documents/967103ad-0b95-4f0f-9712-4bf5770fb196/binary").build());
         return bulkPrintDocuments;
     }
 
@@ -314,5 +365,49 @@ public class TestSetUpUtils {
             }
         });
         return caseData;
+    }
+
+    public static CaseDocument newDocument(String documentName,
+                                           String filename,
+                                           String binaryUrl) {
+        return CaseDocument.builder()
+            .documentFilename(filename)
+            .documentUrl(documentName)
+            .documentBinaryUrl(binaryUrl)
+            .build();
+    }
+
+    public static CaseDocument newDocument() {
+        return CaseDocument.builder()
+            .documentFilename(FILE_NAME)
+            .documentUrl(DOC_URL)
+            .documentBinaryUrl(BINARY_URL)
+            .build();
+    }
+
+    public static ClientDocument newDocumentClientDocument() {
+        ClientDocument caseDocument =
+            new ClientDocument();
+        caseDocument.setUrl(DOC_URL);
+        caseDocument.setFileName(FILE_NAME);
+        caseDocument.setBinaryUrl(BINARY_URL);
+
+        return caseDocument;
+    }
+
+    public static CaseDocument wordDoc() {
+        return CaseDocument.builder()
+            .documentFilename("doc.docx")
+            .documentUrl(DOC_URL)
+            .documentBinaryUrl(BINARY_URL)
+            .build();
+    }
+
+    public static ClientDocument docClientWordDocument() {
+        return ClientDocument.builder()
+            .url(DOC_URL)
+            .fileName("doc.docx")
+            .binaryUrl(BINARY_URL)
+            .build();
     }
 }

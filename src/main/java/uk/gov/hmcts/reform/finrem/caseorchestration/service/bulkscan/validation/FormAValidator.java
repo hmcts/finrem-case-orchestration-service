@@ -76,7 +76,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.help
 public class FormAValidator extends BulkScanFormValidator {
 
     private static final String HWF_NUMBER_6_DIGITS_REGEX = "\\d{6}";
-    private static final String DIVORCE_CASE_NUMBER_REGEX = "^([A-Z|a-z][A-Z|a-z])\\d{2}[D|d]\\d{5}$";
+    private static final String DIVORCE_CASE_NUMBER_REGEX
+        = "^([A-Z|a-z][A-Z|a-z])\\d{2}[D|d|J|j|N|n]\\d{5}$|\\b\\d{4}[ -]\\d{4}[ -]\\d{4}[ -]\\d{4}\\b|\\b\\d{4}\\d{4}\\d{4}\\d{4}\\b";
 
     private static final List<String> MANDATORY_FIELDS = asList(
         DIVORCE_CASE_NUMBER,
@@ -96,12 +97,23 @@ public class FormAValidator extends BulkScanFormValidator {
         RESPONDENT_ADDRESS_LINE_1,
         RESPONDENT_ADDRESS_POSTCODE
     );
-
-    protected List<String> getMandatoryFields() {
-        return MANDATORY_FIELDS;
-    }
-
     private static final Map<String, List<String>> ALLOWED_VALUES_PER_FIELD = new HashMap<>();
+    // List of allowed Document Subtypes that can be attached to a BSP Exception Record
+    private static final List<String> ALLOWED_DOCUMENT_SUBTYPES = asList(
+        D81_DOCUMENT,
+        FORM_A_DOCUMENT,
+        P1_DOCUMENT,
+        PPF1_DOCUMENT,
+        P2_DOCUMENT,
+        PPF2_DOCUMENT,
+        PPF_DOCUMENT,
+        FORM_E_DOCUMENT,
+        COVER_LETTER_DOCUMENT,
+        OTHER_SUPPORT_DOCUMENTS,
+        DRAFT_CONSENT_ORDER_DOCUMENT,
+        DECREE_NISI_DOCUMENT,
+        DECREE_ABSOLUTE_DOCUMENT
+    );
 
     static {
         ALLOWED_VALUES_PER_FIELD.put(PROVISION_MADE_FOR, asList(
@@ -151,59 +163,6 @@ public class FormAValidator extends BulkScanFormValidator {
         ALLOWED_VALUES_PER_FIELD.put(GENDER_CHILD_2, genderEnum);
     }
 
-    @Override
-    protected Map<String, List<String>> getAllowedValuesPerField() {
-        return ALLOWED_VALUES_PER_FIELD;
-    }
-
-    // List of allowed Document Subtypes that can be attached to a BSP Exception Record
-    private static final List<String> ALLOWED_DOCUMENT_SUBTYPES = asList(
-        D81_DOCUMENT,
-        FORM_A_DOCUMENT,
-        P1_DOCUMENT,
-        PPF1_DOCUMENT,
-        P2_DOCUMENT,
-        PPF2_DOCUMENT,
-        PPF_DOCUMENT,
-        FORM_E_DOCUMENT,
-        COVER_LETTER_DOCUMENT,
-        OTHER_SUPPORT_DOCUMENTS,
-        DRAFT_CONSENT_ORDER_DOCUMENT,
-        DECREE_NISI_DOCUMENT,
-        DECREE_ABSOLUTE_DOCUMENT
-    );
-
-    @Override
-    protected List<String> runPostProcessingValidation(Map<String, String> fieldsMap) {
-        List<String> errorMessages = Stream.of(
-            validateHwfNumber(fieldsMap, HWF_NUMBER),
-            validateHasAtLeastTwoNames(fieldsMap, APPLICANT_FULL_NAME),
-            validateHasAtLeastTwoNames(fieldsMap, RESPONDENT_FULL_NAME),
-            validateNonMandatoryCommaSeparatedField(fieldsMap,
-                NATURE_OF_APPLICATION, natureOfApplicationChecklistToCcdFieldNames),
-            validateNonMandatoryCommaSeparatedField(
-                fieldsMap,
-                DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE,
-                dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames
-            ),
-            validateField(fieldsMap, APPLICANT_PHONE, CCD_PHONE_NUMBER_REGEX),
-            validateField(fieldsMap, APPLICANT_EMAIL, CCD_EMAIL_REGEX),
-            validatePostcode(fieldsMap, APPLICANT_ADDRESS_POSTCODE),
-            validatePostcode(fieldsMap, RESPONDENT_ADDRESS_POSTCODE),
-            validateField(fieldsMap, DIVORCE_CASE_NUMBER, DIVORCE_CASE_NUMBER_REGEX)
-        )
-            .flatMap(Collection::stream)
-            .collect(Collectors.toList());
-
-        validateFormDate(fieldsMap, AUTHORISATION_DATE).ifPresent(errorMessages::add);
-        validateFormDate(fieldsMap, DATE_OF_BIRTH_CHILD_1).ifPresent(errorMessages::add);
-        validateFormDate(fieldsMap, DATE_OF_BIRTH_CHILD_2).ifPresent(errorMessages::add);
-
-        log.info("Form A Validation (Post-processing) returned the following errors: {}", errorMessages);
-
-        return errorMessages;
-    }
-
     private static List<String> validateNonMandatoryCommaSeparatedField(
         Map<String, String> fieldsMap, String commaSeparatedFieldKey,
         Map<String, String> validOcrFieldNamesToCcdFieldNames) {
@@ -246,6 +205,46 @@ public class FormAValidator extends BulkScanFormValidator {
         return hwfNumber != null && !hwfNumber.matches(HWF_NUMBER_6_DIGITS_REGEX)
             ? asList("HWFNumber is usually 6 digits")
             : emptyList();
+    }
+
+    protected List<String> getMandatoryFields() {
+        return MANDATORY_FIELDS;
+    }
+
+    @Override
+    protected Map<String, List<String>> getAllowedValuesPerField() {
+        return ALLOWED_VALUES_PER_FIELD;
+    }
+
+    @Override
+    protected List<String> runPostProcessingValidation(Map<String, String> fieldsMap) {
+        List<String> errorMessages = Stream.of(
+                validateHwfNumber(fieldsMap, HWF_NUMBER),
+                validateHasAtLeastTwoNames(fieldsMap, APPLICANT_FULL_NAME),
+                validateHasAtLeastTwoNames(fieldsMap, RESPONDENT_FULL_NAME),
+                validateNonMandatoryCommaSeparatedField(fieldsMap,
+                    NATURE_OF_APPLICATION, natureOfApplicationChecklistToCcdFieldNames),
+                validateNonMandatoryCommaSeparatedField(
+                    fieldsMap,
+                    DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE,
+                    dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames
+                ),
+                validateField(fieldsMap, APPLICANT_PHONE, CCD_PHONE_NUMBER_REGEX),
+                validateField(fieldsMap, APPLICANT_EMAIL, CCD_EMAIL_REGEX),
+                validatePostcode(fieldsMap, APPLICANT_ADDRESS_POSTCODE),
+                validatePostcode(fieldsMap, RESPONDENT_ADDRESS_POSTCODE),
+                validateField(fieldsMap, DIVORCE_CASE_NUMBER, DIVORCE_CASE_NUMBER_REGEX)
+            )
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
+
+        validateFormDate(fieldsMap, AUTHORISATION_DATE).ifPresent(errorMessages::add);
+        validateFormDate(fieldsMap, DATE_OF_BIRTH_CHILD_1).ifPresent(errorMessages::add);
+        validateFormDate(fieldsMap, DATE_OF_BIRTH_CHILD_2).ifPresent(errorMessages::add);
+
+        log.info("Form A Validation (Post-processing) returned the following errors: {}", errorMessages);
+
+        return errorMessages;
     }
 
     public OcrValidationResult validateFormAScannedDocuments(ExceptionRecord exceptionRecord) throws UnsupportedFormTypeException {

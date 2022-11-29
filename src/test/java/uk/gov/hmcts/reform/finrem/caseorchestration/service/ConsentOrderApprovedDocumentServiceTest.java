@@ -42,13 +42,18 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.VARIATION_FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetailsForVariationOrder;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.matchDocumentGenerationRequestTemplateAndFilename;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.pensionDocumentData;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.variationDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
@@ -66,10 +71,14 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     private static final String CONSENT_ORDER_URL = "consentOrderUrl";
     private static final String PENSION_DOCUMENT_URL = "pensionDocumentUrl";
 
-    @Autowired private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
-    @Autowired private ObjectMapper mapper;
-    @Autowired private DocumentHelper documentHelper;
-    @Autowired private DocumentClient documentClientMock;
+    @Autowired
+    private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
+    @Autowired
+    private ObjectMapper mapper;
+    @Autowired
+    private DocumentHelper documentHelper;
+    @Autowired
+    private DocumentClient documentClientMock;
 
     @Value("${document.bulkPrintTemplate}")
     private String documentBulkPrintTemplate;
@@ -80,6 +89,9 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     private String documentApprovedConsentOrderTemplate;
     @Value("${document.approvedConsentOrderFileName}")
     private String documentApprovedConsentOrderFileName;
+
+    @Value("${document.approvedVariationOrderFileName}")
+    private String approvedVariationOrderFileName;
 
     @Value("${document.approvedConsentOrderNotificationTemplate}")
     private String documentApprovedConsentOrderNotificationTemplate;
@@ -115,6 +127,22 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         assertCaseDocument(caseDocument);
         verify(documentClientMock, atLeastOnce()).generatePdf(
             matchDocumentGenerationRequestTemplateAndFilename(documentApprovedConsentOrderTemplate, documentApprovedConsentOrderFileName),
+            anyString());
+    }
+
+    @Test
+    public void shouldGenerateApprovedVariationOrderLetterForConsented() {
+        caseDetails = defaultConsentedCaseDetailsForVariationOrder();
+        when(documentClientMock.generatePdf(matchDocumentGenerationRequestTemplateAndFilename(documentApprovedConsentOrderTemplate,
+            approvedVariationOrderFileName), anyString())).thenReturn(variationDocument());
+        CaseDocument caseDocument = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, AUTH_TOKEN);
+
+        assertThat(caseDocument.getDocumentFilename(), is(VARIATION_FILE_NAME));
+        assertThat(caseDocument.getDocumentUrl(), is(DOC_URL));
+        assertThat(caseDocument.getDocumentBinaryUrl(), is(BINARY_URL));
+
+        verify(documentClientMock, atLeastOnce()).generatePdf(
+            matchDocumentGenerationRequestTemplateAndFilename(documentApprovedConsentOrderTemplate, approvedVariationOrderFileName),
             anyString());
     }
 
@@ -243,10 +271,10 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         caseData.put(CONSENT_ORDER, caseDocument());
 
         consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData, AUTH_TOKEN);
-        assertThat(getDocumentList(caseData, CONTESTED_CONSENT_ORDER_COLLECTION), hasSize(1));
+        assertThat(getDocumentList(caseData), hasSize(1));
 
         consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData, AUTH_TOKEN);
-        assertThat(getDocumentList(caseData, CONTESTED_CONSENT_ORDER_COLLECTION), hasSize(2));
+        assertThat(getDocumentList(caseData), hasSize(2));
     }
 
     @Test
@@ -256,8 +284,9 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         assertThat(documents, hasSize(3));
     }
 
-    private List<CaseDocument> getDocumentList(Map<String, Object> data, String field) {
-        return mapper.convertValue(data.get(field), new TypeReference<>() {});
+    private List<CaseDocument> getDocumentList(Map<String, Object> data) {
+        return mapper.convertValue(data.get(CONTESTED_CONSENT_ORDER_COLLECTION), new TypeReference<>() {
+        });
     }
 
     private void addConsentOrderApprovedDataToCaseDetails(CaseDetails caseDetails) throws Exception {

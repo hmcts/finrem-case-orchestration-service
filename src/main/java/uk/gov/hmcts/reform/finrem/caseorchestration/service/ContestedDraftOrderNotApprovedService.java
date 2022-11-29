@@ -41,10 +41,9 @@ public class ContestedDraftOrderNotApprovedService {
     private final DocumentHelper documentHelper;
     private final DocumentConfiguration documentConfiguration;
     private final ObjectMapper objectMapper;
-
-    private BiFunction<CaseDetails, String, CaseDocument> generateDocument = this::applyGenerateDocument;
-    private Function<CaseDocument, ContestedRefusalOrderPreviewDocument> createRefusalOrderData = this::applyRefusalOrderData;
-    private UnaryOperator<CaseDetails> addExtraFields = this::applyAddExtraFields;
+    private final Function<CaseDocument, ContestedRefusalOrderPreviewDocument> createRefusalOrderData = this::applyRefusalOrderData;
+    private final UnaryOperator<CaseDetails> addExtraFields = this::applyAddExtraFields;
+    private final BiFunction<CaseDetails, String, CaseDocument> generateDocument = this::applyGenerateDocument;
 
     public Map<String, Object> createRefusalOrder(String authorisationToken, CaseDetails caseDetails) {
         log.info("Generating General Order for Case ID: {}", caseDetails.getId());
@@ -136,7 +135,7 @@ public class ContestedDraftOrderNotApprovedService {
         }
 
         List<ContestedRefusalOrderData> refusalOrderList = Optional.ofNullable(caseDetails.getData()
-            .get(CONTESTED_APPLICATION_NOT_APPROVED_COLLECTION))
+                .get(CONTESTED_APPLICATION_NOT_APPROVED_COLLECTION))
             .map(this::convertToRefusalOrderContestedList)
             .orElse(new ArrayList<>());
 

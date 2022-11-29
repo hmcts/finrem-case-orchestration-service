@@ -68,6 +68,26 @@ public class IdamServiceTest extends BaseServiceTest {
         Assert.assertEquals(idamService.getIdamUserId(AUTH_TOKEN), "1234");
     }
 
+    @Test
+    public void retrieveUserEmailId() {
+        mockServer.expect(requestTo(toUri()))
+            .andExpect(method(HttpMethod.GET))
+            .andRespond(withSuccess("{\"email\": \"test@TEST.com\"}", MediaType.APPLICATION_JSON));
+
+        String userEmailId = idamService.getUserEmailId("azsssfsdffsafa");
+        assertThat(userEmailId, is("test@test.com"));
+    }
+
+    @Test
+    public void retrieveUserSurname() {
+        mockServer.expect(requestTo(toUri()))
+            .andExpect(method(HttpMethod.GET))
+            .andRespond(withSuccess("{\"surname\": \"surname\"}", MediaType.APPLICATION_JSON));
+
+        String userSurname = idamService.getIdamSurname("azsssfsdffsafa");
+        assertThat(userSurname, is("surname"));
+    }
+
     private String toUri() {
         return "http://localhost:4501/details";
     }

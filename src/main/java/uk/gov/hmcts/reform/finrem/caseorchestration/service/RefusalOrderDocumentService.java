@@ -7,6 +7,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -42,10 +43,10 @@ public class RefusalOrderDocumentService {
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
     private final CaseDataService caseDataService;
-
-    private final Function<Pair<CaseDetails, String>, CaseDocument> generateDocument = this::applyGenerateRefusalOrder;
+    private final ConsentedApplicationHelper consentedApplicationHelper;
     private final Function<CaseDocument, ConsentOrderData> createConsentOrderData = this::applyCreateConsentOrderData;
     private final UnaryOperator<CaseDetails> addExtraFields = this::applyAddExtraFields;
+    private final Function<Pair<CaseDetails, String>, CaseDocument> generateDocument = this::applyGenerateRefusalOrder;
 
     public Map<String, Object> generateConsentOrderNotApproved(
         String authorisationToken, final CaseDetails caseDetails) {
@@ -93,9 +94,17 @@ public class RefusalOrderDocumentService {
     }
 
     private CaseDocument applyGenerateRefusalOrder(Pair<CaseDetails, String> data) {
+
+        String rejectOrderFileName;
+        if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(data.getLeft().getData()))) {
+            rejectOrderFileName = documentConfiguration.getRejectedVariationOrderFileName();
+        } else {
+            rejectOrderFileName = documentConfiguration.getRejectedOrderFileName();
+        }
+
         return genericDocumentService.generateDocument(data.getRight(), addExtraFields.apply(data.getLeft()),
             documentConfiguration.getRejectedOrderTemplate(),
-            documentConfiguration.getRejectedOrderFileName());
+            rejectOrderFileName);
     }
 
     private ConsentOrderData applyCreateConsentOrderData(CaseDocument caseDocument) {
@@ -113,7 +122,8 @@ public class RefusalOrderDocumentService {
     }
 
     private List<ConsentOrderData> convertToUploadOrderList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<>() {});
+        return objectMapper.convertValue(object, new TypeReference<>() {
+        });
     }
 
     private CaseDetails applyAddExtraFields(CaseDetails caseDetails) {
@@ -125,12 +135,16 @@ public class RefusalOrderDocumentService {
             caseData.put("RespondentName", documentHelper.getRespondentFullNameConsented(caseDetails));
             caseData.put("CourtName", "SITTING in private");
             caseData.put("courtDetails", buildConsentedFrcCourtDetails());
-
         } else {
             caseData.put("RespondentName", documentHelper.getRespondentFullNameContested(caseDetails));
             caseData.put("CourtName", "SITTING AT the Family Court at the "
                 + ContestedCourtHelper.getSelectedCourt(caseDetails));
             caseData.put("courtDetails", buildFrcCourtDetails(caseData));
+        }
+        if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(caseData))) {
+            caseData.put("orderType", "variation");
+        } else {
+            caseData.put("orderType", "consent");
         }
         return caseDetails;
     }

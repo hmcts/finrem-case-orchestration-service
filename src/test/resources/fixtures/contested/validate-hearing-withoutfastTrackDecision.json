@@ -6,6 +6,7 @@
     "state": "applicationDrafted",
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
+      "paperApplication": "Yes",
       "PBANumber": "PBA123",
       "PBAreference": "ABCD",
       "consentOrder": {
@@ -81,6 +82,15 @@
         }
       ],
       "respondentAddress": {
+        "County": "Essex",
+        "Country": "United Kingdom",
+        "PostCode": "SE12 9SE",
+        "PostTown": "London",
+        "AddressLine1": "252 Marvels Lane",
+        "AddressLine2": "AddressGlobalUK",
+        "AddressLine3": "London"
+      },
+      "applicantAddress": {
         "County": "Essex",
         "Country": "United Kingdom",
         "PostCode": "SE12 9SE",

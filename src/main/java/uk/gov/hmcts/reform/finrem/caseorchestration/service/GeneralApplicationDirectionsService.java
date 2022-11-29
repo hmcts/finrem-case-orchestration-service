@@ -6,8 +6,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
@@ -64,11 +66,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_THAMESVALLEY_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_WALES_FRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_WALES_OTHER_COURT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_PRE_STATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_UPLOADED_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIST_FOR_HEARING;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIST_FOR_INTERIM_HEARING;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PREPARE_FOR_HEARING_STATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
@@ -90,6 +93,36 @@ public class GeneralApplicationDirectionsService {
     private final GenericDocumentService genericDocumentService;
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
+    private final CcdService ccdService;
+
+    private static final String CASE_NUMBER = "ccdCaseNumber";
+    private static final String COURT_DETAIL = "courtDetails";
+    private static final String APPLICANT_NAME = "applicantName";
+    private static final String RESPONDENT_NAME = "respondentName";
+    private static final String LETTER_DATE = "letterDate";
+
+    public String getEventPostState(CaseDetails caseDetails, String userAuthorisation) {
+        List<String> eventDetailsOnCase = ccdService.getCcdEventDetailsOnCase(
+            userAuthorisation,
+            caseDetails,
+            EventType.GENERAL_APPLICATION_DIRECTIONS.getCcdType())
+            .stream()
+            .map(CaseEventDetail::getEventName).toList();
+
+        log.info("Previous event names : {} for caseId {}", eventDetailsOnCase, caseDetails.getId());
+        String hearingOption = Objects.toString(caseDetails.getData().get(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED), null);
+        log.info("Hearing option selected on direction : {} for caseId {}", hearingOption, caseDetails.getId());
+
+        if ((!eventDetailsOnCase.isEmpty() && (eventDetailsOnCase.contains(LIST_FOR_HEARING)
+            || eventDetailsOnCase.contains(LIST_FOR_INTERIM_HEARING)))
+            || (hearingOption != null && hearingOption.equals(YES_VALUE))) {
+            return PREPARE_FOR_HEARING_STATE;
+        }
+
+        String previousState = Objects.toString(caseDetails.getData().get(GENERAL_APPLICATION_PRE_STATE), null);
+        log.info("Previous state : {} for caseId {}", previousState, caseDetails.getId());
+        return previousState;
+    }
 
     public void startGeneralApplicationDirections(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
@@ -129,7 +162,7 @@ public class GeneralApplicationDirectionsService {
             GENERAL_APPLICATION_DIRECTIONS_JUDGE_NAME,
             GENERAL_APPLICATION_DIRECTIONS_RECITALS,
             GENERAL_APPLICATION_DIRECTIONS_TEXT_FROM_JUDGE
-        ).forEach(generalApplicationDirectionCcdField -> caseData.remove(generalApplicationDirectionCcdField));
+        ).forEach(caseData::remove);
     }
 
     public void submitInterimHearing(CaseDetails caseDetails, String authorisationToken) {
@@ -138,7 +171,7 @@ public class GeneralApplicationDirectionsService {
     }
 
     private void printInterimDocumentPackAndSendToApplicantAndRespondent(CaseDetails caseDetails, String authorisationToken,
-                                                                  List<BulkPrintDocument> documents) {
+                                                                         List<BulkPrintDocument> documents) {
         Map<String, Object> caseData = caseDetails.getData();
         if (isPaperApplication(caseData) || !isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
@@ -170,12 +203,12 @@ public class GeneralApplicationDirectionsService {
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         Map<String, Object> caseData = caseDetailsCopy.getData();
 
-        caseData.put("ccdCaseNumber", caseDetails.getId());
-        caseData.put("courtDetails", buildInterimFrcCourtDetails(caseData));
-        caseData.put("applicantName", documentHelper.getApplicantFullName(caseDetailsCopy));
-        caseData.put("respondentName", documentHelper.getRespondentFullNameContested(caseDetailsCopy));
+        caseData.put(CASE_NUMBER, caseDetails.getId());
+        caseData.put(COURT_DETAIL, buildInterimFrcCourtDetails(caseData));
+        caseData.put(APPLICANT_NAME, documentHelper.getApplicantFullName(caseDetailsCopy));
+        caseData.put(RESPONDENT_NAME, documentHelper.getRespondentFullNameContested(caseDetailsCopy));
         addInterimHearingVenueDetails(caseDetailsCopy);
-        caseData.put("letterDate", String.valueOf(LocalDate.now()));
+        caseData.put(LETTER_DATE, String.valueOf(LocalDate.now()));
 
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
             documentConfiguration.getGeneralApplicationInterimHearingNoticeTemplate(),
@@ -186,7 +219,6 @@ public class GeneralApplicationDirectionsService {
         Map<String, Object> caseData = caseDetails.getData();
         try {
             Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
-            log.info("Interim hearing courtDetailsMap :{}", courtDetailsMap);
             String selectedCourtIH = getSelectedCourtIH(caseData);
             log.info("Interim hearing selectedCourtIH :{}", selectedCourtIH);
             String courtDetailsObj = (String) caseData.get(selectedCourtIH);
@@ -198,10 +230,22 @@ public class GeneralApplicationDirectionsService {
         }
     }
 
+    public void submitCollectionGeneralApplicationDirections(CaseDetails caseDetails, List<BulkPrintDocument> dirDocuments,
+                                                             String authorisationToken) {
+        printDocumentPackAndSendToApplicantAndRespondent(caseDetails, authorisationToken, dirDocuments);
+    }
+
     public void submitGeneralApplicationDirections(CaseDetails caseDetails, String authorisationToken) {
         List<BulkPrintDocument> documents = prepareDocumentsToPrint(caseDetails, authorisationToken);
         printDocumentPackAndSendToApplicantAndRespondent(caseDetails, authorisationToken, documents);
         resetStateToGeneralApplicationPrestate(caseDetails);
+    }
+
+    public CaseDocument getBulkPrintDocument(CaseDetails caseDetails, String authorisationToken) {
+        Map<String, Object> caseData = caseDetails.getData();
+        return caseData.get(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED).equals(YES_VALUE)
+            ? prepareHearingRequiredNoticeDocument(caseDetails, authorisationToken)
+            : prepareGeneralApplicationDirectionsOrderDocument(caseDetails, authorisationToken);
     }
 
     private List<BulkPrintDocument> prepareDocumentsToPrint(CaseDetails caseDetails, String authorisationToken) {
@@ -212,20 +256,14 @@ public class GeneralApplicationDirectionsService {
             : prepareGeneralApplicationDirectionsOrderDocument(caseDetails, authorisationToken);
         documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(directionsDocument));
         caseData.put(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT, directionsDocument);
-
-        Stream.of(GENERAL_APPLICATION_DOCUMENT_LATEST, GENERAL_APPLICATION_DRAFT_ORDER).forEach(documentFieldName -> {
-            if (caseData.get(documentFieldName) != null) {
-                documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(
-                    documentHelper.convertToCaseDocument(caseData.get(documentFieldName))));
-            }
-        });
-
         return documents;
     }
 
     private void printDocumentPackAndSendToApplicantAndRespondent(CaseDetails caseDetails, String authorisationToken,
                                                                   List<BulkPrintDocument> documents) {
         bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
+        log.info("Sending {} document(s) to applicant via bulk print for Case {}, document(s) are {}", documents.size(), caseDetails.getId(),
+            documents);
         bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documents);
     }
 
@@ -241,10 +279,10 @@ public class GeneralApplicationDirectionsService {
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         Map<String, Object> caseData = caseDetailsCopy.getData();
 
-        caseData.put("courtDetails", buildFrcCourtDetails(caseData));
-        caseData.put("applicantName", documentHelper.getApplicantFullName(caseDetailsCopy));
-        caseData.put("respondentName", documentHelper.getRespondentFullNameContested(caseDetailsCopy));
-        caseData.put("letterDate", String.valueOf(LocalDate.now()));
+        caseData.put(COURT_DETAIL, buildFrcCourtDetails(caseData));
+        caseData.put(APPLICANT_NAME, documentHelper.getApplicantFullName(caseDetailsCopy));
+        caseData.put(RESPONDENT_NAME, documentHelper.getRespondentFullNameContested(caseDetailsCopy));
+        caseData.put(LETTER_DATE, String.valueOf(LocalDate.now()));
 
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
             documentConfiguration.getGeneralApplicationOrderTemplate(),
@@ -255,12 +293,12 @@ public class GeneralApplicationDirectionsService {
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         Map<String, Object> caseData = caseDetailsCopy.getData();
 
-        caseData.put("ccdCaseNumber", caseDetails.getId());
-        caseData.put("courtDetails", buildFrcCourtDetails(caseData));
-        caseData.put("applicantName", documentHelper.getApplicantFullName(caseDetailsCopy));
-        caseData.put("respondentName", documentHelper.getRespondentFullNameContested(caseDetailsCopy));
+        caseData.put(CASE_NUMBER, caseDetails.getId());
+        caseData.put(COURT_DETAIL, buildFrcCourtDetails(caseData));
+        caseData.put(APPLICANT_NAME, documentHelper.getApplicantFullName(caseDetailsCopy));
+        caseData.put(RESPONDENT_NAME, documentHelper.getRespondentFullNameContested(caseDetailsCopy));
         addHearingVenueDetails(caseDetailsCopy);
-        caseData.put("letterDate", String.valueOf(LocalDate.now()));
+        caseData.put(LETTER_DATE, String.valueOf(LocalDate.now()));
 
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
             documentConfiguration.getGeneralApplicationHearingNoticeTemplate(),

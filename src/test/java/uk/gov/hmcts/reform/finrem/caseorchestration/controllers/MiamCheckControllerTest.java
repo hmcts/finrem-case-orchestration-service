@@ -35,9 +35,9 @@ public class MiamCheckControllerTest extends BaseControllerTest {
     public void badRequest() throws Exception {
         doEmptyCaseDataSetUp();
         mvc.perform(post(API_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest())
             .andExpect(content().string(startsWith(GlobalExceptionHandler.SERVER_ERROR_MSG)));
     }
@@ -48,9 +48,9 @@ public class MiamCheckControllerTest extends BaseControllerTest {
         when(service.miamExemptAttendCheck(isA(CaseDetails.class))).thenReturn(ImmutableList.of(ERROR_MSG));
 
         mvc.perform(post(API_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.errors[0]",
@@ -63,9 +63,9 @@ public class MiamCheckControllerTest extends BaseControllerTest {
         when(service.miamExemptAttendCheck(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
 
         mvc.perform(post(API_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.errors[0]").doesNotExist());

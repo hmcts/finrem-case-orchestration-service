@@ -38,9 +38,9 @@ public class GeneralEmailStartControllerTest extends BaseControllerTest {
         generalEmailStartControllerSetUp();
         when(idamService.getIdamFullName(bearerToken)).thenReturn("Firstname LastName");
         mvc.perform(post("/case-orchestration/general-email-start")
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, bearerToken)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, bearerToken)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.generalEmailCreatedBy", is("Firstname LastName")));
 
@@ -51,9 +51,9 @@ public class GeneralEmailStartControllerTest extends BaseControllerTest {
         doEmptyCaseDataSetUp();
 
         mvc.perform(post("/case-orchestration/general-email-start")
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, bearerToken)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, bearerToken)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest());
     }
 
@@ -64,9 +64,9 @@ public class GeneralEmailStartControllerTest extends BaseControllerTest {
             .thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
         mvc.perform(post("/case-orchestration/general-email-start")
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, bearerToken)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, bearerToken)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isInternalServerError());
     }
 

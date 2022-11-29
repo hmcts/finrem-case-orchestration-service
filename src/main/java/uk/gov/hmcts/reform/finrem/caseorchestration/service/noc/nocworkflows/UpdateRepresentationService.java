@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ChangeOfRepresentati
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateSolicitorDetailsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerRepresentationChecker;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.AddedSolicitorService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.RemovedSolicitorService;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -35,14 +36,20 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_FIRM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IS_NOC_REJECTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_FIRM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationApprovalStatus.REJECTED;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UpdateRepresentationService {
+
+    private static final String CHANGE_ORGANISATION_REQUEST = "changeOrganisationRequestField";
+    private static final String NOC_EVENT = "nocRequest";
+    private static final String REPRESENTATION_UPDATE_HISTORY = "RepresentationUpdateHistory";
 
     private final AuditEventService auditEventService;
     private final IdamAuthService idamClient;
@@ -53,18 +60,24 @@ public class UpdateRepresentationService {
     private final ChangeOfRepresentationService changeOfRepresentationService;
     private final AddedSolicitorService addedSolicitorService;
     private final RemovedSolicitorService removedSolicitorService;
-
-    private static final String CHANGE_ORGANISATION_REQUEST = "changeOrganisationRequestField";
-    private static final String NOC_EVENT = "nocRequest";
-    private static final String REPRESENTATION_UPDATE_HISTORY = "RepresentationUpdateHistory";
+    private final BarristerRepresentationChecker barristerRepresentationChecker;
 
     public Map<String, Object> updateRepresentationAsSolicitor(CaseDetails caseDetails,
-                                                               String authToken)  {
+                                                               String authToken) {
 
         log.info("Updating representation for case ID {}", caseDetails.getId());
 
         final UserDetails solicitorToAdd = getInvokerDetails(authToken, caseDetails);
         final ChangeOrganisationRequest changeRequest = getChangeOrganisationRequest(caseDetails);
+
+        if (barristerRepresentationChecker.hasUserBeenBarristerOnCase(caseDetails.getData(), solicitorToAdd)) {
+            log.error("User has represented litigant as Barrister for case {}, REJECTING COR", caseDetails.getId());
+            changeRequest.setApprovalStatus(REJECTED);
+            Map<String, Object> caseData = caseDetails.getData();
+            caseData.put(CHANGE_ORGANISATION_REQUEST, changeRequest);
+            caseData.put(IS_NOC_REJECTED, YES_VALUE);
+            return caseData;
+        }
 
         final ChangedRepresentative addedSolicitor = addedSolicitorService.getAddedSolicitorAsSolicitor(solicitorToAdd,
             changeRequest);
@@ -88,9 +101,9 @@ public class UpdateRepresentationService {
     }
 
     private Map<String, Object> updateRepresentationUpdateHistory(CaseDetails caseDetails,
-                                                              ChangedRepresentative addedSolicitor,
-                                                              ChangedRepresentative removedSolicitor,
-                                                              ChangeOrganisationRequest changeRequest) {
+                                                                  ChangedRepresentative addedSolicitor,
+                                                                  ChangedRepresentative removedSolicitor,
+                                                                  ChangeOrganisationRequest changeRequest) {
 
         Map<String, Object> caseData = caseDetails.getData();
         RepresentationUpdateHistory current = getCurrentRepresentationUpdateHistory(caseData);
@@ -170,7 +183,8 @@ public class UpdateRepresentationService {
     private RepresentationUpdateHistory getCurrentRepresentationUpdateHistory(Map<String, Object> caseData) {
         return RepresentationUpdateHistory.builder()
             .representationUpdateHistory(objectMapper.convertValue(caseData.get(REPRESENTATION_UPDATE_HISTORY),
-                new TypeReference<>() {})).build();
+                new TypeReference<>() {
+                })).build();
     }
 
     private ChangeOfRepresentationRequest buildChangeOfRepresentationRequest(CaseDetails caseDetails,

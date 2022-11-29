@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistory;
 
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -24,15 +23,15 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element.ele
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ChangeOfRepresentationService {
 
-    private static final String NOTICE_OF_CHANGE = "Notice of Change";
+    public static final String NOTICE_OF_CHANGE = "Notice of Change";
 
-    public RepresentationUpdateHistory generateRepresentationUpdateHistory(ChangeOfRepresentationRequest
-                                                                       changeOfRepresentationRequest) {
+    public RepresentationUpdateHistory generateRepresentationUpdateHistory(
+        ChangeOfRepresentationRequest changeOfRepresentationRequest) {
 
         log.info("Updating change of representatives for case.");
 
         RepresentationUpdateHistory history = Optional.ofNullable(changeOfRepresentationRequest.getCurrent()).map(
-            current -> buildNewHistory(current.getRepresentationUpdateHistory()))
+                current -> buildNewHistory(current.getRepresentationUpdateHistory()))
             .orElse(RepresentationUpdateHistory.builder().representationUpdateHistory(new ArrayList<>()).build());
 
         history.getRepresentationUpdateHistory().add(element(UUID.randomUUID(),
@@ -55,7 +54,7 @@ public class ChangeOfRepresentationService {
     }
 
     private RepresentationUpdateHistory buildNewHistory(List<Element<RepresentationUpdate>> currentChangeList) {
-        return  RepresentationUpdateHistory.builder()
+        return RepresentationUpdateHistory.builder()
             .representationUpdateHistory(Optional.ofNullable(currentChangeList).orElse(new ArrayList<>()))
             .build();
     }

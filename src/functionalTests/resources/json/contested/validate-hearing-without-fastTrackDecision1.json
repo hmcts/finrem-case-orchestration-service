@@ -1,7 +1,7 @@
 {
   "event_id": "some_event_id",
   "case_details": {
-    "id": "123",
+    "id": "12345678",
     "jurisdiction": "DIVORCE",
     "state": "applicationDrafted",
     "case_type_id": "FinancialRemedyContested",
@@ -82,6 +82,15 @@
         }
       ],
       "respondentAddress": {
+        "County": "Essex",
+        "Country": "United Kingdom",
+        "PostCode": "SE12 9SE",
+        "PostTown": "London",
+        "AddressLine1": "252 Marvels Lane",
+        "AddressLine2": "AddressGlobalUK",
+        "AddressLine3": "London"
+      },
+      "applicantAddress": {
         "County": "Essex",
         "Country": "United Kingdom",
         "PostCode": "SE12 9SE",

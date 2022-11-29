@@ -9,8 +9,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistory;
 
-
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +21,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element.ele
 
 public class ChangeOfRepresentationServiceTest extends BaseServiceTest {
 
-    @Autowired private ChangeOfRepresentationService changeOfRepresentationService;
+    @Autowired
+    private ChangeOfRepresentationService changeOfRepresentationService;
 
     private ChangeOfRepresentationRequest request;
 

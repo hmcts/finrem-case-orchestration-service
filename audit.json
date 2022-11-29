@@ -469,5 +469,6 @@
   "10054_Cookie without SameSite Attribute_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/documents/general-letter_POST":"ignore",
   "10054_Cookie without SameSite Attribute_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/documents/hearing_POST":"ignore",
   "10096_Timestamp Disclosure - Unix_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/documents/general-letter_POST":"ignore",
-  "10096_Timestamp Disclosure - Unix_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/documents/hearing_POST":"ignore"
+  "10096_Timestamp Disclosure - Unix_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/documents/hearing_POST":"ignore",
+  "100000_A Client Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/v2/api-docs_GET": "ignore"
 }

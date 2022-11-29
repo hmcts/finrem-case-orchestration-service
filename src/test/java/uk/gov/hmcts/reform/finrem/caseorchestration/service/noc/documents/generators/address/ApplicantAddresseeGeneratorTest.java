@@ -1,4 +1,3 @@
-
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.address;
 
 import org.junit.Before;

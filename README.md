@@ -162,11 +162,11 @@ To run all mutation tests execute the following command:
 1. Add one or more appropriate labels to your PR in GitHub. Valid labels are:
 
 - ```enable_security_scan```
-- ```enable_mutation_test```
 - ```enable_fortify_scan```
-- ```enable_all_tests_and_scans```
 
-2. Trigger a build of your PR in Jenkins.  Once the regular pipeline completes, the nightly pipeline will trigger to execute your chosen test(s).
+2. Trigger a build of your PR in Jenkins.  Fortify scans will take place asynchronously as part of the Static Checks/Container Build step.
+- Check the Blue Ocean view for live monitoring, and review the logs once complete for any issues.
+- As Fortify scans execute during the Static Checks/Container Build step, you will need to ensure this is triggered by making a minor change to the PR, such as bumping the chart version.
 
 ## Versioning
 

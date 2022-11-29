@@ -25,31 +25,35 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 public class IdamService {
 
-    private final IdamServiceConfiguration serviceConfig;
-    private final RestTemplate restTemplate;
-
     private static final Function<IdamServiceConfiguration, URI> uriSupplier =
         serviceConfig -> fromHttpUrl(serviceConfig.getUrl() + serviceConfig.getApi()).build().toUri();
-
     private static final Function<String, HttpEntity> buildAuthRequest = authToken -> {
         HttpHeaders headers = new HttpHeaders();
         headers.add(AUTHORIZATION_HEADER, authToken);
         headers.add("Content-Type", "application/json");
         return new HttpEntity<>(headers);
     };
-
     private static final Function<ResponseEntity<Map>, Boolean> isAdmin =
         responseEntity -> List.class.cast(responseEntity.getBody().get(ROLES)).stream()
             .anyMatch(role -> role.equals(FR_COURT_ADMIN));
-
     private static final Function<ResponseEntity<Map>, String> userFullName = responseEntity -> {
         Map body = responseEntity.getBody();
         return body.get("forename") + " " + body.get("surname");
     };
-
+    private static final Function<ResponseEntity<Map>, String> userSurname = responseEntity -> {
+        Map body = responseEntity.getBody();
+        return (String) body.get("surname");
+    };
     private static final Function<ResponseEntity<Map>, String> userId = responseEntity -> {
         Map body = responseEntity.getBody();
         return (String) body.get("id");
+    };
+    private final IdamServiceConfiguration serviceConfig;
+    private final RestTemplate restTemplate;
+
+    private static final Function<ResponseEntity<Map>, String> email = responseEntity -> {
+        Map body = responseEntity.getBody();
+        return (String) body.get("email").toString().toLowerCase();
     };
 
     public boolean isUserRoleAdmin(String authToken) {
@@ -62,8 +66,20 @@ public class IdamService {
             buildAuthRequest.apply(authorisationToken), Map.class));
     }
 
+    public String getIdamSurname(String authorisationToken) {
+        return userSurname.apply(restTemplate.exchange(uriSupplier.apply(serviceConfig), HttpMethod.GET,
+            buildAuthRequest.apply(authorisationToken), Map.class));
+    }
+
     public String getIdamUserId(String authorisationToken) {
         return userId.apply(restTemplate.exchange(uriSupplier.apply(serviceConfig), HttpMethod.GET,
             buildAuthRequest.apply(authorisationToken), Map.class));
     }
+
+
+    public String getUserEmailId(String authorisationToken) {
+        return email.apply(restTemplate.exchange(uriSupplier.apply(serviceConfig), HttpMethod.GET,
+            buildAuthRequest.apply(authorisationToken), Map.class));
+    }
 }
+

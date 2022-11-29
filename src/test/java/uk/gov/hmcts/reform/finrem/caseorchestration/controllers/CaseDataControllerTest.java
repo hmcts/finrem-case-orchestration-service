@@ -44,12 +44,17 @@ public class CaseDataControllerTest extends BaseControllerTest {
     private static final String PATH = "/fixtures/noticeOfChange/";
     private static final String CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON = "/fixtures/contested/validate-hearing-successfully.json";
 
-    @Autowired private CaseDataController caseDataController;
+    @Autowired
+    private CaseDataController caseDataController;
 
-    @MockBean private UpdateSolicitorDetailsService updateSolicitorDetailsService;
-    @MockBean private IdamService idamService;
-    @MockBean private FeatureToggleService featureToggleService;
-    @MockBean private CaseDataService caseDataService;
+    @MockBean
+    private UpdateSolicitorDetailsService updateSolicitorDetailsService;
+    @MockBean
+    private IdamService idamService;
+    @MockBean
+    private FeatureToggleService featureToggleService;
+    @MockBean
+    private CaseDataService caseDataService;
 
     protected CaseDetails caseDetails;
 
@@ -70,9 +75,9 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
         loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
         mvc.perform(post(String.format("/case-orchestration/move-collection/%s/to/%s", source, destination))
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
         verify(caseDataService, times(1)).moveCollection(any(), eq(source), eq(destination));
@@ -84,9 +89,9 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
         loadRequestContentWith(CONTESTED_HWF_JSON);
         mvc.perform(post("/case-orchestration/consented/set-defaults")
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.isAdmin", is(YES_VALUE)));
     }
@@ -97,9 +102,9 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
         loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
         mvc.perform(post("/case-orchestration/consented/set-defaults")
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.isAdmin", is(NO_VALUE)))
             .andExpect(jsonPath("$.data.applicantRepresented", is(YES_VALUE)));
@@ -111,9 +116,9 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
         loadRequestContentWith(CONTESTED_HWF_JSON);
         mvc.perform(post("/case-orchestration/contested/set-defaults")
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.isAdmin", is(YES_VALUE)));
     }
@@ -124,9 +129,9 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
         loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
         mvc.perform(post("/case-orchestration/contested/set-defaults")
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.isAdmin", is(NO_VALUE)))
             .andExpect(jsonPath("$.data.applicantRepresented", is(YES_VALUE)));
@@ -137,8 +142,8 @@ public class CaseDataControllerTest extends BaseControllerTest {
         doValidCaseDataSetUp();
 
         mvc.perform(post("/case-orchestration/contested/set-frc-details")
-            .content(requestContent.toString())
-            .contentType(APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
         verify(caseDataService, times(1)).setFinancialRemediesCourtDetails(any());
@@ -150,9 +155,9 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
         loadRequestContentWith(CONTESTED_HWF_JSON);
         mvc.perform(post("/case-orchestration/contested/set-paper-case-defaults")
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.isAdmin", is(YES_VALUE)))
             .andExpect(jsonPath("$.data.fastTrackDecision", is(NO_VALUE)))
@@ -165,9 +170,9 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
         loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
         mvc.perform(post("/case-orchestration/contested/set-paper-case-defaults")
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.isAdmin", is(NO_VALUE)))
             .andExpect(jsonPath("$.data.fastTrackDecision", is(NO_VALUE)))
@@ -181,9 +186,9 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
         loadRequestContentWith(CONTESTED_HWF_JSON);
         mvc.perform(post("/case-orchestration/contested/set-paper-case-defaults")
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.isAdmin", is(YES_VALUE)))
             .andExpect(jsonPath("$.data.fastTrackDecision", is(NO_VALUE)))
@@ -196,9 +201,9 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
         loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
         mvc.perform(post("/case-orchestration/contested/set-paper-case-defaults")
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.isAdmin", is(NO_VALUE)))
             .andExpect(jsonPath("$.data.fastTrackDecision", is(NO_VALUE)))
@@ -213,11 +218,12 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
         loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
         mvc.perform(post("/case-orchestration/contested/set-paper-case-org-policy")
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy.OrgPolicyCaseAssignedRole", is(APP_SOLICITOR_POLICY)));
+            .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy.OrgPolicyCaseAssignedRole", is(APP_SOLICITOR_POLICY)))
+            .andExpect(jsonPath("$.data.civilPartnership", is(NO_VALUE)));
     }
 
     public void shouldNotSetOrgPolicyIfInvalidCaseType() throws Exception {
@@ -227,9 +233,9 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
         loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
         mvc.perform(post("/case-orchestration/contested/set-paper-case-org-policy")
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy").doesNotExist());
     }

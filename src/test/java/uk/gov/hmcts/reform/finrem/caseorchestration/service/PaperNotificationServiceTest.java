@@ -6,6 +6,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.generalapplication.service.RejectGeneralApplicationDocumentService;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -24,10 +26,16 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
     @Autowired
     private PaperNotificationService paperNotificationService;
 
-    @MockBean private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
-    @MockBean private ManualPaymentDocumentService manualPaymentDocumentService;
-    @MockBean private BulkPrintService bulkPrintService;
-    @MockBean private CaseDataService caseDataService;
+    @MockBean
+    private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
+    @MockBean
+    private ManualPaymentDocumentService manualPaymentDocumentService;
+    @MockBean
+    private BulkPrintService bulkPrintService;
+    @MockBean
+    private CaseDataService caseDataService;
+    @MockBean
+    private RejectGeneralApplicationDocumentService rejectGeneralApplicationDocumentService;
 
     @Test
     public void sendAssignToJudgeNotificationLetterIfIsPaperApplication() {
@@ -76,13 +84,11 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
         when(caseDataService.isPaperApplication(any())).thenReturn(true);
-        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
 
         paperNotificationService.printManualPaymentNotification(buildCaseDetails(), AUTH_TOKEN);
 
         verify(manualPaymentDocumentService).generateManualPaymentLetter(any(), any(), eq(APPLICANT));
-        verify(manualPaymentDocumentService).generateManualPaymentLetter(any(), any(), eq(RESPONDENT));
-        verify(bulkPrintService, times(2)).sendDocumentForPrint(any(), any());
+        verify(bulkPrintService).sendDocumentForPrint(any(), any());
     }
 
     @Test
@@ -117,5 +123,33 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
         caseDetails.getData().put("paperApplication", "YES");
 
         assertThat(paperNotificationService.shouldPrintForApplicant(caseDetails), is(true));
+    }
+
+    @Test
+    public void givenValidCaseData_whenPrintApplicantRejection_thenCallBulkPrintService() {
+        final String json
+            = "/fixtures/refusal-order-contested.json";
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
+        caseDetails.getData().put("paperApplication", "YES");
+        CaseDocument caseDocument = CaseDocument.builder().documentFilename("general_application_rejected").build();
+
+        when(rejectGeneralApplicationDocumentService.generateGeneralApplicationRejectionLetter(eq(caseDetails), any(), eq(APPLICANT)))
+            .thenReturn(caseDocument);
+        paperNotificationService.printApplicantRejectionGeneralApplication(caseDetails, AUTH_TOKEN);
+        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails);
+    }
+
+    @Test
+    public void givenValidCaseData_whenPrintRespondentRejection_thenCallBulkPrintService() {
+        final String json
+            = "/fixtures/refusal-order-contested.json";
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
+        caseDetails.getData().put("paperApplication", "YES");
+        CaseDocument caseDocument = CaseDocument.builder().documentFilename("general_application_rejected").build();
+
+        when(rejectGeneralApplicationDocumentService.generateGeneralApplicationRejectionLetter(eq(caseDetails), any(), eq(RESPONDENT)))
+            .thenReturn(caseDocument);
+        paperNotificationService.printRespondentRejectionGeneralApplication(caseDetails, AUTH_TOKEN);
+        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails);
     }
 }
