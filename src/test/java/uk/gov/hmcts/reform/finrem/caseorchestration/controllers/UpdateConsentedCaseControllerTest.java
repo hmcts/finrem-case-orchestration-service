@@ -288,9 +288,6 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/updatecase/remove-respondent-solicitor-details.json").toURI()));
 
-        assertEquals("No", requestContent.get("case_details").get("case_data").get("applicantRepresented").asText());
-        JsonNode removedNode = ((ObjectNode) requestContent.get("case_details").get("case_data"))
-            .remove("applicantRepresented");
         assertNull(requestContent.get("case_details").get("case_data").get("applicantRepresented"));
 
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CASE)
@@ -313,7 +310,7 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/updatecase/remove-respondent-solicitor-details.json").toURI()));
 
-        assertEquals("No", requestContent.get("case_details").get("case_data").get("applicantRepresented").asText());
+        assertNull(requestContent.get("case_details").get("case_data").get("applicantRepresented"));
         JsonNode removedNode = ((ObjectNode) requestContent.get("case_details").get("case_data"))
             .put("applicantRepresented", "Yes");
         assertEquals("Yes", requestContent.get("case_details").get("case_data").get("applicantRepresented").asText());

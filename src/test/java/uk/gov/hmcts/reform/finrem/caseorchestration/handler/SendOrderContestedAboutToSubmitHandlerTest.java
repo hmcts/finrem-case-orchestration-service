@@ -145,7 +145,8 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
 
         CallbackRequest callbackRequest =
             CallbackRequest.builder().caseDetails(generalOrderContestedCaseDetailsWithoutSolicitorAddress()).build();
-        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = sendOrderContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response =
+            sendOrderContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response.getErrors().size(), is(1));
         assertThat(response.getErrors().get(0), is("CCD address field applicantAddress"
