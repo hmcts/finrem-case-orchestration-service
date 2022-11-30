@@ -16,9 +16,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateSolicitorDetailsService;
 
 import java.io.InputStream;
+import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.times;
@@ -152,6 +154,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     @Test
     public void shouldSuccessfullyReturnAsAdminConsentedPaperCase() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(true);
+        when(caseDataService.isNotEmpty(anyString(), any(Map.class))).thenReturn(true);
 
         loadRequestContentWith(CONTESTED_HWF_JSON);
         mvc.perform(post("/case-orchestration/contested/set-paper-case-defaults")
@@ -160,13 +163,14 @@ public class CaseDataControllerTest extends BaseControllerTest {
                 .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.isAdmin", is(YES_VALUE)))
-            .andExpect(jsonPath("$.data.fastTrackDecision", is(NO_VALUE)))
+            .andExpect(jsonPath("$.data.fastTrackDecision", is(YES_VALUE)))
             .andExpect(jsonPath("$.data.paperApplication", is(YES_VALUE)));
     }
 
     @Test
     public void shouldSuccessfullyReturnNotAsAdminConsentedPaperCase() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
+        when(caseDataService.isNotEmpty(anyString(), any(Map.class))).thenReturn(false);
 
         loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
         mvc.perform(post("/case-orchestration/contested/set-paper-case-defaults")
@@ -183,6 +187,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     @Test
     public void shouldSuccessfullyReturnAsAdminContestedPaperCase() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(true);
+        when(caseDataService.isNotEmpty(anyString(), any(Map.class))).thenReturn(true);
 
         loadRequestContentWith(CONTESTED_HWF_JSON);
         mvc.perform(post("/case-orchestration/contested/set-paper-case-defaults")
@@ -191,7 +196,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
                 .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.isAdmin", is(YES_VALUE)))
-            .andExpect(jsonPath("$.data.fastTrackDecision", is(NO_VALUE)))
+            .andExpect(jsonPath("$.data.fastTrackDecision", is(YES_VALUE)))
             .andExpect(jsonPath("$.data.paperApplication", is(YES_VALUE)));
     }
 
@@ -229,7 +234,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
     public void shouldNotSetOrgPolicyIfInvalidCaseType() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
         when(caseDataService.isContestedApplication(any())).thenReturn(false);
-        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
 
         loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
         mvc.perform(post("/case-orchestration/contested/set-paper-case-org-policy")
