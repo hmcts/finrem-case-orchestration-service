@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.config.FeeServiceConfiguration;
 
 import static org.junit.Assert.assertEquals;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONTESTED;
 
 
 @SpringBootTest({"fees.url: http://localhost:8889"})
@@ -83,14 +84,15 @@ public class FeeLookupConsumerTest extends BaseTest {
     @Test
     @PactVerification(fragment = "generateConsentedFeesPactFragment")
     public void verifyConsentedFeesServicePact() {
-        FeeResponse applicationFee = feeService.getApplicationFee(ApplicationType.CONSENTED);
+        FeeResponse applicationFee = feeService.getApplicationFee(ApplicationType.CONSENTED, null);
         assertEquals("FEE0640", applicationFee.getCode());
     }
 
     @Test
     @PactVerification(fragment = "generateContestedFeesPactFragment")
     public void verifyContestedFeesServicePact() {
-        FeeResponse applicationFee = feeService.getApplicationFee(ApplicationType.CONTESTED);
+        String typeOfApplication  = "In connection to matrimonial and civil partnership proceedings";
+        FeeResponse applicationFee = feeService.getApplicationFee(ApplicationType.CONTESTED, typeOfApplication);
         assertEquals("FEE0229", applicationFee.getCode());
     }
 
