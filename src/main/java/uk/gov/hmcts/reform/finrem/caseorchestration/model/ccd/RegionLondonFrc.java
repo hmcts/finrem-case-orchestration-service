@@ -10,7 +10,8 @@ import java.util.Arrays;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 @RequiredArgsConstructor
 public enum RegionLondonFrc {
-    LONDON("cfc");
+    LONDON("cfc"),
+    LONDON_CONSENTED_COURT("london");
 
     private final String value;
 
