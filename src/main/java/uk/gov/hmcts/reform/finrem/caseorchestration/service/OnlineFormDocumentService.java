@@ -149,7 +149,7 @@ public class OnlineFormDocumentService {
         caseData.put(CONSENTED_RESPONDENT_REPRESENTED, caseData.remove(CONTESTED_RESPONDENT_REPRESENTED));
 
         //Checklist
-        String typeOfApplication = Objects.toString(caseData.get(TYPE_OF_APPLICATION), null);
+        String typeOfApplication = Objects.toString(caseData.get(TYPE_OF_APPLICATION), TYPE_OF_APPLICATION_DEFAULT_TO);
         if (typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)) {
             caseData.put(CONSENTED_NATURE_OF_APPLICATION, caseData.remove(CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION));
         } else {
