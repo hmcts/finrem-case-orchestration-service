@@ -1,24 +1,21 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ManageCaseDocumentsService;
-
-import java.util.Map;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
-public class ManageCaseDocumentsContestedAboutToStartCaseHandler implements CallbackHandler<Map<String, Object>> {
+public class ManageCaseDocumentsContestedAboutToStartCaseHandler extends FinremCallbackHandler {
 
-    private final ManageCaseDocumentsService manageCaseDocumentsService;
+    public ManageCaseDocumentsContestedAboutToStartCaseHandler(FinremCaseDetailsMapper mapper) {
+        super(mapper);
+    }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -28,11 +25,12 @@ public class ManageCaseDocumentsContestedAboutToStartCaseHandler implements Call
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest, String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
+                                                                              String userAuthorisation) {
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        caseData.setManageCaseDocumentCollection(caseData.getUploadCaseDocumentWrapper().getAllCollections());
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(
-            manageCaseDocumentsService.setApplicantAndRespondentDocumentsCollection(caseDetails)).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 }

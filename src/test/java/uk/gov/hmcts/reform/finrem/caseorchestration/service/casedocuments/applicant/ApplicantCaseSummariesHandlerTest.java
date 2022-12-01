@@ -4,8 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandlerTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentManagerTest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,14 +15,14 @@ import static org.hamcrest.Matchers.hasSize;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_CASE_SUMMARIES_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 
-public class ApplicantCaseSummariesHandlerTest extends CaseDocumentHandlerTest {
+public class ApplicantCaseSummariesHandlerTest extends CaseDocumentManagerTest {
 
     private CaseDetails caseDetails;
     private Map<String, Object> caseData;
-    private final List<ContestedUploadedDocumentData> uploadDocumentList = new ArrayList<>();
+    private final List<UploadCaseDocumentCollection> uploadDocumentList = new ArrayList<>();
     private final ObjectMapper mapper = new ObjectMapper();
 
-    ApplicantCaseSummariesHandler applicantCaseSummariesHandler = new ApplicantCaseSummariesHandler(mapper);
+    ApplicantCaseSummariesManager applicantCaseSummariesHandler = new ApplicantCaseSummariesManager(mapper);
 
     @Before
     public void setUp() {
@@ -39,7 +38,7 @@ public class ApplicantCaseSummariesHandlerTest extends CaseDocumentHandlerTest {
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        applicantCaseSummariesHandler.handle(uploadDocumentList, caseData);
+        applicantCaseSummariesHandler.manageDocumentCollection(uploadDocumentList, caseData);
 
         assertThat(getDocumentCollection(caseData, APP_CASE_SUMMARIES_COLLECTION), hasSize(3));
     }

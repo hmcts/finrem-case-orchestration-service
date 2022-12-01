@@ -4,8 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 
 import java.util.HashMap;
 import java.util.List;
@@ -45,10 +43,10 @@ public class UploadedDocumentHelperTest {
         Map<String, Object> modifiedData =
             uploadedDocumentHelper.addUploadDateToNewDocuments(caseData, caseDataBefore, APP_CORRESPONDENCE_COLLECTION);
 
-        List<ContestedUploadedDocumentData> documentData = getContestedUploadedDocs(modifiedData, APP_CORRESPONDENCE_COLLECTION);
+        List<UploadCaseDocumentCollection> documentData = getContestedUploadedDocs(modifiedData, APP_CORRESPONDENCE_COLLECTION);
 
         documentData.forEach(document ->
-            assertThat(document.getUploadedCaseDocument().getCaseDocumentUploadDateTime(), is(notNullValue())));
+            assertThat(document.getUploadCaseDocument().getCaseDocumentUploadDateTime(), is(notNullValue())));
     }
 
     @Test
@@ -64,11 +62,11 @@ public class UploadedDocumentHelperTest {
         Map<String, Object> modifiedData =
             uploadedDocumentHelper.addUploadDateToNewDocuments(caseData, caseDataBefore, APP_CORRESPONDENCE_COLLECTION);
 
-        List<ContestedUploadedDocumentData> documentData = getContestedUploadedDocs(modifiedData, APP_CORRESPONDENCE_COLLECTION);
+        List<UploadCaseDocumentCollection> documentData = getContestedUploadedDocs(modifiedData, APP_CORRESPONDENCE_COLLECTION);
         assertThat(documentData, hasSize(3));
         assertThat(documentData.stream()
-            .map(ContestedUploadedDocumentData::getUploadedCaseDocument)
-            .map(ContestedUploadedDocument::getCaseDocumentUploadDateTime)
+            .map(UploadCaseDocumentCollection::getUploadCaseDocument)
+            .map(UploadCaseDocument::getCaseDocumentUploadDateTime)
             .filter(Objects::nonNull).toList(), hasSize(2));
     }
 
@@ -80,16 +78,16 @@ public class UploadedDocumentHelperTest {
         assertThat(modifiedData, is(notNullValue()));
     }
 
-    private ContestedUploadedDocumentData uploadedDocument(String filename, UUID id) {
-        return ContestedUploadedDocumentData.builder()
+    private UploadCaseDocumentCollection uploadedDocument(String filename, UUID id) {
+        return UploadCaseDocumentCollection.builder()
             .id(id.toString())
-            .uploadedCaseDocument(ContestedUploadedDocument.builder()
+            .uploadedCaseDocument(UploadCaseDocument.builder()
                 .caseDocumentOther(filename)
                 .build())
             .build();
     }
 
-    private List<ContestedUploadedDocumentData> getContestedUploadedDocs(Map<String, Object> data, String documentCollection) {
+    private List<UploadCaseDocumentCollection> getContestedUploadedDocs(Map<String, Object> data, String documentCollection) {
         return mapper.convertValue(data.get(documentCollection), new TypeReference<>() {});
     }
 }

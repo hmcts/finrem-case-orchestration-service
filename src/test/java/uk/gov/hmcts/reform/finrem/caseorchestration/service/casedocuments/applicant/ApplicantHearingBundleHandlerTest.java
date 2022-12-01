@@ -2,16 +2,16 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.appli
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandlerTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentManagerTest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_HEARING_BUNDLES_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 
-public class ApplicantHearingBundleHandlerTest extends CaseDocumentHandlerTest {
+public class ApplicantHearingBundleHandlerTest extends CaseDocumentManagerTest {
 
-    ApplicantHearingBundleHandler applicantHearingBundleHandler = new ApplicantHearingBundleHandler(new ObjectMapper());
+    ApplicantHearingBundleManager applicantHearingBundleHandler = new ApplicantHearingBundleManager(new ObjectMapper());
 
     @Test
     public void appHearingBundlesFiltered() {
@@ -19,7 +19,7 @@ public class ApplicantHearingBundleHandlerTest extends CaseDocumentHandlerTest {
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        applicantHearingBundleHandler.handle(uploadDocumentList, caseData);
+        applicantHearingBundleHandler.manageDocumentCollection(uploadDocumentList, caseData);
 
         assertThat(getDocumentCollection(caseData, APP_HEARING_BUNDLES_COLLECTION), hasSize(1));
     }

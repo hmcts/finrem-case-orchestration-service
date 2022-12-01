@@ -53,7 +53,7 @@ public class ManageCaseDocumentsContestedAboutToStartCaseHandlerTest {
             CallbackRequest.builder().caseDetails(generalOrderContestedCaseDetails()).build();
         manageCaseDocumentsAboutToStartCaseHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(manageCaseDocumentsService).setApplicantAndRespondentDocumentsCollection(any());
+        verify(manageCaseDocumentsService).getManageCaseDocumentCollection(any());
     }
 
     private CaseDetails generalOrderContestedCaseDetails() {

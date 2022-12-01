@@ -13,10 +13,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedDocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandlerTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantCaseSummariesHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantChronologiesStatementHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentManagerTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantCaseSummariesManager;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantChronologiesStatementManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,23 +29,23 @@ import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 
 @RunWith(MockitoJUnitRunner.class)
-public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDocumentHandlerTest {
+public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDocumentManagerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
 
     @Mock
-    ApplicantCaseSummariesHandler applicantCaseSummariesHandler;
+    ApplicantCaseSummariesManager applicantCaseSummariesHandler;
 
     @Mock
-    ApplicantChronologiesStatementHandler applicantChronologiesStatementHandler;
+    ApplicantChronologiesStatementManager applicantChronologiesStatementHandler;
 
     ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
     private UploadContestedCaseDocumentsAboutToSubmitHandler uploadContestedCaseDocumentsHandler;
 
-    private final List<ContestedUploadedDocumentData> uploadDocumentList = new ArrayList<>();
-    private final List<ContestedUploadedDocumentData> existingDocumentList = new ArrayList<>();
+    private final List<UploadCaseDocumentCollection> uploadDocumentList = new ArrayList<>();
+    private final List<UploadCaseDocumentCollection> existingDocumentList = new ArrayList<>();
     private final List<String> expectedDocumentIdList = new ArrayList<>();
-    List<ContestedUploadedDocumentData> handledDocumentList = new ArrayList<>();
+    List<UploadCaseDocumentCollection> handledDocumentList = new ArrayList<>();
     List<String> handledDocumentIdList = new ArrayList<>();
 
     private final UploadedDocumentHelper uploadedDocumentHelper = new UploadedDocumentHelper(objectMapper);
@@ -83,8 +82,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDo
         uploadContestedCaseDocumentsHandler.handle(callbackRequest, AUTH_TOKEN);
 
 
-        verify(applicantCaseSummariesHandler).handle(uploadDocumentList, caseDetails.getData());
-        verify(applicantChronologiesStatementHandler).handle(uploadDocumentList, caseDetails.getData());
+        verify(applicantCaseSummariesHandler).manageDocumentCollection(uploadDocumentList, caseDetails.getData());
+        verify(applicantChronologiesStatementHandler).manageDocumentCollection(uploadDocumentList, caseDetails.getData());
     }
 
     @Test
@@ -92,12 +91,12 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDo
         CallbackRequest callbackRequest = buildCallbackRequest();
 
         CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        ContestedUploadedDocumentData oldDoc = createContestedUploadDocumentItem("Other", "applicant", "yes", "no", "Old Document Example");
+        UploadCaseDocumentCollection oldDoc = createContestedUploadDocumentItem("Other", "applicant", "yes", "no", "Old Document Example");
         existingDocumentList.add(oldDoc);
         caseDetailsBefore.getData().put(CONTESTED_UPLOADED_DOCUMENTS, existingDocumentList);
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        ContestedUploadedDocumentData newDoc = createContestedUploadDocumentItem("Other", "applicant", "yes", "no", "New Document Example");
+        UploadCaseDocumentCollection newDoc = createContestedUploadDocumentItem("Other", "applicant", "yes", "no", "New Document Example");
         uploadDocumentList.addAll(List.of(newDoc, oldDoc));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
@@ -105,7 +104,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDo
         expectedDocumentIdList.add(oldDoc.getId());
 
         handledDocumentList.addAll(
-            (List<ContestedUploadedDocumentData>) uploadContestedCaseDocumentsHandler.handle(
+            (List<UploadCaseDocumentCollection>) uploadContestedCaseDocumentsHandler.handle(
                 callbackRequest, AUTH_TOKEN).getData().get(CONTESTED_UPLOADED_DOCUMENTS));
 
         handledDocumentList.forEach(doc -> handledDocumentIdList.add(doc.getId()));

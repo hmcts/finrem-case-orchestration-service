@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseDocumentTabData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public abstract class DocumentDateHelper<T extends CaseDocumentTabData> {
         this.mapper = objectMapper;
         this.documentType = documentType;
     }
-
+    @Deprecated
     public Map<String, Object> addUploadDateToNewDocuments(Map<String, Object> caseData,
                                                            Map<String, Object> caseDataBefore,
                                                            String documentCollection) {
@@ -42,6 +43,12 @@ public abstract class DocumentDateHelper<T extends CaseDocumentTabData> {
         return caseData;
     }
 
+    public void addUploadDateToNewDocuments(FinremCaseData caseData, FinremCaseData caseDataBefore) {
+        List<T> allDocuments = (List<T>) caseData.getUploadCaseDocumentWrapper().getAllCollections();
+        List<T> documentsBeforeEvent = (List<T>) caseDataBefore.getUploadCaseDocumentWrapper().getAllCollections();
+
+        allDocuments.stream().forEach(document -> addDateToNewDocuments(documentsBeforeEvent, document));
+    }
     private void addDateToNewDocuments(List<T> documentsBeforeEvent, T document) {
         if (isNewDocument.test(document.getElementId(), documentsBeforeEvent)) {
             document.setUploadDateTime(LocalDateTime.now());

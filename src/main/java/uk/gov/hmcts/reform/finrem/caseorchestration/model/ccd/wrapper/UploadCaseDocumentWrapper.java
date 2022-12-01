@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -9,8 +10,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+/*
+ * When adding new collections here please update the getAll method.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder(toBuilder = true)
@@ -76,5 +83,26 @@ public class UploadCaseDocumentWrapper {
     private List<UploadCaseDocumentCollection> respExpertEvidenceCollShared;
     private List<UploadCaseDocumentCollection> respCorrespondenceDocsCollShared;
     private List<UploadCaseDocumentCollection> respOtherCollectionShared;
-    private List<UploadCaseDocumentCollection> manageCaseDocumentCollection;
+
+
+    @JsonIgnore
+    public List<UploadCaseDocumentCollection> getAllCollections() {
+        return Stream.of(uploadCaseDocument, fdrCaseDocumentCollection, appCorrespondenceCollection,
+                appFrFormsCollection, appEvidenceCollection, appTrialBundleCollection, appConfidentialDocsCollection,
+                respCorrespondenceCollection, respFrFormsCollection, respEvidenceCollection, respTrialBundleCollection,
+                respConfidentialDocsCollection, appHearingBundlesCollection, appFormEExhibitsCollection,
+                appChronologiesCollection, appQaCollection, appStatementsExhibitsCollection, appCaseSummariesCollection,
+                appFormsHCollection, appExpertEvidenceCollection, appCorrespondenceDocsCollection, appOtherCollection,
+                respHearingBundlesCollection, respFormEExhibitsCollection, respChronologiesCollection, respQaCollection,
+                respStatementsExhibitsCollection, respCaseSummariesCollection, respFormsHCollection,
+                respExpertEvidenceCollection, respCorrespondenceDocsColl, respOtherCollection,
+                appHearingBundlesCollectionShared, appFormEExhibitsCollectionShared, appChronologiesCollectionShared,
+                appQaCollectionShared, appStatementsExhibitsCollShared, appCaseSummariesCollectionShared,
+                appFormsHCollectionShared, appExpertEvidenceCollectionShared, appCorrespondenceDocsCollShared,
+                appOtherCollectionShared, respHearingBundlesCollShared, respFormEExhibitsCollectionShared,
+                respChronologiesCollectionShared, respStatementsExhibitsCollShared, respQaCollectionShared,
+                respCaseSummariesCollectionShared, respFormsHCollectionShared, respExpertEvidenceCollShared,
+                respCorrespondenceDocsCollShared, respOtherCollectionShared)
+            .flatMap(Collection::stream).collect(Collectors.toList());
+    }
 }

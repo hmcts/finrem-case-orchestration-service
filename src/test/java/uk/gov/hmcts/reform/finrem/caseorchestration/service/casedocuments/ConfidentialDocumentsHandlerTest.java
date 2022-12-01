@@ -14,9 +14,9 @@ import static org.hamcrest.Matchers.hasSize;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONFIDENTIAL_DOCS_UPLOADED_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 
-public class ConfidentialDocumentsHandlerTest extends CaseDocumentHandlerTest {
+public class ConfidentialDocumentsHandlerTest extends CaseDocumentManagerTest {
 
-    ConfidentialDocumentsHandler confidentialDocumentsHandler = new ConfidentialDocumentsHandler(new ObjectMapper());
+    ConfidentialDocumentsManager confidentialDocumentsHandler = new ConfidentialDocumentsManager(new ObjectMapper());
 
     @Test
     public void respondentConfidentialDocumentsFiltered() {

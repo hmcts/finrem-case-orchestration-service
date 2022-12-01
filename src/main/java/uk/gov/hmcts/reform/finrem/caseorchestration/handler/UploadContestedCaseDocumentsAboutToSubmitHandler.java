@@ -12,9 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedDocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentManager;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -30,7 +28,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class UploadContestedCaseDocumentsAboutToSubmitHandler
     implements CallbackHandler<Map<String, Object>> {
 
-    private final List<CaseDocumentHandler> caseDocumentHandlers;
+    private final List<CaseDocumentManager> caseDocumentHandlers;
     private final ObjectMapper objectMapper;
     private final UploadedDocumentHelper uploadedDocumentHelper;
 
@@ -48,11 +46,11 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler
         Map<String, Object> caseData = uploadedDocumentHelper.addUploadDateToNewDocuments(
             callbackRequest.getCaseDetails().getData(),
             callbackRequest.getCaseDetailsBefore().getData(), CONTESTED_UPLOADED_DOCUMENTS);
-        List<ContestedUploadedDocumentData> uploadedDocuments = getDocumentCollection(caseData);
-        caseDocumentHandlers.stream().forEach(h -> h.handle(uploadedDocuments, caseData));
+        List<UploadCaseDocumentCollection> uploadedDocuments = getDocumentCollection(caseData);
+        caseDocumentHandlers.stream().forEach(h -> h.manageDocumentCollection(uploadedDocuments, caseData));
         uploadedDocuments.sort(Comparator.comparing(
-            ContestedUploadedDocumentData::getUploadedCaseDocument, Comparator.comparing(
-                ContestedUploadedDocument::getCaseDocumentUploadDateTime, Comparator.nullsLast(
+            UploadCaseDocumentCollection::getUploadCaseDocument, Comparator.comparing(
+                UploadCaseDocument::getCaseDocumentUploadDateTime, Comparator.nullsLast(
                     Comparator.reverseOrder()))));
         caseData.put(CONTESTED_UPLOADED_DOCUMENTS, uploadedDocuments);
         return GenericAboutToStartOrSubmitCallbackResponse
@@ -61,10 +59,10 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler
             .build();
     }
 
-    private List<ContestedUploadedDocumentData> getDocumentCollection(Map<String, Object> caseData) {
+    private List<UploadCaseDocumentCollection> getDocumentCollection(Map<String, Object> caseData) {
         objectMapper.registerModule(new JavaTimeModule());
 
-        List<ContestedUploadedDocumentData> contestedUploadDocuments = objectMapper.convertValue(
+        List<UploadCaseDocumentCollection> contestedUploadDocuments = objectMapper.convertValue(
             caseData.get(CONTESTED_UPLOADED_DOCUMENTS), new TypeReference<>() {
             });
 

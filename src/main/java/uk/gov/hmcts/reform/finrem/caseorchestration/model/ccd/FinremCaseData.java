@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureAppl
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ReferToJudgeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ManageCaseDocumentsService;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -269,6 +270,7 @@ public class FinremCaseData {
     private OrganisationPolicy respondentOrganisationPolicy;
     private CaseRole currentUserCaseRole;
     private CaseDocument outOfFamilyCourtResolution;
+    private List<UploadCaseDocumentCollection> manageCaseDocumentCollection;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private RegionWrapper regionWrapper;

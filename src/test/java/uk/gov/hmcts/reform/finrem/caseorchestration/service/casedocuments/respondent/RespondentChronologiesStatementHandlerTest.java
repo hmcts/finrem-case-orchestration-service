@@ -2,16 +2,16 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respo
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandlerTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentManagerTest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION;
 
-public class RespondentChronologiesStatementHandlerTest extends CaseDocumentHandlerTest {
+public class RespondentChronologiesStatementHandlerTest extends CaseDocumentManagerTest {
 
-    RespondentChronologiesStatementHandler respondentChronologiesStatementHandler = new RespondentChronologiesStatementHandler(new ObjectMapper());
+    RespondentChronologiesStatementManager respondentChronologiesStatementHandler = new RespondentChronologiesStatementManager(new ObjectMapper());
 
     @Test
     public void respChronologiesStatementsFiltered() {
@@ -21,7 +21,7 @@ public class RespondentChronologiesStatementHandlerTest extends CaseDocumentHand
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        respondentChronologiesStatementHandler.handle(uploadDocumentList, caseData);
+        respondentChronologiesStatementHandler.manageDocumentCollection(uploadDocumentList, caseData);
 
         assertThat(getDocumentCollection(caseData, RESP_CHRONOLOGIES_STATEMENTS_COLLECTION), hasSize(3));
     }
