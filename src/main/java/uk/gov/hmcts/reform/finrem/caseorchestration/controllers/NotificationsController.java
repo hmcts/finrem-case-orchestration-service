@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfCorrespondenceService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.updatefrc.UpdateFrcCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
 
 import java.io.IOException;
@@ -52,6 +53,7 @@ public class NotificationsController extends BaseController {
     private final FeatureToggleService featureToggleService;
     private final NocLetterNotificationService nocLetterNotificationService;
     private final HwfCorrespondenceService hwfNotificationsService;
+    private final UpdateFrcCorrespondenceService updateFrcCorrespondenceService;
 
 
     @PostMapping(value = "/hwf-successful", consumes = APPLICATION_JSON_VALUE)
@@ -642,19 +644,7 @@ public class NotificationsController extends BaseController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
-        if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-            log.info("Sending email notification to Applicant Solicitor for 'Update Frc information'");
-            notificationService.sendUpdateFrcInformationEmailToAppSolicitor(caseDetails);
-        }
-
-        if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData)) {
-            log.info("Sending email notification to Respondent Solicitor for 'Update Frc information'");
-            notificationService.sendUpdateFrcInformationEmailToRespondentSolicitor(caseDetails);
-        }
-
-        log.info("Sending email notification to court for 'Update Frc Information'");
-        notificationService.sendUpdateFrcInformationEmailToCourt(caseDetails);
-        paperNotificationService.printUpdateFrcInformationNotification(caseDetails, authToken);
+        updateFrcCorrespondenceService.sendCorrespondence(caseDetails, authToken);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }

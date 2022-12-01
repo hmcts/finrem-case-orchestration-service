@@ -24,6 +24,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfConsentedApplicantCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfContestedApplicantCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfCorrespondenceService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.updatefrc.UpdateFrcCorrespondenceService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.updatefrc.UpdateFrcEmailAllLitigantsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
@@ -49,7 +51,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(NotificationsController.class)
-@ContextConfiguration(classes = {HwfCorrespondenceService.class, HwfConsentedApplicantCorresponder.class, HwfContestedApplicantCorresponder.class})
+@ContextConfiguration(classes = {HwfCorrespondenceService.class, HwfConsentedApplicantCorresponder.class,
+    HwfContestedApplicantCorresponder.class, UpdateFrcCorrespondenceService.class,
+    UpdateFrcEmailAllLitigantsCorresponder.class})
 public class NotificationsControllerTest extends BaseControllerTest {
 
     @Autowired
@@ -76,6 +80,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     private CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
     @MockBean
     private BulkPrintService bulkPrintService;
+
 
     @Test
     public void sendHwfSuccessfulConfirmationEmailIfDigitalCase() {
@@ -789,8 +794,9 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void givenUpdateFrc_whenSendEmail_thenNotificationServiceCalledThreeTimes() throws JsonProcessingException {
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class))).thenReturn(true);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
+
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any())).thenReturn(true);
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any())).thenReturn(true);
 
         notificationsController.sendUpdateFrcNotifications(AUTH_TOKEN, buildCallbackRequest());
         verify(notificationService, times(1)).sendUpdateFrcInformationEmailToAppSolicitor(any());
@@ -801,8 +807,8 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void givenUpdateFrc_whenAppSolNotAgreeToReceiveEmails_thenNotificationServiceCalledTwice() throws JsonProcessingException {
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class))).thenReturn(false);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any())).thenReturn(false);
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any())).thenReturn(true);
 
         notificationsController.sendUpdateFrcNotifications(AUTH_TOKEN, buildCallbackRequest());
         verify(notificationService, never()).sendUpdateFrcInformationEmailToAppSolicitor(any());
@@ -813,8 +819,8 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void givenUpdateFrc_whenRespSolNotAgreeToReceiveEmails_thenNotificationServiceCalledTwice() throws JsonProcessingException {
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any(CaseDetails.class))).thenReturn(true);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any())).thenReturn(true);
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any())).thenReturn(false);
 
         notificationsController.sendUpdateFrcNotifications(AUTH_TOKEN, buildCallbackRequest());
         verify(notificationService, times(1)).sendUpdateFrcInformationEmailToAppSolicitor(any());
