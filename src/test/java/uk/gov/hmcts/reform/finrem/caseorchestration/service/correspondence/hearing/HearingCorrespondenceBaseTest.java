@@ -7,7 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.MultiLetterAndEmailAllLitigantsCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.MultiLetterOrEmailAllLitigantsCorresponder;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -26,7 +26,7 @@ public abstract class HearingCorrespondenceBaseTest {
     @Mock
     DocumentHelper documentHelper;
     CaseDetails caseDetails;
-    MultiLetterAndEmailAllLitigantsCorresponder applicantAndRespondentMultiLetterCorresponder;
+    MultiLetterOrEmailAllLitigantsCorresponder applicantAndRespondentMultiLetterCorresponder;
 
 
     @Test

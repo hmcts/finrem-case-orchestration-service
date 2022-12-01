@@ -8,13 +8,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SingleLetterAndEmailApplicantCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SingleLetterOrEmailApplicantCorresponder;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 
 @Component
 @Slf4j
-public class HwfConsentedApplicantCorresponder extends SingleLetterAndEmailApplicantCorresponder {
+public class HwfConsentedApplicantCorresponder extends SingleLetterOrEmailApplicantCorresponder {
 
     private final HelpWithFeesDocumentService helpWithFeesDocumentService;
 

@@ -10,13 +10,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 @Component
 @Slf4j
-public abstract class SingleLetterAndEmailApplicantCorresponder extends CorresponderBase {
+public abstract class SingleLetterOrEmailApplicantCorresponder extends CorresponderBase {
 
     protected final BulkPrintService bulkPrintService;
 
     @Autowired
-    public SingleLetterAndEmailApplicantCorresponder(NotificationService notificationService,
-                                                     BulkPrintService bulkPrintService) {
+    public SingleLetterOrEmailApplicantCorresponder(NotificationService notificationService,
+                                                    BulkPrintService bulkPrintService) {
         super(notificationService);
         this.bulkPrintService = bulkPrintService;
     }

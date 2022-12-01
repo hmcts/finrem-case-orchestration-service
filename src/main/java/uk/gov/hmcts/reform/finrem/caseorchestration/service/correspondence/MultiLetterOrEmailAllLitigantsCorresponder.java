@@ -12,13 +12,13 @@ import java.util.List;
 
 @Component
 @Slf4j
-public abstract class MultiLetterAndEmailAllLitigantsCorresponder extends CorresponderBase {
+public abstract class MultiLetterOrEmailAllLitigantsCorresponder extends CorresponderBase {
 
     protected final BulkPrintService bulkPrintService;
 
     @Autowired
-    public MultiLetterAndEmailAllLitigantsCorresponder(NotificationService notificationService,
-                                                       BulkPrintService bulkPrintService) {
+    public MultiLetterOrEmailAllLitigantsCorresponder(NotificationService notificationService,
+                                                      BulkPrintService bulkPrintService) {
         super(notificationService);
         this.bulkPrintService = bulkPrintService;
     }
