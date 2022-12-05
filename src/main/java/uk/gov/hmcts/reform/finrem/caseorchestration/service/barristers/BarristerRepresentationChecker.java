@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -35,12 +36,9 @@ public class BarristerRepresentationChecker {
             .convertValue(caseData.get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {
             });
 
-        if (representationUpdateHistory != null) {
-            return representationUpdateHistory.stream()
-                .map(Element::getValue)
-                .anyMatch(representationUpdate -> hasUserBeenBarrister.test(solicitor.getEmail(), representationUpdate));
-        }
-        return false;
+        return Optional.ofNullable(representationUpdateHistory).orElse(Collections.emptyList()).stream()
+            .map(Element::getValue)
+            .anyMatch(representationUpdate -> hasUserBeenBarrister.test(solicitor.getEmail(), representationUpdate));
     }
 
     private String getChangedRepresentativeEmail(ChangedRepresentative changedRepresentative) {
