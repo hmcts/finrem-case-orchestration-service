@@ -28,15 +28,19 @@ public class BarristerRepresentationChecker {
     private final BiPredicate<String, RepresentationUpdate> hasUserBeenBarrister = (email, update) ->
         (getChangedRepresentativeEmail(update.getAdded()).equals(email)
             || getChangedRepresentativeEmail(update.getRemoved()).equals(email))
-        && update.getVia().equals(MANAGE_BARRISTERS);
+            && update.getVia().equals(MANAGE_BARRISTERS);
 
-    public boolean hasUserBeenBarristerOnCase(Map<String, Object>  caseData, UserDetails solicitor) {
+    public boolean hasUserBeenBarristerOnCase(Map<String, Object> caseData, UserDetails solicitor) {
         List<Element<RepresentationUpdate>> representationUpdateHistory = objectMapper.registerModule(new JavaTimeModule())
-            .convertValue(caseData.get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {});
+            .convertValue(caseData.get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {
+            });
 
-        return representationUpdateHistory.stream()
-            .map(Element::getValue)
-            .anyMatch(representationUpdate -> hasUserBeenBarrister.test(solicitor.getEmail(), representationUpdate));
+        if (representationUpdateHistory != null) {
+            return representationUpdateHistory.stream()
+                .map(Element::getValue)
+                .anyMatch(representationUpdate -> hasUserBeenBarrister.test(solicitor.getEmail(), representationUpdate));
+        }
+        return false;
     }
 
     private String getChangedRepresentativeEmail(ChangedRepresentative changedRepresentative) {
