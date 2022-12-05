@@ -26,14 +26,14 @@ public class NewPaperCaseContestedMidHandler implements CallbackHandler<Map<Stri
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.MID_EVENT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
-            && (EventType.CONTESTED_NEW_PAPER_CASE.equals(eventType));
+            && (EventType.NEW_PAPER_CASE.equals(eventType));
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
                                                                                    String userAuthorisation) {
         log.info("Received request for mid callback event {} for caseid {}",
-                EventType.CONTESTED_NEW_PAPER_CASE, callbackRequest.getCaseDetails().getId());
+                EventType.NEW_PAPER_CASE, callbackRequest.getCaseDetails().getId());
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         List<String> errors  = new ArrayList<>();
         service.hasChildrenLivingOutsideOfEnglandAndWales(caseDetails, errors);

@@ -39,7 +39,7 @@ public class NewPaperCaseContestedMidHandlerTest {
     @Test
     public void givenContestedCase_whenEventIsAmendAndCallbackIsSubmitted_thenHandlerCanNotHandle() {
         assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.CONTESTED_NEW_PAPER_CASE),
+                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.NEW_PAPER_CASE),
             is(false));
     }
 
@@ -54,7 +54,7 @@ public class NewPaperCaseContestedMidHandlerTest {
     @Test
     public void givenContestedCase_whenEventIsAmend_thenHandlerCanHandle() {
         assertThat(handler
-                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.CONTESTED_NEW_PAPER_CASE),
+                .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.NEW_PAPER_CASE),
             is(true));
     }
 
