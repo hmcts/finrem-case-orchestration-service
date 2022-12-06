@@ -6,6 +6,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderDocumentCollection;
 
@@ -18,8 +19,6 @@ import java.util.function.Function;
 
 import static uk.gov.hmcts.reform.bsp.common.mapper.AddressMapper.Field.LINE_1;
 import static uk.gov.hmcts.reform.bsp.common.mapper.AddressMapper.Field.POSTCODE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMEND_CONSENT_ORDER;
@@ -183,11 +182,11 @@ public class CaseDataService {
     }
 
     public boolean isConsentedApplication(CaseDetails caseDetails) {
-        return CASE_TYPE_ID_CONSENTED.equalsIgnoreCase(nullToEmpty(caseDetails.getCaseTypeId()));
+        return CaseType.CONSENTED.getCcdType().equalsIgnoreCase(nullToEmpty(caseDetails.getCaseTypeId()));
     }
 
     public boolean isContestedApplication(CaseDetails caseDetails) {
-        return CASE_TYPE_ID_CONTESTED.equalsIgnoreCase(nullToEmpty(caseDetails.getCaseTypeId()));
+        return CaseType.CONTESTED.getCcdType().equalsIgnoreCase(nullToEmpty(caseDetails.getCaseTypeId()));
     }
 
     public boolean isContestedPaperApplication(CaseDetails caseDetails) {

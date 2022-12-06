@@ -21,8 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_JUDGE_EMAIL;
@@ -105,7 +103,7 @@ public abstract class BaseServiceTest extends BaseTest {
         caseData.put("natureOfApplication2", natureOfApplication);
         return CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
-                .caseTypeId(CASE_TYPE_ID_CONSENTED)
+                .caseTypeId(CaseType.CONSENTED.getCcdType())
                 .id(12345L)
                 .data(caseData)
                 .build())
@@ -136,7 +134,7 @@ public abstract class BaseServiceTest extends BaseTest {
         caseData.put("natureOfApplication2", natureOfApplication);
         return CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
-                .caseTypeId(CASE_TYPE_ID_CONSENTED)
+                .caseTypeId(CaseType.CONSENTED.getCcdType())
                 .id(12345L)
                 .data(caseData)
                 .build())
@@ -169,7 +167,7 @@ public abstract class BaseServiceTest extends BaseTest {
         return CallbackRequest.builder()
             .eventId(UPDATE_CONTACT_DETAILS_EVENT)
             .caseDetails(CaseDetails.builder()
-                .caseTypeId(CASE_TYPE_ID_CONSENTED)
+                .caseTypeId(CaseType.CONSENTED.getCcdType())
                 .id(12345L)
                 .data(caseData)
                 .build())
@@ -182,7 +180,7 @@ public abstract class BaseServiceTest extends BaseTest {
         caseData.put(CONTESTED_RESPONDENT_LAST_NAME, "Goodman");
         return CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
-                .caseTypeId(CASE_TYPE_ID_CONTESTED)
+                .caseTypeId(CaseType.CONTESTED.getCcdType())
                 .id(12345L)
                 .data(caseData)
                 .build())
@@ -197,7 +195,7 @@ public abstract class BaseServiceTest extends BaseTest {
         //caseDataValuesToAdd.keySet().stream().forEach(k ->  caseData.put( k, caseDataValuesToAdd.get(k)));
         return CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
-                .caseTypeId(CASE_TYPE_ID_CONTESTED)
+                .caseTypeId(CaseType.CONTESTED.getCcdType())
                 .id(12345L)
                 .data(caseData)
                 .build())
@@ -245,7 +243,7 @@ public abstract class BaseServiceTest extends BaseTest {
         return CallbackRequest.builder()
             .eventId(UPDATE_CONTACT_DETAILS_EVENT)
             .caseDetails(CaseDetails.builder()
-                .caseTypeId(CASE_TYPE_ID_CONTESTED)
+                .caseTypeId(CaseType.CONTESTED.getCcdType())
                 .id(12345L)
                 .data(caseData)
                 .build())
