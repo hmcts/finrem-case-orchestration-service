@@ -215,6 +215,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     public void shouldSuccessfullySetOrgPolicy() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
 
         loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
         mvc.perform(post("/case-orchestration/contested/set-paper-case-org-policy")
