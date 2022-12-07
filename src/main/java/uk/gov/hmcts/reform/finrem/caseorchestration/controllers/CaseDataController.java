@@ -65,6 +65,16 @@ public class CaseDataController extends BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build());
     }
 
+    @PostMapping(path = "/consented/set-amend-defaults", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(description = "Set consented amend default values")
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setConsentedAmendDefaultValues(
+        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken,
+        @RequestBody final CallbackRequest callbackRequest) {
+        log.info("Set consented amend default values.");
+        setAmendDefaultValues(callbackRequest, authToken);
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build());
+    }
+
     @PostMapping(path = "/contested/set-defaults", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(description = "Set default values for contested journey")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setContestedDefaultValues(
@@ -80,6 +90,12 @@ public class CaseDataController extends BaseController {
         final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         setData(authToken, caseData);
         setOrganisationPolicy(callbackRequest.getCaseDetails());
+        setApplicantSolicitorOrganisationDetails(callbackRequest.getCaseDetails(), authToken);
+    }
+    private void setAmendDefaultValues(CallbackRequest callbackRequest, String authToken) {
+        validateCaseData(callbackRequest);
+        final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        setData(authToken, caseData);
         setApplicantSolicitorOrganisationDetails(callbackRequest.getCaseDetails(), authToken);
     }
 
@@ -208,12 +224,16 @@ public class CaseDataController extends BaseController {
 
     private void setOrganisationPolicy(CaseDetails caseDetails) {
         if (caseDataService.isContestedApplication(caseDetails) || caseDataService.isConsentedApplication(caseDetails)) {
-            setOrganisationPolicy(caseDetails);
 
             Map<String, Object> appSolPolicy = buildOrganisationPolicy(APP_SOLICITOR_POLICY);
-            caseDetails.getData().put(ORGANISATION_POLICY_APPLICANT, appSolPolicy);
+            caseDetails.getData().get(ORGANISATION_POLICY_APPLICANT);
+            if (!caseDataService.isNotEmpty(ORGANISATION_POLICY_APPLICANT, caseDetails.getData()))
+            {
 
-            log.info("App Sol policy added to case: {}", appSolPolicy);
+                caseDetails.getData().put(ORGANISATION_POLICY_APPLICANT, appSolPolicy);
+
+                log.info("App Sol policy added to case: {}", appSolPolicy);
+            }
         }
     }
 
