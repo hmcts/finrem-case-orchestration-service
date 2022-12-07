@@ -2,16 +2,16 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.appli
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentManagerTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentCollectionsManagerTest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_CORRESPONDENCE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 
-public class ApplicantCorrespondenceHandlerTest extends CaseDocumentManagerTest {
+public class ApplicantCorrespondenceHandlerTest extends CaseDocumentCollectionsManagerTest {
 
-    ApplicantCorrespondenceManager applicantCorrespondenceHandler = new ApplicantCorrespondenceManager(new ObjectMapper());
+    ApplicantCorrespondenceCollectionService applicantCorrespondenceHandler = new ApplicantCorrespondenceCollectionService(new ObjectMapper());
 
     @Test
     public void appCorrespondenceDocsFiltered() {
@@ -20,7 +20,7 @@ public class ApplicantCorrespondenceHandlerTest extends CaseDocumentManagerTest 
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        applicantCorrespondenceHandler.manageDocumentCollection(uploadDocumentList, caseData);
+        applicantCorrespondenceHandler.processUploadDocumentCollection(caseData);
 
         assertThat(getDocumentCollection(caseData, APP_CORRESPONDENCE_COLLECTION), hasSize(2));
     }

@@ -14,7 +14,8 @@ public abstract class FinremCallbackHandler implements CallbackHandler<FinremCas
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(CallbackRequest callbackRequest, String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(CallbackRequest callbackRequest,
+                                                                              String userAuthorisation) {
 
         FinremCallbackRequest callbackRequestWithFinremCaseDetails =
             mapToFinremCallbackRequest(callbackRequest);

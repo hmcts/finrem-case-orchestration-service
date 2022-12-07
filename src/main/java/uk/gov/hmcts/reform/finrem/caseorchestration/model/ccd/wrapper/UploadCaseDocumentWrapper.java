@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
 
 import java.util.Collection;
 import java.util.List;
@@ -104,5 +105,44 @@ public class UploadCaseDocumentWrapper {
                 respCaseSummariesCollectionShared, respFormsHCollectionShared, respExpertEvidenceCollShared,
                 respCorrespondenceDocsCollShared, respOtherCollectionShared)
             .flatMap(Collection::stream).collect(Collectors.toList());
+    }
+
+    @JsonIgnore
+    public List<UploadCaseDocumentCollection> getDocumentCollection(ManageCaseDocumentsCollectionType collectionName) {
+
+        return switch (collectionName) {
+            case APPLICANT_CORRESPONDENCE_COLLECTION -> getAppCorrespondenceCollection();
+            case APPLICANT_FR_FORM_COLLECTION -> getAppFrFormsCollection();
+            case APPLICANT_EVIDENCE_COLLECTION -> getAppEvidenceCollection();
+            case APPLICANT_TRIAL_BUNDLE_COLLECTION -> getAppTrialBundleCollection();
+            case APPLICANT_CONFIDENTIAL_DOCS_COLLECTION -> getAppConfidentialDocsCollection();
+            case RESPONDENT_CORRESPONDENCE_COLLECTION -> getRespCorrespondenceCollection();
+            case RESPONDENT_FR_FORM_COLLECTION -> getRespFrFormsCollection();
+            case RESPONDENT_EVIDENCE_COLLECTION -> getRespEvidenceCollection();
+            case RESPONDENT_TRIAL_BUNDLE_COLLECTION -> getRespTrialBundleCollection();
+            case RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION -> getRespConfidentialDocsCollection();
+            case APP_HEARING_BUNDLES_COLLECTION -> getAppHearingBundlesCollection();
+            case APP_FORM_E_EXHIBITS_COLLECTION -> getAppFormEExhibitsCollection();
+            case APP_CHRONOLOGIES_STATEMENTS_COLLECTION -> getAppChronologiesCollection();
+            case APP_QUESTIONNAIRES_ANSWERS_COLLECTION -> getAppQaCollection();
+            case APP_STATEMENTS_EXHIBITS_COLLECTION -> getAppStatementsExhibitsCollection();
+            case APP_CASE_SUMMARIES_COLLECTION -> getAppCaseSummariesCollection();
+            case APP_FORMS_H_COLLECTION -> getAppFormsHCollection();
+            case APP_EXPERT_EVIDENCE_COLLECTION -> getAppExpertEvidenceCollection();
+            case APP_CORRESPONDENCE_COLLECTION -> getAppCorrespondenceDocsCollection();
+            case APP_OTHER_COLLECTION -> getAppOtherCollection();
+            case RESP_HEARING_BUNDLES_COLLECTION -> getRespHearingBundlesCollection();
+            case RESP_FORM_E_EXHIBITS_COLLECTION -> getRespFormEExhibitsCollection();
+            case RESP_CHRONOLOGIES_STATEMENTS_COLLECTION -> getRespChronologiesCollection();
+            case RESP_QUESTIONNAIRES_ANSWERS_COLLECTION -> getRespQaCollection();
+            case RESP_STATEMENTS_EXHIBITS_COLLECTION -> getRespStatementsExhibitsCollection();
+            case RESP_CASE_SUMMARIES_COLLECTION -> getRespCaseSummariesCollection();
+            case RESP_FORM_H_COLLECTION -> getRespFormsHCollection();
+            case RESP_EXPERT_EVIDENCE_COLLECTION -> getRespExpertEvidenceCollection();
+            case RESP_CORRESPONDENCE_COLLECTION -> getRespCorrespondenceDocsColl();
+            case RESP_OTHER_COLLECTION -> getRespOtherCollection();
+            case CONTESTED_UPLOADED_DOCUMENTS -> getUploadCaseDocument();
+            case CONTESTED_FDR_CASE_DOCUMENT_COLLECTION -> getFdrCaseDocumentCollection();
+        };
     }
 }

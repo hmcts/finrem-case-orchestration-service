@@ -2,16 +2,16 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respo
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentManagerTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentCollectionsManagerTest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_EXPERT_EVIDENCE_COLLECTION;
 
-public class RespondentExpertEvidenceHandlerTest extends CaseDocumentManagerTest {
+public class RespondentExpertEvidenceHandlerTest extends CaseDocumentCollectionsManagerTest {
 
-    RespondentExpertEvidenceManager respondentExpertEvidenceHandler = new RespondentExpertEvidenceManager(new ObjectMapper());
+    RespondentExpertEvidenceCollectionService respondentExpertEvidenceHandler = new RespondentExpertEvidenceCollectionService(new ObjectMapper());
 
 
     @Test
@@ -20,7 +20,7 @@ public class RespondentExpertEvidenceHandlerTest extends CaseDocumentManagerTest
         uploadDocumentList.add(createContestedUploadDocumentItem("Expert Evidence", "respondent", "no", "no", null));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        respondentExpertEvidenceHandler.manageDocumentCollection(uploadDocumentList, caseData);
+        respondentExpertEvidenceHandler.processUploadDocumentCollection(caseData);
 
         assertThat(getDocumentCollection(caseData, RESP_EXPERT_EVIDENCE_COLLECTION), hasSize(2));
     }

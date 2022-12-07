@@ -8,16 +8,16 @@ import static org.hamcrest.Matchers.hasSize;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FDR_DOCS_COLLECTION;
 
-public class FdrDocumentsHandlerTest extends CaseDocumentManagerTest {
+public class FdrDocumentsHandlerTest extends CaseDocumentCollectionsManagerTest {
 
-    FdrDocumentsManager fdrDocumentsHandler = new FdrDocumentsManager(new ObjectMapper());
+    FdrDocumentsCollectionService fdrDocumentsHandler = new FdrDocumentsCollectionService(new ObjectMapper());
 
     @Test
     public void shouldFilterFdrDocuments() {
         uploadDocumentList.add(createContestedUploadDocumentItem("Other", "respondent", "no", "yes", "Other Example"));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        fdrDocumentsHandler.manageDocumentCollection(uploadDocumentList, caseData);
+        fdrDocumentsHandler.processDocumentCollections(caseData);
 
         assertThat(getDocumentCollection(caseData, FDR_DOCS_COLLECTION), hasSize(1));
     }

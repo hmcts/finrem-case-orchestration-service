@@ -13,9 +13,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedDocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentManagerTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantCaseSummariesManager;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantChronologiesStatementManager;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentCollectionsManagerTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantCaseSummariesCollectionService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantChronologiesStatementCollectionService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,15 +29,15 @@ import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 
 @RunWith(MockitoJUnitRunner.class)
-public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDocumentManagerTest {
+public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDocumentCollectionsManagerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
 
     @Mock
-    ApplicantCaseSummariesManager applicantCaseSummariesHandler;
+    ApplicantCaseSummariesCollectionService applicantCaseSummariesHandler;
 
     @Mock
-    ApplicantChronologiesStatementManager applicantChronologiesStatementHandler;
+    ApplicantChronologiesStatementCollectionService applicantChronologiesStatementHandler;
 
     ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
     private UploadContestedCaseDocumentsAboutToSubmitHandler uploadContestedCaseDocumentsHandler;
@@ -82,8 +82,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDo
         uploadContestedCaseDocumentsHandler.handle(callbackRequest, AUTH_TOKEN);
 
 
-        verify(applicantCaseSummariesHandler).manageDocumentCollection(uploadDocumentList, caseDetails.getData());
-        verify(applicantChronologiesStatementHandler).manageDocumentCollection(uploadDocumentList, caseDetails.getData());
+        verify(applicantCaseSummariesHandler).processUploadDocumentCollection(caseDetails.getData());
+        verify(applicantChronologiesStatementHandler).processUploadDocumentCollection(caseDetails.getData());
     }
 
     @Test

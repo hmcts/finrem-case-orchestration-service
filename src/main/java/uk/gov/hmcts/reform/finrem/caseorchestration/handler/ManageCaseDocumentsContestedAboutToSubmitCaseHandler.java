@@ -1,10 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedDocumentHelper;
@@ -12,26 +10,23 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ManageCaseDocumentsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentCollectionService;
 
-import java.util.Map;
-
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION;
+import java.util.List;
 
 @Slf4j
 @Service
 public class ManageCaseDocumentsContestedAboutToSubmitCaseHandler extends FinremCallbackHandler {
 
-    private final ManageCaseDocumentsService manageCaseDocumentsService;
+    private final List<DocumentCollectionService> documentCollectionServices;
     private final UploadedDocumentHelper uploadedDocumentHelper;
 
     @Autowired
     public ManageCaseDocumentsContestedAboutToSubmitCaseHandler(FinremCaseDetailsMapper mapper,
-                                                               ManageCaseDocumentsService manageCaseDocumentsService,
+                                                                List<DocumentCollectionService> documentCollectionServices,
                                                                 UploadedDocumentHelper uploadedDocumentHelper) {
         super(mapper);
-        this.manageCaseDocumentsService = manageCaseDocumentsService;
+        this.documentCollectionServices = documentCollectionServices;
         this.uploadedDocumentHelper = uploadedDocumentHelper;
     }
 
@@ -46,23 +41,13 @@ public class ManageCaseDocumentsContestedAboutToSubmitCaseHandler extends Finrem
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
 
-        uploadedDocumentHelper.addUploadDateToNewDocuments(callbackRequest.getCaseDetails().getData(),
-            callbackRequest.getCaseDetailsBefore().getData());
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
+        uploadedDocumentHelper.addUploadDateToNewDocuments(caseData, caseDataBefore);
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data().build();
+        documentCollectionServices.forEach(documentCollectionService ->
+            documentCollectionService.processUploadDocumentCollection(callbackRequest, userAuthorisation));
+
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
-
-//    @Override
-//    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(CallbackRequest callbackRequest, String userAuthorisation) {
-//        Map<String, Object> caseDataBefore = manageCaseDocumentsService.setCaseDataBeforeManageCaseDocumentCollection(
-//            callbackRequest.getCaseDetails().getData(), callbackRequest.getCaseDetailsBefore().getData());
-//
-//        Map<String, Object> caseData = uploadedDocumentHelper.addUploadDateToNewDocuments(
-//            callbackRequest.getCaseDetails().getData(),
-//            caseDataBefore, CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION);
-//
-//        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(
-//            manageCaseDocumentsService.manageCaseDocuments(
-//                caseData)).build();
-//    }
 }

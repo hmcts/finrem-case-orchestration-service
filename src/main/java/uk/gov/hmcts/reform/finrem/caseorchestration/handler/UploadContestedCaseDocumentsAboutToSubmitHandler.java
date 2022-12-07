@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedDocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentManager;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentCollectionsManager;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -28,7 +28,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class UploadContestedCaseDocumentsAboutToSubmitHandler
     implements CallbackHandler<Map<String, Object>> {
 
-    private final List<CaseDocumentManager> caseDocumentHandlers;
+    private final List<CaseDocumentCollectionsManager> caseDocumentHandlers;
     private final ObjectMapper objectMapper;
     private final UploadedDocumentHelper uploadedDocumentHelper;
 
@@ -47,7 +47,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler
             callbackRequest.getCaseDetails().getData(),
             callbackRequest.getCaseDetailsBefore().getData(), CONTESTED_UPLOADED_DOCUMENTS);
         List<UploadCaseDocumentCollection> uploadedDocuments = getDocumentCollection(caseData);
-        caseDocumentHandlers.stream().forEach(h -> h.manageDocumentCollection(uploadedDocuments, caseData));
+        caseDocumentHandlers.stream().forEach(h -> h.addDocumentToCollection(caseData));
         uploadedDocuments.sort(Comparator.comparing(
             UploadCaseDocumentCollection::getUploadCaseDocument, Comparator.comparing(
                 UploadCaseDocument::getCaseDocumentUploadDateTime, Comparator.nullsLast(

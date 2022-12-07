@@ -1,27 +1,28 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentManagerTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentCollectionsManagerTest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_STATEMENTS_EXHIBITS_COLLECTION;
 
-public class RespondentStatementsExhibitsHandlerTest extends CaseDocumentManagerTest {
+public class RespondentStatementsExhibitsHandlerTest extends CaseDocumentCollectionsManagerTest {
 
-    RespondentStatementsExhibitsManager respondentStatementsExhibitsHandler = new RespondentStatementsExhibitsManager(new ObjectMapper());
+    RespondentStatementsExhibitsCollectionService respondentStatementsExhibitsHandler = new RespondentStatementsExhibitsCollectionService();
 
     @Test
     public void respStatementsExhibitsFiltered() {
-        uploadDocumentList.add(createContestedUploadDocumentItem("Statement/Affidavit", "respondent", "no", "no", null));
-        uploadDocumentList.add(createContestedUploadDocumentItem("Witness Statement/Affidavit", "respondent", "no", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.STATEMENT_AFFIDAVIT, CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.WITNESS_STATEMENT_AFFIDAVIT, CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null));
 
-        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        respondentStatementsExhibitsHandler.manageDocumentCollection(uploadDocumentList, caseData);
+        caseDetails.getData().getUploadCaseDocumentWrapper().setUploadCaseDocument(uploadDocumentList);
 
-        assertThat(getDocumentCollection(caseData, RESP_STATEMENTS_EXHIBITS_COLLECTION), hasSize(2));
+        respondentStatementsExhibitsHandler.processUploadDocumentCollection(caseData);
+
+        assertThat(caseDetails.getData().getUploadCaseDocumentWrapper().getRespStatementsExhibitsCollection(), hasSize(2));
     }
 }

@@ -2,16 +2,16 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.appli
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentManagerTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentCollectionsManagerTest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_OTHER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 
-public class ApplicantOtherDocumentsHandlerTest extends CaseDocumentManagerTest {
+public class ApplicantOtherDocumentsHandlerTest extends CaseDocumentCollectionsManagerTest {
 
-    ApplicantOtherDocumentsManager applicantOtherDocumentsHandler = new ApplicantOtherDocumentsManager(new ObjectMapper());
+    ApplicantOtherDocumentsCollectionService applicantOtherDocumentsHandler = new ApplicantOtherDocumentsCollectionService(new ObjectMapper());
 
 
     @Test
@@ -24,7 +24,7 @@ public class ApplicantOtherDocumentsHandlerTest extends CaseDocumentManagerTest 
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
-        applicantOtherDocumentsHandler.manageDocumentCollection(uploadDocumentList, caseData);
+        applicantOtherDocumentsHandler.processUploadDocumentCollection(caseData);
 
         assertThat(getDocumentCollection(caseData, APP_OTHER_COLLECTION), hasSize(5));
     }
