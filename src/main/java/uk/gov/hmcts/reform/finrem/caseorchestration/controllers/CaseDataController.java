@@ -208,6 +208,8 @@ public class CaseDataController extends BaseController {
 
     private void setOrganisationPolicy(CaseDetails caseDetails) {
         if (caseDataService.isContestedApplication(caseDetails) || caseDataService.isConsentedApplication(caseDetails)) {
+            setOrganisationPolicy(caseDetails);
+
             Map<String, Object> appSolPolicy = buildOrganisationPolicy(APP_SOLICITOR_POLICY);
             caseDetails.getData().put(ORGANISATION_POLICY_APPLICANT, appSolPolicy);
 
