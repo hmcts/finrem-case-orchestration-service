@@ -121,6 +121,7 @@ public class FinremCaseData {
     private LocalDate issueDate;
     private AssignToJudgeReason assignedToJudgeReason;
     private String assignedToJudge;
+    private String consentJudgeName;
     private List<UploadConsentOrderDocumentCollection> uploadConsentOrderDocuments;
     private List<UploadOrderCollection> uploadOrder;
     private List<UploadDocumentCollection> uploadDocuments;
