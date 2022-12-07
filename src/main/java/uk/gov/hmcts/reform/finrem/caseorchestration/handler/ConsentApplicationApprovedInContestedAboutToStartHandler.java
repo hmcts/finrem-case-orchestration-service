@@ -39,8 +39,8 @@ public class ConsentApplicationApprovedInContestedAboutToStartHandler extends Fi
             callbackRequest.getCaseDetails().getId());
 
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
-        if (Objects.isNull(caseData.getConsentJudgeName())) {
-            caseData.setConsentJudgeName(service.getIdamFullName(userAuthorisation));
+        if (Objects.isNull(caseData.getConsentOrderWrapper().getConsentJudgeName())) {
+            caseData.getConsentOrderWrapper().setConsentJudgeName(service.getIdamFullName(userAuthorisation));
         }
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }

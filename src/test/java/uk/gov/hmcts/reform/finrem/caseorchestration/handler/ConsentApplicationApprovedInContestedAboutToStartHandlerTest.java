@@ -59,18 +59,18 @@ public class ConsentApplicationApprovedInContestedAboutToStartHandlerTest {
     public void givenContestedCase_whenEventExecuted_thenSetTheLoggedInUserIfNull() {
         when(service.getIdamFullName(AUTH_TOKEN)).thenReturn("Moj Judge");
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest(null), AUTH_TOKEN);
-        assertEquals("Moj Judge", response.getData().getConsentJudgeName());
+        assertEquals("Moj Judge", response.getData().getConsentOrderWrapper().getConsentJudgeName());
     }
 
     @Test
     public void givenContestedCase_whenEventExecuted_thenDoNotSetIfUserIsAlreadyThere() {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest("HM Moj Judge"), AUTH_TOKEN);
-        assertEquals("HM Moj Judge", response.getData().getConsentJudgeName());
+        assertEquals("HM Moj Judge", response.getData().getConsentOrderWrapper().getConsentJudgeName());
     }
 
     private FinremCallbackRequest callbackRequest(String judgeName) {
         FinremCaseData finremCaseData = new FinremCaseData();
-        finremCaseData.setConsentJudgeName(judgeName);
+        finremCaseData.getConsentOrderWrapper().setConsentJudgeName(judgeName);
         return FinremCallbackRequest
             .<FinremCaseDetails>builder()
             .eventType(EventType.CONSENT_APPLICATION_APPROVED_IN_CONTESTED)
