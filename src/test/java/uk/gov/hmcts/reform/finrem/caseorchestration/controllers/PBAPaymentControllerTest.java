@@ -128,7 +128,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     private void doPBASetUp(boolean success) throws Exception {
         requestContent = objectMapper.readTree(new File(getClass().getResource("/fixtures/pba-payment.json").toURI()));
 
-        when(feeService.getApplicationFee(CONSENTED, null)).thenReturn(fee(CONSENTED));
+        when(feeService.getApplicationFee(CONSENTED)).thenReturn(fee(CONSENTED));
         when(pbaPaymentService.makePayment(anyString(), any())).thenReturn(paymentResponse(success));
     }
 
@@ -136,7 +136,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         String pbaPaymentAlreadyExists = "/fixtures/pba-payment-already-exists.json";
         requestContent = objectMapper.readTree(new File(getClass().getResource(pbaPaymentAlreadyExists).toURI()));
 
-        when(feeService.getApplicationFee(CONSENTED, null)).thenReturn(fee(CONSENTED));
+        when(feeService.getApplicationFee(CONSENTED)).thenReturn(fee(CONSENTED));
         when(pbaPaymentService.makePayment(anyString(), any())).thenReturn(paymentResponse(true));
     }
 
@@ -144,7 +144,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/hwf.json").toURI()));
-        when(feeService.getApplicationFee(CONSENTED, null)).thenReturn(fee(CONSENTED));
+        when(feeService.getApplicationFee(CONSENTED)).thenReturn(fee(CONSENTED));
     }
 
     @Test

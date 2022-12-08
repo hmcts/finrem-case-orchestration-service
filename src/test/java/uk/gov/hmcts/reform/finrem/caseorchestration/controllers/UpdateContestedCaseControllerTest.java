@@ -178,21 +178,6 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldRemovePeriodicPaymentOrderDetailsWhenSolicitorUncheckedForSchedule1Contested() throws Exception {
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/remove-periodic-payment-order-details-schedule1.json").toURI()));
-        mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.paymentForChildrenDecision").doesNotExist())
-            .andExpect(jsonPath("$.data.benefitForChildrenDecisionSchedule").doesNotExist())
-            .andExpect(jsonPath("$.data.benefitPaymentChecklistSchedule").doesNotExist());
-    }
-
-    @Test
     public void shouldUpdatePeriodicPaymentDetailsWhenPaymentForChildrenIsUncheckedForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource(

@@ -6,7 +6,6 @@
     "state": "applicationDrafted",
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
-      "typeOfApplication": "In connection to matrimonial and civil partnership proceedings",
       "formC": {
         "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/84c8188c-0765-46bc-a082-f59c818615e7",
         "document_filename": "Form-C.pdf",

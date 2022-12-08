@@ -83,15 +83,14 @@ public class FeeLookupConsumerTest extends BaseTest {
     @Test
     @PactVerification(fragment = "generateConsentedFeesPactFragment")
     public void verifyConsentedFeesServicePact() {
-        FeeResponse applicationFee = feeService.getApplicationFee(ApplicationType.CONSENTED, null);
+        FeeResponse applicationFee = feeService.getApplicationFee(ApplicationType.CONSENTED);
         assertEquals("FEE0640", applicationFee.getCode());
     }
 
     @Test
     @PactVerification(fragment = "generateContestedFeesPactFragment")
     public void verifyContestedFeesServicePact() {
-        String typeOfApplication  = "In connection to matrimonial and civil partnership proceedings";
-        FeeResponse applicationFee = feeService.getApplicationFee(ApplicationType.CONTESTED, typeOfApplication);
+        FeeResponse applicationFee = feeService.getApplicationFee(ApplicationType.CONTESTED);
         assertEquals("FEE0229", applicationFee.getCode());
     }
 

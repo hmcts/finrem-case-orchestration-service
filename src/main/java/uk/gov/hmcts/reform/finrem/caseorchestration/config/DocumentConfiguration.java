@@ -26,7 +26,6 @@ public class DocumentConfiguration {
     private String outOfFamilyCourtResolutionName;
     private String contestedMiniFormTemplate;
     private String contestedMiniFormFileName;
-    private String contestedDraftMiniFormTemplateSchedule;
     private String contestedDraftMiniFormTemplate;
     private String contestedDraftMiniFormFileName;
     private String generalLetterTemplate;

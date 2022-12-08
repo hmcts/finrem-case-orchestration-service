@@ -7,7 +7,6 @@
     "state": "applicationIssued",
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
-      "typeOfApplication": "In connection to matrimonial and civil partnership proceedings",
       "applicantFMName": "John",
       "applicantLName": "Smith",
       "applicantSolicitorName": "Sir Solicitor",

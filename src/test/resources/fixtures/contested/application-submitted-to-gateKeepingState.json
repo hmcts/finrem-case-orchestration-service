@@ -6,7 +6,6 @@
     "state": "applicationSubmitted",
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
-      "typeOfApplication": "In connection to matrimonial and civil partnership proceedings",
       "PBANumber": "PBA123456",
       "d81Question": "No",
       "PBAreference": "ABCD",

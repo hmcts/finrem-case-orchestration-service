@@ -45,8 +45,8 @@ public class FeeLookupControllerTest extends BaseControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource(fileName).toURI()));
-        String typeOfApplication  =  applicationType == CONTESTED ? "In connection to matrimonial and civil partnership proceedings" : null;
-        when(feeService.getApplicationFee(applicationType, typeOfApplication)).thenReturn(fee(applicationType));
+
+        when(feeService.getApplicationFee(applicationType)).thenReturn(fee(applicationType));
     }
 
     @Test
