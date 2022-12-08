@@ -23,7 +23,4 @@ public class FeeServiceConfiguration {
     private String contestedNewKeyword;
 
     private Boolean feePayNewKeywords;
-
-    private String schedule1Service;
-    private String schedule1Keyword;
 }

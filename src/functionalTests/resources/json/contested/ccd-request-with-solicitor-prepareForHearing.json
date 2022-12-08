@@ -3,7 +3,6 @@
   "event_id": "event1",
   "case_details": {
     "case_data": {
-      "typeOfApplication": "In connection to matrimonial and civil partnership proceedings",
       "HWFNumber": "HWF123",
       "PBANumber": "PBA222",
       "PBAPaymentReference": "PBAPaymentRef123",

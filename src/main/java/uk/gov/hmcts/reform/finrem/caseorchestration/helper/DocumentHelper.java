@@ -205,11 +205,6 @@ public class DocumentHelper {
         });
     }
 
-    public List<String> convertToList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<>() {
-        });
-    }
-
     private List<RespondToOrderData> convertToRespondToOrderDataList(Object object) {
         return objectMapper.convertValue(object, new TypeReference<>() {
         });

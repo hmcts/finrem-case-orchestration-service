@@ -42,7 +42,6 @@ public enum EventType {
     ISSUE_APPLICATION("FR_issueApplication"),
     REGENERATE_FORM_C("FR_regenerateFormC"),
     CONSENT_APPLICATION_APPROVED_IN_CONTESTED("FR_consentOrderApproved"),
-
     NOC_REQUEST("nocRequest"),
     @JsonEnumDefaultValue
     NONE("");

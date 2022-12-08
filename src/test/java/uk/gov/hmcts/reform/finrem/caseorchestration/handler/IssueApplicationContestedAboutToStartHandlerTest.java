@@ -41,13 +41,6 @@ public class IssueApplicationContestedAboutToStartHandlerTest {
     }
 
     @Test
-    public void givenConsentedCase_whenEventIsCloseAndCallbackIsSubmitted_thenHandlerCanNotHandle() {
-        assertThat(handler
-                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.CLOSE),
-            is(false));
-    }
-
-    @Test
     public void givenContestedCase_whenEventIsAmend_thenHandlerCanHandle() {
         assertThat(handler
                 .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.ISSUE_APPLICATION),
