@@ -111,6 +111,33 @@ public class CaseDataControllerTest extends BaseControllerTest {
     }
 
     @Test
+    public void shouldSuccessfullyReturnAsAdminConsentedAmended() throws Exception {
+        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(true);
+
+        loadRequestContentWith(CONTESTED_HWF_JSON);
+        mvc.perform(post("/case-orchestration/consented/set-amend-defaults")
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.isAdmin", is(YES_VALUE)));
+    }
+
+    @Test
+    public void shouldSuccessfullyReturnNotAsAdminConsentedAmended() throws Exception {
+        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
+
+        loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
+        mvc.perform(post("/case-orchestration/consented/set-amend-defaults")
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.isAdmin", is(NO_VALUE)))
+            .andExpect(jsonPath("$.data.applicantRepresented", is(YES_VALUE)));
+    }
+
+    @Test
     public void shouldSuccessfullyReturnAsAdminContested() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(true);
 
