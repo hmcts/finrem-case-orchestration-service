@@ -39,7 +39,7 @@ public class FeeServiceTest extends BaseServiceTest {
                 .withBody("{\"code\": \"TEST\", \"fee_amount\": \"50\", "
                     + "\"description\": \"desc\", \"version\": \"1.0\"}")));
 
-        FeeResponse feeResponse = feeService.getApplicationFee(CONSENTED, null);
+        FeeResponse feeResponse = feeService.getApplicationFee(CONSENTED);
         assertThat(feeResponse.getCode(), is("TEST"));
         assertThat(feeResponse.getFeeAmount(), is(BigDecimal.valueOf(50)));
         assertThat(feeResponse.getDescription(), is("desc"));
@@ -48,7 +48,6 @@ public class FeeServiceTest extends BaseServiceTest {
 
     @Test
     public void retrieveContestedApplicationFee() {
-        String typeOfApplication  =  "In connection to matrimonial and civil partnership proceedings";
         feeClient.stubFor(get(urlPathEqualTo(FEE_LOOKUP_API))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
@@ -56,27 +55,9 @@ public class FeeServiceTest extends BaseServiceTest {
                 .withBody("{\"code\": \"TEST\", \"fee_amount\": \"255\", "
                     + "\"description\": \"desc\", \"version\": \"1.0\"}")));
 
-        FeeResponse feeResponse = feeService.getApplicationFee(CONTESTED, typeOfApplication);
+        FeeResponse feeResponse = feeService.getApplicationFee(CONTESTED);
         assertThat(feeResponse.getCode(), is("TEST"));
         assertThat(feeResponse.getFeeAmount(), is(BigDecimal.valueOf(255)));
-        assertThat(feeResponse.getDescription(), is("desc"));
-        assertThat(feeResponse.getVersion(), is("1.0"));
-    }
-
-
-    @Test
-    public void retrieveContestedScedule1ApplicationFee() {
-        String typeOfApplication  =  "Under paragraph 1 or 2 of schedule 1 children act 1989";
-        feeClient.stubFor(get(urlPathEqualTo(FEE_LOOKUP_API))
-            .willReturn(aResponse()
-                .withStatus(HttpStatus.OK.value())
-                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                .withBody("{\"code\": \"TEST\", \"fee_amount\": \"232\", "
-                    + "\"description\": \"desc\", \"version\": \"1.0\"}")));
-
-        FeeResponse feeResponse = feeService.getApplicationFee(CONTESTED, typeOfApplication);
-        assertThat(feeResponse.getCode(), is("TEST"));
-        assertThat(feeResponse.getFeeAmount(), is(BigDecimal.valueOf(232)));
         assertThat(feeResponse.getDescription(), is("desc"));
         assertThat(feeResponse.getVersion(), is("1.0"));
     }

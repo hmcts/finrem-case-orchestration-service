@@ -6,7 +6,6 @@
     "state": "reviewOrder",
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
-      "typeOfApplication": "In connection to matrimonial and civil partnership proceedings",
       "propertyAdjutmentOrderDetail": [],
       "divorceUploadEvidence1": {
         "document_url": "http://document-management-store:8080/documents/a8ae8d4d-8f7a-4e13-8884-2b18724dc905",

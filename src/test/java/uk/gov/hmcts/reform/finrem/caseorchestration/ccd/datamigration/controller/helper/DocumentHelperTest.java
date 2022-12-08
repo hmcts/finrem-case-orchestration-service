@@ -92,14 +92,6 @@ public class DocumentHelperTest {
 
 
     @Test
-    public void castToList() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("validate-pension-collection.json");
-        List<String> natureList = documentHelper.convertToList(
-            callbackRequest.getCaseDetails().getData().get("natureOfApplication6"));
-        assertThat(natureList.size(), is(2));
-    }
-
-    @Test
     public void shouldGetFormADocuments() throws Exception {
         CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("validate-form-a-collection.json");
         List<CaseDocument> pensionDocuments = documentHelper.getFormADocumentsData(
