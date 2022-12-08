@@ -6,6 +6,7 @@
     "state": "consentOrderApproved",
     "case_type_id": "FinancialRemedyMVP2",
     "case_data": {
+      "typeOfApplication": "In connection to matrimonial and civil partnership proceedings",
       "paperApplication": "Yes",
       "applicantRepresented": "Yes",
       "solicitorAgreeToReceiveEmails": "No",

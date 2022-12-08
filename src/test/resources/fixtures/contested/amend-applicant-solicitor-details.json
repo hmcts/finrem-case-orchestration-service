@@ -7,6 +7,7 @@
     "case_type_id": "FinancialRemedyContested",
     "currentUserCaseRole": "[APPSOLICITOR]",
     "case_data": {
+      "typeOfApplication": "In connection to matrimonial and civil partnership proceedings",
       "updateIncludesRepresentativeChange": "No",
       "helpWithFeesQuestion": "Yes",
       "applicantFMName": "Poor",
