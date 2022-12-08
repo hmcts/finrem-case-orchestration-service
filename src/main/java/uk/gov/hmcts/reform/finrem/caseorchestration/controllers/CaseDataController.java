@@ -75,6 +75,13 @@ public class CaseDataController extends BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build());
     }
 
+    private void setAmendDefaultValues(CallbackRequest callbackRequest, String authToken) {
+        validateCaseData(callbackRequest);
+        final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        setData(authToken, caseData);
+        setApplicantSolicitorOrganisationDetails(callbackRequest.getCaseDetails(), authToken);
+    }
+
     @PostMapping(path = "/contested/set-defaults", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(description = "Set default values for contested journey")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setContestedDefaultValues(
@@ -90,12 +97,6 @@ public class CaseDataController extends BaseController {
         final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         setData(authToken, caseData);
         setOrganisationPolicy(callbackRequest.getCaseDetails());
-        setApplicantSolicitorOrganisationDetails(callbackRequest.getCaseDetails(), authToken);
-    }
-    private void setAmendDefaultValues(CallbackRequest callbackRequest, String authToken) {
-        validateCaseData(callbackRequest);
-        final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        setData(authToken, caseData);
         setApplicantSolicitorOrganisationDetails(callbackRequest.getCaseDetails(), authToken);
     }
 
