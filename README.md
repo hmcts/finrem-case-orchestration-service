@@ -19,7 +19,7 @@ To build project please execute the following command:
 ./gradlew build
 ```
 
-To get the project to build in IntelliJ IDEA, you have to:
+To get the project to build in IntelliJ IDEA, you have to do the following:
 
  - Install the Lombok plugin: Preferences -> Plugins
  - Enable Annotation Processing: Preferences -> Build, Execution, Deployment -> Compiler -> Annotation Processors
