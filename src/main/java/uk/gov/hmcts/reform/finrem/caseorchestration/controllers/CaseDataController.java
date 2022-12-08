@@ -227,8 +227,7 @@ public class CaseDataController extends BaseController {
 
             Map<String, Object> appSolPolicy = buildOrganisationPolicy(APP_SOLICITOR_POLICY);
             caseDetails.getData().get(ORGANISATION_POLICY_APPLICANT);
-            if (!caseDataService.isNotEmpty(ORGANISATION_POLICY_APPLICANT, caseDetails.getData()))
-            {
+            if (!caseDataService.isNotEmpty(ORGANISATION_POLICY_APPLICANT, caseDetails.getData())) {
 
                 caseDetails.getData().put(ORGANISATION_POLICY_APPLICANT, appSolPolicy);
 
