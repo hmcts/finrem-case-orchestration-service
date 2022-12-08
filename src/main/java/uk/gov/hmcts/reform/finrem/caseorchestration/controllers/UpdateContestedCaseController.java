@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentSe
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -40,6 +41,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_PHONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION_DEFAULT_TO;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -73,10 +76,15 @@ public class UpdateContestedCaseController extends BaseController {
         validateCaseData(ccdRequest);
 
         Map<String, Object> caseData = caseDetails.getData();
-        updateDivorceDetailsForContestedCase(caseData);
+        String typeOfApplication = Objects.toString(caseData.get(TYPE_OF_APPLICATION));
+        if (typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)) {
+            updateDivorceDetailsForContestedCase(caseData);
+        }
         updateContestedRespondentDetails(caseData);
-        updateContestedPeriodicPaymentOrder(caseData);
-        updateContestedPropertyAdjustmentOrder(caseData);
+        updateContestedPeriodicPaymentOrder(caseData, typeOfApplication);
+        if (typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)) {
+            updateContestedPropertyAdjustmentOrder(caseData);
+        }
         updateContestedFastTrackProcedureDetail(caseData);
         updateContestedComplexityDetails(caseData);
         isApplicantsHomeCourt(caseData);
@@ -225,33 +233,49 @@ public class UpdateContestedCaseController extends BaseController {
         caseData.put("MIAMOtherGroundsChecklist", null);
     }
 
-    private void updateContestedPeriodicPaymentOrder(Map<String, Object> caseData) {
-        ArrayList natureOfApplicationList = (ArrayList) caseData.get("natureOfApplicationChecklist");
+    private void updateContestedPeriodicPaymentOrder(Map<String, Object> caseData, String typeOfApplication) {
+        ArrayList natureOfApplicationList = typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)
+            ? (ArrayList) caseData.get("natureOfApplicationChecklist") : (ArrayList) caseData.get("natureOfApplicationChecklistSchedule");
         if (hasNotSelected(natureOfApplicationList, "periodicalPaymentOrder")) {
-            removeContestedPeriodicalPaymentOrderDetails(caseData);
+            removeContestedPeriodicalPaymentOrderDetails(caseData, typeOfApplication);
         } else {
-            updateContestedPeriodicPaymentDetails(caseData);
+            updateContestedPeriodicPaymentDetails(caseData, typeOfApplication);
         }
     }
 
-    private void updateContestedPeriodicPaymentDetails(Map<String, Object> caseData) {
-        if (equalsTo((String) caseData.get("paymentForChildrenDecision"), NO_VALUE)) {
-            removeBenefitsDetails(caseData);
+    private void updateContestedPeriodicPaymentDetails(Map<String, Object> caseData, String typeOfApplication) {
+        String paymentForChildrenDecisionObj = Objects.toString(caseData.get("paymentForChildrenDecision"));
+
+        if (equalsTo(paymentForChildrenDecisionObj, NO_VALUE)) {
+            removeBenefitsDetails(caseData, typeOfApplication);
         } else {
-            if (equalsTo((String) caseData.get("benefitForChildrenDecision"), YES_VALUE)) {
-                caseData.put("benefitPaymentChecklist", null);
+            if (equalsTo(paymentForChildrenDecisionObj, YES_VALUE)) {
+                removeBenefitPaymentChecklist(caseData, typeOfApplication);
             }
         }
     }
 
-    private void removeBenefitsDetails(Map<String, Object> caseData) {
-        caseData.put("benefitForChildrenDecision", null);
-        caseData.put("benefitPaymentChecklist", null);
+    private void removeBenefitPaymentChecklist(Map<String, Object> caseData, String typeOfApplication) {
+        if (typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)) {
+            caseData.put("benefitPaymentChecklist", null);
+        } else {
+            caseData.put("benefitPaymentChecklistSchedule", null);
+        }
     }
 
-    private void removeContestedPeriodicalPaymentOrderDetails(Map<String, Object> caseData) {
+    private void removeBenefitsDetails(Map<String, Object> caseData, String typeOfApplication) {
+        if (typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)) {
+            caseData.put("benefitForChildrenDecision", null);
+            caseData.put("benefitPaymentChecklist", null);
+        } else {
+            caseData.put("benefitForChildrenDecisionSchedule", null);
+            caseData.put("benefitPaymentChecklistSchedule", null);
+        }
+    }
+
+    private void removeContestedPeriodicalPaymentOrderDetails(Map<String, Object> caseData, String typeOfApplication) {
         caseData.put("paymentForChildrenDecision", null);
-        removeBenefitsDetails(caseData);
+        removeBenefitsDetails(caseData, typeOfApplication);
     }
 
     private void updateContestedPropertyAdjustmentOrder(Map<String, Object> caseData) {
