@@ -8,8 +8,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 
 import java.util.Map;
 
@@ -23,7 +23,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 public class SolicitorCreateConsentedMidHandler
     implements CallbackHandler<Map<String, Object>> {
 
-    private final ConsentedApplicationHelper contsentedApplicatonHelper;
+    private final ConsentedApplicationHelper consentedApplicationHelper;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -41,7 +41,7 @@ public class SolicitorCreateConsentedMidHandler
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
-        contsentedApplicatonHelper.setConsentVariationOrderLabelField(caseData);
+        consentedApplicationHelper.setConsentVariationOrderLabelField(caseData);
 
         String camelCaseLabel = (String) caseData.get(CV_ORDER_CAMELCASE_LABEL_FIELD);
         String lowerCaseLabel = (String) caseData.get(CV_LOWERCASE_LABEL_FIELD);

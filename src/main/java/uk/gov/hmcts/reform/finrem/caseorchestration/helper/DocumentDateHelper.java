@@ -28,6 +28,7 @@ public abstract class DocumentDateHelper<T extends CaseDocumentTabData> {
         this.mapper = objectMapper;
         this.documentType = documentType;
     }
+
     @Deprecated
     public Map<String, Object> addUploadDateToNewDocuments(Map<String, Object> caseData,
                                                            Map<String, Object> caseDataBefore,
@@ -49,6 +50,7 @@ public abstract class DocumentDateHelper<T extends CaseDocumentTabData> {
 
         allDocuments.stream().forEach(document -> addDateToNewDocuments(documentsBeforeEvent, document));
     }
+
     private void addDateToNewDocuments(List<T> documentsBeforeEvent, T document) {
         if (isNewDocument.test(document.getElementId(), documentsBeforeEvent)) {
             document.setUploadDateTime(LocalDateTime.now());

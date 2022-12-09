@@ -7,9 +7,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedDocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentCollectionService;
 
 import java.util.List;
@@ -44,9 +45,11 @@ public class ManageCaseDocumentsContestedAboutToSubmitCaseHandler extends Finrem
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
         uploadedDocumentHelper.addUploadDateToNewDocuments(caseData, caseDataBefore);
-
-        documentCollectionServices.forEach(documentCollectionService ->
-            documentCollectionService.processUploadDocumentCollection(callbackRequest, userAuthorisation));
+        List<UploadCaseDocumentCollection> allManagedDocumentCollections = caseData.getManageCaseDocumentCollection();
+        documentCollectionServices.forEach(documentCollectionService -> {
+            documentCollectionService.deleteEventRemovedDocuments(callbackRequest, userAuthorisation);
+            documentCollectionService.processUploadDocumentCollection(callbackRequest, allManagedDocumentCollections);
+        });
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }

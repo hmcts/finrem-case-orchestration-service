@@ -10,8 +10,10 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedConfidentialDocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConfidentialDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConfidentialDocumentCollection;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -46,10 +48,10 @@ public class UploadConfidentialDocumentsAboutToSubmitHandler
             callbackRequest.getCaseDetailsBefore().getData(),
             CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
 
-        List<ConfidentialUploadedDocumentData> uploadedDocuments = getConfidentialDocumentCollection(caseData);
+        List<UploadConfidentialDocumentCollection> uploadedDocuments = getConfidentialDocumentCollection(caseData);
 
-        uploadedDocuments.sort(comparing(ConfidentialUploadedDocumentData::getConfidentialUploadedDocument,
-            comparing(ConfidentialUploadedDocument::getConfidentialDocumentUploadDateTime, nullsLast(Comparator.reverseOrder()))));
+        uploadedDocuments.sort(comparing(UploadConfidentialDocumentCollection::getValue,
+            comparing(UploadConfidentialDocument::getConfidentialDocumentUploadDateTime, nullsLast(Comparator.reverseOrder()))));
 
         caseData.put(CONFIDENTIAL_DOCS_UPLOADED_COLLECTION, uploadedDocuments);
 
@@ -59,10 +61,10 @@ public class UploadConfidentialDocumentsAboutToSubmitHandler
             .build();
     }
 
-    private List<ConfidentialUploadedDocumentData> getConfidentialDocumentCollection(Map<String, Object> caseData) {
+    private List<UploadConfidentialDocumentCollection> getConfidentialDocumentCollection(Map<String, Object> caseData) {
         objectMapper.registerModule(new JavaTimeModule());
 
-        List<ConfidentialUploadedDocumentData> confidentialDocuments = objectMapper
+        List<UploadConfidentialDocumentCollection> confidentialDocuments = objectMapper
             .convertValue(caseData.get(CONFIDENTIAL_DOCS_UPLOADED_COLLECTION), new TypeReference<>() {
             });
 

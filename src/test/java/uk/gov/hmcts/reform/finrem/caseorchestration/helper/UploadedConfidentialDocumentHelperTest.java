@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConfidentialDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConfidentialDocumentCollection;
 
 import java.util.HashMap;
 import java.util.List;
@@ -44,10 +46,11 @@ public class UploadedConfidentialDocumentHelperTest {
             caseDataBefore,
             CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
 
-        List<ConfidentialUploadedDocumentData> documentData = getContestedUploadedDocs(modifiedData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
+        List<UploadConfidentialDocumentCollection> documentData =
+            getContestedUploadedDocs(modifiedData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
 
         documentData.forEach(document ->
-            assertThat(document.getConfidentialUploadedDocument().getConfidentialDocumentUploadDateTime(), is(notNullValue())));
+            assertThat(document.getValue().getConfidentialDocumentUploadDateTime(), is(notNullValue())));
     }
 
     @Test
@@ -66,12 +69,12 @@ public class UploadedConfidentialDocumentHelperTest {
             caseDataBefore,
             CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
 
-        List<ConfidentialUploadedDocumentData> documentData = getContestedUploadedDocs(modifiedData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
+        List<UploadConfidentialDocumentCollection> documentData = getContestedUploadedDocs(modifiedData, CONFIDENTIAL_DOCS_UPLOADED_COLLECTION);
 
         assertThat(documentData, hasSize(3));
         assertThat(documentData.stream()
-            .map(ConfidentialUploadedDocumentData::getConfidentialUploadedDocument)
-            .map(ConfidentialUploadedDocument::getConfidentialDocumentUploadDateTime)
+            .map(UploadConfidentialDocumentCollection::getValue)
+            .map(UploadConfidentialDocument::getConfidentialDocumentUploadDateTime)
             .filter(Objects::nonNull)
             .toList(), hasSize(2));
     }
@@ -84,16 +87,16 @@ public class UploadedConfidentialDocumentHelperTest {
         assertThat(modifiedData, is(notNullValue()));
     }
 
-    private ConfidentialUploadedDocumentData confidentialDocument(String filename, UUID id) {
-        return ConfidentialUploadedDocumentData.builder()
+    private UploadConfidentialDocumentCollection confidentialDocument(String filename, UUID id) {
+        return UploadConfidentialDocumentCollection.builder()
             .id(id.toString())
-            .confidentialUploadedDocument(ConfidentialUploadedDocument.builder()
+            .value(UploadConfidentialDocument.builder()
                 .documentFileName(filename)
                 .build())
             .build();
     }
 
-    private List<ConfidentialUploadedDocumentData> getContestedUploadedDocs(Map<String, Object> data, String documentCollection) {
+    private List<UploadConfidentialDocumentCollection> getContestedUploadedDocs(Map<String, Object> data, String documentCollection) {
         return mapper.convertValue(data.get(documentCollection), new TypeReference<>() {});
     }
 }

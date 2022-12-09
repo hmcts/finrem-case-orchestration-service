@@ -5,55 +5,52 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedDocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentCollectionsManagerTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentCollectionsServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantCaseSummariesCollectionService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantChronologiesStatementCollectionService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 
 @RunWith(MockitoJUnitRunner.class)
-public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDocumentCollectionsManagerTest {
-
-    public static final String AUTH_TOKEN = "tokien:)";
+public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDocumentCollectionsServiceTest {
 
     @Mock
-    ApplicantCaseSummariesCollectionService applicantCaseSummariesHandler;
-
+    ApplicantCaseSummariesCollectionService applicantCaseSummariesCollectionService;
     @Mock
-    ApplicantChronologiesStatementCollectionService applicantChronologiesStatementHandler;
-
-    ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    ApplicantChronologiesStatementCollectionService applicantChronologiesStatementCollectionService;
+    @InjectMocks
     private UploadContestedCaseDocumentsAboutToSubmitHandler uploadContestedCaseDocumentsHandler;
-
-    private final List<UploadCaseDocumentCollection> uploadDocumentList = new ArrayList<>();
     private final List<UploadCaseDocumentCollection> existingDocumentList = new ArrayList<>();
     private final List<String> expectedDocumentIdList = new ArrayList<>();
     List<UploadCaseDocumentCollection> handledDocumentList = new ArrayList<>();
     List<String> handledDocumentIdList = new ArrayList<>();
 
-    private final UploadedDocumentHelper uploadedDocumentHelper = new UploadedDocumentHelper(objectMapper);
-
     @Before
-    public void setUpTest() {
-        uploadContestedCaseDocumentsHandler = new UploadContestedCaseDocumentsAboutToSubmitHandler(
-            Arrays.asList(applicantCaseSummariesHandler, applicantChronologiesStatementHandler), objectMapper, uploadedDocumentHelper);
+    public void setup() {
+        uploadContestedCaseDocumentsHandler =
+            new UploadContestedCaseDocumentsAboutToSubmitHandler(
+                new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule())),
+                Arrays.asList(applicantCaseSummariesCollectionService, applicantChronologiesStatementCollectionService),
+                uploadedDocumentHelper);
     }
 
     @Test
@@ -73,53 +70,58 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDo
 
     @Test
     public void givenUploadCaseDocument_When_IsValid_ThenExecuteHandlers() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        uploadDocumentList.add(createContestedUploadDocumentItem("Other", "applicant", "yes", "no", "Other Example"));
-        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
-        caseDetailsBefore.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,
+            CaseDocumentParty.APPLICANT, YesOrNo.YES, YesOrNo.NO, "Other Example"));
+
+        caseDetails.getData().getUploadCaseDocumentWrapper().setUploadCaseDocument(screenUploadDocumentList);
+        caseDetailsBefore.getData().getUploadCaseDocumentWrapper().setUploadCaseDocument(screenUploadDocumentList);
         uploadContestedCaseDocumentsHandler.handle(callbackRequest, AUTH_TOKEN);
 
 
-        verify(applicantCaseSummariesHandler).processUploadDocumentCollection(caseDetails.getData());
-        verify(applicantChronologiesStatementHandler).processUploadDocumentCollection(caseDetails.getData());
+        verify(applicantCaseSummariesCollectionService)
+            .processUploadDocumentCollection(callbackRequest,screenUploadDocumentList);
+        verify(applicantChronologiesStatementCollectionService)
+            .processUploadDocumentCollection(callbackRequest, screenUploadDocumentList);
     }
 
     @Test
     public void givenUploadCaseDocument_When_IsValid_ThenExecuteHandler_And_ValidateDocumentOrder() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
 
-        CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        UploadCaseDocumentCollection oldDoc = createContestedUploadDocumentItem("Other", "applicant", "yes", "no", "Old Document Example");
+        UploadCaseDocumentCollection oldDoc = createContestedUploadDocumentItem(CaseDocumentType.OTHER,
+            CaseDocumentParty.APPLICANT, YesOrNo.YES, YesOrNo.NO, "Other Example");
+
+
         existingDocumentList.add(oldDoc);
-        caseDetailsBefore.getData().put(CONTESTED_UPLOADED_DOCUMENTS, existingDocumentList);
+        caseDetails.getData().getUploadCaseDocumentWrapper().setUploadCaseDocument(existingDocumentList);
 
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        UploadCaseDocumentCollection newDoc = createContestedUploadDocumentItem("Other", "applicant", "yes", "no", "New Document Example");
-        uploadDocumentList.addAll(List.of(newDoc, oldDoc));
-        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        UploadCaseDocumentCollection newDoc = createContestedUploadDocumentItem(CaseDocumentType.OTHER,
+            CaseDocumentParty.APPLICANT, YesOrNo.YES, YesOrNo.NO, "New Document Example");
+        screenUploadDocumentList.addAll(List.of(newDoc, oldDoc));
+        caseDetails.getData().getUploadCaseDocumentWrapper().setUploadCaseDocument(screenUploadDocumentList);
 
         expectedDocumentIdList.add(newDoc.getId());
         expectedDocumentIdList.add(oldDoc.getId());
 
-        handledDocumentList.addAll(
-            (List<UploadCaseDocumentCollection>) uploadContestedCaseDocumentsHandler.handle(
-                callbackRequest, AUTH_TOKEN).getData().get(CONTESTED_UPLOADED_DOCUMENTS));
+        handledDocumentList.addAll(uploadContestedCaseDocumentsHandler.handle(
+                callbackRequest, AUTH_TOKEN).getData().getUploadCaseDocumentWrapper().getUploadCaseDocument());
 
         handledDocumentList.forEach(doc -> handledDocumentIdList.add(doc.getId()));
 
         assertThat(handledDocumentIdList.equals(expectedDocumentIdList), is(true));
     }
 
-    private CallbackRequest buildCallbackRequest() {
-        Map<String, Object> caseData = new HashMap<>();
-        Map<String, Object> caseDataBefore = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder().id(123L).build();
-        caseDetails.setData(caseData);
-        CaseDetails caseDetailsBefore = CaseDetails.builder().id(123L).build();
-        caseDetailsBefore.setData(caseDataBefore);
-        return CallbackRequest.builder().eventId(EventType.UPLOAD_CASE_FILES.getCcdType())
+    private FinremCallbackRequest buildCallbackRequest() {
+        FinremCaseData data = FinremCaseData.builder().build();
+        FinremCaseDetails caseDetails =
+            FinremCaseDetails.builder().data(data).id(123L).build();
+        FinremCaseDetails caseDetailsBefore = FinremCaseDetails.builder().data(data).id(123L).build();
+        return FinremCallbackRequest.builder().eventType(EventType.UPLOAD_CASE_FILES)
             .caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
     }
 }

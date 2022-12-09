@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
@@ -24,18 +23,12 @@ public abstract class DocumentCollectionService {
     protected abstract List<UploadCaseDocumentCollection> getDocumentForCollectionServiceType(
         List<UploadCaseDocumentCollection> eventScreenDocumentCollections);
 
-    public void processUploadDocumentCollection(FinremCallbackRequest callbackRequest, String authToken) {
+    public void processUploadDocumentCollection(FinremCallbackRequest callbackRequest,
+                                                List<UploadCaseDocumentCollection> allManagedDocumentCollections) {
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
-        FinremCaseData caseDataBeforeEvent = callbackRequest.getCaseDetailsBefore().getData();
+
         List<UploadCaseDocumentCollection> originalDocumentCollectionForType =
             caseData.getUploadCaseDocumentWrapper().getDocumentCollection(manageCaseDocumentsCollectionType);
-
-
-        deleteEventRemovedDocuments(authToken, caseData, caseDataBeforeEvent);
-
-
-        List<UploadCaseDocumentCollection> allManagedDocumentCollections =
-            caseData.getManageCaseDocumentCollection();
 
         List<UploadCaseDocumentCollection> managedDocumentCollectionForType =
             getDocumentForCollectionServiceType(allManagedDocumentCollections);
@@ -50,10 +43,9 @@ public abstract class DocumentCollectionService {
         allManagedDocumentCollections.removeAll(managedDocumentCollectionForType);
     }
 
-    protected void deleteEventRemovedDocuments(String authToken,
-                                               FinremCaseData caseData,
-                                               FinremCaseData caseDataBeforeEvent) {
-
+    public void deleteEventRemovedDocuments(FinremCallbackRequest callbackRequest, String authToken) {
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        FinremCaseData caseDataBeforeEvent = callbackRequest.getCaseDetailsBefore().getData();
         List<UploadCaseDocumentCollection> originalDocumentCollectionForType =
             caseData.getUploadCaseDocumentWrapper().getDocumentCollection(manageCaseDocumentsCollectionType);
         List<UploadCaseDocumentCollection> documentsForDeletion =
@@ -61,7 +53,7 @@ public abstract class DocumentCollectionService {
         List<UploadCaseDocumentCollection> documentsForDeletionForCollectionType =
             getDocumentForCollectionServiceType(documentsForDeletion);
         documentsForDeletionForCollectionType.stream()
-            .forEach(documentForDeletion-> {
+            .forEach(documentForDeletion -> {
                 originalDocumentCollectionForType.remove(documentForDeletion);
                 evidenceManagementDeleteService.deleteFile(
                     documentForDeletion.getUploadCaseDocument().getCaseDocuments().getDocumentUrl(), authToken);

@@ -11,14 +11,13 @@ import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/*
- * When adding new collections here please update the getAll method.
- */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder(toBuilder = true)
@@ -104,6 +103,7 @@ public class UploadCaseDocumentWrapper {
                 respChronologiesCollectionShared, respStatementsExhibitsCollShared, respQaCollectionShared,
                 respCaseSummariesCollectionShared, respFormsHCollectionShared, respExpertEvidenceCollShared,
                 respCorrespondenceDocsCollShared, respOtherCollectionShared)
+            .filter(Objects::nonNull)
             .flatMap(Collection::stream).collect(Collectors.toList());
     }
 
@@ -111,38 +111,78 @@ public class UploadCaseDocumentWrapper {
     public List<UploadCaseDocumentCollection> getDocumentCollection(ManageCaseDocumentsCollectionType collectionName) {
 
         return switch (collectionName) {
-            case APPLICANT_CORRESPONDENCE_COLLECTION -> getAppCorrespondenceCollection();
-            case APPLICANT_FR_FORM_COLLECTION -> getAppFrFormsCollection();
-            case APPLICANT_EVIDENCE_COLLECTION -> getAppEvidenceCollection();
-            case APPLICANT_TRIAL_BUNDLE_COLLECTION -> getAppTrialBundleCollection();
-            case APPLICANT_CONFIDENTIAL_DOCS_COLLECTION -> getAppConfidentialDocsCollection();
-            case RESPONDENT_CORRESPONDENCE_COLLECTION -> getRespCorrespondenceCollection();
-            case RESPONDENT_FR_FORM_COLLECTION -> getRespFrFormsCollection();
-            case RESPONDENT_EVIDENCE_COLLECTION -> getRespEvidenceCollection();
-            case RESPONDENT_TRIAL_BUNDLE_COLLECTION -> getRespTrialBundleCollection();
-            case RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION -> getRespConfidentialDocsCollection();
-            case APP_HEARING_BUNDLES_COLLECTION -> getAppHearingBundlesCollection();
-            case APP_FORM_E_EXHIBITS_COLLECTION -> getAppFormEExhibitsCollection();
-            case APP_CHRONOLOGIES_STATEMENTS_COLLECTION -> getAppChronologiesCollection();
-            case APP_QUESTIONNAIRES_ANSWERS_COLLECTION -> getAppQaCollection();
-            case APP_STATEMENTS_EXHIBITS_COLLECTION -> getAppStatementsExhibitsCollection();
-            case APP_CASE_SUMMARIES_COLLECTION -> getAppCaseSummariesCollection();
-            case APP_FORMS_H_COLLECTION -> getAppFormsHCollection();
-            case APP_EXPERT_EVIDENCE_COLLECTION -> getAppExpertEvidenceCollection();
-            case APP_CORRESPONDENCE_COLLECTION -> getAppCorrespondenceDocsCollection();
-            case APP_OTHER_COLLECTION -> getAppOtherCollection();
-            case RESP_HEARING_BUNDLES_COLLECTION -> getRespHearingBundlesCollection();
-            case RESP_FORM_E_EXHIBITS_COLLECTION -> getRespFormEExhibitsCollection();
-            case RESP_CHRONOLOGIES_STATEMENTS_COLLECTION -> getRespChronologiesCollection();
-            case RESP_QUESTIONNAIRES_ANSWERS_COLLECTION -> getRespQaCollection();
-            case RESP_STATEMENTS_EXHIBITS_COLLECTION -> getRespStatementsExhibitsCollection();
-            case RESP_CASE_SUMMARIES_COLLECTION -> getRespCaseSummariesCollection();
-            case RESP_FORM_H_COLLECTION -> getRespFormsHCollection();
-            case RESP_EXPERT_EVIDENCE_COLLECTION -> getRespExpertEvidenceCollection();
-            case RESP_CORRESPONDENCE_COLLECTION -> getRespCorrespondenceDocsColl();
-            case RESP_OTHER_COLLECTION -> getRespOtherCollection();
-            case CONTESTED_UPLOADED_DOCUMENTS -> getUploadCaseDocument();
-            case CONTESTED_FDR_CASE_DOCUMENT_COLLECTION -> getFdrCaseDocumentCollection();
+            case APPLICANT_CORRESPONDENCE_COLLECTION ->
+                appCorrespondenceCollection = getNonNull(appCorrespondenceCollection);
+            case APPLICANT_FR_FORM_COLLECTION ->
+                appFrFormsCollection = getNonNull(appFrFormsCollection);
+            case APPLICANT_EVIDENCE_COLLECTION ->
+                appEvidenceCollection = getNonNull(appEvidenceCollection);
+            case APPLICANT_TRIAL_BUNDLE_COLLECTION ->
+                appTrialBundleCollection = getNonNull(appTrialBundleCollection);
+            case APPLICANT_CONFIDENTIAL_DOCS_COLLECTION ->
+                appConfidentialDocsCollection = getNonNull(appConfidentialDocsCollection);
+            case RESPONDENT_CORRESPONDENCE_COLLECTION ->
+                respCorrespondenceCollection = getNonNull(respCorrespondenceCollection);
+            case RESPONDENT_FR_FORM_COLLECTION ->
+                respFrFormsCollection = getNonNull(respFrFormsCollection);
+            case RESPONDENT_EVIDENCE_COLLECTION ->
+                respEvidenceCollection = getNonNull(respEvidenceCollection);
+            case RESPONDENT_TRIAL_BUNDLE_COLLECTION ->
+                respTrialBundleCollection = getNonNull(respTrialBundleCollection);
+            case RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION ->
+                respConfidentialDocsCollection = getNonNull(respConfidentialDocsCollection);
+            case APP_HEARING_BUNDLES_COLLECTION ->
+                appHearingBundlesCollection = getNonNull(appHearingBundlesCollection);
+            case APP_FORM_E_EXHIBITS_COLLECTION ->
+                appFormEExhibitsCollection = getNonNull(appFormEExhibitsCollection);
+            case APP_CHRONOLOGIES_STATEMENTS_COLLECTION ->
+                appChronologiesCollection = getNonNull(appChronologiesCollection);
+            case APP_QUESTIONNAIRES_ANSWERS_COLLECTION ->
+                appQaCollection = getNonNull(appQaCollection);
+            case APP_STATEMENTS_EXHIBITS_COLLECTION ->
+                appStatementsExhibitsCollection = getNonNull(appStatementsExhibitsCollection);
+            case APP_CASE_SUMMARIES_COLLECTION ->
+                appCaseSummariesCollection = getNonNull(appCaseSummariesCollection);
+            case APP_FORMS_H_COLLECTION ->
+                appFormsHCollection = getNonNull(appFormsHCollection);
+            case APP_EXPERT_EVIDENCE_COLLECTION ->
+                appExpertEvidenceCollection = getNonNull(appExpertEvidenceCollection);
+            case APP_CORRESPONDENCE_COLLECTION ->
+                appCorrespondenceDocsCollection = getNonNull(appCorrespondenceDocsCollection);
+            case APP_OTHER_COLLECTION ->
+                appOtherCollection = getNonNull(appOtherCollection);
+            case RESP_HEARING_BUNDLES_COLLECTION ->
+                respHearingBundlesCollection = getNonNull(respHearingBundlesCollection);
+            case RESP_FORM_E_EXHIBITS_COLLECTION ->
+                respFormEExhibitsCollection = getNonNull(respFormEExhibitsCollection);
+            case RESP_CHRONOLOGIES_STATEMENTS_COLLECTION ->
+                respChronologiesCollection = getNonNull(respChronologiesCollection);
+            case RESP_QUESTIONNAIRES_ANSWERS_COLLECTION ->
+                respQaCollection = getNonNull(respQaCollection);
+            case RESP_STATEMENTS_EXHIBITS_COLLECTION ->
+                respStatementsExhibitsCollection = getNonNull(respStatementsExhibitsCollection);
+            case RESP_CASE_SUMMARIES_COLLECTION ->
+                respCaseSummariesCollection = getNonNull(respCaseSummariesCollection);
+            case RESP_FORM_H_COLLECTION ->
+                respFormsHCollection = getNonNull(respFormsHCollection);
+            case RESP_EXPERT_EVIDENCE_COLLECTION ->
+                respExpertEvidenceCollection = getNonNull(respExpertEvidenceCollection);
+            case RESP_CORRESPONDENCE_COLLECTION ->
+                respCorrespondenceDocsColl = getNonNull(respCorrespondenceDocsColl);
+            case RESP_OTHER_COLLECTION ->
+                respOtherCollection = getNonNull(respOtherCollection);
+            case CONTESTED_UPLOADED_DOCUMENTS ->
+                uploadCaseDocument = getNonNull(uploadCaseDocument);
+            case CONTESTED_FDR_CASE_DOCUMENT_COLLECTION ->
+                fdrCaseDocumentCollection = getNonNull(fdrCaseDocumentCollection);
         };
     }
+
+    private List<UploadCaseDocumentCollection> getNonNull(List<UploadCaseDocumentCollection> collection) {
+        if (collection == null) {
+            collection = new ArrayList<>();
+        }
+        return collection;
+    }
 }
+

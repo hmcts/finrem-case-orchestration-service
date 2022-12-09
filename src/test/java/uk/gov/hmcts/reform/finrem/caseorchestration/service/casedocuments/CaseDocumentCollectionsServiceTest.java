@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 
 import org.junit.Before;
 import org.mockito.Mock;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedDocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
@@ -19,17 +20,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public abstract class CaseDocumentCollectionsManagerTest {
+public abstract class CaseDocumentCollectionsServiceTest {
 
     public static final String AUTH_TOKEN = "AuthTokien";
 
     protected FinremCaseDetails caseDetails;
     protected FinremCaseData caseData;
-    protected final List<UploadCaseDocumentCollection> uploadDocumentList = new ArrayList<>();
+    protected final List<UploadCaseDocumentCollection> screenUploadDocumentList = new ArrayList<>();
 
     @Mock
     protected EvidenceManagementDeleteService evidenceManagementDeleteService;
 
+    @Mock
+    protected UploadedDocumentHelper uploadedDocumentHelper;
 
     @Before
     public void setUp() {

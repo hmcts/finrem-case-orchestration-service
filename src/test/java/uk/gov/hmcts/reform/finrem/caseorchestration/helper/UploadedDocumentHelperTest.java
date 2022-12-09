@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 
 import java.util.HashMap;
 import java.util.List;
@@ -81,7 +83,7 @@ public class UploadedDocumentHelperTest {
     private UploadCaseDocumentCollection uploadedDocument(String filename, UUID id) {
         return UploadCaseDocumentCollection.builder()
             .id(id.toString())
-            .uploadedCaseDocument(UploadCaseDocument.builder()
+            .uploadCaseDocument(UploadCaseDocument.builder()
                 .caseDocumentOther(filename)
                 .build())
             .build();

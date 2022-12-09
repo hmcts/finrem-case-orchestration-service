@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCase
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -261,6 +262,7 @@ public class FinremCaseData {
     private String reasonForFrcLocation;
     private List<HearingUploadBundleCollection> hearingUploadBundle;
     private SendOrderEventPostStateOption sendOrderPostStateOption;
+    @Getter(AccessLevel.NONE)
     private List<UploadConfidentialDocumentCollection> confidentialDocumentsUploaded;
     private ChangeOrganisationRequest changeOrganisationRequestField;
     @JsonProperty("ApplicantOrganisationPolicy")
@@ -321,6 +323,13 @@ public class FinremCaseData {
             this.generalLetterWrapper = new GeneralLetterWrapper();
         }
         return generalLetterWrapper;
+    }
+
+    public List<UploadConfidentialDocumentCollection> getConfidentialDocumentsUploaded() {
+        if (confidentialDocumentsUploaded == null) {
+            this.confidentialDocumentsUploaded = new ArrayList<>();
+        }
+        return confidentialDocumentsUploaded;
     }
 
     @JsonIgnore

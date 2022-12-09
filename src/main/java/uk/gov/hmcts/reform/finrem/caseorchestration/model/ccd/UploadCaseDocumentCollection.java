@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseDocumentTabData;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data

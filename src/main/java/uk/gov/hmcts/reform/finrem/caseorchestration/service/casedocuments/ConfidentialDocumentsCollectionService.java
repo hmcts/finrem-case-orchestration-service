@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -11,7 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConfidentialDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConfidentialDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 
 import java.util.Comparator;
@@ -23,39 +21,34 @@ import java.util.stream.Collectors;
 @Order(1)
 public class ConfidentialDocumentsCollectionService extends DocumentCollectionService {
 
-    public ConfidentialDocumentsCollectionService(ManageCaseDocumentsCollectionType manageCaseDocumentsCollectionType,
-                                                  EvidenceManagementDeleteService evidenceManagementDeleteService) {
-        super(manageCaseDocumentsCollectionType, evidenceManagementDeleteService);
+    public ConfidentialDocumentsCollectionService(EvidenceManagementDeleteService evidenceManagementDeleteService) {
+        super(null, evidenceManagementDeleteService);
     }
 
     @Override
-    public void processUploadDocumentCollection(FinremCallbackRequest callbackRequest, String authToken) {
+    public void processUploadDocumentCollection(FinremCallbackRequest callbackRequest,
+                                                List<UploadCaseDocumentCollection> allManagedDocumentCollections) {
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
-        FinremCaseData caseDataBeforeEvent = callbackRequest.getCaseDetailsBefore().getData();
 
-        deleteEventRemovedDocuments(authToken, caseData, caseDataBeforeEvent);
-
-        List<UploadCaseDocumentCollection> allManagedDocumentCollections =
-            caseData.getManageCaseDocumentCollection();
         List<UploadCaseDocumentCollection> managedDocumentCollectionForType =
             getDocumentForCollectionServiceType(allManagedDocumentCollections);
-
 
         log.info("Adding items: {}, to Confidential Documents Collection", managedDocumentCollectionForType);
         allManagedDocumentCollections.removeAll(managedDocumentCollectionForType);
 
-        List<UploadConfidentialDocumentCollection> confidentialDocsCollection =
-            caseData.getConfidentialDocumentsUploaded();
+        List<UploadConfidentialDocumentCollection> confidentialDocsCollection = caseData.getConfidentialDocumentsUploaded();
+
         if (!managedDocumentCollectionForType.isEmpty()) {
-            List<UploadConfidentialDocumentCollection> confidentialDocs =
-                managedDocumentCollectionForType.stream().map(
+            List<UploadConfidentialDocumentCollection> confidentialDocs = managedDocumentCollectionForType.stream().map(
                 doc -> buildConfidentialDocument(doc)).collect((Collectors.toList()));
             confidentialDocsCollection.addAll(confidentialDocs);
+
             confidentialDocsCollection.sort(Comparator.comparing(
                 UploadConfidentialDocumentCollection::getValue, Comparator.comparing(
                     UploadConfidentialDocument::getConfidentialDocumentUploadDateTime, Comparator.nullsLast(
                         Comparator.reverseOrder()))));
         }
+
     }
 
     protected List<UploadCaseDocumentCollection> getDocumentForCollectionServiceType(
