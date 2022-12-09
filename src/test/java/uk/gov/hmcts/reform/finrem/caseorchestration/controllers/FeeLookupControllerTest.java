@@ -28,6 +28,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.fee;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION_DEFAULT_TO;
 
 @WebMvcTest(FeeLookupController.class)
 public class FeeLookupControllerTest extends BaseControllerTest {
@@ -45,7 +46,7 @@ public class FeeLookupControllerTest extends BaseControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource(fileName).toURI()));
-        String typeOfApplication  =  applicationType == CONTESTED ? "In connection to matrimonial and civil partnership proceedings" : null;
+        String typeOfApplication  =  applicationType == CONTESTED ? TYPE_OF_APPLICATION_DEFAULT_TO : null;
         when(feeService.getApplicationFee(applicationType, typeOfApplication)).thenReturn(fee(applicationType));
     }
 

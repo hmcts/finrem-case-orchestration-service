@@ -83,8 +83,8 @@ public class OnlineFormDocumentService {
 
         log.info("Generating Draft Contested Mini Form A for Case ID : {}", caseDetails.getId());
         String contestedDraftMiniFormTemplate;
-        String typeOfApplication = Objects.toString(caseDetails.getData().get(TYPE_OF_APPLICATION), null);
-        if (typeOfApplication != null &&  typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)) {
+        String typeOfApplication = Objects.toString(caseDetails.getData().get(TYPE_OF_APPLICATION), TYPE_OF_APPLICATION_DEFAULT_TO);
+        if (typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)) {
             contestedDraftMiniFormTemplate = documentConfiguration.getContestedDraftMiniFormTemplate();
         } else {
             contestedDraftMiniFormTemplate = documentConfiguration.getContestedDraftMiniFormTemplateSchedule();

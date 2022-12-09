@@ -76,7 +76,7 @@ public class UpdateContestedCaseController extends BaseController {
         validateCaseData(ccdRequest);
 
         Map<String, Object> caseData = caseDetails.getData();
-        String typeOfApplication = Objects.toString(caseData.get(TYPE_OF_APPLICATION));
+        String typeOfApplication = Objects.toString(caseData.get(TYPE_OF_APPLICATION), TYPE_OF_APPLICATION_DEFAULT_TO);
         if (typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)) {
             updateDivorceDetailsForContestedCase(caseData);
         }
