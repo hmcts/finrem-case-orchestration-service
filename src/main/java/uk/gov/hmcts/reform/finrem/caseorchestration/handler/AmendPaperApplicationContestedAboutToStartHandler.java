@@ -30,6 +30,7 @@ public class AmendPaperApplicationContestedAboutToStartHandler implements Callba
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
                                                                                    String userAuthorisation) {
         service.defaultCivilPartnershipField(callbackRequest);
+        service.defaultTypeOfApplication(callbackRequest);
         return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder()
                 .data(callbackRequest.getCaseDetails().getData()).build();
     }
