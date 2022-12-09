@@ -44,6 +44,14 @@ public class BarristerRepresentationCheckerTest {
         caseData = new HashMap<>();
     }
 
+
+    @Test
+    public void givenNoRepresentationHistory_thenReturnFalse() {
+        caseData.put(REPRESENTATION_UPDATE_HISTORY, null);
+
+        assertFalse(barristerRepresentationChecker.hasUserBeenBarristerOnCase(caseData, userDetails(EMAIL_FOUR)));
+    }
+
     @Test
     public void givenUserHasNotBeenBarrister_whenHasUserBeenBarristerOnCase_thenReturnFalse() {
         caseData.put(REPRESENTATION_UPDATE_HISTORY, representationUpdateHistory());
