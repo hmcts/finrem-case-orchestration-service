@@ -27,6 +27,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION_DEFAULT_TO;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -53,6 +55,7 @@ public class ContestedDocumentController extends BaseController {
         CaseDocument document = service.generateContestedMiniFormA(authorisationToken, callback.getCaseDetails());
         caseData.put(MINI_FORM_A, document);
         caseData.putIfAbsent(DIVORCE_CASE_NUMBER, callback.getCaseDetails().getId().toString());
+        caseData.putIfAbsent(TYPE_OF_APPLICATION, TYPE_OF_APPLICATION_DEFAULT_TO);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 }
