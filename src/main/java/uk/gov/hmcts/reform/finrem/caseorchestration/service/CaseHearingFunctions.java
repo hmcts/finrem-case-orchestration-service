@@ -35,6 +35,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CFC_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEVELAND;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_ADDRESS_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_NAME_KEY;
@@ -232,7 +233,7 @@ public final class CaseHearingFunctions {
 
     private static String getNorthEastFRC(Map mapOfCaseData, String frcListName) {
         String northEastList = (String) mapOfCaseData.get(frcListName);
-        if (CLEAVELAND.equalsIgnoreCase(northEastList)) {
+        if (CLEAVELAND.equalsIgnoreCase(northEastList) || CLEVELAND.equalsIgnoreCase(northEastList)) {
             return CLEAVELAND_COURTLIST;
         } else if (NWYORKSHIRE.equalsIgnoreCase(northEastList)) {
             return NWYORKSHIRE_COURTLIST;
