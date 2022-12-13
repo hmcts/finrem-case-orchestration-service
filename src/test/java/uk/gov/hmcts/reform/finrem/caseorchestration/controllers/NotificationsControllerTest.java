@@ -10,17 +10,24 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.AssignToJudgeApplicantCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.AssignToJudgeCorrespondenceService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.AssignToJudgeRespondentCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfConsentedApplicantCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfContestedApplicantCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfCorrespondenceService;
@@ -53,7 +60,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @WebMvcTest(NotificationsController.class)
 @ContextConfiguration(classes = {HwfCorrespondenceService.class, HwfConsentedApplicantCorresponder.class,
     HwfContestedApplicantCorresponder.class, UpdateFrcCorrespondenceService.class,
-    UpdateFrcEmailAllLitigantsCorresponder.class})
+    UpdateFrcEmailAllLitigantsCorresponder.class, AssignToJudgeCorrespondenceService.class, AssignToJudgeRespondentCorresponder.class,
+    AssignToJudgeApplicantCorresponder.class, AssignedToJudgeDocumentService.class})
 public class NotificationsControllerTest extends BaseControllerTest {
 
     @Autowired
@@ -80,6 +88,12 @@ public class NotificationsControllerTest extends BaseControllerTest {
     private CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
     @MockBean
     private BulkPrintService bulkPrintService;
+    @MockBean
+    private GenericDocumentService genericDocumentService;
+    @MockBean
+    private DocumentConfiguration documentConfiguration;
+    @MockBean
+    private DocumentHelper documentHelper;
 
 
     @Test
@@ -118,9 +132,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void sendAssignToJudgeConfirmationEmailIfDigitalCase() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-        when(caseDataService.isPaperApplication(any())).thenReturn(false);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any())).thenReturn(true);
 
         notificationsController.sendAssignToJudgeConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
 
@@ -129,7 +141,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldSendAssignToJudgeConfirmationEmailIfRespondentSolicitorIsAcceptingEmail() {
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any())).thenReturn(true);
 
         notificationsController.sendAssignToJudgeConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
 

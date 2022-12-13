@@ -26,12 +26,14 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,6 +46,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
@@ -72,6 +75,10 @@ public class NotificationsTest extends BaseTest {
     PrdOrganisationService prdOrganisationService;
     @MockBean
     AssignCaseAccessService assignCaseAccessService;
+    @MockBean
+    CheckSolicitorIsDigitalService checkSolicitorIsDigitalService;
+    @MockBean
+    DocumentHelper documentHelper;
 
     private static final String HWF_SUCCESSFUL_URL = "/case-orchestration/notify/hwf-successful";
     private static final String CONSENT_ORDER_MADE_URL = "/case-orchestration/notify/consent-order-made";
@@ -107,13 +114,15 @@ public class NotificationsTest extends BaseTest {
     @Test
     public void notifyHwfSuccessful() throws Exception {
         stubForNotification(NOTIFY_HWF_SUCCESSFUL_CONTEXT_PATH, HttpStatus.OK.value());
+        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(anyString())).thenReturn(true);
+        when(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(anyString())).thenReturn(true);
         when(assignCaseAccessService.getUserRoles(any())).thenReturn(CaseAssignmentUserRolesResource.builder()
             .caseAssignmentUserRoles(List.of(CaseAssignmentUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
             .build());
         webClient.perform(MockMvcRequestBuilders.post(HWF_SUCCESSFUL_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(objectMapper.writeValueAsString(request)))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(content().json(expectedCaseData()));
@@ -125,9 +134,9 @@ public class NotificationsTest extends BaseTest {
     public void notifyConsentOrderMade() throws Exception {
         stubForNotification(NOTIFY_CONSENT_ORDER_MADE_CONTEXT_PATH, HttpStatus.OK.value());
         webClient.perform(MockMvcRequestBuilders.post(CONSENT_ORDER_MADE_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(objectMapper.writeValueAsString(request)))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(content().json(expectedCaseData()));
@@ -139,9 +148,9 @@ public class NotificationsTest extends BaseTest {
     public void notifyConsentOrderAvailable() throws Exception {
         stubForNotification(NOTIFY_CONSENT_ORDER_AVAILABLE_CONTEXT_PATH, HttpStatus.OK.value());
         webClient.perform(MockMvcRequestBuilders.post(CONSENT_ORDER_AVAILABLE_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(objectMapper.writeValueAsString(request)))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(content().json(expectedCaseData()));
@@ -153,9 +162,9 @@ public class NotificationsTest extends BaseTest {
     public void notifyConsentOrderNotApproved() throws Exception {
         stubForNotification(NOTIFY_CONSENT_ORDER_NOT_APPROVED_CONTEXT_PATH, HttpStatus.OK.value());
         webClient.perform(MockMvcRequestBuilders.post(CONSENT_ORDER_NOT_APPROVED_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(objectMapper.writeValueAsString(request)))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(content().json(expectedCaseData()));
@@ -166,10 +175,12 @@ public class NotificationsTest extends BaseTest {
     @Test
     public void notifyAssignToJudge() throws Exception {
         stubForNotification(NOTIFY_ASSIGN_TO_JUDGE_CONTEXT_PATH, HttpStatus.OK.value());
+        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(anyString())).thenReturn(true);
+        when(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(anyString())).thenReturn(true);
         webClient.perform(MockMvcRequestBuilders.post(ASSIGNED_TO_JUDGE_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(objectMapper.writeValueAsString(request)))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(content().json(expectedCaseData()));
@@ -180,8 +191,10 @@ public class NotificationsTest extends BaseTest {
     @Test
     public void notifyNoticeOfChange() throws Exception {
         stubForNotification(NOTIFY_NOTICE_OF_CHANGE_CONTEXT_PATH, HttpStatus.OK.value());
+        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(anyString())).thenReturn(true);
+        when(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(anyString())).thenReturn(true);
         when(assignCaseAccessService.getUserRoles(any())).thenReturn(CaseAssignmentUserRolesResource.builder()
-                .caseAssignmentUserRoles(List.of(CaseAssignmentUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
+            .caseAssignmentUserRoles(List.of(CaseAssignmentUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
             .build());
         webClient.perform(MockMvcRequestBuilders.post(NOTICE_OF_CHANGE_URL)
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
