@@ -24,7 +24,7 @@ public abstract class PartyDocumentCollectionService extends DocumentCollectionS
 
     protected abstract boolean canProcessDocumentType(CaseDocumentType caseDocumentType);
 
-    protected List<UploadCaseDocumentCollection> getDocumentForCollectionServiceType(
+    protected List<UploadCaseDocumentCollection> getServiceCollectionType(
         List<UploadCaseDocumentCollection> eventScreenDocumentCollections) {
 
         return eventScreenDocumentCollections.stream()

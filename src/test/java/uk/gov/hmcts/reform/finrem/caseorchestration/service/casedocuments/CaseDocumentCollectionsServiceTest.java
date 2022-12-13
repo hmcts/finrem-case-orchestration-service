@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 
 import org.junit.Before;
 import org.mockito.Mock;
+import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedDocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
@@ -20,11 +21,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
 public abstract class CaseDocumentCollectionsServiceTest {
 
     public static final String AUTH_TOKEN = "AuthTokien";
 
     protected FinremCaseDetails caseDetails;
+    protected FinremCaseDetails caseDetailsBefore;
     protected FinremCaseData caseData;
     protected final List<UploadCaseDocumentCollection> screenUploadDocumentList = new ArrayList<>();
 
@@ -36,7 +41,10 @@ public abstract class CaseDocumentCollectionsServiceTest {
 
     @Before
     public void setUp() {
+        when(evidenceManagementDeleteService.deleteFile(any(), any()))
+            .thenReturn(ResponseEntity.ok().build());
         caseDetails = buildCaseDetails();
+        caseDetailsBefore = buildCaseDetails();
         caseData = caseDetails.getData();
     }
 

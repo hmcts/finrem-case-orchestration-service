@@ -17,7 +17,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class ManageCaseDocumentsContestedAboutToSubmitCaseHandler extends FinremCallbackHandler {
+public class  ManageCaseDocumentsContestedAboutToSubmitCaseHandler extends FinremCallbackHandler {
 
     private final List<DocumentCollectionService> documentCollectionServices;
     private final UploadedDocumentHelper uploadedDocumentHelper;
@@ -47,8 +47,8 @@ public class ManageCaseDocumentsContestedAboutToSubmitCaseHandler extends Finrem
         uploadedDocumentHelper.addUploadDateToNewDocuments(caseData, caseDataBefore);
         List<UploadCaseDocumentCollection> allManagedDocumentCollections = caseData.getManageCaseDocumentCollection();
         documentCollectionServices.forEach(documentCollectionService -> {
-            documentCollectionService.deleteEventRemovedDocuments(callbackRequest, userAuthorisation);
-            documentCollectionService.processUploadDocumentCollection(callbackRequest, allManagedDocumentCollections);
+            documentCollectionService.deleteRemovedDocumentFromAllPlaces(callbackRequest, userAuthorisation);
+            documentCollectionService.addManagedDocumentToCollection(callbackRequest, allManagedDocumentCollections);
         });
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();

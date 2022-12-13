@@ -26,15 +26,15 @@ public class ConfidentialDocumentsCollectionService extends DocumentCollectionSe
     }
 
     @Override
-    public void processUploadDocumentCollection(FinremCallbackRequest callbackRequest,
-                                                List<UploadCaseDocumentCollection> allManagedDocumentCollections) {
+    public void addManagedDocumentToCollection(FinremCallbackRequest callbackRequest,
+                                               List<UploadCaseDocumentCollection> allScreenCollections) {
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
         List<UploadCaseDocumentCollection> managedDocumentCollectionForType =
-            getDocumentForCollectionServiceType(allManagedDocumentCollections);
+            getServiceCollectionType(allScreenCollections);
 
         log.info("Adding items: {}, to Confidential Documents Collection", managedDocumentCollectionForType);
-        allManagedDocumentCollections.removeAll(managedDocumentCollectionForType);
+        allScreenCollections.removeAll(managedDocumentCollectionForType);
 
         List<UploadConfidentialDocumentCollection> confidentialDocsCollection = caseData.getConfidentialDocumentsUploaded();
 
@@ -48,10 +48,11 @@ public class ConfidentialDocumentsCollectionService extends DocumentCollectionSe
                     UploadConfidentialDocument::getConfidentialDocumentUploadDateTime, Comparator.nullsLast(
                         Comparator.reverseOrder()))));
         }
+        allScreenCollections.removeAll(managedDocumentCollectionForType);
 
     }
 
-    protected List<UploadCaseDocumentCollection> getDocumentForCollectionServiceType(
+    protected List<UploadCaseDocumentCollection> getServiceCollectionType(
         List<UploadCaseDocumentCollection> eventScreenDocumentCollections) {
 
         return eventScreenDocumentCollections.stream()

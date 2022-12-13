@@ -17,57 +17,60 @@ import java.util.stream.Collectors;
 @Slf4j
 public abstract class DocumentCollectionService {
 
-    protected final ManageCaseDocumentsCollectionType manageCaseDocumentsCollectionType;
+    protected final ManageCaseDocumentsCollectionType serviceCollectionType;
     protected final EvidenceManagementDeleteService evidenceManagementDeleteService;
 
-    protected abstract List<UploadCaseDocumentCollection> getDocumentForCollectionServiceType(
+    protected abstract List<UploadCaseDocumentCollection> getServiceCollectionType(
         List<UploadCaseDocumentCollection> eventScreenDocumentCollections);
 
-    public void processUploadDocumentCollection(FinremCallbackRequest callbackRequest,
-                                                List<UploadCaseDocumentCollection> allManagedDocumentCollections) {
+    public void addManagedDocumentToCollection(FinremCallbackRequest callbackRequest,
+                                               List<UploadCaseDocumentCollection> allScreenCollections) {
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
-        List<UploadCaseDocumentCollection> originalDocumentCollectionForType =
-            caseData.getUploadCaseDocumentWrapper().getDocumentCollection(manageCaseDocumentsCollectionType);
+        List<UploadCaseDocumentCollection> originalServiceCollection =
+            caseData.getUploadCaseDocumentWrapper().getDocumentCollection(serviceCollectionType);
+        List<UploadCaseDocumentCollection> screenServiceCollection =
+            getServiceCollectionType(allScreenCollections);
 
-        List<UploadCaseDocumentCollection> managedDocumentCollectionForType =
-            getDocumentForCollectionServiceType(allManagedDocumentCollections);
+        screenServiceCollection.stream()
+            .filter(screenServiceDocument -> !originalServiceCollection.contains(screenServiceDocument))
+            .forEach(screenServiceDocument -> originalServiceCollection.add(screenServiceDocument));
 
-        originalDocumentCollectionForType.addAll(managedDocumentCollectionForType);
-        originalDocumentCollectionForType.sort(Comparator.comparing(
+        originalServiceCollection.sort(Comparator.comparing(
             UploadCaseDocumentCollection::getUploadCaseDocument, Comparator.comparing(
                 UploadCaseDocument::getCaseDocumentUploadDateTime, Comparator.nullsLast(
                     Comparator.reverseOrder()))));
-        log.info("Adding items: {}, to {} Collection", managedDocumentCollectionForType,
-            manageCaseDocumentsCollectionType);
-        allManagedDocumentCollections.removeAll(managedDocumentCollectionForType);
+        log.info("Adding items: {}, to {} Collection", screenServiceCollection,
+            serviceCollectionType);
+        allScreenCollections.removeAll(screenServiceCollection);
     }
 
-    public void deleteEventRemovedDocuments(FinremCallbackRequest callbackRequest, String authToken) {
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
-        FinremCaseData caseDataBeforeEvent = callbackRequest.getCaseDetailsBefore().getData();
-        List<UploadCaseDocumentCollection> originalDocumentCollectionForType =
-            caseData.getUploadCaseDocumentWrapper().getDocumentCollection(manageCaseDocumentsCollectionType);
-        List<UploadCaseDocumentCollection> documentsForDeletion =
-            getDocumentsForDeletion(caseData, caseDataBeforeEvent);
-        List<UploadCaseDocumentCollection> documentsForDeletionForCollectionType =
-            getDocumentForCollectionServiceType(documentsForDeletion);
-        documentsForDeletionForCollectionType.stream()
-            .forEach(documentForDeletion -> {
-                originalDocumentCollectionForType.remove(documentForDeletion);
-                evidenceManagementDeleteService.deleteFile(
-                    documentForDeletion.getUploadCaseDocument().getCaseDocuments().getDocumentUrl(), authToken);
-            });
+    public void deleteRemovedDocumentFromAllPlaces(FinremCallbackRequest callbackRequest, String authToken) {
+        if (serviceCollectionType != null) {
+            FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+            List<UploadCaseDocumentCollection> originalDocumentCollectionForType =
+                caseData.getUploadCaseDocumentWrapper().getDocumentCollection(serviceCollectionType);
+            List<UploadCaseDocumentCollection> documentsForDeletion =
+                getDocumentsForDeletion(caseData);
+            documentsForDeletion.stream()
+                .forEach(documentForDeletion -> {
+                    originalDocumentCollectionForType.remove(documentForDeletion);
+                    evidenceManagementDeleteService.deleteFile(
+                        documentForDeletion.getUploadCaseDocument().getCaseDocuments().getDocumentUrl(), authToken);
+                });
+        }
     }
 
-    private List<UploadCaseDocumentCollection> getDocumentsForDeletion(FinremCaseData caseData,
-                                                                       FinremCaseData caseDataBeforeEvent) {
-        List<String> documentIdsAfterEvent =
-            caseData.getUploadCaseDocumentWrapper().getAllCollections().stream()
-                .map(UploadCaseDocumentCollection::getId).collect(Collectors.toList());
+    private List<UploadCaseDocumentCollection> getDocumentsForDeletion(FinremCaseData caseData) {
+        List<UploadCaseDocumentCollection> allScreenCollections = caseData.getManageCaseDocumentCollection();
+        List<UploadCaseDocumentCollection> serviceScreenCollection = getServiceCollectionType(allScreenCollections);
+        List<String> serviceScreenCollectionDocIds = serviceScreenCollection.stream()
+            .map(UploadCaseDocumentCollection::getId).collect(Collectors.toList());
+        List<UploadCaseDocumentCollection> originalServiceCollection =
+            caseData.getUploadCaseDocumentWrapper().getDocumentCollection(serviceCollectionType);
 
-        return caseDataBeforeEvent.getUploadCaseDocumentWrapper().getAllCollections().stream()
-            .filter(documentCollectionBeforeEvent ->
-                !documentIdsAfterEvent.contains(documentCollectionBeforeEvent.getId())).collect(Collectors.toList());
+        return originalServiceCollection.stream().filter(originalDoc ->
+                !serviceScreenCollectionDocIds.contains(originalDoc.getId()))
+            .collect(Collectors.toList());
     }
 }

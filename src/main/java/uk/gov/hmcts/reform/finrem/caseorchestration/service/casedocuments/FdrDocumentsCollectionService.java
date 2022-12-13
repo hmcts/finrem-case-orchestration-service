@@ -23,7 +23,7 @@ public class FdrDocumentsCollectionService extends DocumentCollectionService {
             evidenceManagementDeleteService);
     }
 
-    protected List<UploadCaseDocumentCollection> getDocumentForCollectionServiceType(
+    protected List<UploadCaseDocumentCollection> getServiceCollectionType(
         List<UploadCaseDocumentCollection> eventScreenDocumentCollections) {
 
         return eventScreenDocumentCollections.stream()

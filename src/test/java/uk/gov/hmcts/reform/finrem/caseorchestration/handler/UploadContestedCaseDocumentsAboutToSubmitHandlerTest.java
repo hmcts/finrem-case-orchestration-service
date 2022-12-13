@@ -9,30 +9,38 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedDocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentCollectionsServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantCaseSummariesCollectionService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantChronologiesStatementCollectionService;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
-public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDocumentCollectionsServiceTest {
+public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
 
+    public static final String AUTH_TOKEN = "AuthTokien";
+
+    @Mock
+    protected UploadedDocumentHelper uploadedDocumentHelper;
     @Mock
     ApplicantCaseSummariesCollectionService applicantCaseSummariesCollectionService;
     @Mock
@@ -43,6 +51,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDo
     private final List<String> expectedDocumentIdList = new ArrayList<>();
     List<UploadCaseDocumentCollection> handledDocumentList = new ArrayList<>();
     List<String> handledDocumentIdList = new ArrayList<>();
+    private final List<UploadCaseDocumentCollection> screenUploadDocumentList = new ArrayList<>();
 
     @Before
     public void setup() {
@@ -83,9 +92,9 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDo
 
 
         verify(applicantCaseSummariesCollectionService)
-            .processUploadDocumentCollection(callbackRequest,screenUploadDocumentList);
+            .addManagedDocumentToCollection(callbackRequest,screenUploadDocumentList);
         verify(applicantChronologiesStatementCollectionService)
-            .processUploadDocumentCollection(callbackRequest, screenUploadDocumentList);
+            .addManagedDocumentToCollection(callbackRequest, screenUploadDocumentList);
     }
 
     @Test
@@ -97,7 +106,6 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDo
 
 
         existingDocumentList.add(oldDoc);
-        caseDetails.getData().getUploadCaseDocumentWrapper().setUploadCaseDocument(existingDocumentList);
 
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         UploadCaseDocumentCollection newDoc = createContestedUploadDocumentItem(CaseDocumentType.OTHER,
@@ -123,5 +131,28 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDo
         FinremCaseDetails caseDetailsBefore = FinremCaseDetails.builder().data(data).id(123L).build();
         return FinremCallbackRequest.builder().eventType(EventType.UPLOAD_CASE_FILES)
             .caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
+    }
+
+    protected UploadCaseDocumentCollection createContestedUploadDocumentItem(CaseDocumentType type,
+                                                                             CaseDocumentParty party,
+                                                                             YesOrNo isConfidential,
+                                                                             YesOrNo isFdr,
+                                                                             String other) {
+        UUID uuid = UUID.randomUUID();
+
+        return UploadCaseDocumentCollection.builder()
+            .id(uuid.toString())
+            .uploadCaseDocument(UploadCaseDocument
+                .builder()
+                .caseDocuments(new CaseDocument())
+                .caseDocumentType(type)
+                .caseDocumentParty(party)
+                .caseDocumentConfidential(isConfidential)
+                .caseDocumentOther(other)
+                .caseDocumentFdr(isFdr)
+                .hearingDetails(null)
+                .caseDocumentUploadDateTime(LocalDateTime.now())
+                .build())
+            .build();
     }
 }
