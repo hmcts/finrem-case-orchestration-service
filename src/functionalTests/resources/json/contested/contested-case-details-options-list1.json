@@ -4,6 +4,7 @@
   "state": "created",
   "case_type_id": "FinancialRemedyContested",
   "case_data": {
+    "typeOfApplication": "In connection to matrimonial and civil partnership proceedings",
     "MIAMExemptionsChecklist": [
       "domesticViolence",
       "urgency",
