@@ -8,6 +8,7 @@
     "state": "applicationDrafted",
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
+      "typeOfApplication": "In connection to matrimonial and civil partnership proceedings",
       "ignore_warning": false,
       "event_data": {
         "applicantRepresented": "Yes",
