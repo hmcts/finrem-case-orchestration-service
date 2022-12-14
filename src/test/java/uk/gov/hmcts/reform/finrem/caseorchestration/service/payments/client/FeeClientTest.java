@@ -31,15 +31,15 @@ public class FeeClientTest extends PaymentsBaseServiceTest {
     @Autowired
     private FeeServiceConfiguration serviceConfig;
 
-
     @Test
     public void retrieveConsentedFee() {
+        String typeOfApplication  =  null;
         mockServer.expect(requestTo(consentedUri()))
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess("{ \"code\" : \"FEE0640\", \"fee_amount\" : 50, "
                 + "\"description\" : \"finrem\", \"version\" : \"v1\" }", APPLICATION_JSON));
 
-        FeeResponse feeResponse = feeClient.getApplicationFee(CONSENTED);
+        FeeResponse feeResponse = feeClient.getApplicationFee(CONSENTED, typeOfApplication);
 
         MatcherAssert.assertThat(feeResponse.getCode(), Matchers.is("FEE0640"));
         MatcherAssert.assertThat(feeResponse.getDescription(), Matchers.is("finrem"));
@@ -50,12 +50,13 @@ public class FeeClientTest extends PaymentsBaseServiceTest {
 
     @Test
     public void retrieveContestedFee() {
+        String typeOfApplication  =  "In connection to matrimonial and civil partnership proceedings";
         mockServer.expect(requestTo(contestedUri()))
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess("{ \"code\" : \"FEE0229\", \"fee_amount\" : 255, "
                 + "\"description\" : \"finrem\", \"version\" : \"v1\" }", APPLICATION_JSON));
 
-        FeeResponse feeResponse = feeClient.getApplicationFee(CONTESTED);
+        FeeResponse feeResponse = feeClient.getApplicationFee(CONTESTED, typeOfApplication);
 
         MatcherAssert.assertThat(feeResponse.getCode(), Matchers.is("FEE0229"));
         MatcherAssert.assertThat(feeResponse.getDescription(), Matchers.is("finrem"));
@@ -63,6 +64,22 @@ public class FeeClientTest extends PaymentsBaseServiceTest {
         MatcherAssert.assertThat(feeResponse.getFeeAmount(), Matchers.is(BigDecimal.valueOf(255)));
     }
 
+
+    @Test
+    public void retrieveContestedSchedule1ApplicationFee() {
+        String typeOfApplication  =  "Under paragraph 1 or 2 of schedule 1 children act 1989";
+        mockServer.expect(requestTo(contestedSchedule1Uri()))
+            .andExpect(method(HttpMethod.GET))
+            .andRespond(withSuccess("{ \"code\" : \"FEE0318\", \"fee_amount\" : 232, "
+                + "\"description\" : \"finrem\", \"version\" : \"2\" }", APPLICATION_JSON));
+
+        FeeResponse feeResponse = feeClient.getApplicationFee(CONTESTED, typeOfApplication);
+
+        MatcherAssert.assertThat(feeResponse.getCode(), Matchers.is("FEE0318"));
+        MatcherAssert.assertThat(feeResponse.getDescription(), Matchers.is("finrem"));
+        MatcherAssert.assertThat(feeResponse.getVersion(), Matchers.is("2"));
+        MatcherAssert.assertThat(feeResponse.getFeeAmount(), Matchers.is(BigDecimal.valueOf(232)));
+    }
 
     @Test
     public void shouldDetermineKeyword() {
@@ -86,4 +103,8 @@ public class FeeClientTest extends PaymentsBaseServiceTest {
             : serviceConfig.getContestedKeyword());
     }
 
+    private String contestedSchedule1Uri() {
+        return "http://localhost:8182/fees-register/fees/lookup?service=private%20law&jurisdiction1=family&jurisdiction2=family-court&channel=default"
+            + "&event=miscellaneous&keyword=" + serviceConfig.getSchedule1Keyword();
+    }
 }

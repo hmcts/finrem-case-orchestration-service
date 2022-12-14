@@ -13,8 +13,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.client.FeeC
 public class FeeService {
     private final FeeClient feeClient;
 
-    public FeeResponse getApplicationFee(ApplicationType applicationType) {
-        log.info("Inside getApplicationFee, applicationType = {}", applicationType);
-        return feeClient.getApplicationFee(applicationType);
+    public FeeResponse getApplicationFee(ApplicationType applicationType, String typeOfApplication) {
+        log.info("Inside getApplicationFee, applicationType = {} typeOfApplication {}", applicationType, typeOfApplication);
+        return feeClient.getApplicationFee(applicationType, typeOfApplication);
     }
 }
