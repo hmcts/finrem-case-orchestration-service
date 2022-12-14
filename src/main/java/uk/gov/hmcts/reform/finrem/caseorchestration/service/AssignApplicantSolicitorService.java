@@ -22,7 +22,6 @@ public class AssignApplicantSolicitorService {
     private final CcdDataStoreService ccdDataStoreService;
     private final FeatureToggleService featureToggleService;
     private final PrdOrganisationService prdOrganisationService;
-    private final AssignCaseAccessException assignCaseAccessException;
 
     public void setApplicantSolicitor(CallbackRequest callbackRequest, String userAuthorisation) throws AssignCaseAccessException {
 
@@ -64,7 +63,6 @@ public class AssignApplicantSolicitorService {
         } else {
             log.info("Assign case info not enabled, Case ID: {}", caseDetails.getId());
         }
-
     }
 
     private String getApplicantOrgId(CaseDetails caseDetails) {
