@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.AssignCaseAccessRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 
 import java.net.URI;
 import java.util.Map;
@@ -24,7 +25,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.SERVICE_AUTHORISATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_CASE_ID;
@@ -55,7 +55,7 @@ public class RestServiceTest extends BaseServiceTest {
         body = AssignCaseAccessRequest
             .builder()
             .case_id(TEST_CASE_ID)
-            .case_type_id(CASE_TYPE_ID_CONTESTED)
+            .case_type_id(CaseType.CONTESTED.getCcdType())
             .assignee_id(TEST_USER_ID)
             .build();
 
