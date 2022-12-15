@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataExcepti
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchFieldExistsException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
@@ -35,8 +36,6 @@ import java.util.Map;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.argThat;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
@@ -217,7 +216,7 @@ public class TestSetUpUtils {
         populateRespondentNameAndAddressConsented(caseData);
 
         return CaseDetails.builder()
-            .caseTypeId(CASE_TYPE_ID_CONSENTED)
+            .caseTypeId(CaseType.CONSENTED.getCcdType())
             .id(123456789L)
             .data(caseData)
             .build();
@@ -239,7 +238,7 @@ public class TestSetUpUtils {
         populateRespondentNameAndAddressConsented(caseData);
 
         return CaseDetails.builder()
-            .caseTypeId(CASE_TYPE_ID_CONSENTED)
+            .caseTypeId(CaseType.CONSENTED.getCcdType())
             .id(123456789L)
             .data(caseData)
             .build();
@@ -261,7 +260,7 @@ public class TestSetUpUtils {
         populateCourtDetails(caseData);
 
         return CaseDetails.builder()
-            .caseTypeId(CASE_TYPE_ID_CONTESTED)
+            .caseTypeId(CaseType.CONTESTED.getCcdType())
             .id(987654321L)
             .data(caseData)
             .build();
