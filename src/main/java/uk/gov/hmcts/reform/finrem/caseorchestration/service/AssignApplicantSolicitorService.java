@@ -6,13 +6,11 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.AssignCaseAccessException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 
-import java.util.Map;
-
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_APPLICANT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION_ID;
 
 @Service
 @Slf4j
@@ -66,12 +64,11 @@ public class AssignApplicantSolicitorService {
     }
 
     private String getApplicantOrgId(CaseDetails caseDetails) {
-        Map<String, Object> applicantOrgPolicy = (Map<String, Object>) caseDetails.getData().get(ORGANISATION_POLICY_APPLICANT);
+        OrganisationPolicy applicantOrgPolicy = (OrganisationPolicy)caseDetails.getData().get(ORGANISATION_POLICY_APPLICANT);
         if (applicantOrgPolicy != null) {
-            Map<String, Object> applicantOrganisation = (Map<String, Object>) applicantOrgPolicy.get(ORGANISATION_POLICY_ORGANISATION);
-
+            Organisation applicantOrganisation = applicantOrgPolicy.getOrganisation();
             if (applicantOrganisation != null) {
-                return (String) applicantOrganisation.get(ORGANISATION_POLICY_ORGANISATION_ID);
+                return applicantOrganisation.getOrganisationID();
             }
         }
         return null;

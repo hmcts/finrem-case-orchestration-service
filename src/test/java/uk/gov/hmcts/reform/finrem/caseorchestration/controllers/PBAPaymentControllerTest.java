@@ -220,4 +220,88 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaPaymentService, never()).makePayment(anyString(), any());
     }
+
+    @Test
+    public void shouldAssignApplicantSolicitor() throws Exception {
+        doPBAPaymentReferenceAlreadyExistsSetup();
+        when(featureToggleService.isAssignCaseAccessEnabled()).thenReturn(true);
+
+        mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.authorisation3", is(notNullValue())))
+            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
+            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+        verify(ccdDataStoreService, times(1)).removeCreatorRole(any(), eq(AUTH_TOKEN));
+        verify(assignCaseAccessService, times(1)).assignCaseAccess(any(), eq(AUTH_TOKEN));
+    }
+
+    @Test
+    public void shouldNotAssignApplicantSolicitor_assignCaseAccessToggledOff() throws Exception {
+        doPBAPaymentReferenceAlreadyExistsSetup();
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(featureToggleService.isAssignCaseAccessEnabled()).thenReturn(false);
+
+        mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
+            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+    }
+
+    @Test
+    public void shouldNotAssignApplicantSolicitor_organisationIdNoMatch() throws Exception {
+        doPBAPaymentReferenceAlreadyExistsSetup();
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(prdOrganisationService.retrieveOrganisationsData(AUTH_TOKEN)).thenReturn(OrganisationsResponse.builder()
+            .contactInformation(singletonList(organisationContactInformation))
+            .name(TEST_SOLICITOR_NAME)
+            .organisationIdentifier("INCORRECT_IDENTIFIER")
+            .build());
+
+        mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors", hasSize(2)))
+            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+    }
+
+    @Test
+    public void shouldNotAssignApplicantSolicitor_organisationEmpty() throws Exception {
+        doPBASetUp(true);
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/pba-payment-no-app-org.json").toURI()));
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+
+        mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors", hasSize(2)))
+            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+        verifyNoInteractions(ccdDataStoreService);
+        verifyNoInteractions(assignCaseAccessService);
+    }
+
+    @Test
+    public void shouldNotAssignApplicantSolicitor_acaApiFailure() throws Exception {
+        doPBASetUp(true);
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        doThrow(feignError()).when(assignCaseAccessService).assignCaseAccess(any(), eq(AUTH_TOKEN));
+
+        mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors", hasSize(1)))
+            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+    }
 }

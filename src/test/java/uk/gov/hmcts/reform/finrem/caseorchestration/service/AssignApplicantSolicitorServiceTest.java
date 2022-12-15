@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import org.aspectj.weaver.ast.Call;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -8,6 +9,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.AssignCaseAccessException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationContactInformation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
@@ -16,18 +19,27 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static java.util.Collections.singletonList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_APPLICANT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION_ID;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AssignApplicantSolicitorServiceTest  {
 
     private static final long CASE_ID = 1583841721773828L;
     private static final String USER_AUTH = "123456789";
+    private static final String TEST_ORG_ID = "1234";
+    private static final String TEST_APP_ORG_NAME = "test org";
 
     @Mock
     private AssignCaseAccessService assignCaseAccessService;
@@ -44,53 +56,72 @@ public class AssignApplicantSolicitorServiceTest  {
     private CaseDetails caseDetails;
     private CallbackRequest callbackRequest;
 
-    public static final String ADDRESS_LINE_1 = "addressLine1";
-    public static final String ADDRESS_LINE_2 = "addressLine2";
-    public static final String ADDRESS_LINE_3 = "addressLine3";
-    public static final String COUNTY = "county";
-    public static final String COUNTRY = "country";
-    public static final String TOWN_CITY = "townCity";
-    public static final String POSTCODE = "postCode";
-
-    OrganisationContactInformation organisationContactInformation = OrganisationContactInformation.builder()
-        .addressLine1(ADDRESS_LINE_1)
-        .addressLine2(ADDRESS_LINE_2)
-        .addressLine3(ADDRESS_LINE_3)
-        .county(COUNTY)
-        .country(COUNTRY)
-        .townCity(TOWN_CITY)
-        .postcode(POSTCODE)
-        .build();
+    private OrganisationPolicy applicantOrgPolicy;
+    private OrganisationsResponse testOrg;
 
     @Before
     public void setUp() throws Exception {
         Map<String, Object> caseData = new HashMap<>();
         caseDetails = CaseDetails.builder().id(CASE_ID).data(caseData).build();
+
+        applicantOrgPolicy = OrganisationPolicy.builder()
+            .orgPolicyCaseAssignedRole(APP_SOLICITOR_POLICY)
+            .organisation(Organisation.builder().organisationID(TEST_ORG_ID).organisationName(TEST_APP_ORG_NAME).organisationID(TEST_ORG_ID).build())
+            .build();
+        testOrg = OrganisationsResponse.builder()
+            .name(TEST_SOLICITOR_NAME)
+            .organisationIdentifier(TEST_ORG_ID)
+            .build();
+
+        caseDetails.getData().put(ORGANISATION_POLICY_APPLICANT, applicantOrgPolicy);
         when(featureToggleService.isAssignCaseAccessEnabled()).thenReturn(true);
-        when(featureToggleService.isUseUserTokenEnabled()).thenReturn(true);
+        when(prdOrganisationService.retrieveOrganisationsData(USER_AUTH)).thenReturn(testOrg);
 
     }
 
     @Test
     public void shouldAssignApplicantSolicitor() {
-
-        caseDetails.getData().put(ORGANISATION_POLICY_APPLICANT, "Test_Policy_Applicant");
-        caseDetails.getData().put(ORGANISATION_POLICY_ORGANISATION, "Test_policy_org");
-        caseDetails.getData().put(ORGANISATION_POLICY_ORGANISATION_ID, "1234");
-
-        OrganisationsResponse testOrg = OrganisationsResponse.builder()
-            .contactInformation(singletonList(organisationContactInformation))
-            .name(TEST_SOLICITOR_NAME)
-            .organisationIdentifier("1234")
-            .build();
-
-        when(featureToggleService.isAssignCaseAccessEnabled()).thenReturn(true);
-        when(prdOrganisationService.retrieveOrganisationsData(USER_AUTH)).thenReturn(testOrg);
-
         callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         assignApplicantSolicitorService.setApplicantSolicitor(callbackRequest, USER_AUTH);
 
         verify(assignCaseAccessService).assignCaseAccess(caseDetails, USER_AUTH);
         verify(ccdDataStoreService).removeCreatorRole(caseDetails, USER_AUTH);
     }
+
+    @Test
+    public void shouldThrowExceptionWhenCaseAccessServiceFails() {
+        callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        doThrow(feignError()).when(assignCaseAccessService).assignCaseAccess(caseDetails, USER_AUTH);
+
+        assertThrows(AssignCaseAccessException.class, () ->
+        assignApplicantSolicitorService.setApplicantSolicitor(callbackRequest, USER_AUTH));
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenGetOrgIdFailsViaNullOrgPolicy() {
+        callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        applicantOrgPolicy = null;
+        caseDetails.getData().put(ORGANISATION_POLICY_APPLICANT, applicantOrgPolicy);
+
+        Exception exception = assertThrows(AssignCaseAccessException.class, () ->
+            assignApplicantSolicitorService.setApplicantSolicitor(callbackRequest, USER_AUTH));
+
+        String expectedMessage = "Applicant organisation not selected";
+        String actualMessage = exception.getMessage();
+        assertEquals(expectedMessage, actualMessage);
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenOrgIdsDoNotMatch(){
+        callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        testOrg.setOrganisationIdentifier("1235");
+
+        Exception exception = assertThrows(AssignCaseAccessException.class, () ->
+            assignApplicantSolicitorService.setApplicantSolicitor(callbackRequest, USER_AUTH));
+
+        String expectedMessage = "Applicant solicitor does not belong to chosen applicant organisation";
+        String actualMessage = exception.getMessage();
+        assertEquals(expectedMessage, actualMessage);
+    }
+
 }
