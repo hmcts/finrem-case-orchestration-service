@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType.getCaseType;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.getEventType;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.forValue;
 
 
 @RequiredArgsConstructor
@@ -36,7 +36,7 @@ public class CallbackDispatchService {
 
         for (CallbackHandler callbackHandler : callbackHandlers) {
             if (callbackHandler.canHandle(callbackType,
-                getCaseType(callbackRequest.getCaseDetails().getCaseTypeId()),
+                forValue(callbackRequest.getCaseDetails().getCaseTypeId()),
                 getEventType(callbackRequest.getEventId()))) {
 
                 GenericAboutToStartOrSubmitCallbackResponse handlerCallbackResponse =
