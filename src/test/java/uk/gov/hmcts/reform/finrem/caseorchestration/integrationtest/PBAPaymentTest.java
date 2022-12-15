@@ -194,22 +194,7 @@ public class PBAPaymentTest extends BaseTest {
             .andExpect(jsonPath("$.errors", hasSize(1)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
-
-    @Test
-    public void shouldDoAssignApplicantSolicitor() throws Exception {
-        setUpPbaPayment("/fixtures/pba-payment.json");
-        stubForAca(HttpStatus.OK);
-
-        webClient.perform(MockMvcRequestBuilders.post(ASSIGN_APPLICANT_SOLICITOR_URL)
-                .content(objectMapper.writeValueAsString(request))
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.authorisation3", is(notNullValue())))
-            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
+    
     @Test
     public void shouldReturnBadRequestError() throws Exception {
         setUpPbaPayment("/fixtures/empty-casedata.json");
