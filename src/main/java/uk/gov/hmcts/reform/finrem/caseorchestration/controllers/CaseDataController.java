@@ -211,14 +211,10 @@ public class CaseDataController extends BaseController {
 
     private void setOrganisationPolicy(CaseDetails caseDetails) {
         if (caseDataService.isContestedApplication(caseDetails) || caseDataService.isConsentedApplication(caseDetails)) {
-
             Map<String, Object> appSolPolicy = buildOrganisationPolicy(APP_SOLICITOR_POLICY);
-            if (!caseDataService.isNotEmpty(ORGANISATION_POLICY_APPLICANT, caseDetails.getData())) {
-
                 caseDetails.getData().put(ORGANISATION_POLICY_APPLICANT, appSolPolicy);
 
                 log.info("App Sol policy added to case: {}", appSolPolicy);
-            }
         }
     }
 
