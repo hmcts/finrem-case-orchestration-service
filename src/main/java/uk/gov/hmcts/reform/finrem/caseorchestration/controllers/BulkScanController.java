@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.bsp.common.model.validation.in.OcrDataValidationReque
 import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResponse;
 import uk.gov.hmcts.reform.bsp.common.service.AuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.event.bulkscan.BulkScanEvents;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkScanService;
 
 import javax.validation.Valid;
@@ -36,7 +37,6 @@ import java.util.Map;
 
 import static java.lang.String.format;
 import static org.springframework.http.ResponseEntity.ok;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.SERVICE_AUTHORISATION_HEADER;
 
 @Slf4j
@@ -110,7 +110,7 @@ public class BulkScanController {
             SuccessfulTransformationResponse callbackResponse = SuccessfulTransformationResponse.builder()
                 .caseCreationDetails(
                     new CaseCreationDetails(
-                        CASE_TYPE_ID_CONSENTED,
+                        CaseType.CONSENTED.getCcdType(),
                         BulkScanEvents.CREATE.getEventName(),
                         transformedCaseData))
                 .build();
