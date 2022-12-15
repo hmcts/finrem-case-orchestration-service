@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.FeeRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentRequestWithSiteID;
@@ -17,8 +18,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.payments.client.PBAP
 import java.math.BigDecimal;
 import java.util.Map;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
@@ -111,7 +110,7 @@ public class PBAPaymentService {
                 .ccdCaseNumber(ccdCaseId)
                 .description(consentedDescription)
                 .organisationName(CONSENTED_SOLICITOR_FIRM)
-                .caseType(CASE_TYPE_ID_CONSENTED)
+                .caseType(CaseType.CONSENTED.getCcdType())
                 .amount(fee.getCalculatedAmount())
                 .feesList(ImmutableList.of(fee))
                 .build();
@@ -123,7 +122,7 @@ public class PBAPaymentService {
                 .ccdCaseNumber(ccdCaseId)
                 .description(contestedDescription)
                 .organisationName(CONTESTED_SOLICITOR_FIRM)
-                .caseType(CASE_TYPE_ID_CONTESTED)
+                .caseType(CaseType.CONTESTED.getCcdType())
                 .amount(fee.getCalculatedAmount())
                 .feesList(ImmutableList.of(fee))
                 .build();

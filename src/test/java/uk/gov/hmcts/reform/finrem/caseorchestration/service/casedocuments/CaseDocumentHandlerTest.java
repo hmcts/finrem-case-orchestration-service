@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Before;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 
@@ -15,8 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 
 public abstract class CaseDocumentHandlerTest {
 
@@ -54,7 +53,7 @@ public abstract class CaseDocumentHandlerTest {
 
     protected CaseDetails buildCaseDetails() {
         Map<String, Object> caseData = new HashMap<>();
-        return CaseDetails.builder().id(Long.valueOf(123)).caseTypeId(CASE_TYPE_ID_CONTESTED).data(caseData).build();
+        return CaseDetails.builder().id(Long.valueOf(123)).caseTypeId(CaseType.CONTESTED.getCcdType()).data(caseData).build();
     }
 
     protected List<ContestedUploadedDocumentData> getDocumentCollection(Map<String, Object> data, String field) {
