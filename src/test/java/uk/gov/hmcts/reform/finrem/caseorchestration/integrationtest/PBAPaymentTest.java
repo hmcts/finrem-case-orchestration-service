@@ -36,7 +36,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -56,7 +55,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus
 @Category(IntegrationTest.class)
 public class PBAPaymentTest extends BaseTest {
     private static final String PBA_PAYMENT_URL = "/case-orchestration/pba-payment";
-    private static final String ASSIGN_APPLICANT_SOLICITOR_URL = "/case-orchestration/assign-applicant-solicitor";
     private static final String PBA_URL = "/credit-account-payments";
     private static final String FEE_RESPONSE = "{\n"
         + "  \"code\": \"FEE0600\",\n"
@@ -181,20 +179,6 @@ public class PBAPaymentTest extends BaseTest {
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
 
-    @Test
-    public void shouldFailWhenAcaCallFails() throws Exception {
-        setUpPbaPayment("/fixtures/pba-payment.json");
-        stubForAca(HttpStatus.NOT_FOUND);
-
-        webClient.perform(MockMvcRequestBuilders.post(ASSIGN_APPLICANT_SOLICITOR_URL)
-                .content(objectMapper.writeValueAsString(request))
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.errors", hasSize(1)))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-    
     @Test
     public void shouldReturnBadRequestError() throws Exception {
         setUpPbaPayment("/fixtures/empty-casedata.json");

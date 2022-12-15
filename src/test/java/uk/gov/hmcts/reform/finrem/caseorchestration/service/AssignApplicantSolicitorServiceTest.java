@@ -87,7 +87,7 @@ public class AssignApplicantSolicitorServiceTest  {
         doThrow(feignError()).when(assignCaseAccessService).assignCaseAccess(caseDetails, USER_AUTH);
 
         assertThrows(AssignCaseAccessException.class, () ->
-        assignApplicantSolicitorService.setApplicantSolicitor(callbackRequest, USER_AUTH));
+            assignApplicantSolicitorService.setApplicantSolicitor(callbackRequest, USER_AUTH));
     }
 
     @Test
@@ -105,7 +105,7 @@ public class AssignApplicantSolicitorServiceTest  {
     }
 
     @Test
-    public void shouldThrowExceptionWhenOrgIdsDoNotMatch(){
+    public void shouldThrowExceptionWhenOrgIdsDoNotMatch() {
         callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         testOrg.setOrganisationIdentifier("1235");
 

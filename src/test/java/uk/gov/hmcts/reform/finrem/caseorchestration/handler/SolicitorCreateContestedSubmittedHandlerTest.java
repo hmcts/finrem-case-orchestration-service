@@ -80,7 +80,8 @@ public class SolicitorCreateContestedSubmittedHandlerTest {
     public void givenACcdCallBackSolicitorCreateContestedCase_WhenHandle_WhenAssignAppSolServiceThrows_ReturnErrorList() {
         CallbackRequest callbackRequest =
             CallbackRequest.builder().caseDetails(getCase()).build();
-        String expectedMsg = "Failed to assign applicant solicitor to case, please ensure you have selected the correct applicant organisation on case";
+        String expectedMsg = "Failed to assign applicant solicitor to case, please ensure you have selected" +
+            " the correct applicant organisation on case";
 
         doThrow(new AssignCaseAccessException(expectedMsg)).when(assignApplicantSolicitorService)
             .setApplicantSolicitor(callbackRequest, AUTH_TOKEN);
