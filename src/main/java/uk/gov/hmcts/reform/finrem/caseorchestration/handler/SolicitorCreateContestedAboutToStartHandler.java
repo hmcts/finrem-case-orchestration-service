@@ -39,8 +39,7 @@ public class SolicitorCreateContestedAboutToStartHandler extends AssignApplicant
                                                                                    String userAuthorisation) {
         service.defaultCivilPartnershipField(callbackRequest);
         service.defaultTypeOfApplication(callbackRequest);
-        if(!caseDataService.isContestedPaperApplication(callbackRequest.getCaseDetails()))
-        {
+        if (!caseDataService.isContestedPaperApplication(callbackRequest.getCaseDetails())) {
             return super.handle(callbackRequest, userAuthorisation);
         }
         return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(callbackRequest

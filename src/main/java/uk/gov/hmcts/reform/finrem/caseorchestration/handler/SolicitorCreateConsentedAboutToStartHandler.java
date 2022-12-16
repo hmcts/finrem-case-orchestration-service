@@ -39,8 +39,7 @@ public class SolicitorCreateConsentedAboutToStartHandler extends AssignApplicant
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
                                                                                    String userAuthorisation) {
         service.defaultCivilPartnershipField(callbackRequest);
-        if (!caseDataService.isPaperApplication(callbackRequest.getCaseDetails().getData()))
-        {
+        if (!caseDataService.isPaperApplication(callbackRequest.getCaseDetails().getData())) {
             return super.handle(callbackRequest, userAuthorisation);
         }
         return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder()
