@@ -44,12 +44,12 @@ public class  ManageCaseDocumentsContestedAboutToSubmitCaseHandler extends Finre
 
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
-        uploadedDocumentHelper.addUploadDateToNewDocuments(caseData, caseDataBefore);
         List<UploadCaseDocumentCollection> screenCollections = caseData.getManageCaseDocumentCollection();
         documentCollectionServices.forEach(documentCollectionService -> {
             documentCollectionService.deleteRemovedDocumentFromAllPlaces(callbackRequest, userAuthorisation);
             documentCollectionService.addManagedDocumentToCollection(callbackRequest, screenCollections);
         });
+        uploadedDocumentHelper.addUploadDateToNewDocuments(caseData, caseDataBefore);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
