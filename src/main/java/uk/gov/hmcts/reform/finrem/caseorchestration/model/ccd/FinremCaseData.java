@@ -269,7 +269,7 @@ public class FinremCaseData {
     private OrganisationPolicy respondentOrganisationPolicy;
     private CaseRole currentUserCaseRole;
     private CaseDocument outOfFamilyCourtResolution;
-    private TypeOfApplicantion typeOfApplicantion;
+    private TypeOfApplication typeOfApplication;
 
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)

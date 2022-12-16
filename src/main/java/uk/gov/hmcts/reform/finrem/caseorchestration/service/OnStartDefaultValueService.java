@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypeOfApplicantion;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypeOfApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.time.LocalDate;
@@ -42,7 +42,7 @@ public class OnStartDefaultValueService {
     }
 
     public void defaultTypeOfApplication(FinremCallbackRequest callbackRequest) {
-        callbackRequest.getCaseDetails().getData().setTypeOfApplicantion(TypeOfApplicantion.TYPE_OF_APPLICATION_DEFAULT_TO);
+        callbackRequest.getCaseDetails().getData().setTypeOfApplication(TypeOfApplication.TYPE_OF_APPLICATION_DEFAULT_TO);
     }
 
     public void defaultIssueDate(CallbackRequest callbackRequest) {

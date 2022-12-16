@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.Arrays;
 
 @RequiredArgsConstructor
-public enum TypeOfApplicantion {
+public enum TypeOfApplication {
 
     @JsonEnumDefaultValue
     TYPE_OF_APPLICATION_DEFAULT_TO("In connection to matrimonial and civil partnership proceedings"),
@@ -20,8 +20,8 @@ public enum TypeOfApplicantion {
         return typeOfApplication;
     }
 
-    public static TypeOfApplicantion forValue(String value) {
-        return Arrays.stream(TypeOfApplicantion.values())
+    public static TypeOfApplication forValue(String value) {
+        return Arrays.stream(TypeOfApplication.values())
             .filter(option -> value.equalsIgnoreCase(option.getTypeOfApplication()))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
