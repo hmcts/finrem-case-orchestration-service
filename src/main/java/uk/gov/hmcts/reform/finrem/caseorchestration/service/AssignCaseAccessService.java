@@ -63,9 +63,9 @@ public class AssignCaseAccessService {
         );
     }
 
-    public void assignCaseAccess(FinremCaseDetails caseDetails, String authorisationToken) {
+    public void assignCaseAccess(FinremCaseDetails finremCaseDetails, String authorisationToken) {
         String userId = idamService.getIdamUserId(authorisationToken);
-        AssignCaseAccessRequest assignCaseAccessRequest = assignCaseAccessRequestMapper.mapToAssignCaseAccessRequest(caseDetails, userId);
+        AssignCaseAccessRequest assignCaseAccessRequest = assignCaseAccessRequestMapper.mapToAssignCaseAccessRequest(finremCaseDetails, userId);
         String url = assignCaseAccessServiceConfiguration.getCaseAssignmentsUrl()
             + (featureToggleService.isUseUserTokenEnabled() ? "?use_user_token=true" : "");
 

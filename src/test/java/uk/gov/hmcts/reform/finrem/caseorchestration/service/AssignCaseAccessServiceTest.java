@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUser
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.util.List;
 import java.util.Set;
@@ -96,6 +97,8 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
         when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(TEST_USER_ID);
         when(assignCaseAccessRequestMapper.mapToAssignCaseAccessRequest(any(CaseDetails.class), eq(TEST_USER_ID)))
             .thenReturn(assignCaseAccessRequest);
+        when(assignCaseAccessRequestMapper.mapToAssignCaseAccessRequest(any(FinremCaseDetails.class), eq(TEST_USER_ID)))
+            .thenReturn(assignCaseAccessRequest);
         when(assignCaseAccessServiceConfiguration.getCaseAssignmentsUrl()).thenReturn(TEST_URL);
         when(featureToggleService.isUseUserTokenEnabled()).thenReturn(true);
     }
@@ -109,6 +112,23 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
         verify(idamService, times(1)).getIdamUserId(AUTH_TOKEN);
         verify(assignCaseAccessRequestMapper, times(1))
             .mapToAssignCaseAccessRequest(caseDetails, TEST_USER_ID);
+        verify(assignCaseAccessServiceConfiguration, times(1)).getCaseAssignmentsUrl();
+        verify(restService, times(1))
+            .restApiPostCall(AUTH_TOKEN, ACA_ENDPOINT, assignCaseAccessRequest);
+    }
+
+    @Test
+    public void assignCaseAccessWithFinremCaseDetails() {
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder()
+            .caseType(CaseType.CONTESTED)
+            .id(123L)
+            .build();
+
+        assignCaseAccessService.assignCaseAccess(finremCaseDetails, AUTH_TOKEN);
+
+        verify(idamService, times(1)).getIdamUserId(AUTH_TOKEN);
+        verify(assignCaseAccessRequestMapper, times(1))
+            .mapToAssignCaseAccessRequest(finremCaseDetails, TEST_USER_ID);
         verify(assignCaseAccessServiceConfiguration, times(1)).getCaseAssignmentsUrl();
         verify(restService, times(1))
             .restApiPostCall(AUTH_TOKEN, ACA_ENDPOINT, assignCaseAccessRequest);

@@ -43,7 +43,8 @@ public enum State {
     CONSENTED_ORDER_NOT_APPROVED("consentedOrderNotApproved"),
     GENERAL_APPLICATION("generalApplication"),
     GENERAL_APPLICATION_AWAITING_JUDICIARY_RESPONSE("generalApplicationAwaitingJudiciaryResponse"),
-    GENERAL_APPLICATION_OUTCOME("generalApplicationOutcome");
+    GENERAL_APPLICATION_OUTCOME("generalApplicationOutcome"),
+    APPLICATION_DRAFTED("applicationDrafted");
 
     private final String stateId;
 

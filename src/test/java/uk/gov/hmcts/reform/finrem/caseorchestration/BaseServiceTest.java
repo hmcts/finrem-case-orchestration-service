@@ -13,8 +13,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureApplicationWrapper;
 
 import java.io.InputStream;
 import java.util.HashMap;
@@ -76,6 +79,13 @@ public abstract class BaseServiceTest extends BaseTest {
             "Property Adjustment Order");
         caseData.put("natureOfApplication2", natureOfApplication);
         return CaseDetails.builder().id(Long.valueOf(123)).caseTypeId(CaseType.CONSENTED.getCcdType()).data(caseData).build();
+    }
+
+    protected FinremCaseDetails buildFinremCaseDetails() {
+        return FinremCaseDetails.builder()
+            .caseType(CaseType.CONTESTED)
+            .id(123L)
+            .build();
     }
 
     protected CallbackRequest getConsentedCallbackRequestForVariationOrder() {
