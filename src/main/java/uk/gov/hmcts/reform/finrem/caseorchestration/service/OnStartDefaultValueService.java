@@ -42,7 +42,7 @@ public class OnStartDefaultValueService {
     }
 
     public void defaultTypeOfApplication(FinremCallbackRequest callbackRequest) {
-        callbackRequest.getCaseDetails().getData().setTypeOfApplication(TypeOfApplication.TYPE_OF_APPLICATION_DEFAULT_TO);
+        callbackRequest.getCaseDetails().getData().setTypeOfApplication(TypeOfApplication.MATRIMONIAL_CIVILPARTNERSHIP);
     }
 
     public void defaultIssueDate(CallbackRequest callbackRequest) {

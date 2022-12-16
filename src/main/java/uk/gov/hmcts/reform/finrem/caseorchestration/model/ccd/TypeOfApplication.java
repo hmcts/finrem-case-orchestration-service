@@ -10,7 +10,7 @@ import java.util.Arrays;
 public enum TypeOfApplication {
 
     @JsonEnumDefaultValue
-    TYPE_OF_APPLICATION_DEFAULT_TO("In connection to matrimonial and civil partnership proceedings"),
+    MATRIMONIAL_CIVILPARTNERSHIP("In connection to matrimonial and civil partnership proceedings"),
     SCHEDULE_ONE("Under paragraph 1 or 2 of schedule 1 children act 1989");
 
     private final String typeOfApplication;
