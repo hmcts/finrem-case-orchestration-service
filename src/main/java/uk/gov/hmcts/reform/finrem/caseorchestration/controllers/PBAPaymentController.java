@@ -16,13 +16,9 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdDataStoreService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 
 import javax.validation.constraints.NotNull;
 
@@ -47,10 +43,6 @@ public class PBAPaymentController extends BaseController {
     private final FeeService feeService;
     private final PBAPaymentService pbaPaymentService;
     private final CaseDataService caseDataService;
-    private final AssignCaseAccessService assignCaseAccessService;
-    private final CcdDataStoreService ccdDataStoreService;
-    private final FeatureToggleService featureToggleService;
-    private final PrdOrganisationService prdOrganisationService;
 
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/pba-payment", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)

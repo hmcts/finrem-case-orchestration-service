@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -8,16 +7,26 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignApplicantSolicitorService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueService;
 
 import java.util.Map;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
-public class SolicitorCreateConsentedAboutToStartHandler implements CallbackHandler<Map<String, Object>> {
+public class SolicitorCreateConsentedAboutToStartHandler extends AssignApplicantSolicitorHandler {
 
     private final OnStartDefaultValueService service;
+    private final CaseDataService caseDataService;
+
+    public SolicitorCreateConsentedAboutToStartHandler(AssignApplicantSolicitorService assignApplicantSolicitorService,
+                                                       CaseDataService caseDataService, OnStartDefaultValueService service) {
+        super(assignApplicantSolicitorService);
+        this.caseDataService = caseDataService;
+        this.service = service;
+    }
+
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -30,6 +39,10 @@ public class SolicitorCreateConsentedAboutToStartHandler implements CallbackHand
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
                                                                                    String userAuthorisation) {
         service.defaultCivilPartnershipField(callbackRequest);
+        if (!caseDataService.isPaperApplication(callbackRequest.getCaseDetails().getData()))
+        {
+            return super.handle(callbackRequest, userAuthorisation);
+        }
         return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder()
             .data(callbackRequest.getCaseDetails().getData()).build();
     }
