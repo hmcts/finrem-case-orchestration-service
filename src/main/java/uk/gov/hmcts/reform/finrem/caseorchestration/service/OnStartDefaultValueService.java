@@ -5,6 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypeOfApplicantion;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.time.LocalDate;
 
@@ -30,8 +33,16 @@ public class OnStartDefaultValueService {
         callbackRequest.getCaseDetails().getData().putIfAbsent(CIVIL_PARTNERSHIP, NO_VALUE);
     }
 
+    public void defaultCivilPartnershipField(FinremCallbackRequest callbackRequest) {
+        callbackRequest.getCaseDetails().getData().setCivilPartnership(YesOrNo.NO);
+    }
+
     public void defaultTypeOfApplication(CallbackRequest callbackRequest) {
         callbackRequest.getCaseDetails().getData().putIfAbsent(TYPE_OF_APPLICATION, TYPE_OF_APPLICATION_DEFAULT_TO);
+    }
+
+    public void defaultTypeOfApplication(FinremCallbackRequest callbackRequest) {
+        callbackRequest.getCaseDetails().getData().setTypeOfApplicantion(TypeOfApplicantion.TYPE_OF_APPLICATION_DEFAULT_TO);
     }
 
     public void defaultIssueDate(CallbackRequest callbackRequest) {

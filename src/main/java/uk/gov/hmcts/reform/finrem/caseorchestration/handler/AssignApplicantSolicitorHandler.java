@@ -1,30 +1,37 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.AssignCaseAccessException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignApplicantSolicitorService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
-public abstract class AssignApplicantSolicitorHandler implements CallbackHandler {
+public abstract class AssignApplicantSolicitorHandler extends FinremCallbackHandler {
 
     private final AssignApplicantSolicitorService assignApplicantSolicitorService;
 
+    public AssignApplicantSolicitorHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                           AssignApplicantSolicitorService assignApplicantSolicitorService) {
+        super(finremCaseDetailsMapper);
+        this.assignApplicantSolicitorService = assignApplicantSolicitorService;
+    }
+
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
-                                                                                   String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
+                                                                              String userAuthorisation) {
+        FinremCaseDetails finremCaseDetails = callbackRequest.getCaseDetails();
+
         try {
-            assignApplicantSolicitorService.setApplicantSolicitor(callbackRequest, userAuthorisation);
-            return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().build();
+            assignApplicantSolicitorService.setApplicantSolicitor(finremCaseDetails, userAuthorisation);
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().build();
         } catch (AssignCaseAccessException e) {
             log.info("Assigning case access failed for Case ID: {}", callbackRequest.getCaseDetails().getId());
 
@@ -32,7 +39,7 @@ public abstract class AssignApplicantSolicitorHandler implements CallbackHandler
             err.add(e.getMessage());
             err.add("Failed to assign applicant solicitor to case, please ensure you have selected the correct applicant organisation on case");
 
-            return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().errors(err).build();
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().errors(err).build();
         }
 
     }

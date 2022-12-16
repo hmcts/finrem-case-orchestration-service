@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUser
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.util.List;
 import java.util.Optional;
@@ -48,7 +49,21 @@ public class AssignCaseAccessService {
     private final SystemUserService systemUserService;
     private final FeatureToggleService featureToggleService;
 
+
     public void assignCaseAccess(CaseDetails caseDetails, String authorisationToken) {
+        String userId = idamService.getIdamUserId(authorisationToken);
+        AssignCaseAccessRequest assignCaseAccessRequest = assignCaseAccessRequestMapper.mapToAssignCaseAccessRequest(caseDetails, userId);
+        String url = assignCaseAccessServiceConfiguration.getCaseAssignmentsUrl()
+            + (featureToggleService.isUseUserTokenEnabled() ? "?use_user_token=true" : "");
+
+        restService.restApiPostCall(
+            authorisationToken,
+            url,
+            assignCaseAccessRequest
+        );
+    }
+
+    public void assignCaseAccess(FinremCaseDetails caseDetails, String authorisationToken) {
         String userId = idamService.getIdamUserId(authorisationToken);
         AssignCaseAccessRequest assignCaseAccessRequest = assignCaseAccessRequestMapper.mapToAssignCaseAccessRequest(caseDetails, userId);
         String url = assignCaseAccessServiceConfiguration.getCaseAssignmentsUrl()

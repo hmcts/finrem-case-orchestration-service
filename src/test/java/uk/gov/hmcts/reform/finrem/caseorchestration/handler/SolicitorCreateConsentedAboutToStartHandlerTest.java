@@ -5,19 +5,18 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.AssignCaseAccessException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignApplicantSolicitorService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueService;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -26,8 +25,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SolicitorCreateConsentedAboutToStartHandlerTest {
@@ -37,13 +34,15 @@ public class SolicitorCreateConsentedAboutToStartHandlerTest {
     @Mock
     private AssignApplicantSolicitorService assignApplicantSolicitorService;
     @Mock
+    private FinremCaseDetailsMapper finremCaseDetailsMapper;
+    @Mock
     private CaseDataService caseDataService;
 
     private SolicitorCreateConsentedAboutToStartHandler handler;
 
     @Before
     public void setup() {
-        handler =  new SolicitorCreateConsentedAboutToStartHandler(assignApplicantSolicitorService, caseDataService,
+        handler =  new SolicitorCreateConsentedAboutToStartHandler(finremCaseDetailsMapper, assignApplicantSolicitorService, caseDataService,
             new OnStartDefaultValueService());
     }
 
@@ -63,37 +62,37 @@ public class SolicitorCreateConsentedAboutToStartHandlerTest {
 
     @Test
     public void givenACcdCallBackSolicitorCreateContestedCase_WhenHandle_thenSetSolicitorRole() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        when(caseDataService.isPaperApplication(callbackRequest.getCaseDetails().getData())).thenReturn(false);
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        when(caseDataService.isPaperApplicationFinremCaseData(callbackRequest.getCaseDetails().getData())).thenReturn(false);
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(assignApplicantSolicitorService, times(1)).setApplicantSolicitor(callbackRequest, AUTH_TOKEN);
+        verify(assignApplicantSolicitorService, times(1)).setApplicantSolicitor(callbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 
     @Test
     public void givenACcdCallBackSolicitorCreateContestedCase_WhenHandle_WhenAssignAppSolServiceThrows_ReturnErrorList() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
         String expectedMsg = "Failed to assign applicant solicitor to case, please ensure you have selected the correct"
             + " applicant organisation on case";
 
         doThrow(new AssignCaseAccessException(expectedMsg)).when(assignApplicantSolicitorService)
-            .setApplicantSolicitor(callbackRequest, AUTH_TOKEN);
+            .setApplicantSolicitor(callbackRequest.getCaseDetails(), AUTH_TOKEN);
 
-        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response =  handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =  handler.handle(callbackRequest, AUTH_TOKEN);
         assertEquals(response.getErrors().get(0), expectedMsg);
     }
 
     @Test
     public void handle() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        when(caseDataService.isPaperApplication(callbackRequest.getCaseDetails().getData())).thenReturn(true);
-        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
-        assertEquals(NO_VALUE, response.getData().get(CIVIL_PARTNERSHIP));
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        when(caseDataService.isPaperApplicationFinremCaseData(callbackRequest.getCaseDetails().getData())).thenReturn(true);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        assertEquals(YesOrNo.NO, response.getData().getCivilPartnership());
     }
 
-    private CallbackRequest buildCallbackRequest() {
-        Map<String, Object> caseData = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
-        return CallbackRequest.builder().eventId("SomeEventId").caseDetails(caseDetails).build();
+    private FinremCallbackRequest buildCallbackRequest() {
+        FinremCaseData caseData = FinremCaseData.builder().build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123L).data(caseData).build();
+        return FinremCallbackRequest.builder().eventType(EventType.SOLICITOR_CREATE).caseDetails(caseDetails).build();
     }
 }

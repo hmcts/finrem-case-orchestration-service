@@ -2,16 +2,16 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignApplicantSolicitorService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueService;
 
-import java.util.Map;
 
 @Slf4j
 @Service
@@ -20,9 +20,10 @@ public class SolicitorCreateConsentedAboutToStartHandler extends AssignApplicant
     private final OnStartDefaultValueService service;
     private final CaseDataService caseDataService;
 
-    public SolicitorCreateConsentedAboutToStartHandler(AssignApplicantSolicitorService assignApplicantSolicitorService,
+    public SolicitorCreateConsentedAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                       AssignApplicantSolicitorService assignApplicantSolicitorService,
                                                        CaseDataService caseDataService, OnStartDefaultValueService service) {
-        super(assignApplicantSolicitorService);
+        super(finremCaseDetailsMapper, assignApplicantSolicitorService);
         this.caseDataService = caseDataService;
         this.service = service;
     }
@@ -36,13 +37,13 @@ public class SolicitorCreateConsentedAboutToStartHandler extends AssignApplicant
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
-                                                                                   String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
+                                                                              String userAuthorisation) {
         service.defaultCivilPartnershipField(callbackRequest);
-        if (!caseDataService.isPaperApplication(callbackRequest.getCaseDetails().getData())) {
+        if (!caseDataService.isPaperApplicationFinremCaseData(callbackRequest.getCaseDetails().getData())) {
             return super.handle(callbackRequest, userAuthorisation);
         }
-        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder()
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(callbackRequest.getCaseDetails().getData()).build();
     }
 }
