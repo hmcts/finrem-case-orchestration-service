@@ -34,8 +34,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @ActiveProfiles("test-mock-feign-clients")
 public class HelpWithFeesDocumentServiceTest extends BaseServiceTest {
 
-    @Autowired private HelpWithFeesDocumentService helpWithFeesDocumentService;
-    @Autowired private DocumentClient documentClientMock;
+    @Autowired
+    private HelpWithFeesDocumentService helpWithFeesDocumentService;
+    @Autowired
+    private DocumentClient documentClientMock;
 
     private CaseDetails caseDetails;
 

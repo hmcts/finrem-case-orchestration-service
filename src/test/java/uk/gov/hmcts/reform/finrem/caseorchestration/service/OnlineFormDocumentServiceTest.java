@@ -43,6 +43,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION;
 
 public class OnlineFormDocumentServiceTest extends BaseServiceTest {
 
@@ -83,7 +84,21 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void generateConsentedInContestedMiniFormA() throws Exception {
-        assertCaseDocument(onlineFormDocumentService.generateConsentedInContestedMiniFormA(consentedInContestedCaseDetails(), AUTH_TOKEN));
+        String payload = "/fixtures/mini-form-a-consent-in-contested.json";
+        assertCaseDocument(onlineFormDocumentService
+            .generateConsentedInContestedMiniFormA(consentedInContestedCaseDetails(payload), AUTH_TOKEN));
+
+        verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
+            eq(documentConfiguration.getMiniFormTemplate()), eq(documentConfiguration.getMiniFormFileName()));
+
+        verifyAdditionalFields(caseDetailsArgumentCaptor.getValue().getData());
+    }
+
+    @Test
+    public void generateConsentedInContestedMiniFormASchedule1() throws Exception {
+        String payload = "/fixtures/mini-form-a-consent-in-contested-schedule1.json";
+        assertCaseDocument(onlineFormDocumentService
+            .generateConsentedInContestedMiniFormA(consentedInContestedCaseDetails(payload), AUTH_TOKEN));
 
         verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
             eq(documentConfiguration.getMiniFormTemplate()), eq(documentConfiguration.getMiniFormFileName()));
@@ -99,18 +114,28 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
             eq(documentConfiguration.getContestedDraftMiniFormTemplate()), eq(documentConfiguration.getContestedDraftMiniFormFileName()));
     }
 
+    @Test
+    public void generateContestedDraftMiniFormASchedule() {
+        Map<String, Object> data = caseData();
+        data.put(TYPE_OF_APPLICATION, "Under paragraph 1 or 2 of schedule 1 children act 1989");
+        assertCaseDocument(onlineFormDocumentService.generateDraftContestedMiniFormA(AUTH_TOKEN, CaseDetails.builder().data(data).build()));
+
+        verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
+            eq(documentConfiguration.getContestedDraftMiniFormTemplateSchedule()), eq(documentConfiguration.getContestedDraftMiniFormFileName()));
+    }
+
     private Map<String, Object> caseData() {
         Map<String, Object> documentMap = new HashMap<>();
         documentMap.put("document_url", "http://test.url");
 
         Map<String, Object> data = new HashMap<>();
         data.put(MINI_FORM_A, documentMap);
-
+        data.put(TYPE_OF_APPLICATION, "In connection to matrimonial and civil partnership proceedings");
         return data;
     }
 
-    private CaseDetails consentedInContestedCaseDetails() throws Exception {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/mini-form-a-consent-in-contested.json")) {
+    private CaseDetails consentedInContestedCaseDetails(String payload) throws Exception {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(payload)) {
             return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         }
     }

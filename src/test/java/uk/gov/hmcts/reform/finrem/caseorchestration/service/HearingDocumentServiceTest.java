@@ -87,15 +87,22 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
     private static final String DATE_OF_HEARING = "2019-01-01";
 
-    @Autowired private HearingDocumentService hearingDocumentService;
-    @Autowired private DocumentConfiguration documentConfiguration;
+    @Autowired
+    private HearingDocumentService hearingDocumentService;
+    @Autowired
+    private DocumentConfiguration documentConfiguration;
 
-    @MockBean private GenericDocumentService genericDocumentService;
-    @MockBean BulkPrintService bulkPrintService;
+    @MockBean
+    private GenericDocumentService genericDocumentService;
+    @MockBean
+    BulkPrintService bulkPrintService;
 
-    @Captor private ArgumentCaptor<List<BulkPrintDocument>> bulkPrintDocumentsCaptor;
-    @Captor private ArgumentCaptor<CaseDetails> caseDetailsArgumentCaptor;
-    @MockBean private NotificationService notificationService;
+    @Captor
+    private ArgumentCaptor<List<BulkPrintDocument>> bulkPrintDocumentsCaptor;
+    @Captor
+    private ArgumentCaptor<CaseDetails> caseDetailsArgumentCaptor;
+    @MockBean
+    private NotificationService notificationService;
 
     @Before
     public void setUp() {
@@ -210,7 +217,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyCourtDetailsFields(
             "Canterbury Family Court Hearing Centre", "The Law Courts, Chaucer Road, Canterbury, CT1 1ZA",
-            "01634 887900", "FRCKSS@justice.gov.uk");
+            "01634 887900", "Family.canterbury.countycourt@justice.gov.uk");
     }
 
     @Test

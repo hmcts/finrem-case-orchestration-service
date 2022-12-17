@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 
@@ -25,11 +26,9 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMENDED_CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMEND_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CONFIDENTIAL_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_SOLICITOR;
@@ -51,9 +50,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER;
 
-public class  CaseDataServiceTest extends BaseServiceTest {
+public class CaseDataServiceTest extends BaseServiceTest {
 
-    @Autowired CaseDataService caseDataService;
+    @Autowired
+    CaseDataService caseDataService;
 
     @Test
     public void isRespondentSolicitorResponsibleToDraftOrder_shouldReturnTrue() {
@@ -81,7 +81,7 @@ public class  CaseDataServiceTest extends BaseServiceTest {
 
         caseDataService.moveCollection(caseData, HEARING_ORDER_COLLECTION, "uploadHearingOrderRO");
 
-        assertThat(((Collection<CaseDocument>)caseData.get("uploadHearingOrderRO")), hasSize(3));
+        assertThat(((Collection<CaseDocument>) caseData.get("uploadHearingOrderRO")), hasSize(3));
         assertThat(caseData.get(HEARING_ORDER_COLLECTION), Matchers.nullValue());
     }
 
@@ -91,7 +91,7 @@ public class  CaseDataServiceTest extends BaseServiceTest {
         caseData.put("uploadHearingOrderRO", null);
         caseDataService.moveCollection(caseData, HEARING_ORDER_COLLECTION, "uploadHearingOrderRO");
 
-        assertThat(((Collection<CaseDocument>)caseData.get("uploadHearingOrderRO")), hasSize(1));
+        assertThat(((Collection<CaseDocument>) caseData.get("uploadHearingOrderRO")), hasSize(1));
         assertThat(caseData.get(HEARING_ORDER_COLLECTION), Matchers.nullValue());
     }
 
@@ -101,7 +101,7 @@ public class  CaseDataServiceTest extends BaseServiceTest {
         caseData.put(HEARING_ORDER_COLLECTION, "nonarrayValue");
         caseDataService.moveCollection(caseData, HEARING_ORDER_COLLECTION, "uploadHearingOrderRO");
 
-        assertThat(((Collection<CaseDocument>)caseData.get("uploadHearingOrderRO")), hasSize(2));
+        assertThat(((Collection<CaseDocument>) caseData.get("uploadHearingOrderRO")), hasSize(2));
         assertThat(caseData.get(HEARING_ORDER_COLLECTION), Matchers.is("nonarrayValue"));
     }
 
@@ -112,7 +112,7 @@ public class  CaseDataServiceTest extends BaseServiceTest {
         caseDataService.moveCollection(caseData, HEARING_ORDER_COLLECTION, "uploadHearingOrderRO");
 
         assertThat(caseData.get("uploadHearingOrderRO"), Matchers.is("nonarrayValue"));
-        assertThat(((Collection<CaseDocument>)caseData.get(HEARING_ORDER_COLLECTION)), hasSize(1));
+        assertThat(((Collection<CaseDocument>) caseData.get(HEARING_ORDER_COLLECTION)), hasSize(1));
     }
 
     @Test
@@ -121,19 +121,19 @@ public class  CaseDataServiceTest extends BaseServiceTest {
         caseData.put(HEARING_ORDER_COLLECTION, null);
         caseDataService.moveCollection(caseData, HEARING_ORDER_COLLECTION, "uploadHearingOrderRO");
 
-        assertThat(((Collection<CaseDocument>)caseData.get("uploadHearingOrderRO")), hasSize(2));
+        assertThat(((Collection<CaseDocument>) caseData.get("uploadHearingOrderRO")), hasSize(2));
         assertThat(caseData.get(HEARING_ORDER_COLLECTION), Matchers.nullValue());
     }
 
     @Test
     public void shouldOverwriteTargetCollection() {
         Map<String, Object> caseData = TestSetUpUtils.caseDataWithUploadHearingOrder();
-        assertThat(((Collection<CaseDocument>)caseData.get(HEARING_ORDER_COLLECTION)), hasSize(1));
-        assertThat(((Collection<CaseDocument>)caseData.get("uploadHearingOrderRO")), hasSize(2));
+        assertThat(((Collection<CaseDocument>) caseData.get(HEARING_ORDER_COLLECTION)), hasSize(1));
+        assertThat(((Collection<CaseDocument>) caseData.get("uploadHearingOrderRO")), hasSize(2));
 
         caseDataService.overwriteCollection(caseData, HEARING_ORDER_COLLECTION, "uploadHearingOrderRO");
 
-        assertThat(((Collection<CaseDocument>)caseData.get("uploadHearingOrderRO")), hasSize(1));
+        assertThat(((Collection<CaseDocument>) caseData.get("uploadHearingOrderRO")), hasSize(1));
     }
 
     @Test
@@ -250,7 +250,7 @@ public class  CaseDataServiceTest extends BaseServiceTest {
     public void isApplicantSolicitorAgreeToReceiveEmailsShouldReturnTrueWhenAppSolAgreedToReceiveEmailsIsYesForConsented() {
         Map<String, Object> data = new HashMap<>();
         data.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED, YES_VALUE);
-        CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONSENTED).data(data).build();
+        CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CaseType.CONSENTED.getCcdType()).data(data).build();
 
         assertThat(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails), is(true));
     }
@@ -259,7 +259,7 @@ public class  CaseDataServiceTest extends BaseServiceTest {
     public void isApplicantSolicitorAgreeToReceiveEmailsShouldReturnFalseWhenAppSolAgreedToReceiveEmailsIsNoForConsented() {
         Map<String, Object> data = new HashMap<>();
         data.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED, null);
-        CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONSENTED).data(data).build();
+        CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CaseType.CONSENTED.getCcdType()).data(data).build();
 
         assertThat(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails), is(false));
     }
@@ -268,7 +268,7 @@ public class  CaseDataServiceTest extends BaseServiceTest {
     public void isApplicantSolicitorAgreeToReceiveEmailsShouldReturnTrueWhenAppSolAgreedToReceiveEmailsIsYesForContested() {
         Map<String, Object> data = new HashMap<>();
         data.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, YES_VALUE);
-        CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONTESTED).data(data).build();
+        CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CaseType.CONTESTED.getCcdType()).data(data).build();
 
         assertThat(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails), is(true));
     }
@@ -277,7 +277,7 @@ public class  CaseDataServiceTest extends BaseServiceTest {
     public void isApplicantSolicitorAgreeToReceiveEmailsShouldReturnFalseWhenAppSolAgreedToReceiveEmailsIsNoForContested() {
         Map<String, Object> data = new HashMap<>();
         data.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, null);
-        CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONTESTED).data(data).build();
+        CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CaseType.CONTESTED.getCcdType()).data(data).build();
 
         assertThat(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails), is(false));
     }
@@ -374,7 +374,7 @@ public class  CaseDataServiceTest extends BaseServiceTest {
 
     @Test
     public void isAmendedConsentOrderTypeShouldReturnTrueWhenDocumentTypeIsAmendedConsentOrder() {
-        assertThat(caseDataService.isAmendedConsentOrderType(getRespondToOrderData(AMENDED_CONSENT_ORDER)), is(true));
+        assertThat(caseDataService.isAmendedConsentOrderType(getRespondToOrderData(AMEND_CONSENT_ORDER)), is(true));
     }
 
     @Test

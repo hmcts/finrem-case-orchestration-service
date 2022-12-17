@@ -1,0 +1,38 @@
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueService;
+
+import java.util.Map;
+
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class ApprovedConsentOrderAboutToStartHandler implements CallbackHandler {
+
+    private final OnStartDefaultValueService onStartDefaultValueService;
+
+    @Override
+    public boolean canHandle(final CallbackType callbackType, final CaseType caseType,
+                             final EventType eventType) {
+        return CallbackType.ABOUT_TO_START.equals(callbackType)
+            && CaseType.CONSENTED.equals(caseType)
+            && EventType.APPROVE_ORDER.equals(eventType);
+    }
+
+    @Override
+    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
+                                                                                   String userAuthorisation) {
+        onStartDefaultValueService.defaultConsentedOrderJudgeName(callbackRequest, userAuthorisation);
+        onStartDefaultValueService.defaultConsentedOrderDate(callbackRequest);
+        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(callbackRequest.getCaseDetails().getData()).build();
+    }
+}

@@ -37,9 +37,12 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
     private static final String CONSENT_IN_CONTESTED = "consented-in-consented.json";
     private static final String CONSENT_IN_CONTESTED_NO_PENSION_COLLECTION = "consented-in-consented-no-pension-collection.json";
 
-    @Autowired private DocumentValidationService documentValidationService;
-    @Autowired private DocumentClient documentClientMock;
-    @Autowired private ObjectMapper objectMapper;
+    @Autowired
+    private DocumentValidationService documentValidationService;
+    @Autowired
+    private DocumentClient documentClientMock;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private CallbackRequest callbackRequest;
 

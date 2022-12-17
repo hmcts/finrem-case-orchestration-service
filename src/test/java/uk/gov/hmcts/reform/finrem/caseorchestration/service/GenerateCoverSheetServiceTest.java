@@ -13,9 +13,11 @@ import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
 import java.io.InputStream;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.hasKey;
@@ -36,8 +38,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 
 public class GenerateCoverSheetServiceTest extends BaseServiceTest {
 
-    @Autowired private GenerateCoverSheetService generateCoverSheetService;
-    @Autowired private ObjectMapper mapper;
+    @Autowired
+    private GenerateCoverSheetService generateCoverSheetService;
+    @Autowired
+    private ObjectMapper mapper;
 
     @Rule
     public ExpectedException expectedException = none();
@@ -105,6 +109,14 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
         generateCoverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
 
         assertCoversheetAddress("123 Applicant Solicitor Street\nSecond Address Line\nGreater London\nLondon\nSE1");
+    }
+
+    @Test(expected = InvalidCaseDataException.class)
+    public void shouldThrowExceptionToGenerateApplicantCoverSheetUsingApplicantSolicitorAddress() throws Exception {
+        CaseDetails caseDetails = caseDetailsWithSolicitors();
+        ((LinkedHashMap) caseDetails.getData().get("solicitorAddress")).put("AddressLine1","");
+        ((LinkedHashMap) caseDetails.getData().get("applicantAddress")).put("AddressLine1","");
+        generateCoverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
     }
 
     @Test

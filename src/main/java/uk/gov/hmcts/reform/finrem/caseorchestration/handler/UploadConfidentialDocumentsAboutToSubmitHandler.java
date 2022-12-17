@@ -6,12 +6,12 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedConfidentialDocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConfidentialUploadedDocumentData;
 
@@ -28,7 +28,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UploadConfidentialDocumentsAboutToSubmitHandler implements CallbackHandler {
+public class UploadConfidentialDocumentsAboutToSubmitHandler
+    implements CallbackHandler<Map<String, Object>> {
 
     private final ObjectMapper objectMapper;
     private final UploadedConfidentialDocumentHelper uploadedConfidentialDocumentHelper;
@@ -40,8 +41,8 @@ public class UploadConfidentialDocumentsAboutToSubmitHandler implements Callback
     }
 
     @Override
-    public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest, String userAuthorisation) {
-
+    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
+                                                                                   String userAuthorisation) {
         Map<String, Object> caseData = uploadedConfidentialDocumentHelper.addUploadDateToNewDocuments(
             callbackRequest.getCaseDetails().getData(),
             callbackRequest.getCaseDetailsBefore().getData(),
@@ -54,8 +55,8 @@ public class UploadConfidentialDocumentsAboutToSubmitHandler implements Callback
 
         caseData.put(CONFIDENTIAL_DOCS_UPLOADED_COLLECTION, uploadedDocuments);
 
-        return AboutToStartOrSubmitCallbackResponse
-            .builder()
+        return GenericAboutToStartOrSubmitCallbackResponse
+            .<Map<String, Object>>builder()
             .data(caseData)
             .build();
     }
@@ -64,7 +65,8 @@ public class UploadConfidentialDocumentsAboutToSubmitHandler implements Callback
         objectMapper.registerModule(new JavaTimeModule());
 
         List<ConfidentialUploadedDocumentData> confidentialDocuments = objectMapper
-            .convertValue(caseData.get(CONFIDENTIAL_DOCS_UPLOADED_COLLECTION), new TypeReference<>() {});
+            .convertValue(caseData.get(CONFIDENTIAL_DOCS_UPLOADED_COLLECTION), new TypeReference<>() {
+            });
 
         return Optional.ofNullable(confidentialDocuments).orElse(new ArrayList<>());
     }

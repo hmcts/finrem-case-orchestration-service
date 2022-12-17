@@ -10,8 +10,10 @@ import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
@@ -27,6 +29,8 @@ import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -79,7 +83,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_WALES_FRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_WALES_OTHER_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_PRE_STATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PREPARE_FOR_HEARING_STATE;
 
 public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
 
@@ -97,6 +103,8 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     private BulkPrintService bulkPrintService;
     @MockBean
     private GenericDocumentService genericDocumentService;
+    @MockBean
+    private CcdService ccdService;
 
     @Captor
     ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
@@ -113,45 +121,91 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void givenContestedCase_whenDirectionEventExecutedReturnNoPreviousStateFound_thenHandlerReturnsPostStateNull() {
+        when(ccdService.getCcdEventDetailsOnCase(any(), any(), any())).thenReturn(new ArrayList<>());
+        caseDetails.getData().put(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED, NO_VALUE);
+        assertNull(generalApplicationDirectionsService.getEventPostState(caseDetails, AUTH_TOKEN));
+    }
+
+    @Test
+    public void givenContestedCase_whenDirectionEventExecutedReturnPreviousStateFound_thenHandlerReturnsPreviousPostState() {
+        caseDetails.getData().put(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED, NO_VALUE);
+        caseDetails.getData().put(GENERAL_APPLICATION_PRE_STATE, "applicationIssued");
+        when(ccdService.getCcdEventDetailsOnCase(any(), any(), any())).thenReturn(new ArrayList<>());
+
+        assertEquals("applicationIssued", generalApplicationDirectionsService.getEventPostState(caseDetails, AUTH_TOKEN));
+    }
+
+    @Test
+    public void givenContestedCase_whenDirectionEventExecutedAndAnySortOfHearingGoingOn_thenHandlerReturnsPostState() {
+        List<CaseEventDetail> list = new ArrayList<>();
+        CaseEventDetail.CaseEventDetailBuilder builder = CaseEventDetail.builder();
+        builder.eventName("General Application Outcome");
+        list.add(builder.build());
+
+        builder = CaseEventDetail.builder();
+        builder.eventName("List for Hearing");
+        list.add(builder.build());
+
+        caseDetails.getData().put(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED, NO_VALUE);
+        caseDetails.getData().put(GENERAL_APPLICATION_PRE_STATE, "applicationIssued");
+        when(ccdService.getCcdEventDetailsOnCase(AUTH_TOKEN, caseDetails, EventType.GENERAL_APPLICATION_DIRECTIONS.getCcdType()))
+            .thenReturn(list);
+
+        assertEquals(PREPARE_FOR_HEARING_STATE, generalApplicationDirectionsService.getEventPostState(caseDetails, AUTH_TOKEN));
+    }
+
+    private void buildCase() {
+        List<CaseEventDetail> list = new ArrayList<>();
+        CaseEventDetail.CaseEventDetailBuilder builder = CaseEventDetail.builder();
+        builder.eventName("General Application Outcome");
+        list.add(builder.build());
+
+        builder = CaseEventDetail.builder();
+        builder.eventName("List for Hearing");
+        list.add(builder.build());
+    }
+
+    @Test
     public void whenGeneralApplicationDirectionsStarted_thenStateSpecificFieldAreSetToNull() {
         generalApplicationDirectionsService.startGeneralApplicationDirections(caseDetails);
 
         Stream.of(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED,
-            GENERAL_APPLICATION_DIRECTIONS_HEARING_DATE,
-            GENERAL_APPLICATION_DIRECTIONS_HEARING_TIME,
-            GENERAL_APPLICATION_DIRECTIONS_HEARING_TIME_ESTIMATE,
-            GENERAL_APPLICATION_DIRECTIONS_HEARING_REGION,
-            GENERAL_APPLICATION_DIRECTIONS_LONDON_FRC,
-            GENERAL_APPLICATION_DIRECTIONS_MIDLANDS_FRC,
-            GENERAL_APPLICATION_DIRECTIONS_NORTHEAST_FRC,
-            GENERAL_APPLICATION_DIRECTIONS_NORTHWEST_FRC,
-            GENERAL_APPLICATION_DIRECTIONS_SOUTHEAST_FRC,
-            GENERAL_APPLICATION_DIRECTIONS_SOUTHWEST_FRC,
-            GENERAL_APPLICATION_DIRECTIONS_WALES_FRC,
-            GENERAL_APPLICATION_DIRECTIONS_BEDFORDSHIRE_COURT,
-            GENERAL_APPLICATION_DIRECTIONS_BIRMINGHAM_COURT,
-            GENERAL_APPLICATION_DIRECTIONS_BRISTOL_COURT,
-            GENERAL_APPLICATION_DIRECTIONS_CFC_COURT,
-            GENERAL_APPLICATION_DIRECTIONS_CLEVELAND_COURT,
-            GENERAL_APPLICATION_DIRECTIONS_DEVON_COURT,
-            GENERAL_APPLICATION_DIRECTIONS_DORSET_COURT,
-            GENERAL_APPLICATION_DIRECTIONS_HUMBER_COURT,
-            GENERAL_APPLICATION_DIRECTIONS_KENTSURREY_COURT,
-            GENERAL_APPLICATION_DIRECTIONS_LANCASHIRE_COURT,
-            GENERAL_APPLICATION_DIRECTIONS_LIVERPOOL_COURT,
-            GENERAL_APPLICATION_DIRECTIONS_MANCHESTER_COURT,
-            GENERAL_APPLICATION_DIRECTIONS_NEWPORT_COURT,
-            GENERAL_APPLICATION_DIRECTIONS_NOTTINGHAM_COURT,
-            GENERAL_APPLICATION_DIRECTIONS_NWYORKSHIRE_COURT,
-            GENERAL_APPLICATION_DIRECTIONS_SWANSEA_COURT,
-            GENERAL_APPLICATION_DIRECTIONS_THAMESVALLEY_COURT,
-            GENERAL_APPLICATION_DIRECTIONS_WALES_OTHER_COURT,
-            GENERAL_APPLICATION_DIRECTIONS_ADDITIONAL_INFORMATION,
-            GENERAL_APPLICATION_DIRECTIONS_COURT_ORDER_DATE,
-            GENERAL_APPLICATION_DIRECTIONS_JUDGE_TYPE,
-            GENERAL_APPLICATION_DIRECTIONS_JUDGE_NAME,
-            GENERAL_APPLICATION_DIRECTIONS_RECITALS,
-            GENERAL_APPLICATION_DIRECTIONS_TEXT_FROM_JUDGE)
+                GENERAL_APPLICATION_DIRECTIONS_HEARING_DATE,
+                GENERAL_APPLICATION_DIRECTIONS_HEARING_TIME,
+                GENERAL_APPLICATION_DIRECTIONS_HEARING_TIME_ESTIMATE,
+                GENERAL_APPLICATION_DIRECTIONS_HEARING_REGION,
+                GENERAL_APPLICATION_DIRECTIONS_LONDON_FRC,
+                GENERAL_APPLICATION_DIRECTIONS_MIDLANDS_FRC,
+                GENERAL_APPLICATION_DIRECTIONS_NORTHEAST_FRC,
+                GENERAL_APPLICATION_DIRECTIONS_NORTHWEST_FRC,
+                GENERAL_APPLICATION_DIRECTIONS_SOUTHEAST_FRC,
+                GENERAL_APPLICATION_DIRECTIONS_SOUTHWEST_FRC,
+                GENERAL_APPLICATION_DIRECTIONS_WALES_FRC,
+                GENERAL_APPLICATION_DIRECTIONS_BEDFORDSHIRE_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_BIRMINGHAM_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_BRISTOL_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_CFC_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_CLEVELAND_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_DEVON_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_DORSET_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_HUMBER_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_KENTSURREY_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_LANCASHIRE_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_LIVERPOOL_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_MANCHESTER_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_NEWPORT_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_NOTTINGHAM_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_NWYORKSHIRE_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_SWANSEA_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_THAMESVALLEY_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_WALES_OTHER_COURT,
+                GENERAL_APPLICATION_DIRECTIONS_ADDITIONAL_INFORMATION,
+                GENERAL_APPLICATION_DIRECTIONS_COURT_ORDER_DATE,
+                GENERAL_APPLICATION_DIRECTIONS_JUDGE_TYPE,
+                GENERAL_APPLICATION_DIRECTIONS_JUDGE_NAME,
+                GENERAL_APPLICATION_DIRECTIONS_RECITALS,
+                GENERAL_APPLICATION_DIRECTIONS_TEXT_FROM_JUDGE)
             .forEach(ccdFieldName -> assertThat(caseDetails.getData().get(ccdFieldName), is(nullValue())));
     }
 
@@ -292,7 +346,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     private void assertDocumentPrintRequestContainsExpectedDocuments() {
         List<BulkPrintDocument> documentsToPrint = printDocumentsRequestDocumentListCaptor.getValue();
         assertThat(documentsToPrint, containsInAnyOrder(Stream.of(
-            GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL)
+             GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL)
             .map(binaryFileUrl -> BulkPrintDocument.builder().binaryFileUrl(binaryFileUrl).fileName("app_docs.pdf").build())
             .toArray()));
     }

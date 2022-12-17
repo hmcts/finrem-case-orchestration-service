@@ -40,12 +40,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
 
-    @Autowired private RefusalOrderDocumentService refusalOrderDocumentService;
-    @Autowired private ObjectMapper objectMapper;
+    @Autowired
+    private RefusalOrderDocumentService refusalOrderDocumentService;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    @MockBean private GenericDocumentService genericDocumentService;
+    @MockBean
+    private GenericDocumentService genericDocumentService;
 
-    @Captor private ArgumentCaptor<CaseDetails> generateDocumentCaseDetailsCaptor;
+    @Captor
+    private ArgumentCaptor<CaseDetails> generateDocumentCaseDetailsCaptor;
 
     @Before
     public void setUp() {
@@ -139,7 +143,8 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
     }
 
     private List<CaseDocument> getDocumentList(Map<String, Object> data, String field) {
-        return objectMapper.convertValue(data.get(field), new TypeReference<>() {});
+        return objectMapper.convertValue(data.get(field), new TypeReference<>() {
+        });
     }
 
     private void assertCaseDataExtraFields() {
@@ -150,7 +155,7 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
         assertThat(caseData.get("ApplicantName"), is("Poor Guy"));
         assertThat(caseData.get("RespondentName"), is("john smith"));
         assertThat(caseData.get("RefusalOrderHeader"), is("Sitting in the Family Court"));
-        List<String> list  = (List<String>) caseData.get("natureOfApplication2");
+        List<String> list = (List<String>) caseData.get("natureOfApplication2");
         assertNotNull(list);
         if (list.contains("Variation Order")) {
             assertThat(caseData.get("orderType"), is("variation"));
@@ -190,12 +195,13 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
     }
 
     private ConsentOrderData consentOrderData(Map<String, Object> caseData) {
-        List<ConsentOrderData> list = objectMapper.convertValue(caseData.get(UPLOAD_ORDER), new TypeReference<>() {});
+        List<ConsentOrderData> list = objectMapper.convertValue(caseData.get(UPLOAD_ORDER), new TypeReference<>() {
+        });
 
         return list
-                .stream()
-                .filter(cd -> cd.getConsentOrder().getDocumentType().equals(REJECTED_ORDER_TYPE))
-                .findFirst().orElseThrow(() -> new IllegalStateException(REJECTED_ORDER_TYPE + " missing"));
+            .stream()
+            .filter(cd -> cd.getConsentOrder().getDocumentType().equals(REJECTED_ORDER_TYPE))
+            .findFirst().orElseThrow(() -> new IllegalStateException(REJECTED_ORDER_TYPE + " missing"));
     }
 
     private CaseDetails caseDetails(String name) throws Exception {
@@ -205,6 +211,7 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
     }
 
     private List<OrderRefusalData> refusalOrderCollection(Map<String, Object> caseData) {
-        return objectMapper.convertValue(caseData.get(ORDER_REFUSAL_COLLECTION), new TypeReference<>() {});
+        return objectMapper.convertValue(caseData.get(ORDER_REFUSAL_COLLECTION), new TypeReference<>() {
+        });
     }
 }

@@ -11,8 +11,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedDocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandlerTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantCaseSummariesHandler;
@@ -116,8 +116,10 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDo
     private CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
         Map<String, Object> caseDataBefore = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
-        CaseDetails caseDetailsBefore = CaseDetails.builder().id(123L).data(caseDataBefore).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(123L).build();
+        caseDetails.setData(caseData);
+        CaseDetails caseDetailsBefore = CaseDetails.builder().id(123L).build();
+        caseDetailsBefore.setData(caseDataBefore);
         return CallbackRequest.builder().eventId(EventType.UPLOAD_CASE_FILES.getCcdType())
             .caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
     }

@@ -6,14 +6,14 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdateHistory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
@@ -57,9 +57,9 @@ public class ManageBarristerAboutToSubmitHandlerTest {
     @Test
     public void givenHandlerCanHandleCallback_whenCanHandle_thenReturnTrue() {
         assertThat(manageBarristerAboutToSubmitHandler.canHandle(
-            CallbackType.ABOUT_TO_SUBMIT,
-            CaseType.CONTESTED,
-            EventType.MANAGE_BARRISTER),
+                CallbackType.ABOUT_TO_SUBMIT,
+                CaseType.CONTESTED,
+                EventType.MANAGE_BARRISTER),
             is(true));
     }
 
@@ -101,7 +101,8 @@ public class ManageBarristerAboutToSubmitHandlerTest {
         when(manageBarristerService.updateBarristerAccess(callbackRequest.getCaseDetails(),
             barristers, barristers, AUTH_TOKEN)).thenReturn(Map.of(REPRESENTATION_UPDATE_HISTORY, RepresentationUpdateHistory.builder().build()));
 
-        AboutToStartOrSubmitCallbackResponse response = manageBarristerAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>>
+            response = manageBarristerAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(manageBarristerService).updateBarristerAccess(callbackRequest.getCaseDetails(), barristers, barristers, AUTH_TOKEN);
         assertTrue(response.getData().containsKey(REPRESENTATION_UPDATE_HISTORY));

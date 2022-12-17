@@ -3,14 +3,14 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
@@ -28,7 +29,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class GeneralApplicationOutcomeAboutToSubmitHandler implements CallbackHandler {
+public class GeneralApplicationOutcomeAboutToSubmitHandler
+    implements CallbackHandler<Map<String, Object>> {
 
     private final GeneralApplicationHelper helper;
 
@@ -40,8 +42,9 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler implements CallbackHa
     }
 
     @Override
-    public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
-                                                       String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(
+        CallbackRequest callbackRequest,
+        String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         final String caseId = caseDetails.getId().toString();
         log.info("Received on start request to outcome decision general application for Case ID: {}", caseId);
@@ -54,14 +57,15 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler implements CallbackHa
         } else {
             DynamicList dynamicList = helper.objectToDynamicList(caseData.get(GENERAL_APPLICATION_OUTCOME_LIST));
 
-            final String outcome  = Objects.toString(caseData.get(GENERAL_APPLICATION_OUTCOME_DECISION), null);
+            final String outcome = Objects.toString(caseData.get(GENERAL_APPLICATION_OUTCOME_DECISION), null);
             log.info("Outcome decision {} for general application for Case ID: {} Event type {}",
                 outcome, caseId, EventType.GENERAL_APPLICATION_OUTCOME);
 
             final String valueCode = dynamicList.getValueCode();
             log.info("Selected dynamic list code : {} Case ID: {}", valueCode, caseId);
             final List<GeneralApplicationCollectionData> applicationCollectionDataList
-                = existingList.stream().map(ga -> setStatusForElement(caseData, ga, valueCode, outcome)).sorted(helper::getCompareTo).toList();
+                = existingList.stream().map(ga -> setStatusForElement(caseData, ga, valueCode, outcome)).sorted(helper::getCompareTo).collect(
+                Collectors.toList());
 
             log.info("applicationCollectionDataList : {} caseId {}", applicationCollectionDataList.size(), caseId);
             caseData.put(GENERAL_APPLICATION_COLLECTION, applicationCollectionDataList);
@@ -69,7 +73,7 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler implements CallbackHa
             caseData.remove(GENERAL_APPLICATION_OUTCOME_OTHER);
             caseData.remove(GENERAL_APPLICATION_OUTCOME_DECISION);
         }
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).build();
     }
 
     private void migrateExistingApplication(CaseDetails caseDetails, String userAuthorisation) {
@@ -77,21 +81,21 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler implements CallbackHa
         List<GeneralApplicationCollectionData> existingGeneralApplication = helper.getGeneralApplicationList(caseData);
         GeneralApplicationCollectionData data = helper.migrateExistingGeneralApplication(caseData, userAuthorisation);
         if (data != null) {
-            String status  = Objects.toString(caseData.get(GENERAL_APPLICATION_OUTCOME_DECISION), null);
+            String status = Objects.toString(caseData.get(GENERAL_APPLICATION_OUTCOME_DECISION), null);
             log.info("In migration outcome decision {} for general application for Case ID: {} Event type {}",
                 status, caseDetails.getId(), EventType.GENERAL_APPLICATION_OUTCOME);
             updateStatus(caseData, data, status);
             existingGeneralApplication.add(data);
-            caseData.put(GENERAL_APPLICATION_COLLECTION,existingGeneralApplication);
+            caseData.put(GENERAL_APPLICATION_COLLECTION, existingGeneralApplication);
         }
         helper.deleteNonCollectionGeneralApplication(caseData);
         caseData.remove(GENERAL_APPLICATION_OUTCOME_LIST);
     }
 
     private GeneralApplicationCollectionData setStatusForElement(Map<String, Object> caseData,
-                                                       GeneralApplicationCollectionData data,
-                                                       String code,
-                                                       String status) {
+                                                                 GeneralApplicationCollectionData data,
+                                                                 String code,
+                                                                 String status) {
         if (code.equals(data.getId())) {
             return updateStatus(caseData, data, status);
         }
@@ -99,8 +103,8 @@ public class GeneralApplicationOutcomeAboutToSubmitHandler implements CallbackHa
     }
 
     private GeneralApplicationCollectionData updateStatus(Map<String, Object> caseData,
-                                                       GeneralApplicationCollectionData data,
-                                                       String status) {
+                                                          GeneralApplicationCollectionData data,
+                                                          String status) {
         GeneralApplicationItems items = data.getGeneralApplicationItems();
         items.setGeneralApplicationOutcomeOther(Objects.toString(caseData.get(GENERAL_APPLICATION_OUTCOME_OTHER), null));
         switch (status) {

@@ -34,10 +34,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 
 public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
 
-    @Autowired private ManualPaymentDocumentService manualPaymentDocumentService;
-    @Autowired private ObjectMapper mapper;
+    @Autowired
+    private ManualPaymentDocumentService manualPaymentDocumentService;
+    @Autowired
+    private ObjectMapper mapper;
 
-    @MockBean private GenericDocumentService genericDocumentService;
+    @MockBean
+    private GenericDocumentService genericDocumentService;
 
     @Captor
     ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
@@ -101,8 +104,8 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
         assertThat(frcCourtDetails, is(notNullValue()));
         assertThat(frcCourtDetails.getCourtName(), is("Horsham County Court And Family Court"));
         assertThat(frcCourtDetails.getCourtAddress(), is("The Law Courts, Hurst Road, Horsham, RH12 2ET"));
-        assertThat(frcCourtDetails.getPhoneNumber(), is("01634 887900"));
-        assertThat(frcCourtDetails.getEmail(), is("FRCKSS@justice.gov.uk"));
+        assertThat(frcCourtDetails.getPhoneNumber(), is("0300 1235577"));
+        assertThat(frcCourtDetails.getEmail(), is("sussexfamily@Justice.gov.uk"));
     }
 
     private CaseDetails contestedPaperCaseDetails() throws Exception {

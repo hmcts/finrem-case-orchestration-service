@@ -1,26 +1,28 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
-import java.util.Map;
 import java.util.Objects;
-
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_DIRECTION_JUDGE_NAME;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
-public class ConsentApplicationApprovedInContestedAboutToStartHandler implements CallbackHandler {
+public class ConsentApplicationApprovedInContestedAboutToStartHandler extends FinremCallbackHandler {
 
     private final IdamService service;
+
+    public ConsentApplicationApprovedInContestedAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                                    IdamService service) {
+        super(finremCaseDetailsMapper);
+        this.service = service;
+    }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -29,15 +31,17 @@ public class ConsentApplicationApprovedInContestedAboutToStartHandler implements
             && EventType.CONSENT_APPLICATION_APPROVED_IN_CONTESTED.equals(eventType);
     }
 
+
     @Override
-    public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
-                                                       String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
+                                                                              String userAuthorisation) {
         log.info("Received request for {} caseId {}", EventType.CONSENT_APPLICATION_APPROVED_IN_CONTESTED,
             callbackRequest.getCaseDetails().getId());
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        if (Objects.isNull(caseData.get(CONTESTED_ORDER_DIRECTION_JUDGE_NAME))) {
-            caseData.put(CONTESTED_ORDER_DIRECTION_JUDGE_NAME, service.getIdamFullName(userAuthorisation));
+
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        if (Objects.isNull(caseData.getConsentOrderWrapper().getConsentJudgeName())) {
+            caseData.getConsentOrderWrapper().setConsentJudgeName(service.getIdamFullName(userAuthorisation));
         }
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }
 }

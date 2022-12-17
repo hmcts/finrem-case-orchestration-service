@@ -39,13 +39,18 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class ContestedDraftOrderNotApprovedServiceTest extends BaseServiceTest {
 
-    @Autowired private ContestedDraftOrderNotApprovedService refusalOrderService;
-    @Autowired private ObjectMapper objectMapper;
-    @Autowired private DocumentConfiguration documentConfiguration;
+    @Autowired
+    private ContestedDraftOrderNotApprovedService refusalOrderService;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
+    private DocumentConfiguration documentConfiguration;
 
-    @MockBean private GenericDocumentService genericDocumentService;
+    @MockBean
+    private GenericDocumentService genericDocumentService;
 
-    @Captor private ArgumentCaptor<CaseDetails> caseDetailsArgumentCaptor;
+    @Captor
+    private ArgumentCaptor<CaseDetails> caseDetailsArgumentCaptor;
 
     @Before
     public void setUp() {
@@ -80,7 +85,8 @@ public class ContestedDraftOrderNotApprovedServiceTest extends BaseServiceTest {
 
         assertThat(refusalOrders, hasSize(2));
         assertThat(refusalOrders.get(0).getId(), is("1234"));
-        assertThat(refusalOrders.get(0).getContestedRefusalOrder().getRefusalOrderAdditionalDocument().getDocumentUrl(), is("http://dm-store/lhjbyuivu87y989hijbb"));
+        assertThat(refusalOrders.get(0).getContestedRefusalOrder().getRefusalOrderAdditionalDocument().getDocumentUrl(),
+            is("http://dm-store/lhjbyuivu87y989hijbb"));
         assertThat(refusalOrders.get(0).getContestedRefusalOrder().getRefusalOrderAdditionalDocument().getDocumentFilename(),
             is("app_docs.pdf"));
         assertThat(refusalOrders.get(0).getContestedRefusalOrder().getRefusalOrderAdditionalDocument().getDocumentBinaryUrl(),

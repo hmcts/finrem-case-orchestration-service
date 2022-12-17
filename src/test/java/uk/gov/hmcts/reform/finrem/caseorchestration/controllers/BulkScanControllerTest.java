@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.bsp.common.model.validation.in.OcrDataValidationReque
 import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResponse;
 import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResult;
 import uk.gov.hmcts.reform.bsp.common.service.AuthService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkScanService;
 
 import java.util.List;
@@ -36,7 +37,6 @@ import static org.springframework.http.HttpStatus.NOT_IMPLEMENTED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 import static uk.gov.hmcts.reform.bsp.common.model.validation.out.ValidationStatus.ERRORS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_BULK_UNSUPPORTED_FORM_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_FORM_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_KEY;
@@ -107,7 +107,7 @@ public class BulkScanControllerTest {
         SuccessfulTransformationResponse transformationResponse = response.getBody();
         assertThat(transformationResponse.getWarnings(), is(emptyList()));
         CaseCreationDetails caseCreationDetails = transformationResponse.getCaseCreationDetails();
-        assertThat(caseCreationDetails.getCaseTypeId(), is(CASE_TYPE_ID_CONSENTED));
+        assertThat(caseCreationDetails.getCaseTypeId(), is(CaseType.CONSENTED.getCcdType()));
         assertThat(caseCreationDetails.getEventId(), is("FR_newPaperCase"));
         assertThat(caseCreationDetails.getCaseData(), hasEntry(TEST_KEY, TEST_VALUE));
 
