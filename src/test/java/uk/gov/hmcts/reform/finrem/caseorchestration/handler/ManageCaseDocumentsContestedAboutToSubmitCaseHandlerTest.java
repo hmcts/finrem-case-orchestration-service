@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.ConfidentialDocumentsCollectionService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentCollectionService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.FdrDocumentsCollectionService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantChronologiesStatementCollectionService;
@@ -54,7 +53,6 @@ public class ManageCaseDocumentsContestedAboutToSubmitCaseHandlerTest {
 
     private ApplicantChronologiesStatementCollectionService applicantChronologiesStatementCollectionService;
     private ApplicantOtherDocumentsCollectionService applicantOtherDocumentsCollectionService;
-    private ConfidentialDocumentsCollectionService confidentialDocumentsCollectionService;
     private FdrDocumentsCollectionService fdrDocumentsCollectionService;
     private RespondentQuestionnairesAnswersCollectionService respondentQuestionnairesAnswersCollectionService;
     private ManageCaseDocumentsContestedAboutToSubmitCaseHandler manageCaseDocumentsAboutToSubmitCaseHandler;
