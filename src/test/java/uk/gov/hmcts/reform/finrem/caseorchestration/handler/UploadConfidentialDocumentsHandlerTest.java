@@ -9,7 +9,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedConfidentialDocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedConfidentialDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
@@ -42,7 +42,7 @@ public class UploadConfidentialDocumentsHandlerTest {
     List<UploadConfidentialDocumentCollection> handledDocumentList = new ArrayList<>();
     List<String> handledDocumentIdList = new ArrayList<>();
 
-    private final UploadedConfidentialDocumentHelper uploadedConfidentialDocumentHelper = new UploadedConfidentialDocumentHelper(objectMapper);
+    private final UploadedConfidentialDocumentService uploadedConfidentialDocumentHelper = new UploadedConfidentialDocumentService(objectMapper);
 
     protected UploadConfidentialDocumentCollection createConfidentialUploadDocumentItem(CaseDocumentType type, CaseDocument link,
                                                                                         LocalDate dateAdded, String fileName,

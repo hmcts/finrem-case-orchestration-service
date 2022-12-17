@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.ManageCollectionsServiceTest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,17 +18,19 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ApplicantExpertEvidenceCollectionServiceTest extends ManageCollectionsServiceTest {
+public class CaseDocumentCollectionServiceTest extends ManageCollectionsServiceTest {
 
     @InjectMocks
-    ApplicantExpertEvidenceCollectionService collectionService;
+    CaseDocumentCollectionService collectionService;
 
     @Test
     public void givenAddedDocOnScreenCollectionWhenAddNewOrMovedDocumentToCollectionThenAddScreenDocsToCollectionType() {
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.VALUATION_REPORT,
-            CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.EXPERT_EVIDENCE,
-            CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.POSITION_STATEMENT,
+            CaseDocumentParty.CASE, YesOrNo.NO, YesOrNo.NO, null));
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.SKELETON_ARGUMENT,
+            CaseDocumentParty.CASE, YesOrNo.NO, YesOrNo.NO, null));
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CASE_SUMMARY,
+            CaseDocumentParty.CASE, YesOrNo.NO, YesOrNo.NO, null));
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
@@ -38,8 +39,8 @@ public class ApplicantExpertEvidenceCollectionServiceTest extends ManageCollecti
             screenUploadDocumentList);
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollection(ManageCaseDocumentsCollectionType.APP_EXPERT_EVIDENCE_COLLECTION),
-            hasSize(2));
+                .getDocumentCollection(ManageCaseDocumentsCollectionType.CONTESTED_UPLOADED_DOCUMENTS),
+            hasSize(3));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
     }
@@ -47,16 +48,18 @@ public class ApplicantExpertEvidenceCollectionServiceTest extends ManageCollecti
     @Test
     public void givenRemovedDocFromScreenCollectionWhenDeleteRemovedDocumentFromCollectionThenRemoveScreenDocsFromCollectionType() {
         List<UploadCaseDocumentCollection> beforeEventDocList = new ArrayList<>();
-        UploadCaseDocumentCollection removedDoc = createContestedUploadDocumentItem(CaseDocumentType.VALUATION_REPORT,
-            CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null);
+        UploadCaseDocumentCollection removedDoc = createContestedUploadDocumentItem(CaseDocumentType.POSITION_STATEMENT,
+            CaseDocumentParty.CASE, YesOrNo.NO, YesOrNo.NO, null);
         beforeEventDocList.add(removedDoc);
-        beforeEventDocList.add(createContestedUploadDocumentItem(CaseDocumentType.EXPERT_EVIDENCE,
-            CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
+        beforeEventDocList.add(createContestedUploadDocumentItem(CaseDocumentType.SKELETON_ARGUMENT,
+            CaseDocumentParty.CASE, YesOrNo.NO, YesOrNo.NO, null));
+        beforeEventDocList.add(createContestedUploadDocumentItem(CaseDocumentType.CASE_SUMMARY,
+            CaseDocumentParty.CASE, YesOrNo.NO, YesOrNo.NO, null));
         caseData.getUploadCaseDocumentWrapper()
-            .getDocumentCollection(ManageCaseDocumentsCollectionType.APP_EXPERT_EVIDENCE_COLLECTION)
+            .getDocumentCollection(ManageCaseDocumentsCollectionType.CONTESTED_UPLOADED_DOCUMENTS)
             .addAll(beforeEventDocList);
         caseDetailsBefore.getData().getUploadCaseDocumentWrapper()
-            .getDocumentCollection(ManageCaseDocumentsCollectionType.APP_EXPERT_EVIDENCE_COLLECTION)
+            .getDocumentCollection(ManageCaseDocumentsCollectionType.CONTESTED_UPLOADED_DOCUMENTS)
             .addAll(beforeEventDocList);
         screenUploadDocumentList.addAll(beforeEventDocList);
         screenUploadDocumentList.remove(removedDoc);
@@ -68,7 +71,8 @@ public class ApplicantExpertEvidenceCollectionServiceTest extends ManageCollecti
         );
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
-                .getDocumentCollection(ManageCaseDocumentsCollectionType.APP_EXPERT_EVIDENCE_COLLECTION),
-            hasSize(1));
+                .getDocumentCollection(ManageCaseDocumentsCollectionType.CONTESTED_UPLOADED_DOCUMENTS),
+            hasSize(2));
     }
+
 }

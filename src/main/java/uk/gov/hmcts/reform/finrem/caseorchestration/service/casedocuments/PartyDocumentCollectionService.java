@@ -6,7 +6,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,18 +15,17 @@ public abstract class PartyDocumentCollectionService extends DocumentCollectionS
     private final CaseDocumentParty party;
 
     public PartyDocumentCollectionService(ManageCaseDocumentsCollectionType manageCaseDocumentsCollectionType,
-                                          EvidenceManagementDeleteService evidenceManagementDeleteService,
                                           CaseDocumentParty party) {
-        super(manageCaseDocumentsCollectionType, evidenceManagementDeleteService);
+        super(manageCaseDocumentsCollectionType);
         this.party = party;
     }
 
     protected abstract boolean canProcessDocumentType(CaseDocumentType caseDocumentType);
 
     protected List<UploadCaseDocumentCollection> getServiceCollectionType(
-        List<UploadCaseDocumentCollection> eventScreenDocumentCollections) {
+        List<UploadCaseDocumentCollection> screenCollections) {
 
-        return eventScreenDocumentCollections.stream()
+        return screenCollections.stream()
             .filter(d -> {
                 UploadCaseDocument uploadedCaseDocument = d.getUploadCaseDocument();
                 return uploadedCaseDocument.getCaseDocuments() != null

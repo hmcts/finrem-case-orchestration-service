@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentCollectionsServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.ManageCollectionsServiceTest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ApplicantHearingBundleCollectionServiceTest extends CaseDocumentCollectionsServiceTest {
+public class ApplicantHearingBundleCollectionServiceTest extends ManageCollectionsServiceTest {
 
     @InjectMocks
     ApplicantHearingBundleCollectionService collectionService;
@@ -43,6 +43,26 @@ public class ApplicantHearingBundleCollectionServiceTest extends CaseDocumentCol
     }
 
     @Test
+    public void givenMovedDocOnScreenCollectionWhenAddManagedDocumentToCollectionThenAddScreenDocsToCollectionType() {
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.TRIAL_BUNDLE,
+            CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.NO, null));
+        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.TRIAL_BUNDLE,
+            CaseDocumentParty.CASE, YesOrNo.NO, YesOrNo.NO, null));
+
+        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
+
+        collectionService.addManagedDocumentToCollection(
+            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build(),
+            screenUploadDocumentList);
+
+        assertThat(caseData.getUploadCaseDocumentWrapper()
+                .getDocumentCollection(ManageCaseDocumentsCollectionType.APP_HEARING_BUNDLES_COLLECTION),
+            hasSize(1));
+        assertThat(caseData.getManageCaseDocumentCollection(),
+            hasSize(1));
+    }
+
+    @Test
     public void givenRemovedDocFromScreenCollectionWhenDeleteRemovedDocumentFromCollectionThenRemoveScreenDocsFromCollectionType() {
         List<UploadCaseDocumentCollection> beforeEventDocList = new ArrayList<>();
         UploadCaseDocumentCollection removedDoc = createContestedUploadDocumentItem(CaseDocumentType.TRIAL_BUNDLE,
@@ -59,9 +79,9 @@ public class ApplicantHearingBundleCollectionServiceTest extends CaseDocumentCol
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
-        collectionService.deleteRemovedDocumentFromAllPlaces(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
-            AUTH_TOKEN);
+        collectionService.removeMovedDocumentFromCollection(
+            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build()
+        );
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollection(ManageCaseDocumentsCollectionType.APP_HEARING_BUNDLES_COLLECTION),

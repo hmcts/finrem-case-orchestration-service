@@ -5,12 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedDocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentCollectionService;
 
 import java.util.List;
@@ -20,12 +20,12 @@ import java.util.List;
 public class  ManageCaseDocumentsContestedAboutToSubmitCaseHandler extends FinremCallbackHandler {
 
     private final List<DocumentCollectionService> documentCollectionServices;
-    private final UploadedDocumentHelper uploadedDocumentHelper;
+    private final UploadedDocumentService uploadedDocumentHelper;
 
     @Autowired
     public ManageCaseDocumentsContestedAboutToSubmitCaseHandler(FinremCaseDetailsMapper mapper,
                                                                 List<DocumentCollectionService> documentCollectionServices,
-                                                                UploadedDocumentHelper uploadedDocumentHelper) {
+                                                                UploadedDocumentService uploadedDocumentHelper) {
         super(mapper);
         this.documentCollectionServices = documentCollectionServices;
         this.uploadedDocumentHelper = uploadedDocumentHelper;
@@ -46,10 +46,11 @@ public class  ManageCaseDocumentsContestedAboutToSubmitCaseHandler extends Finre
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
         List<UploadCaseDocumentCollection> screenCollections = caseData.getManageCaseDocumentCollection();
         documentCollectionServices.forEach(documentCollectionService -> {
-            documentCollectionService.deleteRemovedDocumentFromAllPlaces(callbackRequest, userAuthorisation);
+            documentCollectionService.removeMovedDocumentFromCollection(callbackRequest);
             documentCollectionService.addManagedDocumentToCollection(callbackRequest, screenCollections);
         });
         uploadedDocumentHelper.addUploadDateToNewDocuments(caseData, caseDataBefore);
+        uploadedDocumentHelper.deleteRemovedDocuments(caseData, caseDataBefore, userAuthorisation);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
     }

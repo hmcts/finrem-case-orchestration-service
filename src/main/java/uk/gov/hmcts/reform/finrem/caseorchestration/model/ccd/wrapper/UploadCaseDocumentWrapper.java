@@ -111,8 +111,6 @@ public class UploadCaseDocumentWrapper {
     public List<UploadCaseDocumentCollection> getDocumentCollection(ManageCaseDocumentsCollectionType collectionName) {
 
         return switch (collectionName) {
-            case APPLICANT_CORRESPONDENCE_COLLECTION ->
-                appCorrespondenceCollection = getNonNull(appCorrespondenceCollection);
             case APPLICANT_FR_FORM_COLLECTION ->
                 appFrFormsCollection = getNonNull(appFrFormsCollection);
             case APPLICANT_EVIDENCE_COLLECTION ->
@@ -121,8 +119,6 @@ public class UploadCaseDocumentWrapper {
                 appTrialBundleCollection = getNonNull(appTrialBundleCollection);
             case APPLICANT_CONFIDENTIAL_DOCS_COLLECTION ->
                 appConfidentialDocsCollection = getNonNull(appConfidentialDocsCollection);
-            case RESPONDENT_CORRESPONDENCE_COLLECTION ->
-                respCorrespondenceCollection = getNonNull(respCorrespondenceCollection);
             case RESPONDENT_FR_FORM_COLLECTION ->
                 respFrFormsCollection = getNonNull(respFrFormsCollection);
             case RESPONDENT_EVIDENCE_COLLECTION ->

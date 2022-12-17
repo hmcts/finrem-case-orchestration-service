@@ -32,7 +32,7 @@ public class ConfidentialDocumentsCollectionServiceTest {
     public static final String AUTH_TOKEN = "AuthTokien";
     private final List<UploadCaseDocumentCollection> screenUploadDocumentList = new ArrayList<>();
     ConfidentialDocumentsCollectionService collectionService =
-        new ConfidentialDocumentsCollectionService(null);
+        new ConfidentialDocumentsCollectionService();
     private FinremCaseDetails caseDetails;
     private FinremCaseDetails caseDetailsBefore;
     private FinremCaseData caseData;

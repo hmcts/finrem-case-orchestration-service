@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
-public abstract class DocumentDateHelper<T extends CaseDocumentTabData> {
+public abstract class DocumentDateService<T extends CaseDocumentTabData> {
 
     private final ObjectMapper mapper;
     private final Class<T> documentType;
@@ -23,7 +23,7 @@ public abstract class DocumentDateHelper<T extends CaseDocumentTabData> {
     private final BiPredicate<String, List<T>> isNewDocument = (id, oldDocuments) ->
         oldDocuments.stream().map(T::getElementId).noneMatch(oldId -> oldId.equals(id));
 
-    public DocumentDateHelper(ObjectMapper objectMapper, Class<T> documentType) {
+    public DocumentDateService(ObjectMapper objectMapper, Class<T> documentType) {
         objectMapper.registerModule(new JavaTimeModule());
         this.mapper = objectMapper;
         this.documentType = documentType;

@@ -4,8 +4,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,17 +24,21 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_CORRESPONDENCE_COLLECTION;
 
+@RunWith(MockitoJUnitRunner.class)
 public class UploadedDocumentHelperTest {
 
-    private UploadedDocumentHelper uploadedDocumentHelper;
+    private UploadedDocumentService uploadedDocumentHelper;
     private ObjectMapper mapper = new ObjectMapper();
 
     private Map<String, Object> caseData;
     private Map<String, Object> caseDataBefore;
 
+    @Mock
+    private EvidenceManagementDeleteService evidenceManagementDeleteService;
+
     @Before
     public void setUp() {
-        uploadedDocumentHelper = new UploadedDocumentHelper(mapper);
+        uploadedDocumentHelper = new UploadedDocumentService(mapper, evidenceManagementDeleteService);
 
         caseData = new HashMap<>();
         caseDataBefore = new HashMap<>();

@@ -2,8 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments;
 
 import org.junit.Before;
 import org.mockito.Mock;
-import org.springframework.http.ResponseEntity;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedDocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
@@ -14,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 
 import java.time.LocalDateTime;
@@ -21,10 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
-public abstract class CaseDocumentCollectionsServiceTest {
+public abstract class ManageCollectionsServiceTest {
 
     public static final String AUTH_TOKEN = "AuthTokien";
 
@@ -37,12 +33,10 @@ public abstract class CaseDocumentCollectionsServiceTest {
     protected EvidenceManagementDeleteService evidenceManagementDeleteService;
 
     @Mock
-    protected UploadedDocumentHelper uploadedDocumentHelper;
+    protected UploadedDocumentService uploadedDocumentHelper;
 
     @Before
     public void setUp() {
-        when(evidenceManagementDeleteService.deleteFile(any(), any()))
-            .thenReturn(ResponseEntity.ok().build());
         caseDetails = buildCaseDetails();
         caseDetailsBefore = buildCaseDetails();
         caseData = caseDetails.getData();

@@ -18,7 +18,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 
 @RunWith(MockitoJUnitRunner.class)
-public class FdrDocumentsCollectionServiceTest extends CaseDocumentCollectionsServiceTest {
+public class FdrDocumentsCollectionServiceTest extends ManageCollectionsServiceTest {
 
     @InjectMocks
     FdrDocumentsCollectionService collectionService;
@@ -58,9 +58,9 @@ public class FdrDocumentsCollectionServiceTest extends CaseDocumentCollectionsSe
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
-        collectionService.deleteRemovedDocumentFromAllPlaces(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
-            AUTH_TOKEN);
+        collectionService.removeMovedDocumentFromCollection(
+            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build()
+        );
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollection(ManageCaseDocumentsCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION),

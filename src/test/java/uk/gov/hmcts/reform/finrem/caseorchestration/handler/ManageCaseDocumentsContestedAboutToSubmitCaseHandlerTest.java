@@ -7,9 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedDocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -23,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.ConfidentialDocumentsCollectionService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.DocumentCollectionService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.FdrDocumentsCollectionService;
@@ -30,7 +29,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applic
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantOtherDocumentsCollectionService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentChronologiesStatementCollectionService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.respondent.RespondentQuestionnairesAnswersCollectionService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -43,16 +41,15 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ManageCaseDocumentsContestedAboutToSubmitCaseHandlerTest {
 
     public static final String AUTH_TOKEN = "AuthTokien";
     @Mock
-    protected EvidenceManagementDeleteService evidenceManagementDeleteService;
-    @Mock
-    private UploadedDocumentHelper uploadedDocumentHelper;
+    private UploadedDocumentService uploadedDocumentHelper;
     private RespondentChronologiesStatementCollectionService respondentChronologiesStatementCollectionService;
 
     private ApplicantChronologiesStatementCollectionService applicantChronologiesStatementCollectionService;
@@ -69,29 +66,26 @@ public class ManageCaseDocumentsContestedAboutToSubmitCaseHandlerTest {
 
     @Before
     public void setUp() {
-        when(evidenceManagementDeleteService.deleteFile(any(), any()))
-            .thenReturn(ResponseEntity.ok().build());
+
         caseDetails = buildCaseDetails();
         caseDetailsBefore = buildCaseDetails();
         caseData = caseDetails.getData();
 
         respondentChronologiesStatementCollectionService =
-            new RespondentChronologiesStatementCollectionService(evidenceManagementDeleteService);
+            new RespondentChronologiesStatementCollectionService();
         applicantOtherDocumentsCollectionService =
-            new ApplicantOtherDocumentsCollectionService(evidenceManagementDeleteService);
-        confidentialDocumentsCollectionService =
-            new ConfidentialDocumentsCollectionService(evidenceManagementDeleteService);
+            new ApplicantOtherDocumentsCollectionService();
         fdrDocumentsCollectionService =
-            new FdrDocumentsCollectionService(evidenceManagementDeleteService);
+            new FdrDocumentsCollectionService();
         respondentQuestionnairesAnswersCollectionService =
-            new RespondentQuestionnairesAnswersCollectionService(evidenceManagementDeleteService);
+            new RespondentQuestionnairesAnswersCollectionService();
         applicantChronologiesStatementCollectionService =
-            new ApplicantChronologiesStatementCollectionService(evidenceManagementDeleteService);
+            new ApplicantChronologiesStatementCollectionService();
 
         List<DocumentCollectionService> documentCollectionServices =
             Stream.of(respondentChronologiesStatementCollectionService, applicantOtherDocumentsCollectionService,
-                confidentialDocumentsCollectionService, fdrDocumentsCollectionService,
-                respondentQuestionnairesAnswersCollectionService, applicantChronologiesStatementCollectionService)
+                    fdrDocumentsCollectionService, respondentQuestionnairesAnswersCollectionService,
+                    applicantChronologiesStatementCollectionService)
                 .collect(Collectors.toList());
         FinremCaseDetailsMapper finremCaseDetailsMapper =
             new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
@@ -134,10 +128,9 @@ public class ManageCaseDocumentsContestedAboutToSubmitCaseHandlerTest {
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollection(ManageCaseDocumentsCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION),
             hasSize(1));
-        assertThat(caseData.getConfidentialDocumentsUploaded(),
-            hasSize(1));
         assertThat(caseData.getManageCaseDocumentCollection(),
             hasSize(0));
+        verify(uploadedDocumentHelper, times(1)).deleteRemovedDocuments(any(), any(), any());
     }
 
     private void setUpAddedDocuments() {
@@ -147,8 +140,6 @@ public class ManageCaseDocumentsContestedAboutToSubmitCaseHandlerTest {
             CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
             CaseDocumentParty.RESPONDENT, YesOrNo.NO, YesOrNo.NO, null));
-        screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,
-            CaseDocumentParty.APPLICANT, YesOrNo.YES, YesOrNo.NO, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.CHRONOLOGY,
             CaseDocumentParty.APPLICANT, YesOrNo.NO, YesOrNo.YES, null));
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.FORM_G,

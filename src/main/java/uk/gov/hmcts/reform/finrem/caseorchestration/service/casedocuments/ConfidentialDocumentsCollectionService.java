@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConfidentialDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConfidentialDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 
 import java.util.Comparator;
 import java.util.List;
@@ -19,13 +18,8 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @Order(1)
-public class ConfidentialDocumentsCollectionService extends DocumentCollectionService {
+public class ConfidentialDocumentsCollectionService {
 
-    public ConfidentialDocumentsCollectionService(EvidenceManagementDeleteService evidenceManagementDeleteService) {
-        super(null, evidenceManagementDeleteService);
-    }
-
-    @Override
     public void addManagedDocumentToCollection(FinremCallbackRequest callbackRequest,
                                                List<UploadCaseDocumentCollection> allScreenCollections) {
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();

@@ -7,7 +7,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,9 +17,8 @@ import java.util.stream.Collectors;
 public class FdrDocumentsCollectionService extends DocumentCollectionService {
 
 
-    public FdrDocumentsCollectionService(EvidenceManagementDeleteService evidenceManagementDeleteService) {
-        super(ManageCaseDocumentsCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION,
-            evidenceManagementDeleteService);
+    public FdrDocumentsCollectionService() {
+        super(ManageCaseDocumentsCollectionType.CONTESTED_FDR_CASE_DOCUMENT_COLLECTION);
     }
 
     protected List<UploadCaseDocumentCollection> getServiceCollectionType(

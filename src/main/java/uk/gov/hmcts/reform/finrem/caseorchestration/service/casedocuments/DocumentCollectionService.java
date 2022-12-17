@@ -7,7 +7,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
 
 import java.util.Comparator;
 import java.util.List;
@@ -18,7 +17,6 @@ import java.util.stream.Collectors;
 public abstract class DocumentCollectionService {
 
     protected final ManageCaseDocumentsCollectionType serviceCollectionType;
-    protected final EvidenceManagementDeleteService evidenceManagementDeleteService;
 
     protected abstract List<UploadCaseDocumentCollection> getServiceCollectionType(
         List<UploadCaseDocumentCollection> eventScreenDocumentCollections);
@@ -45,23 +43,15 @@ public abstract class DocumentCollectionService {
         allScreenCollections.removeAll(screenServiceCollection);
     }
 
-    public void deleteRemovedDocumentFromAllPlaces(FinremCallbackRequest callbackRequest, String authToken) {
-        if (serviceCollectionType != null) {
-            FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
-            List<UploadCaseDocumentCollection> originalDocumentCollectionForType =
-                caseData.getUploadCaseDocumentWrapper().getDocumentCollection(serviceCollectionType);
-            List<UploadCaseDocumentCollection> documentsForDeletion =
-                getDocumentsForDeletion(caseData);
-            documentsForDeletion.stream()
-                .forEach(documentForDeletion -> {
-                    originalDocumentCollectionForType.remove(documentForDeletion);
-                    evidenceManagementDeleteService.deleteFile(
-                        documentForDeletion.getUploadCaseDocument().getCaseDocuments().getDocumentUrl(), authToken);
-                });
-        }
+    public void removeMovedDocumentFromCollection(FinremCallbackRequest callbackRequest) {
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+        List<UploadCaseDocumentCollection> originalDocumentCollectionForType =
+            caseData.getUploadCaseDocumentWrapper().getDocumentCollection(serviceCollectionType);
+        List<UploadCaseDocumentCollection> documentsToRemove = getDocumentsToRemove(caseData);
+        documentsToRemove.stream().forEach(originalDocumentCollectionForType::remove);
     }
 
-    private List<UploadCaseDocumentCollection> getDocumentsForDeletion(FinremCaseData caseData) {
+    private List<UploadCaseDocumentCollection> getDocumentsToRemove(FinremCaseData caseData) {
         List<UploadCaseDocumentCollection> allScreenCollections = caseData.getManageCaseDocumentCollection();
         List<UploadCaseDocumentCollection> serviceScreenCollection = getServiceCollectionType(allScreenCollections);
         List<String> serviceScreenCollectionDocIds = serviceScreenCollection.stream()

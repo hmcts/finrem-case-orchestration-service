@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ManageCaseDocumentsCollectionType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentCollectionsServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.ManageCollectionsServiceTest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ApplicantCaseSummariesCollectionServiceTest extends CaseDocumentCollectionsServiceTest {
+public class ApplicantCaseSummariesCollectionServiceTest extends ManageCollectionsServiceTest {
 
     @InjectMocks
     ApplicantCaseSummariesCollectionService collectionService;
@@ -67,9 +67,9 @@ public class ApplicantCaseSummariesCollectionServiceTest extends CaseDocumentCol
 
         caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
-        collectionService.deleteRemovedDocumentFromAllPlaces(
-            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build(),
-            AUTH_TOKEN);
+        collectionService.removeMovedDocumentFromCollection(
+            FinremCallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build()
+        );
 
         assertThat(caseData.getUploadCaseDocumentWrapper()
                 .getDocumentCollection(ManageCaseDocumentsCollectionType.APP_CASE_SUMMARIES_COLLECTION),

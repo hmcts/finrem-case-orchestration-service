@@ -21,7 +21,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class UploadedConfidentialDocumentHelperTest {
 
-    private UploadedConfidentialDocumentHelper uploadedConfidentialDocumentHelper;
+    private UploadedConfidentialDocumentService uploadedConfidentialDocumentHelper;
     private ObjectMapper mapper = new ObjectMapper();
 
     private Map<String, Object> caseData;
@@ -29,7 +29,7 @@ public class UploadedConfidentialDocumentHelperTest {
 
     @Before
     public void setUp() {
-        uploadedConfidentialDocumentHelper = new UploadedConfidentialDocumentHelper(mapper);
+        uploadedConfidentialDocumentHelper = new UploadedConfidentialDocumentService(mapper);
 
         caseData = new HashMap<>();
         caseDataBefore = new HashMap<>();
