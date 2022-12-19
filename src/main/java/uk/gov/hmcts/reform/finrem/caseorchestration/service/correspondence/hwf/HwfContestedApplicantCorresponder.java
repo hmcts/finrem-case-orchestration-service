@@ -5,11 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.EmailOnlyApplicantCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.EmailOnlyApplicantSolicitorCorresponder;
 
 @Slf4j
 @Component
-public class HwfContestedApplicantCorresponder extends EmailOnlyApplicantCorresponder {
+public class HwfContestedApplicantCorresponder extends EmailOnlyApplicantSolicitorCorresponder {
 
     @Autowired
     public HwfContestedApplicantCorresponder(NotificationService notificationService) {
@@ -17,7 +17,7 @@ public class HwfContestedApplicantCorresponder extends EmailOnlyApplicantCorresp
     }
 
     @Override
-    protected void emailApplicant(CaseDetails caseDetails) {
+    public void emailApplicantSolicitor(CaseDetails caseDetails) {
         log.info("Sending Contested HWF Successful email notification to Solicitor");
         notificationService.sendContestedHwfSuccessfulConfirmationEmail(caseDetails);
     }

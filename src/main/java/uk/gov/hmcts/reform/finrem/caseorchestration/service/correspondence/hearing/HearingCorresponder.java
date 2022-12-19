@@ -6,11 +6,11 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.MultiLetterOrEmailAllLitigantsCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.MultiLetterOrEmailAllPartiesCorresponder;
 
 @Component
 @Slf4j
-public abstract class HearingCorresponder extends MultiLetterOrEmailAllLitigantsCorresponder {
+public abstract class HearingCorresponder extends MultiLetterOrEmailAllPartiesCorresponder {
 
     @Autowired
     public HearingCorresponder(BulkPrintService bulkPrintService,
@@ -19,12 +19,12 @@ public abstract class HearingCorresponder extends MultiLetterOrEmailAllLitigants
     }
 
     @Override
-    protected void emailApplicant(CaseDetails caseDetails) {
+    public void emailApplicantSolicitor(CaseDetails caseDetails) {
         notificationService.sendPrepareForHearingEmailApplicant(caseDetails);
     }
 
     @Override
-    protected void emailRespondent(CaseDetails caseDetails) {
+    public void emailRespondentSolicitor(CaseDetails caseDetails) {
         notificationService.sendPrepareForHearingEmailRespondent(caseDetails);
     }
 

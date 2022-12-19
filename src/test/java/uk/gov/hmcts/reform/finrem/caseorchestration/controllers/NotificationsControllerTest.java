@@ -10,6 +10,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
@@ -17,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
@@ -25,10 +28,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.H
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfContestedApplicantCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.updatefrc.UpdateFrcCorrespondenceService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.updatefrc.UpdateFrcEmailAllLitigantsCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.updatefrc.UpdateFrcLetterOrEmailAllSolicitorsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.generators.UpdateFrcInfoLetterDetailsGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.service.UpdateFrcInfoRespondentDocumentService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -51,9 +56,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(NotificationsController.class)
-@ContextConfiguration(classes = {HwfCorrespondenceService.class, HwfConsentedApplicantCorresponder.class,
-    HwfContestedApplicantCorresponder.class, UpdateFrcCorrespondenceService.class,
-    UpdateFrcEmailAllLitigantsCorresponder.class})
+@ContextConfiguration(classes = {HwfCorrespondenceService.class,
+    HwfConsentedApplicantCorresponder.class,
+    HwfContestedApplicantCorresponder.class,
+    UpdateFrcCorrespondenceService.class,
+    UpdateFrcLetterOrEmailAllSolicitorsCorresponder.class,
+    UpdateFrcInfoRespondentDocumentService.class,
+    UpdateFrcInfoLetterDetailsGenerator.class,
+    DocumentHelper.class})
 public class NotificationsControllerTest extends BaseControllerTest {
 
     @Autowired
@@ -80,7 +90,10 @@ public class NotificationsControllerTest extends BaseControllerTest {
     private CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
     @MockBean
     private BulkPrintService bulkPrintService;
-
+    @MockBean
+    private GenericDocumentService genericDocumentService;
+    @MockBean
+    private DocumentConfiguration documentConfiguration;
 
     @Test
     public void sendHwfSuccessfulConfirmationEmailIfDigitalCase() {
@@ -802,7 +815,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
         verify(notificationService, times(1)).sendUpdateFrcInformationEmailToAppSolicitor(any());
         verify(notificationService, times(1)).sendUpdateFrcInformationEmailToRespondentSolicitor(any());
         verify(notificationService, times(1)).sendUpdateFrcInformationEmailToCourt(any());
-        verify(paperNotificationService, times(1)).printUpdateFrcInformationNotification(any(), any());
     }
 
     @Test
@@ -814,7 +826,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         verify(notificationService, never()).sendUpdateFrcInformationEmailToAppSolicitor(any());
         verify(notificationService, times(1)).sendUpdateFrcInformationEmailToRespondentSolicitor(any());
         verify(notificationService, times(1)).sendUpdateFrcInformationEmailToCourt(any());
-        verify(paperNotificationService, times(1)).printUpdateFrcInformationNotification(any(), any());
+
     }
 
     @Test
@@ -826,7 +838,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
         verify(notificationService, times(1)).sendUpdateFrcInformationEmailToAppSolicitor(any());
         verify(notificationService, never()).sendUpdateFrcInformationEmailToRespondentSolicitor(any());
         verify(notificationService, times(1)).sendUpdateFrcInformationEmailToCourt(any());
-        verify(paperNotificationService, times(1)).printUpdateFrcInformationNotification(any(), any());
     }
 
     private CallbackRequest createCallbackRequestWithFinalOrder() {

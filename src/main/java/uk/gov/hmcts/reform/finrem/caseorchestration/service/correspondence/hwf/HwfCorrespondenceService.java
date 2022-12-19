@@ -19,10 +19,10 @@ public class HwfCorrespondenceService {
         log.info("Send HWF correspondence for case: {}", caseDetails.getId());
         if (caseDataService.isConsentedApplication(caseDetails)) {
             log.info("Send HWF Consented correspondence for case: {}", caseDetails.getId());
-            hwfConsentedApplicantCorresponder.sendApplicantCorrespondence(authToken, caseDetails);
+            hwfConsentedApplicantCorresponder.sendCorrespondence(caseDetails, authToken);
         } else if (caseDataService.isContestedApplication(caseDetails)) {
             log.info("Send HWF Contested correspondence for case: {}", caseDetails.getId());
-            hwfContestedApplicantCorresponder.sendApplicantEmail(caseDetails);
+            hwfContestedApplicantCorresponder.sendCorrespondence(caseDetails, authToken);
         }
     }
 

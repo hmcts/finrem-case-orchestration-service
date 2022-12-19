@@ -6,7 +6,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.service.UpdateFrcInfoRespondentDocumentService;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -14,16 +16,23 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class UpdateFrcEmailAllLitigantsCorresponderTest {
 
-    UpdateFrcEmailAllLitigantsCorresponder updateFrcEmailAllLitigantsCorresponder;
+    UpdateFrcLetterOrEmailAllSolicitorsCorresponder updateFrcEmailAllLitigantsCorresponder;
 
     @Mock
     NotificationService notificationService;
+    @Mock
+    BulkPrintService bulkPrintService;
+    @Mock
+    UpdateFrcInfoRespondentDocumentService updateFrcInfoRespondentDocumentService;
 
     private CaseDetails caseDetails;
 
+    protected static final String AUTHORISATION_TOKEN = "authorisationToken";
+
     @Before
     public void setUp() throws Exception {
-        updateFrcEmailAllLitigantsCorresponder = new UpdateFrcEmailAllLitigantsCorresponder(notificationService);
+        updateFrcEmailAllLitigantsCorresponder =
+            new UpdateFrcLetterOrEmailAllSolicitorsCorresponder(notificationService, bulkPrintService, updateFrcInfoRespondentDocumentService);
         caseDetails = CaseDetails.builder().build();
     }
 
@@ -32,7 +41,7 @@ public class UpdateFrcEmailAllLitigantsCorresponderTest {
 
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
-        updateFrcEmailAllLitigantsCorresponder.sendEmails(caseDetails);
+        updateFrcEmailAllLitigantsCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
         verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);
         verify(notificationService).isRespondentSolicitorDigitalAndEmailPopulated(caseDetails);
         verify(notificationService).sendUpdateFrcInformationEmailToAppSolicitor(caseDetails);
@@ -43,7 +52,7 @@ public class UpdateFrcEmailAllLitigantsCorresponderTest {
 
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
-        updateFrcEmailAllLitigantsCorresponder.sendEmails(caseDetails);
+        updateFrcEmailAllLitigantsCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
         verify(notificationService).isRespondentSolicitorDigitalAndEmailPopulated(caseDetails);
         verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);
         verify(notificationService).sendUpdateFrcInformationEmailToRespondentSolicitor(caseDetails);
