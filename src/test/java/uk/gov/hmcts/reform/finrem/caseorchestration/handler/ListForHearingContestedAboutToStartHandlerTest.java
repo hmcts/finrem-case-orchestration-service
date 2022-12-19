@@ -1,35 +1,29 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENTS_OPTION;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ListForHearingContestedAboutToStartHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
-    private ListForHearingContestedAboutToStartHandler handler;
-
-    @Before
-    public void setup() {
-        handler = new ListForHearingContestedAboutToStartHandler(
-            new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule())));
-    }
+    private final ListForHearingContestedAboutToStartHandler handler = new ListForHearingContestedAboutToStartHandler();
 
     @Test
     public void givenContestedCase_whenEventIsListForHearing_thenHandlerCanHandle() {
@@ -62,20 +56,16 @@ public class ListForHearingContestedAboutToStartHandlerTest {
 
     @Test
     public void givenCase_whenEventStart_thenSetDefaultOptionToNo() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response
-            = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        assertEquals(YesOrNo.NO, response.getData().getAdditionalHearingDocumentsOption());
+        CallbackRequest callbackRequest = buildCallbackRequest();
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        assertEquals(NO_VALUE, response.getData().get(ADDITIONAL_HEARING_DOCUMENTS_OPTION));
     }
 
-
-    private FinremCallbackRequest buildCallbackRequest() {
-        return FinremCallbackRequest
-            .<FinremCaseDetails>builder()
-            .eventType(EventType.LIST_FOR_HEARING)
-            .caseDetails(FinremCaseDetails.builder().id(123L)
-                .caseType(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED)
-                .data(new FinremCaseData()).build())
-            .build();
+    private CallbackRequest buildCallbackRequest() {
+        Map<String, Object> caseData = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder().id(123L).build();
+        caseDetails.setData(caseData);
+        return CallbackRequest.builder().eventId(EventType.AMEND_CASE.getCcdType())
+            .caseDetails(caseDetails).build();
     }
 }
