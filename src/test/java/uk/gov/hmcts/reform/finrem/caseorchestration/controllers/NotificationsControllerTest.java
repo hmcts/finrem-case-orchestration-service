@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -46,8 +47,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
@@ -481,7 +480,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
 
         CallbackRequest callbackRequest = buildCallbackRequest();
-        callbackRequest.getCaseDetails().setCaseTypeId(CASE_TYPE_ID_CONTESTED);
+        callbackRequest.getCaseDetails().setCaseTypeId(CaseType.CONTESTED.getCcdType());
         notificationsController.sendConsentOrderNotApprovedEmail(callbackRequest);
 
         verify(notificationService).sendContestOrderNotApprovedEmailRespondent(any());
@@ -504,7 +503,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
 
         CallbackRequest callbackRequest = buildCallbackRequest();
-        callbackRequest.getCaseDetails().setCaseTypeId(CASE_TYPE_ID_CONSENTED);
+        callbackRequest.getCaseDetails().setCaseTypeId(CaseType.CONSENTED.getCcdType());
         notificationsController.sendConsentOrderNotApprovedEmail(callbackRequest);
 
         verify(notificationService).sendConsentOrderNotApprovedEmailToRespondentSolicitor(any());
@@ -666,7 +665,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @Test
     public void givenConsentedCase_whenToggleEnabledAndShouldSendEmailToRespSolicitor_thenSendsEmail() {
         CallbackRequest callbackRequest = buildCallbackRequest();
-        callbackRequest.getCaseDetails().setCaseTypeId(CASE_TYPE_ID_CONSENTED);
+        callbackRequest.getCaseDetails().setCaseTypeId(CaseType.CONSENTED.getCcdType());
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
         notificationsController.sendConsentOrderAvailableEmail(callbackRequest);
         verify(notificationService).sendConsentOrderAvailableEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
@@ -683,7 +682,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @Test
     public void doesNotSendConsentOrderMadeEmailToRespSolicitor() {
         CallbackRequest callbackRequest = buildCallbackRequest();
-        callbackRequest.getCaseDetails().setCaseTypeId(CASE_TYPE_ID_CONSENTED);
+        callbackRequest.getCaseDetails().setCaseTypeId(CaseType.CONSENTED.getCcdType());
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
         notificationsController.sendConsentOrderMadeConfirmationEmail(callbackRequest);
         verify(notificationService, never()).sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(callbackRequest.getCaseDetails());

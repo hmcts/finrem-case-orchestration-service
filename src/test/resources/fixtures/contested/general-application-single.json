@@ -6,6 +6,7 @@
     "state": "applicationDrafted",
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
+      "typeOfApplication": "In connection to matrimonial and civil partnership proceedings",
       "propertyAdjutmentOrderDetail": [],
       "divorceUploadEvidence1": {
         "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/33482ce7-639b-48dd-bee4-61a849da50cc",
