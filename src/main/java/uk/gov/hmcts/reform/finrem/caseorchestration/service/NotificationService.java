@@ -472,6 +472,16 @@ public class NotificationService {
             || !isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails));
     }
 
+
+    public boolean shouldPrintForApplicantSolicitor(CaseDetails caseDetails) {
+        return caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())
+            && !caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails);
+    }
+
+    public boolean shouldPrintForApplicant(CaseDetails caseDetails) {
+        return !caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData());
+    }
+
     private URI buildUri(String endPoint) {
         return fromHttpUrl(notificationServiceConfiguration.getUrl()
             + notificationServiceConfiguration.getApi()

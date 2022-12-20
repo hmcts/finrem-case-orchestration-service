@@ -7,7 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.MultiLetterOrEmailAllLitigantsCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.MultiLetterOrEmailAllPartiesCorresponder;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -26,7 +26,7 @@ public abstract class HearingCorrespondenceBaseTest {
     @Mock
     DocumentHelper documentHelper;
     CaseDetails caseDetails;
-    MultiLetterOrEmailAllLitigantsCorresponder applicantAndRespondentMultiLetterCorresponder;
+    MultiLetterOrEmailAllPartiesCorresponder applicantAndRespondentMultiLetterCorresponder;
 
 
     @Test
@@ -35,7 +35,7 @@ public abstract class HearingCorrespondenceBaseTest {
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
 
-        applicantAndRespondentMultiLetterCorresponder.sendApplicantAndRespondentCorrespondence("authToken", caseDetails);
+        applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, "authToken");
 
         verify(notificationService).sendPrepareForHearingEmailRespondent(caseDetails);
         verify(notificationService).sendPrepareForHearingEmailApplicant(caseDetails);
@@ -48,7 +48,7 @@ public abstract class HearingCorrespondenceBaseTest {
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
 
-        applicantAndRespondentMultiLetterCorresponder.sendApplicantAndRespondentCorrespondence("authToken", caseDetails);
+        applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, "authToken");
 
         verify(bulkPrintService).printRespondentDocuments(any(CaseDetails.class), anyString(), anyList());
     }
@@ -59,7 +59,7 @@ public abstract class HearingCorrespondenceBaseTest {
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
 
-        applicantAndRespondentMultiLetterCorresponder.sendApplicantAndRespondentCorrespondence("authToken", caseDetails);
+        applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, "authToken");
 
         verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), anyString(), anyList());
         verify(notificationService).sendPrepareForHearingEmailRespondent(caseDetails);
@@ -72,7 +72,7 @@ public abstract class HearingCorrespondenceBaseTest {
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
 
-        applicantAndRespondentMultiLetterCorresponder.sendApplicantAndRespondentCorrespondence("authToken", caseDetails);
+        applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, "authToken");
 
         verify(bulkPrintService).printRespondentDocuments(any(CaseDetails.class), anyString(), anyList());
         verify(notificationService).sendPrepareForHearingEmailApplicant(caseDetails);

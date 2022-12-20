@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
@@ -32,10 +33,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.H
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfContestedApplicantCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.updatefrc.UpdateFrcCorrespondenceService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.updatefrc.UpdateFrcEmailAllLitigantsCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.updatefrc.UpdateFrcLetterOrEmailAllSolicitorsCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.generators.UpdateFrcInfoLetterDetailsGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.service.UpdateFrcInfoRespondentDocumentService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,8 +51,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
@@ -58,9 +59,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(NotificationsController.class)
-@ContextConfiguration(classes = {HwfCorrespondenceService.class, HwfConsentedApplicantCorresponder.class,
-    HwfContestedApplicantCorresponder.class, UpdateFrcCorrespondenceService.class,
-    UpdateFrcEmailAllLitigantsCorresponder.class, AssignToJudgeCorrespondenceService.class, AssignToJudgeRespondentCorresponder.class,
+@ContextConfiguration(classes = {HwfCorrespondenceService.class,
+    HwfConsentedApplicantCorresponder.class,
+    HwfContestedApplicantCorresponder.class,
+    UpdateFrcCorrespondenceService.class,
+    UpdateFrcLetterOrEmailAllSolicitorsCorresponder.class,
+    UpdateFrcInfoRespondentDocumentService.class,
+    UpdateFrcInfoLetterDetailsGenerator.class,
+    DocumentHelper.class, AssignToJudgeCorrespondenceService.class, AssignToJudgeRespondentCorresponder.class,
     AssignToJudgeApplicantCorresponder.class, AssignedToJudgeDocumentService.class})
 public class NotificationsControllerTest extends BaseControllerTest {
 
@@ -480,7 +486,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
 
         CallbackRequest callbackRequest = buildCallbackRequest();
-        callbackRequest.getCaseDetails().setCaseTypeId(CASE_TYPE_ID_CONTESTED);
+        callbackRequest.getCaseDetails().setCaseTypeId(CaseType.CONTESTED.getCcdType());
         notificationsController.sendConsentOrderNotApprovedEmail(callbackRequest);
 
         verify(notificationService).sendContestOrderNotApprovedEmailRespondent(any());
@@ -503,7 +509,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
 
         CallbackRequest callbackRequest = buildCallbackRequest();
-        callbackRequest.getCaseDetails().setCaseTypeId(CASE_TYPE_ID_CONSENTED);
+        callbackRequest.getCaseDetails().setCaseTypeId(CaseType.CONSENTED.getCcdType());
         notificationsController.sendConsentOrderNotApprovedEmail(callbackRequest);
 
         verify(notificationService).sendConsentOrderNotApprovedEmailToRespondentSolicitor(any());
@@ -665,7 +671,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @Test
     public void givenConsentedCase_whenToggleEnabledAndShouldSendEmailToRespSolicitor_thenSendsEmail() {
         CallbackRequest callbackRequest = buildCallbackRequest();
-        callbackRequest.getCaseDetails().setCaseTypeId(CASE_TYPE_ID_CONSENTED);
+        callbackRequest.getCaseDetails().setCaseTypeId(CaseType.CONSENTED.getCcdType());
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
         notificationsController.sendConsentOrderAvailableEmail(callbackRequest);
         verify(notificationService).sendConsentOrderAvailableEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
@@ -682,7 +688,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @Test
     public void doesNotSendConsentOrderMadeEmailToRespSolicitor() {
         CallbackRequest callbackRequest = buildCallbackRequest();
-        callbackRequest.getCaseDetails().setCaseTypeId(CASE_TYPE_ID_CONSENTED);
+        callbackRequest.getCaseDetails().setCaseTypeId(CaseType.CONSENTED.getCcdType());
         when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
         notificationsController.sendConsentOrderMadeConfirmationEmail(callbackRequest);
         verify(notificationService, never()).sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
@@ -814,7 +820,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
         verify(notificationService, times(1)).sendUpdateFrcInformationEmailToAppSolicitor(any());
         verify(notificationService, times(1)).sendUpdateFrcInformationEmailToRespondentSolicitor(any());
         verify(notificationService, times(1)).sendUpdateFrcInformationEmailToCourt(any());
-        verify(paperNotificationService, times(1)).printUpdateFrcInformationNotification(any(), any());
     }
 
     @Test
@@ -826,7 +831,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         verify(notificationService, never()).sendUpdateFrcInformationEmailToAppSolicitor(any());
         verify(notificationService, times(1)).sendUpdateFrcInformationEmailToRespondentSolicitor(any());
         verify(notificationService, times(1)).sendUpdateFrcInformationEmailToCourt(any());
-        verify(paperNotificationService, times(1)).printUpdateFrcInformationNotification(any(), any());
+
     }
 
     @Test
@@ -838,7 +843,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
         verify(notificationService, times(1)).sendUpdateFrcInformationEmailToAppSolicitor(any());
         verify(notificationService, never()).sendUpdateFrcInformationEmailToRespondentSolicitor(any());
         verify(notificationService, times(1)).sendUpdateFrcInformationEmailToCourt(any());
-        verify(paperNotificationService, times(1)).printUpdateFrcInformationNotification(any(), any());
     }
 
     private CallbackRequest createCallbackRequestWithFinalOrder() {

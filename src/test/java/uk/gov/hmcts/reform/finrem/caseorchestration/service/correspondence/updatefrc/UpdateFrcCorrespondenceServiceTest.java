@@ -8,7 +8,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 
 import static org.mockito.Mockito.verify;
 
@@ -18,18 +17,16 @@ public class UpdateFrcCorrespondenceServiceTest {
     protected static final String AUTH_TOKEN = "authToken";
     UpdateFrcCorrespondenceService updateFrcCorrespondenceService;
     @Mock
-    UpdateFrcEmailAllLitigantsCorresponder updateFrcEmailAllLitigantsCorresponder;
+    UpdateFrcLetterOrEmailAllSolicitorsCorresponder updateFrcEmailAllLitigantsCorresponder;
     @Mock
     NotificationService notificationService;
-    @Mock
-    PaperNotificationService paperNotificationService;
 
     private CaseDetails caseDetails;
 
     @Before
     public void setUp() throws Exception {
         updateFrcCorrespondenceService =
-            new UpdateFrcCorrespondenceService(updateFrcEmailAllLitigantsCorresponder, notificationService, paperNotificationService);
+            new UpdateFrcCorrespondenceService(updateFrcEmailAllLitigantsCorresponder, notificationService);
         caseDetails = CaseDetails.builder().build();
     }
 
@@ -37,9 +34,8 @@ public class UpdateFrcCorrespondenceServiceTest {
     public void shouldSendCorrespondence() throws JsonProcessingException {
 
         updateFrcCorrespondenceService.sendCorrespondence(caseDetails, AUTH_TOKEN);
-
-        verify(updateFrcEmailAllLitigantsCorresponder).sendEmails(caseDetails);
+        verify(updateFrcEmailAllLitigantsCorresponder).sendCorrespondence(caseDetails, AUTH_TOKEN);
         verify(notificationService).sendUpdateFrcInformationEmailToCourt(caseDetails);
-        verify(paperNotificationService).printUpdateFrcInformationNotification(caseDetails, AUTH_TOKEN);
+
     }
 }

@@ -67,7 +67,7 @@ public class RemovedSolicitorService {
 
         final String litigantOrgPolicy = isApplicant ? APPLICANT_ORGANISATION_POLICY : RESPONDENT_ORGANISATION_POLICY;
 
-        if (caseData.get(getLitigantRepresentedKey(caseDetails, isApplicant)).equals(YES_VALUE)) {
+        if (YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(getLitigantRepresentedKey(caseDetails, isApplicant))))) {
             return ChangedRepresentative.builder()
                 .name(getSolicitorName(caseDetails, isApplicant))
                 .email(getSolicitorEmail(caseDetails, isApplicant))

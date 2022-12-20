@@ -21,20 +21,20 @@ public abstract class SingleLetterOrEmailApplicantCorresponder extends Correspon
         this.bulkPrintService = bulkPrintService;
     }
 
-    public void sendApplicantCorrespondence(String authorisationToken, CaseDetails caseDetails) {
+    @Override
+    public void sendCorrespondence(CaseDetails caseDetails, String authToken) {
 
         if (shouldSendApplicantSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to applicant for case: {}", caseDetails.getId());
-            this.emailApplicant(caseDetails);
+            this.emailApplicantSolicitor(caseDetails);
         } else {
             log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
-            bulkPrintService.sendDocumentForPrint(getDocumentToPrint(caseDetails, authorisationToken), caseDetails);
+            bulkPrintService.sendDocumentForPrint(getDocumentToPrint(caseDetails, authToken), caseDetails);
         }
     }
 
     public abstract CaseDocument getDocumentToPrint(CaseDetails caseDetails, String authorisationToken);
 
-    protected abstract void emailApplicant(CaseDetails caseDetails);
-
+    protected abstract void emailApplicantSolicitor(CaseDetails caseDetails);
 
 }

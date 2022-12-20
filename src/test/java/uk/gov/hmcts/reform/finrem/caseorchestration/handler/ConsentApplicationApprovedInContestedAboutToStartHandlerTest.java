@@ -5,22 +5,18 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_DIRECTION_JUDGE_NAME;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ConsentApplicationApprovedInContestedAboutToStartHandlerTest {
@@ -62,22 +58,24 @@ public class ConsentApplicationApprovedInContestedAboutToStartHandlerTest {
     @Test
     public void givenContestedCase_whenEventExecuted_thenSetTheLoggedInUserIfNull() {
         when(service.getIdamFullName(AUTH_TOKEN)).thenReturn("Moj Judge");
-        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(buildCallbackRequest(null), AUTH_TOKEN);
-        assertEquals("Moj Judge", response.getData().get(CONTESTED_ORDER_DIRECTION_JUDGE_NAME));
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest(null), AUTH_TOKEN);
+        assertEquals("Moj Judge", response.getData().getConsentOrderWrapper().getConsentJudgeName());
     }
 
     @Test
     public void givenContestedCase_whenEventExecuted_thenDoNotSetIfUserIsAlreadyThere() {
-        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(buildCallbackRequest("HM Moj Judge"), AUTH_TOKEN);
-        assertEquals("HM Moj Judge", response.getData().get(CONTESTED_ORDER_DIRECTION_JUDGE_NAME));
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest("HM Moj Judge"), AUTH_TOKEN);
+        assertEquals("HM Moj Judge", response.getData().getConsentOrderWrapper().getConsentJudgeName());
     }
 
-    private CallbackRequest buildCallbackRequest(String judgeName) {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(CONTESTED_ORDER_DIRECTION_JUDGE_NAME, judgeName);
-        CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CaseType.CONTESTED.getCcdType())
-            .id(123L).data(caseData).build();
-        return CallbackRequest.builder()
-            .eventId(EventType.CONSENT_APPLICATION_APPROVED_IN_CONTESTED.getCcdType()).caseDetails(caseDetails).build();
+    private FinremCallbackRequest callbackRequest(String judgeName) {
+        FinremCaseData finremCaseData = new FinremCaseData();
+        finremCaseData.getConsentOrderWrapper().setConsentJudgeName(judgeName);
+        return FinremCallbackRequest
+            .<FinremCaseDetails>builder()
+            .eventType(EventType.CONSENT_APPLICATION_APPROVED_IN_CONTESTED)
+            .caseDetails(FinremCaseDetails.builder().id(123L)
+                .data(finremCaseData).build())
+            .build();
     }
 }

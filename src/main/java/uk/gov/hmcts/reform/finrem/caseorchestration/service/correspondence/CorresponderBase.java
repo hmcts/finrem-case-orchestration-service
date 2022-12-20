@@ -13,6 +13,8 @@ public abstract class CorresponderBase {
 
     protected final NotificationService notificationService;
 
+    public abstract void sendCorrespondence(CaseDetails caseDetails, String authToken);
+
     protected boolean shouldSendApplicantSolicitorEmail(CaseDetails caseDetails) {
         return notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);
     }
@@ -20,4 +22,5 @@ public abstract class CorresponderBase {
     protected boolean shouldSendRespondentSolicitorEmail(CaseDetails caseDetails) {
         return notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails);
     }
+
 }

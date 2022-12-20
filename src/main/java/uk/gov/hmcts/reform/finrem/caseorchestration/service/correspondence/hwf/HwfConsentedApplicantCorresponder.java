@@ -35,7 +35,7 @@ public class HwfConsentedApplicantCorresponder extends SingleLetterOrEmailApplic
     }
 
     @Override
-    protected void emailApplicant(CaseDetails caseDetails) {
+    protected void emailApplicantSolicitor(CaseDetails caseDetails) {
         log.info("Sending Consented HWF Successful email notification to Solicitor");
         notificationService.sendConsentedHWFSuccessfulConfirmationEmail(caseDetails);
     }
