@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.approvedordernotice.ApprovedOrderNoticeOfHearingApplicantCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.approvedordernotice.ApprovedOrderNoticeOfHearingCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.approvedordernotice.ApprovedOrderNoticeOfHearingDocumentsGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.approvedordernotice.ApprovedOrderNoticeOfHearingRespondentCorresponder;
 
 import java.util.List;
@@ -23,21 +24,23 @@ public class ApprovedOrderNoticeOfHearingCorrespondenceHandlerTest extends Heari
     private static final String LATEST_DRAFT_ORDER_DOCUMENT_BIN_URL = "http://dm-store/1frea-ldo-doc/binary";
     private static final String GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL = "http://dm-store/1f3a-gads-doc/binary";
 
-
     private ObjectMapper objectMapper = new ObjectMapper();
-
 
     ApprovedOrderNoticeOfHearingApplicantCorresponder approvedOrderNoticeOfHearingApplicantCorresponder;
     ApprovedOrderNoticeOfHearingRespondentCorresponder approvedOrderNoticeOfHearingRespondentCorresponder;
+    ApprovedOrderNoticeOfHearingDocumentsGenerator approvedOrderNoticeOfHearingDocumentsGenerator;
 
     @Before
     public void setUp() throws Exception {
         objectMapper = new ObjectMapper();
+        approvedOrderNoticeOfHearingDocumentsGenerator = new ApprovedOrderNoticeOfHearingDocumentsGenerator(documentHelper, objectMapper);
         approvedOrderNoticeOfHearingApplicantCorresponder =
-            new ApprovedOrderNoticeOfHearingApplicantCorresponder(notificationService, bulkPrintService, documentHelper, objectMapper);
+            new ApprovedOrderNoticeOfHearingApplicantCorresponder(notificationService, bulkPrintService,
+                approvedOrderNoticeOfHearingDocumentsGenerator);
 
         approvedOrderNoticeOfHearingRespondentCorresponder =
-            new ApprovedOrderNoticeOfHearingRespondentCorresponder(notificationService, bulkPrintService, documentHelper, objectMapper);
+            new ApprovedOrderNoticeOfHearingRespondentCorresponder(notificationService, bulkPrintService,
+                approvedOrderNoticeOfHearingDocumentsGenerator);
 
         applicantAndRespondentMultiLetterCorresponder =
             new ApprovedOrderNoticeOfHearingCorresponder(approvedOrderNoticeOfHearingApplicantCorresponder,
