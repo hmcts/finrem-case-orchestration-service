@@ -22,7 +22,7 @@ public enum NatureApplication {
     A_SETTLEMENT_OR_A_TRANSFER_OF_PROPERTY("A settlement or a transfer of property",
         "A settlement or a transfer of property for the benefit of the child(ren)"),
     PROPERTY_ADJUSTMENT_ORDER("propertyAdjustmentOrder", "Property Adjustment Order"),
-    VARIATION_ORDER("variationOrder", "Variation Order"),
+    VARIATION_ORDER("Variation Order", "Variation Order"),
     CONSENTED_PERIODICAL_PAYMENT_ORDER("Periodical Payment Order", "Periodical Payment Order"),
     CONSENTED_PROPERTY_ADJUSTMENT_ORDER("Property Adjustment Order", "Property Adjustment Order");
 
