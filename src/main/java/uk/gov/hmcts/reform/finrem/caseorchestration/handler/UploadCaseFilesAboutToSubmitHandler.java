@@ -23,16 +23,19 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UploadCaseFilesAboutToSubmitHandler implements CallbackHandler<Map<String, Object>> {
+
     public static final String TRIAL_BUNDLE_SELECTED_ERROR =
         "To upload a hearing bundle please use the Manage hearing "
             + "bundles event which can be found on the drop-down list on the home page";
     public static final String TRIAL_BUNDLE_TYPE = "Trial Bundle";
     private final FeatureToggleService featureToggleService;
     private final ObjectMapper objectMapper;
+
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
@@ -73,6 +76,7 @@ public class UploadCaseFilesAboutToSubmitHandler implements CallbackHandler<Map<
 
         return Optional.ofNullable(contestedUploadDocuments).orElse(new ArrayList<>());
     }
+
     private boolean isTrialBundleSelectedInAnyUploadedFile(Map<String, Object> caseData) {
         return !getTrialBundleUploadedList(getDocumentCollection(caseData)).isEmpty();
     }
