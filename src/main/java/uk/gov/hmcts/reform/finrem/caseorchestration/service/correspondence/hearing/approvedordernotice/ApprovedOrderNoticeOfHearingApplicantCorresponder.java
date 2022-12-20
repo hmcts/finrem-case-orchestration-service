@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.approvedordernotice;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.MultiLetterOrEmailApplicantCorresponder;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,21 +21,26 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @Component
 @Slf4j
-public class ApprovedOrderNoticeOfHearingCorresponder extends HearingCorresponder {
+public class ApprovedOrderNoticeOfHearingApplicantCorresponder extends MultiLetterOrEmailApplicantCorresponder {
 
-    private final ObjectMapper objectMapper;
+
     private final DocumentHelper documentHelper;
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    public ApprovedOrderNoticeOfHearingCorresponder(BulkPrintService bulkPrintService,
-                                                    NotificationService notificationService,
-                                                    ObjectMapper objectMapper, DocumentHelper documentHelper) {
-        super(bulkPrintService, notificationService);
-        this.objectMapper = objectMapper;
+    public ApprovedOrderNoticeOfHearingApplicantCorresponder(NotificationService notificationService,
+                                                             BulkPrintService bulkPrintService,
+                                                             DocumentHelper documentHelper, ObjectMapper objectMapper) {
+        super(notificationService, bulkPrintService);
         this.documentHelper = documentHelper;
+        this.objectMapper = objectMapper;
     }
 
     @Override
+    protected void emailSolicitor(CaseDetails caseDetails) {
+        notificationService.sendPrepareForHearingEmailApplicant(caseDetails);
+    }
+
     public List<BulkPrintDocument> getDocumentsToPrint(CaseDetails caseDetails) {
         List<CaseDocument> hearingNoticePack = getHearingNoticeDocumentPackFromCaseData(caseDetails);
         List<BulkPrintDocument> documentsToPrint = documentHelper.getCaseDocumentsAsBulkPrintDocuments(hearingNoticePack);
@@ -51,6 +57,4 @@ public class ApprovedOrderNoticeOfHearingCorresponder extends HearingCorresponde
             .map(Element::getValue)
             .collect(Collectors.toList());
     }
-
-
 }

@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.formcandg;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.MultiLetterOrEmailRespondentCorresponder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,18 +27,23 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @Component
 @Slf4j
-public class FormCandGCorresponder extends HearingCorresponder {
+public class FormCandGRespondentCorresponder extends MultiLetterOrEmailRespondentCorresponder {
 
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public FormCandGCorresponder(BulkPrintService bulkPrintService,
-                                 NotificationService notificationService,
-                                 DocumentHelper documentHelper, ObjectMapper objectMapper) {
-        super(bulkPrintService, notificationService);
+    public FormCandGRespondentCorresponder(NotificationService notificationService,
+                                           BulkPrintService bulkPrintService,
+                                           DocumentHelper documentHelper, ObjectMapper objectMapper) {
+        super(notificationService, bulkPrintService);
         this.documentHelper = documentHelper;
         this.objectMapper = objectMapper;
+    }
+
+    @Override
+    protected void emailSolicitor(CaseDetails caseDetails) {
+        notificationService.sendPrepareForHearingEmailRespondent(caseDetails);
     }
 
     @Override
@@ -67,6 +73,5 @@ public class FormCandGCorresponder extends HearingCorresponder {
 
         return caseDocuments;
     }
-
 
 }

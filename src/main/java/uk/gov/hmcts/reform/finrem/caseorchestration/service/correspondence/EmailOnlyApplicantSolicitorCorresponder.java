@@ -8,7 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 @Component
 @Slf4j
-public abstract class EmailOnlyApplicantSolicitorCorresponder extends CorresponderBase  {
+public abstract class EmailOnlyApplicantSolicitorCorresponder extends CorresponderBase {
 
     @Autowired
     public EmailOnlyApplicantSolicitorCorresponder(NotificationService notificationService) {
@@ -17,11 +17,14 @@ public abstract class EmailOnlyApplicantSolicitorCorresponder extends Correspond
 
     @Override
     public void sendCorrespondence(CaseDetails caseDetails, String authToken) {
-        if (shouldSendApplicantSolicitorEmail(caseDetails)) {
+        if (shouldSendEmail(caseDetails)) {
             log.info("Sending email correspondence to applicant for case: {}", caseDetails.getId());
-            this.emailApplicantSolicitor(caseDetails);
+            this.emailSolicitor(caseDetails);
         }
     }
 
-    protected abstract void emailApplicantSolicitor(CaseDetails caseDetails);
+    @Override
+    protected boolean shouldSendEmail(CaseDetails caseDetails) {
+        return notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);
+    }
 }

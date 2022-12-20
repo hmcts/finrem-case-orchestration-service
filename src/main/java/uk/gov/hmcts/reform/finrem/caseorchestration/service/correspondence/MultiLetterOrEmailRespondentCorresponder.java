@@ -10,11 +10,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 @Component
 @Slf4j
-public abstract class SingleLetterOrEmailRespondentCorresponder extends SingleLetterOrEmailCorresponderBase {
+public abstract class MultiLetterOrEmailRespondentCorresponder extends MultiLetterOrEmailCorresponderBase {
 
     @Autowired
-    public SingleLetterOrEmailRespondentCorresponder(NotificationService notificationService,
-                                                     BulkPrintService bulkPrintService) {
+    public MultiLetterOrEmailRespondentCorresponder(NotificationService notificationService,
+                                                    BulkPrintService bulkPrintService) {
         super(notificationService, bulkPrintService);
 
     }
@@ -28,5 +28,4 @@ public abstract class SingleLetterOrEmailRespondentCorresponder extends SingleLe
     protected boolean shouldSendEmail(CaseDetails caseDetails) {
         return notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails);
     }
-
 }

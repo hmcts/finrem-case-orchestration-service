@@ -10,21 +10,21 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AssignToJudgeCorrespondenceServiceTest {
+public class AssignToJudgeCorresponderTest {
 
     @Mock
     AssignToJudgeRespondentCorresponder assignToJudgeRespondentCorresponder;
     @Mock
     AssignToJudgeApplicantCorresponder assignToJudgeApplicantCorresponder;
 
-    AssignToJudgeCorrespondenceService assignToJudgeCorrespondenceService;
+    AssignToJudgeCorresponder assignToJudgeCorrespondenceService;
 
     private CaseDetails caseDetails;
 
     @Before
     public void setUp() throws Exception {
         assignToJudgeCorrespondenceService =
-            new AssignToJudgeCorrespondenceService(assignToJudgeApplicantCorresponder, assignToJudgeRespondentCorresponder);
+            new AssignToJudgeCorresponder(assignToJudgeApplicantCorresponder, assignToJudgeRespondentCorresponder);
         caseDetails = CaseDetails.builder().build();
     }
 

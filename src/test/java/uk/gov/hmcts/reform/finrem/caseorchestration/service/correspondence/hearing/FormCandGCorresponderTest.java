@@ -2,20 +2,17 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hear
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.formcandg.FormCandGApplicantCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.formcandg.FormCandGCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.formcandg.FormCandGRespondentCorresponder;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.singletonList;
-import static org.junit.Assert.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.pensionDocumentData;
@@ -30,22 +27,23 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RunWith(MockitoJUnitRunner.class)
 public class FormCandGCorresponderTest extends HearingCorrespondenceBaseTest {
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    FormCandGApplicantCorresponder multiLetterOrEmailApplicantCorresponder;
+    FormCandGRespondentCorresponder multiLetterOrEmailRespondentCorresponde;
 
     private static final String DATE_OF_HEARING = "2019-01-01";
 
     @Before
     public void setUp() throws Exception {
         caseDetails = caseDetails(NO_VALUE);
-        applicantAndRespondentMultiLetterCorresponder =
-            new FormCandGCorresponder(bulkPrintService, notificationService,
-                new DocumentHelper(objectMapper, new CaseDataService()), objectMapper);
-    }
+        multiLetterOrEmailApplicantCorresponder =
+            new FormCandGApplicantCorresponder(notificationService, bulkPrintService, documentHelper, new ObjectMapper());
 
-    @Test
-    public void getDocumentsToPrint() {
-        List<BulkPrintDocument> documentsToPrint = applicantAndRespondentMultiLetterCorresponder.getDocumentsToPrint(caseDetails);
-        assertEquals(5, documentsToPrint.size());
+        multiLetterOrEmailRespondentCorresponde =
+            new FormCandGRespondentCorresponder(notificationService, bulkPrintService, documentHelper, new ObjectMapper());
+
+        applicantAndRespondentMultiLetterCorresponder = new FormCandGCorresponder(
+            multiLetterOrEmailApplicantCorresponder,
+            multiLetterOrEmailRespondentCorresponde);
     }
 
     private CaseDetails caseDetails(String isFastTrackDecision) {

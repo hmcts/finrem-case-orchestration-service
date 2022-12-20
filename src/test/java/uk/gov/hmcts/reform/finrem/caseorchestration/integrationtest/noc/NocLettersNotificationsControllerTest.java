@@ -23,7 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocum
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.AssignToJudgeCorrespondenceService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
 
 import java.util.Collections;
@@ -59,7 +59,7 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
     @MockBean
     private AssignCaseAccessService assignCaseAccessService;
     @MockBean
-    private AssignToJudgeCorrespondenceService assignToJudgeCorrespondenceService;
+    private AssignToJudgeCorresponder assignToJudgeCorrespondenceService;
     @MockBean
     private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
     @Autowired

@@ -46,7 +46,8 @@ public class HwfConsentedApplicantCorresponderTest {
     @Test
     public void shouldGetDocumentToPrint() {
 
-        CaseDocument result = hwfConsentedApplicantCorresponder.getDocumentToPrint(caseDetails, AUTHORISATION_TOKEN);
+        CaseDocument result = hwfConsentedApplicantCorresponder.getDocumentToPrint(caseDetails, AUTHORISATION_TOKEN,
+            DocumentHelper.PaperNotificationRecipient.APPLICANT);
         assertEquals(caseDocument, result);
         verify(helpWithFessDocumentService).generateHwfSuccessfulNotificationLetter(caseDetails, AUTHORISATION_TOKEN,
             DocumentHelper.PaperNotificationRecipient.APPLICANT);

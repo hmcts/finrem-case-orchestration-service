@@ -46,7 +46,8 @@ public class AssignToJudgeApplicantCorresponderTest {
 
     @Test
     public void shouldGetDocumentToPrint() {
-        CaseDocument result = assignToJudgeApplicantCorresponder.getDocumentToPrint(caseDetails, AUTHORISATION_TOKEN);
+        CaseDocument result = assignToJudgeApplicantCorresponder.getDocumentToPrint(caseDetails, AUTHORISATION_TOKEN,
+            DocumentHelper.PaperNotificationRecipient.APPLICANT);
         assertEquals(caseDocument, result);
         verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(caseDetails, AUTHORISATION_TOKEN,
             DocumentHelper.PaperNotificationRecipient.APPLICANT);
@@ -55,7 +56,7 @@ public class AssignToJudgeApplicantCorresponderTest {
     @Test
     public void shouldSendLetterToApplicant() {
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
-        assignToJudgeApplicantCorresponder.sendCorrespondence(caseDetails,AUTHORISATION_TOKEN);
+        assignToJudgeApplicantCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
         verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails);
     }
 
@@ -63,7 +64,7 @@ public class AssignToJudgeApplicantCorresponderTest {
     public void shouldSendEmailToApplicant() {
 
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
-        assignToJudgeApplicantCorresponder.sendCorrespondence(caseDetails,AUTHORISATION_TOKEN);
+        assignToJudgeApplicantCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
         verify(notificationService).sendAssignToJudgeConfirmationEmailToApplicantSolicitor(caseDetails);
     }
 }

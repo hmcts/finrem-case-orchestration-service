@@ -4,13 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SingleLetterOrEmailApplicantCorresponder;
-
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 
 @Component
 @Slf4j
@@ -25,14 +24,15 @@ public class AssignToJudgeApplicantCorresponder extends SingleLetterOrEmailAppli
         this.assignedToJudgeDocumentService = assignedToJudgeDocumentService;
     }
 
+
     @Override
-    public CaseDocument getDocumentToPrint(CaseDetails caseDetails, String authorisationToken) {
-        return assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(
-            caseDetails, authorisationToken, APPLICANT);
+    protected void emailSolicitor(CaseDetails caseDetails) {
+        notificationService.sendAssignToJudgeConfirmationEmailToApplicantSolicitor(caseDetails);
     }
 
     @Override
-    protected void emailApplicantSolicitor(CaseDetails caseDetails) {
-        notificationService.sendAssignToJudgeConfirmationEmailToApplicantSolicitor(caseDetails);
+    public CaseDocument getDocumentToPrint(CaseDetails caseDetails, String authorisationToken, DocumentHelper.PaperNotificationRecipient recipient) {
+        return assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(
+            caseDetails, authorisationToken, recipient);
     }
 }

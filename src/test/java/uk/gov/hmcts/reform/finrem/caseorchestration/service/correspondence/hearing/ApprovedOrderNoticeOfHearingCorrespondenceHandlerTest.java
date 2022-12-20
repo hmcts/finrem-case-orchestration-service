@@ -2,19 +2,17 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hear
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.approvedordernotice.ApprovedOrderNoticeOfHearingApplicantCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.approvedordernotice.ApprovedOrderNoticeOfHearingCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.approvedordernotice.ApprovedOrderNoticeOfHearingRespondentCorresponder;
 
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NOTICE_DOCUMENT_PACK;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element.element;
@@ -29,22 +27,24 @@ public class ApprovedOrderNoticeOfHearingCorrespondenceHandlerTest extends Heari
     private ObjectMapper objectMapper = new ObjectMapper();
 
 
+    ApprovedOrderNoticeOfHearingApplicantCorresponder approvedOrderNoticeOfHearingApplicantCorresponder;
+    ApprovedOrderNoticeOfHearingRespondentCorresponder approvedOrderNoticeOfHearingRespondentCorresponder;
+
     @Before
     public void setUp() throws Exception {
         objectMapper = new ObjectMapper();
+        approvedOrderNoticeOfHearingApplicantCorresponder =
+            new ApprovedOrderNoticeOfHearingApplicantCorresponder(notificationService, bulkPrintService, documentHelper, objectMapper);
+
+        approvedOrderNoticeOfHearingRespondentCorresponder =
+            new ApprovedOrderNoticeOfHearingRespondentCorresponder(notificationService, bulkPrintService, documentHelper, objectMapper);
+
         applicantAndRespondentMultiLetterCorresponder =
-            new ApprovedOrderNoticeOfHearingCorresponder(bulkPrintService, notificationService,
-                objectMapper, documentHelper);
+            new ApprovedOrderNoticeOfHearingCorresponder(approvedOrderNoticeOfHearingApplicantCorresponder,
+                approvedOrderNoticeOfHearingRespondentCorresponder);
         caseDetails = caseDetailsFromResource("/fixtures/general-application-directions.json", objectMapper);
         caseDetails.getData().put(HEARING_NOTICE_DOCUMENT_PACK, buildHearingNoticePack());
 
-    }
-
-    @Test
-    public void shouldGetDocumentsToPrint() {
-        when(documentHelper.getCaseDocumentsAsBulkPrintDocuments(anyList())).thenReturn(List.of(getBulkPrintDocument(), getBulkPrintDocument()));
-        List<BulkPrintDocument> documentsToPrint = applicantAndRespondentMultiLetterCorresponder.getDocumentsToPrint(caseDetails);
-        assertEquals(2, documentsToPrint.size());
     }
 
 

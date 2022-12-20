@@ -10,23 +10,22 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 @Component
 @Slf4j
-public abstract class SingleLetterOrEmailRespondentCorresponder extends SingleLetterOrEmailCorresponderBase {
+public abstract class MultiLetterOrEmailApplicantCorresponder extends MultiLetterOrEmailCorresponderBase {
 
     @Autowired
-    public SingleLetterOrEmailRespondentCorresponder(NotificationService notificationService,
-                                                     BulkPrintService bulkPrintService) {
+    public MultiLetterOrEmailApplicantCorresponder(NotificationService notificationService,
+                                                   BulkPrintService bulkPrintService) {
         super(notificationService, bulkPrintService);
 
     }
 
     @Override
     protected DocumentHelper.PaperNotificationRecipient getRecipient() {
-        return DocumentHelper.PaperNotificationRecipient.RESPONDENT;
+        return DocumentHelper.PaperNotificationRecipient.APPLICANT;
     }
 
     @Override
     protected boolean shouldSendEmail(CaseDetails caseDetails) {
-        return notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails);
+        return notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);
     }
-
 }

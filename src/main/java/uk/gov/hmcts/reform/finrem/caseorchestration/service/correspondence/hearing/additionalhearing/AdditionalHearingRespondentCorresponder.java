@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.additionalhearing;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.MultiLetterOrEmailRespondentCorresponder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,16 +19,21 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @Component
 @Slf4j
-public class AdditionalHearingCorresponder extends HearingCorresponder {
+public class AdditionalHearingRespondentCorresponder extends MultiLetterOrEmailRespondentCorresponder {
 
     private final DocumentHelper documentHelper;
 
     @Autowired
-    public AdditionalHearingCorresponder(BulkPrintService bulkPrintService,
-                                         NotificationService notificationService,
-                                         DocumentHelper documentHelper) {
-        super(bulkPrintService, notificationService);
+    public AdditionalHearingRespondentCorresponder(NotificationService notificationService,
+                                                   BulkPrintService bulkPrintService,
+                                                   DocumentHelper documentHelper) {
+        super(notificationService, bulkPrintService);
         this.documentHelper = documentHelper;
+    }
+
+    @Override
+    protected void emailSolicitor(CaseDetails caseDetails) {
+        notificationService.sendPrepareForHearingEmailRespondent(caseDetails);
     }
 
     @Override
@@ -52,5 +58,4 @@ public class AdditionalHearingCorresponder extends HearingCorresponder {
         documents.add(additionalDoc);
         return documents;
     }
-
 }
