@@ -32,7 +32,7 @@ public class AssignToJudgeApplicantCorresponder extends SingleLetterOrEmailAppli
     }
 
     @Override
-    protected void emailApplicant(CaseDetails caseDetails) {
+    protected void emailApplicantSolicitor(CaseDetails caseDetails) {
         notificationService.sendAssignToJudgeConfirmationEmailToApplicantSolicitor(caseDetails);
     }
 }

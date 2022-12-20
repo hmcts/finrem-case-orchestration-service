@@ -31,7 +31,7 @@ public class AssignToJudgeCorrespondenceServiceTest {
     @Test
     public void shouldSendAssignToJudgeCorrespondence() {
         assignToJudgeCorrespondenceService.sendCorrespondence(caseDetails, "authorisationToken");
-        verify(assignToJudgeApplicantCorresponder).sendApplicantCorrespondence("authorisationToken", caseDetails);
-        verify(assignToJudgeRespondentCorresponder).sendRespondentCorrespondence("authorisationToken", caseDetails);
+        verify(assignToJudgeApplicantCorresponder).sendCorrespondence(caseDetails, "authorisationToken");
+        verify(assignToJudgeRespondentCorresponder).sendCorrespondence(caseDetails, "authorisationToken");
     }
 }

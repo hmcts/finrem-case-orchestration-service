@@ -9,12 +9,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SingleLetterOrEmailAllLitigantsCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SingleLetterOrEmailAllPartiesCorresponder;
 
 
 @Component
 @Slf4j
-public class AssignToJudgeCorresponder extends SingleLetterOrEmailAllLitigantsCorresponder {
+public class AssignToJudgeCorresponder extends SingleLetterOrEmailAllPartiesCorresponder {
 
     private final AssignedToJudgeDocumentService assignedToJudgeDocumentService;
 
@@ -26,20 +26,21 @@ public class AssignToJudgeCorresponder extends SingleLetterOrEmailAllLitigantsCo
         this.assignedToJudgeDocumentService = assignedToJudgeDocumentService;
     }
 
+
     @Override
-    public CaseDocument getDocumentToPrint(CaseDetails caseDetails, DocumentHelper.PaperNotificationRecipient recipient, String authorisationToken) {
+    public CaseDocument getDocumentToPrint(CaseDetails caseDetails, String authorisationToken, DocumentHelper.PaperNotificationRecipient recipient) {
         return assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(
             caseDetails, authorisationToken, recipient);
-
     }
 
+
     @Override
-    protected void emailApplicant(CaseDetails caseDetails) {
+    protected void emailApplicantSolicitor(CaseDetails caseDetails) {
         notificationService.sendAssignToJudgeConfirmationEmailToApplicantSolicitor(caseDetails);
     }
 
     @Override
-    protected void emailRespondent(CaseDetails caseDetails) {
+    protected void emailRespondentSolicitor(CaseDetails caseDetails) {
         notificationService.sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
     }
 }

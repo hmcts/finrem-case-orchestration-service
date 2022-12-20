@@ -55,7 +55,7 @@ public class AssignToJudgeRespondentCorresponderTest {
     @Test
     public void shouldSendLetterToRespondent() {
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
-        assignToJudgeRespondentCorresponder.sendRespondentCorrespondence(AUTHORISATION_TOKEN, caseDetails);
+        assignToJudgeRespondentCorresponder.sendCorrespondence(caseDetails,AUTHORISATION_TOKEN);
         verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails);
     }
 
@@ -63,7 +63,7 @@ public class AssignToJudgeRespondentCorresponderTest {
     public void shouldSendEmailToRespondent() {
 
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
-        assignToJudgeRespondentCorresponder.sendRespondentCorrespondence(AUTHORISATION_TOKEN, caseDetails);
+        assignToJudgeRespondentCorresponder.sendCorrespondence(caseDetails,AUTHORISATION_TOKEN);
         verify(notificationService).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
     }
 }

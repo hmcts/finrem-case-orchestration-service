@@ -21,11 +21,11 @@ public abstract class SingleLetterOrEmailRespondentCorresponder extends Correspo
         this.bulkPrintService = bulkPrintService;
     }
 
-    public void sendRespondentCorrespondence(String authorisationToken, CaseDetails caseDetails) {
+    public void sendCorrespondence(CaseDetails caseDetails, String authorisationToken) {
 
         if (shouldSendRespondentSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to respondent for case: {}", caseDetails.getId());
-            this.emailRespondent(caseDetails);
+            this.emailRespondentSolicitor(caseDetails);
         } else {
             log.info("Sending letter correspondence to respondent for case: {}", caseDetails.getId());
             bulkPrintService.sendDocumentForPrint(getDocumentToPrint(caseDetails, authorisationToken), caseDetails);
@@ -34,7 +34,7 @@ public abstract class SingleLetterOrEmailRespondentCorresponder extends Correspo
 
     public abstract CaseDocument getDocumentToPrint(CaseDetails caseDetails, String authorisationToken);
 
-    protected abstract void emailRespondent(CaseDetails caseDetails);
+    protected abstract void emailRespondentSolicitor(CaseDetails caseDetails);
 
 
 }

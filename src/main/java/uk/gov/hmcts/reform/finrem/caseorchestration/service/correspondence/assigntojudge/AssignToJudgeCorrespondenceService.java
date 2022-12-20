@@ -15,8 +15,8 @@ public class AssignToJudgeCorrespondenceService {
 
     public void sendCorrespondence(CaseDetails caseDetails, String authorisationToken) {
         log.info("Sending Assign to Judge correspondence for case {}", caseDetails.getId());
-        assignToJudgeApplicantCorresponder.sendApplicantCorrespondence(authorisationToken, caseDetails);
-        assignToJudgeRespondentCorresponder.sendRespondentCorrespondence(authorisationToken, caseDetails);
+        assignToJudgeApplicantCorresponder.sendCorrespondence(caseDetails, authorisationToken);
+        assignToJudgeRespondentCorresponder.sendCorrespondence(caseDetails, authorisationToken);
 
     }
 
