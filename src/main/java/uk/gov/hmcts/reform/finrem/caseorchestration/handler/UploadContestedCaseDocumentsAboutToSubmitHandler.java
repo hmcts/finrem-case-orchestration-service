@@ -64,7 +64,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler
                     Comparator.reverseOrder()))));
         caseData.put(CONTESTED_UPLOADED_DOCUMENTS, uploadedDocuments);
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = getCallBackResponse(caseData);
-        setWarningsAndErrors(caseData, response);
+        setWarningsAndErrors(uploadedDocuments, response);
         return response;
     }
 
@@ -86,15 +86,16 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler
             .build();
     }
 
-    private void setWarningsAndErrors(Map<String, Object> caseData, GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response) {
+    private void setWarningsAndErrors(List<ContestedUploadedDocumentData> uploadedDocuments,
+                                      GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response) {
         if (featureToggleService.isManageBundleEnabled()
-            && isTrialBundleSelectedInAnyUploadedFile(caseData)) {
+            && isTrialBundleSelectedInAnyUploadedFile(uploadedDocuments)) {
             response.getErrors().add(TRIAL_BUNDLE_SELECTED_ERROR);
         }
     }
 
-    private boolean isTrialBundleSelectedInAnyUploadedFile(Map<String, Object> caseData) {
-        return !getTrialBundleUploadedList(getDocumentCollection(caseData)).isEmpty();
+    private boolean isTrialBundleSelectedInAnyUploadedFile(List<ContestedUploadedDocumentData> uploadedDocuments) {
+        return !getTrialBundleUploadedList(uploadedDocuments).isEmpty();
     }
 
     private List<ContestedUploadedDocumentData> getTrialBundleUploadedList(List<ContestedUploadedDocumentData> uploadedDocuments) {
