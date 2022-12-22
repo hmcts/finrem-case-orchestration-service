@@ -8,7 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.approvedordernotice.ApprovedOrderNoticeOfHearingApplicantCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.approvedordernotice.ApprovedOrderNoticeOfHearingCorresponder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.approvedordernotice.ApprovedOrderNoticeOfHearingDocumentsGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.approvedordernotice.ApprovedOrderNoticeOfHearingDocumentsFetcher;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.approvedordernotice.ApprovedOrderNoticeOfHearingRespondentCorresponder;
 
 import java.util.List;
@@ -28,12 +28,12 @@ public class ApprovedOrderNoticeOfHearingCorrespondenceHandlerTest extends Heari
 
     ApprovedOrderNoticeOfHearingApplicantCorresponder approvedOrderNoticeOfHearingApplicantCorresponder;
     ApprovedOrderNoticeOfHearingRespondentCorresponder approvedOrderNoticeOfHearingRespondentCorresponder;
-    ApprovedOrderNoticeOfHearingDocumentsGenerator approvedOrderNoticeOfHearingDocumentsGenerator;
+    ApprovedOrderNoticeOfHearingDocumentsFetcher approvedOrderNoticeOfHearingDocumentsGenerator;
 
     @Before
     public void setUp() throws Exception {
         objectMapper = new ObjectMapper();
-        approvedOrderNoticeOfHearingDocumentsGenerator = new ApprovedOrderNoticeOfHearingDocumentsGenerator(documentHelper, objectMapper);
+        approvedOrderNoticeOfHearingDocumentsGenerator = new ApprovedOrderNoticeOfHearingDocumentsFetcher(documentHelper, objectMapper);
         approvedOrderNoticeOfHearingApplicantCorresponder =
             new ApprovedOrderNoticeOfHearingApplicantCorresponder(notificationService, bulkPrintService,
                 approvedOrderNoticeOfHearingDocumentsGenerator);

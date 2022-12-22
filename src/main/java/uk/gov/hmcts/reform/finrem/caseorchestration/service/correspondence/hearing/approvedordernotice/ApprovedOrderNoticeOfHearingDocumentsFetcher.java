@@ -19,12 +19,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class ApprovedOrderNoticeOfHearingDocumentsGenerator {
+public class ApprovedOrderNoticeOfHearingDocumentsFetcher {
 
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
 
-    public List<BulkPrintDocument> generateDocuments(CaseDetails caseDetails) {
+    public List<BulkPrintDocument> fetchDocuments(CaseDetails caseDetails) {
         List<CaseDocument> hearingNoticePack = getHearingNoticeDocumentPackFromCaseData(caseDetails);
         List<BulkPrintDocument> documentsToPrint = documentHelper.getCaseDocumentsAsBulkPrintDocuments(hearingNoticePack);
         return documentsToPrint;

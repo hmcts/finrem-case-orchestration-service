@@ -15,12 +15,13 @@ import java.util.List;
 @Slf4j
 public class ApprovedOrderNoticeOfHearingApplicantCorresponder extends MultiLetterOrEmailApplicantCorresponder {
 
-    private final ApprovedOrderNoticeOfHearingDocumentsGenerator approvedOrderNoticeOfHearingDocumentsGenerator;
+    private final ApprovedOrderNoticeOfHearingDocumentsFetcher approvedOrderNoticeOfHearingDocumentsGenerator;
 
     @Autowired
     public ApprovedOrderNoticeOfHearingApplicantCorresponder(NotificationService notificationService,
                                                              BulkPrintService bulkPrintService,
-                                                             ApprovedOrderNoticeOfHearingDocumentsGenerator approvedOrderNoticeOfHearingDocumentsGenerator) {
+                                                             ApprovedOrderNoticeOfHearingDocumentsFetcher
+                                                                     approvedOrderNoticeOfHearingDocumentsGenerator) {
         super(notificationService, bulkPrintService);
         this.approvedOrderNoticeOfHearingDocumentsGenerator = approvedOrderNoticeOfHearingDocumentsGenerator;
     }
@@ -31,7 +32,7 @@ public class ApprovedOrderNoticeOfHearingApplicantCorresponder extends MultiLett
     }
 
     public List<BulkPrintDocument> getDocumentsToPrint(CaseDetails caseDetails) {
-        return approvedOrderNoticeOfHearingDocumentsGenerator.generateDocuments(caseDetails);
+        return approvedOrderNoticeOfHearingDocumentsGenerator.fetchDocuments(caseDetails);
     }
 
 }
