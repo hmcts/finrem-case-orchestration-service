@@ -30,6 +30,7 @@ import java.util.Optional;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
@@ -101,12 +102,7 @@ public class RemoveApplicantDetailsController extends BaseController {
 
     private void removeApplicantDetails(Map<String, Object> caseData) {
         String applicantRepresented = nullToEmpty(caseData.get(APPLICANT_REPRESENTED));
-        if (applicantRepresented.equals(YES_VALUE)) {
-            //remove applicants data as solicitors data has been added
-            caseData.remove("applicantAddress");
-            caseData.remove("applicantPhone");
-            caseData.remove("applicantEmail");
-        } else {
+        if (applicantRepresented.equals(NO_VALUE)) {
             caseData.remove("applicantSolicitorName");
             caseData.remove("applicantSolicitorFirm");
             caseData.remove("applicantSolicitorAddress");

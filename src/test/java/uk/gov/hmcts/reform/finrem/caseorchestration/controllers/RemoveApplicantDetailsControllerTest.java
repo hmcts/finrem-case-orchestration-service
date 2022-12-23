@@ -59,31 +59,4 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.applicantSolicitorDXnumber").doesNotExist())
             .andExpect(jsonPath("$.data.applicantSolicitorConsentForEmails").doesNotExist());
     }
-
-    @Test
-    public void shouldSuccessfullyRemoveApplicantDetails() throws Exception {
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/amend-applicant-details.json").toURI()));
-        when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(true);
-
-        mvc.perform(post(REMOVE_DETAILS_URL)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(jsonPath("$.data.applicantRepresented", is(YES_VALUE)))
-            .andExpect(jsonPath("$.data.applicantAddress").doesNotExist())
-            .andExpect(jsonPath("$.data.applicantPhone").doesNotExist())
-            .andExpect(jsonPath("$.data.applicantEmail").doesNotExist())
-
-            .andExpect(jsonPath("$.data.applicantFMName", is("Poor")))
-            .andExpect(jsonPath("$.data.applicantLName", is("Guy")))
-            .andExpect(jsonPath("$.data.applicantSolicitorName", is("SolName99")))
-            .andExpect(jsonPath("$.data.applicantSolicitorFirm", is("SolFirm99")))
-            .andExpect(jsonPath("$.data.solicitorReference", is("SolRef99")))
-            .andExpect(jsonPath("$.data.applicantSolicitorAddress").exists())
-            .andExpect(jsonPath("$.data.applicantSolicitorPhone", is("89897876765")))
-            .andExpect(jsonPath("$.data.applicantSolicitorEmail", is("emailSol99@email.com")))
-            .andExpect(jsonPath("$.data.applicantSolicitorDXnumber").exists())
-            .andExpect(jsonPath("$.data.applicantSolicitorConsentForEmails", is("No")));
-    }
 }
