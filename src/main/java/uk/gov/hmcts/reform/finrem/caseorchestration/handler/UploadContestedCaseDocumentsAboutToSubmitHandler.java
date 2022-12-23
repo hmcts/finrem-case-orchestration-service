@@ -53,6 +53,9 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
                                                                                    String userAuthorisation) {
 
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>>
+            response = validateUploadedDocuments(callbackRequest.getCaseDetails().getData());
+
         Map<String, Object> caseData = uploadedDocumentHelper.addUploadDateToNewDocuments(
             callbackRequest.getCaseDetails().getData(),
             callbackRequest.getCaseDetailsBefore().getData(), CONTESTED_UPLOADED_DOCUMENTS);
@@ -63,8 +66,13 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler
                 ContestedUploadedDocument::getCaseDocumentUploadDateTime, Comparator.nullsLast(
                     Comparator.reverseOrder()))));
         caseData.put(CONTESTED_UPLOADED_DOCUMENTS, uploadedDocuments);
+
+        return response;
+    }
+
+    private GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> validateUploadedDocuments(Map<String, Object> caseData) {
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = getCallBackResponse(caseData);
-        setWarningsAndErrors(uploadedDocuments, response);
+        setWarningsAndErrors(caseData, response);
         return response;
     }
 
@@ -86,16 +94,15 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler
             .build();
     }
 
-    private void setWarningsAndErrors(List<ContestedUploadedDocumentData> uploadedDocuments,
-                                      GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response) {
+    private void setWarningsAndErrors(Map<String, Object> caseData, GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response) {
         if (featureToggleService.isManageBundleEnabled()
-            && isTrialBundleSelectedInAnyUploadedFile(uploadedDocuments)) {
+            && isTrialBundleSelectedInAnyUploadedFile(caseData)) {
             response.getErrors().add(TRIAL_BUNDLE_SELECTED_ERROR);
         }
     }
 
-    private boolean isTrialBundleSelectedInAnyUploadedFile(List<ContestedUploadedDocumentData> uploadedDocuments) {
-        return !getTrialBundleUploadedList(uploadedDocuments).isEmpty();
+    private boolean isTrialBundleSelectedInAnyUploadedFile(Map<String, Object> caseData) {
+        return !getTrialBundleUploadedList(getDocumentCollection(caseData)).isEmpty();
     }
 
     private List<ContestedUploadedDocumentData> getTrialBundleUploadedList(List<ContestedUploadedDocumentData> uploadedDocuments) {
