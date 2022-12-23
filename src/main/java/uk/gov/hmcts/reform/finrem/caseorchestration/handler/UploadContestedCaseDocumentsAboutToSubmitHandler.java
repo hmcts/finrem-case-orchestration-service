@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -55,7 +56,9 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler
 
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>>
             response = validateUploadedDocuments(callbackRequest.getCaseDetails().getData());
-
+        if (!CollectionUtils.isEmpty(response.getErrors())) {
+            return response;
+        }
         Map<String, Object> caseData = uploadedDocumentHelper.addUploadDateToNewDocuments(
             callbackRequest.getCaseDetails().getData(),
             callbackRequest.getCaseDetailsBefore().getData(), CONTESTED_UPLOADED_DOCUMENTS);
@@ -66,11 +69,11 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler
                 ContestedUploadedDocument::getCaseDocumentUploadDateTime, Comparator.nullsLast(
                     Comparator.reverseOrder()))));
         caseData.put(CONTESTED_UPLOADED_DOCUMENTS, uploadedDocuments);
-
         return response;
     }
 
-    private GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> validateUploadedDocuments(Map<String, Object> caseData) {
+    private GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> validateUploadedDocuments(
+                                                        Map<String, Object> caseData) {
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = getCallBackResponse(caseData);
         setWarningsAndErrors(caseData, response);
         return response;
