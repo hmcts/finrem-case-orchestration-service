@@ -35,8 +35,6 @@ public class AssignApplicantSolicitorServiceTest  {
     @Mock
     private CcdDataStoreService ccdDataStoreService;
     @Mock
-    private FeatureToggleService featureToggleService;
-    @Mock
     private PrdOrganisationService prdOrganisationService;
 
     @InjectMocks
@@ -62,7 +60,6 @@ public class AssignApplicantSolicitorServiceTest  {
             .build();
 
         caseDetails.getData().setApplicantOrganisationPolicy(applicantOrgPolicy);
-        when(featureToggleService.isAssignCaseAccessEnabled()).thenReturn(true);
         when(prdOrganisationService.retrieveOrganisationsData(USER_AUTH)).thenReturn(testOrg);
 
     }
