@@ -21,7 +21,7 @@ public enum CfcCourt implements CourtList {
     EAST_LONDON_FAMILY_COURT("FR_s_CFCList_11"),
     UXBRIDGE_COUNTY_COURT_AND_FAMILY_COURT("FR_s_CFCList_14"),
     WILLESDEN_COUNTY_COURT_AND_FAMILY_COURT("FR_s_CFCList_16"),
-    HIGH_COURT_FAMILY_DIVISION("FR_s_CFCList_17"),
+    THE_ROYAL_COURT_OF_JUSTICE("FR_s_CFCList_17"),
     MIGRATION_TEMP_HC("FR_s_londonList_12");
 
     private final String id;
