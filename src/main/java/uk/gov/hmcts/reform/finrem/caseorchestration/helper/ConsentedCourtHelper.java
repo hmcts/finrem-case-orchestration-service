@@ -129,6 +129,7 @@ public class ConsentedCourtHelper {
         .put("FR_birminghamList_10", "Hereford County Court and Family Court")
         .build();
     private static Map<String, String> londonMap = ImmutableMap.<String, String>builder()
+        .put("FR_londonList_13", "The Royal Court of Justice")
         .put("FR_londonList_11", "Bromley County Court and Family Court")
         .put("FR_londonList_10", "Croydon County Court and Family Court")
         .put("FR_londonList_9", "Edmonton County Court and Family Court")
