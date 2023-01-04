@@ -17,7 +17,7 @@ public class HwfContestedApplicantCorresponder extends EmailOnlyApplicantSolicit
     }
 
     @Override
-    public void emailSolicitor(CaseDetails caseDetails) {
+    public void emailApplicantSolicitor(CaseDetails caseDetails) {
         log.info("Sending Contested HWF Successful email notification to Solicitor");
         notificationService.sendContestedHwfSuccessfulConfirmationEmail(caseDetails);
     }

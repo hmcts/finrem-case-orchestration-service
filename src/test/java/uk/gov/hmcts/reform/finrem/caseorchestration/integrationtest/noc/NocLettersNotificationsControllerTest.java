@@ -19,11 +19,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUser
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
 
 import java.util.Collections;
@@ -58,10 +56,6 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
     GenericDocumentService genericDocumentServiceMock;
     @MockBean
     private AssignCaseAccessService assignCaseAccessService;
-    @MockBean
-    private AssignToJudgeCorresponder assignToJudgeCorrespondenceService;
-    @MockBean
-    private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
     @Autowired
     private DocumentConfiguration documentConfiguration;
     @Captor

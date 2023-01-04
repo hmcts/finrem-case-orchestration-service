@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.approvedordernotice.ApprovedOrderNoticeOfHearingCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.ApprovedOrderNoticeOfHearingCorresponder;
 
 import java.util.ArrayList;
 import java.util.Date;

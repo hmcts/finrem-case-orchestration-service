@@ -24,7 +24,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudge.AssignToJudgeCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.updatefrc.UpdateFrcCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
@@ -55,7 +54,6 @@ public class NotificationsController extends BaseController {
     private final NocLetterNotificationService nocLetterNotificationService;
     private final HwfCorrespondenceService hwfNotificationsService;
     private final UpdateFrcCorrespondenceService updateFrcCorrespondenceService;
-    private final AssignToJudgeCorresponder assignToJudgeCorrespondenceService;
 
 
     @PostMapping(value = "/hwf-successful", consumes = APPLICATION_JSON_VALUE)
@@ -92,7 +90,20 @@ public class NotificationsController extends BaseController {
         validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
-        assignToJudgeCorrespondenceService.sendCorrespondence(caseDetails, authToken);
+
+        paperNotificationService.printAssignToJudgeNotification(caseDetails, authToken);
+
+        if (!caseDataService.isPaperApplication(caseData)
+            && caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
+            log.info("Sending email notification to Applicant Solicitor for Judge successfully assigned to case");
+            notificationService.sendAssignToJudgeConfirmationEmailToApplicantSolicitor(caseDetails);
+        }
+
+        if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData)) {
+            log.info("Sending email notification to Respondent Solicitor for Judge successfully assigned to case");
+            notificationService.sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
+        }
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 

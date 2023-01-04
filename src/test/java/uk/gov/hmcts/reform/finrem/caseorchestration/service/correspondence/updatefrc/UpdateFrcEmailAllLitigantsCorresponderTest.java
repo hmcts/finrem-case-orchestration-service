@@ -25,21 +25,14 @@ public class UpdateFrcEmailAllLitigantsCorresponderTest {
     @Mock
     UpdateFrcInfoRespondentDocumentService updateFrcInfoRespondentDocumentService;
 
-    UpdateFrcApplicantCorresponder updateFrcApplicantCorresponder;
-    UpdateFrcRespondentCorresponder updateFrcRespondentCorresponder;
-
     private CaseDetails caseDetails;
 
     protected static final String AUTHORISATION_TOKEN = "authorisationToken";
 
     @Before
     public void setUp() throws Exception {
-        updateFrcApplicantCorresponder =
-            new UpdateFrcApplicantCorresponder(bulkPrintService, notificationService, updateFrcInfoRespondentDocumentService);
-        updateFrcRespondentCorresponder =
-            new UpdateFrcRespondentCorresponder(bulkPrintService, notificationService, updateFrcInfoRespondentDocumentService);
         updateFrcEmailAllLitigantsCorresponder =
-            new UpdateFrcLetterOrEmailAllSolicitorsCorresponder(updateFrcApplicantCorresponder, updateFrcRespondentCorresponder);
+            new UpdateFrcLetterOrEmailAllSolicitorsCorresponder(notificationService, bulkPrintService, updateFrcInfoRespondentDocumentService);
         caseDetails = CaseDetails.builder().build();
     }
 
