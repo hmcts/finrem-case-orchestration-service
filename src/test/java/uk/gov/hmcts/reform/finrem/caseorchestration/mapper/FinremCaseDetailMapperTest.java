@@ -81,7 +81,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamExemption;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamOtherGrounds;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamPreviousAttendance;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamUrgencyReason;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedNatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderDirection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalHolder;
@@ -875,7 +875,7 @@ public class FinremCaseDetailMapperTest {
     private void assertConsentOrderWrapper(FinremCaseData caseData) {
         ConsentOrderWrapper consentOrderWrapper = caseData.getConsentOrderWrapper();
         assertTrue(consentOrderWrapper.getConsentNatureOfApplicationChecklist()
-            .contains(NatureApplication.PENSION_COMPENSATION_SHARING_ORDER));
+            .contains(ContestedNatureApplication.PENSION_COMPENSATION_SHARING_ORDER));
         assertEquals(consentOrderWrapper.getConsentNatureOfApplicationAddress(), "Address");
         assertEquals(consentOrderWrapper.getConsentNatureOfApplicationMortgage(), "Mortgage");
         assertEquals(consentOrderWrapper.getConsentNatureOfApplication5(), YesOrNo.YES);
