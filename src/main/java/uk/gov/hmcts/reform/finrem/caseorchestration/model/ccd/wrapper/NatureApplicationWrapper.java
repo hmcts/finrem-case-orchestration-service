@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildrenOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedNatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication5b;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
@@ -20,8 +20,8 @@ import java.util.List;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class NatureApplicationWrapper {
-    private List<NatureApplication> natureOfApplicationChecklist;
-    private List<NatureApplication> natureOfApplication2;
+    private List<ContestedNatureApplication> natureOfApplicationChecklist;
+    private List<ContestedNatureApplication> natureOfApplication2;
     private String natureOfApplication3a;
     private String natureOfApplication3b;
     private YesOrNo orderForChildrenQuestion1;

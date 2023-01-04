@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Intention;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedNatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.util.ArrayList;
@@ -45,9 +45,9 @@ public class AmendApplicationAboutToStartHandler extends FinremCallbackHandler {
 
         if (Intention.APPLY_TO_VARY.equals(intention)) {
             log.info("Add applicant intends to {} to nature of application", intention.getValue());
-            List<NatureApplication> natureApplicationList =
+            List<ContestedNatureApplication> natureApplicationList =
                 Optional.ofNullable(caseData.getNatureApplicationWrapper().getNatureOfApplication2()).orElse(new ArrayList<>());
-            natureApplicationList.add(NatureApplication.VARIATION_ORDER);
+            natureApplicationList.add(ContestedNatureApplication.VARIATION_ORDER);
             caseData.getNatureApplicationWrapper().setNatureOfApplication2(natureApplicationList);
             log.info("paper case {} marked as variation order", caseDetails.getId());
         }
