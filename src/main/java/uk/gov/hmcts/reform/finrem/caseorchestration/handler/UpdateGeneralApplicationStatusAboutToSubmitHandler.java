@@ -3,14 +3,14 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.GeneralApplicationStatus;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 
@@ -22,7 +22,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UpdateGeneralApplicationStatusAboutToSubmitHandler implements CallbackHandler {
+public class UpdateGeneralApplicationStatusAboutToSubmitHandler implements CallbackHandler<Map<String, Object>> {
 
     private final GeneralApplicationService service;
     private final GeneralApplicationHelper helper;
@@ -35,8 +35,8 @@ public class UpdateGeneralApplicationStatusAboutToSubmitHandler implements Callb
     }
 
     @Override
-    public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
-                                                       String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
+                                                                                   String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("About to Submit callback event type {} for case id: {}", EventType.UPDATE_CONTESTED_GENERAL_APPLICATION, caseDetails.getId());
 
@@ -49,7 +49,7 @@ public class UpdateGeneralApplicationStatusAboutToSubmitHandler implements Callb
             caseData.put(GENERAL_APPLICATION_COLLECTION, list);
         }
         helper.deleteNonCollectionGeneralApplication(caseData);
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).build();
     }
 
     private GeneralApplicationCollectionData updateStatus(GeneralApplicationCollectionData item) {
