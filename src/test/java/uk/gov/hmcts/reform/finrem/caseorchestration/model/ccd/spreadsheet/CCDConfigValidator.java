@@ -60,7 +60,6 @@ public class CCDConfigValidator {
         Map.entry("currentUserCaseRole", "CaseRole")
     );
 
-
     public List<String> validateCCDConfigAgainstClassStructure(File configFile, Class baseClassToCompareWith)
         throws IOException, InvalidFormatException {
 
@@ -97,8 +96,8 @@ public class CCDConfigValidator {
                 }
             }
             if (!found) {
-                validationErrors.add("No FinremCaseData Field Found for CCD Field Id: " + ccdFieldAttributes.getFieldId() + " Field Type: " +
-                    ccdFieldAttributes.getFieldType());
+                validationErrors.add("No FinremCaseData Field Found for CCD Field Id: " + ccdFieldAttributes.getFieldId() + " Field Type: "
+                    + ccdFieldAttributes.getFieldType());
             }
         }
         return validationErrors;
@@ -114,11 +113,10 @@ public class CCDConfigValidator {
 
         List<String> errors = new ArrayList<>();
 
-        if (isNotASpecialFieldType(ccdFieldAttributes, field) && (isaHighLevelCaseField(complexTypeSheet, ccdFieldAttributes) &&
-            fieldDoesNotHaveAValidMapping(ccdFieldAttributes, field))) {
-            errors.add("CCD Field Id: " + ccdFieldAttributes.getFieldId() + " Field Type: " + ccdFieldAttributes.getFieldType() +
-                " does not match " +
-                field.getType().getSimpleName());
+        if (isNotASpecialFieldType(ccdFieldAttributes, field) && (isaHighLevelCaseField(complexTypeSheet, ccdFieldAttributes)
+            && fieldDoesNotHaveAValidMapping(ccdFieldAttributes, field))) {
+            errors.add("CCD Field Id: " + ccdFieldAttributes.getFieldId() + " Field Type: " + ccdFieldAttributes.getFieldType()
+                + " does not match " + field.getType().getSimpleName());
         } else {
             if (isComplexType(complexTypeSheet, ccdFieldAttributes.getFieldType())) {
                 log.info("Complex Type: {}", ccdFieldAttributes.getFieldType());
@@ -127,8 +125,8 @@ public class CCDConfigValidator {
                         field.getType()));
             } else if (ccdFieldAttributes.getFieldType().equals("Collection")) {
                 errors.addAll(validateCollectionField(complexTypeSheet, fixedListSheet, ccdFieldAttributes, field));
-            } else if (ccdFieldAttributes.getFieldType().equals("MultiSelectList") || ccdFieldAttributes.getFieldType().equals("FixedList") ||
-                ccdFieldAttributes.getFieldType().equals("FixedRadioList")) {
+            } else if (ccdFieldAttributes.getFieldType().equals("MultiSelectList") || ccdFieldAttributes.getFieldType().equals("FixedList")
+                || ccdFieldAttributes.getFieldType().equals("FixedRadioList")) {
                 errors.addAll(validateFixedListCaseField(fixedListSheet, ccdFieldAttributes, field));
             }
         }
@@ -136,23 +134,22 @@ public class CCDConfigValidator {
     }
 
     private boolean fieldDoesNotHaveAValidMapping(CcdFieldAttributes ccdFieldAttributes, Field field) {
-        return fieldTypesMap.get(ccdFieldAttributes.getFieldType()) == null ||
-            !fieldTypesMap.get(ccdFieldAttributes.getFieldType()).equals(field.getType().getSimpleName());
+        return fieldTypesMap.get(ccdFieldAttributes.getFieldType()) == null
+            || !fieldTypesMap.get(ccdFieldAttributes.getFieldType()).equals(field.getType().getSimpleName());
     }
 
     private boolean isaHighLevelCaseField(Sheet complexTypeSheet, CcdFieldAttributes ccdFieldAttributes) {
-        return !isComplexType(complexTypeSheet, ccdFieldAttributes.getFieldType()) &&
-            !fixedListValues.contains(ccdFieldAttributes.getFieldType());
+        return !isComplexType(complexTypeSheet, ccdFieldAttributes.getFieldType())
+            && !fixedListValues.contains(ccdFieldAttributes.getFieldType());
     }
 
     private boolean isNotASpecialFieldType(CcdFieldAttributes ccdFieldAttributes, Field field) {
-        return !(specialFieldTypes.get(ccdFieldAttributes.getFieldId()) != null &&
-            specialFieldTypes.get(ccdFieldAttributes.getFieldId()).equals(field.getType().getSimpleName()));
+        return !(specialFieldTypes.get(ccdFieldAttributes.getFieldId()) != null
+            && specialFieldTypes.get(ccdFieldAttributes.getFieldId()).equals(field.getType().getSimpleName()));
     }
 
     private List<String> validateCollectionField(Sheet complexTypeSheet, Sheet fixedListSheet, CcdFieldAttributes ccdFieldAttributes, Field field) {
 
-        List<String> collectionErrors = new ArrayList<>();
         log.info("CCD Field Id: {} with Field Type: {} is a collection of type {} with field type parameter of {}", ccdFieldAttributes.getFieldId(),
             ccdFieldAttributes.getFieldType(), field.getGenericType().getTypeName(), ccdFieldAttributes.getFieldTypeParameter());
         List<CcdFieldAttributes> complexTypeFields = getComplexType(complexTypeSheet, ccdFieldAttributes.getFieldTypeParameter());
@@ -162,6 +159,7 @@ public class CCDConfigValidator {
         Class<?> listClass = (Class<?>) stringListType.getActualTypeArguments()[0];
         log.info("The type of the List class is: {} ", listClass.getName());
         Field[] declaredFields = listClass.getDeclaredFields();
+        List<String> collectionErrors = new ArrayList<>();
         Arrays.stream(declaredFields).filter(f -> f.getName().equals("value")).findFirst()  // get the value field
             .ifPresent(f -> {
                 collectionErrors.addAll(validateComplexField(fixedListSheet, complexTypeFields, f.getType()));
@@ -185,8 +183,8 @@ public class CCDConfigValidator {
                 .filter(vf -> c.getListElementCode().equals(vf.getName()) || hasMatchingAnnotationForField(vf, c.getListElementCode())).findFirst()
                 .ifPresentOrElse(vf -> {
                     log.info("Matching on {} complex type field: {}", frClass.getName(), vf.getName());
-                    if (fieldTypesMap.get(c.getFieldType()) == null ||
-                        !fieldTypesMap.get(c.getFieldType()).equals(vf.getType().getSimpleName())) {
+                    if (fieldTypesMap.get(c.getFieldType()) == null
+                        || !fieldTypesMap.get(c.getFieldType()).equals(vf.getType().getSimpleName())) {
                         if (fixedListValues.contains(c.getFieldType())) {
                             log.info("In a fixedlist field with ccd parameter type {} and field type {}", c.getFieldTypeParameter(),
                                 vf.getType().getSimpleName());
@@ -254,12 +252,11 @@ public class CCDConfigValidator {
                 successCounter.incrementAndGet();
             }, () -> {
                 fixedListErrors.add(
-                    "No enum found for fixed list field " + f.getListElementCode() + " in class " + fixedListClass.getName() + " for fixedList " +
-                        fixedListParameterName);
+                    "No enum found for fixed list field " + f.getListElementCode() + " in class " + fixedListClass.getName() + " for fixedList "
+                        + fixedListParameterName);
                 errorCounter.incrementAndGet();
             });
         });
-
 
         if (successCounter.get() != fixedListFields.size()) {
             fixedListErrors.add("Fixed list field count does not match enum count for fixedList " + fixedListParameterName);
@@ -285,7 +282,6 @@ public class CCDConfigValidator {
             }
         }
     }
-
 
     private boolean invokeJsonValueMethod(Method m, Object e, CcdFieldAttributes f) {
         try {

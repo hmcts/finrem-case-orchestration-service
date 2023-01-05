@@ -34,10 +34,8 @@ public class AccessingAllClassesInPackage {
 
     public Set<Class> getWrappedClassesForClass(Class clazz) {
         Set<Class> classes = new HashSet<>();
-        for(Field field  : clazz.getDeclaredFields())
-        {
-            if (field.isAnnotationPresent(JsonUnwrapped.class))
-            {
+        for (Field field : clazz.getDeclaredFields()) {
+            if (field.isAnnotationPresent(JsonUnwrapped.class)) {
                 classes.add(field.getType());
                 getWrappedClassesForClass(field.getType()).forEach(classes::add);
             }
