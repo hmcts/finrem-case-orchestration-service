@@ -81,7 +81,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamExemption;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamOtherGrounds;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamPreviousAttendance;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamUrgencyReason;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedNatureApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderDirection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalHolder;
@@ -342,7 +342,7 @@ public class FinremCaseDetailMapperTest {
         assertEquals(caseData.getRegionWrapper().getInterimRegionWrapper().getInterimRegionList(), Region.SOUTHWEST);
         assertEquals(caseData.getRegionWrapper().getInterimRegionWrapper().getInterimSouthWestFrcList(), RegionSouthWestFrc.BRISTOL);
         assertEquals(caseData.getRegionWrapper().getInterimRegionWrapper().getCourtListWrapper().getInterimBristolCourtList(),
-            BristolCourt.FR_bristolList_4);
+            BristolCourt.SALISBURY_LAW_COURTS);
         assertEquals(caseData.getAddToComplexityListOfCourts(), Complexity.TRUE_YES);
         assertTrue(caseData.getEstimatedAssetsChecklist().containsAll(List.of(
             EstimatedAsset.UNABLE_TO_QUANTIFY,
@@ -769,7 +769,7 @@ public class FinremCaseDetailMapperTest {
                 .build()
         );
 
-        assertTrue(caseData.getGeneralApplicationWrapper().getGeneralApplicationCollection().size() == 1);
+        assertTrue(caseData.getGeneralApplicationWrapper().getGeneralApplicationDocumentCollection().size() == 1);
     }
 
     private void assertGeneralLetterCollection(FinremCaseData caseData) {
@@ -875,7 +875,7 @@ public class FinremCaseDetailMapperTest {
     private void assertConsentOrderWrapper(FinremCaseData caseData) {
         ConsentOrderWrapper consentOrderWrapper = caseData.getConsentOrderWrapper();
         assertTrue(consentOrderWrapper.getConsentNatureOfApplicationChecklist()
-            .contains(ContestedNatureApplication.PENSION_COMPENSATION_SHARING_ORDER));
+            .contains(NatureApplication.PENSION_COMPENSATION_SHARING_ORDER));
         assertEquals(consentOrderWrapper.getConsentNatureOfApplicationAddress(), "Address");
         assertEquals(consentOrderWrapper.getConsentNatureOfApplicationMortgage(), "Mortgage");
         assertEquals(consentOrderWrapper.getConsentNatureOfApplication5(), YesOrNo.YES);

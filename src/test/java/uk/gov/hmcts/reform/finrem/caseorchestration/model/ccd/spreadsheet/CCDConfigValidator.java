@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
+package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.spreadsheet;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -8,7 +8,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.junit.Test;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AccessingAllClassesInPackage;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,14 +28,20 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
-public class FinremCaseDataTest {
+@SuppressWarnings("unchecked")
+public class CCDConfigValidator {
 
+    protected static final String CASE_FIELD = "CaseField";
+    protected static final String COMPLEX_TYPES = "ComplexTypes";
+    protected static final String FIXED_LISTS = "FixedLists";
+    private List<String> ccdFieldsToIgnore = Arrays.asList("Label", "OrderSummary", "CaseHistoryViewer", "CasePaymentHistoryViewer");
+    private List<String> fixedListValues = Arrays.asList("FixedList", "FixedRadioList");
+    private List<String> alreadyProcessedCcdFields = new ArrayList<>();
 
-    List<String> ccdFieldsToIgnore = Arrays.asList("Label", "OrderSummary", "CaseHistoryViewer", "CasePaymentHistoryViewer");
-
-    Map<String, String> fieldTypesMap = Map.ofEntries(
+    private Map<String, String> fieldTypesMap = Map.ofEntries(
         Map.entry("Text", "String"),
         Map.entry("AddressUK", "Address"),
+        Map.entry("AddressGlobalUK", "Address"),
         Map.entry("Email", "String"),
         Map.entry("Telephone", "String"),
         Map.entry("TextArea", "String"),
@@ -44,31 +50,28 @@ public class FinremCaseDataTest {
         Map.entry("MoneyGBP", "BigDecimal"),
         Map.entry("Date", "LocalDate"),
         Map.entry("ChangeOrganisationRequest", "ChangeOrganisationRequest"),
-        Map.entry("ApplicantOrganisationPolicy", "ApplicantOrganisationPolicy"),
+        Map.entry("OrganisationPolicy", "OrganisationPolicy"),
         Map.entry("Collection", "List"),
-        Map.entry("MultiSelectList", "List")
+        Map.entry("MultiSelectList", "List"),
+        Map.entry("DynamicList", "String")
+    );
+
+    private Map<String, String> specialFieldTypes = Map.ofEntries(
+        Map.entry("currentUserCaseRole", "CaseRole")
     );
 
 
-    List<String> fixedListValues = Arrays.asList("FixedList", "FixedRadioList");
+    public List<String> validateCCDConfigAgainstClassStructure(File configFile, Class baseClassToCompareWith)
+        throws IOException, InvalidFormatException {
 
-    List<String> alreadyProcessedCcdFields = new ArrayList<>();
-
-
-    @Test
-    public void testFinRemCaseData() throws IOException, InvalidFormatException {
-
-        ClassLoader classLoader = this.getClass().getClassLoader();
-        File configFile = new File(classLoader.getResource("ccd-config-preview-consented.xlsx").getFile());
         Workbook workbook = new XSSFWorkbook(configFile);
-        Sheet caseFieldSheet = workbook.getSheet("CaseField");
-        Sheet complexTypeSheet = workbook.getSheet("ComplexTypes");
-        Sheet fixedListSheet = workbook.getSheet("FixedLists");
-
+        Sheet caseFieldSheet = workbook.getSheet(CASE_FIELD);
+        Sheet complexTypeSheet = workbook.getSheet(COMPLEX_TYPES);
+        Sheet fixedListSheet = workbook.getSheet(FIXED_LISTS);
         List<CcdFieldAttributes> caseFields = collateCaseFields(caseFieldSheet);
 
-        Set<Class> finremCaseDataClasses = new HashSet<>(Arrays.asList(FinremCaseData.class));
-        finremCaseDataClasses.addAll(new AccessingAllClassesInPackage().getWrappedClassesForClass(FinremCaseData.class));
+        Set<Class> finremCaseDataClasses = new HashSet<>(Arrays.asList(baseClassToCompareWith));
+        finremCaseDataClasses.addAll(new AccessingAllClassesInPackage().getWrappedClassesForClass(baseClassToCompareWith));
 
         List<String> validationErrors = new ArrayList<>();
         for (CcdFieldAttributes ccdFieldAttributes : caseFields) {
@@ -82,8 +85,7 @@ public class FinremCaseDataTest {
                         validationErrors.addAll(validateCCDField(complexTypeSheet, fixedListSheet, ccdFieldAttributes, found, field));
                         break;
                     } else {
-                        JsonProperty annotation = field.getAnnotation(JsonProperty.class);
-                        if (annotation != null && annotation.value().equals(ccdFieldAttributes.getFieldId())) {
+                        if (hasMatchingAnnotationForField(field, ccdFieldAttributes.getFieldId())) {
                             found = true;
                             log.info(
                                 "Found annotation for CCD Field Id: {} and Field Type: {}", ccdFieldAttributes.getFieldId(),
@@ -99,7 +101,12 @@ public class FinremCaseDataTest {
                     ccdFieldAttributes.getFieldType());
             }
         }
-        assert validationErrors.isEmpty();
+        return validationErrors;
+    }
+
+    private boolean hasMatchingAnnotationForField(Field field, String ccdFieldId) {
+        JsonProperty annotation = field.getAnnotation(JsonProperty.class);
+        return annotation != null && annotation.value().equals(ccdFieldId);
     }
 
     private List<String> validateCCDField(Sheet complexTypeSheet, Sheet fixedListSheet, CcdFieldAttributes ccdFieldAttributes, boolean found,
@@ -107,8 +114,8 @@ public class FinremCaseDataTest {
 
         List<String> errors = new ArrayList<>();
 
-        if (isaHighLevelCaseField(complexTypeSheet, ccdFieldAttributes) &&
-            fieldDoesNotHaveAValidMapping(ccdFieldAttributes, field)) {
+        if (isNotASpecialFieldType(ccdFieldAttributes, field) && (isaHighLevelCaseField(complexTypeSheet, ccdFieldAttributes) &&
+            fieldDoesNotHaveAValidMapping(ccdFieldAttributes, field))) {
             errors.add("CCD Field Id: " + ccdFieldAttributes.getFieldId() + " Field Type: " + ccdFieldAttributes.getFieldType() +
                 " does not match " +
                 field.getType().getSimpleName());
@@ -138,6 +145,11 @@ public class FinremCaseDataTest {
             !fixedListValues.contains(ccdFieldAttributes.getFieldType());
     }
 
+    private boolean isNotASpecialFieldType(CcdFieldAttributes ccdFieldAttributes, Field field) {
+        return !(specialFieldTypes.get(ccdFieldAttributes.getFieldId()) != null &&
+            specialFieldTypes.get(ccdFieldAttributes.getFieldId()).equals(field.getType().getSimpleName()));
+    }
+
     private List<String> validateCollectionField(Sheet complexTypeSheet, Sheet fixedListSheet, CcdFieldAttributes ccdFieldAttributes, Field field) {
 
         List<String> collectionErrors = new ArrayList<>();
@@ -162,24 +174,34 @@ public class FinremCaseDataTest {
 
         log.info("Validate ComplexType - ct collection is : {}", frClass.getName());
         List<String> complexTypeErrors = new ArrayList<>();
+        if (alreadyProcessedCcdFields.contains(frClass.getName())) {
+            return complexTypeErrors;
+        } else {
+            alreadyProcessedCcdFields.add(frClass.getName());
+        }
         complexTypeFields.stream().forEach(c -> {
             log.info("Matching on field in complex type: {} with type: {}", c.getListElementCode(), c.getFieldType());
-            Arrays.stream(frClass.getDeclaredFields()).filter(vf -> c.getListElementCode().equals(vf.getName())).findFirst().ifPresent(vf -> {
-                log.info("Matching on {} complex type field: {}", frClass.getName(), vf.getName());
-                if (fieldTypesMap.get(c.getFieldType()) == null ||
-                    !fieldTypesMap.get(c.getFieldType()).equals(vf.getType().getSimpleName())) {
-                    if (fixedListValues.contains(c.getFieldType())) {
-                        log.info("In a fixedlist field with ccd parameter type {} and field type {}", c.getFieldTypeParameter(),
-                            vf.getType().getSimpleName());
-                        if (!vf.getType().getSimpleName().equals("String")) {
-                            complexTypeErrors.addAll(validateFixedList(fixedListSheet, vf.getType(), c.getFieldTypeParameter()));
-                        } else {
-                            log.info("Fixed list is a string");
+            Arrays.stream(frClass.getDeclaredFields())
+                .filter(vf -> c.getListElementCode().equals(vf.getName()) || hasMatchingAnnotationForField(vf, c.getListElementCode())).findFirst()
+                .ifPresentOrElse(vf -> {
+                    log.info("Matching on {} complex type field: {}", frClass.getName(), vf.getName());
+                    if (fieldTypesMap.get(c.getFieldType()) == null ||
+                        !fieldTypesMap.get(c.getFieldType()).equals(vf.getType().getSimpleName())) {
+                        if (fixedListValues.contains(c.getFieldType())) {
+                            log.info("In a fixedlist field with ccd parameter type {} and field type {}", c.getFieldTypeParameter(),
+                                vf.getType().getSimpleName());
+                            if (!vf.getType().getSimpleName().equals("String")) {
+                                complexTypeErrors.addAll(validateFixedList(fixedListSheet, vf.getType(), c.getFieldTypeParameter()));
+                            } else {
+                                log.info("Fixed list is a string");
+                            }
                         }
-                    }
 
-                }
-            });
+                    }
+                }, () -> {
+                    complexTypeErrors.add(
+                        "No matching field found for " + c.getListElementCode() + " and type " + c.getFieldType() + " in " + frClass.getName());
+                });
         });
         return complexTypeErrors;
     }
@@ -225,19 +247,6 @@ public class FinremCaseDataTest {
         Method method = findAnnotatedMethod(fixedListClass, JsonValue.class);
         AtomicInteger successCounter = new AtomicInteger(0);
         AtomicInteger errorCounter = new AtomicInteger(0);
-        //fixedListFields.stream()
-//        Arrays.stream(fixedListClass.getEnumConstants()).forEach(e -> {
-//            log.info("Found enum constant {}", e.toString());
-//            fixedListFields.stream().filter(f -> validateEnumValue(method, e, f)).findFirst().ifPresentOrElse(ff -> {
-//                log.info("Found fixed list field {} for fixedList {} ", ff.getListElementCode(), ff.getFieldId());
-//                successCounter.incrementAndGet();
-//            }, () -> {
-//                fixedListErrors.add(
-//                    "No fixed list field found for enum " + e.toString() + " in class " + fixedListClass.getName() + " for fixedList " +
-//                        fixedListParameterName);
-//                errorCounter.incrementAndGet();
-//            });
-//        });
 
         fixedListFields.forEach(f -> {
             Arrays.stream(fixedListClass.getEnumConstants()).filter(e -> validateEnumValue(method, e, f)).findFirst().ifPresentOrElse(e -> {
@@ -277,9 +286,10 @@ public class FinremCaseDataTest {
         }
     }
 
+
     private boolean invokeJsonValueMethod(Method m, Object e, CcdFieldAttributes f) {
         try {
-            return f.getListElementCode().equals(m.invoke(e, null));
+            return m.invoke(e).equals(f.getListElementCode());
         } catch (IllegalAccessException ex) {
             ex.printStackTrace();
         } catch (InvocationTargetException ex) {
@@ -349,7 +359,6 @@ public class FinremCaseDataTest {
         return caseFields;
     }
 
-
     private List<CcdFieldAttributes> getFixedList(Sheet fixedListSheet, String fieldTypeParameter) {
         List<CcdFieldAttributes> caseFields = new ArrayList<>();
         int i = 0;
@@ -368,52 +377,4 @@ public class FinremCaseDataTest {
         return caseFields;
     }
 
-
-    class CcdFieldAttributes {
-        String fieldType;
-        String fieldId;
-        String fieldTypeParameter;
-        String listElementCode;
-
-        public void setListElementLabel(String listElementLabel) {
-            this.listElementLabel = listElementLabel;
-        }
-
-        String listElementLabel;
-
-        public String getListElementCode() {
-            return listElementCode;
-        }
-
-        public void setListElementCode(String listElementCode) {
-            this.listElementCode = listElementCode;
-        }
-
-        public String getFieldType() {
-            return fieldType;
-        }
-
-        public void setFieldType(String fieldType) {
-            this.fieldType = fieldType;
-        }
-
-        public String getFieldId() {
-            return fieldId;
-        }
-
-        public void setFieldId(String fieldId) {
-            this.fieldId = fieldId;
-        }
-
-        public String getFieldTypeParameter() {
-            return fieldTypeParameter;
-        }
-
-        public void setFieldTypeParameter(String fieldTypeParameter) {
-            this.fieldTypeParameter = fieldTypeParameter;
-        }
-
-    }
 }
-
-

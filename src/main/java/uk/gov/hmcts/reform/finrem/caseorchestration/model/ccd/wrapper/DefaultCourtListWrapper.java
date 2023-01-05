@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -44,10 +46,12 @@ public class DefaultCourtListWrapper implements CourtListWrapper {
     private LancashireCourt lancashireCourtList;
     private ClevelandCourt cleavelandCourtList;
     private ClevelandCourt clevelandCourtList;
+    @JsonProperty("nwyorkshireCourtList")
     private NwYorkshireCourt nwYorkshireCourtList;
     private HumberCourt humberCourtList;
     private KentSurreyCourt kentSurreyCourtList;
     private BedfordshireCourt bedfordshireCourtList;
+    @JsonProperty("thamesvalleyCourtList")
     private ThamesValleyCourt thamesValleyCourtList;
     private DevonCourt devonCourtList;
     private DorsetCourt dorsetCourtList;

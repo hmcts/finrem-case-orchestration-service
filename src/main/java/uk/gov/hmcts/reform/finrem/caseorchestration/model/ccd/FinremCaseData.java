@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -57,6 +56,7 @@ public class FinremCaseData {
     private String divorceCaseNumber;
     private StageReached divorceStageReached;
     private CaseDocument divorceUploadEvidence1;
+    private CaseDocument d11;
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate divorceDecreeNisiDate;
@@ -68,7 +68,9 @@ public class FinremCaseData {
     private Intention applicantIntendsTo;
     private List<PeriodicalPaymentSubstitute> dischargePeriodicalPaymentSubstituteFor;
     private YesOrNo applyingForConsentOrder;
+    @JsonProperty("ChildSupportAgencyCalculationMade")
     private YesOrNo childSupportAgencyCalculationMade;
+    @JsonProperty("ChildSupportAgencyCalculationReason")
     private String childSupportAgencyCalculationReason;
     private String authorisationName;
     private String authorisationFirm;
@@ -90,6 +92,7 @@ public class FinremCaseData {
     @JsonProperty("otherCollection")
     private List<OtherDocumentCollection> otherDocumentsCollection;
     private YesOrNo helpWithFeesQuestion;
+    @JsonProperty("HWFNumber")
     private String hwfNumber;
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private BigDecimal amountToPay;
@@ -97,6 +100,7 @@ public class FinremCaseData {
     private String pbaNumber;
     @JsonProperty("PBAreference")
     private String pbaReference;
+    @JsonProperty("PBAPaymentReference")
     private String pbaPaymentReference;
     private OrderDirection orderDirection;
     private CaseDocument orderDirectionOpt1;
@@ -259,6 +263,7 @@ public class FinremCaseData {
     private String hearingDetails;
     private YesOrNo applicantShareDocs;
     private YesOrNo respondentShareDocs;
+    @JsonProperty("reasonForFRCLocation")
     private String reasonForFrcLocation;
     private List<HearingUploadBundleCollection> hearingUploadBundle;
     private SendOrderEventPostStateOption sendOrderPostStateOption;
@@ -306,6 +311,20 @@ public class FinremCaseData {
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private ConsentOrderWrapper consentOrderWrapper;
+    private YesOrNo additionalHearingDocumentsOption;
+    private CaseDocument additionalListOfHearingDocuments;
+
+    @JsonProperty("typeOfDocument")
+    private ScannedDocumentTypeOption scannedDocsTypeOfDocument;
+    private List<ScannedDocumentCollection> applicantScanDocuments;
+    private List<ScannedDocumentCollection> respondentScanDocuments;
+
+    @JsonProperty("appBarristerCollection")
+    private List<BarristerData> applicantBarristers;
+    @JsonProperty("respBarristerCollection")
+    private List<BarristerData> respondentBarristers;
+    private BarristerParty barristerParty;
+
 
     @JsonIgnore
     public MiamWrapper getMiamWrapper() {

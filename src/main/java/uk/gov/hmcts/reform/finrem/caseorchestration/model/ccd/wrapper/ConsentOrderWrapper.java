@@ -51,9 +51,13 @@ public class ConsentOrderWrapper {
     private CaseDocument consentD81Applicant;
     private CaseDocument consentD81Respondent;
     private List<OtherDocumentCollection> consentOtherCollection;
+    @JsonProperty("consentOrderFRCName")
     private String consentOrderFrcName;
-    private Address consentOrderFrcAddress;
+    @JsonProperty("consentOrderFRCAddress")
+    private String consentOrderFrcAddress;
+    @JsonProperty("consentOrderFRCEmail")
     private String consentOrderFrcEmail;
+    @JsonProperty("consentOrderFRCPhone")
     private String consentOrderFrcPhone;
     private YesOrNo consentSubjectToDecreeAbsoluteValue;
     private YesOrNo consentServePensionProvider;
