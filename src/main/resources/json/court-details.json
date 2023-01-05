@@ -796,5 +796,11 @@
     "courtAddress": "Law Courts, Mold, CH7 1AE",
     "phoneNumber": "01978 317400",
     "email": "FRCWrexham@justice.gov.uk"
+  },
+  "FR_highCourtList_1": {
+    "courtName": "High Court Family Division",
+    "courtAddress": "High Court Family Division, Queens Building, Royal Courts of Justice, Strand, London, WC2A 2LL",
+    "phoneNumber": "0207 947 6000",
+    "email": "rcj.familyhighcourt@justice.gov.uk"
   }
 }
