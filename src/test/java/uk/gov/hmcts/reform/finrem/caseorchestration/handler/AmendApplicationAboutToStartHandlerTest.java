@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Intention;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedNatureApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.util.List;
@@ -69,16 +69,16 @@ public class AmendApplicationAboutToStartHandlerTest {
 
         FinremCaseData data = callbackRequest.getCaseDetails().getData();
         data.getNatureApplicationWrapper().setNatureOfApplication2(Lists.newArrayList(
-            ContestedNatureApplication.PENSION_SHARING_ORDER,
-            ContestedNatureApplication.LUMP_SUM_ORDER));
+            NatureApplication.PENSION_SHARING_ORDER,
+            NatureApplication.LUMP_SUM_ORDER));
         data.setApplicantIntendsTo(Intention.APPLY_TO_VARY);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         final FinremCaseData responseData = response.getData();
-        final List<ContestedNatureApplication> natureOfApplication2 = responseData.getNatureApplicationWrapper().getNatureOfApplication2();
+        final List<NatureApplication> natureOfApplication2 = responseData.getNatureApplicationWrapper().getNatureOfApplication2();
 
-        assertThat(natureOfApplication2, hasItems(ContestedNatureApplication.VARIATION_ORDER));
+        assertThat(natureOfApplication2, hasItems(NatureApplication.VARIATION_ORDER));
         assertThat(natureOfApplication2, hasSize(3));
         assertEquals(YesOrNo.NO, responseData.getCivilPartnership());
     }
@@ -89,17 +89,17 @@ public class AmendApplicationAboutToStartHandlerTest {
 
         FinremCaseData data = callbackRequest.getCaseDetails().getData();
         data.getNatureApplicationWrapper().setNatureOfApplication2(Lists.newArrayList(
-            ContestedNatureApplication.PENSION_SHARING_ORDER,
-            ContestedNatureApplication.LUMP_SUM_ORDER));
+            NatureApplication.PENSION_SHARING_ORDER,
+            NatureApplication.LUMP_SUM_ORDER));
         data.setApplicantIntendsTo(Intention.APPLY_TO_COURT_FOR);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         final FinremCaseData responseData = response.getData();
-        final List<ContestedNatureApplication> natureOfApplication2 = responseData.getNatureApplicationWrapper().getNatureOfApplication2();
+        final List<NatureApplication> natureOfApplication2 = responseData.getNatureApplicationWrapper().getNatureOfApplication2();
 
-        assertThat(natureOfApplication2, hasItems(ContestedNatureApplication.PENSION_SHARING_ORDER,
-            ContestedNatureApplication.LUMP_SUM_ORDER));
+        assertThat(natureOfApplication2, hasItems(NatureApplication.PENSION_SHARING_ORDER,
+            NatureApplication.LUMP_SUM_ORDER));
         assertThat(natureOfApplication2, hasSize(2));
         assertEquals(YesOrNo.NO, responseData.getCivilPartnership());
     }
@@ -114,9 +114,9 @@ public class AmendApplicationAboutToStartHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         final FinremCaseData responseData = response.getData();
-        final List<ContestedNatureApplication> natureOfApplication2 = responseData.getNatureApplicationWrapper().getNatureOfApplication2();
+        final List<NatureApplication> natureOfApplication2 = responseData.getNatureApplicationWrapper().getNatureOfApplication2();
 
-        assertThat(natureOfApplication2, hasItems(ContestedNatureApplication.VARIATION_ORDER));
+        assertThat(natureOfApplication2, hasItems(NatureApplication.VARIATION_ORDER));
         assertThat(natureOfApplication2, hasSize(1));
         assertEquals(YesOrNo.NO, responseData.getCivilPartnership());
     }

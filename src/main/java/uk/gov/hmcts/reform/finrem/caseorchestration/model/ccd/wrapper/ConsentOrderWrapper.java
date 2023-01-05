@@ -17,7 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollec
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedNatureApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OtherDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionProvider;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadConsentOrderCollection;
@@ -39,7 +39,7 @@ public class ConsentOrderWrapper {
     private List<DraftDirectionOrderCollection> judgesAmendedOrderCollection;
     private List<DraftDirectionDetailsCollection> draftDirectionDetailsCollection;
     private List<DraftDirectionDetailsCollection> draftDirectionDetailsCollectionRO;
-    private List<ContestedNatureApplication> consentNatureOfApplicationChecklist;
+    private List<NatureApplication> consentNatureOfApplicationChecklist;
     private String consentNatureOfApplicationAddress;
     private String consentNatureOfApplicationMortgage;
     private YesOrNo consentOrderForChildrenQuestion1;

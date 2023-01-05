@@ -8,10 +8,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedNatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedNatureApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.StageReached;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
@@ -76,10 +75,10 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
     }
 
     private void updatePeriodicPaymentData(FinremCaseData caseData) {
-        List<ContestedNatureApplication> natureOfApplication2 =
+        List<NatureApplication> natureOfApplication2 =
             Optional.ofNullable(caseData.getNatureApplicationWrapper().getNatureOfApplication2()).orElse(new ArrayList<>());
 
-        if (!natureOfApplication2.contains(ConsentedNatureApplication.CONSENTED_PERIODICAL_PAYMENT_ORDER)) {
+        if (!natureOfApplication2.contains(NatureApplication.CONSENTED_PERIODICAL_PAYMENT_ORDER)) {
             removePeriodicPaymentData(caseData);
         } else {
             // if written agreement for order for children
@@ -91,10 +90,10 @@ public class AmendApplicationAboutToSubmitHandler extends FinremCallbackHandler 
     }
 
     private void updatePropertyDetails(FinremCaseData caseData) {
-        List<ContestedNatureApplication> natureOfApplication2 =
+        List<NatureApplication> natureOfApplication2 =
             Optional.ofNullable(caseData.getNatureApplicationWrapper().getNatureOfApplication2()).orElse(new ArrayList<>());
 
-        if (!natureOfApplication2.contains(ConsentedNatureApplication.CONSENTED_PROPERTY_ADJUSTMENT_ORDER)) {
+        if (!natureOfApplication2.contains(NatureApplication.CONSENTED_PROPERTY_ADJUSTMENT_ORDER)) {
             removePropertyAdjustmentDetails(caseData);
         }
     }
