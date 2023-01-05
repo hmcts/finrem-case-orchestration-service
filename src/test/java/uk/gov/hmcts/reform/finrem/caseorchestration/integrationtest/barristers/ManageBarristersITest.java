@@ -464,5 +464,4 @@ public class ManageBarristersITest implements IntegrationTest {
             .name(APP_BARR_ORG_NAME)
             .build();
     }
-
 }

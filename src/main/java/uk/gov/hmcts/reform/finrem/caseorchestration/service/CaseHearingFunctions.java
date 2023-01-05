@@ -162,7 +162,7 @@ public final class CaseHearingFunctions {
             INTERIM_WALES_FRC_LIST);
     }
 
-    static String getSelectedCourtComplexType(Map<String, Object> mapOfCaseData) {
+    public static String getSelectedCourtComplexType(Map<String, Object> mapOfCaseData) {
         return getSelectedCourt(mapOfCaseData, REGION_CT, MIDLANDS_FRC_LIST_CT, LONDON_FRC_LIST_CT, NORTHWEST_FRC_LIST_CT,
             NORTHEAST_FRC_LIST_CT, SOUTHWEST_FRC_LIST_CT, SOUTHEAST_FRC_LIST_CT, WALES_FRC_LIST_CT);
     }
@@ -322,7 +322,7 @@ public final class CaseHearingFunctions {
         }
     }
 
-    static String getFrcCourtDetailsAsOneLineAddressString(Map<String, Object> courtDetailsMap) {
+    public static String getFrcCourtDetailsAsOneLineAddressString(Map<String, Object> courtDetailsMap) {
         return StringUtils.joinWith(", ", courtDetailsMap.get(COURT_DETAILS_NAME_KEY), courtDetailsMap.get(COURT_DETAILS_ADDRESS_KEY));
     }
 
