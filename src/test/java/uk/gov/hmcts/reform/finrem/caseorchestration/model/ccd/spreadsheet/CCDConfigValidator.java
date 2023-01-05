@@ -31,11 +31,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 @SuppressWarnings("unchecked")
 public class CCDConfigValidator {
 
-    protected static final String CASE_FIELD = "CaseField";
-    protected static final String COMPLEX_TYPES = "ComplexTypes";
-    protected static final String FIXED_LISTS = "FixedLists";
+    protected static final String CASE_FIELD_SHEET = "CaseField";
+    protected static final String COMPLEX_TYPES_SHEET = "ComplexTypes";
+    protected static final String FIXED_LISTS_SHEET = "FixedLists";
+    protected static final String COLLECTION = "Collection";
+    protected static final String MULTI_SELECT_LIST = "MultiSelectList";
+    protected static final String FIXED_RADIO_LIST = "FixedRadioList";
+    protected static final String FIXED_LIST = "FixedList";
+    protected static final int ROW_HEADERS = 2;
     private List<String> ccdFieldsToIgnore = Arrays.asList("Label", "OrderSummary", "CaseHistoryViewer", "CasePaymentHistoryViewer");
-    private List<String> fixedListValues = Arrays.asList("FixedList", "FixedRadioList");
+    private List<String> fixedListValues = Arrays.asList(FIXED_LIST, FIXED_RADIO_LIST);
     private List<String> alreadyProcessedCcdFields = new ArrayList<>();
 
     private Map<String, String> fieldTypesMap = Map.ofEntries(
@@ -51,8 +56,8 @@ public class CCDConfigValidator {
         Map.entry("Date", "LocalDate"),
         Map.entry("ChangeOrganisationRequest", "ChangeOrganisationRequest"),
         Map.entry("OrganisationPolicy", "OrganisationPolicy"),
-        Map.entry("Collection", "List"),
-        Map.entry("MultiSelectList", "List"),
+        Map.entry(COLLECTION, "List"),
+        Map.entry(MULTI_SELECT_LIST, "List"),
         Map.entry("DynamicList", "String")
     );
 
@@ -64,9 +69,9 @@ public class CCDConfigValidator {
         throws IOException, InvalidFormatException {
 
         Workbook workbook = new XSSFWorkbook(configFile);
-        Sheet caseFieldSheet = workbook.getSheet(CASE_FIELD);
-        Sheet complexTypeSheet = workbook.getSheet(COMPLEX_TYPES);
-        Sheet fixedListSheet = workbook.getSheet(FIXED_LISTS);
+        Sheet caseFieldSheet = workbook.getSheet(CASE_FIELD_SHEET);
+        Sheet complexTypeSheet = workbook.getSheet(COMPLEX_TYPES_SHEET);
+        Sheet fixedListSheet = workbook.getSheet(FIXED_LISTS_SHEET);
         List<CcdFieldAttributes> caseFields = collateCaseFields(caseFieldSheet);
 
         Set<Class> finremCaseDataClasses = new HashSet<>(Arrays.asList(baseClassToCompareWith));
@@ -123,10 +128,10 @@ public class CCDConfigValidator {
                 errors.addAll(
                     validateComplexField(fixedListSheet, getComplexType(complexTypeSheet, ccdFieldAttributes.getFieldType()),
                         field.getType()));
-            } else if (ccdFieldAttributes.getFieldType().equals("Collection")) {
+            } else if (ccdFieldAttributes.getFieldType().equals(COLLECTION)) {
                 errors.addAll(validateCollectionField(complexTypeSheet, fixedListSheet, ccdFieldAttributes, field));
-            } else if (ccdFieldAttributes.getFieldType().equals("MultiSelectList") || ccdFieldAttributes.getFieldType().equals("FixedList")
-                || ccdFieldAttributes.getFieldType().equals("FixedRadioList")) {
+            } else if (ccdFieldAttributes.getFieldType().equals(MULTI_SELECT_LIST) || ccdFieldAttributes.getFieldType().equals(FIXED_LIST)
+                || ccdFieldAttributes.getFieldType().equals(FIXED_RADIO_LIST)) {
                 errors.addAll(validateFixedListCaseField(fixedListSheet, ccdFieldAttributes, field));
             }
         }
@@ -307,7 +312,7 @@ public class CCDConfigValidator {
         List<CcdFieldAttributes> caseFields = new ArrayList<>();
         int i = 0;
         for (Row row : sheet) {
-            if (i > 2) {
+            if (i > ROW_HEADERS) {
                 CcdFieldAttributes fieldAttributes = new CcdFieldAttributes();
                 fieldAttributes.setFieldId(row.getCell(3).getStringCellValue());
                 fieldAttributes.setFieldType(row.getCell(6).getStringCellValue());
@@ -324,7 +329,7 @@ public class CCDConfigValidator {
     private boolean isComplexType(Sheet complexTypeSheet, String fieldType) {
         int i = 0;
         for (Row row : complexTypeSheet) {
-            if (i > 3) {
+            if (i > ROW_HEADERS) {
                 if (row.getCell(2) != null && row.getCell(2).getStringCellValue().equals(fieldType)) {
                     return true;
                 }
@@ -338,7 +343,7 @@ public class CCDConfigValidator {
         List<CcdFieldAttributes> caseFields = new ArrayList<>();
         int i = 0;
         for (Row row : complexTypeSheet) {
-            if (i > 2) {
+            if (i > ROW_HEADERS) {
                 if (row.getCell(2).getStringCellValue().equals(fieldTypeParameter)) {
                     CcdFieldAttributes fieldAttributes = new CcdFieldAttributes();
                     fieldAttributes.setFieldId(row.getCell(2).getStringCellValue());
@@ -359,7 +364,7 @@ public class CCDConfigValidator {
         List<CcdFieldAttributes> caseFields = new ArrayList<>();
         int i = 0;
         for (Row row : fixedListSheet) {
-            if (i > 2) {
+            if (i > ROW_HEADERS) {
                 if (row.getCell(2).getStringCellValue().equals(fieldTypeParameter)) {
                     CcdFieldAttributes fieldAttributes = new CcdFieldAttributes();
                     fieldAttributes.setFieldId(row.getCell(2).getStringCellValue());
