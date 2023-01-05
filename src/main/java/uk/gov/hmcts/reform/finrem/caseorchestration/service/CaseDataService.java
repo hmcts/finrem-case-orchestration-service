@@ -196,7 +196,7 @@ public class CaseDataService {
     }
 
     public boolean isContestedFinremCaseDetailsApplication(FinremCaseDetails caseDetails) {
-        return CaseType.CONTESTED.getCcdType().equalsIgnoreCase(nullToEmpty(caseDetails.getCaseType()));
+        return CaseType.CONTESTED.getCcdType().equalsIgnoreCase(nullToEmpty(caseDetails.getCaseType().getCcdType()));
     }
 
     public boolean isContestedPaperApplication(CaseDetails caseDetails) {
