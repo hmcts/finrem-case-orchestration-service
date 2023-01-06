@@ -337,16 +337,14 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-text', version: '1.9'
     implementation group: 'org.apache.poi', name: 'poi', version: '5.2.3'
     implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '5.2.3'
-
-    constraints {
-        add("implementation", "commons-net:commons-net") {
-            version {
-                strictly("3.9.0")
-                prefer("3.9.0")
-            }
-            because("CVE-2021-37533 commons-net Vulnerability")
-        }
+    implementation("org.apache.poi:poi") {
+        exclude group: "commons-net", module: "commons-net"
     }
+    implementation("org.apache.poi:poi-ooxml") {
+        exclude group: "commons-net", module: "commons-net"
+    }
+    implementation group: 'commons-net', name: 'commons-net', version: '3.9.0'
+
     implementation("org.springframework.boot:spring-boot-starter-web") {
         exclude group: "org.yaml", module: "snakeyaml"
     }
