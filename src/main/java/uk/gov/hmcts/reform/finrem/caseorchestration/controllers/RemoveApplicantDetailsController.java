@@ -100,7 +100,8 @@ public class RemoveApplicantDetailsController extends BaseController {
             caseData.put(MINI_FORM_A, document);
         }
 
-        if (featureToggleService.isCaseworkerNoCEnabled() && Optional.ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
+        if (featureToggleService.isCaseworkerNoCEnabled()
+            && Optional.ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
             && caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE)) {
             CaseDetails originalCaseDetails = callback.getCaseDetailsBefore();
             return ResponseEntity.ok(nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails,
