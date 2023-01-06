@@ -4,28 +4,36 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 import java.io.File;
+import java.util.LinkedHashMap;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @WebMvcTest(RemoveApplicantDetailsController.class)
 public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
 
     private static final String REMOVE_DETAILS_URL = "/case-orchestration/remove-details";
-
+    public static final String AUTH_TOKEN = "tokien:)";
     @MockBean
     protected UpdateRepresentationWorkflowService handleNocWorkflowService;
+
+    @MockBean
+    protected OnlineFormDocumentService service;
 
     @MockBean
     protected FeatureToggleService featureToggleService;
@@ -37,6 +45,7 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/amend-applicant-solicitor-details.json").toURI()));
         when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(true);
+        when(service.generateContestedMiniFormA(any(), any())).thenReturn(TestSetUpUtils.caseDocument());
 
         mvc.perform(post(REMOVE_DETAILS_URL)
                 .content(requestContent.toString())
@@ -48,7 +57,9 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.applicantEmail", is("email01@email.com")))
             .andExpect(jsonPath("$.data.applicantFMName", is("Poor")))
             .andExpect(jsonPath("$.data.applicantLName", is("Guy")))
-
+            .andExpect(jsonPath("$.data.applicantAddressConfidential", is("Yes")))
+            .andExpect(jsonPath("$.data.respondentAddressConfidential", is("No")))
+            .andExpect(jsonPath("$.data.miniFormA", isA(LinkedHashMap.class)))
             .andExpect(jsonPath("$.data.applicantSolicitorName").doesNotExist())
             .andExpect(jsonPath("$.data.applicantSolicitorFirm").doesNotExist())
             .andExpect(jsonPath("$.data.solicitorReference").doesNotExist())
