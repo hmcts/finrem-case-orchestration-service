@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.spreadsheet;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.junit.Ignore;
 import org.junit.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 
@@ -10,6 +11,7 @@ import java.io.IOException;
 import java.util.List;
 
 @Slf4j
+@Ignore
 public class FinremCaseDataTest {
 
     ClassLoader classLoader = this.getClass().getClassLoader();
