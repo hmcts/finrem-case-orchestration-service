@@ -95,7 +95,8 @@ public class RemoveApplicantDetailsController extends BaseController {
 
         String applicantConfidentialAddress = Objects.toString(caseData.get(APPLICANT_CONFIDENTIAL_ADDRESS), null);
         String respondentConfidentialAddress = Objects.toString(caseData.get(RESPONDENT_CONFIDENTIAL_ADDRESS), null);
-        if (applicantConfidentialAddress != null || respondentConfidentialAddress != null) {
+        if (applicantConfidentialAddress != null && applicantConfidentialAddress.equalsIgnoreCase(YES_VALUE)
+            || respondentConfidentialAddress != null && respondentConfidentialAddress.equalsIgnoreCase(YES_VALUE)) {
             CaseDocument document = service.generateContestedMiniFormA(authorisationToken, callback.getCaseDetails());
             caseData.put(MINI_FORM_A, document);
         }
