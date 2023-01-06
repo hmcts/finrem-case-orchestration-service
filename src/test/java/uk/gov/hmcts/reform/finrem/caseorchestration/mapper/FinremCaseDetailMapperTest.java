@@ -886,8 +886,7 @@ public class FinremCaseDetailMapperTest {
         )));
         assertEquals(consentOrderWrapper.getConsentNatureOfApplication7(), "String");
         assertEquals(consentOrderWrapper.getConsentOrderFrcName(), "Bromley");
-        assertEquals(consentOrderWrapper.getConsentOrderFrcAddress(), Address.builder()
-            .addressLine1("Address").build());
+        assertEquals(consentOrderWrapper.getConsentOrderFrcAddress(), "The Law Courts, North Parade Road, Bath, BA1 5AF");
         assertEquals(consentOrderWrapper.getConsentOrderFrcEmail(), "email");
         assertEquals(consentOrderWrapper.getConsentOrderFrcPhone(), "123456789");
         assertEquals(consentOrderWrapper.getConsentSubjectToDecreeAbsoluteValue(), YesOrNo.YES);
