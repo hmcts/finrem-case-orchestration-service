@@ -335,15 +335,12 @@ dependencies {
     implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: versions.apacheLogging
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
     implementation group: 'org.apache.commons', name: 'commons-text', version: '1.9'
-    implementation group: 'org.apache.poi', name: 'poi', version: '5.2.3'
-    implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '5.2.3'
-    implementation("org.apache.poi:poi") {
+    implementation("org.apache.poi:poi:5.2.3") {
         exclude group: "commons-net", module: "commons-net"
     }
-    implementation("org.apache.poi:poi-ooxml") {
+    implementation("org.apache.poi:poi-ooxml:5.2.3") {
         exclude group: "commons-net", module: "commons-net"
     }
-    implementation group: 'commons-net', name: 'commons-net', version: '3.9.0'
 
     implementation("org.springframework.boot:spring-boot-starter-web") {
         exclude group: "org.yaml", module: "snakeyaml"
