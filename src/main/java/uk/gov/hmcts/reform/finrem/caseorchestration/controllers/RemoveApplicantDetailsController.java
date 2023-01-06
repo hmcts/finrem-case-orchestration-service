@@ -93,23 +93,19 @@ public class RemoveApplicantDetailsController extends BaseController {
         removeApplicantDetails(caseData);
         removeRespondentDetails(caseData, caseDetails.getCaseTypeId());
 
-        String applicantConfidentialAddress = Objects.toString(APPLICANT_CONFIDENTIAL_ADDRESS, null);
-        String respondentConfidentialAddress = Objects.toString(RESPONDENT_CONFIDENTIAL_ADDRESS, null);
+        String applicantConfidentialAddress = Objects.toString(caseData.get(APPLICANT_CONFIDENTIAL_ADDRESS), null);
+        String respondentConfidentialAddress = Objects.toString(caseData.get(RESPONDENT_CONFIDENTIAL_ADDRESS), null);
         if (applicantConfidentialAddress != null || respondentConfidentialAddress != null) {
             CaseDocument document = service.generateContestedMiniFormA(authorisationToken, callback.getCaseDetails());
             caseData.put(MINI_FORM_A, document);
         }
 
-        if (featureToggleService.isCaseworkerNoCEnabled()) {
-
-            if (Optional.ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
-                && caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE)) {
-                CaseDetails originalCaseDetails = callback.getCaseDetailsBefore();
-                return ResponseEntity.ok(nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails,
-                    authorisationToken,
-                    originalCaseDetails));
-            }
-
+        if (featureToggleService.isCaseworkerNoCEnabled() && Optional.ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
+            && caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE)) {
+            CaseDetails originalCaseDetails = callback.getCaseDetailsBefore();
+            return ResponseEntity.ok(nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails,
+                authorisationToken,
+                originalCaseDetails));
         }
 
         persistOrgPolicies(caseData, callback.getCaseDetailsBefore());

@@ -69,6 +69,8 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.applicantSolicitorEmail").doesNotExist())
             .andExpect(jsonPath("$.data.applicantSolicitorDXnumber").doesNotExist())
             .andExpect(jsonPath("$.data.applicantSolicitorConsentForEmails").doesNotExist());
+
+        verify(service).generateContestedMiniFormA(any(), any());
     }
 
 
@@ -100,6 +102,8 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.applicantSolicitorEmail").doesNotExist())
             .andExpect(jsonPath("$.data.applicantSolicitorDXnumber").doesNotExist())
             .andExpect(jsonPath("$.data.applicantSolicitorConsentForEmails").doesNotExist());
+
+        verify(service).generateContestedMiniFormA(any(), any());
     }
 
     @Test
@@ -130,6 +134,8 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.applicantSolicitorEmail").doesNotExist())
             .andExpect(jsonPath("$.data.applicantSolicitorDXnumber").doesNotExist())
             .andExpect(jsonPath("$.data.applicantSolicitorConsentForEmails").doesNotExist());
+
+        verify(service).generateContestedMiniFormA(any(), any());
     }
 
     @Test
@@ -137,7 +143,6 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/amend-applicant-solicitor-details-both-untouched.json").toURI()));
         when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(true);
-        when(service.generateContestedMiniFormA(any(), any())).thenReturn(TestSetUpUtils.caseDocument());
 
         mvc.perform(post(REMOVE_DETAILS_URL)
                 .content(requestContent.toString())
@@ -151,7 +156,6 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.applicantLName", is("Guy")))
             .andExpect(jsonPath("$.data.applicantAddressConfidential").doesNotExist())
             .andExpect(jsonPath("$.data.respondentAddressConfidential").doesNotExist())
-            .andExpect(jsonPath("$.data.miniFormA", isA(LinkedHashMap.class)))
             .andExpect(jsonPath("$.data.applicantSolicitorName").doesNotExist())
             .andExpect(jsonPath("$.data.applicantSolicitorFirm").doesNotExist())
             .andExpect(jsonPath("$.data.solicitorReference").doesNotExist())
@@ -161,7 +165,7 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.applicantSolicitorDXnumber").doesNotExist())
             .andExpect(jsonPath("$.data.applicantSolicitorConsentForEmails").doesNotExist());
 
-        verify(service, never()).generateDraftContestedMiniFormA(any(), any());
+        verify(service, never()).generateContestedMiniFormA(any(), any());
     }
 
 }
