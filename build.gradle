@@ -339,6 +339,12 @@ dependencies {
     implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '5.2.3'
     implementation group: 'commons-net', name: 'commons-net', version: '3.9.0'
 
+    implementation("commons-net:commons-net") {
+        version {
+            strictly("3.9.0")
+        }
+    }
+
     implementation("org.springframework.boot:spring-boot-starter-web") {
         exclude group: "org.yaml", module: "snakeyaml"
     }
