@@ -334,8 +334,13 @@ dependencies {
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: versions.apacheLogging
     implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: versions.apacheLogging
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
-    implementation group: 'org.apache.poi', name: 'poi', version: '5.2.3'
-    implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '5.2.3'
+    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.9'
+    implementation("org.apache.poi:poi:5.2.3") {
+        exclude group: "org.apache.commons", module: "commons-math3"
+    }
+    implementation("org.apache.poi:poi-ooxml:5.2.3") {
+        exclude group: "org.apache.commons", module: "commons-compress"
+    }
 
     implementation("org.springframework.boot:spring-boot-starter-web") {
         exclude group: "org.yaml", module: "snakeyaml"
@@ -377,6 +382,7 @@ dependencies {
     functionalImplementation group: 'junit', name: 'junit', version: versions.junit
     functionalImplementation ("net.serenity-bdd:serenity-core:3.2.5") {
         exclude group: "commons-net", module: "commons-net"
+        exclude group: "org.apache.commons", module: "commons-compress"
     }
     functionalImplementation group: 'net.serenity-bdd', name: 'serenity-junit', version: versions.serenity
     functionalImplementation group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: versions.serenity
