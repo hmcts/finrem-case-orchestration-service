@@ -45,6 +45,6 @@
    file name: commons-compress-1.21.jar
    ]]></notes>
         <packageUrl regex="true">^pkg:maven/org\.apache\.commons/commons\-compress@.*$</packageUrl>
-        <cpe>cpe:/a:apache:commons_compress</cpe>
+        <cpe>cpe:/a:apache:commons_net</cpe>
     </suppress>
 </suppressions>
