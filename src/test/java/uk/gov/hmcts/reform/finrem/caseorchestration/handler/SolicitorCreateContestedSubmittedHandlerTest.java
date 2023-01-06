@@ -18,6 +18,7 @@ import java.io.InputStream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -55,7 +56,7 @@ public class SolicitorCreateContestedSubmittedHandlerTest {
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(createCaseService, times(1)).setSupplementaryData(any(), any());
+        verify(createCaseService, times(1)).setSupplementaryData(eq(callbackRequest), any());
     }
 
     private CaseDetails getCase() {
