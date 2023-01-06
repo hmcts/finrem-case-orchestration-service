@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
+package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.spreadsheet;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
