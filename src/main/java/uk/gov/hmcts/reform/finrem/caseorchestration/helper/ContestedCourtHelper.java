@@ -103,6 +103,7 @@ public class ContestedCourtHelper {
         .put("FR_s_CFCList_11", "East London Family Court")
         .put("FR_s_CFCList_14", "Uxbridge County Court and Family Court")
         .put("FR_s_CFCList_16", "Willesden County Court and Family Court")
+        .put("FR_s_CFCList_17", "The Royal Courts of Justice")
         .build();
     private static Map<String, String> liverpoolMap = ImmutableMap.<String, String>builder()
         .put("FR_liverpool_hc_list_1", "Liverpool Civil and Family Court")

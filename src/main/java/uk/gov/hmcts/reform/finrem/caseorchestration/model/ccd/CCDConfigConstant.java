@@ -89,6 +89,8 @@ public class CCDConfigConstant {
     public static final String SOUTHWEST_FRC_LIST_CT = "southWestList";
     public static final String WALES_FRC_LIST = "walesFRCList";
     public static final String WALES_FRC_LIST_CT = "walesList";
+    public static final String HIGHCOURT_FRC_LIST = "highCourtFRCList";
+    public static final String HIGHCOURT_FRC_LIST_CT = "highCourtList";
 
     //Regions
     public static final String LONDON = "london";
@@ -98,6 +100,7 @@ public class CCDConfigConstant {
     public static final String SOUTHEAST = "southeast";
     public static final String SOUTHWEST = "southwest";
     public static final String WALES = "wales";
+    public static final String HIGHCOURT = "highcourt";
 
     //FRCs
     public static final String BEDFORDSHIRE = "bedfordshire";
@@ -139,6 +142,7 @@ public class CCDConfigConstant {
     public static final String MANCHESTER_COURTLIST = "manchesterCourtList";
     public static final String NEWPORT_COURTLIST = "newportCourtList";
     public static final String NORTH_WALES_COURTLIST = "northWalesCourtList";
+    public static final String HIGHCOURT_COURTLIST = "highCourtList";
     public static final String NOTTINGHAM_COURTLIST = "nottinghamCourtList";
     public static final String NWOTHER_COURTLIST = "otherNWCourtList";
     public static final String NWYORKSHIRE_COURTLIST = "nwyorkshireCourtList";
@@ -393,6 +397,7 @@ public class CCDConfigConstant {
     public static final String GENERAL_APPLICATION_DIRECTIONS_SOUTHEAST_FRC = "generalApplicationDirections_southEastFRCList";
     public static final String GENERAL_APPLICATION_DIRECTIONS_SOUTHWEST_FRC = "generalApplicationDirections_southWestFRCList";
     public static final String GENERAL_APPLICATION_DIRECTIONS_WALES_FRC = "generalApplicationDirections_walesFRCList";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_HIGHCOURT_FRC = "generalApplicationDirections_highCourtFRCList";
 
     // Generap Application CourtLists
     public static final String GENERAL_APPLICATION_DIRECTIONS_BEDFORDSHIRE_COURT = "generalApplicationDirections_bedfordshireCourtList";
@@ -539,6 +544,7 @@ public class CCDConfigConstant {
     public static final String INTERIM_SOUTHEAST_FRC_LIST = "interim_southEastFRCList";
     public static final String INTERIM_SOUTHWEST_FRC_LIST = "interim_southWestFRCList";
     public static final String INTERIM_WALES_FRC_LIST = "interim_walesFRCList";
+    public static final String INTERIM_HIGHCOURT_FRC_LIST = "interim_highCourtFRCList";
 
     //Interim Documents
     public static final String INTERIM_HEARING_COLLECTION = "interimHearings";
