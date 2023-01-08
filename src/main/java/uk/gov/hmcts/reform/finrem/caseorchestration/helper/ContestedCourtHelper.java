@@ -22,6 +22,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CFC_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEVELAND;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DEVON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DORSET;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE;
@@ -185,6 +186,8 @@ public class ContestedCourtHelper {
             case CFC:
                 return getLondonCourt(caseData);
             case CLEAVELAND:
+                return getCleavelandCourt(caseData);
+            case CLEVELAND:
                 return getCleavelandCourt(caseData);
             case DEVON:
                 return getDevonCourt(caseData);
@@ -387,7 +390,7 @@ public class ContestedCourtHelper {
 
     private static String getNorthEastHearingFRC(Map<String, Object> hearingData) {
         String northEastList = Objects.toString(hearingData.get(NORTHEAST_FRC_LIST),"");
-        if (CLEAVELAND.equalsIgnoreCase(northEastList)) {
+        if (CLEAVELAND.equalsIgnoreCase(northEastList) || CLEVELAND.equalsIgnoreCase(northEastList)) {
             return CLEAVELAND;
         } else if (NWYORKSHIRE.equalsIgnoreCase(northEastList)) {
             return NWYORKSHIRE;
@@ -493,7 +496,7 @@ public class ContestedCourtHelper {
 
     private static String getNorthEastFRC(Map mapOfCaseData) {
         String northEastList = (String) mapOfCaseData.get(NORTHEAST_FRC_LIST);
-        if (CLEAVELAND.equalsIgnoreCase(northEastList)) {
+        if (CLEAVELAND.equalsIgnoreCase(northEastList) || CLEVELAND.equalsIgnoreCase(northEastList)) {
             return CLEAVELAND;
         } else if (NWYORKSHIRE.equalsIgnoreCase(northEastList)) {
             return NWYORKSHIRE;
