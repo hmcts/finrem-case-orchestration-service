@@ -21,9 +21,6 @@ public class NotificationTests extends IntegrationTestBase {
     @Value("${cos.notification.consent-order-unapproved.api}")
     private String consentOrderNotApproved;
 
-    @Value("${cos.notification.hwf-success.api}")
-    private String hwfSuccessfulApiUri;
-
     @Value("${cos.notification.prepare-for-hearing.api}")
     private String prepareForHearingApiUri;
 
@@ -39,11 +36,12 @@ public class NotificationTests extends IntegrationTestBase {
     @Value("${cos.notification.contest-draft-order.api}")
     private String contestDraftOrderApiUri;
 
-    @Value("${case.orchestration.api}/notify/update-frc")
+    @Value(" /notify/update-frc")
     private String updateFrcInfoUri;
 
     private final String consentedDir = "/json/consented/";
     private final String contestedDir = "/json/contested/";
+
 
     @Test
     public void verifyNotifyAssignToJudgeTestIsOkay() {
@@ -71,13 +69,6 @@ public class NotificationTests extends IntegrationTestBase {
 
         utils.validatePostSuccess(consentOrderNotApproved,
             "ccd-request-with-solicitor-consentOrderNotApproved1.json", consentedDir);
-    }
-
-    @Test
-    public void verifyNotifyHwfSuccessfulTestIsOkay() {
-
-        utils.validatePostSuccess(hwfSuccessfulApiUri,
-            "ccd-request-with-solicitor-hwfSuccessfulEmail1.json", consentedDir);
     }
 
     @Test

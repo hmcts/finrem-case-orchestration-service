@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApplicantRepresentedPaper;
@@ -342,7 +341,7 @@ public class FinremCaseDetailMapperTest {
         assertEquals(caseData.getRegionWrapper().getInterimRegionWrapper().getInterimRegionList(), Region.SOUTHWEST);
         assertEquals(caseData.getRegionWrapper().getInterimRegionWrapper().getInterimSouthWestFrcList(), RegionSouthWestFrc.BRISTOL);
         assertEquals(caseData.getRegionWrapper().getInterimRegionWrapper().getCourtListWrapper().getInterimBristolCourtList(),
-            BristolCourt.FR_bristolList_4);
+            BristolCourt.SALISBURY_LAW_COURTS);
         assertEquals(caseData.getAddToComplexityListOfCourts(), Complexity.TRUE_YES);
         assertTrue(caseData.getEstimatedAssetsChecklist().containsAll(List.of(
             EstimatedAsset.UNABLE_TO_QUANTIFY,
@@ -769,7 +768,7 @@ public class FinremCaseDetailMapperTest {
                 .build()
         );
 
-        assertTrue(caseData.getGeneralApplicationWrapper().getGeneralApplicationCollection().size() == 1);
+        assertTrue(caseData.getGeneralApplicationWrapper().getGeneralApplicationDocumentCollection().size() == 1);
     }
 
     private void assertGeneralLetterCollection(FinremCaseData caseData) {
@@ -886,8 +885,7 @@ public class FinremCaseDetailMapperTest {
         )));
         assertEquals(consentOrderWrapper.getConsentNatureOfApplication7(), "String");
         assertEquals(consentOrderWrapper.getConsentOrderFrcName(), "Bromley");
-        assertEquals(consentOrderWrapper.getConsentOrderFrcAddress(), Address.builder()
-            .addressLine1("Address").build());
+        assertEquals(consentOrderWrapper.getConsentOrderFrcAddress(), "The Law Courts, North Parade Road, Bath, BA1 5AF");
         assertEquals(consentOrderWrapper.getConsentOrderFrcEmail(), "email");
         assertEquals(consentOrderWrapper.getConsentOrderFrcPhone(), "123456789");
         assertEquals(consentOrderWrapper.getConsentSubjectToDecreeAbsoluteValue(), YesOrNo.YES);
