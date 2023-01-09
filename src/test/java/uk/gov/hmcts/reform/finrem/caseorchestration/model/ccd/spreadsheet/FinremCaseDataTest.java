@@ -18,13 +18,13 @@ public class FinremCaseDataTest {
 
     @Test
     public void testContestedConfigFinRemCaseData() throws IOException, InvalidFormatException {
-        File configFile = new File(classLoader.getResource("ccd-config-preview-consented.xlsx").getFile());
+        File configFile = new File(classLoader.getResource("ccd-config-prod-contested.xlsx").getFile());
         validateConfig(configFile);
     }
 
     @Test
     public void testConsentedConfigFinRemCaseData() throws IOException, InvalidFormatException {
-        File configFile = new File(classLoader.getResource("ccd-config-preview-consented.xlsx").getFile());
+        File configFile = new File(classLoader.getResource("ccd-config-prod-consented.xlsx").getFile());
         validateConfig(configFile);
     }
 

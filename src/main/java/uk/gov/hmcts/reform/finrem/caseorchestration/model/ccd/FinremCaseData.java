@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrappe
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ReferToJudgeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
 
 import java.math.BigDecimal;
@@ -325,6 +326,26 @@ public class FinremCaseData {
     private List<BarristerData> respondentBarristers;
     private BarristerParty barristerParty;
 
+    private YesOrNo benefitForChildrenDecisionSchedule;
+    private List<BenefitPaymentChecklist> benefitPaymentChecklistSchedule;
+    private CaseDocument variationOrderDocument;
+    private CaseDocument consentVariationOrderDocument;
+
+    private YesOrNo isNocRejected;
+
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private ScheduleOneWrapper scheduleOneWrapper;
+
+    private List<ConsentedHearingDataWrapper> listForHearings;
+
+    @JsonIgnore
+    public ScheduleOneWrapper getScheduleOneWrapper() {
+        if (scheduleOneWrapper == null) {
+            this.scheduleOneWrapper = new ScheduleOneWrapper();
+        }
+        return scheduleOneWrapper;
+    }
 
     @JsonIgnore
     public MiamWrapper getMiamWrapper() {
