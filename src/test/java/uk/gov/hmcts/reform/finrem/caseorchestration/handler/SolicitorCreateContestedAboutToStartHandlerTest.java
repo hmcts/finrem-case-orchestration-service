@@ -92,7 +92,6 @@ public class SolicitorCreateContestedAboutToStartHandlerTest {
         when(caseDataService.isContestedFinremCasePaperApplication(callbackRequest.getCaseDetails())).thenReturn(true);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
         assertEquals(YesOrNo.NO, response.getData().getCivilPartnership());
-        //assertEquals(TYPE_OF_APPLICATION_DEFAULT_TO, response.getData().get(TYPE_OF_APPLICATION));
     }
 
     private FinremCallbackRequest buildCallbackRequest() {

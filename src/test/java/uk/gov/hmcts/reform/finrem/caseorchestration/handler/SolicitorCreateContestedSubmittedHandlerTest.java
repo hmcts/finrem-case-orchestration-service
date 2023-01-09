@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -13,7 +12,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CreateCaseService;
 
-import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -32,9 +32,6 @@ public class SolicitorCreateContestedSubmittedHandlerTest {
     @Mock
     private CreateCaseService createCaseService;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
-
     @Test
     public void givenACcdCallbackSolicitorCreateContestedCase_WhenCanHandleCalled_thenHandlerCanHandle() {
         assertThat(handler
@@ -51,21 +48,16 @@ public class SolicitorCreateContestedSubmittedHandlerTest {
 
     @Test
     public void givenACcdCallbackSolicitorCreateContestedCase_WhenHandle_thenAddSupplementary() {
-        CallbackRequest callbackRequest =
-            CallbackRequest.builder().caseDetails(getCase()).build();
-
+        CallbackRequest callbackRequest = buildCallbackRequest();
         handler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(createCaseService, times(1)).setSupplementaryData(eq(callbackRequest), any());
     }
 
-    private CaseDetails getCase() {
-        try (InputStream resourceAsStream = getClass()
-            .getResourceAsStream("/fixtures/contested/validate-hearing-with-fastTrackDecision.json")) {
-            return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    private CallbackRequest buildCallbackRequest() {
+        Map<String, Object> caseData = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
+        return CallbackRequest.builder().eventId("FR_solicitorCreate").caseDetails(caseDetails).build();
     }
 
 }
