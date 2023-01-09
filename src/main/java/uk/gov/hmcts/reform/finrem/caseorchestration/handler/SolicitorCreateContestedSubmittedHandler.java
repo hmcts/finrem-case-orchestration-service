@@ -6,19 +6,33 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignApplicantSolicitorService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CreateCaseService;
 
 import java.util.Map;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
-public class SolicitorCreateContestedSubmittedHandler implements CallbackHandler {
+public class SolicitorCreateContestedSubmittedHandler extends AssignApplicantSolicitorHandler {
 
 
     private final CreateCaseService createCaseService;
+
+    private final CaseDataService caseDataService;
+
+    public SolicitorCreateContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                    AssignApplicantSolicitorService assignApplicantSolicitorService,
+                                                    CreateCaseService createCaseService,
+                                                    CaseDataService caseDataService) {
+        super(finremCaseDetailsMapper, assignApplicantSolicitorService);
+        this.createCaseService = createCaseService;
+        this.caseDataService = caseDataService;
+    }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -28,15 +42,16 @@ public class SolicitorCreateContestedSubmittedHandler implements CallbackHandler
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
-                                                       String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
+                                                                              String userAuthorisation) {
         log.info("Processing Submitted callback for event {} with Case ID : {}",
             EventType.SOLICITOR_CREATE, callbackRequest.getCaseDetails().getId());
 
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-
         createCaseService.setSupplementaryData(callbackRequest, userAuthorisation);
-
-        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).build();
+        if (!caseDataService.isPaperApplicationFinremCaseData(callbackRequest.getCaseDetails().getData())) {
+            return super.handle(callbackRequest, userAuthorisation);
+        }
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+            .data(callbackRequest.getCaseDetails().getData()).build();
     }
 }

@@ -10,6 +10,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CreateCaseService;
 
 import java.util.HashMap;
@@ -48,16 +50,16 @@ public class SolicitorCreateContestedSubmittedHandlerTest {
 
     @Test
     public void givenACcdCallbackSolicitorCreateContestedCase_WhenHandle_thenAddSupplementary() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
         handler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(createCaseService, times(1)).setSupplementaryData(eq(callbackRequest), any());
     }
 
-    private CallbackRequest buildCallbackRequest() {
-        Map<String, Object> caseData = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
-        return CallbackRequest.builder().eventId("FR_solicitorCreate").caseDetails(caseDetails).build();
+    private FinremCallbackRequest buildFinremCallbackRequest() {
+        FinremCaseData caseData = FinremCaseData.builder().build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123L).data(caseData).build();
+        return FinremCallbackRequest.builder().eventType(EventType.SOLICITOR_CREATE).caseDetails(caseDetails).build();
     }
 
 }
