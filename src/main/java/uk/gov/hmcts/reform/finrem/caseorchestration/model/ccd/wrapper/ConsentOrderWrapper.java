@@ -10,7 +10,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentNatureOfApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollection;
@@ -51,9 +50,13 @@ public class ConsentOrderWrapper {
     private CaseDocument consentD81Applicant;
     private CaseDocument consentD81Respondent;
     private List<OtherDocumentCollection> consentOtherCollection;
+    @JsonProperty("consentOrderFRCName")
     private String consentOrderFrcName;
-    private Address consentOrderFrcAddress;
+    @JsonProperty("consentOrderFRCAddress")
+    private String consentOrderFrcAddress;
+    @JsonProperty("consentOrderFRCEmail")
     private String consentOrderFrcEmail;
+    @JsonProperty("consentOrderFRCPhone")
     private String consentOrderFrcPhone;
     private YesOrNo consentSubjectToDecreeAbsoluteValue;
     private YesOrNo consentServePensionProvider;

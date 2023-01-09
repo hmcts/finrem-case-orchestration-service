@@ -13,7 +13,7 @@ public enum NottinghamCourt implements CourtList {
     LEICESTER_COUNTY_COURT_AND_FAMILY_COURT("FR_s_NottinghamList_3"),
     LINCOLN_COUNTY_COURT_AND_FAMILY_COURT("FR_s_NottinghamList_4"),
     NORTHAMPTON_CROWN_COUNTY_AND_FAMILY_COURT("FR_s_NottinghamList_5"),
-    CHESTERFIELD_COUNTY_COURT("FR_s_nottinghamList_6"),
+    CHESTERFIELD_COUNTY_COURT("FR_s_NottinghamList_6"),
     MANSFIELD_MAGISTRATES_AND_COUNTY_COURT("FR_s_NottinghamList_7"),
     BOSTON_COUNTY_COURT_AND_FAMILY_COURT("FR_s_NottinghamList_8"),
     CONSENTED_NOTTINGHAM_COUNTY_COURT_AND_FAMILY_COURT("FR_nottinghamList_1"),
