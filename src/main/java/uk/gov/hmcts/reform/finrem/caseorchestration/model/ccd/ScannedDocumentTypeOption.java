@@ -9,11 +9,10 @@ import java.util.Arrays;
 
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 @RequiredArgsConstructor
-public enum RegionSouthEastFrc {
-    KENT_FRC("kentfrc"),
-    KENT("kent"),
-    BEDFORDSHIRE("bedfordshire"),
-    THAMES_VALLEY("thamesvalley");
+public enum ScannedDocumentTypeOption {
+
+    APPLICANT_DOCUMENT("applicantDoc"),
+    RESPONDENT_DOCUMENT("respondentDoc");
 
     private final String value;
 
@@ -22,8 +21,8 @@ public enum RegionSouthEastFrc {
         return value;
     }
 
-    public static RegionSouthEastFrc forValue(String value) {
-        return Arrays.stream(RegionSouthEastFrc.values())
+    public static ScannedDocumentTypeOption forValue(String value) {
+        return Arrays.stream(ScannedDocumentTypeOption.values())
             .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
