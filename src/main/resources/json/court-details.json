@@ -68,7 +68,7 @@
   "FR_s_CFCList_17": {
     "courtName": "The Royal Courts of Justice",
     "courtAddress": "The Royal Courts of Justice, Strand, London, WC2A 2LL",
-    "phoneNumber": "0207 947 6000",
+    "phoneNumber": "020 7947 7551",
     "email": "rcj.familyhighcourt@justice.gov.uk"
   },
   "FR_s_NottinghamList_1": {
@@ -800,7 +800,7 @@
   "FR_highCourtList_1": {
     "courtName": "High Court Family Division",
     "courtAddress": "High Court Family Division, Queens Building, Royal Courts of Justice, Strand, London, WC2A 2LL",
-    "phoneNumber": "0207 947 6000",
+    "phoneNumber": "020 7947 7551",
     "email": "rcj.familyhighcourt@justice.gov.uk"
   }
 }
