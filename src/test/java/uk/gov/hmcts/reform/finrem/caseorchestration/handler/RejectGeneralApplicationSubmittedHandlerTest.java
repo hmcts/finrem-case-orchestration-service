@@ -12,8 +12,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
@@ -91,7 +91,7 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
     public void givenApplicantSolicitorDigital_whenHandle_thenSendEmailToAppSolicitor() {
         callbackRequest.setCaseDetailsBefore(caseDetailsBefore(APPLICANT));
         when(generalApplicationHelper.objectToDynamicList(any())).thenReturn(generalApplicationDynamicList());
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails))
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails))
             .thenReturn(true);
         submittedHandler.handle(callbackRequest, AUTH_TOKEN);
         verify(notificationService).sendGeneralApplicationRejectionEmailToAppSolicitor(caseDetails);
@@ -111,7 +111,7 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
     public void givenApplicantSolicitorNotDigital_whenHandle_thenSendLetterToAppSolicitor() {
         callbackRequest.setCaseDetailsBefore(caseDetailsBefore(APPLICANT));
         when(generalApplicationHelper.objectToDynamicList(any())).thenReturn(generalApplicationDynamicList());
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails))
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails))
             .thenReturn(false);
         submittedHandler.handle(callbackRequest, AUTH_TOKEN);
         verify(paperNotificationService).printApplicantRejectionGeneralApplication(caseDetails, AUTH_TOKEN);
