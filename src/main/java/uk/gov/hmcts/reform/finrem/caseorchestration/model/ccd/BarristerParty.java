@@ -5,15 +5,11 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Arrays;
-
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 @RequiredArgsConstructor
-public enum RegionSouthEastFrc {
-    KENT_FRC("kentfrc"),
-    KENT("kent"),
-    BEDFORDSHIRE("bedfordshire"),
-    THAMES_VALLEY("thamesvalley");
+public enum BarristerParty {
+    APPLICANT("applicant"),
+    RESPONDENT("respondent");
 
     private final String value;
 
@@ -22,8 +18,8 @@ public enum RegionSouthEastFrc {
         return value;
     }
 
-    public static RegionSouthEastFrc forValue(String value) {
-        return Arrays.stream(RegionSouthEastFrc.values())
+    public static BarristerParty forValue(String value) {
+        return java.util.Arrays.stream(BarristerParty.values())
             .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }

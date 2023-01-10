@@ -674,14 +674,12 @@
           }
         }
       ],
-      "consentOrderFrcName": "Bromley",
-      "consentOrderFrcAddress": {
-        "AddressLine1": "Address"
-      },
+      "consentOrderFRCName": "Bromley",
+      "consentOrderFRCAddress": "The Law Courts, North Parade Road, Bath, BA1 5AF",
       "divorceDecreeNisiDate": "2022-02-02",
       "divorceDecreeAbsoluteDate": "2022-02-02",
-      "consentOrderFrcEmail": "email",
-      "consentOrderFrcPhone": "123456789",
+      "consentOrderFRCEmail": "email",
+      "consentOrderFRCPhone": "123456789",
       "consentSubjectToDecreeAbsoluteValue": "Yes",
       "consentServePensionProvider": "Yes",
       "consentServePensionProviderResponsibility": "applicantSolicitor",

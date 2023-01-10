@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 
 import java.util.HashMap;
@@ -26,11 +27,15 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TYPE;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReGenerateFormCAboutToSubmitHandlerTest {
 
-    public static final String THERE_IS_NO_HEARING_ON_THE_CASE_ERROR_MESSAGE = "There is no hearing on the case";
+    public static final String THERE_IS_NO_HEARING_ON_THE_CASE_ERROR_MESSAGE = "There is no hearing on the case.";
+
+    private static final String NO_FDA_HEARING_TYPE =
+        "Form C can only be regenerated with First Directions Appointment Hearings.";
     public static final String AUTH = "AUTH";
     public static final String NEW_FORM_C_FILE_NAME = "new form c";
     public static final String NEW_FORM_G_FILE_NAME = "new form g";
@@ -58,13 +63,50 @@ public class ReGenerateFormCAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void givenACaseWithoutHearing_WhenAnAboutToSubmitRegenFormC_thenThrowError() {
+    public void givenACaseWithoutHearingDate_WhenAnAboutToSubmitRegenFormC_thenThrowError() {
         CallbackRequest callbackRequest =
             CallbackRequest.builder().caseDetails(getCaseDetailsTest()).caseDetailsBefore(getCaseDetailsTest()).build();
+        callbackRequest.getCaseDetails().getData().put(HEARING_TYPE, HearingTypeDirection.FDA.getId());
 
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = reGenerateFormCAboutToSubmitHandler.handle(callbackRequest, AUTH);
 
         assertThat(response.getErrors().get(0), is(THERE_IS_NO_HEARING_ON_THE_CASE_ERROR_MESSAGE));
+    }
+
+    @Test
+    public void givenACaseWithHearingDateNoHearingType_WhenAnAboutToSubmitRegenFormC_thenThrowError() {
+        CallbackRequest callbackRequest =
+            CallbackRequest.builder().caseDetails(getCaseDetailsTest()).caseDetailsBefore(getCaseDetailsTest()).build();
+        callbackRequest.getCaseDetails().getData().put(HEARING_DATE, "2019-06-24");
+
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = reGenerateFormCAboutToSubmitHandler.handle(callbackRequest, AUTH);
+
+        assertThat(response.getErrors().get(0), is(NO_FDA_HEARING_TYPE));
+    }
+
+    @Test
+    public void givenACaseWithHearingDateNoFda_WhenAnAboutToSubmitRegenFormC_thenThrowError() {
+        CallbackRequest callbackRequest =
+            CallbackRequest.builder().caseDetails(getCaseDetailsTest()).caseDetailsBefore(getCaseDetailsTest()).build();
+        callbackRequest.getCaseDetails().getData().put(HEARING_DATE, "2019-06-24");
+        callbackRequest.getCaseDetails().getData().put(HEARING_TYPE, HearingTypeDirection.FDR.getId());
+
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = reGenerateFormCAboutToSubmitHandler.handle(callbackRequest, AUTH);
+
+        assertThat(response.getErrors().get(0), is(NO_FDA_HEARING_TYPE));
+    }
+
+    @Test
+    public void givenACaseWithHearingDateAndFda_WhenAnAboutToSubmitRegenFormC_thenThrowNoError() {
+        CallbackRequest callbackRequest =
+            CallbackRequest.builder().caseDetails(getCaseDetailsTest()).caseDetailsBefore(getCaseDetailsTest()).build();
+        when(hearingDocumentService.generateHearingDocuments(any(), any())).thenReturn(new HashMap<>());
+        callbackRequest.getCaseDetails().getData().put(HEARING_DATE, "2019-06-24");
+        callbackRequest.getCaseDetails().getData().put(HEARING_TYPE, HearingTypeDirection.FDA.getId());
+
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = reGenerateFormCAboutToSubmitHandler.handle(callbackRequest, AUTH);
+
+        assertThat(response.getErrors(), is(nullValue()));
     }
 
     @Test
@@ -73,6 +115,7 @@ public class ReGenerateFormCAboutToSubmitHandlerTest {
             CallbackRequest.builder().caseDetails(getCaseDetailsTest()).caseDetailsBefore(getCaseDetailsTest()).build();
         when(hearingDocumentService.generateHearingDocuments(any(), any())).thenReturn(new HashMap<>());
         callbackRequest.getCaseDetails().getData().put(HEARING_DATE, "2019-06-24");
+        callbackRequest.getCaseDetails().getData().put(HEARING_TYPE, HearingTypeDirection.FDA.getId());
 
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = reGenerateFormCAboutToSubmitHandler.handle(callbackRequest, AUTH);
 
@@ -86,6 +129,7 @@ public class ReGenerateFormCAboutToSubmitHandlerTest {
         when(hearingDocumentService.generateHearingDocuments(any(), any()))
             .thenReturn(getTestFormCAndG(NEW_FORM_C_FILE_NAME, NEW_FORM_G_FILE_NAME));
         callbackRequest.getCaseDetails().getData().put(HEARING_DATE, "2019-06-24");
+        callbackRequest.getCaseDetails().getData().put(HEARING_TYPE, HearingTypeDirection.FDA.getId());
 
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = reGenerateFormCAboutToSubmitHandler.handle(callbackRequest, AUTH);
 
@@ -101,6 +145,7 @@ public class ReGenerateFormCAboutToSubmitHandlerTest {
         when(hearingDocumentService.generateHearingDocuments(any(), any()))
             .thenReturn(getTestFormCAndG(NEW_FORM_C_FILE_NAME, NEW_FORM_G_FILE_NAME));
         callbackRequest.getCaseDetails().getData().put(HEARING_DATE, "2019-06-24");
+        callbackRequest.getCaseDetails().getData().put(HEARING_TYPE, HearingTypeDirection.FDA.getId());
 
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = reGenerateFormCAboutToSubmitHandler.handle(callbackRequest, AUTH);
 
