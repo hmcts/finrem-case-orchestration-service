@@ -38,7 +38,7 @@ public class CCDConfigValidator {
     protected static final String FIXED_RADIO_LIST = "FixedRadioList";
     protected static final String FIXED_LIST = "FixedList";
     protected static final int ROW_HEADERS = 2;
-    private List<String> ccdFieldsToIgnore = Arrays.asList("Label", "OrderSummary", "CaseHistoryViewer", "CasePaymentHistoryViewer");
+    private List<String> ccdFieldsToIgnore = Arrays.asList("Label", "OrderSummary", "CaseHistoryViewer", "CasePaymentHistoryViewer", "FlagLauncher");
     private List<String> fixedListValues = Arrays.asList(FIXED_LIST, FIXED_RADIO_LIST);
     private List<String> alreadyProcessedCcdFields = new ArrayList<>();
 
@@ -57,7 +57,8 @@ public class CCDConfigValidator {
         Map.entry("OrganisationPolicy", "OrganisationPolicy"),
         Map.entry(COLLECTION, "List"),
         Map.entry(MULTI_SELECT_LIST, "List"),
-        Map.entry("DynamicList", "String")
+        Map.entry("DynamicList", "String"),
+        Map.entry("Flags", "CaseFlag")
     );
 
     private Map<String, String> specialFieldTypes = Map.ofEntries(

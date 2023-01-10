@@ -8,9 +8,9 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.caseflag.CaseFlag;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.caseflag.FlagDetail;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.caseflag.FlagDetailData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.caseflag.caseflag.CaseFlag;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.caseflag.caseflag.FlagDetail;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.caseflag.caseflag.FlagDetailData;
 
 import java.util.HashMap;
 import java.util.List;

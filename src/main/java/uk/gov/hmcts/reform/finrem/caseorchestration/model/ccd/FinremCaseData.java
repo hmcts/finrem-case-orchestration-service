@@ -14,6 +14,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseFlagsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
@@ -338,6 +339,19 @@ public class FinremCaseData {
     private ScheduleOneWrapper scheduleOneWrapper;
 
     private List<ConsentedHearingDataWrapper> listForHearings;
+
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private CaseFlagsWrapper caseFlagsWrapper;
+
+
+    @JsonIgnore
+    public CaseFlagsWrapper getCaseFlagsWrapper() {
+        if (caseFlagsWrapper == null) {
+            this.caseFlagsWrapper = new CaseFlagsWrapper();
+        }
+        return caseFlagsWrapper;
+    }
 
     @JsonIgnore
     public ScheduleOneWrapper getScheduleOneWrapper() {

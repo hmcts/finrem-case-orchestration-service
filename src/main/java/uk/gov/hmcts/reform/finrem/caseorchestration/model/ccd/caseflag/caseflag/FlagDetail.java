@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.model.caseflag;
+package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.caseflag.caseflag;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
