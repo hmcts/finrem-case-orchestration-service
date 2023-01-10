@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCo
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 
@@ -56,7 +55,6 @@ public class HearingDocumentController extends BaseController {
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
     private final ValidateHearingService validateHearingService;
     private final CaseDataService caseDataService;
-    private final NotificationService notificationService;
     private final ObjectMapper objectMapper;
     private final CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
 
@@ -107,7 +105,7 @@ public class HearingDocumentController extends BaseController {
                 additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, caseDetails);
             } else {
                 log.info("Sending Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
-                hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, authorisationToken);
+                hearingDocumentService.sendInitialHearingCorrespondence(caseDetails, authorisationToken);
             }
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).warnings(warnings).build());
@@ -120,7 +118,7 @@ public class HearingDocumentController extends BaseController {
             content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))}),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateHearingDocumentDirectionOrder(
+    public ResponseEntity<GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>>> generateHearingDocumentDirectionOrder(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callback) {
         CaseDetails caseDetails = callback.getCaseDetails();
@@ -137,8 +135,8 @@ public class HearingDocumentController extends BaseController {
             errors.add(e.getMessage());
         }
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
-            .builder()
+        return ResponseEntity.ok(GenericAboutToStartOrSubmitCallbackResponse
+            .<Map<String, Object>>builder()
             .data(caseData)
             .errors(errors)
             .build());

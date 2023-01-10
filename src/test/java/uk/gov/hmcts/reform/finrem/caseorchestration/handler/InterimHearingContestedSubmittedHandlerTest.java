@@ -7,16 +7,16 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.InterimHearingService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
-import java.io.InputStream;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -25,7 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
-public class InterimHearingContestedSubmittedHandlerTest {
+public class InterimHearingContestedSubmittedHandlerTest extends BaseHandlerTest {
 
     @InjectMocks
     private InterimHearingContestedSubmittedHandler interimHearingContestedSubmittedHandler;
@@ -70,8 +70,8 @@ public class InterimHearingContestedSubmittedHandlerTest {
 
     @Test
     public void givenContestedCase_WhenPartiesNeedToNotify_ThenItShouldSendNotificaiton() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        AboutToStartOrSubmitCallbackResponse handle =
+        CallbackRequest callbackRequest = buildCallbackRequest(TEST_JSON);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle =
             interimHearingContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         assertNotNull(handle.getData());
@@ -79,11 +79,4 @@ public class InterimHearingContestedSubmittedHandlerTest {
         verify(interimHearingService).sendNotification(any(), any());
     }
 
-    private CallbackRequest buildCallbackRequest()  {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(TEST_JSON)) {
-            return objectMapper.readValue(resourceAsStream, CallbackRequest.class);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

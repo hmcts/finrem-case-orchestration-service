@@ -3,11 +3,11 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CreateCaseService;
 
 import java.util.Map;
@@ -28,8 +28,8 @@ public class PaperCaseCreateConsentedSubmittedHandler implements CallbackHandler
     }
 
     @Override
-    public AboutToStartOrSubmitCallbackResponse handle(CallbackRequest callbackRequest,
-                                                       String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
+                                                                                   String userAuthorisation) {
         log.info("Processing Submitted callback for event {} with Case ID : {}",
             EventType.NEW_PAPER_CASE, callbackRequest.getCaseDetails().getId());
 
@@ -37,6 +37,6 @@ public class PaperCaseCreateConsentedSubmittedHandler implements CallbackHandler
 
         createCaseService.setSupplementaryData(callbackRequest, userAuthorisation);
 
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).build();
     }
 }

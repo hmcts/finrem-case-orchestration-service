@@ -6,17 +6,18 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import java.io.InputStream;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -96,12 +97,12 @@ public class SolicitorCreateConsentedAboutToSubmitHandlerTest {
         when(idamService.isUserRoleAdmin(any())).thenReturn(false);
         when(consentOrderService.getLatestConsentOrderData(any(CallbackRequest.class))).thenReturn(getCaseDocument());
 
-        AboutToStartOrSubmitCallbackResponse response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertNotNull(response.getData().get(LATEST_CONSENT_ORDER));
         assertEquals(YES_VALUE, response.getData().get(APPLICANT_REPRESENTED));
         verify(idamService).isUserRoleAdmin(any());
-        verify(consentOrderService).getLatestConsentOrderData(any());
+        verify(consentOrderService).getLatestConsentOrderData(any(CallbackRequest.class));
     }
 
 
@@ -111,15 +112,15 @@ public class SolicitorCreateConsentedAboutToSubmitHandlerTest {
         CallbackRequest callbackRequest = doValidCaseDataSetUp();
         when(idamService.isUserRoleAdmin(any())).thenReturn(true);
 
-        AboutToStartOrSubmitCallbackResponse response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
         assertNotNull(response.getData().get(LATEST_CONSENT_ORDER));
         assertNull(response.getData().get(APPLICANT_REPRESENTED));
         verify(idamService).isUserRoleAdmin(any());
-        verify(consentOrderService).getLatestConsentOrderData(any());
+        verify(consentOrderService).getLatestConsentOrderData(any(CallbackRequest.class));
     }
 
-    private CallbackRequest doValidCaseDataSetUp()  {
+    private CallbackRequest doValidCaseDataSetUp() {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(APPROVE_ORDER_VALID_JSON)) {
             return objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         } catch (Exception e) {

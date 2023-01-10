@@ -79,16 +79,16 @@ public class ConsentHearingService {
         Map<String, Object> caseData = caseDetails.getData();
         List<ConsentedHearingDataWrapper> hearingList = helper.getHearings(caseData);
 
-        log.info("hearingList ::{}", hearingList.size());
+        log.info("hearingList ::{} for case id {}", hearingList.size(), caseDetails.getId());
         List<String> hearingIdsToProcess =  getNewOrDateTimeModifiedHearingIdsList(caseDetails, caseDetailsBefore);
-        log.info("Hearing to Process ::{}", hearingIdsToProcess.size());
+        log.info("Hearing to Process ::{} for case id {}", hearingIdsToProcess.size(), caseDetails.getId());
 
         List<BulkPrintDocument> documents = new ArrayList<>();
         List<ConsentedHearingDataWrapper> updatedHearingList =
             hearingList.stream().map(hearingData -> generateHearingDocument(caseDetails,
                 hearingData, hearingIdsToProcess, documents, authorisationToken)).toList();
 
-        log.info("Bulk Print list  ::{}", documents.size());
+        log.info("Bulk Print list  ::{} for case id {}", documents.size(), caseDetails.getId());
         caseData.put(LIST_FOR_HEARING_COLLECTION_CONSENTED, sortEarliestHearingFirst(updatedHearingList));
 
         log.info("Sending hearing documents to bulk print for caseid {}", caseDetails.getId());
@@ -136,7 +136,7 @@ public class ConsentHearingService {
         caseData.put("ccdCaseNumber", caseDetailsCopy.getId());
         caseData.put("courtDetails", buildFrcCourtDetails(hearingCaseData));
         caseData.put("applicantName", documentHelper.getApplicantFullName(caseDetailsCopy));
-        caseData.put("respondentName", documentHelper.getRespondentFullNameContested(caseDetailsCopy));
+        caseData.put("respondentName",  caseDataService.buildFullRespondentName(caseDetails));
         addHearingVenueDetails(caseDetailsCopy, hearingCaseData);
         caseData.put("letterDate", String.valueOf(LocalDate.now()));
         caseData.put("hearingType", hearingCaseData.get("hearingType"));
@@ -172,12 +172,12 @@ public class ConsentHearingService {
     private void addHearingVenueDetails(CaseDetails caseDetailsCopy, Map<String, Object> hearingCaseData) {
         Map<String, Object> caseData = caseDetailsCopy.getData();
         try {
-            log.info("Hearing Case Data {}", hearingCaseData);
+            log.info("Hearing Case Data {} for caseId {}", hearingCaseData, caseDetailsCopy.getId());
             Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), new TypeReference<>() {});
             String selectedCourt = getSelectedCourt(hearingCaseData);
-            log.info("SELECTED COURT ---> {}", selectedCourt);//FR_londonList
+            log.info("SELECTED COURT ---> {} for caseId {}", selectedCourt, caseDetailsCopy.getId());//FR_londonList
             String courtDetailsObj = Objects.toString(hearingCaseData.get(selectedCourt), null);
-            log.info("HEARING COURT ---> {}", courtDetailsObj);
+            log.info("HEARING COURT ---> {} for caseId {}", courtDetailsObj, caseDetailsCopy.getId());
             Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(courtDetailsObj);
             caseData.put("hearingVenue", getFrcCourtDetailsAsOneLineAddressString(courtDetails));
         } catch (IOException exception) {

@@ -2,9 +2,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.CallbackHandler;
 
 import java.util.ArrayList;
@@ -13,8 +13,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType.getCaseType;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType.getEventType;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.forValue;
+
 
 @RequiredArgsConstructor
 @Service
@@ -22,13 +23,12 @@ public class CallbackDispatchService {
 
     private final List<CallbackHandler> callbackHandlers;
 
-
-    public AboutToStartOrSubmitCallbackResponse dispatchToHandlers(CallbackType callbackType,
-                                                                   CallbackRequest callbackRequest,
-                                                                   String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse dispatchToHandlers(CallbackType callbackType,
+                                                                          CallbackRequest callbackRequest,
+                                                                          String userAuthorisation) {
         requireNonNull(callbackRequest, "callback must not be null");
 
-        AboutToStartOrSubmitCallbackResponse callbackResponse = AboutToStartOrSubmitCallbackResponse
+        GenericAboutToStartOrSubmitCallbackResponse callbackResponse = GenericAboutToStartOrSubmitCallbackResponse
             .builder()
             .errors(new ArrayList<>())
             .warnings(new ArrayList<>())
@@ -36,10 +36,10 @@ public class CallbackDispatchService {
 
         for (CallbackHandler callbackHandler : callbackHandlers) {
             if (callbackHandler.canHandle(callbackType,
-                getCaseType(callbackRequest.getCaseDetails().getCaseTypeId()),
+                forValue(callbackRequest.getCaseDetails().getCaseTypeId()),
                 getEventType(callbackRequest.getEventId()))) {
 
-                AboutToStartOrSubmitCallbackResponse handlerCallbackResponse =
+                GenericAboutToStartOrSubmitCallbackResponse handlerCallbackResponse =
                     callbackHandler.handle(callbackRequest, userAuthorisation);
 
                 callbackResponse.setData(handlerCallbackResponse.getData());

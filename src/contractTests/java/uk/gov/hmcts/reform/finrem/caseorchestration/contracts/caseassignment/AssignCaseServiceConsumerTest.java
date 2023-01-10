@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.AssignCaseAccessServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.AssignCaseAccessRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.AssignCaseAccessRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
@@ -28,7 +29,6 @@ import java.io.IOException;
 import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonBody;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 
 @SpringBootTest
 public class AssignCaseServiceConsumerTest extends BaseTest {
@@ -89,7 +89,8 @@ public class AssignCaseServiceConsumerTest extends BaseTest {
         given(authTokenGenerator.generate()).willReturn(someServiceAuthToken);
 
         assignCaseAccessService
-            .assignCaseAccess(CaseDetails.builder().id(Long.parseLong(CASE_ID)).caseTypeId(CASE_TYPE_ID_CONTESTED).build(), authorizationToken);
+            .assignCaseAccess(CaseDetails.builder().id(Long.parseLong(CASE_ID)).caseTypeId(CaseType.CONTESTED.getCcdType()).build(),
+                authorizationToken);
 
     }
 
@@ -101,7 +102,7 @@ public class AssignCaseServiceConsumerTest extends BaseTest {
         return AssignCaseAccessRequest
             .builder()
             .case_id(CASE_ID)
-            .case_type_id(CASE_TYPE_ID_CONTESTED)
+            .case_type_id(CaseType.CONTESTED.getCcdType())
             .assignee_id(ASSIGNEE_ID)
             .build();
     }

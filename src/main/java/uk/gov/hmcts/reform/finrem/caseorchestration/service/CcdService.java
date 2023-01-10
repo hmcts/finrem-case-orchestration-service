@@ -3,20 +3,24 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.CaseEventsApi;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.wrapper.IdamToken;
 
-import java.util.Collections;
+import java.util.List;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class CcdService {
 
+    private static final String JURISDICTION = "DIVORCE";
+    private final CaseEventsApi caseEventsApi;
     private final CoreCaseDataApi coreCaseDataApi;
     private final SystemUserService systemUserService;
 
@@ -34,7 +38,7 @@ public class CcdService {
             .startEventForCaseWorker(idamToken.getIdamOauth2Token(),
                 idamToken.getServiceAuthorization(),
                 idamToken.getUserId(),
-                "DIVORCE",
+                JURISDICTION,
                 caseTypeId,
                 caseId.toString(),
                 eventType);
@@ -43,7 +47,7 @@ public class CcdService {
             idamToken.getIdamOauth2Token(),
             idamToken.getServiceAuthorization(),
             idamToken.getUserId(),
-            "DIVORCE",
+            JURISDICTION,
             caseTypeId,
             caseId.toString(),
             true,
@@ -59,8 +63,23 @@ public class CcdService {
                 .id(startEventResponse.getEventId())
                 .build())
             .data(caseData)
-            .supplementaryDataRequest(
-                Collections.singletonMap("$set", Collections.singletonMap("HMCTSServiceId", "BBA3")))
             .build();
+    }
+
+    public List<CaseEventDetail> getCcdEventDetailsOnCase(String authorisation, CaseDetails caseDetails,
+                                      String eventType) {
+        Long caseId = caseDetails.getId();
+        String caseTypeId = caseDetails.getCaseTypeId();
+
+        log.info("Executing eventType {} on caseId {}", eventType, caseId);
+
+        IdamToken idamToken = systemUserService.getIdamToken(authorisation);
+
+        return caseEventsApi.findEventDetailsForCase(idamToken.getIdamOauth2Token(),
+            idamToken.getServiceAuthorization(),
+            idamToken.getUserId(),
+            JURISDICTION,
+            caseTypeId,
+            caseId.toString());
     }
 }

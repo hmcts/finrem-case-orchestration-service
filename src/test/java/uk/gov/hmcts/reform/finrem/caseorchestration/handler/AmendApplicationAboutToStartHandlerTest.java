@@ -1,41 +1,37 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.common.collect.Lists;
 import org.junit.Before;
 import org.junit.Test;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Intention;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.APPLICANT_INTENDS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.VARIATION_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_NATURE_OF_APPLICATION;
 
 public class AmendApplicationAboutToStartHandlerTest {
 
     private static final String AUTH_TOKEN = "4d73f8d4-2a8d-48e2-af91-11cbaa642345";
-
     private AmendApplicationAboutToStartHandler handler;
-    private ConsentedApplicationHelper helper;
 
     @Before
     public void setup() {
-        helper = new ConsentedApplicationHelper();
-        handler = new AmendApplicationAboutToStartHandler(helper);
+        handler = new AmendApplicationAboutToStartHandler(new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule())));
     }
 
     @Test
@@ -69,62 +65,67 @@ public class AmendApplicationAboutToStartHandlerTest {
 
     @Test
     public void givenCase_whenIntendsToIsApplyToVary_thenShouldAddToNatureList() {
-        CallbackRequest callbackRequest = callbackRequest();
+        FinremCallbackRequest callbackRequest = callbackRequest();
 
-        Map<String, Object> data = callbackRequest.getCaseDetails().getData();
-        data.put(CONSENTED_NATURE_OF_APPLICATION, List.of("Pension document","Lump sum"));
-        data.put(APPLICANT_INTENDS, "ApplyToVary");
+        FinremCaseData data = callbackRequest.getCaseDetails().getData();
+        data.getNatureApplicationWrapper().setNatureOfApplication2(Lists.newArrayList(
+            NatureApplication.PENSION_SHARING_ORDER,
+            NatureApplication.LUMP_SUM_ORDER));
+        data.setApplicantIntendsTo(Intention.APPLY_TO_VARY);
 
-        AboutToStartOrSubmitCallbackResponse response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
-        final Map<String, Object> responseData = response.getData();
-        final List<String> list = helper.convertToList(responseData.get(CONSENTED_NATURE_OF_APPLICATION));
+        final FinremCaseData responseData = response.getData();
+        final List<NatureApplication> natureOfApplication2 = responseData.getNatureApplicationWrapper().getNatureOfApplication2();
 
-        assertThat(list, hasItems(VARIATION_ORDER));
-        assertThat(list, hasSize(3));
-        assertEquals(NO_VALUE, responseData.get(CIVIL_PARTNERSHIP));
+        assertThat(natureOfApplication2, hasItems(NatureApplication.VARIATION_ORDER));
+        assertThat(natureOfApplication2, hasSize(3));
+        assertEquals(YesOrNo.NO, responseData.getCivilPartnership());
     }
 
     @Test
     public void givenCase_whenIntendsToIsNotApplyToVary_thenShouldNotDoAnything() {
-        CallbackRequest callbackRequest = callbackRequest();
+        FinremCallbackRequest callbackRequest = callbackRequest();
 
-        Map<String, Object> data = callbackRequest.getCaseDetails().getData();
-        data.put(CONSENTED_NATURE_OF_APPLICATION, List.of("Pension document","Lump sum"));
-        data.put(APPLICANT_INTENDS, "ApplyToCourtFor");
+        FinremCaseData data = callbackRequest.getCaseDetails().getData();
+        data.getNatureApplicationWrapper().setNatureOfApplication2(Lists.newArrayList(
+            NatureApplication.PENSION_SHARING_ORDER,
+            NatureApplication.LUMP_SUM_ORDER));
+        data.setApplicantIntendsTo(Intention.APPLY_TO_COURT_FOR);
 
-        AboutToStartOrSubmitCallbackResponse response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
-        final Map<String, Object> responseData = response.getData();
-        final List<String> list = helper.convertToList(responseData.get(CONSENTED_NATURE_OF_APPLICATION));
+        final FinremCaseData responseData = response.getData();
+        final List<NatureApplication> natureOfApplication2 = responseData.getNatureApplicationWrapper().getNatureOfApplication2();
 
-        assertThat(list, hasItems("Pension document","Lump sum"));
-        assertThat(list, hasSize(2));
-        assertEquals(NO_VALUE, responseData.get(CIVIL_PARTNERSHIP));
+        assertThat(natureOfApplication2, hasItems(NatureApplication.PENSION_SHARING_ORDER,
+            NatureApplication.LUMP_SUM_ORDER));
+        assertThat(natureOfApplication2, hasSize(2));
+        assertEquals(YesOrNo.NO, responseData.getCivilPartnership());
     }
 
     @Test
     public void givenCase_whenNatureListIsEmptyAndIntendsToIsApplyToVary_thenShouldAddToNatureList() {
-        CallbackRequest callbackRequest = callbackRequest();
+        FinremCallbackRequest callbackRequest = callbackRequest();
 
-        Map<String, Object> data = callbackRequest.getCaseDetails().getData();
-        data.put(APPLICANT_INTENDS, "ApplyToVary");
+        FinremCaseData data = callbackRequest.getCaseDetails().getData();
+        data.setApplicantIntendsTo(Intention.APPLY_TO_VARY);
 
-        AboutToStartOrSubmitCallbackResponse response = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(callbackRequest, AUTH_TOKEN);
 
-        final Map<String, Object> responseData = response.getData();
-        final List<String> list = helper.convertToList(responseData.get(CONSENTED_NATURE_OF_APPLICATION));
+        final FinremCaseData responseData = response.getData();
+        final List<NatureApplication> natureOfApplication2 = responseData.getNatureApplicationWrapper().getNatureOfApplication2();
 
-        assertThat(list, hasItems(VARIATION_ORDER));
-        assertThat(list, hasSize(1));
-        assertEquals(NO_VALUE, responseData.get(CIVIL_PARTNERSHIP));
+        assertThat(natureOfApplication2, hasItems(NatureApplication.VARIATION_ORDER));
+        assertThat(natureOfApplication2, hasSize(1));
+        assertEquals(YesOrNo.NO, responseData.getCivilPartnership());
     }
 
-    private CallbackRequest callbackRequest() {
-        return CallbackRequest
-            .builder()
-            .caseDetails(CaseDetails.builder().id(123L)
-                .data(new HashMap<>()).build())
+    private FinremCallbackRequest callbackRequest() {
+        return FinremCallbackRequest
+            .<FinremCaseDetails>builder()
+            .caseDetails(FinremCaseDetails.builder().id(123L)
+                .data(new FinremCaseData()).build())
             .build();
     }
 }

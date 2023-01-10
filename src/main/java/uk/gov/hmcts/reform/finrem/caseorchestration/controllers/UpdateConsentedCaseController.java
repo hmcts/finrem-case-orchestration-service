@@ -24,9 +24,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.Upd
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
@@ -117,7 +119,7 @@ public class UpdateConsentedCaseController extends BaseController {
 
         if (featureToggleService.isCaseworkerNoCEnabled()) {
 
-            if (Optional.ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
+            if (ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
                 && caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE)) {
                 CaseDetails originalCaseDetails = ccdRequest.getCaseDetailsBefore();
                 return ResponseEntity.ok(nocWorkflowService.handleNoticeOfChangeWorkflow(caseDetails,
@@ -220,7 +222,8 @@ public class UpdateConsentedCaseController extends BaseController {
 
 
     private void updateApplicantOrSolicitorContactDetails(Map<String, Object> caseData) {
-        if (equalsTo((String) caseData.get(APPLICANT_REPRESENTED), "No")) {
+        Optional<Object> applicantRepresented = ofNullable(caseData.get(APPLICANT_REPRESENTED));
+        if (equalsTo(Objects.toString(applicantRepresented.orElse("No")), "No")) {
             removeApplicantSolicitorAddress(caseData, false);
         } else {
             removeApplicantAddress(caseData);

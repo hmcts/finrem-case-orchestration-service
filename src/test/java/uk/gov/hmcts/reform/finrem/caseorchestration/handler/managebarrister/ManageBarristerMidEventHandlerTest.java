@@ -6,14 +6,14 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BarristerData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.BarristerValidationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers.ManageBarristerService;
@@ -98,7 +98,8 @@ public class ManageBarristerMidEventHandlerTest {
         when(barristerValidationService.validateBarristerEmails(getBarristerData(), AUTH_TOKEN, CASE_ID, APP_SOLICITOR_POLICY))
             .thenReturn(new ArrayList<>());
 
-        AboutToStartOrSubmitCallbackResponse response = manageBarristerMidEventHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response =
+            manageBarristerMidEventHandler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response.getErrors(), is(nullValue()));
     }
@@ -112,7 +113,8 @@ public class ManageBarristerMidEventHandlerTest {
         when(barristerValidationService.validateBarristerEmails(getBarristerData(), AUTH_TOKEN, CASE_ID, APP_SOLICITOR_POLICY))
             .thenReturn(List.of("Validation Error"));
 
-        AboutToStartOrSubmitCallbackResponse response = manageBarristerMidEventHandler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response =
+            manageBarristerMidEventHandler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response.getErrors(), hasSize(1));
     }

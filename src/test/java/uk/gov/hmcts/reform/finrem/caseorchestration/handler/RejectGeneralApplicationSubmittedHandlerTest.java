@@ -12,8 +12,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
@@ -58,11 +58,11 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
     private CaseDetails caseDetails;
 
 
-
     @Before
     public void setup() {
         callbackRequest = CallbackRequest.builder().build();
-        caseDetails = CaseDetails.builder().data(new HashMap<>()).build();
+        caseDetails = CaseDetails.builder().build();
+        caseDetails.setData(new HashMap<>());
         callbackRequest.setCaseDetails(caseDetails);
 
         ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
@@ -91,7 +91,7 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
     public void givenApplicantSolicitorDigital_whenHandle_thenSendEmailToAppSolicitor() {
         callbackRequest.setCaseDetailsBefore(caseDetailsBefore(APPLICANT));
         when(generalApplicationHelper.objectToDynamicList(any())).thenReturn(generalApplicationDynamicList());
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails))
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails))
             .thenReturn(true);
         submittedHandler.handle(callbackRequest, AUTH_TOKEN);
         verify(notificationService).sendGeneralApplicationRejectionEmailToAppSolicitor(caseDetails);
@@ -111,7 +111,7 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
     public void givenApplicantSolicitorNotDigital_whenHandle_thenSendLetterToAppSolicitor() {
         callbackRequest.setCaseDetailsBefore(caseDetailsBefore(APPLICANT));
         when(generalApplicationHelper.objectToDynamicList(any())).thenReturn(generalApplicationDynamicList());
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails))
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails))
             .thenReturn(false);
         submittedHandler.handle(callbackRequest, AUTH_TOKEN);
         verify(paperNotificationService).printApplicantRejectionGeneralApplication(caseDetails, AUTH_TOKEN);
@@ -155,6 +155,11 @@ public class RejectGeneralApplicationSubmittedHandlerTest {
                 .build()
         );
         caseData.put(GENERAL_APPLICATION_COLLECTION, rejectedGeneralApplicationData);
-        return CaseDetails.builder().data(caseData).build();
+        CaseDetails caseDetails = CaseDetails.builder()
+            .caseTypeId(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED.getCcdType())
+            .id(12345L)
+            .build();
+        caseDetails.setData(caseData);
+        return caseDetails;
     }
 }

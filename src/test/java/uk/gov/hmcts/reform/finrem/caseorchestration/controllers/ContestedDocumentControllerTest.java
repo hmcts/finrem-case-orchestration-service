@@ -33,6 +33,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_UR
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION_DEFAULT_TO;
 
 @WebMvcTest(ContestedDocumentController.class)
 public class ContestedDocumentControllerTest extends BaseControllerTest {
@@ -74,13 +75,14 @@ public class ContestedDocumentControllerTest extends BaseControllerTest {
         whenServiceGeneratesDocument().thenReturn(caseDocument());
 
         mvc.perform(post(endpoint())
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.miniFormA.document_url", is(DOC_URL)))
             .andExpect(jsonPath("$.data.miniFormA.document_filename", is(FILE_NAME)))
             .andExpect(jsonPath("$.data.miniFormA.document_binary_url", is(BINARY_URL)))
+            .andExpect(jsonPath("$.data.typeOfApplication", is(TYPE_OF_APPLICATION_DEFAULT_TO)))
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
@@ -88,9 +90,9 @@ public class ContestedDocumentControllerTest extends BaseControllerTest {
     @Test
     public void generateMiniFormAHttpError400() throws Exception {
         mvc.perform(post(endpoint())
-            .content("kwuilebge")
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content("kwuilebge")
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest());
     }
 
@@ -99,9 +101,9 @@ public class ContestedDocumentControllerTest extends BaseControllerTest {
         whenServiceGeneratesDocument().thenThrow(feignError());
 
         mvc.perform(post(endpoint())
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isInternalServerError());
     }
 

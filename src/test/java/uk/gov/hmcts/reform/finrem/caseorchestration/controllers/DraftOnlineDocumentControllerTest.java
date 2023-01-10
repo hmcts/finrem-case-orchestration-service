@@ -78,9 +78,9 @@ public class DraftOnlineDocumentControllerTest extends BaseControllerTest {
         whenServiceGeneratesDocument().thenReturn(caseDocument());
 
         mvc.perform(post(endpoint())
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.miniFormA.document_url", is(DOC_URL)))
             .andExpect(jsonPath("$.data.miniFormA.document_filename", is(FILE_NAME)))
@@ -92,9 +92,9 @@ public class DraftOnlineDocumentControllerTest extends BaseControllerTest {
     @Test
     public void generateMiniFormAHttpError400() throws Exception {
         mvc.perform(post(endpoint())
-            .content("kwuilebge")
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content("kwuilebge")
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest());
     }
 
@@ -103,9 +103,9 @@ public class DraftOnlineDocumentControllerTest extends BaseControllerTest {
         whenServiceGeneratesDocument().thenThrow(feignError());
 
         mvc.perform(post(endpoint())
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isInternalServerError());
     }
 

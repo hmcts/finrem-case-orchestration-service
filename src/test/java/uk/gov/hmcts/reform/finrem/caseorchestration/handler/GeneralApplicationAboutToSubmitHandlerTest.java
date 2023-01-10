@@ -6,14 +6,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -61,7 +62,7 @@ public class GeneralApplicationAboutToSubmitHandlerTest {
     public void setup() {
         objectMapper = new ObjectMapper();
         helper = new GeneralApplicationHelper(objectMapper, documentService);
-        handler  = new GeneralApplicationAboutToSubmitHandler(service,helper);
+        handler = new GeneralApplicationAboutToSubmitHandler(service, helper);
     }
 
     @Test
@@ -94,16 +95,17 @@ public class GeneralApplicationAboutToSubmitHandlerTest {
 
     @Test
     public void givenCase_whenExistingGeneApp_thenSetCreatedBy() {
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(buildCaseDetailsWtihPath(GA_JSON))
-            .caseDetailsBefore(buildCaseDetailsWtihPath(GA_JSON)).build();
+        CallbackRequest callbackRequest =
+            CallbackRequest.builder().caseDetails(buildCaseDetailsWtihPath(GA_JSON))
+                .caseDetailsBefore(buildCaseDetailsWtihPath(GA_JSON)).build();
 
         List<GeneralApplicationCollectionData> existingGeneralApplication = new ArrayList<>();
         existingGeneralApplication.add(migrateExistingGeneralApplication(callbackRequest.getCaseDetails().getData()));
-        callbackRequest.getCaseDetails().getData().put(GENERAL_APPLICATION_COLLECTION,existingGeneralApplication);
+        callbackRequest.getCaseDetails().getData().put(GENERAL_APPLICATION_COLLECTION, existingGeneralApplication);
 
         when(service.updateGeneralApplications(callbackRequest, AUTH_TOKEN)).thenReturn(callbackRequest.getCaseDetails().getData());
 
-        AboutToStartOrSubmitCallbackResponse handle = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle = handler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = handle.getData();
         List<GeneralApplicationCollectionData> generalApplicationList = helper.getGeneralApplicationList(caseData);
@@ -113,8 +115,9 @@ public class GeneralApplicationAboutToSubmitHandlerTest {
 
     @Test
     public void sortGeneralApplicationListByLatestDate() {
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(buildCaseDetailsWtihPath(GA_UNSORTED_JSON))
-            .caseDetailsBefore(buildCaseDetailsWtihPath(GA_UNSORTED_JSON)).build();
+        CallbackRequest callbackRequest =
+            CallbackRequest.builder().caseDetails(buildCaseDetailsWtihPath(GA_UNSORTED_JSON))
+                .caseDetailsBefore(buildCaseDetailsWtihPath(GA_UNSORTED_JSON)).build();
 
         CaseDetails caseDetailsCopy = deepCopy(callbackRequest.getCaseDetails(), CaseDetails.class);
         List<GeneralApplicationCollectionData> unsortedList =
@@ -122,14 +125,14 @@ public class GeneralApplicationAboutToSubmitHandlerTest {
 
         List<GeneralApplicationCollectionData> applicationCollectionDataList = unsortedList.stream()
             .sorted(helper::getCompareTo)
-            .toList();
+            .collect(Collectors.toList());
 
         Map<String, Object> data = caseDetailsCopy.getData();
         data.put(GENERAL_APPLICATION_COLLECTION, applicationCollectionDataList);
 
         when(service.updateGeneralApplications(callbackRequest, AUTH_TOKEN)).thenReturn(data);
 
-        AboutToStartOrSubmitCallbackResponse handle = handler.handle(callbackRequest, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle = handler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = handle.getData();
         List<GeneralApplicationCollectionData> generalApplicationList = helper.getGeneralApplicationList(caseData);
@@ -147,9 +150,10 @@ public class GeneralApplicationAboutToSubmitHandlerTest {
         assertNull(caseData.get(GENERAL_APPLICATION_DOCUMENT_LATEST_DATE));
     }
 
-    private CaseDetails buildCaseDetailsWtihPath(String path)  {
+    private CaseDetails buildCaseDetailsWtihPath(String path) {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(path)) {
-            CaseDetails caseDetails = objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+            CaseDetails caseDetails =
+                objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
             return CallbackRequest.builder().caseDetails(caseDetails).build().getCaseDetails();
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -163,7 +167,7 @@ public class GeneralApplicationAboutToSubmitHandlerTest {
             .build();
     }
 
-    private GeneralApplicationItems getApplicationItems(Map<String,Object> caseData) {
+    private GeneralApplicationItems getApplicationItems(Map<String, Object> caseData) {
         GeneralApplicationItems.GeneralApplicationItemsBuilder builder =
             GeneralApplicationItems.builder();
         builder.generalApplicationReceivedFrom(Objects.toString(caseData.get(GENERAL_APPLICATION_RECEIVED_FROM), null));

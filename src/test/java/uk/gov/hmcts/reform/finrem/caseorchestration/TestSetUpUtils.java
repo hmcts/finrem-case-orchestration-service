@@ -14,11 +14,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataExcepti
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchFieldExistsException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ClientDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
@@ -34,8 +36,6 @@ import java.util.Map;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.argThat;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
@@ -203,7 +203,7 @@ public class TestSetUpUtils {
 
     public static CaseDetails defaultConsentedCaseDetails() {
         Map<String, Object> caseData = new HashMap<>();
-        List<String> natureOfApplication =  List.of("Lump Sum Order",
+        List<String> natureOfApplication = List.of("Lump Sum Order",
             "Periodical Payment Order",
             "Pension Sharing Order",
             "Pension Attachment Order",
@@ -216,7 +216,7 @@ public class TestSetUpUtils {
         populateRespondentNameAndAddressConsented(caseData);
 
         return CaseDetails.builder()
-            .caseTypeId(CASE_TYPE_ID_CONSENTED)
+            .caseTypeId(CaseType.CONSENTED.getCcdType())
             .id(123456789L)
             .data(caseData)
             .build();
@@ -224,7 +224,7 @@ public class TestSetUpUtils {
 
     public static CaseDetails defaultConsentedCaseDetailsForVariationOrder() {
         Map<String, Object> caseData = new HashMap<>();
-        List<String> natureOfApplication =  List.of("Lump Sum Order",
+        List<String> natureOfApplication = List.of("Lump Sum Order",
             "Periodical Payment Order",
             "Pension Sharing Order",
             "Pension Attachment Order",
@@ -238,7 +238,7 @@ public class TestSetUpUtils {
         populateRespondentNameAndAddressConsented(caseData);
 
         return CaseDetails.builder()
-            .caseTypeId(CASE_TYPE_ID_CONSENTED)
+            .caseTypeId(CaseType.CONSENTED.getCcdType())
             .id(123456789L)
             .data(caseData)
             .build();
@@ -246,7 +246,7 @@ public class TestSetUpUtils {
 
     public static CaseDetails defaultContestedCaseDetails() {
         Map<String, Object> caseData = new HashMap<>();
-        List<String> natureOfApplication =  List.of("Lump Sum Order",
+        List<String> natureOfApplication = List.of("Lump Sum Order",
             "Periodical Payment Order",
             "Pension Sharing Order",
             "Pension Attachment Order",
@@ -260,7 +260,7 @@ public class TestSetUpUtils {
         populateCourtDetails(caseData);
 
         return CaseDetails.builder()
-            .caseTypeId(CASE_TYPE_ID_CONTESTED)
+            .caseTypeId(CaseType.CONTESTED.getCcdType())
             .id(987654321L)
             .data(caseData)
             .build();
@@ -345,7 +345,8 @@ public class TestSetUpUtils {
 
     public static List<BulkPrintDocument> bulkPrintDocumentList() {
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
-        bulkPrintDocuments.add(BulkPrintDocument.builder().binaryFileUrl("http://dm-store-aat.service.core-compute-aat.internal/documents/967103ad-0b95-4f0f-9712-4bf5770fb196/binary").build());
+        bulkPrintDocuments.add(BulkPrintDocument.builder()
+            .binaryFileUrl("http://dm-store-aat.service.core-compute-aat.internal/documents/967103ad-0b95-4f0f-9712-4bf5770fb196/binary").build());
         return bulkPrintDocuments;
     }
 
@@ -363,5 +364,49 @@ public class TestSetUpUtils {
             }
         });
         return caseData;
+    }
+
+    public static CaseDocument newDocument(String documentName,
+                                           String filename,
+                                           String binaryUrl) {
+        return CaseDocument.builder()
+            .documentFilename(filename)
+            .documentUrl(documentName)
+            .documentBinaryUrl(binaryUrl)
+            .build();
+    }
+
+    public static CaseDocument newDocument() {
+        return CaseDocument.builder()
+            .documentFilename(FILE_NAME)
+            .documentUrl(DOC_URL)
+            .documentBinaryUrl(BINARY_URL)
+            .build();
+    }
+
+    public static ClientDocument newDocumentClientDocument() {
+        ClientDocument caseDocument =
+            new ClientDocument();
+        caseDocument.setUrl(DOC_URL);
+        caseDocument.setFileName(FILE_NAME);
+        caseDocument.setBinaryUrl(BINARY_URL);
+
+        return caseDocument;
+    }
+
+    public static CaseDocument wordDoc() {
+        return CaseDocument.builder()
+            .documentFilename("doc.docx")
+            .documentUrl(DOC_URL)
+            .documentBinaryUrl(BINARY_URL)
+            .build();
+    }
+
+    public static ClientDocument docClientWordDocument() {
+        return ClientDocument.builder()
+            .url(DOC_URL)
+            .fileName("doc.docx")
+            .binaryUrl(BINARY_URL)
+            .build();
     }
 }

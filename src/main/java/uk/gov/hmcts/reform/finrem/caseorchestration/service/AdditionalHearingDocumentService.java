@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCo
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.AdditionalHearingCorresponder;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -56,6 +57,7 @@ public class AdditionalHearingDocumentService {
     private final BulkPrintService bulkPrintService;
     private final CaseDataService caseDataService;
     private final NotificationService notificationService;
+    private final AdditionalHearingCorresponder additionalHearingCorresponder;
 
 
     public void createAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) throws JsonProcessingException {
@@ -75,7 +77,7 @@ public class AdditionalHearingDocumentService {
     }
 
     public void sendAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
-        bulkPrintAdditionalHearingDocuments(caseDetails, authorisationToken);
+        additionalHearingCorresponder.sendCorrespondence(caseDetails, authorisationToken);
     }
 
     public void createAndStoreAdditionalHearingDocumentsFromApprovedOrder(String authorisationToken, CaseDetails caseDetails) {
@@ -217,7 +219,6 @@ public class AdditionalHearingDocumentService {
             documentHelper.convertToAdditionalHearingDocumentData(
                 caseDetails.getData().get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION));
 
-        AdditionalHearingDocumentData additionalHearingDocument = additionalHearingDocumentData.get(additionalHearingDocumentData.size() - 1);
 
         List<BulkPrintDocument> document = new ArrayList<>();
         if (caseDetails.getData().get(HEARING_ADDITIONAL_DOC) != null) {
@@ -227,12 +228,14 @@ public class AdditionalHearingDocumentService {
             document.add(additionalUploadedDoc);
         }
 
+        AdditionalHearingDocumentData additionalHearingDocument = additionalHearingDocumentData.get(additionalHearingDocumentData.size() - 1);
+
         BulkPrintDocument additionalDoc
             = documentHelper.getBulkPrintDocumentFromCaseDocument(additionalHearingDocument.getAdditionalHearingDocument().getDocument());
 
         document.add(additionalDoc);
 
-        if (!notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
+        if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)) {
             bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, document);
         }
         if (!notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {

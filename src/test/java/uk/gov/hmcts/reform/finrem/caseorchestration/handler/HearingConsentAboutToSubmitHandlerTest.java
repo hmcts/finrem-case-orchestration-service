@@ -7,12 +7,12 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedHearingHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentHearingService;
 
@@ -76,7 +76,7 @@ public class HearingConsentAboutToSubmitHandlerTest {
     @Test
     public void givenContestedCase_WhenMultipleInterimHearing_ThenHearingsShouldBePresentInChronologicalOrder() {
         CallbackRequest callbackRequest = buildCallbackRequest();
-        AboutToStartOrSubmitCallbackResponse handle =
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle =
             handler.handle(callbackRequest, AUTH_TOKEN);
 
         Map<String, Object> caseData = handle.getData();
@@ -85,7 +85,7 @@ public class HearingConsentAboutToSubmitHandlerTest {
         verify(service).submitHearing(any(), any(), any());
     }
 
-    private CallbackRequest buildCallbackRequest()  {
+    private CallbackRequest buildCallbackRequest() {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(TEST_JSON)) {
             return objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         } catch (Exception e) {

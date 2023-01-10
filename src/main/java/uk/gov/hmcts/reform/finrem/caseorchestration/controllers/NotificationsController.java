@@ -24,9 +24,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfCorrespondenceService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.updatefrc.UpdateFrcCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
 
 import java.io.IOException;
 import java.util.Map;
@@ -36,6 +36,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INCLUDES_REPRESENTATIVE_UPDATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IS_NOC_REJECTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOC_PARTY;
 
 @RestController
@@ -51,8 +52,9 @@ public class NotificationsController extends BaseController {
     private final TransferCourtService transferCourtService;
     private final FeatureToggleService featureToggleService;
     private final NocLetterNotificationService nocLetterNotificationService;
-    private final CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
-    private final CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
+    private final HwfCorrespondenceService hwfNotificationsService;
+    private final UpdateFrcCorrespondenceService updateFrcCorrespondenceService;
+
 
     @PostMapping(value = "/hwf-successful", consumes = APPLICATION_JSON_VALUE)
     @Operation(summary = "Notify Applicant/Applicant Solicitor of HWF Successful by email or letter.")
@@ -69,19 +71,7 @@ public class NotificationsController extends BaseController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
-        if (caseDataService.isConsentedApplication(callbackRequest.getCaseDetails())) {
-            paperNotificationService.printHwfSuccessfulNotification(caseDetails, authToken);
-
-            if (!caseDataService.isPaperApplication(caseData)
-                && caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-                log.info("Sending Consented HWF Successful email notification to Solicitor");
-                notificationService.sendConsentedHWFSuccessfulConfirmationEmail(caseDetails);
-            }
-        } else if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-            log.info("Sending Contested HWF Successful email notification to Solicitor");
-            notificationService.sendContestedHwfSuccessfulConfirmationEmail(caseDetails);
-        }
-
+        hwfNotificationsService.sendCorrespondence(caseDetails, authToken);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
@@ -343,7 +333,7 @@ public class NotificationsController extends BaseController {
         validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        if (notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
+        if (notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)) {
             log.info("Sending email notification to Applicant Solicitor for 'Prepare for Hearing' for Case ID: {}",
                 callbackRequest.getCaseDetails().getId());
             notificationService.sendPrepareForHearingEmailApplicant(caseDetails);
@@ -605,9 +595,11 @@ public class NotificationsController extends BaseController {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        notificationService.sendNoticeOfChangeEmail(caseDetails);
-        log.info("Call the noc letter service");
-        nocLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, callbackRequest.getCaseDetailsBefore(), authorisationToken);
+        if (!YES_VALUE.equals(caseDetails.getData().get(IS_NOC_REJECTED))) {
+            notificationService.sendNoticeOfChangeEmail(caseDetails);
+            log.info("Call the noc letter service");
+            nocLetterNotificationService.sendNoticeOfChangeLetters(caseDetails, callbackRequest.getCaseDetailsBefore(), authorisationToken);
+        }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
@@ -652,19 +644,7 @@ public class NotificationsController extends BaseController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
-        if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-            log.info("Sending email notification to Applicant Solicitor for 'Update Frc information'");
-            notificationService.sendUpdateFrcInformationEmailToAppSolicitor(caseDetails);
-        }
-
-        if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData)) {
-            log.info("Sending email notification to Respondent Solicitor for 'Update Frc information'");
-            notificationService.sendUpdateFrcInformationEmailToRespondentSolicitor(caseDetails);
-        }
-
-        log.info("Sending email notification to court for 'Update Frc Information'");
-        notificationService.sendUpdateFrcInformationEmailToCourt(caseDetails);
-        paperNotificationService.printUpdateFrcInformationNotification(caseDetails, authToken);
+        updateFrcCorrespondenceService.sendCorrespondence(caseDetails, authToken);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
