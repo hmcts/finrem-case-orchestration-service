@@ -105,13 +105,14 @@ public class BulkScanServiceTest {
 
         Map<String, Object> returnedResult = bulkScanService.transformBulkScanForm(exceptionRecord);
 
+        assertThat(returnedResult, hasEntry(TEST_KEY, TEST_VALUE));
+        assertNotNull(returnedResult.get(APPLICANT_ORGANISATION_POLICY));
+        assertNotNull(returnedResult.get(RESPONDENT_ORGANISATION_POLICY));
+
         verify(finRemBulkScanFormTransformerFactory).getTransformer(TEST_FORM_TYPE);
         verify(bulkScanFormTransformer).transformIntoCaseData(exceptionRecord);
         verify(caseDataService).isApplicantRepresentedByASolicitor(any());
         verify(caseDataService).isRespondentRepresentedByASolicitor(any());
-        assertThat(returnedResult, hasEntry(TEST_KEY, TEST_VALUE));
-        assertNotNull(returnedResult.get(APPLICANT_ORGANISATION_POLICY));
-        assertNotNull(returnedResult.get(RESPONDENT_ORGANISATION_POLICY));
     }
 
     @Test
