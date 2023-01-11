@@ -10,12 +10,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 
 import java.util.Collections;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TYPE;
 
 
 @Slf4j
@@ -23,7 +25,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequiredArgsConstructor
 public class ReGenerateFormCAboutToSubmitHandler implements CallbackHandler {
 
-    public static final String THERE_IS_NO_HEARING_ON_THE_CASE_ERROR_MESSAGE = "There is no hearing on the case";
+    public static final String THERE_IS_NO_HEARING_ON_THE_CASE_ERROR_MESSAGE = "There is no hearing on the case.";
+    private static final String NO_FDA_HEARING_TYPE =
+        "Form C can only be regenerated with First Directions Appointment Hearings.";
 
     private final HearingDocumentService hearingDocumentService;
 
@@ -35,21 +39,36 @@ public class ReGenerateFormCAboutToSubmitHandler implements CallbackHandler {
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest, String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(
+        CallbackRequest callbackRequest, String userAuthorisation) {
+
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request to re-generate Form C on case with Case ID: {}", caseDetails.getId());
 
         Map<String, Object> caseData = caseDetails.getData();
 
-        if (caseData.containsKey(HEARING_DATE) && StringUtils.isNotBlank(caseData.get(HEARING_DATE).toString())) {
+        if (isHearingDatePresent(caseData) && isHearingTypeFda(caseData)) {
 
             caseDetails.getData().putAll(
                 hearingDocumentService.generateHearingDocuments(userAuthorisation, caseDetails));
 
             return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).build();
+        } else if (!isHearingTypeFda(caseData)) {
+            return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData)
+                .errors(Collections.singletonList(NO_FDA_HEARING_TYPE)).build();
         } else {
             return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData)
                 .errors(Collections.singletonList(THERE_IS_NO_HEARING_ON_THE_CASE_ERROR_MESSAGE)).build();
         }
+    }
+
+    private boolean isHearingTypeFda(Map<String, Object> caseData) {
+        return caseData.containsKey(HEARING_TYPE)
+            && StringUtils.isNotBlank(caseData.get(HEARING_TYPE).toString())
+            && caseData.get(HEARING_TYPE).equals(HearingTypeDirection.FDA.getId());
+    }
+
+    private static boolean isHearingDatePresent(Map<String, Object> caseData) {
+        return caseData.containsKey(HEARING_DATE) && StringUtils.isNotBlank(caseData.get(HEARING_DATE).toString());
     }
 }

@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.RestService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
 @TestConfiguration
 @ComponentScan(basePackages = {"uk.gov.hmcts.reform.finrem.caseorchestration.service.barristers",
@@ -48,4 +49,7 @@ public class ManageBarristerTestConfiguration {
 
     @MockBean
     private CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
+
+    @MockBean
+    private CheckSolicitorIsDigitalService checkSolicitorIsDigitalService;
 }
