@@ -218,7 +218,6 @@ public class FinremCaseData {
     private LocalDate hearingDate;
     private String additionalInformationAboutHearing;
     private String hearingTime;
-    private YesOrNo additionalHearingDocumentsOption;
     private List<JudgeAllocated> judgeAllocated;
     private YesOrNo applicationAllocatedTo;
     private YesOrNo caseAllocatedTo;
