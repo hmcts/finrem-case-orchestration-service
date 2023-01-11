@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrappe
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ReferToJudgeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
 
 import java.math.BigDecimal;
@@ -56,6 +57,7 @@ public class FinremCaseData {
     private String divorceCaseNumber;
     private StageReached divorceStageReached;
     private CaseDocument divorceUploadEvidence1;
+    private CaseDocument d11;
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate divorceDecreeNisiDate;
@@ -67,7 +69,9 @@ public class FinremCaseData {
     private Intention applicantIntendsTo;
     private List<PeriodicalPaymentSubstitute> dischargePeriodicalPaymentSubstituteFor;
     private YesOrNo applyingForConsentOrder;
+    @JsonProperty("ChildSupportAgencyCalculationMade")
     private YesOrNo childSupportAgencyCalculationMade;
+    @JsonProperty("ChildSupportAgencyCalculationReason")
     private String childSupportAgencyCalculationReason;
     private String authorisationName;
     private String authorisationFirm;
@@ -89,6 +93,7 @@ public class FinremCaseData {
     @JsonProperty("otherCollection")
     private List<OtherDocumentCollection> otherDocumentsCollection;
     private YesOrNo helpWithFeesQuestion;
+    @JsonProperty("HWFNumber")
     private String hwfNumber;
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private BigDecimal amountToPay;
@@ -96,6 +101,7 @@ public class FinremCaseData {
     private String pbaNumber;
     @JsonProperty("PBAreference")
     private String pbaReference;
+    @JsonProperty("PBAPaymentReference")
     private String pbaPaymentReference;
     private OrderDirection orderDirection;
     private CaseDocument orderDirectionOpt1;
@@ -259,6 +265,7 @@ public class FinremCaseData {
     private String hearingDetails;
     private YesOrNo applicantShareDocs;
     private YesOrNo respondentShareDocs;
+    @JsonProperty("reasonForFRCLocation")
     private String reasonForFrcLocation;
     private List<HearingUploadBundleCollection> hearingUploadBundle;
     private SendOrderEventPostStateOption sendOrderPostStateOption;
@@ -306,6 +313,40 @@ public class FinremCaseData {
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private ConsentOrderWrapper consentOrderWrapper;
+    private YesOrNo additionalHearingDocumentsOption;
+    private CaseDocument additionalListOfHearingDocuments;
+
+    @JsonProperty("typeOfDocument")
+    private ScannedDocumentTypeOption scannedDocsTypeOfDocument;
+    private List<ScannedDocumentCollection> applicantScanDocuments;
+    private List<ScannedDocumentCollection> respondentScanDocuments;
+
+    @JsonProperty("appBarristerCollection")
+    private List<BarristerData> applicantBarristers;
+    @JsonProperty("respBarristerCollection")
+    private List<BarristerData> respondentBarristers;
+    private BarristerParty barristerParty;
+
+    private YesOrNo benefitForChildrenDecisionSchedule;
+    private List<BenefitPaymentChecklist> benefitPaymentChecklistSchedule;
+    private CaseDocument variationOrderDocument;
+    private CaseDocument consentVariationOrderDocument;
+
+    private YesOrNo isNocRejected;
+
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private ScheduleOneWrapper scheduleOneWrapper;
+
+    private List<ConsentedHearingDataWrapper> listForHearings;
+
+    @JsonIgnore
+    public ScheduleOneWrapper getScheduleOneWrapper() {
+        if (scheduleOneWrapper == null) {
+            this.scheduleOneWrapper = new ScheduleOneWrapper();
+        }
+        return scheduleOneWrapper;
+    }
 
     @JsonIgnore
     public MiamWrapper getMiamWrapper() {
