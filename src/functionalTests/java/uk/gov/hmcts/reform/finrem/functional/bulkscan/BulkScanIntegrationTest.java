@@ -12,6 +12,8 @@ import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.bsp.common.utils.ResourceLoader;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
+import static org.junit.Assert.assertTrue;
+
 @RunWith(SerenityRunner.class)
 @Slf4j
 public class BulkScanIntegrationTest extends IntegrationTestBase {
@@ -64,7 +66,9 @@ public class BulkScanIntegrationTest extends IntegrationTestBase {
         String token = utils.getS2SToken(bulkScanTransformationAndUpdateMicroservice);
 
         Response forTransformationEndpoint = responseForEndpoint(token, TRANSFORMATION_END_POINT);
-
+        String body = forTransformationEndpoint.getBody().asString();
+        assertTrue(body.contains("ApplicantOrganisationPolicy"));
+        assertTrue(body.contains("RespondentOrganisationPolicy"));
         assert forTransformationEndpoint.getStatusCode() == 200 : "Service is not authorised to transform OCR data to case "
             + forTransformationEndpoint.getStatusCode();
     }
