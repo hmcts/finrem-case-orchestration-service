@@ -67,6 +67,7 @@ public class BulkScanIntegrationTest extends IntegrationTestBase {
 
         Response forTransformationEndpoint = responseForEndpoint(token, TRANSFORMATION_END_POINT);
         String body = forTransformationEndpoint.getBody().asString();
+        System.out.println(body);
         assertTrue(body.contains("ApplicantOrganisationPolicy"));
         assertTrue(body.contains("RespondentOrganisationPolicy"));
         assert forTransformationEndpoint.getStatusCode() == 200 : "Service is not authorised to transform OCR data to case "
