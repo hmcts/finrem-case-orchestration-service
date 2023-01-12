@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResult;
 import uk.gov.hmcts.reform.bsp.common.model.validation.out.ValidationStatus;
 import uk.gov.hmcts.reform.bsp.common.service.BulkScanFormValidator;
 import uk.gov.hmcts.reform.bsp.common.service.transformation.BulkScanFormTransformer;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.FinRemBulkScanFormTransformerFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.FinRemBulkScanFormValidatorFactory;
@@ -22,6 +23,7 @@ import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 
@@ -48,11 +50,23 @@ public class BulkScanService {
         BulkScanFormTransformer bulkScanFormTransformer = finRemBulkScanFormTransformerFactory.getTransformer(exceptionRecord.getFormType());
         Map<String, Object> transformIntoCaseData = bulkScanFormTransformer.transformIntoCaseData(exceptionRecord);
         Map<String, Object> caseData = new HashMap<>(transformIntoCaseData);
-        addDefaultOrganisationPoliciesIfPartiesNotRepresented(caseData);
+        addChangeOrganisationRequestAndDefaultOrganisationPolicies(caseData);
         return caseData;
     }
 
-    private void addDefaultOrganisationPoliciesIfPartiesNotRepresented(Map<String, Object> caseData) {
+    private void addChangeOrganisationRequestAndDefaultOrganisationPolicies(Map<String, Object> caseData) {
+        ChangeOrganisationRequest defaultChangeRequest = ChangeOrganisationRequest
+            .builder()
+            .requestTimestamp(null)
+            .approvalRejectionTimestamp(null)
+            .caseRoleId(null)
+            .approvalStatus(null)
+            .organisationToAdd(null)
+            .organisationToRemove(null)
+            .reason(null)
+            .build();
+        caseData.put(CHANGE_ORGANISATION_REQUEST, defaultChangeRequest);
+
         if (!caseDataService.isApplicantRepresentedByASolicitor(caseData)) {
             OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
                 .orgPolicyCaseAssignedRole(APP_SOLICITOR_POLICY)

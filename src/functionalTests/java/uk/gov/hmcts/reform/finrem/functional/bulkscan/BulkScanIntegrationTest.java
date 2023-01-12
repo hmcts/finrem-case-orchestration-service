@@ -13,6 +13,8 @@ import uk.gov.hmcts.reform.bsp.common.utils.ResourceLoader;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
 import static org.junit.Assert.assertTrue;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
 
 @RunWith(SerenityRunner.class)
 @Slf4j
@@ -67,7 +69,8 @@ public class BulkScanIntegrationTest extends IntegrationTestBase {
 
         Response forTransformationEndpoint = responseForEndpoint(token, TRANSFORMATION_END_POINT);
         String body = forTransformationEndpoint.getBody().asString();
-        assertTrue(body.contains("ApplicantOrganisationPolicy"));
+        assertTrue(body.contains(APPLICANT_ORGANISATION_POLICY));
+        assertTrue(body.contains(CHANGE_ORGANISATION_REQUEST));
         assert forTransformationEndpoint.getStatusCode() == 200 : "Service is not authorised to transform OCR data to case "
             + forTransformationEndpoint.getStatusCode();
     }

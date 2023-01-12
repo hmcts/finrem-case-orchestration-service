@@ -38,6 +38,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_FO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -108,6 +109,7 @@ public class BulkScanServiceTest {
         assertThat(returnedResult, hasEntry(TEST_KEY, TEST_VALUE));
         assertNotNull(returnedResult.get(APPLICANT_ORGANISATION_POLICY));
         assertNotNull(returnedResult.get(RESPONDENT_ORGANISATION_POLICY));
+        assertNotNull(returnedResult.get(CHANGE_ORGANISATION_REQUEST));
 
         verify(finRemBulkScanFormTransformerFactory).getTransformer(TEST_FORM_TYPE);
         verify(bulkScanFormTransformer).transformIntoCaseData(exceptionRecord);
