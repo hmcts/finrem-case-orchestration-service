@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResult;
 import uk.gov.hmcts.reform.bsp.common.service.BulkScanFormValidator;
 import uk.gov.hmcts.reform.bsp.common.service.transformation.BulkScanFormTransformer;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkScanService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.FinRemBulkScanFormTransformerFactory;
 
 import java.util.List;
@@ -58,9 +57,6 @@ public class BulkScanServiceTest {
 
     @Mock
     private FormAValidator formAValidator;
-
-    @Mock
-    private CaseDataService caseDataService;
 
     @Mock
     private FinRemBulkScanFormValidatorFactory finRemBulkScanFormValidatorFactory;
@@ -113,8 +109,6 @@ public class BulkScanServiceTest {
 
         verify(finRemBulkScanFormTransformerFactory).getTransformer(TEST_FORM_TYPE);
         verify(bulkScanFormTransformer).transformIntoCaseData(exceptionRecord);
-        verify(caseDataService).isApplicantRepresentedByASolicitor(any());
-        verify(caseDataService).isRespondentRepresentedByASolicitor(any());
     }
 
     @Test

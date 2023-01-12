@@ -37,7 +37,6 @@ public class BulkScanService {
     private final FinRemBulkScanFormTransformerFactory finRemBulkScanFormTransformerFactory;
 
     private final FormAValidator formAValidator;
-    private final CaseDataService caseDataService;
 
     public OcrValidationResult validateBulkScanForm(String formType, List<OcrDataField> ocrDataFields) throws UnsupportedFormTypeException {
         BulkScanFormValidator formValidator = finRemBulkScanFormValidatorFactory.getValidator(formType);
@@ -67,18 +66,15 @@ public class BulkScanService {
             .build();
         caseData.put(CHANGE_ORGANISATION_REQUEST, defaultChangeRequest);
 
-        if (!caseDataService.isApplicantRepresentedByASolicitor(caseData)) {
-            OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
-                .orgPolicyCaseAssignedRole(APP_SOLICITOR_POLICY)
-                .build();
-            caseData.put(APPLICANT_ORGANISATION_POLICY, applicantOrganisationPolicy);
-        }
-        if (!caseDataService.isRespondentRepresentedByASolicitor(caseData)) {
-            OrganisationPolicy respondentOrganisationPolicy = OrganisationPolicy.builder()
-                .orgPolicyCaseAssignedRole(RESP_SOLICITOR_POLICY)
-                .build();
-            caseData.put(RESPONDENT_ORGANISATION_POLICY, respondentOrganisationPolicy);
-        }
+        OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
+            .orgPolicyCaseAssignedRole(APP_SOLICITOR_POLICY)
+            .build();
+        caseData.put(APPLICANT_ORGANISATION_POLICY, applicantOrganisationPolicy);
+
+        OrganisationPolicy respondentOrganisationPolicy = OrganisationPolicy.builder()
+            .orgPolicyCaseAssignedRole(RESP_SOLICITOR_POLICY)
+            .build();
+        caseData.put(RESPONDENT_ORGANISATION_POLICY, respondentOrganisationPolicy);
     }
 
     private void validateForTransformation(ExceptionRecord exceptionRecord) throws UnsupportedFormTypeException, InvalidDataException {
