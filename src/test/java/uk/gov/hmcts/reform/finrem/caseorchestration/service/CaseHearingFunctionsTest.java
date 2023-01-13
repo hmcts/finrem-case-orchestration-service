@@ -8,6 +8,7 @@ import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BEDFORDSHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BEDFORDSHIRE_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BOURNEMOUTH;
@@ -285,7 +286,7 @@ public class CaseHearingFunctionsTest {
             HIGHCOURT_COURTLIST, HIGHCOURT_COURT);
 
         Map<String, Object> stringObjectMap = CaseHearingFunctions.buildFrcCourtDetails(caseData);
-        assertThat(stringObjectMap, is(null));
+        assertThat(stringObjectMap, is(nullValue()));
     }
 
     @Test
