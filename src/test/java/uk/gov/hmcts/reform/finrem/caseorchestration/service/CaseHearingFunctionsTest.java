@@ -278,6 +278,17 @@ public class CaseHearingFunctionsTest {
     }
 
     @Test
+    public void shouldReturnNullIfHighCourtFRCIsWrongDetails() {
+        Map<String, Object> caseData = ImmutableMap.of(
+            REGION, HIGHCOURT,
+            HIGHCOURT_FRC_LIST, LONDON,
+            HIGHCOURT_COURTLIST, HIGHCOURT_COURT);
+
+        Map<String, Object> stringObjectMap = CaseHearingFunctions.buildFrcCourtDetails(caseData);
+        assertThat(stringObjectMap, is(null));
+    }
+
+    @Test
     public void shouldPopulateInterimHearingLondonFrcCourtDetails() {
         Map<String, Object> caseData = ImmutableMap.of(
             INTERIM_REGION, LONDON,
