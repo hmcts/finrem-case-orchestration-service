@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildDetailsCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildDetailsCollectionElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureOfApplicationSchedule;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
 
@@ -21,7 +21,7 @@ import java.util.List;
 public class ScheduleOneWrapper {
 
     private Schedule1OrMatrimonialAndCpList typeOfApplication;
-    private List<ChildDetailsCollection> childrenCollection;
+    private List<ChildDetailsCollectionElement> childrenCollection;
     private List<NatureOfApplicationSchedule> natureOfApplicationChecklistSchedule;
     private List<NatureOfApplicationSchedule> consentNatureOfApplicationChecklistSchedule;
 }
