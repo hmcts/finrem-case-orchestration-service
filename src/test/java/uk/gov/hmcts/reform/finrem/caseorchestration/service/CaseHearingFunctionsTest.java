@@ -28,7 +28,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_HEARING_REGION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_MIDLANDS_FRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_NOTTINGHAM_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_FRC_LIST_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_CFC_COURT_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HIGHCOURT_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_LONDON_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_REGION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENTFRC;
@@ -95,6 +101,16 @@ public class CaseHearingFunctionsTest {
 
         String courtList = CaseHearingFunctions.getSelectedCourtComplexType(caseData);
         assertThat(courtList, is(NOTTINGHAM_COURTLIST));
+    }
+
+    @Test
+    public void givenHighCourtDetailsInCaseData_whenGettingSelectedCourtListCt_thenHighCourtListCtIsReturned() {
+        Map<String, Object> caseData = ImmutableMap.of(
+            REGION_CT, HIGHCOURT,
+            HIGHCOURT_FRC_LIST_CT, HIGHCOURT);
+
+        String courtList = CaseHearingFunctions.getSelectedCourtComplexType(caseData);
+        assertThat(courtList, is(HIGHCOURT_FRC_LIST_CT));
     }
 
     @Test
@@ -245,6 +261,20 @@ public class CaseHearingFunctionsTest {
         assertThat(stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY), is("PO Box 12746, Harlow, CM20 9QZ"));
         assertThat(stringObjectMap.get(COURT_DETAILS_PHONE_KEY), is("0300 303 0642"));
         assertThat(stringObjectMap.get(COURT_DETAILS_EMAIL_KEY), is("contactFinancialRemedy@justice.gov.uk"));
+    }
+
+    @Test
+    public void shouldPopulateHighCourtDetails() {
+        Map<String, Object> caseData = ImmutableMap.of(
+            REGION, HIGHCOURT,
+            HIGHCOURT_FRC_LIST, HIGHCOURT,
+            HIGHCOURT_COURTLIST, HIGHCOURT_COURT);
+
+        Map<String, Object> stringObjectMap = CaseHearingFunctions.buildFrcCourtDetails(caseData);
+        assertThat(stringObjectMap.get(COURT_DETAILS_NAME_KEY), is("High Court Family Division"));
+        assertThat(stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY), is("High Court Family Division, Queens Building, Royal Courts of Justice, Strand, London, WC2A 2LL"));
+        assertThat(stringObjectMap.get(COURT_DETAILS_PHONE_KEY), is("020 7947 7551"));
+        assertThat(stringObjectMap.get(COURT_DETAILS_EMAIL_KEY), is("rcj.familyhighcourt@justice.gov.uk"));
     }
 
     @Test

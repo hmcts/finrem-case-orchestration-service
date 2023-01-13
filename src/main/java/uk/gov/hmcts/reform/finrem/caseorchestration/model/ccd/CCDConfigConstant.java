@@ -222,6 +222,9 @@ public class CCDConfigConstant {
     public static final String WELSHPOOL = "FR_northwalesList_4";
     public static final String MOLD = "FR_northwalesList_5";
 
+    //High court List
+    public static final String HIGHCOURT_COURT = "FR_highCourtList_1";
+
     //SouthEast Kent
     public static final String KENT_DARTFORD_COURTS = "FR_kent_surrey_hc_list_3";
 
