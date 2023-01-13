@@ -34,7 +34,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_FRC_LIST_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_CFC_COURT_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HIGHCOURT_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_LONDON_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_REGION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENTFRC;
@@ -272,7 +271,8 @@ public class CaseHearingFunctionsTest {
 
         Map<String, Object> stringObjectMap = CaseHearingFunctions.buildFrcCourtDetails(caseData);
         assertThat(stringObjectMap.get(COURT_DETAILS_NAME_KEY), is("High Court Family Division"));
-        assertThat(stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY), is("High Court Family Division, Queens Building, Royal Courts of Justice, Strand, London, WC2A 2LL"));
+        assertThat(stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY),
+            is("High Court Family Division, Queens Building, Royal Courts of Justice, Strand, London, WC2A 2LL"));
         assertThat(stringObjectMap.get(COURT_DETAILS_PHONE_KEY), is("020 7947 7551"));
         assertThat(stringObjectMap.get(COURT_DETAILS_EMAIL_KEY), is("rcj.familyhighcourt@justice.gov.uk"));
     }
