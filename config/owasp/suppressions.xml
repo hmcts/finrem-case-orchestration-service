@@ -153,7 +153,7 @@
         <notes><![CDATA[
    file name: commons-io-2.7.jar
    ]]></notes>
-        <packageUrl regex="true">^pkg:maven/commons\-logging/commons-\-logging@.*$</packageUrl>
+        <packageUrl regex="true">^pkg:maven/commons\-logging/commons\-logging@.*$</packageUrl>
         <cve>CVE-2021-37533</cve>
     </suppress>
 
