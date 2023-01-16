@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueS
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.URGENT_CASE_QUESTION;
 
 @Slf4j
@@ -35,6 +34,7 @@ public class AmendApplicationContestedAboutToStartHandler implements CallbackHan
                                                                                    String userAuthorisation) {
         service.defaultCivilPartnershipField(callbackRequest);
         service.defaultTypeOfApplication(callbackRequest);
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         if (CaseType.CONTESTED.getCcdType().equals(callbackRequest.getCaseDetails().getCaseTypeId())) {
             caseData.putIfAbsent(URGENT_CASE_QUESTION, NO_VALUE);
         }
