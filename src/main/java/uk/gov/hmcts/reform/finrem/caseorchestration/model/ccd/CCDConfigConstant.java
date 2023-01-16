@@ -265,6 +265,7 @@ public class CCDConfigConstant {
     public static final String URGENT_CASE_QUESTION = "promptForUrgentCaseQuestion";
     public static final String CONSENTED_NATURE_OF_APPLICATION = "natureOfApplication2";
     public static final String CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION = "consentNatureOfApplicationChecklist";
+    public static final String CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_SCHEDULE_1 = "consentNatureOfApplicationChecklistSchedule";
     public static final String CONSENTED_NATURE_OF_APPLICATION_3A = "natureOfApplication3a";
     public static final String CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_3A = "consentNatureOfApplicationAddress";
     public static final String CONSENTED_NATURE_OF_APPLICATION_3B = "natureOfApplication3b";
@@ -522,6 +523,11 @@ public class CCDConfigConstant {
 
     //NFD
     public static final String CIVIL_PARTNERSHIP = "civilPartnership";
+
+    //Schedule1FormA
+    public static final String TYPE_OF_APPLICATION = "typeOfApplication";
+    public static final String TYPE_OF_APPLICATION_DEFAULT_TO = "In connection to matrimonial and civil partnership proceedings";
+    public static final String CHILDREN_COLLECTION = "childrenCollection";
 
     //Get user based on role i.e applicant or respondent
     public static final String CASE_ROLE = "currentUserCaseRole";

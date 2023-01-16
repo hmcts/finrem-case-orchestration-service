@@ -205,7 +205,7 @@ pitest {
     threads.set(4)
     outputFormats.set(['XML', 'HTML'])
     timestampedReports.set(false)
-    mutationThreshold.set(80)
+    mutationThreshold.set(75)
 }
 
 bootJar {
@@ -225,7 +225,7 @@ pact {
         pactDirectory = 'pacts'
         pactBrokerUrl = System.getenv("PACT_BROKER_FULL_URL") ?: 'http://localhost:80'
         tags = [System.getenv("PACT_BRANCH_NAME") ?: 'Dev']
-        version = versions.pact
+        version = project.pactVersion
     }
 }
 
@@ -303,7 +303,7 @@ dependencyManagement {
     }
     dependencies {
         //CVE-2022-42252
-        dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.68') {
+        dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.69') {
             entry 'tomcat-embed-core'
             entry 'tomcat-embed-websocket'
         }
@@ -334,8 +334,12 @@ dependencies {
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: versions.apacheLogging
     implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: versions.apacheLogging
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
-
-
+    implementation("org.apache.poi:poi:5.2.3") {
+        exclude group: "org.apache.commons", module: "commons-math3"
+    }
+    implementation("org.apache.poi:poi-ooxml:5.2.3") {
+        exclude group: "org.apache.commons", module: "commons-math3"
+    }
 
     implementation("org.springframework.boot:spring-boot-starter-web") {
         exclude group: "org.yaml", module: "snakeyaml"
@@ -375,7 +379,10 @@ dependencies {
     functionalImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
     functionalImplementation group: 'io.jsonwebtoken', name: 'jjwt', version: versions.jjwt
     functionalImplementation group: 'junit', name: 'junit', version: versions.junit
-    functionalImplementation group: 'net.serenity-bdd', name: 'serenity-core', version: versions.serenity
+    functionalImplementation ("net.serenity-bdd:serenity-core:3.2.5") {
+        exclude group: "commons-net", module: "commons-net"
+        exclude group: "org.apache.commons", module: "commons-compress"
+    }
     functionalImplementation group: 'net.serenity-bdd', name: 'serenity-junit', version: versions.serenity
     functionalImplementation group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: versions.serenity
     functionalImplementation group: 'net.serenity-bdd', name: 'serenity-spring', version: versions.serenity

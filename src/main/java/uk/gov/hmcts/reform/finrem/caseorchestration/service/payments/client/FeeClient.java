@@ -21,8 +21,8 @@ public class FeeClient {
     private final FeeServiceConfiguration serviceConfig;
     private final RestTemplate restTemplate;
 
-    public FeeResponse getApplicationFee(ApplicationType application) {
-        URI uri = buildUri(application);
+    public FeeResponse getApplicationFee(ApplicationType application, String typeOfApplication) {
+        URI uri = isSchedule1Application(typeOfApplication) ? buildSchedule1Uri(application) : buildUri(application);
         log.info("Inside getApplicationFee, FeeResponse API uri : {} ", uri);
         ResponseEntity<FeeResponse> response = restTemplate.getForEntity(uri, FeeResponse.class);
         log.info("Fee response : {} ", response);
@@ -43,6 +43,20 @@ public class FeeClient {
             .toUri();
     }
 
+    private URI buildSchedule1Uri(ApplicationType application) {
+        return fromHttpUrl(serviceConfig.getUrl() + serviceConfig.getApi())
+            .queryParam("service", serviceConfig.getSchedule1Service())
+            .queryParam("jurisdiction1", serviceConfig.getJurisdiction1())
+            .queryParam("jurisdiction2", serviceConfig.getJurisdiction2())
+            .queryParam("channel", serviceConfig.getChannel())
+            .queryParam("event", application == ApplicationType.CONSENTED
+                ? serviceConfig.getConsentedEvent() : serviceConfig.getContestedEvent())
+            .queryParam("keyword", serviceConfig.getSchedule1Keyword())
+            .build()
+            .encode()
+            .toUri();
+    }
+
     public String getKeyword(ApplicationType application) {
         log.info("Inside getKeyword for application type: {} and with use new keywords set to {}",
             application, serviceConfig.getFeePayNewKeywords());
@@ -53,5 +67,9 @@ public class FeeClient {
         } else {
             return serviceConfig.getContestedKeyword();
         }
+    }
+
+    private boolean isSchedule1Application(String typeOfApplication) {
+        return typeOfApplication != null && typeOfApplication.equals("Under paragraph 1 or 2 of schedule 1 children act 1989");
     }
 }

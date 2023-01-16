@@ -6,8 +6,9 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueService;
 
 import java.util.Map;
 
@@ -18,27 +19,26 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class DefaultValueAboutToStartHandler implements CallbackHandler<Map<String, Object>> {
+public class AmendApplicationContestedAboutToStartHandler implements CallbackHandler<Map<String, Object>> {
+
+    private final OnStartDefaultValueService service;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
         return CallbackType.ABOUT_TO_START.equals(callbackType)
-            && (CaseType.CONSENTED.equals(caseType) || CaseType.CONTESTED.equals(caseType))
-            && (EventType.SOLICITOR_CREATE.equals(eventType)
-            || EventType.AMEND_CASE.equals(eventType)
-            || EventType.AMEND_CONTESTED_APP_DETAILS.equals(eventType)
-            || EventType.AMEND_CONTESTED_PAPER_APP_DETAILS.equals(eventType));
+            && CaseType.CONTESTED.equals(caseType)
+            && (EventType.AMEND_CONTESTED_APP_DETAILS.equals(eventType));
     }
 
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
                                                                                    String userAuthorisation) {
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        caseData.putIfAbsent(CIVIL_PARTNERSHIP, NO_VALUE);
+        service.defaultCivilPartnershipField(callbackRequest);
+        service.defaultTypeOfApplication(callbackRequest);
         if (CaseType.CONTESTED.getCcdType().equals(callbackRequest.getCaseDetails().getCaseTypeId())) {
             caseData.putIfAbsent(URGENT_CASE_QUESTION, NO_VALUE);
         }
-        
-        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).build();
+        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder()
+            .data(callbackRequest.getCaseDetails().getData()).build();
     }
 }
