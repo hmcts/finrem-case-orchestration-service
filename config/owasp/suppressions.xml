@@ -151,6 +151,14 @@
     </suppress>
     <suppress>
         <notes><![CDATA[
+   file name: commons-io-2.7.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/commons\-io/commons-logging\-io@.*$</packageUrl>
+        <cve>CVE-2021-37533</cve>
+    </suppress>
+
+    <suppress>
+        <notes><![CDATA[
             The 'utils_project' is a personal collection of scripts from someones /bin/ directory, not a maven project
             https://github.com/fredsmith/utils
        ]]></notes>
