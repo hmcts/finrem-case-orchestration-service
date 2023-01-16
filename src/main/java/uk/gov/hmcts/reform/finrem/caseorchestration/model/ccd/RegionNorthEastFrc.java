@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 public enum RegionNorthEastFrc {
     @JsonProperty("cleveland")
     CLEVELAND,
+    @JsonProperty("cleaveland")
+    CLEAVELAND,
     @JsonProperty("nwyorkshire")
     NW_YORKSHIRE,
     @JsonProperty("hsyorkshire")

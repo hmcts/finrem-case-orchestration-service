@@ -15,13 +15,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationSer
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateSolicitorDetailsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.updatefrc.UpdateFrcCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.NoticeOfChangeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.service.UpdateFrcInfoRespondentDocumentService;
 
 @TestConfiguration
 @ComponentScan(basePackages = {"uk.gov.hmcts.reform.finrem.caseorchestration.service.noc",
-    "uk.gov.hmcts.reform.finrem.caseorchestration.helper"})
+    "uk.gov.hmcts.reform.finrem.caseorchestration.helper", "uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence"})
 public class NocTestConfig {
 
     @Bean
@@ -57,6 +59,10 @@ public class NocTestConfig {
     private UpdateRepresentationWorkflowService updateRepresentationWorkflowService;
     @MockBean
     private UpdateRepresentationService updateRepresentationService;
+    @MockBean
+    UpdateFrcCorrespondenceService updateFrcCorrespondenceService;
+    @MockBean
+    UpdateFrcInfoRespondentDocumentService updateFrcInfoRespondentDocumentService;
 
 }
 

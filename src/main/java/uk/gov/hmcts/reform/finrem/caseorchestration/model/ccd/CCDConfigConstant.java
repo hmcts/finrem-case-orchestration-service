@@ -12,6 +12,9 @@ public class CCDConfigConstant {
     public static final String CASE_DETAILS = "caseDetails";
     public static final String CASE_DATA = "case_data";
 
+    public static final String HMCTS_SERVICE_ID = "HMCTSServiceId";
+
+    public static final String SUPPLEMENTARY_DATA_UPDATES = "supplementary_data_updates";
     public static final String APPLICANT_FIRST_MIDDLE_NAME = "applicantFMName";
     public static final String APPLICANT_LAST_NAME = "applicantLName";
     public static final String APPLICANT_ADDRESS = "applicantAddress";
@@ -102,6 +105,7 @@ public class CCDConfigConstant {
     public static final String BRISTOLFRC = "bristol";
     public static final String CFC = "cfc";
     public static final String CLEAVELAND = "cleaveland";
+    public static final String CLEVELAND = "cleveland";
     public static final String DEVON = "devon";
     public static final String DORSET = "dorset";
     public static final String HSYORKSHIRE = "hsyorkshire";
@@ -259,6 +263,7 @@ public class CCDConfigConstant {
     //Nature of Application
     public static final String CONSENTED_NATURE_OF_APPLICATION = "natureOfApplication2";
     public static final String CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION = "consentNatureOfApplicationChecklist";
+    public static final String CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_SCHEDULE_1 = "consentNatureOfApplicationChecklistSchedule";
     public static final String CONSENTED_NATURE_OF_APPLICATION_3A = "natureOfApplication3a";
     public static final String CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_3A = "consentNatureOfApplicationAddress";
     public static final String CONSENTED_NATURE_OF_APPLICATION_3B = "natureOfApplication3b";
@@ -516,6 +521,11 @@ public class CCDConfigConstant {
 
     //NFD
     public static final String CIVIL_PARTNERSHIP = "civilPartnership";
+
+    //Schedule1FormA
+    public static final String TYPE_OF_APPLICATION = "typeOfApplication";
+    public static final String TYPE_OF_APPLICATION_DEFAULT_TO = "In connection to matrimonial and civil partnership proceedings";
+    public static final String CHILDREN_COLLECTION = "childrenCollection";
 
     //Get user based on role i.e applicant or respondent
     public static final String CASE_ROLE = "currentUserCaseRole";

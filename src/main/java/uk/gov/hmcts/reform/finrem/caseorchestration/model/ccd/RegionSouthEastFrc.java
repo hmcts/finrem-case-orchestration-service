@@ -10,6 +10,7 @@ import java.util.Arrays;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 @RequiredArgsConstructor
 public enum RegionSouthEastFrc {
+    KENT_FRC("kentfrc"),
     KENT("kent"),
     BEDFORDSHIRE("bedfordshire"),
     THAMES_VALLEY("thamesvalley");

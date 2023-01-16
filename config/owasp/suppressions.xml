@@ -123,10 +123,59 @@
         <cve>CVE-2022-42003</cve>
         <cve>CVE-2022-42004</cve>
     </suppress>
-
     <suppress>
         <notes><![CDATA[file name: spring-web-5.3.21.jar]]></notes>
         <packageUrl regex="true">^pkg:maven/org\.springframework/spring\-web@.*$</packageUrl>
         <cve>CVE-2016-1000027</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: commons-codec-1.15.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/commons\-codec/commons\-codec@.*$</packageUrl>
+        <cve>CVE-2021-37533</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: commons-fileupload-1.4.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/commons\-fileupload/commons\-fileupload@.*$</packageUrl>
+        <cve>CVE-2021-37533</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: commons-io-2.7.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/commons\-io/commons\-io@.*$</packageUrl>
+        <cve>CVE-2021-37533</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+            The 'utils_project' is a personal collection of scripts from someones /bin/ directory, not a maven project
+            https://github.com/fredsmith/utils
+       ]]></notes>
+       <packageUrl regex="true">^pkg:maven/.*/.*@.*$</packageUrl>
+       <cpe>cpe:/a:utils_project:utils</cpe>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: commons-compress-1.21.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.commons/commons\-compress@.*$</packageUrl>
+        <cpe>cpe:/a:apache:commons_net</cpe>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: snakeyaml-1.33.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.yaml/snakeyaml@.*$</packageUrl>
+        <cve>CVE-2022-3064</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: snakeyaml-1.33.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.yaml/snakeyaml@.*$</packageUrl>
+        <cve>CVE-2021-4235</cve>
     </suppress>
 </suppressions>

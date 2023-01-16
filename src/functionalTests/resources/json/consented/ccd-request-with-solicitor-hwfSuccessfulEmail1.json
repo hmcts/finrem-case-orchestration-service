@@ -3,6 +3,14 @@
   "event_id": "event1",
   "case_details": {
     "case_data": {
+      "ApplicantOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "A31PTVA",
+          "OrganisationName": "FRApplicantSolicitorFirm"
+        },
+        "OrgPolicyReference": "FRApplicant",
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
+      },
       "HWFNumber": "HWF123",
       "PBANumber": "PBA222",
       "PBAPaymentReference": "PBAPaymentRef123",

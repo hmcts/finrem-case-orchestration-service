@@ -148,7 +148,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     public void sendToBulkPrint() {
         CaseDetails caseDetails = caseDetails(NO_VALUE);
 
-        hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, AUTH_TOKEN);
+        hearingDocumentService.sendInitialHearingCorrespondence(caseDetails, AUTH_TOKEN);
 
         verify(bulkPrintService).printApplicantDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
         verify(bulkPrintService).printRespondentDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
@@ -163,10 +163,10 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         caseDetails.getData().put(FORM_A_COLLECTION, asList(pensionDocumentData(), pensionDocumentData(), pensionDocumentData()));
 
-        hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, AUTH_TOKEN);
+        hearingDocumentService.sendInitialHearingCorrespondence(caseDetails, AUTH_TOKEN);
 
         when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(false);
-        when(notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any())).thenReturn(true);
 
         verify(bulkPrintService).printApplicantDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
 
@@ -217,7 +217,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyCourtDetailsFields(
             "Canterbury Family Court Hearing Centre", "The Law Courts, Chaucer Road, Canterbury, CT1 1ZA",
-            "01634 887900", "FRCKSS@justice.gov.uk");
+            "01634 887900", "Family.canterbury.countycourt@justice.gov.uk");
     }
 
     @Test

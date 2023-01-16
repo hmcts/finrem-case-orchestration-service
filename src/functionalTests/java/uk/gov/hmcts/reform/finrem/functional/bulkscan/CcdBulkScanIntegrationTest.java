@@ -16,9 +16,9 @@ import uk.gov.hmcts.reform.bsp.common.utils.ResourceLoader;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.functional.idam.IdamUtils;
 import uk.gov.hmcts.reform.finrem.functional.model.UserDetails;
 import uk.gov.hmcts.reform.finrem.functional.util.ServiceUtils;
@@ -35,7 +35,6 @@ import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.collection.IsMapContaining.hasKey;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.SERVICE_AUTHORISATION_HEADER;
 
 @Slf4j
@@ -129,7 +128,7 @@ public class CcdBulkScanIntegrationTest {
             serviceToken,
             userDetails.getId(),
             DIVORCE_JURISDICTION_ID,
-            CASE_TYPE_ID_CONSENTED,
+            CaseType.CONSENTED.getCcdType(),
             FR_NEW_PAPER_CASE_EVENT_ID
         );
 
@@ -149,7 +148,7 @@ public class CcdBulkScanIntegrationTest {
             serviceToken,
             userDetails.getId(),
             DIVORCE_JURISDICTION_ID,
-            CASE_TYPE_ID_CONSENTED,
+            CaseType.CONSENTED.getCcdType(),
             true,
             caseDataContent);
 

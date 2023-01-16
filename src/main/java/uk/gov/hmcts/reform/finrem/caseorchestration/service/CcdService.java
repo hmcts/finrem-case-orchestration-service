@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.IdamToken;
 
-import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -64,8 +63,6 @@ public class CcdService {
                 .id(startEventResponse.getEventId())
                 .build())
             .data(caseData)
-            .supplementaryDataRequest(
-                Collections.singletonMap("$set", Collections.singletonMap("HMCTSServiceId", "BBA3")))
             .build();
     }
 

@@ -34,6 +34,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CFC_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEVELAND;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_ADDRESS_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_NAME_KEY;
@@ -160,7 +161,7 @@ public final class CaseHearingFunctions {
             INTERIM_WALES_FRC_LIST);
     }
 
-    static String getSelectedCourtComplexType(Map<String, Object> mapOfCaseData) {
+    public static String getSelectedCourtComplexType(Map<String, Object> mapOfCaseData) {
         return getSelectedCourt(mapOfCaseData, REGION_CT, MIDLANDS_FRC_LIST_CT, LONDON_FRC_LIST_CT, NORTHWEST_FRC_LIST_CT,
             NORTHEAST_FRC_LIST_CT, SOUTHWEST_FRC_LIST_CT, SOUTHEAST_FRC_LIST_CT, WALES_FRC_LIST_CT);
     }
@@ -231,7 +232,7 @@ public final class CaseHearingFunctions {
 
     private static String getNorthEastFRC(Map mapOfCaseData, String frcListName) {
         String northEastList = (String) mapOfCaseData.get(frcListName);
-        if (CLEAVELAND.equalsIgnoreCase(northEastList)) {
+        if (CLEAVELAND.equalsIgnoreCase(northEastList) || CLEVELAND.equalsIgnoreCase(northEastList)) {
             return CLEAVELAND_COURTLIST;
         } else if (NWYORKSHIRE.equalsIgnoreCase(northEastList)) {
             return NWYORKSHIRE_COURTLIST;
@@ -320,7 +321,7 @@ public final class CaseHearingFunctions {
         }
     }
 
-    static String getFrcCourtDetailsAsOneLineAddressString(Map<String, Object> courtDetailsMap) {
+    public static String getFrcCourtDetailsAsOneLineAddressString(Map<String, Object> courtDetailsMap) {
         return StringUtils.joinWith(", ", courtDetailsMap.get(COURT_DETAILS_NAME_KEY), courtDetailsMap.get(COURT_DETAILS_ADDRESS_KEY));
     }
 
