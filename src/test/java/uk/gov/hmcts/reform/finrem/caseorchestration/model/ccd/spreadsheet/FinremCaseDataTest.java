@@ -31,6 +31,10 @@ public class FinremCaseDataTest {
     private void validateConfig(File configFile) throws IOException, InvalidFormatException {
         CCDConfigValidator ccdConfigValidator = new CCDConfigValidator();
         List<String> errors = ccdConfigValidator.validateCCDConfigAgainstClassStructure(configFile, FinremCaseData.class);
+        if (!errors.isEmpty()) {
+            log.error("Errors found when validating config file: {}", configFile.getName());
+            errors.forEach(log::error);
+        }
         assert errors.isEmpty();
     }
 }

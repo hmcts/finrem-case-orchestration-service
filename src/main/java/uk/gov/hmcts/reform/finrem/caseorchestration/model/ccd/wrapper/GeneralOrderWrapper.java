@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedGeneralOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderAddressTo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.JudgeType;
 
 import java.time.LocalDate;
@@ -38,5 +38,5 @@ public class GeneralOrderWrapper {
     private CaseDocument generalOrderPreviewDocument;
     private List<ContestedGeneralOrderCollection> generalOrders;
     private List<ContestedGeneralOrderCollection> generalOrdersConsent;
-    private List<GeneralOrderCollection> generalOrderCollection;
+    private List<GeneralOrderCollectionItem> generalOrderCollection;
 }
