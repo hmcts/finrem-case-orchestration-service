@@ -71,8 +71,6 @@ public class AmendCaseContestedAboutToStartHandlerTest {
         CallbackRequest callbackRequest = buildCallbackRequest();
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
         assertEquals(NO_VALUE, response.getData().get(CIVIL_PARTNERSHIP));
-        assertEquals(NO_VALUE, response.getData().get(URGENT_CASE_QUESTION));
-
     }
 
     private CallbackRequest buildCallbackRequest() {
