@@ -7,6 +7,7 @@
     "state": "caseAdded",
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
+      "typeOfApplication": "In connection to matrimonial and civil partnership proceedings",
       "cfcCourtList": "FR_s_CFCList_2",
       "applicantLName": "Ramisetti0012",
       "dateOfMarriage": "2012-01-11",

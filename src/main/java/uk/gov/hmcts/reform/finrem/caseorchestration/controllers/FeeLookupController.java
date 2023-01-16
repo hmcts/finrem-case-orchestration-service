@@ -32,6 +32,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION;
 
 @RestController
 @RequiredArgsConstructor
@@ -55,7 +56,10 @@ public class FeeLookupController extends BaseController {
         validateCaseData(callbackRequest);
 
         ApplicationType applicationType = caseDataService.isConsentedApplication(caseDetails) ? CONSENTED : CONTESTED;
-        FeeResponse feeResponse = feeService.getApplicationFee(applicationType);
+        String typeOfApplication =  Objects.toString(callbackRequest.getCaseDetails().getData().get(TYPE_OF_APPLICATION), null);
+        log.info("Received request for Fee lookup for Case ID {} typeOfApplication{}", caseDetails.getId(), typeOfApplication);
+
+        FeeResponse feeResponse = feeService.getApplicationFee(applicationType, typeOfApplication);
 
         FeeCaseData feeResponseData = FeeCaseData.builder().build();
         Map<String, Object> mapOfCaseData = caseDetails.getData();

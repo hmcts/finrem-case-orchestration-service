@@ -10,12 +10,14 @@ import java.util.Arrays;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 @RequiredArgsConstructor
 public enum BristolCourt implements CourtList {
-    FR_bristolList_1("FR_bristolList_1"),
-    FR_bristolList_2("FR_bristolList_2"),
-    FR_bristolList_3("FR_bristolList_3"),
-    FR_bristolList_4("FR_bristolList_4"),
-    FR_bristolList_5("FR_bristolList_5"),
-    FR_bristolList_6("FR_bristolList_6");
+    BRISTOL_CIVIL_AND_FAMILY_JUSTICE_CENTRE("FR_bristolList_1"),
+    GLOUCESTER_AND_CHELTENHAM_COUNTY_AND_FAMILY_COURT("FR_bristolList_2"),
+    SWINDON_COMBINED_COURT("FR_bristolList_3"),
+    SALISBURY_LAW_COURTS("FR_bristolList_4"),
+    BATH_LAW_COURTS("FR_bristolList_5"),
+    WESTON_SUPER_MARE_COUNTY_AND_FAMILY_COURT("FR_bristolList_6"),
+    BRISTOL_MAGISTRATES_COURT("FR_bristolList_7"),
+    SWINDON_MAGISTRATES_COURT("FR_bristolList_8");
 
     private final String id;
 

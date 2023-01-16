@@ -11,8 +11,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
@@ -67,7 +67,7 @@ public class RejectGeneralApplicationSubmittedHandler
     }
 
     private void sendApplicantNotifications(String userAuthorisation, CaseDetails caseDetails) {
-        if (notificationService.isApplicantSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
+        if (notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)) {
             notificationService.sendGeneralApplicationRejectionEmailToAppSolicitor(caseDetails);
         } else {
             paperNotificationService.printApplicantRejectionGeneralApplication(caseDetails, userAuthorisation);
