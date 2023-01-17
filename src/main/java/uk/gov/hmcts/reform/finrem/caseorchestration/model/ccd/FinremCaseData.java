@@ -321,9 +321,9 @@ public class FinremCaseData {
     private List<ScannedDocumentCollection> respondentScanDocuments;
 
     @JsonProperty("appBarristerCollection")
-    private List<BarristerData> applicantBarristers;
+    private List<BarristerCollectionItem> applicantBarristers;
     @JsonProperty("respBarristerCollection")
-    private List<BarristerData> respondentBarristers;
+    private List<BarristerCollectionItem> respondentBarristers;
     private BarristerParty barristerParty;
 
     private YesOrNo benefitForChildrenDecisionSchedule;
