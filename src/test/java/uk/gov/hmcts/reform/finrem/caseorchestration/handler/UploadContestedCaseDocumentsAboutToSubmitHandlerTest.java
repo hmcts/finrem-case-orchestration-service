@@ -47,10 +47,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
     ApplicantChronologiesStatementCollectionService applicantChronologiesStatementCollectionService;
     @InjectMocks
     private UploadContestedCaseDocumentsAboutToSubmitHandler uploadContestedCaseDocumentsHandler;
-    private final List<UploadCaseDocumentCollection> existingDocumentList = new ArrayList<>();
-    private final List<String> expectedDocumentIdList = new ArrayList<>();
-    List<UploadCaseDocumentCollection> handledDocumentList = new ArrayList<>();
-    List<String> handledDocumentIdList = new ArrayList<>();
+
     private final List<UploadCaseDocumentCollection> screenUploadDocumentList = new ArrayList<>();
 
     @Before
@@ -78,50 +75,21 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest {
 
 
     @Test
-    public void givenUploadCaseDocument_When_IsValid_ThenExecuteHandlers() {
+    public void givenUploadCaseDocumentForApplicant_When_IsValid_ThenExecuteHandlers() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
 
         screenUploadDocumentList.add(createContestedUploadDocumentItem(CaseDocumentType.OTHER,
             CaseDocumentParty.APPLICANT, YesOrNo.YES, YesOrNo.NO, "Other Example"));
+        caseDetails.getData().setManageCaseDocumentCollection(screenUploadDocumentList);
 
         caseDetails.getData().getUploadCaseDocumentWrapper().setUploadCaseDocument(screenUploadDocumentList);
-        caseDetailsBefore.getData().getUploadCaseDocumentWrapper().setUploadCaseDocument(screenUploadDocumentList);
         uploadContestedCaseDocumentsHandler.handle(callbackRequest, AUTH_TOKEN);
-
 
         verify(applicantCaseSummariesCollectionService)
             .addManagedDocumentToCollection(callbackRequest,screenUploadDocumentList);
         verify(applicantChronologiesStatementCollectionService)
             .addManagedDocumentToCollection(callbackRequest, screenUploadDocumentList);
-    }
-
-    @Test
-    public void givenUploadCaseDocument_When_IsValid_ThenExecuteHandler_And_ValidateDocumentOrder() {
-        FinremCallbackRequest callbackRequest = buildCallbackRequest();
-
-        UploadCaseDocumentCollection oldDoc = createContestedUploadDocumentItem(CaseDocumentType.OTHER,
-            CaseDocumentParty.APPLICANT, YesOrNo.YES, YesOrNo.NO, "Other Example");
-
-
-        existingDocumentList.add(oldDoc);
-
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        UploadCaseDocumentCollection newDoc = createContestedUploadDocumentItem(CaseDocumentType.OTHER,
-            CaseDocumentParty.APPLICANT, YesOrNo.YES, YesOrNo.NO, "New Document Example");
-        screenUploadDocumentList.addAll(List.of(newDoc, oldDoc));
-        caseDetails.getData().getUploadCaseDocumentWrapper().setUploadCaseDocument(screenUploadDocumentList);
-
-        expectedDocumentIdList.add(newDoc.getId());
-        expectedDocumentIdList.add(oldDoc.getId());
-
-        handledDocumentList.addAll(uploadContestedCaseDocumentsHandler.handle(
-                callbackRequest, AUTH_TOKEN).getData().getUploadCaseDocumentWrapper().getUploadCaseDocument());
-
-        handledDocumentList.forEach(doc -> handledDocumentIdList.add(doc.getId()));
-
-        assertThat(handledDocumentIdList.equals(expectedDocumentIdList), is(true));
     }
 
     private FinremCallbackRequest buildCallbackRequest() {

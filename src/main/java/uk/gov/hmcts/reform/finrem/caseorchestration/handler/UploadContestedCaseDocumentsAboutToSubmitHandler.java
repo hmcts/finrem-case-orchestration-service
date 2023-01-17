@@ -43,13 +43,12 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler extends FinremCall
                                                                               String userAuthorisation) {
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         FinremCaseData caseDataBefore = callbackRequest.getCaseDetailsBefore().getData();
-        List<UploadCaseDocumentCollection> uploadCaseDocuments =
-            caseData.getUploadCaseDocumentWrapper().getUploadCaseDocument();
+        List<UploadCaseDocumentCollection> screenCollections = caseData.getManageCaseDocumentCollection();
 
         documentCollectionServices.forEach(documentCollectionService ->
-            documentCollectionService.addManagedDocumentToCollection(callbackRequest, uploadCaseDocuments));
+            documentCollectionService.addManagedDocumentToCollection(callbackRequest, screenCollections));
 
-        uploadCaseDocuments.sort(Comparator.comparing(
+        screenCollections.sort(Comparator.comparing(
             UploadCaseDocumentCollection::getUploadCaseDocument, Comparator.comparing(
                 UploadCaseDocument::getCaseDocumentUploadDateTime, Comparator.nullsLast(
                     Comparator.reverseOrder()))));
