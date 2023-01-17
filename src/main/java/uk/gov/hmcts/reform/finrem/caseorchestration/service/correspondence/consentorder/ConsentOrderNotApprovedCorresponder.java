@@ -23,10 +23,10 @@ public class ConsentOrderNotApprovedCorresponder extends EmailOnlyAllSolicitorsC
     @Override
     protected void emailApplicantSolicitor(CaseDetails caseDetails) {
         if (caseDataService.isConsentedApplication(caseDetails)) {
-            log.info("Sending email notification to Applicant Solicitor for 'Consent Order Not Approved'");
+            log.info("Sending email notification to Applicant Solicitor for 'Consent Order Not Approved' for case: {}", caseDetails.getId());
             notificationService.sendConsentOrderNotApprovedEmailToApplicantSolicitor(caseDetails);
         } else {
-            log.info("Sending email notification to Applicant Solicitor for 'Contest Order Not Approved'");
+            log.info("Sending email notification to Applicant Solicitor for 'Contest Order Not Approved' for case:{}", caseDetails.getId());
             notificationService.sendContestOrderNotApprovedEmailApplicant(caseDetails);
         }
     }
@@ -34,10 +34,10 @@ public class ConsentOrderNotApprovedCorresponder extends EmailOnlyAllSolicitorsC
     @Override
     protected void emailRespondentSolicitor(CaseDetails caseDetails) {
         if (caseDataService.isConsentedApplication(caseDetails)) {
-            log.info("Sending email notification to Respondent Solicitor for 'Consent Order Not Approved'");
+            log.info("Sending email notification to Respondent Solicitor for 'Consent Order Not Approved' for case: {}", caseDetails.getId());
             notificationService.sendConsentOrderNotApprovedEmailToRespondentSolicitor(caseDetails);
         } else {
-            log.info("Sending email notification to Respondent Solicitor for 'Contest Order Not Approved'");
+            log.info("Sending email notification to Respondent Solicitor for 'Contest Order Not Approved' for case: {}", caseDetails.getId());
             notificationService.sendContestOrderNotApprovedEmailRespondent(caseDetails);
         }
     }
