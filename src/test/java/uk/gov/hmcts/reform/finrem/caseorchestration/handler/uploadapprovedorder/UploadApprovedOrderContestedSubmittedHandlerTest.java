@@ -26,24 +26,24 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DIRECTION_DETAILS_COLLECTION;
 
 @RunWith(MockitoJUnitRunner.class)
-public class UploadApprovedOrderSubmittedHandlerTest extends UploadApprovedOrderBaseHandlerTest {
+public class UploadApprovedOrderContestedSubmittedHandlerTest extends UploadApprovedOrderBaseHandlerTest {
 
     @InjectMocks
-    UploadApprovedOrderSubmittedHandler uploadApprovedOrderSubmittedHandler;
+    UploadApprovedOrderContestedSubmittedHandler uploadApprovedOrderContestedSubmittedHandler;
 
     @Mock
     ApprovedOrderNoticeOfHearingService approvedOrderNoticeOfHearingService;
 
     @Test
     public void givenContestedCase_whenAboutToSubmitUploadApprovedOrder_thenCanHandle() {
-        assertThat(uploadApprovedOrderSubmittedHandler
+        assertThat(uploadApprovedOrderContestedSubmittedHandler
                 .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.UPLOAD_APPROVED_ORDER),
             is(true));
     }
 
     @Test
     public void givenContestedCase_whenSubmittedUploadApprovedOrder_thenCannotHandle() {
-        assertThat(uploadApprovedOrderSubmittedHandler
+        assertThat(uploadApprovedOrderContestedSubmittedHandler
                 .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.UPLOAD_APPROVED_ORDER),
             is(false));
     }
@@ -51,7 +51,7 @@ public class UploadApprovedOrderSubmittedHandlerTest extends UploadApprovedOrder
     @Test
     public void givenContestedCase_whenSubmittedUploadApprovedOrder_thenHandle() {
         setHearingDirectionDetailsCollection(YES_VALUE);
-        uploadApprovedOrderSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
+        uploadApprovedOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(approvedOrderNoticeOfHearingService, times(1))
             .printHearingNoticePackAndSendToApplicantAndRespondent(callbackRequest.getCaseDetails(), AUTH_TOKEN);
@@ -60,7 +60,7 @@ public class UploadApprovedOrderSubmittedHandlerTest extends UploadApprovedOrder
     @Test
     public void givenContestedCase_whenSubmittedUploadApprovedOrderAndNotFinalHearing_thenHandle() {
         setHearingDirectionDetailsCollection(NO_VALUE);
-        uploadApprovedOrderSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
+        uploadApprovedOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(approvedOrderNoticeOfHearingService, never())
             .printHearingNoticePackAndSendToApplicantAndRespondent(callbackRequest.getCaseDetails(), AUTH_TOKEN);
