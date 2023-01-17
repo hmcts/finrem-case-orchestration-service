@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.draftordernotapproved;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,12 +10,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.Email
 
 @Component
 @Slf4j
-public class DraftOrderNotApprovedCorresponder extends EmailOnlyAllSolicitorsCorresponder {
+public class ConsentOrderNotApprovedCorresponder extends EmailOnlyAllSolicitorsCorresponder {
 
     private final CaseDataService caseDataService;
 
     @Autowired
-    public DraftOrderNotApprovedCorresponder(NotificationService notificationService, CaseDataService caseDataService) {
+    public ConsentOrderNotApprovedCorresponder(NotificationService notificationService, CaseDataService caseDataService) {
         super(notificationService);
         this.caseDataService = caseDataService;
     }

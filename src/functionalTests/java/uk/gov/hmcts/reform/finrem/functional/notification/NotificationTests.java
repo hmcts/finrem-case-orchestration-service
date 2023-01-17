@@ -18,9 +18,6 @@ public class NotificationTests extends IntegrationTestBase {
     @Value("${cos.notification.consent-order-approved.api}")
     private String consentOrderMade;
 
-    @Value("${cos.notification.consent-order-unapproved.api}")
-    private String consentOrderNotApproved;
-
     @Value("${cos.notification.prepare-for-hearing.api}")
     private String prepareForHearingApiUri;
 
@@ -62,13 +59,6 @@ public class NotificationTests extends IntegrationTestBase {
 
         utils.validatePostSuccess(consentOrderMade,
             "ccd-request-with-solicitor-consentOrderMade1.json", consentedDir);
-    }
-
-    @Test
-    public void verifyNotifyConsentOrderNotApprovedTestIsOkay() {
-
-        utils.validatePostSuccess(consentOrderNotApproved,
-            "ccd-request-with-solicitor-consentOrderNotApproved1.json", consentedDir);
     }
 
     @Test

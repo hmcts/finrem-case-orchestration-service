@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.draftordernotapproved;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -13,23 +13,20 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DraftOrderNotApprovedCorresponderTest {
+public class ConsentOrderNotApprovedCorresponderTest {
 
-    DraftOrderNotApprovedCorresponder draftOrderNotApprovedCorresponder;
+    ConsentOrderNotApprovedCorresponder consentOrderNotApprovedCorresponder;
 
     @Mock
     NotificationService notificationService;
     @Mock
     CaseDataService caseDataService;
 
-
     private CaseDetails caseDetails;
-
-    protected static final String AUTHORISATION_TOKEN = "authorisationToken";
 
     @Before
     public void setUp() throws Exception {
-        draftOrderNotApprovedCorresponder = new DraftOrderNotApprovedCorresponder(notificationService, caseDataService);
+        consentOrderNotApprovedCorresponder = new ConsentOrderNotApprovedCorresponder(notificationService, caseDataService);
         caseDetails = CaseDetails.builder().build();
     }
 
@@ -37,7 +34,7 @@ public class DraftOrderNotApprovedCorresponderTest {
     public void shouldEmailApplicantSolicitorForConsentedCase() {
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
-        draftOrderNotApprovedCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
+        consentOrderNotApprovedCorresponder.sendCorrespondence(caseDetails);
         verify(notificationService).sendConsentOrderNotApprovedEmailToApplicantSolicitor(caseDetails);
     }
 
@@ -45,7 +42,7 @@ public class DraftOrderNotApprovedCorresponderTest {
     public void shouldEmailApplicantSolicitorForContestedCase() {
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(false);
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
-        draftOrderNotApprovedCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
+        consentOrderNotApprovedCorresponder.sendCorrespondence(caseDetails);
         verify(notificationService).sendContestOrderNotApprovedEmailApplicant(caseDetails);
     }
 
@@ -53,7 +50,7 @@ public class DraftOrderNotApprovedCorresponderTest {
     public void shouldEmailRespondentSolicitorForConsentedCase() {
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
-        draftOrderNotApprovedCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
+        consentOrderNotApprovedCorresponder.sendCorrespondence(caseDetails);
         verify(notificationService).sendConsentOrderNotApprovedEmailToRespondentSolicitor(caseDetails);
     }
 
@@ -62,7 +59,7 @@ public class DraftOrderNotApprovedCorresponderTest {
     public void shouldEmailRespondentSolicitorForContestedCase() {
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(false);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
-        draftOrderNotApprovedCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
+        consentOrderNotApprovedCorresponder.sendCorrespondence(caseDetails);
         verify(notificationService).sendContestOrderNotApprovedEmailRespondent(caseDetails);
     }
 

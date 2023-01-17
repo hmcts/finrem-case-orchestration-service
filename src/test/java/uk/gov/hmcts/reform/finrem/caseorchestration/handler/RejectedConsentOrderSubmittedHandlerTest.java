@@ -10,8 +10,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderNotApprovedCorresponder;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,9 +19,7 @@ import java.util.Map;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_EMAIL;
@@ -51,10 +48,7 @@ public class RejectedConsentOrderSubmittedHandlerTest {
     private RejectedConsentOrderSubmittedHandler handler;
 
     @Mock
-    private CaseDataService caseDataService;
-    @Mock
-    private NotificationService notificationService;
-
+    private ConsentOrderNotApprovedCorresponder consentOrderNotApprovedCorresponder;
 
     @Test
     public void givenACcdCallbackConsentCase_WhenSubmitEventRejectOrder_thenHandlerCanHandle() {
@@ -85,82 +79,12 @@ public class RejectedConsentOrderSubmittedHandlerTest {
     }
 
     @Test
-    public void givenConsentOrderCase_WhenAppSolAgreeToSendEmail_ThenSendConsentOrderNotApprovedEmail() {
+    public void givenConsentOrderCase_sendConsentOrderNotApprovedCorrespondence() {
         CallbackRequest callbackRequest = getConsentedCallbackRequestForConsentOrder();
-        when(caseDataService.isConsentedApplication(callbackRequest.getCaseDetails())).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(callbackRequest.getCaseDetails())).thenReturn(true);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(callbackRequest.getCaseDetails().getData())).thenReturn(true);
-
         handler.handle(callbackRequest, AUTH_TOKEN);
-
-        verify(notificationService).sendConsentOrderNotApprovedEmailToApplicantSolicitor(any());
-        verify(notificationService).sendConsentOrderNotApprovedEmailToRespondentSolicitor(any());
+        verify(consentOrderNotApprovedCorresponder).sendCorrespondence(any());
     }
 
-    @Test
-    public void givenConsentOrderCase_WhenNoConsentToEmail_ThenNoNotificationSent() {
-        CallbackRequest callbackRequest = getConsentedCallbackRequestForConsentOrder();
-
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(callbackRequest.getCaseDetails())).thenReturn(false);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(callbackRequest.getCaseDetails().getData())).thenReturn(false);
-
-        handler.handle(callbackRequest, AUTH_TOKEN);
-
-        verify(notificationService, never()).sendConsentOrderNotApprovedEmailToApplicantSolicitor(any());
-        verify(notificationService, never()).sendConsentOrderNotApprovedEmailToRespondentSolicitor(any());
-    }
-
-    @Test
-    public void givenVariationOrderCase_WhenAppSolAgreeToSendEmail_ThenSendConsentOrderNotApprovedEmail() {
-        CallbackRequest callbackRequest = getConsentedCallbackRequestForVariationOrder();
-        when(caseDataService.isConsentedApplication(callbackRequest.getCaseDetails())).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(callbackRequest.getCaseDetails())).thenReturn(true);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(callbackRequest.getCaseDetails().getData())).thenReturn(true);
-
-        handler.handle(callbackRequest, AUTH_TOKEN);
-
-        verify(notificationService).sendConsentOrderNotApprovedEmailToApplicantSolicitor(any());
-        verify(notificationService).sendConsentOrderNotApprovedEmailToRespondentSolicitor(any());
-    }
-
-    @Test
-    public void givenVariationOrderCase_WhenNoConsentToEmail_ThenNoNotificationSent() {
-        CallbackRequest callbackRequest = getConsentedCallbackRequestForVariationOrder();
-
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(callbackRequest.getCaseDetails())).thenReturn(false);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(callbackRequest.getCaseDetails().getData())).thenReturn(false);
-
-        handler.handle(callbackRequest, AUTH_TOKEN);
-
-        verify(notificationService, never()).sendConsentOrderNotApprovedEmailToApplicantSolicitor(any());
-        verify(notificationService, never()).sendConsentOrderNotApprovedEmailToRespondentSolicitor(any());
-    }
-
-
-    @Test
-    public void givenContestCase_WhenAppSolAgreeToSendEmail_ThenSendConsentOrderNotApprovedEmail() {
-        CallbackRequest callbackRequest = getConsentedCallbackRequestForConsentOrder();
-        when(caseDataService.isConsentedApplication(callbackRequest.getCaseDetails())).thenReturn(false);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(callbackRequest.getCaseDetails())).thenReturn(true);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(callbackRequest.getCaseDetails().getData())).thenReturn(true);
-
-        handler.handle(callbackRequest, AUTH_TOKEN);
-
-        verify(notificationService).sendContestOrderNotApprovedEmailApplicant(any());
-        verify(notificationService).sendContestOrderNotApprovedEmailRespondent(any());
-    }
-
-    @Test
-    public void givenContestCase_WhenBothSolNoTAgreeToSendEmail_ThenNoEmailSent() {
-        CallbackRequest callbackRequest = getConsentedCallbackRequestForConsentOrder();
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(callbackRequest.getCaseDetails())).thenReturn(false);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(callbackRequest.getCaseDetails().getData())).thenReturn(false);
-
-        handler.handle(callbackRequest, AUTH_TOKEN);
-
-        verify(notificationService, never()).sendContestOrderNotApprovedEmailApplicant(any());
-        verify(notificationService, never()).sendContestOrderNotApprovedEmailRespondent(any());
-    }
 
     protected CallbackRequest getConsentedCallbackRequestForConsentOrder() {
         Map<String, Object> caseData = new HashMap<>();
