@@ -162,6 +162,8 @@ public class FinremCaseData {
     private String transferLocalCourtInstructions;
     private List<TransferCourtEmailCollection> transferLocalCourtEmailCollection;
     private YesOrNo civilPartnership;
+    private YesOrNo promptForUrgentCaseQuestion;
+    private String urgentCaseQuestionDetailsTextArea;
     @JsonProperty("RepresentationUpdateHistory")
     private List<RepresentationUpdateHistoryCollection> representationUpdateHistory;
     private YesOrNo paperApplication;
