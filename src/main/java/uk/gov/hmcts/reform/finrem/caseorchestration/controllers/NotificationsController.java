@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderNotApprovedCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedConsentOrderApprovedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.updatefrc.UpdateFrcCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
@@ -56,6 +57,7 @@ public class NotificationsController extends BaseController {
     private final HwfCorrespondenceService hwfNotificationsService;
     private final UpdateFrcCorrespondenceService updateFrcCorrespondenceService;
     private final ConsentOrderNotApprovedCorresponder consentOrderNotApprovedCorresponder;
+    private final ContestedConsentOrderApprovedCorresponder contestedConsentOrderApprovedCorresponder;
 
 
     @PostMapping(value = "/hwf-successful", consumes = APPLICATION_JSON_VALUE)
@@ -190,15 +192,7 @@ public class NotificationsController extends BaseController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
-        if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-            log.info("Sending email notification to Applicant Solicitor for 'Contested Consent Order Approved'");
-            notificationService.sendContestedConsentOrderApprovedEmailToApplicantSolicitor(caseDetails);
-        }
-
-        if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData)) {
-            log.info("Sending email notification to Respondent Solicitor for 'Contested Consent Order Approved'");
-            notificationService.sendContestedConsentOrderApprovedEmailToRespondentSolicitor(caseDetails);
-        }
+        contestedConsentOrderApprovedCorresponder.sendCorrespondence(callbackRequest.getCaseDetails());
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }

@@ -27,12 +27,6 @@ public class NotificationTests extends IntegrationTestBase {
     @Value("${cos.notification.contest-application-issued.api}")
     private String contestApplicationIssuedApiUri;
 
-    @Value("${cos.notification.contest-order-approved.api}")
-    private String contestOrderApprovedApiUri;
-
-    @Value("${cos.notification.contest-draft-order.api}")
-    private String contestDraftOrderApiUri;
-
     @Value(" /notify/update-frc")
     private String updateFrcInfoUri;
 
