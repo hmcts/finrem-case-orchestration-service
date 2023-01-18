@@ -12,13 +12,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_DIRECTION_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_DIRECTION_JUDGE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ISSUE_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.URGENT_CASE_QUESTION;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OnStartDefaultValueServiceTest  extends BaseServiceTest {
@@ -70,6 +73,15 @@ public class OnStartDefaultValueServiceTest  extends BaseServiceTest {
         service.defaultContestedOrderDate(callbackRequest);
         assertNotNull(callbackRequest.getCaseDetails().getData().get(CONTESTED_ORDER_APPROVED_DATE));
     }
+
+    @Test
+    public void setDefaultUrgencyQuestion() {
+        CallbackRequest callbackRequest = buildCallbackRequest();
+        service.defaultUrgencyQuestion(callbackRequest);
+        assertNotNull(callbackRequest.getCaseDetails().getData().get(URGENT_CASE_QUESTION));
+        assertEquals(NO_VALUE, callbackRequest.getCaseDetails().getData().get(URGENT_CASE_QUESTION));
+    }
+
 
     private CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();

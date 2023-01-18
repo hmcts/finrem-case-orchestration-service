@@ -17,6 +17,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ISSUE_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION_DEFAULT_TO;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.URGENT_CASE_QUESTION;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +29,10 @@ public class OnStartDefaultValueService {
 
     public void defaultCivilPartnershipField(CallbackRequest callbackRequest) {
         callbackRequest.getCaseDetails().getData().putIfAbsent(CIVIL_PARTNERSHIP, NO_VALUE);
+    }
+
+    public void defaultUrgencyQuestion(CallbackRequest callbackRequest) {
+        callbackRequest.getCaseDetails().getData().putIfAbsent(URGENT_CASE_QUESTION, NO_VALUE);
     }
 
     public void defaultTypeOfApplication(CallbackRequest callbackRequest) {
@@ -55,4 +60,6 @@ public class OnStartDefaultValueService {
     public void defaultContestedOrderDate(CallbackRequest callbackRequest) {
         callbackRequest.getCaseDetails().getData().putIfAbsent(CONTESTED_ORDER_APPROVED_DATE, LocalDate.now());
     }
+
+
 }
