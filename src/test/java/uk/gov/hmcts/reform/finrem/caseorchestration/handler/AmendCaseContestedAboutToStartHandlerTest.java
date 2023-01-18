@@ -74,8 +74,9 @@ public class AmendCaseContestedAboutToStartHandlerTest {
 
     private CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseData).build();
-        return CallbackRequest.builder().eventId("SomeEventId").caseDetails(caseDetails).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(123L).caseTypeId(CaseType.CONTESTED.getCcdType()).data(caseData).build();
+        return CallbackRequest.builder()
+            .eventId(EventType.AMEND_CASE.getCcdType()).caseDetails(caseDetails).build();
     }
 
 }

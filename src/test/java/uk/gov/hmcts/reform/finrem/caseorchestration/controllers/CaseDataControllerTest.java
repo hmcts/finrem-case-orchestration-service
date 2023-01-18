@@ -228,7 +228,8 @@ public class CaseDataControllerTest extends BaseControllerTest {
                 .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy.OrgPolicyCaseAssignedRole", is(APP_SOLICITOR_POLICY)))
-            .andExpect(jsonPath("$.data.civilPartnership", is(NO_VALUE)));
+            .andExpect(jsonPath("$.data.civilPartnership", is(NO_VALUE)))
+            .andExpect(jsonPath("$.data.promptForUrgentCaseQuestion", is(NO_VALUE)));
     }
 
     public void shouldNotSetOrgPolicyIfInvalidCaseType() throws Exception {
