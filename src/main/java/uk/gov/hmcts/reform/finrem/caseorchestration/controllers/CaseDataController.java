@@ -210,7 +210,9 @@ public class CaseDataController extends BaseController {
 
     private void setPaperCaseData(Map<String, Object> caseData) {
         caseData.put(PAPER_APPLICATION, YES_VALUE);
-        caseData.put(FAST_TRACK_DECISION, NO_VALUE);
+        if (!caseDataService.isNotEmpty(FAST_TRACK_DECISION, caseData)) {
+            caseData.put(FAST_TRACK_DECISION, NO_VALUE);
+        }
     }
 
     private void setOrganisationPolicy(CaseDetails caseDetails) {
