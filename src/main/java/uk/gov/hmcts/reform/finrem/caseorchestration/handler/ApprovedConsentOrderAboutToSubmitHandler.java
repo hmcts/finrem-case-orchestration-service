@@ -27,7 +27,6 @@ import java.util.Map;
 
 import static java.util.Collections.singletonList;
 import static org.springframework.util.ObjectUtils.isEmpty;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.CONSENT_ORDER_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.CONSENT_ORDER_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
@@ -85,7 +84,7 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
 
         ApprovedOrder approvedOrder = approvedOrderBuilder.build();
 
-        if (Boolean.TRUE.equals(pensionDocumentsExists(caseData))) {
+        if (Boolean.FALSE.equals(pensionDocumentsExists(caseData))) {
             log.info("Pension Documents not empty for case - stamping Pension Documents and adding to approvedOrder for case {}",
                 caseDetails.getId());
 
@@ -103,7 +102,7 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
 
         log.info("Successfully generated documents for 'Consent Order Approved' for case {}", caseDetails.getId());
 
-        if (Boolean.FALSE.equals(pensionDocumentsExists(caseData))) {
+        if (Boolean.TRUE.equals(pensionDocumentsExists(caseData))) {
             log.info("Case {} has no pension documents, updating status to {} and sending for bulk print",
                 caseDetails.getId(),
                 CONSENT_ORDER_MADE);
@@ -116,8 +115,6 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
             } catch (JsonProcessingException e) {
                 log.error("case - {}: Error encountered trying to update status and send for bulk print: {}", caseDetails.getId(), e.getMessage());
             }
-        } else {
-            caseData.put(STATE, CONSENT_ORDER_APPROVED.toString());
         }
     }
 
@@ -133,6 +130,6 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
 
     private Boolean pensionDocumentsExists(Map<String, Object> caseData) {
         List<CaseDocument> pensionDocumentsData = documentHelper.getPensionDocumentsData(caseData);
-        return !pensionDocumentsData.isEmpty();
+        return pensionDocumentsData.isEmpty();
     }
 }
