@@ -37,6 +37,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.CONSENT_ORDER_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.CONSENT_ORDER_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
 
@@ -147,6 +148,21 @@ public class ApprovedConsentOrderAboutToSubmitHandlerTest {
         assertEquals(response.getData().get(STATE), CONSENT_ORDER_MADE.toString());
 
         verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), any());
+    }
+
+    @Test
+    public void givenCase_whenPensionDocuments_thenShouldUpdateStateToConsentApprovedMadeAndBulkPrint() {
+        CallbackRequest callbackRequest =
+            doValidCaseDataSetUp(APPROVE_ORDER_VALID_JSON);
+        whenServiceGeneratesDocument().thenReturn(caseDocument());
+        whenAnnexStampingDocument().thenReturn(caseDocument());
+        when(documentHelper.getPensionDocumentsData(any())).thenReturn(singletonList(caseDocument()));
+
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertEquals(response.getData().get(STATE), CONSENT_ORDER_APPROVED.toString());
+
+
     }
 
     @Test
