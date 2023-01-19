@@ -74,7 +74,6 @@ public class NotificationsTest extends BaseTest {
     AssignCaseAccessService assignCaseAccessService;
 
     private static final String HWF_SUCCESSFUL_URL = "/case-orchestration/notify/hwf-successful";
-    private static final String CONSENT_ORDER_MADE_URL = "/case-orchestration/notify/consent-order-made";
     private static final String CONSENT_ORDER_AVAILABLE_URL = "/case-orchestration/notify/consent-order-available";
     private static final String CONSENT_ORDER_NOT_APPROVED_URL = "/case-orchestration/notify/order-not-approved";
     private static final String ASSIGNED_TO_JUDGE_URL = "/case-orchestration/notify/assign-to-judge";
@@ -111,9 +110,9 @@ public class NotificationsTest extends BaseTest {
             .caseAssignmentUserRoles(List.of(CaseAssignmentUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
             .build());
         webClient.perform(MockMvcRequestBuilders.post(HWF_SUCCESSFUL_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(objectMapper.writeValueAsString(request)))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(content().json(expectedCaseData()));
@@ -122,26 +121,12 @@ public class NotificationsTest extends BaseTest {
     }
 
     @Test
-    public void notifyConsentOrderMade() throws Exception {
-        stubForNotification(NOTIFY_CONSENT_ORDER_MADE_CONTEXT_PATH, HttpStatus.OK.value());
-        webClient.perform(MockMvcRequestBuilders.post(CONSENT_ORDER_MADE_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(content().json(expectedCaseData()));
-        verify(postRequestedFor(urlEqualTo(NOTIFY_CONSENT_ORDER_MADE_CONTEXT_PATH))
-            .withHeader(CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE)));
-    }
-
-    @Test
     public void notifyConsentOrderAvailable() throws Exception {
         stubForNotification(NOTIFY_CONSENT_ORDER_AVAILABLE_CONTEXT_PATH, HttpStatus.OK.value());
         webClient.perform(MockMvcRequestBuilders.post(CONSENT_ORDER_AVAILABLE_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(objectMapper.writeValueAsString(request)))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(content().json(expectedCaseData()));
@@ -156,9 +141,9 @@ public class NotificationsTest extends BaseTest {
             .caseAssignmentUserRoles(List.of(CaseAssignmentUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
             .build());
         webClient.perform(MockMvcRequestBuilders.post(CONSENT_ORDER_NOT_APPROVED_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(objectMapper.writeValueAsString(request)))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(content().json(expectedCaseData()));
@@ -170,9 +155,9 @@ public class NotificationsTest extends BaseTest {
     public void notifyAssignToJudge() throws Exception {
         stubForNotification(NOTIFY_ASSIGN_TO_JUDGE_CONTEXT_PATH, HttpStatus.OK.value());
         webClient.perform(MockMvcRequestBuilders.post(ASSIGNED_TO_JUDGE_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(objectMapper.writeValueAsString(request)))
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(content().json(expectedCaseData()));
@@ -184,7 +169,7 @@ public class NotificationsTest extends BaseTest {
     public void notifyNoticeOfChange() throws Exception {
         stubForNotification(NOTIFY_NOTICE_OF_CHANGE_CONTEXT_PATH, HttpStatus.OK.value());
         when(assignCaseAccessService.getUserRoles(any())).thenReturn(CaseAssignmentUserRolesResource.builder()
-                .caseAssignmentUserRoles(List.of(CaseAssignmentUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
+            .caseAssignmentUserRoles(List.of(CaseAssignmentUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
             .build());
         webClient.perform(MockMvcRequestBuilders.post(NOTICE_OF_CHANGE_URL)
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
