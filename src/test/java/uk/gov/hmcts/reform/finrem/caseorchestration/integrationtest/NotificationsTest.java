@@ -123,6 +123,9 @@ public class NotificationsTest extends BaseTest {
     @Test
     public void notifyConsentOrderAvailable() throws Exception {
         stubForNotification(NOTIFY_CONSENT_ORDER_AVAILABLE_CONTEXT_PATH, HttpStatus.OK.value());
+        when(assignCaseAccessService.getUserRoles(any())).thenReturn(CaseAssignmentUserRolesResource.builder()
+            .caseAssignmentUserRoles(List.of(CaseAssignmentUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
+            .build());
         webClient.perform(MockMvcRequestBuilders.post(CONSENT_ORDER_AVAILABLE_URL)
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
