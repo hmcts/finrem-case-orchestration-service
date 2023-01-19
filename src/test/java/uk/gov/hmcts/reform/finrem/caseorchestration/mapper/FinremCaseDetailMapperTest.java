@@ -60,7 +60,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterAddressToType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingBundleDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingBundleDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTimeDirection;
@@ -633,8 +633,8 @@ public class FinremCaseDetailMapperTest {
     }
 
     private void assertGeneralOrderCollection(FinremCaseData caseData) {
-        List<GeneralOrderCollection> expected = List.of(
-            GeneralOrderCollection.builder()
+        List<GeneralOrderCollectionItem> expected = List.of(
+            GeneralOrderCollectionItem.builder()
                 .value(GeneralOrder.builder()
                     .generalOrderJudgeType(JudgeType.DISTRICT_JUDGE)
                     .generalOrderDateOfOrder(LocalDate.of(2010, 1, 2))

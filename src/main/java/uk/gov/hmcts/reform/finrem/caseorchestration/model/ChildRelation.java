@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.RequiredArgsConstructor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
 
 import java.util.Arrays;
 
@@ -28,8 +27,8 @@ public enum ChildRelation {
         return value;
     }
 
-    public static Schedule1OrMatrimonialAndCpList forValue(String value) {
-        return Arrays.stream(Schedule1OrMatrimonialAndCpList.values())
+    public static ChildRelation forValue(String value) {
+        return Arrays.stream(ChildRelation.values())
             .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
