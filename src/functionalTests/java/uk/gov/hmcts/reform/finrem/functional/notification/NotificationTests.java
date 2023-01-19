@@ -12,12 +12,6 @@ public class NotificationTests extends IntegrationTestBase {
     @Value("${cos.notification.judge-assign.api}")
     private String notifyAssignToJudge;
 
-    @Value("${cos.notification.consent-order-available.api}")
-    private String consentOrderAvailable;
-
-    @Value("${cos.notification.consent-order-approved.api}")
-    private String consentOrderMade;
-
     @Value("${cos.notification.prepare-for-hearing.api}")
     private String prepareForHearingApiUri;
 
@@ -39,20 +33,6 @@ public class NotificationTests extends IntegrationTestBase {
 
         utils.validatePostSuccess(notifyAssignToJudge,
             "ccd-request-with-solicitor-assignedToJudge1.json", consentedDir);
-    }
-
-    @Test
-    public void verifyNotifyConsentOrderAvailableTestIsOkay() {
-
-        utils.validatePostSuccess(consentOrderAvailable,
-            "ccd-request-with-solicitor-consentOrderAvailable1.json", consentedDir);
-    }
-
-    @Test
-    public void verifyNotifyConsentOrderMadeTestIsOkay() {
-
-        utils.validatePostSuccess(consentOrderMade,
-            "ccd-request-with-solicitor-consentOrderMade1.json", consentedDir);
     }
 
     @Test
