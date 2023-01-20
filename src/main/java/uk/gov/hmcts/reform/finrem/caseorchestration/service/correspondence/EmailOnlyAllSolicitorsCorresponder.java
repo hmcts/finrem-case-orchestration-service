@@ -17,6 +17,7 @@ public abstract class EmailOnlyAllSolicitorsCorresponder extends EmailOnlyCorres
 
     @Override
     public void sendCorrespondence(CaseDetails caseDetails) {
+        log.info("Determine whether to send email notifications to all solicitors for case: {}", caseDetails.getId());
         if (shouldSendApplicantSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to applicant for case: {}", caseDetails.getId());
             this.emailApplicantSolicitor(caseDetails);
