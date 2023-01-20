@@ -145,7 +145,8 @@ public class NotificationsController extends BaseController {
             content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendConsentOrderNotApprovedEmail(
         @RequestBody CallbackRequest callbackRequest) {
-        log.info("Received request to process notifications for 'Consent/Contest Order Not Approved' for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        log.info("Received request to process notifications for 'Consent/Contest Order Not Approved' for Case ID: {}",
+            callbackRequest.getCaseDetails().getId());
 
         validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
@@ -165,7 +166,8 @@ public class NotificationsController extends BaseController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendContestedConsentOrderApprovedEmail(
         @RequestBody CallbackRequest callbackRequest) {
 
-        log.info("Received request to process notifications for 'Contested Consent Order Approved' for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        log.info("Received request to process notifications for 'Contested Consent Order Approved' for Case ID: {}",
+            callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
@@ -183,7 +185,8 @@ public class NotificationsController extends BaseController {
             content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendContestedConsentOrderNotApprovedEmail(
         @RequestBody CallbackRequest callbackRequest) {
-        log.info("Received request to process notifications for 'Contested Consent Order Not Approved' for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        log.info("Received request to process notifications for 'Contested Consent Order Not Approved' for Case ID: {}",
+            callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
