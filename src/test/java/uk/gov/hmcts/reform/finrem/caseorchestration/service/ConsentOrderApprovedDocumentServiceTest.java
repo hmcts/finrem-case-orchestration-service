@@ -17,7 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 
@@ -208,8 +208,8 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         Mockito.reset(documentClientMock);
         when(documentClientMock.stampDocument(any(), anyString())).thenReturn(document());
 
-        List<PensionCollectionData> pensionDocuments = asList(pensionDocumentData(), pensionDocumentData());
-        List<PensionCollectionData> stampPensionDocuments = consentOrderApprovedDocumentService.stampPensionDocuments(pensionDocuments, AUTH_TOKEN);
+        List<PensionTypeCollection> pensionDocuments = asList(pensionDocumentData(), pensionDocumentData());
+        List<PensionTypeCollection> stampPensionDocuments = consentOrderApprovedDocumentService.stampPensionDocuments(pensionDocuments, AUTH_TOKEN);
 
         stampPensionDocuments.forEach(data -> assertCaseDocument(data.getTypedCaseDocument().getPensionDocument()));
         verify(documentClientMock, times(2)).stampDocument(any(), anyString());
@@ -220,11 +220,11 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         Mockito.reset(documentClientMock);
         when(documentClientMock.stampDocument(any(), anyString())).thenReturn(document());
 
-        PensionCollectionData pensionCollectionDataWithNullDocument = pensionDocumentData();
+        PensionTypeCollection pensionCollectionDataWithNullDocument = pensionDocumentData();
         pensionCollectionDataWithNullDocument.getTypedCaseDocument().setPensionDocument(null);
-        List<PensionCollectionData> pensionDocuments = asList(pensionDocumentData(), pensionCollectionDataWithNullDocument);
+        List<PensionTypeCollection> pensionDocuments = asList(pensionDocumentData(), pensionCollectionDataWithNullDocument);
 
-        List<PensionCollectionData> stampPensionDocuments = consentOrderApprovedDocumentService.stampPensionDocuments(pensionDocuments, AUTH_TOKEN);
+        List<PensionTypeCollection> stampPensionDocuments = consentOrderApprovedDocumentService.stampPensionDocuments(pensionDocuments, AUTH_TOKEN);
 
         assertThat(stampPensionDocuments, hasSize(1));
         stampPensionDocuments.forEach(data -> assertCaseDocument(data.getTypedCaseDocument().getPensionDocument()));
@@ -290,7 +290,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     }
 
     private void addConsentOrderApprovedDataToCaseDetails(CaseDetails caseDetails) throws Exception {
-        PensionCollectionData pensionData = pensionDocumentData();
+        PensionTypeCollection pensionData = pensionDocumentData();
         pensionData.getTypedCaseDocument().getPensionDocument().setDocumentBinaryUrl(PENSION_DOCUMENT_URL);
 
         ApprovedOrder approvedOrder = ApprovedOrder.builder()
