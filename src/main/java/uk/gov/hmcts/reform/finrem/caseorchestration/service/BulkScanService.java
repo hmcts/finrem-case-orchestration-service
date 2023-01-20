@@ -11,12 +11,21 @@ import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResult;
 import uk.gov.hmcts.reform.bsp.common.model.validation.out.ValidationStatus;
 import uk.gov.hmcts.reform.bsp.common.service.BulkScanFormValidator;
 import uk.gov.hmcts.reform.bsp.common.service.transformation.BulkScanFormTransformer;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.FinRemBulkScanFormTransformerFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.FinRemBulkScanFormValidatorFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.FormAValidator;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 
 @RequiredArgsConstructor
 @Service
@@ -38,7 +47,34 @@ public class BulkScanService {
         validateForTransformation(exceptionRecord);
 
         BulkScanFormTransformer bulkScanFormTransformer = finRemBulkScanFormTransformerFactory.getTransformer(exceptionRecord.getFormType());
-        return bulkScanFormTransformer.transformIntoCaseData(exceptionRecord);
+        Map<String, Object> transformIntoCaseData = bulkScanFormTransformer.transformIntoCaseData(exceptionRecord);
+        Map<String, Object> caseData = new HashMap<>(transformIntoCaseData);
+        addChangeOrganisationRequestAndDefaultOrganisationPolicies(caseData);
+        return caseData;
+    }
+
+    private void addChangeOrganisationRequestAndDefaultOrganisationPolicies(Map<String, Object> caseData) {
+        ChangeOrganisationRequest defaultChangeRequest = ChangeOrganisationRequest
+            .builder()
+            .requestTimestamp(null)
+            .approvalRejectionTimestamp(null)
+            .caseRoleId(null)
+            .approvalStatus(null)
+            .organisationToAdd(null)
+            .organisationToRemove(null)
+            .reason(null)
+            .build();
+        caseData.put(CHANGE_ORGANISATION_REQUEST, defaultChangeRequest);
+
+        OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
+            .orgPolicyCaseAssignedRole(APP_SOLICITOR_POLICY)
+            .build();
+        caseData.put(APPLICANT_ORGANISATION_POLICY, applicantOrganisationPolicy);
+
+        OrganisationPolicy respondentOrganisationPolicy = OrganisationPolicy.builder()
+            .orgPolicyCaseAssignedRole(RESP_SOLICITOR_POLICY)
+            .build();
+        caseData.put(RESPONDENT_ORGANISATION_POLICY, respondentOrganisationPolicy);
     }
 
     private void validateForTransformation(ExceptionRecord exceptionRecord) throws UnsupportedFormTypeException, InvalidDataException {
