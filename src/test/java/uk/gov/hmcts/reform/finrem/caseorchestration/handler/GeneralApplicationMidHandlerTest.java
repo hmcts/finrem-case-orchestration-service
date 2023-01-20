@@ -1,23 +1,27 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.GeneralApplicationHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationItems;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -30,18 +34,16 @@ public class GeneralApplicationMidHandlerTest extends BaseHandlerTest {
     private GeneralApplicationMidHandler handler;
     @Mock
     private GenericDocumentService service;
-    private ObjectMapper objectMapper;
-    private GeneralApplicationHelper helper;
 
     public static final String AUTH_TOKEN = "tokien:)";
-    private static final String GA_JSON = "/fixtures/contested/general-application-double.json";
 
 
     @Before
     public void setup() {
-        objectMapper = new ObjectMapper();
-        helper = new GeneralApplicationHelper(objectMapper, service);
-        handler = new GeneralApplicationMidHandler(helper);
+        FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
+        ObjectMapper objectMapper = new ObjectMapper();
+        GeneralApplicationHelper helper = new GeneralApplicationHelper(objectMapper, service);
+        handler = new GeneralApplicationMidHandler(finremCaseDetailsMapper, helper);
     }
 
     @Test
@@ -74,16 +76,16 @@ public class GeneralApplicationMidHandlerTest extends BaseHandlerTest {
 
     @Test
     public void givenContestedCase_whenGeneralApplicationEventStartButNotAddedDetails_thenThrowErrorMessage() {
-        CallbackRequest callbackRequest = getEmptyCallbackRequest();
-        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
-        assertTrue(response.getErrors().get(0)
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        assertTrue(handle.getErrors().get(0)
             .contains("Please complete the General Application. No information has been entered for this application."));
     }
 
     @Test
     public void givenContestedCase_whenGeneralApplicationEventStartAndThereIsExistingApplicationButNotAddedNewApplication_thenThrowErrorMessage() {
-        CallbackRequest callbackRequest = buildCallbackRequestWithCaseDetailsBefore(GA_JSON);
-        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequestWithCaseDetailsBefore();
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
         assertTrue(response.getErrors().get(0)
             .contains("Any changes to an existing General Applications will not be saved."
@@ -91,22 +93,33 @@ public class GeneralApplicationMidHandlerTest extends BaseHandlerTest {
     }
 
 
-    private CallbackRequest getEmptyCallbackRequest() {
-        return CallbackRequest
+    private FinremCallbackRequest buildCallbackRequest() {
+        return FinremCallbackRequest
             .builder()
-            .caseDetailsBefore(CaseDetails.builder().caseTypeId(CONTESTED.getCcdType()).data(new HashMap<>()).build())
-            .caseDetails(CaseDetails.builder().caseTypeId(CONTESTED.getCcdType()).data(new HashMap<>()).build())
+            .eventType(EventType.GENERAL_APPLICATION)
+            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+                .data(new FinremCaseData()).build())
+            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+                .data(new FinremCaseData()).build())
             .build();
-
     }
 
-    private CallbackRequest buildCallbackRequestWithCaseDetailsBefore(String testJson) {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(testJson)) {
-            CaseDetails caseDetails =
-                objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-            return CallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+
+    private FinremCallbackRequest buildCallbackRequestWithCaseDetailsBefore() {
+        GeneralApplicationsCollection record1 = GeneralApplicationsCollection.builder().id(UUID.randomUUID())
+            .value(GeneralApplicationItems.builder().generalApplicationCreatedBy("Test1").build()).build();
+        GeneralApplicationsCollection record2 = GeneralApplicationsCollection.builder().id(UUID.randomUUID())
+            .value(GeneralApplicationItems.builder().generalApplicationCreatedBy("Test2").build()).build();
+
+        GeneralApplicationWrapper wrapper1 = GeneralApplicationWrapper.builder().generalApplications(List.of(record1, record2)).build();
+
+        return FinremCallbackRequest
+            .builder()
+            .eventType(EventType.GENERAL_APPLICATION)
+            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+                .data(FinremCaseData.builder().generalApplicationWrapper(wrapper1).build()).build())
+            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+                .data(FinremCaseData.builder().generalApplicationWrapper(wrapper1).build()).build())
+            .build();
     }
 }
