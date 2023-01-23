@@ -12,11 +12,8 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CollectionElement<T> {
-
-    @JsonProperty("id")
-    protected String id;
+public class BarristerCollectionItem extends CollectionElement<Barrister> {
 
     @JsonProperty("value")
-    protected T value;
+    private Barrister value;
 }

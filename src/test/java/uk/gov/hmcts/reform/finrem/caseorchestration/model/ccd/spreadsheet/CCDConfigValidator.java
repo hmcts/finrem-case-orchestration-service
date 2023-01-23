@@ -165,9 +165,13 @@ public class CCDConfigValidator {
         log.info("The type of the List class is: {} ", listClass.getName());
         Field[] declaredFields = listClass.getDeclaredFields();
         List<String> collectionErrors = new ArrayList<>();
-        Arrays.stream(declaredFields).filter(f -> f.getName().equals("value")).findFirst()  // get the value field
-            .ifPresent(f -> {
+        Arrays.stream(declaredFields).filter(f -> f.getName().equals("value")
+                || hasMatchingAnnotationForField(f, "value"))
+            .findFirst()  // get the value field
+            .ifPresentOrElse(f -> {
                 collectionErrors.addAll(validateComplexField(fixedListSheet, complexTypeFields, f.getType()));
+            }, () -> {
+                collectionErrors.add("No value field found for collection field: " + ccdFieldAttributes.getFieldId());
             });
         return collectionErrors;
     }

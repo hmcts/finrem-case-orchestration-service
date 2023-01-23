@@ -162,6 +162,8 @@ public class FinremCaseData {
     private String transferLocalCourtInstructions;
     private List<TransferCourtEmailCollection> transferLocalCourtEmailCollection;
     private YesOrNo civilPartnership;
+    private YesOrNo promptForUrgentCaseQuestion;
+    private String urgentCaseQuestionDetailsTextArea;
     @JsonProperty("RepresentationUpdateHistory")
     private List<RepresentationUpdateHistoryCollection> representationUpdateHistory;
     private YesOrNo paperApplication;
@@ -322,9 +324,9 @@ public class FinremCaseData {
     private List<ScannedDocumentCollection> respondentScanDocuments;
 
     @JsonProperty("appBarristerCollection")
-    private List<BarristerData> applicantBarristers;
+    private List<BarristerCollectionItem> applicantBarristers;
     @JsonProperty("respBarristerCollection")
-    private List<BarristerData> respondentBarristers;
+    private List<BarristerCollectionItem> respondentBarristers;
     private BarristerParty barristerParty;
 
     private YesOrNo benefitForChildrenDecisionSchedule;

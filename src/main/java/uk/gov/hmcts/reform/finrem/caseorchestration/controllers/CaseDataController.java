@@ -45,6 +45,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION_DEFAULT_TO;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.URGENT_CASE_QUESTION;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -124,6 +126,7 @@ public class CaseDataController extends BaseController {
         validateCaseData(callbackRequest);
         setOrganisationPolicyForNewPaperCase(callbackRequest.getCaseDetails());
         callbackRequest.getCaseDetails().getData().putIfAbsent(CIVIL_PARTNERSHIP, NO_VALUE);
+        callbackRequest.getCaseDetails().getData().putIfAbsent(URGENT_CASE_QUESTION, NO_VALUE);
         callbackRequest.getCaseDetails().getData().putIfAbsent(TYPE_OF_APPLICATION, TYPE_OF_APPLICATION_DEFAULT_TO);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build());
     }
@@ -151,6 +154,7 @@ public class CaseDataController extends BaseController {
 
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         caseData.putIfAbsent(CIVIL_PARTNERSHIP, NO_VALUE);
+        caseData.putIfAbsent(URGENT_CASE_QUESTION, NO_VALUE);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
@@ -209,7 +213,9 @@ public class CaseDataController extends BaseController {
 
     private void setPaperCaseData(Map<String, Object> caseData) {
         caseData.put(PAPER_APPLICATION, YES_VALUE);
-        caseData.put(FAST_TRACK_DECISION, NO_VALUE);
+        if (!caseDataService.isNotEmpty(FAST_TRACK_DECISION, caseData)) {
+            caseData.put(FAST_TRACK_DECISION, NO_VALUE);
+        }
     }
 
     private void setOrganisationPolicy(CaseDetails caseDetails) {
