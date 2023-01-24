@@ -8,6 +8,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,6 +39,7 @@ public class CCDConfigValidator {
     protected static final String FIXED_RADIO_LIST = "FixedRadioList";
     protected static final String FIXED_LIST = "FixedList";
     protected static final int ROW_HEADERS = 2;
+    protected static final String STATE_SHEET = "State";
     private List<String> ccdFieldsToIgnore = Arrays.asList("Label", "OrderSummary", "CaseHistoryViewer", "CasePaymentHistoryViewer");
     private List<String> fixedListValues = Arrays.asList(FIXED_LIST, FIXED_RADIO_LIST);
     private List<String> alreadyProcessedCcdFields = new ArrayList<>();
@@ -64,7 +66,7 @@ public class CCDConfigValidator {
         Map.entry("currentUserCaseRole", "CaseRole")
     );
 
-    public List<String> validateCCDConfigAgainstClassStructure(File configFile, Class baseClassToCompareWith)
+    public List<String> validateCaseFieldsAgainstClassStructure(File configFile, Class baseClassToCompareWith)
         throws IOException, InvalidFormatException {
 
         Workbook workbook = new XSSFWorkbook(configFile);
@@ -73,6 +75,38 @@ public class CCDConfigValidator {
         Sheet fixedListSheet = workbook.getSheet(FIXED_LISTS_SHEET);
         List<CcdFieldAttributes> caseFields = collateCaseFields(caseFieldSheet);
 
+        List<String> validationErrors = validateCaseFields(baseClassToCompareWith, complexTypeSheet, fixedListSheet, caseFields);
+        return validationErrors;
+    }
+
+    public List<String> validateStatesAgainstClassStructure(File configFile)
+        throws IOException, InvalidFormatException {
+
+        Workbook workbook = new XSSFWorkbook(configFile);
+        Sheet stateSheet = workbook.getSheet(STATE_SHEET);
+        List<StateAttributes> stateAttributes = collateStates(stateSheet);
+
+        List<String> validationErrors = validateStates(stateAttributes);
+        return validationErrors;
+    }
+
+    private List<String> validateStates(List<StateAttributes> stateAttributes) {
+        List<String> validationErrors = new ArrayList<>();
+        for (StateAttributes stateAttribute : stateAttributes) {
+            log.info("Validating state: {}", stateAttribute.getId());
+            try {
+                State.forValue(stateAttribute.getId());
+                log.info("State {} is valid", stateAttribute.getId());
+            } catch (IllegalArgumentException e) {
+                validationErrors.add(String.format("State %s is not defined in the State enum", stateAttribute.getId()));
+            }
+        }
+        return validationErrors;
+    }
+
+
+    private List<String> validateCaseFields(Class baseClassToCompareWith, Sheet complexTypeSheet, Sheet fixedListSheet,
+                                            List<CcdFieldAttributes> caseFields) {
         Set<Class> finremCaseDataClasses = new HashSet<>(Arrays.asList(baseClassToCompareWith));
         finremCaseDataClasses.addAll(new AccessingAllClassesInPackage().getWrappedClassesForClass(baseClassToCompareWith));
 
@@ -327,6 +361,21 @@ public class CCDConfigValidator {
             i++;
         }
         return caseFields;
+    }
+
+    private List<StateAttributes> collateStates(Sheet sheet) {
+        List<StateAttributes> stateFields = new ArrayList<>();
+        int i = 0;
+        for (Row row : sheet) {
+            if (i > ROW_HEADERS) {
+                StateAttributes stateAttributes = new StateAttributes();
+                stateAttributes.setId(row.getCell(3).getStringCellValue());
+                stateAttributes.setName(row.getCell(4).getStringCellValue());
+                stateFields.add(stateAttributes);
+            }
+            i++;
+        }
+        return stateFields;
     }
 
     private boolean isComplexType(Sheet complexTypeSheet, String fieldType) {
