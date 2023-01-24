@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrde
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
@@ -396,7 +397,7 @@ public class DocumentHelper {
         List<Map<String, Object>> documentList = ofNullable(data.get(collectionName))
             .map(i -> (List<Map<String, Object>>) i)
             .orElse(new ArrayList<>());
-
+        List<DocumentCollection> documentCollections = convertToDocumentCollectionDataList(data.get(collectionName));
         for (Map<String, Object> document : documentList) {
             Map<String, Object> value = (Map<String, Object>) document.get(VALUE);
 
@@ -405,13 +406,23 @@ public class DocumentHelper {
                 CaseDocument caseDocument = documentLinkAsCaseDocument.get();
                 CaseDocument pdfCaseDocument = service.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken);
                 documents.add(pdfCaseDocument);
+                documentCollections.add(DocumentCollection
+                    .builder()
+                        .value(pdfCaseDocument)
+                    .build());
             }
-
         }
-        data.put(collectionName, documents);
+        data.put(collectionName, documentCollections);
         return documents;
     }
 
+    public List<DocumentCollection> convertToDocumentCollectionDataList(Object object) {
+        if (object != null) {
+            return objectMapper.convertValue(object, new TypeReference<>() {
+            });
+        }
+        return null;
+    }
     public Optional<CaseDocument> getDocumentLinkAsCaseDocument(Map<String, Object> data, String documentName) {
         Map<String, Object> documentLink = documentName != null
             ? (Map<String, Object>) data.get(documentName)
