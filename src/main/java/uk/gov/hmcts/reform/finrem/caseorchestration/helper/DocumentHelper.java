@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderDocu
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -99,6 +100,7 @@ public class DocumentHelper {
 
     private final ObjectMapper objectMapper;
     private final CaseDataService caseDataService;
+    private final GenericDocumentService service;
 
     public static CtscContactDetails buildCtscContactDetails() {
         return CtscContactDetails.builder()
@@ -381,12 +383,14 @@ public class DocumentHelper {
             : Optional.empty();
     }
 
-    public List<BulkPrintDocument> getCollectionOfDocumentLinksAsBulkPrintDocuments(Map<String, Object> data, String collectionName) {
-        return getCaseDocumentsAsBulkPrintDocuments(getDocumentLinksFromCustomCollectionAsCaseDocuments(data, collectionName, null));
+    public List<BulkPrintDocument> getCollectionOfDocumentLinksAsBulkPrintDocuments(Map<String, Object> data,
+                                                                                    String collectionName, String authorisationToken) {
+        return getCaseDocumentsAsBulkPrintDocuments(getDocumentLinksFromCustomCollectionAsCaseDocuments(data,
+            collectionName, null, authorisationToken));
     }
 
     public List<CaseDocument> getDocumentLinksFromCustomCollectionAsCaseDocuments(Map<String, Object> data, String collectionName,
-                                                                                  String documentName) {
+                                                                                  String documentName, String authorisationToken) {
         List<CaseDocument> documents = new ArrayList<>();
 
         List<Map<String, Object>> documentList = ofNullable(data.get(collectionName))
@@ -395,8 +399,16 @@ public class DocumentHelper {
 
         for (Map<String, Object> document : documentList) {
             Map<String, Object> value = (Map<String, Object>) document.get(VALUE);
-            getDocumentLinkAsCaseDocument(value, documentName).ifPresent(documents::add);
+
+            Optional<CaseDocument> documentLinkAsCaseDocument = getDocumentLinkAsCaseDocument(value, documentName);
+            if (documentLinkAsCaseDocument.isPresent()) {
+                CaseDocument caseDocument = documentLinkAsCaseDocument.get();
+                CaseDocument pdfCaseDocument = service.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken);
+                documents.add(pdfCaseDocument);
+            }
+
         }
+        data.put(collectionName, documents);
         return documents;
     }
 

@@ -63,12 +63,15 @@ public class GeneralOrderService {
             .apply(documentHelper.deepCopy(caseDetails, CaseDetails.class), authorisationToken);
     }
 
-    public BulkPrintDocument getLatestGeneralOrderAsBulkPrintDocument(Map<String, Object> caseData) {
+    public BulkPrintDocument getLatestGeneralOrderAsBulkPrintDocument(Map<String, Object> caseData, String authorisationToken) {
         CaseDocument latestGeneralOrder = documentHelper.getLatestGeneralOrder(caseData);
-        return latestGeneralOrder != null
-            ? BulkPrintDocument.builder().binaryFileUrl(latestGeneralOrder.getDocumentBinaryUrl())
-            .fileName(latestGeneralOrder.getDocumentFilename()).build()
-            : null;
+        if (latestGeneralOrder != null) {
+            CaseDocument pdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(latestGeneralOrder, authorisationToken);
+            caseData.put(GENERAL_ORDER_LATEST_DOCUMENT, pdfDocument);
+            return BulkPrintDocument.builder().binaryFileUrl(pdfDocument.getDocumentBinaryUrl())
+                .fileName(pdfDocument.getDocumentFilename()).build();
+        }
+        return null;
     }
 
     private CaseDocument applyGenerateDocument(CaseDetails caseDetails, String authorisationToken) {

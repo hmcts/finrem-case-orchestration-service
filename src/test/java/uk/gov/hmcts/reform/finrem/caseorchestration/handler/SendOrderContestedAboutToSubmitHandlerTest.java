@@ -112,7 +112,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
     public void givenShouldPrintAppAndResp_whenPrintAndMailGeneralOrderTriggered_thenBothAppAndRespPacksPrinted() {
         when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
         when(paperNotificationService.shouldPrintForRespondent(any())).thenReturn(true);
-        when(generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(any()))
+        when(generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(any(), any()))
             .thenReturn(BulkPrintDocument.builder().build());
 
         CallbackRequest callbackRequest =
@@ -300,7 +300,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
     private void mockDocumentHelperToReturnDefaultExpectedDocuments() {
         when(documentHelper.getDocumentLinkAsBulkPrintDocument(any(), eq(LATEST_DRAFT_HEARING_ORDER))).thenReturn(
             Optional.of(BulkPrintDocument.builder().binaryFileUrl("HearingOrderBinaryURL").build()));
-        when(documentHelper.getCollectionOfDocumentLinksAsBulkPrintDocuments(any(), eq(HEARING_ORDER_OTHER_COLLECTION))).thenReturn(
+        when(documentHelper.getCollectionOfDocumentLinksAsBulkPrintDocuments(any(), eq(HEARING_ORDER_OTHER_COLLECTION), any())).thenReturn(
             singletonList(BulkPrintDocument.builder().binaryFileUrl("OtherHearingOrderDocumentsURL").build()));
 
         CaseDocument additionalHearingDocument = CaseDocument.builder().documentBinaryUrl("AdditionalHearingDocumentURL").build();

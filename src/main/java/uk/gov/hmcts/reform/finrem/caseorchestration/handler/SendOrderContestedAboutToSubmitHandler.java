@@ -91,7 +91,7 @@ public class SendOrderContestedAboutToSubmitHandler
 
     private void printAndMailGeneralOrderToParties(CaseDetails caseDetails, String authorisationToken) {
         if (contestedGeneralOrderPresent(caseDetails)) {
-            BulkPrintDocument generalOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(caseDetails.getData());
+            BulkPrintDocument generalOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(caseDetails.getData(), authorisationToken);
 
             if (paperNotificationService.shouldPrintForApplicant(caseDetails)) {
                 bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, singletonList(generalOrder));
@@ -107,7 +107,7 @@ public class SendOrderContestedAboutToSubmitHandler
         if (caseDataService.isContestedPaperApplication(caseDetails)) {
             Map<String, Object> caseData = caseDetails.getData();
 
-            List<BulkPrintDocument> hearingDocumentPack = createHearingDocumentPack(caseData);
+            List<BulkPrintDocument> hearingDocumentPack = createHearingDocumentPack(caseData, authorisationToken);
 
             if (paperNotificationService.shouldPrintForApplicant(caseDetails)) {
                 log.info("Received request to send hearing pack for applicant for case {}:", caseDetails.getId());
@@ -121,7 +121,7 @@ public class SendOrderContestedAboutToSubmitHandler
         }
     }
 
-    private List<BulkPrintDocument> createHearingDocumentPack(Map<String, Object> caseData) {
+    private List<BulkPrintDocument> createHearingDocumentPack(Map<String, Object> caseData, String authorisationToken) {
         List<BulkPrintDocument> hearingDocumentPack = new ArrayList<>();
 
         documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, CONTESTED_ORDER_APPROVED_COVER_LETTER).ifPresent(hearingDocumentPack::add);
@@ -134,7 +134,7 @@ public class SendOrderContestedAboutToSubmitHandler
         }
 
         List<BulkPrintDocument> otherHearingDocuments = documentHelper.getCollectionOfDocumentLinksAsBulkPrintDocuments(
-            caseData, HEARING_ORDER_OTHER_COLLECTION);
+            caseData, HEARING_ORDER_OTHER_COLLECTION, authorisationToken);
 
         if (otherHearingDocuments != null) {
             hearingDocumentPack.addAll(otherHearingDocuments);

@@ -279,7 +279,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldConvertCollectionDocument() {
-        List<CaseDocument> documents = consentOrderApprovedDocumentService.approvedOrderCollection(caseDetails());
+        List<CaseDocument> documents = consentOrderApprovedDocumentService.approvedOrderCollection(caseDetails(), AUTH_TOKEN);
 
         assertThat(documents, hasSize(3));
     }

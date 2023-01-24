@@ -130,7 +130,7 @@ public class ConsentOrderApprovedDocumentService {
             bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(coverLetter));
         }
 
-        bulkPrintDocuments.addAll(documentHelper.getCaseDocumentsAsBulkPrintDocuments(approvedOrderCollection(caseDetails)));
+        bulkPrintDocuments.addAll(documentHelper.getCaseDocumentsAsBulkPrintDocuments(approvedOrderCollection(caseDetails, authorisationToken)));
 
         return bulkPrintDocuments;
     }
@@ -215,7 +215,7 @@ public class ConsentOrderApprovedDocumentService {
         return detailsCopy;
     }
 
-    public List<CaseDocument> approvedOrderCollection(CaseDetails caseDetails) {
+    public List<CaseDocument> approvedOrderCollection(CaseDetails caseDetails, String authorisationToken) {
         Map<String, Object> data = caseDetails.getData();
         List<CaseDocument> documents = new ArrayList<>();
         String approvedOrderCollectionFieldName = caseDataService.isConsentedInContestedCase(caseDetails)
@@ -234,7 +234,7 @@ public class ConsentOrderApprovedDocumentService {
             documents.addAll(documentHelper.getDocumentLinksFromCustomCollectionAsCaseDocuments(
                 lastApprovedOrder,
                 PENSION_DOCUMENTS,
-                "uploadedDocument"));
+                "uploadedDocument", authorisationToken));
         } else {
             log.info("Failed to extract '{}' from case data for bulk print as document list was empty, case {}",
                 approvedOrderCollectionFieldName, caseDetails.getId());
