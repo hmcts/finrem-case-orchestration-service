@@ -72,6 +72,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NOTICES_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_OTHER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
@@ -406,13 +407,17 @@ public class DocumentHelper {
                 CaseDocument caseDocument = documentLinkAsCaseDocument.get();
                 CaseDocument pdfCaseDocument = service.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken);
                 documents.add(pdfCaseDocument);
-                documentCollections.add(DocumentCollection
-                    .builder()
+                if (HEARING_ORDER_OTHER_COLLECTION.equalsIgnoreCase(collectionName)) {
+                    documentCollections.add(DocumentCollection
+                        .builder()
                         .value(pdfCaseDocument)
-                    .build());
+                        .build());
+                }
             }
         }
-        data.put(collectionName, documentCollections);
+        if (HEARING_ORDER_OTHER_COLLECTION.equalsIgnoreCase(collectionName)) {
+            data.put(collectionName, documentCollections);
+        }
         return documents;
     }
 
