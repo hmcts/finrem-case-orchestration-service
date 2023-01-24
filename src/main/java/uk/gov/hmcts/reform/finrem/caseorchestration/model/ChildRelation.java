@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
+package uk.gov.hmcts.reform.finrem.caseorchestration.model;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
@@ -9,11 +9,16 @@ import java.util.Arrays;
 
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 @RequiredArgsConstructor
-public enum RegionSouthEastFrc {
-    KENT_FRC("kentfrc"),
-    KENT("kent"),
-    BEDFORDSHIRE("bedfordshire"),
-    THAMES_VALLEY("thamesvalley");
+public enum ChildRelation {
+
+    MOTHER("Mother"),
+    FATHER("Father"),
+    STEP_MOTHER("Step mother"),
+    STEP_FATHER("Step father"),
+    GRAND_PARENT("Grand parent"),
+    GUARDIAN("Guardian"),
+    SPECIAL_GUARDIAN("Special Guardian"),
+    OTHER("Other");
 
     private final String value;
 
@@ -22,8 +27,8 @@ public enum RegionSouthEastFrc {
         return value;
     }
 
-    public static RegionSouthEastFrc forValue(String value) {
-        return Arrays.stream(RegionSouthEastFrc.values())
+    public static ChildRelation forValue(String value) {
+        return Arrays.stream(ChildRelation.values())
             .filter(option -> option.getValue().equalsIgnoreCase(value))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }

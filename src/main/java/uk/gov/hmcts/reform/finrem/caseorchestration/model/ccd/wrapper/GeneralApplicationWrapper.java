@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import lombok.AllArgsConstructor;
@@ -43,7 +44,8 @@ public class GeneralApplicationWrapper {
     private LocalDate generalApplicationDirectionsHearingDate;
     private JudgeType generalApplicationDirectionsJudgeType;
     private String generalApplicationDirectionsJudgeName;
-    private List<GeneralApplicationCollection> generalApplicationCollection;
+    @JsonProperty("generalApplicationCollection")
+    private List<GeneralApplicationCollection> generalApplicationDocumentCollection;
     private String generalApplicationCreatedBy;
     private YesOrNo generalApplicationHearingRequired;
     private String generalApplicationTimeEstimate;
@@ -58,4 +60,12 @@ public class GeneralApplicationWrapper {
     private String generalApplicationReferToJudgeEmail;
     private String generalApplicationOutcomeOther;
     private GeneralApplicationOutcome generalApplicationOutcome;
+    private List<GeneralApplicationsCollection> generalApplications;
+    private String generalApplicationTracking;
+    private String generalApplicationRejectReason;
+    private String generalApplicationList;
+    private String generalApplicationReferList;
+    private String generalApplicationReferDetail;
+    private String generalApplicationOutcomeList;
+    private String generalApplicationDirectionsList;
 }

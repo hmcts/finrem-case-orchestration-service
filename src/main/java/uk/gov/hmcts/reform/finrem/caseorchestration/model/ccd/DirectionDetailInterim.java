@@ -26,5 +26,6 @@ public class DirectionDetailInterim {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate interimDateOfHearing;
     private String interimHearingTime;
+    private YesOrNo isAnotherHearingYN;
 
 }
