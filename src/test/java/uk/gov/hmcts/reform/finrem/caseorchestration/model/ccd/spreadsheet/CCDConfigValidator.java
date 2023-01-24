@@ -8,7 +8,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 
 import java.io.File;
@@ -61,7 +60,7 @@ public class CCDConfigValidator {
         Map.entry("OrganisationPolicy", "OrganisationPolicy"),
         Map.entry(COLLECTION, "List"),
         Map.entry(MULTI_SELECT_LIST, "List"),
-        Map.entry("DynamicList", "List")
+        Map.entry(DYNAMIC_LIST, "DynamicList")
     );
 
     private Map<String, String> specialFieldTypes = Map.ofEntries(
@@ -168,24 +167,9 @@ public class CCDConfigValidator {
             } else if (ccdFieldAttributes.getFieldType().equals(MULTI_SELECT_LIST) || ccdFieldAttributes.getFieldType().equals(FIXED_LIST)
                 || ccdFieldAttributes.getFieldType().equals(FIXED_RADIO_LIST)) {
                 errors.addAll(validateFixedListCaseField(fixedListSheet, ccdFieldAttributes, field));
-            } else if (ccdFieldAttributes.getFieldType().equals(DYNAMIC_LIST) && !field.getType().getSimpleName().equals(DYNAMIC_LIST)) {
-                errors.addAll(validateDynamicListCaseField(ccdFieldAttributes, field));
             }
         }
         return errors;
-    }
-
-    private List<String> validateDynamicListCaseField(CcdFieldAttributes ccdFieldAttributes, Field field) {
-        Type type = field.getGenericType();
-        log.info("type: {}", type.getTypeName());
-        ParameterizedType stringListType = (ParameterizedType) type;
-        Class<?> listClass = (Class<?>) stringListType.getActualTypeArguments()[0];
-        if (listClass.getName().equals(DynamicList.class.getName())) {
-            return Collections.emptyList();
-        } else {
-            return Collections.singletonList("CCD Field Id: " + ccdFieldAttributes.getFieldId() + " Field Type: " + type.getTypeName()
-                + " does not match DynamicList");
-        }
     }
 
     private boolean fieldDoesNotHaveAValidMapping(CcdFieldAttributes ccdFieldAttributes, Field field) {

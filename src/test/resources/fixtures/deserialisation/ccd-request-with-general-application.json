@@ -1,0 +1,302 @@
+{
+  "token": "",
+  "event_id": "FR_approveApplication",
+  "case_details": {
+    "id": 1674492229060142,
+    "jurisdiction": "DIVORCE",
+    "state": "prepareForHearing",
+    "version": 7,
+    "case_type_id": "FinancialRemedyContested",
+    "created_date": [
+      2023,
+      1,
+      23,
+      16,
+      43,
+      49,
+      78321000
+    ],
+    "last_modified": [
+      2023,
+      1,
+      23,
+      16,
+      56,
+      20,
+      470475000
+    ],
+    "last_state_modified_date": [
+      2023,
+      1,
+      23,
+      16,
+      56,
+      20,
+      470235000
+    ],
+    "security_classification": "PUBLIC",
+    "case_data": {
+      "divorceUploadEvidence1": null,
+      "generalApplicationDirections_regionList": "wales",
+      "divorceUploadEvidence2": null,
+      "generalApplicationDirectionsAdditionalInformation": "aaa",
+      "generalApplicationDirections_lancashireCourtList": null,
+      "newportCourtList": null,
+      "divorceStageReached": "Petition Issued",
+      "generalApplicationDirectionsTextFromJudge": null,
+      "southEastFRCList": "bedfordshire",
+      "otherReasonForComplexity": null,
+      "generalApplicationDirections_swanseaCourtList": null,
+      "applicantFMName": "Elmo Garrett",
+      "generalApplicationDirections_nwyorkshireCourtList": null,
+      "fastTrackDecision": "No",
+      "dorsetCourtList": null,
+      "potentialAllegationChecklist": [
+        "notApplicable"
+      ],
+      "lancashireCourtList": null,
+      "applicantSolicitorAddress": {
+        "County": "Greater London",
+        "Country": null,
+        "PostCode": "wa1",
+        "PostTown": "Knutsford",
+        "AddressLine1": "Orchard Farm",
+        "AddressLine2": "Boots Green Lane",
+        "AddressLine3": "Allostock"
+      },
+      "nameOfCourtDivorceCentre": "Zachery Porter",
+      "RespondentOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "95V5X7X",
+          "OrganisationName": "FinRem-2-Org"
+        },
+        "LastNoCRequestedBy": null,
+        "OrgPolicyReference": null,
+        "PreviousOrganisations": [],
+        "OrgPolicyCaseAssignedRole": "[RESPSOLICITOR]",
+        "PrepopulateToUsersOrganisation": null
+      },
+      "rSolicitorDXnumber": null,
+      "netValueOfHome": "22",
+      "dateOfSepration": "1988-08-15",
+      "promptForAnyDocument": "No",
+      "claimingExemptionMIAM": null,
+      "generalApplicationDirectionsJudgeName": null,
+      "nottinghamCourtList": null,
+      "solicitorFirm": "Molestiae repudianda",
+      "bristolCourtList": null,
+      "southWestFRCList": null,
+      "applicantSolicitorConsentForEmails": "Yes",
+      "generalApplicationDirections_southWestFRCList": null,
+      "isAdmin": "No",
+      "orderSummary": {
+        "Fees": [
+          {
+            "id": "e9728feb-d818-4d37-9952-7f09d04a8ebe",
+            "value": {
+              "FeeCode": "FEE0229",
+              "FeeAmount": "27500",
+              "FeeVersion": "2",
+              "FeeDescription": "Application for a financial order"
+            }
+          }
+        ],
+        "PaymentTotal": "27500",
+        "PaymentReference": "null"
+      },
+      "northWestFRCList": null,
+      "applicantSolicitorName": "JNK",
+      "walesFRCList": null,
+      "generalApplicationDirectionsRecitals": null,
+      "HWFNumber": "hwf-222",
+      "promptForUrgentCaseQuestion": "No",
+      "familyMediatorServiceName": "Dante Vincent",
+      "specificArrangementsRequired": null,
+      "respondentRepresented": "Yes",
+      "generalApplicationDirections_dorsetCourtList": null,
+      "miniFormA": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/6591a0a0-a1bb-4f51-9c44-45c2d192a674",
+        "document_filename": "OnlineForm.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/6591a0a0-a1bb-4f51-9c44-45c2d192a674/binary"
+      },
+      "northEastFRCList": null,
+      "cfcCourtList": null,
+      "familyMediatorMIAM": null,
+      "applicantRepresented": "Yes",
+      "consentOrderFRCAddress": "10 King Street, Watford, Hertfordshire, WD18 0BW",
+      "generalApplicationDirections_humberCourtList": null,
+      "applicantAttendedMIAM": "Yes",
+      "generalApplicationReferDetail": " Received from - respondent - Created Date - 2023-01-23 - Hearing Required - No",
+      "specialAssistanceRequired": null,
+      "consentOrderFRCPhone": "0300 123 5577",
+      "respondentPhone": null,
+      "isApplicantsHomeCourt": "No",
+      "fastTrackDecisionReason": [],
+      "generalApplicationDirections_devonCourtList": null,
+      "bulkPrintCoverSheetApp": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/f92c1206-fd2a-4491-adf8-fd9f2e08dfbc",
+        "document_filename": "BulkPrintCoverSheet.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/f92c1206-fd2a-4491-adf8-fd9f2e08dfbc/binary"
+      },
+      "generalApplicationDirections_walesFRCList": "northwales",
+      "generalApplicationDirections_manchesterCourtList": null,
+      "generalApplicationDirections_londonFRCList": null,
+      "applicantAddress": {},
+      "generalApplicationDirections_cfcCourtList": null,
+      "generalApplicationDirections_bedfordshireCourtList": null,
+      "generalApplicationDirectionsJudgeType": null,
+      "divorceCaseNumber": "LV18J81000",
+      "typeOfApplication": "In connection to matrimonial and civil partnership proceedings",
+      "thamesvalleyCourtList": null,
+      "consentOrderFRCName": "Watford County Court and Family Hearing Centre",
+      "estimatedAssetsChecklist": [
+        "estimatedAssetsChecklist_3"
+      ],
+      "londonFRCList": null,
+      "generalApplications": [
+        {
+          "value": {
+            "generalApplicationReceivedFrom": "respondent",
+            "generalApplicationCreatedBy": "Claire Mumford",
+            "generalApplicationHearingRequired": "No",
+            "generalApplicationSpecialMeasures": null,
+            "generalApplicationStatus": "Approved, Completed",
+            "generalApplicationOutcomeOther": null,
+            "generalApplicationDocument": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/c86e09bc-c5c0-433a-be84-995242c80595",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/c86e09bc-c5c0-433a-be84-995242c80595/binary",
+              "document_filename": "Dummy document.pdf"
+            },
+            "gaSupportDocuments": [],
+            "generalApplicationDirectionsDocument": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/079bd7eb-985d-4a0e-8697-49d55203d311",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/079bd7eb-985d-4a0e-8697-49d55203d311/binary",
+              "document_filename": "generalApplicationHearingNotice.pdf"
+            }
+          },
+          "id": "af797d57-1600-4978-acfc-0216db4fd0db"
+        }
+      ],
+      "generalApplicationPreState": "applicationIssued",
+      "applicantPhone": null,
+      "amountToPay": "27500",
+      "rSolicitorAddress": {
+        "County": "",
+        "Country": "United Kingdom",
+        "PostCode": "SW1H 9AJ",
+        "PostTown": "London",
+        "AddressLine1": "Ministry Of Justice",
+        "AddressLine2": "Seventh Floor 102 Petty France",
+        "AddressLine3": ""
+      },
+      "divorcePetitionIssuedDate": "2010-04-02",
+      "rSolicitorName": null,
+      "authorisationName": "Florence Mendez",
+      "generalApplicationDirections_midlandsFRCList": null,
+      "generalApplicationDirections_northEastFRCList": null,
+      "generalApplicationDirections_northWalesCourtList": "FR_northwalesList_5",
+      "divorceDecreeNisiDate": null,
+      "otherReasonForComplexityText": null,
+      "uploadAdditionalDocument": [],
+      "generalApplicationDirectionsHearingTime": "11",
+      "authorisation3": "2007-07-08",
+      "applicantSolicitorFirm": "FinRem-1-Org",
+      "bedfordshireCourtList": "FR_bedfordshireList_11",
+      "applicantLName": "Wheeler",
+      "rSolicitorEmail": "jnk@mailinator.com",
+      "respondentAddress": {},
+      "natureOfApplicationChecklist": [
+        "Maintenance Pending Suit",
+        "Lump Sum Order"
+      ],
+      "northWalesCourtList": null,
+      "urgentCaseQuestionDetailsTextArea": null,
+      "generalApplicationDirections_northWestFRCList": null,
+      "applicantSolicitorDXnumber": null,
+      "manchesterCourtList": null,
+      "variationOrderDocument": null,
+      "natureOfApplicationChecklistSchedule": [],
+      "generalApplicationDirections_cleavelandCourtList": null,
+      "generalApplicationDirectionsHearingRequired": "Yes",
+      "applicantSolicitorEmail": "dfr@mailinator.com",
+      "generalApplicationDirections_newportCourtList": null,
+      "devonCourtList": null,
+      "generalApplicationDirections_bristolCourtList": null,
+      "generalApplicationDirections_birminghamCourtList": null,
+      "generalApplicationDirections_liverpoolCourtList": null,
+      "swanseaCourtList": null,
+      "ApplicantOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "Y707HZM",
+          "OrganisationName": "FinRem-1-Org"
+        },
+        "LastNoCRequestedBy": null,
+        "OrgPolicyReference": null,
+        "PreviousOrganisations": [],
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]",
+        "PrepopulateToUsersOrganisation": null
+      },
+      "generalApplicationDirections_thamesvalleyCourtList": null,
+      "respondentLName": "Mayer",
+      "midlandsFRCList": null,
+      "kentSurreyCourtList": null,
+      "generalApplicationDirectionsHearingTimeEstimate": "12",
+      "reasonForLocalCourt": null,
+      "rSolicitorPhone": null,
+      "birminghamCourtList": null,
+      "rSolicitorReference": null,
+      "cleavelandCourtList": null,
+      "rSolicitorFirm": "dd",
+      "generalApplicationDirections_nottinghamCourtList": null,
+      "applicantSolicitorPhone": "444444",
+      "solicitorReference": "Y707HZM",
+      "soleTraderName": "Henry Fischer",
+      "bulkPrintCoverSheetRes": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b86036d0-e13e-4615-b7f9-2e8722acfbcb",
+        "document_filename": "BulkPrintCoverSheet.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b86036d0-e13e-4615-b7f9-2e8722acfbcb/binary"
+      },
+      "generalApplicationReferList": {
+        "value": {
+          "code": "af797d57-1600-4978-acfc-0216db4fd0db",
+          "label": "General Application 1 - Received from - respondent - Created Date - 2023-01-23 - Hearing Required - No"
+        },
+        "list_items": [
+          {
+            "code": "af797d57-1600-4978-acfc-0216db4fd0db",
+            "label": "General Application 1 - Received from - respondent - Created Date - 2023-01-23 - Hearing Required - No"
+          }
+        ]
+      },
+      "authorisation2b": "Consectetur irure no",
+      "nwyorkshireCourtList": null,
+      "divorceUploadPetition": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/9ff4b6e2-bfa6-4e86-805b-451ed9caa4d6",
+        "document_filename": "Dummy document.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/9ff4b6e2-bfa6-4e86-805b-451ed9caa4d6/binary"
+      },
+      "issueDate": "2023-01-23",
+      "liverpoolCourtList": null,
+      "mediatorRegistrationNumber": "373",
+      "reasonForFRCLocation": null,
+      "detailPotentialAllegation": null,
+      "generalApplicationTracking": null,
+      "regionList": "southeast",
+      "generalApplicationDirectionsCourtOrderDate": null,
+      "dateOfMarriage": "1980-10-07",
+      "generalApplicationDirectionsHearingDate": "1980-04-03",
+      "applicantEmail": null,
+      "divorceDecreeAbsoluteDate": null,
+      "civilPartnership": "No",
+      "humberCourtList": null,
+      "generalApplicationDirections_southEastFRCList": null,
+      "generalApplicationDirections_kentSurreyCourtList": null,
+      "respondentEmail": null,
+      "respondentFMName": "Sheila Summers",
+      "consentOrderFRCEmail": "watfordcountyfamily@justice.gov.uk",
+      "generalApplicationReferToJudgeEmail": "jnk@mailinator.com",
+      "helpWithFeesQuestion": "Yes",
+      "addToComplexityListOfCourts": "trueYes"
+    }
+  }
+}
