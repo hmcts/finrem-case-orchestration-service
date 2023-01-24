@@ -26,6 +26,8 @@ public class Court implements CourtListWrapper {
     private RegionSouthEastFrc southEastList;
     private RegionSouthWestFrc southWestList;
     private RegionWalesFrc walesList;
+
+    private RegionHighCourtFrc highCourtList;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     DefaultCourtListWrapper courtListWrapper;
@@ -145,5 +147,10 @@ public class Court implements CourtListWrapper {
     @Override
     public NorthWalesCourt getNorthWalesCourt() {
         return getDefaultCourtListWrapper().getNorthWalesCourtList();
+    }
+
+    @Override
+    public HighCourt getHighCourt() {
+        return getDefaultCourtListWrapper().getHighCourt();
     }
 }
