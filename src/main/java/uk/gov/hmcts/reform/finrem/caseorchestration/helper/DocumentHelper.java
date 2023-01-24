@@ -397,7 +397,7 @@ public class DocumentHelper {
         List<Map<String, Object>> documentList = ofNullable(data.get(collectionName))
             .map(i -> (List<Map<String, Object>>) i)
             .orElse(new ArrayList<>());
-        List<DocumentCollection> documentCollections = convertToDocumentCollectionDataList(data.get(collectionName));
+        List<DocumentCollection> documentCollections = new ArrayList<>();
         for (Map<String, Object> document : documentList) {
             Map<String, Object> value = (Map<String, Object>) document.get(VALUE);
 
@@ -414,14 +414,6 @@ public class DocumentHelper {
         }
         data.put(collectionName, documentCollections);
         return documents;
-    }
-
-    public List<DocumentCollection> convertToDocumentCollectionDataList(Object object) {
-        if (object != null) {
-            return objectMapper.convertValue(object, new TypeReference<>() {
-            });
-        }
-        return null;
     }
 
     public Optional<CaseDocument> getDocumentLinkAsCaseDocument(Map<String, Object> data, String documentName) {
