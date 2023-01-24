@@ -423,6 +423,7 @@ public class DocumentHelper {
         }
         return null;
     }
+
     public Optional<CaseDocument> getDocumentLinkAsCaseDocument(Map<String, Object> data, String documentName) {
         Map<String, Object> documentLink = documentName != null
             ? (Map<String, Object>) data.get(documentName)
