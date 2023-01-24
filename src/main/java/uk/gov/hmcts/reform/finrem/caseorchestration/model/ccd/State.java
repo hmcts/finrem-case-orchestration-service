@@ -50,7 +50,8 @@ public enum State {
     CONSENT_ORDER_NOT_APPROVED("consentOrderNotApproved"),
     AWAITING_JUDICIARY_RESPONSE("awaitingJudiciaryResponse"),
     CASE_WORKER_REVIEW("caseWorkerReview"),
-    PAPER_CASE_ADDED("paperCaseAdded");
+    PAPER_CASE_ADDED("paperCaseAdded"),
+    READY_FOR_HEARING("readyForHearing");
 
 
     private final String stateId;
