@@ -64,9 +64,9 @@ public class GeneralApplicationWrapper {
     private List<GeneralApplicationsCollection> generalApplications;
     private String generalApplicationTracking;
     private String generalApplicationRejectReason;
-    private List<DynamicList> generalApplicationList;
-    private List<DynamicList> generalApplicationReferList;
+    private DynamicList generalApplicationList;
+    private DynamicList generalApplicationReferList;
     private String generalApplicationReferDetail;
-    private List<DynamicList> generalApplicationOutcomeList;
-    private List<DynamicList> generalApplicationDirectionsList;
+    private DynamicList generalApplicationOutcomeList;
+    private DynamicList generalApplicationDirectionsList;
 }
