@@ -46,8 +46,6 @@ public class ApprovedConsentOrderSubmittedHandler implements CallbackHandler<Map
 
 
     private void sendConsentOrderAvailableEmailNotifications(CaseDetails caseDetails, Map<String, Object> caseData) {
-        notificationService.sendConsentOrderAvailableCtscEmail(caseDetails);
-
         if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             log.info("case - {}: Sending email notification for to Applicant Solicitor for 'Consent Order Available'", caseDetails.getId());
             notificationService.sendConsentOrderAvailableEmailToApplicantSolicitor(caseDetails);
