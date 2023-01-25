@@ -37,6 +37,8 @@ public class ConsentedHearingDataElement {
     public String southWestFRCList;
     @JsonProperty("walesFRCList")
     public String walesFRCList;
+    @JsonProperty("highCourtFRCList")
+    public String highCourtFRCList;
     @JsonProperty("nottinghamCourtList")
     public String nottinghamCourtList;
     @JsonProperty("cfcCourtList")
@@ -73,6 +75,8 @@ public class ConsentedHearingDataElement {
     public String swanseaCourtList;
     @JsonProperty("northWalesCourtList")
     public String northWalesCourtList;
+    @JsonProperty("highCourtList")
+    public String highCourtList;
     @JsonProperty("additionalInformationAboutHearing")
     public String additionalInformationAboutHearing;
     @JsonProperty("promptForAnyDocument")

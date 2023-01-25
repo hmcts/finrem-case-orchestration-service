@@ -12,6 +12,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionHighCourtFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionLondonFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionMidlandsFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionNorthEastFrc;
@@ -43,6 +44,8 @@ public class InterimRegionWrapper {
     private RegionSouthWestFrc interimSouthWestFrcList;
     @JsonProperty("interim_walesFRCList")
     private RegionWalesFrc interimWalesFrcList;
+    @JsonProperty("interim_highCourtFRCList")
+    private RegionHighCourtFrc interimHighCourtFrcList;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     InterimCourtListWrapper courtListWrapper;
