@@ -407,12 +407,10 @@ public class DocumentHelper {
                 CaseDocument caseDocument = documentLinkAsCaseDocument.get();
                 CaseDocument pdfCaseDocument = service.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken);
                 documents.add(pdfCaseDocument);
-                if (HEARING_ORDER_OTHER_COLLECTION.equalsIgnoreCase(collectionName)) {
-                    documentCollections.add(DocumentCollection
-                        .builder()
-                        .value(pdfCaseDocument)
-                        .build());
-                }
+                documentCollections.add(DocumentCollection
+                    .builder()
+                    .value(pdfCaseDocument)
+                    .build());
             }
         }
         if (HEARING_ORDER_OTHER_COLLECTION.equalsIgnoreCase(collectionName)) {
