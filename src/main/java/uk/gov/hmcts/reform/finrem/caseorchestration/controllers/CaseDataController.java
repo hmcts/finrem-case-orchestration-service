@@ -210,7 +210,9 @@ public class CaseDataController extends BaseController {
 
     private void setPaperCaseData(Map<String, Object> caseData) {
         caseData.put(PAPER_APPLICATION, YES_VALUE);
-        caseData.put(FAST_TRACK_DECISION, NO_VALUE);
+        if (!caseDataService.isNotEmpty(FAST_TRACK_DECISION, caseData)) {
+            caseData.put(FAST_TRACK_DECISION, NO_VALUE);
+        }
     }
 
     private void setOrganisationPolicy(CaseDetails caseDetails) {
@@ -245,8 +247,7 @@ public class CaseDataController extends BaseController {
     }
 
     private void setApplicantSolicitorOrganisationDetails(CaseDetails caseDetails, String authToken) {
-        if (featureToggleService.isRespondentJourneyEnabled()
-            && caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())) {
+        if (caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())) {
             solicitorService.setApplicantSolicitorOrganisationDetails(authToken, caseDetails);
         }
     }

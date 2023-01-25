@@ -20,7 +20,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.ASSIGN
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CASEWORKER_NOTICE_OF_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.MANAGE_BUNDLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.PAYMENT_REQUEST_USING_CASE_TYPE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.RESPONDENT_JOURNEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_TO_FRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SOLICITOR_NOTICE_OF_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.USE_USER_TOKEN;
@@ -65,10 +64,6 @@ public class FeatureToggleService {
         return isFeatureEnabled(ASSIGN_CASE_ACCESS);
     }
 
-    public boolean isRespondentJourneyEnabled() {
-        return isFeatureEnabled(RESPONDENT_JOURNEY);
-    }
-
     public boolean isPBAUsingCaseTypeEnabled() {
         return isFeatureEnabled(PAYMENT_REQUEST_USING_CASE_TYPE);
     }
@@ -103,9 +98,9 @@ public class FeatureToggleService {
     public Map<Class, List<String>> getFieldsIgnoredDuringSerialisation() {
         Map<Class, List<String>> ignoredFields = Maps.newHashMap();
 
-        if (!isRespondentJourneyEnabled()) {
-            ignoredFields.put(UploadCaseDocument.class, Arrays.asList("caseDocumentConfidential", "hearingDetails"));
-        }
+
+        ignoredFields.put(UploadCaseDocument.class, Arrays.asList("caseDocumentConfidential", "hearingDetails"));
+
 
         return ignoredFields;
     }
