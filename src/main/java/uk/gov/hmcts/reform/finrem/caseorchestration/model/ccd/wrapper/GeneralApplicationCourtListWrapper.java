@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ClevelandCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DevonCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DorsetCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HighCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HumberCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.KentSurreyCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.LancashireCourt;
@@ -70,6 +71,9 @@ public class GeneralApplicationCourtListWrapper implements CourtListWrapper {
     private SwanseaCourt generalApplicationDirectionsSwanseaCourtList;
     @JsonProperty("generalApplicationDirections_northWalesCourtList")
     private NorthWalesCourt generalApplicationDirectionsNorthWalesCourtList;
+
+    @JsonProperty("generalApplicationDirections_highCourtList")
+    private HighCourt generalApplicationDirectionsHighCourtList;
 
     @JsonIgnore
     @Override
@@ -178,4 +182,11 @@ public class GeneralApplicationCourtListWrapper implements CourtListWrapper {
     public NorthWalesCourt getNorthWalesCourt() {
         return generalApplicationDirectionsNorthWalesCourtList;
     }
+
+    @JsonIgnore
+    @Override
+    public HighCourt getHighCourt() {
+        return generalApplicationDirectionsHighCourtList;
+    }
+
 }
