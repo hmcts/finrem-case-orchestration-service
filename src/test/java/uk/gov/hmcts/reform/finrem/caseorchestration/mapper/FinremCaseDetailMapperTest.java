@@ -161,6 +161,8 @@ public class FinremCaseDetailMapperTest {
     private static final String SOL_CONTEST_CALLBACK_REQUEST = "/fixtures/deserialisation/ccd-request-with-solicitor-contestApplicationIssued.json";
     private static final String BASIC_REQUEST = "/fixtures/deserialisation/basic-request.json";
 
+    private static final String GA_REQUEST = "/fixtures/deserialisation/ccd-request-with-general-application.json";
+
 
     private CaseDetails caseDetails;
     private ObjectMapper objectMapper;
@@ -193,6 +195,13 @@ public class FinremCaseDetailMapperTest {
     @Test
     public void givenGeneralOrderFixture_whenDeserializeFromString_thenSuccessfullyDeserialize() {
         caseDetails = buildCaseDetailsFromJson(CONTESTED_INTERIM_CALLBACK_REQUEST);
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        assertNotNull(finremCaseDetails);
+    }
+
+    @Test
+    public void givenGeneralApplicationFixture_whenDeserializeFromString_thenSuccessfullyDeserialize() {
+        caseDetails = buildCaseDetailsFromJson(GA_REQUEST);
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         assertNotNull(finremCaseDetails);
     }
