@@ -15,10 +15,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckRespondentSolicitorIsDigitalService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
 import java.util.List;
 import java.util.Map;
@@ -47,6 +47,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element.element;
 
 public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
+
     private static final String LATEST_DRAFT_ORDER_DOCUMENT_BIN_URL = "http://dm-store/1frea-ldo-doc/binary";
     private static final String GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL = "http://dm-store/1f3a-gads-doc/binary";
     static final String CASE_DATA = "case_data";
@@ -66,9 +67,7 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     @MockBean
     private GenericDocumentService genericDocumentService;
     @MockBean
-    private CheckApplicantSolicitorIsDigitalService checkApplicantSolicitorIsDigitalService;
-    @MockBean
-    private CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
+    private CheckSolicitorIsDigitalService checkSolicitorIsDigitalService;
     @MockBean
     private CaseDataService caseDataService;
     @MockBean
@@ -91,12 +90,31 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenHearingRequired_whenSubmitNoticeOfHearing_thenHearingNoticeIsPrinted() {
+    public void givenHearingRequired_whenSubmitNoticeOfHearing_thenHearingNoticeIsPrintedForContestedCase() {
         when(documentHelper.getApplicantFullName(caseDetails)).thenReturn("Poor Guy");
-        when(documentHelper.getRespondentFullNameContested(caseDetails)).thenReturn("test Korivi");
-
+        when(caseDataService.buildFullRespondentName(caseDetails)).thenReturn("test Korivi");
+        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(false);
 
         caseDetails.getData().put(ANOTHER_HEARING_TO_BE_LISTED, YES_VALUE);
+        caseDetails.setCaseTypeId(CaseType.CONTESTED.getCcdType());
+        approvedOrderNoticeOfHearingService.createAndStoreHearingNoticeDocumentPack(caseDetails, AUTH_TOKEN);
+
+        assertCaseDataHasHearingNoticesCollection();
+        assertDocumentServiceInteraction();
+
+        Map<String, Object> caseDetailsMap = (Map) placeholdersMapCaptor.getValue().get(CASE_DETAILS);
+        Map<String, Object> data = (Map) caseDetailsMap.get(CASE_DATA);
+        assertCaseData(data);
+    }
+
+    @Test
+    public void givenHearingRequired_whenSubmitNoticeOfHearing_thenHearingNoticeIsPrintedForConsentedCase() {
+        when(documentHelper.getApplicantFullName(caseDetails)).thenReturn("Poor Guy");
+        when(caseDataService.buildFullRespondentName(caseDetails)).thenReturn("test Korivi");
+        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
+
+        caseDetails.getData().put(ANOTHER_HEARING_TO_BE_LISTED, YES_VALUE);
+        caseDetails.setCaseTypeId(CaseType.CONSENTED.getCcdType());
         approvedOrderNoticeOfHearingService.createAndStoreHearingNoticeDocumentPack(caseDetails, AUTH_TOKEN);
 
         assertCaseDataHasHearingNoticesCollection();
@@ -110,7 +128,7 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     @Test
     public void givenDraftHearingOrderIsUploaded_whenSubmitNoticeOfHearing_thenOrderIsPrinted() {
         when(documentHelper.getApplicantFullName(caseDetails)).thenReturn("Poor Guy");
-        when(documentHelper.getRespondentFullNameContested(caseDetails)).thenReturn("test Korivi");
+        when(caseDataService.buildFullRespondentName(caseDetails)).thenReturn("test Korivi");
 
         caseDetails.getData().put(ANOTHER_HEARING_TO_BE_LISTED, YES_VALUE);
         caseDetails.getData().put(LATEST_DRAFT_HEARING_ORDER, CaseDocument.builder().documentBinaryUrl(LATEST_DRAFT_ORDER_DOCUMENT_BIN_URL).build());
@@ -129,8 +147,8 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     @Test
     public void givenSubmittedCallbackReceived_whenSubmitNotice_thenSendNoticeOfHearingToAppAndResp() {
         caseDetails.getData().put(HEARING_NOTICE_DOCUMENT_PACK, buildHearingNoticePack());
-        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(false);
-        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(false);
+        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString())).thenReturn(false);
+        when(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString())).thenReturn(false);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)).thenReturn(true);
         when(caseDataService.isRespondentSolicitorAgreeToReceiveEmails(caseDetails)).thenReturn(true);
         when(documentHelper.getCaseDocumentsAsBulkPrintDocuments(any())).thenReturn(List.of(BulkPrintDocument
@@ -159,10 +177,8 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     @Test
     public void givenSubmittedCallbackReceived_whenSubmitNotice_thenSendNoticeOfHearingEmailToAppAndResp() {
         caseDetails.getData().put(HEARING_NOTICE_DOCUMENT_PACK, buildHearingNoticePack());
-        when(checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(true);
-        when(checkRespondentSolicitorIsDigitalService.isSolicitorDigital(caseDetails)).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)).thenReturn(true);
-        when(caseDataService.isRespondentSolicitorAgreeToReceiveEmails(caseDetails)).thenReturn(true);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
         approvedOrderNoticeOfHearingService.printHearingNoticePackAndSendToApplicantAndRespondent(caseDetails, AUTH_TOKEN);
 
         assertNotificationServiceInteraction();
@@ -202,8 +218,8 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
             Matchers.<String, Object>hasEntry("CCDCaseNumber", 1234567890L),
             Matchers.hasEntry("CourtName", "Hastings County Court And Family Court Hearing Centre"),
             Matchers.hasEntry("CourtAddress", "The Law Courts, Bohemia Road, Hastings, TN34 1QX"),
-            Matchers.hasEntry("CourtPhone", "01634 887900"),
-            Matchers.hasEntry("CourtEmail", "FRCKSS@justice.gov.uk"),
+            Matchers.hasEntry("CourtPhone", "0300 1235577"),
+            Matchers.hasEntry("CourtEmail", "hastingsfamily@justice.gov.uk"),
             Matchers.hasEntry("ApplicantName", "Poor Guy"),
             Matchers.<String, Object>hasEntry("HearingTime", "1pm"),
             Matchers.<String, Object>hasEntry("RespondentName", "test Korivi"),

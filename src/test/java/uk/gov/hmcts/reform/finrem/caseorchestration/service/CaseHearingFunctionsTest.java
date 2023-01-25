@@ -8,6 +8,7 @@ import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BEDFORDSHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BEDFORDSHIRE_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BOURNEMOUTH;
@@ -15,6 +16,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BRISTOL_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CAMBRIDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CFC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEVELAND;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_ADDRESS_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_NAME_KEY;
@@ -26,6 +29,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_HEARING_REGION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_MIDLANDS_FRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_NOTTINGHAM_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_FRC_LIST_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_CFC_COURT_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_LONDON_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_REGION;
@@ -39,6 +47,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS_FRC_LIST_CT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHEAST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHEAST_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHWALES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHWEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHWEST_FRC_LIST;
@@ -94,6 +104,16 @@ public class CaseHearingFunctionsTest {
     }
 
     @Test
+    public void givenHighCourtDetailsInCaseData_whenGettingSelectedCourtListCt_thenHighCourtListCtIsReturned() {
+        Map<String, Object> caseData = ImmutableMap.of(
+            REGION_CT, HIGHCOURT,
+            HIGHCOURT_FRC_LIST_CT, HIGHCOURT);
+
+        String courtList = CaseHearingFunctions.getSelectedCourtComplexType(caseData);
+        assertThat(courtList, is(HIGHCOURT_FRC_LIST_CT));
+    }
+
+    @Test
     public void shouldPopulateReedleyCourtDetails() {
         Map<String, Object> caseData = ImmutableMap.of(
             REGION, NORTHWEST,
@@ -145,8 +165,8 @@ public class CaseHearingFunctionsTest {
         Map<String, Object> stringObjectMap = CaseHearingFunctions.buildFrcCourtDetails(caseData);
         assertThat(stringObjectMap.get(COURT_DETAILS_NAME_KEY), is("Reading County Court and Family Court"));
         assertThat(stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY), is("Hearing Centre, 160-163 Friar Street, Reading, RG1 1HE"));
-        assertThat(stringObjectMap.get(COURT_DETAILS_PHONE_KEY), is("01865 264 225"));
-        assertThat(stringObjectMap.get(COURT_DETAILS_EMAIL_KEY), is("FRCThamesValley@justice.gov.uk"));
+        assertThat(stringObjectMap.get(COURT_DETAILS_PHONE_KEY), is("0118 987 0500"));
+        assertThat(stringObjectMap.get(COURT_DETAILS_EMAIL_KEY), is("family.reading.countycourt@justice.gov.uk"));
     }
 
     @Test
@@ -160,7 +180,21 @@ public class CaseHearingFunctionsTest {
         assertThat(stringObjectMap.get(COURT_DETAILS_NAME_KEY), is("Dartford County Court And Family Court"));
         assertThat(stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY), is("Home Gardens, Dartford, DA1 1DX"));
         assertThat(stringObjectMap.get(COURT_DETAILS_PHONE_KEY), is("01634 887900"));
-        assertThat(stringObjectMap.get(COURT_DETAILS_EMAIL_KEY), is("FRCKSS@justice.gov.uk"));
+        assertThat(stringObjectMap.get(COURT_DETAILS_EMAIL_KEY), is("family.dartford.countycourt@justice.gov.uk"));
+    }
+
+    @Test
+    public void shouldPopulateDurhamCourtDetails() {
+        Map<String, Object> caseData = ImmutableMap.of(
+            REGION, NORTHEAST,
+            NORTHEAST_FRC_LIST, CLEVELAND,
+            CLEAVELAND_COURTLIST, "FR_cleaveland_hc_list_2");
+
+        Map<String, Object> stringObjectMap = CaseHearingFunctions.buildFrcCourtDetails(caseData);
+        assertThat(stringObjectMap.get(COURT_DETAILS_NAME_KEY), is("Durham Justice Centre"));
+        assertThat(stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY), is("Green Lane, Old Elvet, Durham, DH1 3RG"));
+        assertThat(stringObjectMap.get(COURT_DETAILS_PHONE_KEY), is("0191 2058750"));
+        assertThat(stringObjectMap.get(COURT_DETAILS_EMAIL_KEY), is("Family.newcastle.countycourt@justice.gov.uk"));
     }
 
     @Test
@@ -227,6 +261,32 @@ public class CaseHearingFunctionsTest {
         assertThat(stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY), is("PO Box 12746, Harlow, CM20 9QZ"));
         assertThat(stringObjectMap.get(COURT_DETAILS_PHONE_KEY), is("0300 303 0642"));
         assertThat(stringObjectMap.get(COURT_DETAILS_EMAIL_KEY), is("contactFinancialRemedy@justice.gov.uk"));
+    }
+
+    @Test
+    public void shouldPopulateHighCourtDetails() {
+        Map<String, Object> caseData = ImmutableMap.of(
+            REGION, HIGHCOURT,
+            HIGHCOURT_FRC_LIST, HIGHCOURT,
+            HIGHCOURT_COURTLIST, HIGHCOURT_COURT);
+
+        Map<String, Object> stringObjectMap = CaseHearingFunctions.buildFrcCourtDetails(caseData);
+        assertThat(stringObjectMap.get(COURT_DETAILS_NAME_KEY), is("High Court Family Division"));
+        assertThat(stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY),
+            is("High Court Family Division, Queens Building, Royal Courts of Justice, Strand, London, WC2A 2LL"));
+        assertThat(stringObjectMap.get(COURT_DETAILS_PHONE_KEY), is("020 7947 7551"));
+        assertThat(stringObjectMap.get(COURT_DETAILS_EMAIL_KEY), is("rcj.familyhighcourt@justice.gov.uk"));
+    }
+
+    @Test
+    public void shouldReturnNullIfHighCourtFRCIsWrongDetails() {
+        Map<String, Object> caseData = ImmutableMap.of(
+            REGION, HIGHCOURT,
+            HIGHCOURT_FRC_LIST, LONDON,
+            HIGHCOURT_COURTLIST, HIGHCOURT_COURT);
+
+        Map<String, Object> stringObjectMap = CaseHearingFunctions.buildFrcCourtDetails(caseData);
+        assertThat(stringObjectMap, is(nullValue()));
     }
 
     @Test

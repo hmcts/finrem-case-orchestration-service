@@ -65,6 +65,12 @@
     "phoneNumber": "0208 963 8200",
     "email": "family.willesden.countycourt@justice.gov.uk"
   },
+  "FR_s_CFCList_17": {
+    "courtName": "The Royal Courts of Justice",
+    "courtAddress": "The Royal Courts of Justice, Strand, London, WC2A 2LL",
+    "phoneNumber": "020 7947 7551",
+    "email": "rcj.familyhighcourt@justice.gov.uk"
+  },
   "FR_s_NottinghamList_1": {
     "courtName": "Nottingham County Court And Family Court",
     "courtAddress": "60 Canal Street, Nottingham NG1 7EJ",
@@ -333,7 +339,7 @@
     "courtName": "Canterbury Family Court Hearing Centre",
     "courtAddress": "The Law Courts, Chaucer Road, Canterbury, CT1 1ZA",
     "phoneNumber": "01634 887900",
-    "email": "FRCKSS@justice.gov.uk"
+    "email": "Family.canterbury.countycourt@justice.gov.uk"
   },
   "FR_kent_surrey_hc_list_2": {
     "courtName": "Maidstone Combined Court Centre",
@@ -345,49 +351,49 @@
     "courtName": "Dartford County Court And Family Court",
     "courtAddress": "Home Gardens, Dartford, DA1 1DX",
     "phoneNumber": "01634 887900",
-    "email": "FRCKSS@justice.gov.uk"
+    "email": "family.dartford.countycourt@justice.gov.uk"
   },
   "FR_kent_surrey_hc_list_4": {
     "courtName": "Medway County Court And Family Court",
-    "courtAddress": "The Holiday Inn, Maidstone Road, Rochester, Kent, ME5 9SF",
+    "courtAddress": "Medway Civil and Family Court, Gun Wharf, Dock Road, Chatham, Kent, ME4 4AR",
     "phoneNumber": "01634 887900",
     "email": "FRCKSS@justice.gov.uk"
   },
   "FR_kent_surrey_hc_list_5": {
     "courtName": "Guildford County Court And Family Court",
     "courtAddress": "The Law Courts, Mary Road, Guildford, GU1 4PS",
-    "phoneNumber": "01634 887900",
-    "email": "FRCKSS@justice.gov.uk"
+    "phoneNumber": "0300 1235577",
+    "email": "surreyfamily@Justice.gov.uk"
   },
   "FR_kent_surrey_hc_list_6": {
     "courtName": "Staines County Court And Family Court",
     "courtAddress": "Knowle Green, Staines, TW18 1XH",
-    "phoneNumber": "01634 887900",
-    "email": "FRCKSS@justice.gov.uk"
+    "phoneNumber": "0300 1235577",
+    "email": "surreyfamily@Justice.gov.uk"
   },
   "FR_kent_surrey_hc_list_7": {
     "courtName": "Brighton County And Family Court",
     "courtAddress": "William Street, Brighton, BN2 0RF",
-    "phoneNumber": "01634 887900",
-    "email": "FRCKSS@justice.gov.uk"
+    "phoneNumber": "0300 1235577",
+    "email": "sussexfamily@Justice.gov.uk"
   },
   "FR_kent_surrey_hc_list_8": {
     "courtName": "Worthing County Court And Family Court",
     "courtAddress": "The Law Courts, Christchurch Road, Worthing, BN11 1JD",
-    "phoneNumber": "01634 887900",
-    "email": "FRCKSS@justice.gov.uk"
+    "phoneNumber": "0300 1235577",
+    "email": "worthingfamily@justice.gov.uk"
   },
   "FR_kent_surrey_hc_list_9": {
     "courtName": "Hastings County Court And Family Court Hearing Centre",
     "courtAddress": "The Law Courts, Bohemia Road, Hastings, TN34 1QX",
-    "phoneNumber": "01634 887900",
-    "email": "FRCKSS@justice.gov.uk"
+    "phoneNumber": "0300 1235577",
+    "email": "hastingsfamily@justice.gov.uk"
   },
   "FR_kent_surrey_hc_list_10": {
     "courtName": "Horsham County Court And Family Court",
     "courtAddress": "The Law Courts, Hurst Road, Horsham, RH12 2ET",
-    "phoneNumber": "01634 887900",
-    "email": "FRCKSS@justice.gov.uk"
+    "phoneNumber": "0300 1235577",
+    "email": "sussexfamily@Justice.gov.uk"
   },
   "FR_swansea_hc_list_1": {
     "courtName": "Swansea Civil & Family Justice Centre",
@@ -543,55 +549,55 @@
     "courtName": "Bury St Edmunds County Court and Family Court",
     "courtAddress": "2nd Floor, Triton House, St Andrews Street (N), Bury St Edmunds, Suffolk, IP33 1TR",
     "phoneNumber": "0344 892 4000",
-    "email": "FRC.NES.BCH@justice.gov.uk"
+    "email": "Family.Chelmsford.Countycourt@justice.gov.uk"
   },
   "FR_bedfordshireList_4": {
     "courtName": "Norwich Combined Court Centre",
     "courtAddress": "The Law courts, Bishopgate, Norwich, NR3 1UR",
     "phoneNumber": "0344 892 4000",
-    "email": "FRC.NES.BCH@justice.gov.uk"
+    "email": "Family.norwich.countycourt@justice.gov.uk"
   },
   "FR_bedfordshireList_5": {
     "courtName": "Ipswich County Court and Family Hearing Centre",
     "courtAddress": "8 Arcade Street , Ipswich, IP1 1EJ",
     "phoneNumber": "0344 892 4000",
-    "email": "FRC.NES.BCH@justice.gov.uk"
+    "email": "Family.Chelmsford.Countycourt@justice.gov.uk"
   },
   "FR_bedfordshireList_6": {
     "courtName": "Chelmsford County Court and Family Hearing Centre",
     "courtAddress": "Priory Place, New London Road, Chelmsford, CM2 0PP",
     "phoneNumber": "0344 892 4000",
-    "email": "FRC.NES.BCH@justice.gov.uk"
+    "email": "Family.Chelmsford.Countycourt@justice.gov.uk"
   },
   "FR_bedfordshireList_7": {
     "courtName": "Southend County Court and Family Hearing Centre",
     "courtAddress": "80 Victoria Avenue, Southend-On-Sea, SS2 6EU",
     "phoneNumber": "0344 892 4000",
-    "email": "FRC.NES.BCH@justice.gov.uk"
+    "email": "Family.Chelmsford.Countycourt@justice.gov.uk"
   },
   "FR_bedfordshireList_8": {
     "courtName": "Bedford County Court and Family Hearing Centre",
-    "courtAddress": "Luton Justice Centre, Floors 4&5 Arndale House, The Mall, Luton, LU1 2LJ",
-    "phoneNumber": "0344 892 4000",
-    "email": "FRC.NES.BCH@justice.gov.uk"
+    "courtAddress": "Shire Hall, 3 St Paul's square, Bedford, MK40 1SQ",
+    "phoneNumber": "0300 123 5577",
+    "email": "Lutoncountyfamily@Justice.gov.uk"
   },
   "FR_bedfordshireList_9": {
     "courtName": "Luton Justice Centre",
     "courtAddress": "Luton Justice Centre, Floors 4&5 Arndale House, The Mall, Luton, LU1 2LJ",
-    "phoneNumber": "0344 892 4000",
-    "email": "FRC.NES.BCH@justice.gov.uk"
+    "phoneNumber": "0300 123 5577",
+    "email": "Lutoncountyfamily@Justice.gov.uk"
   },
   "FR_bedfordshireList_10": {
     "courtName": "Hertford County Court and Family Hearing Centre",
     "courtAddress": "PO Box 373, Hertord, SG13 9HT",
-    "phoneNumber": "0344 892 4000",
-    "email": "FRC.NES.BCH@justice.gov.uk"
+    "phoneNumber": "0300 123 5577",
+    "email": "enquiries.hertford.countycourt@justice.gov.uk"
   },
   "FR_bedfordshireList_11": {
     "courtName": "Watford County Court and Family Hearing Centre",
     "courtAddress": "10 King Street, Watford, Hertfordshire, WD18 0BW",
-    "phoneNumber": "0344 892 4000",
-    "email": "FRC.NES.BCH@justice.gov.uk"
+    "phoneNumber": "0300 123 5577",
+    "email": "watfordcountyfamily@justice.gov.uk "
   },
   "FR_thamesvalleyList_1": {
     "courtName": "Oxford Combined Court Centre",
@@ -602,20 +608,20 @@
   "FR_thamesvalleyList_2": {
     "courtName": "Reading County Court and Family Court",
     "courtAddress": "Hearing Centre, 160-163 Friar Street, Reading, RG1 1HE",
-    "phoneNumber": "01865 264 225",
-    "email": "FRCThamesValley@justice.gov.uk"
+    "phoneNumber": "0118 987 0500",
+    "email": "family.reading.countycourt@justice.gov.uk"
   },
   "FR_thamesvalleyList_3": {
     "courtName": "Milton Keynes County Court and Family Court",
     "courtAddress": "351 Silbury Boulevard, Witon Gate East, Central Milton Keynes, MK9 2DT",
-    "phoneNumber": "01865 264 225",
-    "email": "FRCThamesValley@justice.gov.uk"
+    "phoneNumber": "01908 302800",
+    "email": "family.miltonkeynes.countycourt@justice.gov.uk"
   },
   "FR_thamesvalleyList_4": {
     "courtName": "Slough County Court",
     "courtAddress": "The Law Courts, Windsor Road, Slough, SL1 2HE",
-    "phoneNumber": "01865 264 225",
-    "email": "FRCThamesValley@justice.gov.uk"
+    "phoneNumber": "0118 987 0500",
+    "email": "family.reading.countycourt@justice.gov.uk"
   },
   "FR_devonList_1": {
     "courtName": "Plymouth Combined Court",
@@ -790,5 +796,11 @@
     "courtAddress": "Law Courts, Mold, CH7 1AE",
     "phoneNumber": "01978 317400",
     "email": "FRCWrexham@justice.gov.uk"
+  },
+  "FR_highCourtList_1": {
+    "courtName": "High Court Family Division",
+    "courtAddress": "High Court Family Division, Queens Building, Royal Courts of Justice, Strand, London, WC2A 2LL",
+    "phoneNumber": "020 7947 7551",
+    "email": "rcj.familyhighcourt@justice.gov.uk"
   }
 }

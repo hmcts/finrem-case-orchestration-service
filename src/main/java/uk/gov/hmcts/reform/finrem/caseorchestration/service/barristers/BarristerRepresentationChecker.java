@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -28,13 +29,14 @@ public class BarristerRepresentationChecker {
     private final BiPredicate<String, RepresentationUpdate> hasUserBeenBarrister = (email, update) ->
         (getChangedRepresentativeEmail(update.getAdded()).equals(email)
             || getChangedRepresentativeEmail(update.getRemoved()).equals(email))
-        && update.getVia().equals(MANAGE_BARRISTERS);
+            && update.getVia().equals(MANAGE_BARRISTERS);
 
-    public boolean hasUserBeenBarristerOnCase(Map<String, Object>  caseData, UserDetails solicitor) {
+    public boolean hasUserBeenBarristerOnCase(Map<String, Object> caseData, UserDetails solicitor) {
         List<Element<RepresentationUpdate>> representationUpdateHistory = objectMapper.registerModule(new JavaTimeModule())
-            .convertValue(caseData.get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {});
+            .convertValue(caseData.get(REPRESENTATION_UPDATE_HISTORY), new TypeReference<>() {
+            });
 
-        return representationUpdateHistory.stream()
+        return Optional.ofNullable(representationUpdateHistory).orElse(Collections.emptyList()).stream()
             .map(Element::getValue)
             .anyMatch(representationUpdate -> hasUserBeenBarrister.test(solicitor.getEmail(), representationUpdate));
     }

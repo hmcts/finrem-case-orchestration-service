@@ -14,7 +14,8 @@ public enum Region {
     NORTHEAST("northeast"),
     SOUTHEAST("southeast"),
     SOUTHWEST("southwest"),
-    WALES("wales");
+    WALES("wales"),
+    HIGHCOURT("highcourt");
 
     private final String value;
 

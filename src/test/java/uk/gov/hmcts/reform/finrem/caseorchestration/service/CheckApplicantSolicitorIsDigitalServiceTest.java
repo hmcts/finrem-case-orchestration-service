@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckApplicantSolicitorIsDigitalService;
@@ -17,8 +18,6 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
@@ -43,7 +42,7 @@ public class CheckApplicantSolicitorIsDigitalServiceTest {
             .orgPolicyCaseAssignedRole(APP_SOLICITOR_POLICY)
             .organisation(Organisation.builder().organisationID("TestID").organisationName("TestName").build())
             .build());
-        caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONTESTED).id(123L).data(caseData).build();
+        caseDetails = CaseDetails.builder().caseTypeId(CaseType.CONTESTED.getCcdType()).id(123L).data(caseData).build();
     }
 
     @Test
@@ -56,7 +55,7 @@ public class CheckApplicantSolicitorIsDigitalServiceTest {
 
     @Test
     public void givenConsentedCaseAndOrganisationIsPresent_whenCheckSolIsDigital_thenReturnTrue() {
-        caseDetails.setCaseTypeId(CASE_TYPE_ID_CONSENTED);
+        caseDetails.setCaseTypeId(CaseType.CONSENTED.getCcdType());
         when(caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())).thenReturn(true);
 
         boolean isSolicitorDigital = checkApplicantSolicitorIsDigitalService.isSolicitorDigital(caseDetails);

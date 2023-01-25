@@ -6,6 +6,7 @@
     "state": "applicationDrafted",
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
+      "typeOfApplication": "In connection to matrimonial and civil partnership proceedings",
       "PBANumber": "PBA123",
       "PBAreference": "ABCD",
       "consentOrder": {
@@ -66,7 +67,6 @@
       "divorceCaseNumber": "DD12D12345",
       "issueDate": "2019-03-04",
       "hearingDate": "2019-05-04",
-      "fastTrackDecision": "Yes",
       "pensionCollection": [
         {
           "id": "ad403dd7-75da-4ca6-8cf6-24a5e42f5bf4",

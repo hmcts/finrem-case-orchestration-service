@@ -17,6 +17,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CFC_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEVELAND;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DEVON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DORSET;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE;
@@ -185,6 +186,9 @@ public class ContestedCourtHelperTest {
         verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, CLEAVELAND, CLEAVELAND_COURTLIST,
             "FR_cleaveland_hc_list_8", "Darlington County Court and Family Court");
 
+        verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, CLEVELAND, CLEAVELAND_COURTLIST,
+            "FR_cleaveland_hc_list_8", "Darlington County Court and Family Court");
+
         verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, "invalid", CLEAVELAND_COURTLIST,
             "FR_cleaveland_hc_list_8", "");
 
@@ -327,6 +331,9 @@ public class ContestedCourtHelperTest {
         verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON_CFC, CFC_COURTLIST,
             "FR_s_CFCList_16", "Willesden County Court and Family Court");
 
+        verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON_CFC, CFC_COURTLIST,
+            "FR_s_CFCList_17", "The Royal Courts of Justice");
+
         verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, "invalid", CFC_COURTLIST,
             "FR_s_CFCList_1", "");
 
@@ -422,7 +429,8 @@ public class ContestedCourtHelperTest {
                                             String courtListName, String court, String expectedValue) {
         details = getCaseDetailsWithAllocatedValues(region, subRegionListName, subRegion, courtListName,
             court);
-        MatcherAssert.assertThat(ContestedCourtHelper.getSelectedCourt(details), is(expectedValue));
+        String selectedCourt = ContestedCourtHelper.getSelectedCourt(details);
+        MatcherAssert.assertThat(selectedCourt, is(expectedValue));
     }
 
     @Test

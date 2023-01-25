@@ -47,9 +47,10 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
     public void givenConsentedHearing_whenNoConsentToEmail_thenItShouldSendAllToBulkPrint() {
         CaseDetails caseDetails = buildCaseDetails(SINGLE_HEARING_TEST_PAYLOAD);
         CaseDetails caseDetailsBefore = buildCaseDetails(SINGLE_HEARING_TEST_PAYLOAD);
-
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
+        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
+        when(caseDataService.isConsentedApplication(caseDetailsBefore)).thenReturn(true);
 
         service.submitHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
@@ -64,9 +65,10 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
     public void givenConsentedMultipleHearing_whenNoConsentToEmail_thenItShouldSendAllToBulkPrint() {
         CaseDetails caseDetails = buildCaseDetails(MULTIPLE_HEARING_TEST_PAYLOAD);
         CaseDetails caseDetailsBefore = buildCaseDetails(MULTIPLE_HEARING_TEST_PAYLOAD);
-
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
+        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
+        when(caseDataService.isConsentedApplication(caseDetailsBefore)).thenReturn(true);
 
         service.submitHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
@@ -82,7 +84,8 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
     public void givenConsentedMultipleHearing_whenOneExistingHearingAndAddedAnotherOne_thenItShouldSendAllToBulkPrint() {
         CaseDetails caseDetails = buildCaseDetails(MULTIPLE_HEARING_TEST_PAYLOAD);
         CaseDetails caseDetailsBefore = buildCaseDetails(SINGLE_HEARING_TEST_PAYLOAD);
-
+        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
+        when(caseDataService.isConsentedApplication(caseDetailsBefore)).thenReturn(true);
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
 

@@ -19,24 +19,31 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 import javax.validation.constraints.NotNull;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CONFIDENTIAL_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INCLUDES_REPRESENTATION_CHANGE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_CONFIDENTIAL_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_PHONE;
@@ -57,6 +64,9 @@ public class RemoveApplicantDetailsController extends BaseController {
 
     @Autowired
     private final UpdateRepresentationWorkflowService nocWorkflowService;
+
+    @Autowired
+    private final OnlineFormDocumentService service;
 
     @Autowired
     private final FeatureToggleService featureToggleService;
@@ -83,6 +93,14 @@ public class RemoveApplicantDetailsController extends BaseController {
         removeApplicantDetails(caseData);
         removeRespondentDetails(caseData, caseDetails.getCaseTypeId());
 
+        String applicantConfidentialAddress = Objects.toString(caseData.get(APPLICANT_CONFIDENTIAL_ADDRESS), null);
+        String respondentConfidentialAddress = Objects.toString(caseData.get(RESPONDENT_CONFIDENTIAL_ADDRESS), null);
+        if (applicantConfidentialAddress != null && applicantConfidentialAddress.equalsIgnoreCase(YES_VALUE)
+            || respondentConfidentialAddress != null && respondentConfidentialAddress.equalsIgnoreCase(YES_VALUE)) {
+            CaseDocument document = service.generateContestedMiniFormA(authorisationToken, callback.getCaseDetails());
+            caseData.put(MINI_FORM_A, document);
+        }
+
         if (featureToggleService.isCaseworkerNoCEnabled()) {
 
             if (Optional.ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
@@ -101,12 +119,7 @@ public class RemoveApplicantDetailsController extends BaseController {
 
     private void removeApplicantDetails(Map<String, Object> caseData) {
         String applicantRepresented = nullToEmpty(caseData.get(APPLICANT_REPRESENTED));
-        if (applicantRepresented.equals(YES_VALUE)) {
-            //remove applicants data as solicitors data has been added
-            caseData.remove("applicantAddress");
-            caseData.remove("applicantPhone");
-            caseData.remove("applicantEmail");
-        } else {
+        if (applicantRepresented.equals(NO_VALUE)) {
             caseData.remove("applicantSolicitorName");
             caseData.remove("applicantSolicitorFirm");
             caseData.remove("applicantSolicitorAddress");
@@ -118,7 +131,7 @@ public class RemoveApplicantDetailsController extends BaseController {
     }
 
     private void removeRespondentDetails(Map<String, Object> caseData, String caseTypeId) {
-        boolean isContested = caseTypeId.equalsIgnoreCase(CASE_TYPE_ID_CONTESTED);
+        boolean isContested = caseTypeId.equalsIgnoreCase(CaseType.CONTESTED.getCcdType());
         String respondentRepresented = isContested
             ? (String) caseData.get(CONTESTED_RESPONDENT_REPRESENTED)
             : (String) caseData.get(CONSENTED_RESPONDENT_REPRESENTED);

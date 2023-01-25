@@ -12,6 +12,9 @@ public class CCDConfigConstant {
     public static final String CASE_DETAILS = "caseDetails";
     public static final String CASE_DATA = "case_data";
 
+    public static final String HMCTS_SERVICE_ID = "HMCTSServiceId";
+
+    public static final String SUPPLEMENTARY_DATA_UPDATES = "supplementary_data_updates";
     public static final String APPLICANT_FIRST_MIDDLE_NAME = "applicantFMName";
     public static final String APPLICANT_LAST_NAME = "applicantLName";
     public static final String APPLICANT_ADDRESS = "applicantAddress";
@@ -29,6 +32,7 @@ public class CCDConfigConstant {
     public static final String RESPONDENT_PHONE = "respondentPhone";
     public static final String RESPONDENT_EMAIL = "respondentEmail";
     public static final String RESPONDENT = "Respondent";
+
 
     //Applicant Solicitor related
     public static final String SOLICITOR_REFERENCE = "solicitorReference";
@@ -86,6 +90,8 @@ public class CCDConfigConstant {
     public static final String SOUTHWEST_FRC_LIST_CT = "southWestList";
     public static final String WALES_FRC_LIST = "walesFRCList";
     public static final String WALES_FRC_LIST_CT = "walesList";
+    public static final String HIGHCOURT_FRC_LIST = "highCourtFRCList";
+    public static final String HIGHCOURT_FRC_LIST_CT = "highCourtList";
 
     //Regions
     public static final String LONDON = "london";
@@ -95,6 +101,7 @@ public class CCDConfigConstant {
     public static final String SOUTHEAST = "southeast";
     public static final String SOUTHWEST = "southwest";
     public static final String WALES = "wales";
+    public static final String HIGHCOURT = "highcourt";
 
     //FRCs
     public static final String BEDFORDSHIRE = "bedfordshire";
@@ -102,6 +109,7 @@ public class CCDConfigConstant {
     public static final String BRISTOLFRC = "bristol";
     public static final String CFC = "cfc";
     public static final String CLEAVELAND = "cleaveland";
+    public static final String CLEVELAND = "cleveland";
     public static final String DEVON = "devon";
     public static final String DORSET = "dorset";
     public static final String HSYORKSHIRE = "hsyorkshire";
@@ -135,6 +143,7 @@ public class CCDConfigConstant {
     public static final String MANCHESTER_COURTLIST = "manchesterCourtList";
     public static final String NEWPORT_COURTLIST = "newportCourtList";
     public static final String NORTH_WALES_COURTLIST = "northWalesCourtList";
+    public static final String HIGHCOURT_COURTLIST = "highCourtList";
     public static final String NOTTINGHAM_COURTLIST = "nottinghamCourtList";
     public static final String NWOTHER_COURTLIST = "otherNWCourtList";
     public static final String NWYORKSHIRE_COURTLIST = "nwyorkshireCourtList";
@@ -214,6 +223,9 @@ public class CCDConfigConstant {
     public static final String WELSHPOOL = "FR_northwalesList_4";
     public static final String MOLD = "FR_northwalesList_5";
 
+    //High court List
+    public static final String HIGHCOURT_COURT = "FR_highCourtList_1";
+
     //SouthEast Kent
     public static final String KENT_DARTFORD_COURTS = "FR_kent_surrey_hc_list_3";
 
@@ -257,8 +269,10 @@ public class CCDConfigConstant {
     public static final String CONSENT_D81_QUESTION = "consentD81Question";
 
     //Nature of Application
+    public static final String URGENT_CASE_QUESTION = "promptForUrgentCaseQuestion";
     public static final String CONSENTED_NATURE_OF_APPLICATION = "natureOfApplication2";
     public static final String CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION = "consentNatureOfApplicationChecklist";
+    public static final String CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_SCHEDULE_1 = "consentNatureOfApplicationChecklistSchedule";
     public static final String CONSENTED_NATURE_OF_APPLICATION_3A = "natureOfApplication3a";
     public static final String CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_3A = "consentNatureOfApplicationAddress";
     public static final String CONSENTED_NATURE_OF_APPLICATION_3B = "natureOfApplication3b";
@@ -388,6 +402,7 @@ public class CCDConfigConstant {
     public static final String GENERAL_APPLICATION_DIRECTIONS_SOUTHEAST_FRC = "generalApplicationDirections_southEastFRCList";
     public static final String GENERAL_APPLICATION_DIRECTIONS_SOUTHWEST_FRC = "generalApplicationDirections_southWestFRCList";
     public static final String GENERAL_APPLICATION_DIRECTIONS_WALES_FRC = "generalApplicationDirections_walesFRCList";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_HIGHCOURT_FRC = "generalApplicationDirections_highCourtFRCList";
 
     // Generap Application CourtLists
     public static final String GENERAL_APPLICATION_DIRECTIONS_BEDFORDSHIRE_COURT = "generalApplicationDirections_bedfordshireCourtList";
@@ -517,6 +532,11 @@ public class CCDConfigConstant {
     //NFD
     public static final String CIVIL_PARTNERSHIP = "civilPartnership";
 
+    //Schedule1FormA
+    public static final String TYPE_OF_APPLICATION = "typeOfApplication";
+    public static final String TYPE_OF_APPLICATION_DEFAULT_TO = "In connection to matrimonial and civil partnership proceedings";
+    public static final String CHILDREN_COLLECTION = "childrenCollection";
+
     //Get user based on role i.e applicant or respondent
     public static final String CASE_ROLE = "currentUserCaseRole";
 
@@ -529,6 +549,7 @@ public class CCDConfigConstant {
     public static final String INTERIM_SOUTHEAST_FRC_LIST = "interim_southEastFRCList";
     public static final String INTERIM_SOUTHWEST_FRC_LIST = "interim_southWestFRCList";
     public static final String INTERIM_WALES_FRC_LIST = "interim_walesFRCList";
+    public static final String INTERIM_HIGHCOURT_FRC_LIST = "interim_highCourtFRCList";
 
     //Interim Documents
     public static final String INTERIM_HEARING_COLLECTION = "interimHearings";

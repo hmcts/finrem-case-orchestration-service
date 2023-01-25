@@ -10,10 +10,12 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedDocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandlerTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantCaseSummariesHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.applicant.ApplicantChronologiesStatementHandler;
@@ -27,6 +29,7 @@ import java.util.Map;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -39,6 +42,9 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDo
 
     @Mock
     ApplicantChronologiesStatementHandler applicantChronologiesStatementHandler;
+
+    @Mock
+    FeatureToggleService featureToggleService;
 
     ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
     private UploadContestedCaseDocumentsAboutToSubmitHandler uploadContestedCaseDocumentsHandler;
@@ -53,7 +59,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDo
 
     @Before
     public void setUpTest() {
-        uploadContestedCaseDocumentsHandler = new UploadContestedCaseDocumentsAboutToSubmitHandler(
+        when(featureToggleService.isManageBundleEnabled()).thenReturn(false);
+        uploadContestedCaseDocumentsHandler = new UploadContestedCaseDocumentsAboutToSubmitHandler(featureToggleService,
             Arrays.asList(applicantCaseSummariesHandler, applicantChronologiesStatementHandler), objectMapper, uploadedDocumentHelper);
     }
 
@@ -111,6 +118,39 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDo
         handledDocumentList.forEach(doc -> handledDocumentIdList.add(doc.getId()));
 
         assertThat(handledDocumentIdList.equals(expectedDocumentIdList), is(true));
+    }
+
+    @Test
+    public void givenUploadFileTrialBundleSelectedWhenAboutToSubmitThenShowTrialBundleDeprecatedErrorMessage() {
+
+        when(featureToggleService.isManageBundleEnabled()).thenReturn(true);
+
+        uploadDocumentList.add(createContestedUploadDocumentItem("Trial Bundle", "applicant", "yes", "no","Other Example"));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Other", "respondent", "yes", "no","Other Example"));
+        CallbackRequest callbackRequest = buildCallbackRequest();
+        callbackRequest.getCaseDetails().getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>>
+            response = uploadContestedCaseDocumentsHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getErrors().size(), is(1));
+        assertThat(response.getErrors().iterator().next(), is(UploadContestedCaseDocumentsAboutToSubmitHandler.TRIAL_BUNDLE_SELECTED_ERROR));
+    }
+
+    @Test
+    public void givenUploadFileWithoutTrialBundleWhenAboutToSubmitThenNoErrors() {
+
+        when(featureToggleService.isManageBundleEnabled()).thenReturn(true);
+
+        uploadDocumentList.add(createContestedUploadDocumentItem("Letter from Applicant", "applicant", "yes", "no","Other Example"));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Other", "respondent", "yes", "no","Other Example"));
+        CallbackRequest callbackRequest = buildCallbackRequest();
+        callbackRequest.getCaseDetails().getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>>
+            response = uploadContestedCaseDocumentsHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        assertThat(response.getErrors().size(), is(0));
     }
 
     private CallbackRequest buildCallbackRequest() {

@@ -32,6 +32,7 @@ public enum EventType {
     CLOSE("FR_close"),
     MANAGE_CASE_DOCUMENTS("FR_manageCaseDocuments"),
     UPLOAD_APPROVED_ORDER("FR_uploadApprovedOrder"),
+    NEW_PAPER_CASE("FR_newPaperCase"),
     LIST_FOR_HEARING("FR_addSchedulingListingInfo"),
     GENERAL_APPLICATION_REFER_TO_JUDGE("FR_generalApplicationReferToJudge"),
     GENERAL_APPLICATION_OUTCOME("FR_GeneralApplicationOutcome"),
@@ -41,6 +42,8 @@ public enum EventType {
     ISSUE_APPLICATION("FR_issueApplication"),
     REGENERATE_FORM_C("FR_regenerateFormC"),
     CONSENT_APPLICATION_APPROVED_IN_CONTESTED("FR_consentOrderApproved"),
+    UPDATE_CONTESTED_GENERAL_APPLICATION("updateGeneralApplication"),
+
     NOC_REQUEST("nocRequest"),
     @JsonEnumDefaultValue
     NONE("");
