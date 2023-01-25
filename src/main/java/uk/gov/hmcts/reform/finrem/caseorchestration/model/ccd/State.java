@@ -44,8 +44,6 @@ public enum State {
     GENERAL_APPLICATION("generalApplication"),
     GENERAL_APPLICATION_AWAITING_JUDICIARY_RESPONSE("generalApplicationAwaitingJudiciaryResponse"),
     GENERAL_APPLICATION_OUTCOME("generalApplicationOutcome"),
-    APPLICATION_DRAFTED("applicationDrafted"),
-    GENERAL_APPLICATION_OUTCOME("generalApplicationOutcome"),
     PREPARE_FOR_HEARING("prepareForHearing"),
     CASE_FILE_SUBMITTED("caseFileSubmitted"),
     CONSENT_PROCESS("consentProcess"),
