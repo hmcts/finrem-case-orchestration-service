@@ -47,6 +47,8 @@ public class InterimHearingItem {
     public String interimSouthEastFRCList;
     @JsonProperty("interim_southWestFRCList")
     public String interimSouthWestFRCList;
+    @JsonProperty("interim_highCourtFRCList")
+    public String interimHighCourtFRCList;
     @JsonProperty("interim_swanseaCourtList")
     public String interimSwanseaCourtList;
     @JsonProperty("interimHearingTimeEstimate")
@@ -75,6 +77,8 @@ public class InterimHearingItem {
     public String interimBedfordshireCourtList;
     @JsonProperty("interim_thamesvalleyCourtList")
     public String interimThamesvalleyCourtList;
+    @JsonProperty("interim_highCourtList")
+    public String interimHighCourtList;
     @JsonProperty("interimUploadAdditionalDocument")
     public CaseDocument interimUploadAdditionalDocument;
     @JsonProperty("interimAdditionalInformationAboutHearing")

@@ -28,9 +28,36 @@ public class FinremCaseDataTest {
         validateConfig(configFile);
     }
 
+    @Test
+    public void testConsentedStateData() throws IOException, InvalidFormatException {
+        File configFile = new File(classLoader.getResource("ccd-config-prod-consented.xlsx").getFile());
+        validateState(configFile);
+    }
+
+
+    @Test
+    public void testContestedStateData() throws IOException, InvalidFormatException {
+        File configFile = new File(classLoader.getResource("ccd-config-prod-contested.xlsx").getFile());
+        validateState(configFile);
+    }
+
     private void validateConfig(File configFile) throws IOException, InvalidFormatException {
         CCDConfigValidator ccdConfigValidator = new CCDConfigValidator();
-        List<String> errors = ccdConfigValidator.validateCCDConfigAgainstClassStructure(configFile, FinremCaseData.class);
+        List<String> errors = ccdConfigValidator.validateCaseFieldsAgainstClassStructure(configFile, FinremCaseData.class);
+        if (!errors.isEmpty()) {
+            log.error("Errors found when validating config file: {}", configFile.getName());
+            errors.forEach(log::error);
+        }
+        assert errors.isEmpty();
+    }
+
+    private void validateState(File configFile) throws IOException, InvalidFormatException {
+        CCDConfigValidator ccdConfigValidator = new CCDConfigValidator();
+        List<String> errors = ccdConfigValidator.validateStatesAgainstClassStructure(configFile);
+        if (!errors.isEmpty()) {
+            log.error("Errors found when validating state: {}", configFile.getName());
+            errors.forEach(log::error);
+        }
         assert errors.isEmpty();
     }
 }

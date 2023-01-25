@@ -331,6 +331,9 @@ public class ContestedCourtHelperTest {
         verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON_CFC, CFC_COURTLIST,
             "FR_s_CFCList_16", "Willesden County Court and Family Court");
 
+        verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON_CFC, CFC_COURTLIST,
+            "FR_s_CFCList_17", "The Royal Courts of Justice");
+
         verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, "invalid", CFC_COURTLIST,
             "FR_s_CFCList_1", "");
 
