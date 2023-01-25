@@ -3,7 +3,7 @@
   "event_id": "some_event_id",
   "case_details": {
     "jurisdiction": "DIVORCE",
-    "state": "applicationDrafted",
+    "state": "caseAdded",
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
       "typeOfApplication": "In connection to matrimonial and civil partnership proceedings",
