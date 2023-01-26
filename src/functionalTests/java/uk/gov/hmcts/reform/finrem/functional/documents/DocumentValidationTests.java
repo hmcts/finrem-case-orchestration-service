@@ -158,7 +158,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
     private List<PensionTypeCollection> convertToPensionCollectionDataList(Object object) {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-        return objectMapper.convertValue(object, new TypeReference<List<PensionCollectionData>>() {});
+        return objectMapper.convertValue(object, new TypeReference<List<PensionTypeCollection>>() {});
     }
 
     private void setPensionCollectionData() {
