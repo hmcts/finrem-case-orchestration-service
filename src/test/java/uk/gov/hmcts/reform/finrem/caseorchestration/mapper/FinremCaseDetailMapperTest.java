@@ -260,7 +260,7 @@ public class FinremCaseDetailMapperTest {
             AmendedConsentOrderCollection.builder()
                 .value(AmendedConsentOrder.builder()
                     .amendedConsentOrder(getTestDocument())
-                    .amendedConsentOrderDate(convertToDateViaInstant(LocalDate.of(2020, 1, 2)))
+                    .amendedConsentOrderDate(LocalDate.of(2020, 1, 2))
                     .build())
                 .build());
         assertNotNull(caseData.getAmendedConsentOrderCollection());

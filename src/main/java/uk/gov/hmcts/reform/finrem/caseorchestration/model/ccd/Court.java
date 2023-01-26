@@ -149,6 +149,7 @@ public class Court implements CourtListWrapper {
         return getDefaultCourtListWrapper().getNorthWalesCourtList();
     }
 
+    @JsonIgnore
     @Override
     public HighCourt getHighCourt() {
         return getDefaultCourtListWrapper().getHighCourt();

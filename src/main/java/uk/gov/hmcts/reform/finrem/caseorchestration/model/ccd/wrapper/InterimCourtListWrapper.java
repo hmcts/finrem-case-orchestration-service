@@ -183,6 +183,7 @@ public class InterimCourtListWrapper implements CourtListWrapper {
         return interimNorthWalesCourtList;
     }
 
+    @JsonIgnore
     @Override
     public HighCourt getHighCourt() {
         return interimHighCourtList;
