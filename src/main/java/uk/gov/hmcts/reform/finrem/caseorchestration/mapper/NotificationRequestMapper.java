@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationH
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
@@ -17,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -55,7 +58,13 @@ public class NotificationRequestMapper {
     private final ConsentedApplicationHelper consentedApplicationHelper;
     private final ObjectMapper objectMapper;
 
+    @Deprecated
     public NotificationRequest getNotificationRequestForRespondentSolicitor(CaseDetails caseDetails,
+                                                                            Map<String, Object> interimHearingData) {
+        return buildNotificationRequest(caseDetails, getCaseDataKeysForRespondentSolicitor(), interimHearingData);
+    }
+
+    public NotificationRequest getNotificationRequestForRespondentSolicitor(FinremCaseDetails caseDetails,
                                                                             Map<String, Object> interimHearingData) {
         return buildNotificationRequest(caseDetails, getCaseDataKeysForRespondentSolicitor(), interimHearingData);
     }
@@ -146,6 +155,7 @@ public class NotificationRequestMapper {
         return notificationRequest;
     }
 
+    @Deprecated
     private NotificationRequest buildNotificationRequest(CaseDetails caseDetails,
                                                          SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper,
                                                          Map<String, Object> interimHearingData) {
@@ -156,6 +166,22 @@ public class NotificationRequestMapper {
         }
 
         if (caseDataService.isContestedApplication(caseDetails)) {
+            notificationRequest.setSelectedCourt(ContestedCourtHelper.getSelectedInterimHearingFrc(interimHearingData));
+        }
+
+        return notificationRequest;
+    }
+
+    private NotificationRequest buildNotificationRequest(FinremCaseDetails caseDetails,
+                                                         SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper,
+                                                         Map<String, Object> interimHearingData) {
+        NotificationRequest notificationRequest = getNotificationCoreData(caseDetails, solicitorCaseDataKeysWrapper);
+
+        if (caseDetails.getData().isConsentedApplication()) {
+            notificationRequest.setSelectedCourt(ContestedCourtHelper.getSelectedHearingFrc(interimHearingData));
+        }
+
+        if (caseDetails.getData().isContestedApplication()) {
             notificationRequest.setSelectedCourt(ContestedCourtHelper.getSelectedInterimHearingFrc(interimHearingData));
         }
 
@@ -176,6 +202,7 @@ public class NotificationRequestMapper {
             .build();
     }
 
+    @Deprecated
     private NotificationRequest getNotificationCoreData(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
         NotificationRequest notificationRequest = new NotificationRequest();
         Map<String, Object> caseData = caseDetails.getData();
@@ -214,6 +241,54 @@ public class NotificationRequestMapper {
             notificationRequest.setRespondentName(Objects.toString(respName));
         }
         notificationRequest.setHearingType(Objects.toString(caseData.get(HEARING_TYPE), ""));
+        return notificationRequest;
+    }
+
+    private NotificationRequest getNotificationCoreData(FinremCaseDetails caseDetails,
+                                                        SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
+        NotificationRequest notificationRequest = new NotificationRequest();
+        Map<String, Object> notificationRequestPayload = null;
+        try {
+            notificationRequestPayload =
+                objectMapper.readValue(objectMapper.writeValueAsString(caseDetails.getData()), HashMap.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        notificationRequest.setCaseReferenceNumber(Objects.toString(caseDetails.getId()));
+        notificationRequest.setSolicitorReferenceNumber(Objects.toString(notificationRequestPayload.get(solicitorCaseDataKeysWrapper.getSolicitorReferenceKey()),
+            EMPTY_STRING));
+        notificationRequest.setDivorceCaseNumber(Objects.toString(notificationRequestPayload.get(DIVORCE_CASE_NUMBER)));
+        notificationRequest.setName(Objects.toString(notificationRequestPayload.get(solicitorCaseDataKeysWrapper.getSolicitorNameKey())));
+        notificationRequest.setNotificationEmail(Objects.toString(notificationRequestPayload.get(solicitorCaseDataKeysWrapper.getSolicitorEmailKey())));
+        notificationRequest.setGeneralEmailBody(Objects.toString(notificationRequestPayload.get(GENERAL_EMAIL_BODY)));
+        notificationRequest.setCaseType(caseDetails.getCaseType().toString().toLowerCase());
+        notificationRequest.setPhoneOpeningHours(CTSC_OPENING_HOURS);
+        notificationRequest.setGeneralApplicationRejectionReason(
+            Objects.toString(caseDetails.getData().get(GENERAL_APPLICATION_REJECT_REASON), ""));
+        String appName = caseDataService.buildFullName(caseDetails.getData(), APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME);
+        notificationRequest.setApplicantName(Objects.toString(appName));
+        if (caseDataService.isConsentedApplication(caseDetails)) {
+            String respName = caseDataService.buildFullName(caseDetails.getData(),
+                CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, CONSENTED_RESPONDENT_LAST_NAME);
+            notificationRequest.setRespondentName(Objects.toString(respName));
+            if (Boolean.TRUE.equals(consentedApplicationHelper.isVariationOrder(notificationRequestPayload))) {
+                notificationRequest.setCaseOrderType("variation");
+                notificationRequest.setCamelCaseOrderType("Variation");
+            } else {
+                notificationRequest.setCaseOrderType("consent");
+                notificationRequest.setCamelCaseOrderType("Consent");
+            }
+            log.info("caseOrder Type is {} for case ID: {}", notificationRequest.getCaseOrderType(),
+                notificationRequest.getCaseReferenceNumber());
+        }
+
+        if (caseDataService.isContestedApplication(caseDetails)) {
+            String respName = caseDataService.buildFullName(caseDetails.getData(),
+                CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME, CONTESTED_RESPONDENT_LAST_NAME);
+            notificationRequest.setRespondentName(Objects.toString(respName));
+        }
+        notificationRequest.setHearingType(Objects.toString(notificationRequestPayload.get(HEARING_TYPE), ""));
         return notificationRequest;
     }
 }

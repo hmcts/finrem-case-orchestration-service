@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
@@ -321,7 +322,14 @@ public class NotificationService {
             interimHearingData));
     }
 
+    @Deprecated
     public void sendConsentHearingNotificationEmailToApplicantSolicitor(CaseDetails caseDetails,
+                                                                        Map<String, Object> hearingData) {
+        sendConsentedHearingNotificationEmail(notificationRequestMapper.getNotificationRequestForConsentApplicantSolicitor(caseDetails,
+            hearingData));
+    }
+
+    public void sendConsentHearingNotificationEmailToApplicantSolicitor(FinremCaseDetails caseDetails,
                                                                         Map<String, Object> hearingData) {
         sendConsentedHearingNotificationEmail(notificationRequestMapper.getNotificationRequestForConsentApplicantSolicitor(caseDetails,
             hearingData));
@@ -332,7 +340,14 @@ public class NotificationService {
         sendNotificationEmail(notificationRequest, uri);
     }
 
+    @Deprecated
     public void sendConsentHearingNotificationEmailToRespondentSolicitor(CaseDetails caseDetails,
+                                                                         Map<String, Object> hearingData) {
+        sendConsentedHearingNotificationEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails,
+            hearingData));
+    }
+
+    public void sendConsentHearingNotificationEmailToRespondentSolicitor(FinremCaseDetails caseDetails,
                                                                          Map<String, Object> hearingData) {
         sendConsentedHearingNotificationEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails,
             hearingData));

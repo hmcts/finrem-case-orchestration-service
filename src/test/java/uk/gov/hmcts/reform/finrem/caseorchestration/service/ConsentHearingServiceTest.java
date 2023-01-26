@@ -7,8 +7,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedHearingHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.io.InputStream;
 import java.util.List;
@@ -114,8 +118,28 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
         verify(caseDataService).isPaperApplication(any());
         verify(caseDataService, never()).isApplicantSolicitorAgreeToReceiveEmails(any());
         verify(notificationService, never()).isRespondentSolicitorEmailCommunicationEnabled(any());
-        verify(notificationService, never()).sendConsentHearingNotificationEmailToApplicantSolicitor(any(), anyMap());
-        verify(notificationService, never()).sendConsentHearingNotificationEmailToRespondentSolicitor(any(), anyMap());
+        verify(notificationService, never()).sendConsentHearingNotificationEmailToApplicantSolicitor(any(CaseDetails.class), anyMap());
+        verify(notificationService, never()).sendConsentHearingNotificationEmailToRespondentSolicitor(any(CaseDetails.class), anyMap());
+    }
+
+    @Test
+    public void givenFinremCaseDetailsConsentedPaperCase_WhenPaperCase_ThenItShouldNotSendNotificaton() {
+        FinremCaseDetails caseDetails = buildFinremCaseDetails(MULTIPLE_HEARING_TEST_PAYLOAD);
+        FinremCaseDetails caseDetailsBefore = buildFinremCaseDetails(SINGLE_HEARING_TEST_PAYLOAD);
+
+        caseDetails.getData().setPaperApplication(YesOrNo.YES);
+
+        when(caseDataService.isPaperApplication(any())).thenReturn(true);
+
+        service.sendNotification(caseDetails, caseDetailsBefore);
+
+        verify(caseDataService).isPaperApplication(any());
+        verify(caseDataService, never()).isApplicantSolicitorAgreeToReceiveEmails(any());
+        verify(notificationService, never()).isRespondentSolicitorEmailCommunicationEnabled(any());
+        verify(notificationService, never())
+            .sendConsentHearingNotificationEmailToApplicantSolicitor(any(FinremCaseDetails.class), anyMap());
+        verify(notificationService, never())
+            .sendConsentHearingNotificationEmailToRespondentSolicitor(any(FinremCaseDetails.class), anyMap());
     }
 
     @Test
@@ -134,13 +158,44 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
 
         verify(caseDataService, times(2)).isApplicantSolicitorAgreeToReceiveEmails(any());
         verify(notificationService, times(2)).isRespondentSolicitorEmailCommunicationEnabled(any());
-        verify(notificationService, times(2)).sendConsentHearingNotificationEmailToApplicantSolicitor(any(), anyMap());
-        verify(notificationService, times(2)).sendConsentHearingNotificationEmailToRespondentSolicitor(any(), anyMap());
+        verify(notificationService, times(2)).sendConsentHearingNotificationEmailToApplicantSolicitor(any(CaseDetails.class), anyMap());
+        verify(notificationService, times(2)).sendConsentHearingNotificationEmailToRespondentSolicitor(any(CaseDetails.class), anyMap());
+    }
+
+    @Test
+    public void givenFinremCaseDetailsConsentedNotPaperCase_WhenPaperCase_ThenItShouldSendNotification() {
+        FinremCaseDetails caseDetails = buildFinremCaseDetails(MULTIPLE_HEARING_TEST_PAYLOAD);
+
+        caseDetails.getData().setPaperApplication(YesOrNo.NO);
+
+        when(caseDataService.isPaperApplication(any())).thenReturn(false);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
+
+        FinremCaseDetails caseDetailsBefore = buildFinremCaseDetails(SINGLE_HEARING_TEST_PAYLOAD);
+        service.sendNotification(caseDetails, caseDetailsBefore);
+
+        verify(caseDataService).isPaperApplication(any());
+
+        verify(caseDataService, times(2)).isApplicantSolicitorAgreeToReceiveEmails(any());
+        verify(notificationService, times(2)).isRespondentSolicitorEmailCommunicationEnabled(any());
+        verify(notificationService, times(2))
+            .sendConsentHearingNotificationEmailToApplicantSolicitor(any(FinremCaseDetails.class), anyMap());
+        verify(notificationService, times(2))
+            .sendConsentHearingNotificationEmailToRespondentSolicitor(any(FinremCaseDetails.class), anyMap());
     }
 
     private CaseDetails buildCaseDetails(String testPayload)  {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(testPayload)) {
             return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private FinremCaseDetails buildFinremCaseDetails(String testPayload)  {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(testPayload)) {
+            return objectMapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -76,6 +76,7 @@ public class ConsentHearingService {
         }
     }
 
+    @Deprecated
     private void notify(CaseDetails caseDetails, ConsentedHearingDataWrapper hearingCaseData, List<String> hearingIdsToProcess) {
         if (hearingIdsToProcess.contains(hearingCaseData.getId())) {
             Map<String, Object> caseData = helper.convertToMap(hearingCaseData.getValue());
@@ -85,6 +86,22 @@ public class ConsentHearingService {
                 log.info("Email notification to Applicant Solicitor about hearing for case id {} sent.", caseDetails.getId());
             }
             if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
+                log.info("Sending email notification to Respondent Solicitor about hearing for case id {}", caseDetails.getId());
+                notificationService.sendConsentHearingNotificationEmailToRespondentSolicitor(caseDetails, caseData);
+                log.info("Email notification to Respondent Solicitor about hearing for case id {} sent", caseDetails.getId());
+            }
+        }
+    }
+
+    private void notify(FinremCaseDetails caseDetails, ConsentedHearingDataWrapper hearingCaseData, List<String> hearingIdsToProcess) {
+        if (hearingIdsToProcess.contains(hearingCaseData.getId())) {
+            Map<String, Object> caseData = helper.convertToMap(hearingCaseData.getValue());
+            if (caseDetails.getData().isApplicantSolicitorAgreeToReceiveEmails()) {
+                log.info("Sending email notification to Applicant Solicitor about hearing for case id {}", caseDetails.getId());
+                notificationService.sendConsentHearingNotificationEmailToApplicantSolicitor(caseDetails, caseData);
+                log.info("Email notification to Applicant Solicitor about hearing for case id {} sent.", caseDetails.getId());
+            }
+            if (caseDetails.getData().isRespondentSolicitorEmailCommunicationEnabled()) {
                 log.info("Sending email notification to Respondent Solicitor about hearing for case id {}", caseDetails.getId());
                 notificationService.sendConsentHearingNotificationEmailToRespondentSolicitor(caseDetails, caseData);
                 log.info("Email notification to Respondent Solicitor about hearing for case id {} sent", caseDetails.getId());
