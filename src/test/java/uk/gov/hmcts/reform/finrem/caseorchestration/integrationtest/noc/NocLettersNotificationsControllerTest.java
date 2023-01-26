@@ -58,6 +58,7 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
     private AssignCaseAccessService assignCaseAccessService;
     @Autowired
     private DocumentConfiguration documentConfiguration;
+
     @Captor
     ArgumentCaptor<Map> placeholdersMapArgumentCaptor;
 

@@ -9,9 +9,6 @@ import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 @RunWith(SerenityRunner.class)
 public class NotificationTests extends IntegrationTestBase {
 
-    @Value("${cos.notification.judge-assign.api}")
-    private String notifyAssignToJudge;
-
     @Value("${cos.notification.prepare-for-hearing.api}")
     private String prepareForHearingApiUri;
 

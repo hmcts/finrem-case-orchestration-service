@@ -59,6 +59,7 @@
           }
         }
       ],
+      "rSolicitorEmail": "test@adminR.com",
       "respondentEmail": "test@test.com",
       "respondentPhone": "9963472494",
       "appRespondentRep": "Yes",
@@ -393,6 +394,7 @@
           }
         }
       ],
+      "rSolicitorEmail": "test@adminR.com",
       "respondentEmail": "test@test.com",
       "respondentPhone": "9963472494",
       "appRespondentRep": "No",
