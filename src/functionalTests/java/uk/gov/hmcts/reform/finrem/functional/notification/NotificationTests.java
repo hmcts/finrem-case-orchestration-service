@@ -9,9 +9,6 @@ import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 @RunWith(SerenityRunner.class)
 public class NotificationTests extends IntegrationTestBase {
 
-    @Value("${cos.notification.judge-assign.api}")
-    private String notifyAssignToJudge;
-
     @Value("${cos.notification.consent-order-available.api}")
     private String consentOrderAvailable;
 
@@ -42,13 +39,6 @@ public class NotificationTests extends IntegrationTestBase {
     private final String consentedDir = "/json/consented/";
     private final String contestedDir = "/json/contested/";
 
-
-    @Test
-    public void verifyNotifyAssignToJudgeTestIsOkay() {
-
-        utils.validatePostSuccess(notifyAssignToJudge,
-            "ccd-request-with-solicitor-assignedToJudge1.json", consentedDir);
-    }
 
     @Test
     public void verifyNotifyConsentOrderAvailableTestIsOkay() {
