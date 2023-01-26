@@ -26,19 +26,15 @@ public class CreateCaseService {
 
     public void setSupplementaryData(CallbackRequest callbackRequest, String authorisation) {
         String caseId = String.valueOf(callbackRequest.getCaseDetails().getId());
-        Map<String, Map<String, Map<String, Object>>> supplementaryDataFinancialRemedy = new HashMap<>();
-        supplementaryDataFinancialRemedy.put("supplementary_data_updates",
-            singletonMap("$set", singletonMap("HMCTSServiceId",
-                caseFlagsConfiguration.getHmctsId())));
-
-        coreCaseDataApi.submitSupplementaryData(authorisation,
-                                                authTokenGenerator.generate(),
-                                                caseId,
-                                                supplementaryDataFinancialRemedy);
+        submitSupplementaryDataToCcd(authorisation, caseId);
     }
 
     public void setSupplementaryData(FinremCallbackRequest callbackRequest, String authorisation) {
         String caseId = String.valueOf(callbackRequest.getCaseDetails().getId());
+        submitSupplementaryDataToCcd(authorisation, caseId);
+    }
+
+    private void submitSupplementaryDataToCcd(String authorisation, String caseId) {
         Map<String, Map<String, Map<String, Object>>> supplementaryDataFinancialRemedy = new HashMap<>();
         supplementaryDataFinancialRemedy.put("supplementary_data_updates",
             singletonMap("$set", singletonMap("HMCTSServiceId",
