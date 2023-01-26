@@ -93,7 +93,6 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(notificationService).sendConsentOrderAvailableCtscEmail(any());
         verify(notificationService).sendConsentOrderAvailableEmailToApplicantSolicitor(any());
         verify(notificationService).sendConsentOrderAvailableEmailToRespondentSolicitor(any());
         verify(notificationService).sendConsentOrderMadeConfirmationEmailToApplicantSolicitor(any());
@@ -109,7 +108,6 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(notificationService).sendConsentOrderAvailableCtscEmail(any());
         verify(notificationService, never()).sendConsentOrderAvailableEmailToApplicantSolicitor(any());
         verify(notificationService, never()).sendConsentOrderAvailableEmailToRespondentSolicitor(any());
         verify(notificationService, never()).sendConsentOrderMadeConfirmationEmailToApplicantSolicitor(any());
@@ -125,7 +123,6 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(notificationService).sendConsentOrderAvailableCtscEmail(any());
         verify(notificationService).sendConsentOrderAvailableEmailToApplicantSolicitor(any());
         verify(notificationService).sendConsentOrderAvailableEmailToRespondentSolicitor(any());
         verify(notificationService).sendConsentOrderMadeConfirmationEmailToApplicantSolicitor(any());
@@ -140,7 +137,6 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(notificationService).sendConsentOrderAvailableCtscEmail(any());
         verify(notificationService, never()).sendConsentOrderAvailableEmailToApplicantSolicitor(any());
         verify(notificationService, never()).sendConsentOrderAvailableEmailToRespondentSolicitor(any());
         verify(notificationService, never()).sendConsentOrderMadeConfirmationEmailToApplicantSolicitor(any());
