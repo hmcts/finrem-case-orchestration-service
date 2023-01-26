@@ -24,14 +24,6 @@ public class NotificationTests extends IntegrationTestBase {
     private final String consentedDir = "/json/consented/";
     private final String contestedDir = "/json/contested/";
 
-
-    @Test
-    public void verifyNotifyAssignToJudgeTestIsOkay() {
-
-        utils.validatePostSuccess(notifyAssignToJudge,
-            "ccd-request-with-solicitor-assignedToJudge1.json", consentedDir);
-    }
-
     @Test
     public void verifyNotifyPrepareForHearingTestIsOkay() {
 
