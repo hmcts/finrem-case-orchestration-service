@@ -20,9 +20,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEVELAND;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DEVON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DORSET;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_REGION_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HIGHCOURT_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_LONDON_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_MIDLANDS_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_NORTHEAST_FRC_LIST;
@@ -415,6 +419,14 @@ public class ContestedCourtHelperTest {
             "FR_s_NottinghamList_8", "");
     }
 
+    @Test
+    public void highCourtListTest() {
+        verifyCorrectCourtReturned(HIGHCOURT, HIGHCOURT_FRC_LIST, HIGHCOURT, HIGHCOURT_COURTLIST,
+            "FR_highCourtList_1", "High Court Family Division");
+
+        verifyCorrectCourtReturned(HIGHCOURT, HIGHCOURT_FRC_LIST, HIGHCOURT, HIGHCOURT_COURTLIST,
+            "invalid", "");
+    }
 
     private CaseDetails getCaseDetailsWithAllocatedValues(String region, String subRegionListName, String subRegion,
                                                           String courtListName, String court) {
@@ -479,6 +491,11 @@ public class ContestedCourtHelperTest {
         verifyCorrectInterimHearingCourtReturned(MIDLANDS, INTERIM_MIDLANDS_FRC_LIST, BIRMINGHAM);
     }
 
+    @Test
+    public void interim_highCourtFRCCourts() {
+        verifyCorrectInterimHearingCourtReturned(HIGHCOURT, INTERIM_HIGHCOURT_FRC_LIST, HIGHCOURT);
+    }
+
     private void verifyCorrectInterimHearingCourtReturned(final String region, final String subRegionListName, final String subRegion) {
         Map<String, Object> interimCaseData = getCaseDetailsWithAllocatedValuesForInterimHearing(region, subRegionListName, subRegion);
         String selectedInterimHearingFrc = ContestedCourtHelper.getSelectedInterimHearingFrc(interimCaseData);
@@ -537,6 +554,11 @@ public class ContestedCourtHelperTest {
     public void midlandsFRCCourts() {
         verifyCorrectHearingCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, NOTTINGHAM);
         verifyCorrectHearingCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, BIRMINGHAM);
+    }
+
+    @Test
+    public void highCourtFRCCourts() {
+        verifyCorrectHearingCourtReturned(HIGHCOURT, HIGHCOURT_FRC_LIST, HIGHCOURT);
     }
 
     private void verifyCorrectHearingCourtReturned(final String region, final String subRegionListName, final String subRegion) {
