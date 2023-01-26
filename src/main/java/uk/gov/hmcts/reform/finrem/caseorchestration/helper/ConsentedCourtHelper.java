@@ -38,6 +38,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.EXETER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GLOUCESTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HERTFORD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IPSWICH;
@@ -129,6 +132,7 @@ public class ConsentedCourtHelper {
         .put("FR_birminghamList_10", "Hereford County Court and Family Court")
         .build();
     private static Map<String, String> londonMap = ImmutableMap.<String, String>builder()
+        .put("FR_londonList_13", "The Royal Courts of Justice")
         .put("FR_londonList_11", "Bromley County Court and Family Court")
         .put("FR_londonList_10", "Croydon County Court and Family Court")
         .put("FR_londonList_9", "Edmonton County Court and Family Court")
@@ -348,6 +352,10 @@ public class ConsentedCourtHelper {
         .put(MOLD, "Mold County")
         .build();
 
+    private static Map<String, String> highCourtMap = ImmutableMap.<String, String>builder()
+        .put("FR_highCourtList_1", "High Court Family Division")
+        .build();
+
     private ConsentedCourtHelper() {
     }
 
@@ -375,6 +383,9 @@ public class ConsentedCourtHelper {
         }
         if (SOUTHEAST.equalsIgnoreCase(region)) {
             return getSouthEastFRC(caseData);
+        }
+        if (HIGHCOURT.equalsIgnoreCase(region)) {
+            return getHighCourtFRC(caseData);
         }
         return EMPTY;
     }
@@ -439,6 +450,14 @@ public class ConsentedCourtHelper {
         String londonList = (String) caseData.get(LONDON_FRC_LIST);
         if (LONDON.equalsIgnoreCase(londonList)) {
             return getLondonCourt(caseData);
+        }
+        return EMPTY;
+    }
+
+    private static String getHighCourtFRC(Map<String, Object> caseData) {
+        String londonList = (String) caseData.get(HIGHCOURT_FRC_LIST);
+        if (HIGHCOURT.equalsIgnoreCase(londonList)) {
+            return getHighCourt(caseData);
         }
         return EMPTY;
     }
@@ -551,5 +570,9 @@ public class ConsentedCourtHelper {
 
     public static String getNorthWalesCourt(Map<String, Object> caseData) {
         return northWalesMap.getOrDefault(caseData.get(NORTH_WALES_COURTLIST), "");
+    }
+
+    public static String getHighCourt(Map<String, Object> caseData) {
+        return highCourtMap.getOrDefault(caseData.get(HIGHCOURT_COURTLIST), "");
     }
 }

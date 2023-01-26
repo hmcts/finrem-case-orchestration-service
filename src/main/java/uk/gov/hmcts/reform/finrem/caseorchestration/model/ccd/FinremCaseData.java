@@ -161,6 +161,8 @@ public class FinremCaseData {
     private String transferLocalCourtInstructions;
     private List<TransferCourtEmailCollection> transferLocalCourtEmailCollection;
     private YesOrNo civilPartnership;
+    private YesOrNo promptForUrgentCaseQuestion;
+    private String urgentCaseQuestionDetailsTextArea;
     @JsonProperty("RepresentationUpdateHistory")
     private List<RepresentationUpdateHistoryCollection> representationUpdateHistory;
     private YesOrNo paperApplication;
@@ -321,9 +323,9 @@ public class FinremCaseData {
     private List<ScannedDocumentCollection> respondentScanDocuments;
 
     @JsonProperty("appBarristerCollection")
-    private List<BarristerData> applicantBarristers;
+    private List<BarristerCollectionItem> applicantBarristers;
     @JsonProperty("respBarristerCollection")
-    private List<BarristerData> respondentBarristers;
+    private List<BarristerCollectionItem> respondentBarristers;
     private BarristerParty barristerParty;
 
     private YesOrNo benefitForChildrenDecisionSchedule;
@@ -623,7 +625,8 @@ public class FinremCaseData {
             Region.NORTHWEST, getNorthWestCourt(regionWrapper.getNorthWestFrcList(), courtList),
             Region.SOUTHWEST, getSouthWestCourt(regionWrapper.getSouthWestFrcList(), courtList),
             Region.SOUTHEAST, getSouthEastCourt(regionWrapper.getSouthEastFrcList(), courtList),
-            Region.WALES, getWalesCourt(regionWrapper.getWalesFrcList(), courtList)
+            Region.WALES, getWalesCourt(regionWrapper.getWalesFrcList(), courtList),
+            Region.HIGHCOURT, getHighCourt(regionWrapper.getHighCourtFrcList(), courtList)
         ).get(regionWrapper.getRegionList());
     }
 
@@ -639,7 +642,8 @@ public class FinremCaseData {
             Region.NORTHWEST, getNorthWestCourt(interimWrapper.getInterimNorthWestFrcList(), courtList),
             Region.SOUTHWEST, getSouthWestCourt(interimWrapper.getInterimSouthWestFrcList(), courtList),
             Region.SOUTHEAST, getSouthEastCourt(interimWrapper.getInterimSouthEastFrcList(), courtList),
-            Region.WALES, getWalesCourt(interimWrapper.getInterimWalesFrcList(), courtList)
+            Region.WALES, getWalesCourt(interimWrapper.getInterimWalesFrcList(), courtList),
+            Region.HIGHCOURT, getHighCourt(interimWrapper.getInterimHighCourtFrcList(), courtList)
         ).get(interimWrapper.getInterimRegionList());
     }
 
@@ -660,7 +664,8 @@ public class FinremCaseData {
                 courtList),
             Region.SOUTHEAST, getSouthEastCourt(regionWrapper.getGeneralApplicationDirectionsSouthEastFrcList(),
                 courtList),
-            Region.WALES, getWalesCourt(regionWrapper.getGeneralApplicationDirectionsWalesFrcList(), courtList)
+            Region.WALES, getWalesCourt(regionWrapper.getGeneralApplicationDirectionsWalesFrcList(), courtList),
+            Region.HIGHCOURT, getHighCourt(regionWrapper.getGeneralApplicationDirectionsHighCourtFrcList(), courtList)
         ).get(regionWrapper.getGeneralApplicationDirectionsRegionList());
     }
 
@@ -715,6 +720,13 @@ public class FinremCaseData {
             RegionWalesFrc.NORTH_WALES, getCourtListIdOrDefault(courtList.getNorthWalesCourt()),
             RegionWalesFrc.NEWPORT, getCourtListIdOrDefault(courtList.getNewportCourt()),
             RegionWalesFrc.SWANSEA, getCourtListIdOrDefault(courtList.getSwanseaCourt())
+        ).get(frc).getSelectedCourtId();
+    }
+
+    @JsonIgnore
+    private String getHighCourt(RegionHighCourtFrc frc, CourtListWrapper courtList) {
+        return Map.of(
+            RegionHighCourtFrc.HIGHCOURT, getCourtListIdOrDefault(courtList.getHighCourt())
         ).get(frc).getSelectedCourtId();
     }
 

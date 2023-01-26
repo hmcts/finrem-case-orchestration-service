@@ -25,6 +25,7 @@ import static java.util.Collections.singletonMap;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasEntry;
+import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.rules.ExpectedException.none;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -35,6 +36,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_FO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_FORM_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BulkScanServiceTest {
@@ -98,9 +102,13 @@ public class BulkScanServiceTest {
 
         Map<String, Object> returnedResult = bulkScanService.transformBulkScanForm(exceptionRecord);
 
+        assertThat(returnedResult, hasEntry(TEST_KEY, TEST_VALUE));
+        assertNotNull(returnedResult.get(APPLICANT_ORGANISATION_POLICY));
+        assertNotNull(returnedResult.get(RESPONDENT_ORGANISATION_POLICY));
+        assertNotNull(returnedResult.get(CHANGE_ORGANISATION_REQUEST));
+
         verify(finRemBulkScanFormTransformerFactory).getTransformer(TEST_FORM_TYPE);
         verify(bulkScanFormTransformer).transformIntoCaseData(exceptionRecord);
-        assertThat(returnedResult, hasEntry(TEST_KEY, TEST_VALUE));
     }
 
     @Test

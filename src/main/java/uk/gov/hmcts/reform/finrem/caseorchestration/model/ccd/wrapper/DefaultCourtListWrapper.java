@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CfcCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ClevelandCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DevonCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DorsetCourt;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HighCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HumberCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.KentSurreyCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.LancashireCourt;
@@ -58,6 +59,8 @@ public class DefaultCourtListWrapper implements CourtListWrapper {
     private NewportCourt newportCourtList;
     private SwanseaCourt swanseaCourtList;
     private NorthWalesCourt northWalesCourtList;
+
+    private HighCourt highCourtList;
 
     @JsonIgnore
     @Override
@@ -166,4 +169,11 @@ public class DefaultCourtListWrapper implements CourtListWrapper {
     public NorthWalesCourt getNorthWalesCourt() {
         return northWalesCourtList;
     }
+
+    @Override
+    public HighCourt getHighCourt() {
+        return highCourtList;
+    }
+
+
 }

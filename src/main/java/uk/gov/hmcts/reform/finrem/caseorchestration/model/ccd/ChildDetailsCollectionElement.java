@@ -12,11 +12,8 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CollectionElement<T> {
-
-    @JsonProperty("id")
-    protected String id;
+public class ChildDetailsCollectionElement extends CollectionElement<ChildDetails> {
 
     @JsonProperty("value")
-    protected T value;
+    private ChildDetails childDetails;
 }

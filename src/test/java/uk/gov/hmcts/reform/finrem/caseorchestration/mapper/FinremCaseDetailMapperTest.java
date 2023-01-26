@@ -60,7 +60,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterAddressToType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderCollectionItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingBundleDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingBundleDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTimeDirection;
@@ -161,6 +161,8 @@ public class FinremCaseDetailMapperTest {
     private static final String SOL_CONTEST_CALLBACK_REQUEST = "/fixtures/deserialisation/ccd-request-with-solicitor-contestApplicationIssued.json";
     private static final String BASIC_REQUEST = "/fixtures/deserialisation/basic-request.json";
 
+    private static final String GA_REQUEST = "/fixtures/deserialisation/ccd-request-with-general-application.json";
+
 
     private CaseDetails caseDetails;
     private ObjectMapper objectMapper;
@@ -193,6 +195,13 @@ public class FinremCaseDetailMapperTest {
     @Test
     public void givenGeneralOrderFixture_whenDeserializeFromString_thenSuccessfullyDeserialize() {
         caseDetails = buildCaseDetailsFromJson(CONTESTED_INTERIM_CALLBACK_REQUEST);
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        assertNotNull(finremCaseDetails);
+    }
+
+    @Test
+    public void givenGeneralApplicationFixture_whenDeserializeFromString_thenSuccessfullyDeserialize() {
+        caseDetails = buildCaseDetailsFromJson(GA_REQUEST);
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         assertNotNull(finremCaseDetails);
     }
@@ -633,8 +642,8 @@ public class FinremCaseDetailMapperTest {
     }
 
     private void assertGeneralOrderCollection(FinremCaseData caseData) {
-        List<GeneralOrderCollection> expected = List.of(
-            GeneralOrderCollection.builder()
+        List<GeneralOrderCollectionItem> expected = List.of(
+            GeneralOrderCollectionItem.builder()
                 .value(GeneralOrder.builder()
                     .generalOrderJudgeType(JudgeType.DISTRICT_JUDGE)
                     .generalOrderDateOfOrder(LocalDate.of(2010, 1, 2))
