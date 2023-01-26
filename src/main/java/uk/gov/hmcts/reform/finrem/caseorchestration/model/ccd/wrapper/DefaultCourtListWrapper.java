@@ -170,6 +170,8 @@ public class DefaultCourtListWrapper implements CourtListWrapper {
         return northWalesCourtList;
     }
 
+
+    @JsonIgnore
     @Override
     public HighCourt getHighCourt() {
         return highCourtList;

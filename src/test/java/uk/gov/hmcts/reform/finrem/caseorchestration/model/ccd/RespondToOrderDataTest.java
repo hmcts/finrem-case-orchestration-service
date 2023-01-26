@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -26,6 +27,7 @@ public class RespondToOrderDataTest {
     @Test
     public void shouldConvertRespondToOrderDataObject() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
         RespondToOrderData respondToOrderData = objectMapper.readValue(json, RespondToOrderData.class);
         assertThat(respondToOrderData, is(notNullValue()));
         assertThat(respondToOrderData.getId(), is("1"));

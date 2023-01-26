@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -14,7 +14,7 @@ public class RespondToOrder {
     @JsonProperty("DocumentLink")
     private CaseDocument documentLink;
     @JsonProperty("DocumentDateAdded")
-    private Date documentAdded;
+    private LocalDate documentAdded;
     @JsonProperty("DocumentFileName")
     private String fileName;
 }
