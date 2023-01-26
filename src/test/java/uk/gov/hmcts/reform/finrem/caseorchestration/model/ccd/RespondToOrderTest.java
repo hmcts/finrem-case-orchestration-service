@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -25,6 +26,7 @@ public class RespondToOrderTest {
     @Test
     public void shouldPopulateRespondToOrderObject() throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
         RespondToOrder respondToOrder = objectMapper.readValue(json, RespondToOrder.class);
         assertThat(respondToOrder, is(notNullValue()));
         CaseDocument documentLink = respondToOrder.getDocumentLink();
