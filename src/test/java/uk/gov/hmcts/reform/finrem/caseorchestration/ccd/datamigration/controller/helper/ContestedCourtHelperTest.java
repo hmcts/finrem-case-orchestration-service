@@ -494,6 +494,7 @@ public class ContestedCourtHelperTest {
     @Test
     public void interim_highCourtFRCCourts() {
         verifyCorrectInterimHearingCourtReturned(HIGHCOURT, INTERIM_HIGHCOURT_FRC_LIST, HIGHCOURT);
+        verifyCorrectInterimHearingCourtReturned("highCourt", INTERIM_HIGHCOURT_FRC_LIST, HIGHCOURT);
     }
 
     private void verifyCorrectInterimHearingCourtReturned(final String region, final String subRegionListName, final String subRegion) {
@@ -559,6 +560,7 @@ public class ContestedCourtHelperTest {
     @Test
     public void highCourtFRCCourts() {
         verifyCorrectHearingCourtReturned(HIGHCOURT, HIGHCOURT_FRC_LIST, HIGHCOURT);
+        verifyCorrectHearingCourtReturned("highCourt", HIGHCOURT_FRC_LIST, HIGHCOURT);
     }
 
     private void verifyCorrectHearingCourtReturned(final String region, final String subRegionListName, final String subRegion) {
