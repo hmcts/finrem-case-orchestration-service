@@ -81,7 +81,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler
         return response;
     }
 
-    protected List<ContestedUploadedDocumentData> getDocumentCollection(Map<String, Object> caseData) {
+    private List<ContestedUploadedDocumentData> getDocumentCollection(Map<String, Object> caseData) {
         objectMapper.registerModule(new JavaTimeModule());
 
         caseData.get(CONTESTED_UPLOADED_DOCUMENTS);
