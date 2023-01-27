@@ -424,6 +424,9 @@ public class ContestedCourtHelperTest {
         verifyCorrectCourtReturned(HIGHCOURT, HIGHCOURT_FRC_LIST, HIGHCOURT, HIGHCOURT_COURTLIST,
             "FR_highCourtList_1", "High Court Family Division");
 
+        verifyCorrectCourtReturned(HIGHCOURT, HIGHCOURT_FRC_LIST, "invalid", HIGHCOURT_COURTLIST,
+            "FR_highCourtList_1", "");
+
         verifyCorrectCourtReturned(HIGHCOURT, HIGHCOURT_FRC_LIST, HIGHCOURT, HIGHCOURT_COURTLIST,
             "invalid", "");
     }
@@ -495,6 +498,7 @@ public class ContestedCourtHelperTest {
     public void interim_highCourtFRCCourts() {
         verifyCorrectInterimHearingCourtReturned(HIGHCOURT, INTERIM_HIGHCOURT_FRC_LIST, HIGHCOURT);
         verifyCorrectInterimHearingCourtReturned("highCourt", INTERIM_HIGHCOURT_FRC_LIST, HIGHCOURT);
+        verifyCorrectInterimHearingCourtReturned("invalid", INTERIM_HIGHCOURT_FRC_LIST, "");
     }
 
     private void verifyCorrectInterimHearingCourtReturned(final String region, final String subRegionListName, final String subRegion) {
@@ -561,6 +565,7 @@ public class ContestedCourtHelperTest {
     public void highCourtFRCCourts() {
         verifyCorrectHearingCourtReturned(HIGHCOURT, HIGHCOURT_FRC_LIST, HIGHCOURT);
         verifyCorrectHearingCourtReturned("highCourt", HIGHCOURT_FRC_LIST, HIGHCOURT);
+        verifyCorrectHearingCourtReturned("invalid", HIGHCOURT_FRC_LIST, "");
     }
 
     private void verifyCorrectHearingCourtReturned(final String region, final String subRegionListName, final String subRegion) {
