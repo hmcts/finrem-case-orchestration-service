@@ -83,16 +83,12 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler
 
     private List<ContestedUploadedDocumentData> getDocumentCollection(Map<String, Object> caseData) {
         objectMapper.registerModule(new JavaTimeModule());
-
-        caseData.get(CONTESTED_UPLOADED_DOCUMENTS);
-
         List<ContestedUploadedDocumentData> contestedUploadDocuments = objectMapper.convertValue(
             caseData.get(CONTESTED_UPLOADED_DOCUMENTS), new TypeReference<>() {
             });
 
         return Optional.ofNullable(contestedUploadDocuments).orElse(new ArrayList<>());
     }
-
 
     private GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> getCallBackResponse(Map<String, Object> caseData) {
         return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder()
