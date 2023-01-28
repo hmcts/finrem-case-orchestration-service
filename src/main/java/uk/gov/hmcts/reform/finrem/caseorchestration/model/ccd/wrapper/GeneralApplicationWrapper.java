@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.EvidenceParty;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationOutcome;
@@ -63,9 +64,9 @@ public class GeneralApplicationWrapper {
     private List<GeneralApplicationsCollection> generalApplications;
     private String generalApplicationTracking;
     private String generalApplicationRejectReason;
-    private String generalApplicationList;
-    private String generalApplicationReferList;
+    private DynamicList generalApplicationList;
+    private DynamicList generalApplicationReferList;
     private String generalApplicationReferDetail;
-    private String generalApplicationOutcomeList;
-    private String generalApplicationDirectionsList;
+    private DynamicList generalApplicationOutcomeList;
+    private DynamicList generalApplicationDirectionsList;
 }

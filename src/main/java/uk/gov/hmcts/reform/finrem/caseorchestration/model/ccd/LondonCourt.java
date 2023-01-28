@@ -18,7 +18,8 @@ public enum LondonCourt implements CourtList {
     EDMONTON_COOUNTY_COURT_AND_FAMILY_COURT("FR_londonList_9"),
     CROYDON_COUNTY_COURT_AND_FAMILY_COURT("FR_londonList_10"),
     BROMLEY_COUNTY_COURT_AND_FAMILY_COURT("FR_londonList_11"),
-    MIGRATION_TEMP_HC("FR_londonList_12");
+    MIGRATION_TEMP_HC("FR_londonList_12"),
+    THE_ROYAL_COURT_OF_JUSTICE("FR_londonList_13");
 
     private final String id;
 
