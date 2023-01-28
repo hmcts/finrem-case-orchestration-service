@@ -1,6 +1,13 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -10,7 +17,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedHearingHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
@@ -42,10 +48,21 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
     @Autowired
     private ConsentedHearingHelper helper;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper;
     private static final String AUTH_TOKEN = "tokien:)";
     private static final String SINGLE_HEARING_TEST_PAYLOAD = "/fixtures/consented.listOfHearing/list-for-hearing.json";
     private static final String MULTIPLE_HEARING_TEST_PAYLOAD = "/fixtures/consented.listOfHearing/list-for-hearing-multiple.json";
+
+    @Before
+    public void setup() {
+        objectMapper = JsonMapper
+            .builder()
+            .addModule(new JavaTimeModule())
+            .addModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .build();
+    }
 
     @Test
     public void givenConsentedHearing_whenNoConsentToEmail_thenItShouldSendAllToBulkPrint() {
@@ -129,11 +146,8 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
 
         caseDetails.getData().setPaperApplication(YesOrNo.YES);
 
-        when(caseDataService.isPaperApplication(any())).thenReturn(true);
-
         service.sendNotification(caseDetails, caseDetailsBefore);
 
-        verify(caseDataService).isPaperApplication(any());
         verify(caseDataService, never()).isApplicantSolicitorAgreeToReceiveEmails(any());
         verify(notificationService, never()).isRespondentSolicitorEmailCommunicationEnabled(any());
         verify(notificationService, never())
@@ -165,20 +179,15 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
     @Test
     public void givenFinremCaseDetailsConsentedNotPaperCase_WhenPaperCase_ThenItShouldSendNotification() {
         FinremCaseDetails caseDetails = buildFinremCaseDetails(MULTIPLE_HEARING_TEST_PAYLOAD);
-
         caseDetails.getData().setPaperApplication(YesOrNo.NO);
-
-        when(caseDataService.isPaperApplication(any())).thenReturn(false);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
-
+        caseDetails.getData().getContactDetailsWrapper().setSolicitorAgreeToReceiveEmails(YesOrNo.YES);
+        caseDetails.getData().getContactDetailsWrapper().setConsentedRespondentRepresented(YesOrNo.YES);
+        caseDetails.getData().getContactDetailsWrapper().setSolicitorEmail("some@som.com");
+        caseDetails.getData().setRespSolNotificationsEmailConsent(YesOrNo.YES);
         FinremCaseDetails caseDetailsBefore = buildFinremCaseDetails(SINGLE_HEARING_TEST_PAYLOAD);
+
         service.sendNotification(caseDetails, caseDetailsBefore);
 
-        verify(caseDataService).isPaperApplication(any());
-
-        verify(caseDataService, times(2)).isApplicantSolicitorAgreeToReceiveEmails(any());
-        verify(notificationService, times(2)).isRespondentSolicitorEmailCommunicationEnabled(any());
         verify(notificationService, times(2))
             .sendConsentHearingNotificationEmailToApplicantSolicitor(any(FinremCaseDetails.class), anyMap());
         verify(notificationService, times(2))

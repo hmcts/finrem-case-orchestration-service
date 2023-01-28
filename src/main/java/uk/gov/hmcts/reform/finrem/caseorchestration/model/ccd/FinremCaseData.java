@@ -572,6 +572,7 @@ public class FinremCaseData {
         return getConsentOrderWrapper().getConsentedNotApprovedOrders() != null
             && !getConsentOrderWrapper().getConsentedNotApprovedOrders().isEmpty();
     }
+
     @JsonIgnore
     public boolean isRespondentSolicitorEmailCommunicationEnabled() {
         return !isPaperCase()
