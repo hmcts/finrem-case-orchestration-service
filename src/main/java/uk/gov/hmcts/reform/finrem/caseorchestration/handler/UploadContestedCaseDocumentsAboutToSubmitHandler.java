@@ -59,10 +59,12 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler
         if (!CollectionUtils.isEmpty(response.getErrors())) {
             return response;
         }
+
         Map<String, Object> caseData = uploadedDocumentHelper.addUploadDateToNewDocuments(
             callbackRequest.getCaseDetails().getData(),
             callbackRequest.getCaseDetailsBefore().getData(), CONTESTED_UPLOADED_DOCUMENTS);
-        List<ContestedUploadedDocumentData> uploadedDocuments = getDocumentCollection(caseData);
+
+        List<ContestedUploadedDocumentData> uploadedDocuments = (List<ContestedUploadedDocumentData>) caseData.get(CONTESTED_UPLOADED_DOCUMENTS);
         caseDocumentHandlers.stream().forEach(h -> h.handle(uploadedDocuments, caseData));
         uploadedDocuments.sort(Comparator.comparing(
             ContestedUploadedDocumentData::getUploadedCaseDocument, Comparator.comparing(
@@ -73,7 +75,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler
     }
 
     private GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> validateUploadedDocuments(
-                                                        Map<String, Object> caseData) {
+        Map<String, Object> caseData) {
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = getCallBackResponse(caseData);
         setWarningsAndErrors(caseData, response);
         return response;
@@ -81,7 +83,6 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler
 
     private List<ContestedUploadedDocumentData> getDocumentCollection(Map<String, Object> caseData) {
         objectMapper.registerModule(new JavaTimeModule());
-
         List<ContestedUploadedDocumentData> contestedUploadDocuments = objectMapper.convertValue(
             caseData.get(CONTESTED_UPLOADED_DOCUMENTS), new TypeReference<>() {
             });
@@ -102,6 +103,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler
             && isTrialBundleSelectedInAnyUploadedFile(caseData)) {
             response.getErrors().add(TRIAL_BUNDLE_SELECTED_ERROR);
         }
+
     }
 
     private boolean isTrialBundleSelectedInAnyUploadedFile(Map<String, Object> caseData) {

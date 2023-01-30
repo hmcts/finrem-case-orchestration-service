@@ -15,7 +15,6 @@
       "applicantPhone": "89897876765",
       "applicantEmail": "email01@email.com",
       "applicantRepresented": "No",
-      "applicantAddressConfidential" : "Yes",
       "applicantAddress": {
         "AddressLine1": "67 Pears Road",
         "AddressLine2": "",
@@ -33,7 +32,6 @@
       "respondentEmail": null,
       "respondentLName": "test",
       "respondentPhone": null,
-      "respondentAddressConfidential" : "No",
       "respondentFMName": "test",
       "divorceCaseNumber": "DD12D12345",
       "fastTrackDecision": "Yes",
