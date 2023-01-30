@@ -94,7 +94,7 @@ public class ConsentOrderPrintService {
         Map<String, Object> caseData = caseDetails.getData();
 
         List<CaseDocument> orderDocuments = caseDataService.isOrderApprovedCollectionPresent(caseData)
-            ? consentOrderApprovedDocumentService.approvedOrderCollection(caseDetails, authorisationToken)
+            ? consentOrderApprovedDocumentService.approvedOrderDocuments(caseDetails, authorisationToken)
             : consentOrderNotApprovedDocumentService.notApprovedConsentOrder(caseDetails);
 
         if (!isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {

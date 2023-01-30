@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -31,6 +32,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentServi
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -385,36 +387,44 @@ public class DocumentHelper {
             : Optional.empty();
     }
 
-    public List<BulkPrintDocument> getCollectionOfDocumentLinksAsBulkPrintDocuments(Map<String, Object> data,
-                                                                                    String collectionName, String authorisationToken) {
-        return getCaseDocumentsAsBulkPrintDocuments(getDocumentLinksFromCustomCollectionAsCaseDocuments(data,
-            collectionName, null, authorisationToken));
+    public List<BulkPrintDocument> getHearingDocumentsAsBulkPrintDocuments(Map<String, Object> data, String authorisationToken) {
+
+        List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
+        List<DocumentCollection> pdfDocuments = new ArrayList<>();
+        List<DocumentCollection> documentCollections = covertDocumentCollections(data.get(HEARING_ORDER_OTHER_COLLECTION));
+        documentCollections.forEach(doc -> {
+            CaseDocument caseDocument = doc.getValue();
+            CaseDocument pdfDocument = service.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken);
+            pdfDocuments.add(DocumentCollection
+                .builder()
+                .value(pdfDocument)
+                .build());
+            bulkPrintDocuments.add(getCaseDocumentAsBulkPrintDocument(pdfDocument));
+        });
+
+        data.put(HEARING_ORDER_OTHER_COLLECTION, pdfDocuments);
+        return bulkPrintDocuments;
+    }
+
+    private List<DocumentCollection> covertDocumentCollections(Object object) {
+        if (object == null) {
+            return Collections.emptyList();
+        }
+        return objectMapper.registerModule(new JavaTimeModule()).convertValue(object, new TypeReference<>() {
+        });
     }
 
     public List<CaseDocument> getDocumentLinksFromCustomCollectionAsCaseDocuments(Map<String, Object> data, String collectionName,
-                                                                                  String documentName, String authorisationToken) {
+                                                                                  String documentName) {
         List<CaseDocument> documents = new ArrayList<>();
 
         List<Map<String, Object>> documentList = ofNullable(data.get(collectionName))
             .map(i -> (List<Map<String, Object>>) i)
             .orElse(new ArrayList<>());
-        List<DocumentCollection> documentCollections = new ArrayList<>();
+
         for (Map<String, Object> document : documentList) {
             Map<String, Object> value = (Map<String, Object>) document.get(VALUE);
-
-            Optional<CaseDocument> documentLinkAsCaseDocument = getDocumentLinkAsCaseDocument(value, documentName);
-            if (documentLinkAsCaseDocument.isPresent()) {
-                CaseDocument caseDocument = documentLinkAsCaseDocument.get();
-                CaseDocument pdfCaseDocument = service.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken);
-                documents.add(pdfCaseDocument);
-                documentCollections.add(DocumentCollection
-                    .builder()
-                    .value(pdfCaseDocument)
-                    .build());
-            }
-        }
-        if (HEARING_ORDER_OTHER_COLLECTION.equalsIgnoreCase(collectionName)) {
-            data.put(collectionName, documentCollections);
+            getDocumentLinkAsCaseDocument(value, documentName).ifPresent(documents::add);
         }
         return documents;
     }
