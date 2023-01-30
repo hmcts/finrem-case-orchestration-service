@@ -171,6 +171,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
 
         assertThat(bulkPrintArgumentCaptor.getAllValues().get(0).stream().map(BulkPrintDocument::getBinaryFileUrl).collect(Collectors.toList()),
             containsInAnyOrder(expectedBulkPrintDocuments.toArray()));
+        verify(documentHelper).getHearingDocumentsAsBulkPrintDocuments(any(), any());
     }
 
     @Test
