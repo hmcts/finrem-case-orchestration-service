@@ -5,7 +5,6 @@ import io.restassured.response.Response;
 import net.serenitybdd.junit.runners.SerenityRunner;
 import net.serenitybdd.rest.SerenityRest;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
@@ -73,7 +72,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
             .equalsIgnoreCase("approvedConvertedHearingOrder.pdf"));
     }
 
-    @Ignore
     @Test
     public void verifyBulkPrintDocumentGenerationShouldReturnOkResponseCode() {
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(GENERAL_ORDER_JSON, documentRejectedOrderUrl,
