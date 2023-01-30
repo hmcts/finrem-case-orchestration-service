@@ -26,6 +26,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -296,6 +297,11 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         assertThat(data.get("GeneralOrderHeaderOne"), is("In the Family Court"));
         assertThat(data.get("GeneralOrderHeaderTwo"), is("sitting in the"));
         assertThat(data.get("GeneralOrderCourtSitting"), is("SITTING AT the Family Court at the "));
+        Map<String, Object> court = (Map<String, Object>) data.get("courtDetails");
 
+        assertThat(court.get("courtName"), is("Nottingham County Court And Family Court"));
+        assertThat(court.get("courtAddress"), is("60 Canal Street, Nottingham NG1 7EJ"));
+        assertThat(court.get("phoneNumber"), is("0115 910 3504"));
+        assertThat(court.get("email"), is("FRCNottingham@justice.gov.uk"));
     }
 }
