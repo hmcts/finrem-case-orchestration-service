@@ -96,7 +96,7 @@ public class ConsentHearingService {
     private void notify(FinremCaseDetails caseDetails, ConsentedHearingDataWrapper hearingCaseData, List<String> hearingIdsToProcess) {
         if (hearingIdsToProcess.contains(hearingCaseData.getId())) {
             Map<String, Object> caseData = helper.convertToMap(hearingCaseData.getValue());
-            if (caseDetails.getData().isApplicantSolicitorAgreeToReceiveEmails()) {
+            if (caseDetails.isApplicantSolicitorAgreeToReceiveEmails()) {
                 log.info("Sending email notification to Applicant Solicitor about hearing for case id {}", caseDetails.getId());
                 notificationService.sendConsentHearingNotificationEmailToApplicantSolicitor(caseDetails, caseData);
                 log.info("Email notification to Applicant Solicitor about hearing for case id {} sent.", caseDetails.getId());

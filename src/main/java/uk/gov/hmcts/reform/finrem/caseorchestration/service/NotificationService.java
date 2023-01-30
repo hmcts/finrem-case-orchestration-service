@@ -425,13 +425,13 @@ public class NotificationService {
 
     public void sendBarristerAddedEmail(CaseDetails caseDetails, Barrister barrister) {
         URI uri = buildUri(notificationServiceConfiguration.getAddedBarrister());
-        NotificationRequest notificationRequest = notificationRequestMapper.buildNotificationRequest(caseDetails, barrister);
+        NotificationRequest notificationRequest = notificationRequestMapper.buildInterimHearingNotificationRequest(caseDetails, barrister);
         sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendBarristerRemovedEmail(CaseDetails caseDetails, Barrister barrister) {
         URI uri = buildUri(notificationServiceConfiguration.getRemovedBarrister());
-        NotificationRequest notificationRequest = notificationRequestMapper.buildNotificationRequest(caseDetails, barrister);
+        NotificationRequest notificationRequest = notificationRequestMapper.buildInterimHearingNotificationRequest(caseDetails, barrister);
         sendNotificationEmail(notificationRequest, uri);
     }
 

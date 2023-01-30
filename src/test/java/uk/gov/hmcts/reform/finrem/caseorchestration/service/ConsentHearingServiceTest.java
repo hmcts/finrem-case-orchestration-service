@@ -122,7 +122,7 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
 
 
     @Test
-    public void givenConsentedPaperCase_WhenPaperCase_ThenItShouldNotSendNotificaton() {
+    public void givenConsentedPaperCase_WhenPaperCase_ThenItShouldNotSendNotification() {
         CaseDetails caseDetails = buildCaseDetails(MULTIPLE_HEARING_TEST_PAYLOAD);
         CaseDetails caseDetailsBefore = buildCaseDetails(SINGLE_HEARING_TEST_PAYLOAD);
 
@@ -140,7 +140,7 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
     }
 
     @Test
-    public void givenFinremCaseDetailsConsentedPaperCase_WhenPaperCase_ThenItShouldNotSendNotificaton() {
+    public void givenFinremCaseDetailsConsentedPaperCase_WhenPaperCase_ThenItShouldNotSendNotification() {
         FinremCaseDetails caseDetails = buildFinremCaseDetails(MULTIPLE_HEARING_TEST_PAYLOAD);
         FinremCaseDetails caseDetailsBefore = buildFinremCaseDetails(SINGLE_HEARING_TEST_PAYLOAD);
 
@@ -157,7 +157,7 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
     }
 
     @Test
-    public void givenConsentedNotPaperCase_WhenPaperCase_ThenItShouldSendNotificaton() {
+    public void givenConsentedNotPaperCase_WhenPaperCase_ThenItShouldSendNotification() {
         CaseDetails caseDetails = buildCaseDetails(MULTIPLE_HEARING_TEST_PAYLOAD);
         caseDetails.getData().put("paperApplication", NO_VALUE);
 
