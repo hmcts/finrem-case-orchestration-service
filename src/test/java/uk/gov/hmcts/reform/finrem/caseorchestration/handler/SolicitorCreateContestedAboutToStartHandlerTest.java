@@ -21,6 +21,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TYPE_OF_APPLICATION_DEFAULT_TO;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.URGENT_CASE_QUESTION;
 
 public class SolicitorCreateContestedAboutToStartHandlerTest {
 
@@ -52,6 +53,7 @@ public class SolicitorCreateContestedAboutToStartHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = handler.handle(callbackRequest, AUTH_TOKEN);
         assertEquals(NO_VALUE, response.getData().get(CIVIL_PARTNERSHIP));
         assertEquals(TYPE_OF_APPLICATION_DEFAULT_TO, response.getData().get(TYPE_OF_APPLICATION));
+        assertEquals(NO_VALUE, response.getData().get(URGENT_CASE_QUESTION));
     }
 
     private CallbackRequest buildCallbackRequest() {

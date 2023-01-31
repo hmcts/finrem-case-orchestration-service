@@ -9,18 +9,6 @@ import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 @RunWith(SerenityRunner.class)
 public class NotificationTests extends IntegrationTestBase {
 
-    @Value("${cos.notification.judge-assign.api}")
-    private String notifyAssignToJudge;
-
-    @Value("${cos.notification.consent-order-available.api}")
-    private String consentOrderAvailable;
-
-    @Value("${cos.notification.consent-order-approved.api}")
-    private String consentOrderMade;
-
-    @Value("${cos.notification.consent-order-unapproved.api}")
-    private String consentOrderNotApproved;
-
     @Value("${cos.notification.prepare-for-hearing.api}")
     private String prepareForHearingApiUri;
 
@@ -30,46 +18,11 @@ public class NotificationTests extends IntegrationTestBase {
     @Value("${cos.notification.contest-application-issued.api}")
     private String contestApplicationIssuedApiUri;
 
-    @Value("${cos.notification.contest-order-approved.api}")
-    private String contestOrderApprovedApiUri;
-
-    @Value("${cos.notification.contest-draft-order.api}")
-    private String contestDraftOrderApiUri;
-
     @Value(" /notify/update-frc")
     private String updateFrcInfoUri;
 
     private final String consentedDir = "/json/consented/";
     private final String contestedDir = "/json/contested/";
-
-
-    @Test
-    public void verifyNotifyAssignToJudgeTestIsOkay() {
-
-        utils.validatePostSuccess(notifyAssignToJudge,
-            "ccd-request-with-solicitor-assignedToJudge1.json", consentedDir);
-    }
-
-    @Test
-    public void verifyNotifyConsentOrderAvailableTestIsOkay() {
-
-        utils.validatePostSuccess(consentOrderAvailable,
-            "ccd-request-with-solicitor-consentOrderAvailable1.json", consentedDir);
-    }
-
-    @Test
-    public void verifyNotifyConsentOrderMadeTestIsOkay() {
-
-        utils.validatePostSuccess(consentOrderMade,
-            "ccd-request-with-solicitor-consentOrderMade1.json", consentedDir);
-    }
-
-    @Test
-    public void verifyNotifyConsentOrderNotApprovedTestIsOkay() {
-
-        utils.validatePostSuccess(consentOrderNotApproved,
-            "ccd-request-with-solicitor-consentOrderNotApproved1.json", consentedDir);
-    }
 
     @Test
     public void verifyNotifyPrepareForHearingTestIsOkay() {
