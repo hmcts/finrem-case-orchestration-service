@@ -525,39 +525,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     }
 
-    @Test
-    public void sendContestedConsentGeneralOrderEmail() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
-        when(caseDataService.isConsentedInContestedCase(any())).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
-
-        notificationsController.sendGeneralOrderRaisedEmail(buildCallbackRequest());
-
-        verify(notificationService).sendContestedConsentGeneralOrderEmailApplicantSolicitor(any());
-    }
-
-    @Test
-    public void sendContestedGeneralOrderEmails() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
-        when(caseDataService.isConsentedInContestedCase(any())).thenReturn(false);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
-
-        notificationsController.sendGeneralOrderRaisedEmail(buildCallbackRequest());
-
-        verify(notificationService).sendContestedGeneralOrderEmailApplicant(any());
-        verify(notificationService).sendContestedGeneralOrderEmailRespondent(any());
-    }
-
-    @Test
-    public void whenShouldNotSendContestedGeneralOrderEmailToRespondent_ThenTheEmailIsNotIssued() {
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
-
-        notificationsController.sendGeneralOrderRaisedEmail(buildCallbackRequest());
-
-        verify(notificationService, never()).sendContestedConsentGeneralOrderEmailRespondentSolicitor(any());
-        verify(notificationService, never()).sendContestedGeneralOrderEmailRespondent(any());
-    }
 
     @Test
     public void shouldNotSendEmailToRespSolicitor() {
@@ -568,30 +535,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
         verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(any());
     }
 
-    @Test
-    public void shouldSendContestedConsentGeneralOrderEmailToRespondentInConsentedInContestedCase() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
-        when(caseDataService.isConsentedInContestedCase(any())).thenReturn(true);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
-
-        notificationsController.sendGeneralOrderRaisedEmail(buildCallbackRequest());
-
-        verify(notificationService).sendContestedConsentGeneralOrderEmailRespondentSolicitor(any());
-        verify(notificationService, never()).sendContestedGeneralOrderEmailRespondent(any());
-        verify(notificationService, never()).sendConsentedGeneralOrderEmailToRespondentSolicitor(any());
-    }
-
-    @Test
-    public void sendConsentedGeneralOrderEmail() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
-
-        notificationsController.sendGeneralOrderRaisedEmail(buildCallbackRequest());
-
-        verify(notificationService).sendConsentedGeneralOrderEmailToApplicantSolicitor(any());
-        verify(notificationService).sendConsentedGeneralOrderEmailToRespondentSolicitor(any());
-    }
 
     @Test
     public void sendContestedGeneralApplicationReferToJudgeEmail() {
