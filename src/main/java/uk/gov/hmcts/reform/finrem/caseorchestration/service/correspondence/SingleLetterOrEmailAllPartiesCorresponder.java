@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 @Component
 @Slf4j
-public abstract class SingleLetterOrEmailAllPartiesCorresponder extends CorresponderBase {
+public abstract class SingleLetterOrEmailAllPartiesCorresponder extends EmailAndLettersCorresponderBase {
 
     protected final BulkPrintService bulkPrintService;
 
