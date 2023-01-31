@@ -29,9 +29,6 @@ public class CheckSolicitorIsDigitalService {
         CaseAssignmentUserRolesResource rolesResource = assignCaseAccessService.getUserRoles(caseId);
         log.info("CheckSolicitorIsDigitalService::rolesResource =={}==getCaseAssignmentUserRoles{} ==caseId{}==",
             rolesResource.getCaseAssignmentUserRoles(), caseId);
-        for (CaseAssignmentUserRole cr : rolesResource.getCaseAssignmentUserRoles()) {
-            log.info("Role List role {}, case data id{} case id {}", cr.getCaseRole(), cr.getCaseDataId(), caseId);
-        }
 
         if (rolesResource == null || rolesResource.getCaseAssignmentUserRoles() == null) {
             return false;
