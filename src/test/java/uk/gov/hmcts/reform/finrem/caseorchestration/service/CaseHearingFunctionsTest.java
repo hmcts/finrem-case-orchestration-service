@@ -110,7 +110,7 @@ public class CaseHearingFunctionsTest {
             HIGHCOURT_FRC_LIST_CT, HIGHCOURT);
 
         String courtList = CaseHearingFunctions.getSelectedCourtComplexType(caseData);
-        assertThat(courtList, is(HIGHCOURT_FRC_LIST_CT));
+        assertThat(courtList, is(HIGHCOURT_COURTLIST));
     }
 
     @Test
