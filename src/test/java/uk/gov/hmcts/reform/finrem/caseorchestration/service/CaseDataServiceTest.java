@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 
@@ -487,24 +486,6 @@ public class CaseDataServiceTest extends BaseServiceTest {
             "/fixtures/bulkprint/bulk-print-paper-application.json"), CallbackRequest.class).getCaseDetails();
 
         assertThat(caseDataService.isContestedPaperApplication(caseDetails), is(false));
-    }
-
-    @Test
-    public void isContestedFinremPaperApplicationShouldReturnTrueWhenCaseTypeIsSetToContestedAndIsPaperCase() throws IOException {
-        CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
-            "/fixtures/contested/finrem-validate-hearing-with-fastTrackDecision-paperApplication.json"), CallbackRequest.class).getCaseDetails();
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-
-        assertThat(caseDataService.isContestedFinremCasePaperApplication(finremCaseDetails), is(true));
-    }
-
-    @Test
-    public void isContestedFinremPaperApplicationShouldReturnFalseWhenCaseTypeIsSetToConsentedAndIsPaperCase() throws IOException {
-        CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
-            "/fixtures/bulkprint/finrem-bulk-print-paper-application.json"), CallbackRequest.class).getCaseDetails();
-        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
-
-        assertThat(caseDataService.isContestedFinremCasePaperApplication(finremCaseDetails), is(false));
     }
 
     @Test

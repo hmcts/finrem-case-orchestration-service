@@ -7,7 +7,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderDocumentCollection;
@@ -172,10 +171,6 @@ public class CaseDataService {
         return YES_VALUE.equalsIgnoreCase(Objects.toString(caseData.get(PAPER_APPLICATION)));
     }
 
-    public boolean isPaperApplicationFinremCaseData(FinremCaseData caseData) {
-        return YES_VALUE.equalsIgnoreCase(Objects.toString(caseData.getPaperApplication()));
-    }
-
     public boolean isConsentedInContestedCase(CaseDetails caseDetails) {
         return isContestedApplication(caseDetails) && caseDetails.getData().get(CONSENT_D81_QUESTION) != null;
     }
@@ -210,10 +205,6 @@ public class CaseDataService {
 
     public boolean isContestedPaperApplication(CaseDetails caseDetails) {
         return isContestedApplication(caseDetails) && isPaperApplication(caseDetails.getData());
-    }
-
-    public boolean isContestedFinremCasePaperApplication(FinremCaseDetails caseDetails) {
-        return isContestedFinremCaseDetailsApplication(caseDetails) && isPaperApplicationFinremCaseData(caseDetails.getData());
     }
 
     public boolean isOrderApprovedCollectionPresent(Map<String, Object> caseData) {

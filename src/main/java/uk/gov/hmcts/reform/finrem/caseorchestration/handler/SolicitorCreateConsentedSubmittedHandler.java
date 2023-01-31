@@ -41,10 +41,6 @@ public class SolicitorCreateConsentedSubmittedHandler extends AssignApplicantSol
         log.info("Processing Submitted callback for event {} with Case ID : {}",
             EventType.SOLICITOR_CREATE, callbackRequest.getCaseDetails().getId());
         createCaseService.setSupplementaryData(callbackRequest, userAuthorisation);
-        if (!caseDataService.isPaperApplicationFinremCaseData(callbackRequest.getCaseDetails().getData())) {
-            return super.handle(callbackRequest, userAuthorisation);
-        }
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(callbackRequest.getCaseDetails().getData()).build();
+        return super.handle(callbackRequest, userAuthorisation);
     }
 }
