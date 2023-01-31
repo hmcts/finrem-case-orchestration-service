@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.conse
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderNotApprovedSentCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedConsentOrderApprovedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedConsentOrderNotApprovedCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.generalorder.GeneralOrderRaisedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfConsentedApplicantCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfContestedApplicantCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfCorrespondenceService;
@@ -110,6 +111,8 @@ public class NotificationsControllerTest extends BaseControllerTest {
     private DocumentConfiguration documentConfiguration;
     @MockBean
     private DocumentHelper documentHelper;
+    @MockBean
+    private GeneralOrderRaisedCorresponder generalOrderRaisedCorresponder;
 
 
     @Test
@@ -514,15 +517,12 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
 
     @Test
-    public void shouldNotSendGeneralOrderEmail() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+    public void shouldSendGeneralOrderCorrespondence() {
 
-        notificationsController.sendGeneralOrderRaisedEmail(buildCallbackRequest());
+        CallbackRequest callbackRequest = buildCallbackRequest();
+        notificationsController.sendGeneralOrderRaisedEmail(callbackRequest);
+        verify(generalOrderRaisedCorresponder).sendCorrespondence(callbackRequest.getCaseDetails());
 
-        verify(notificationService, never()).sendConsentedGeneralOrderEmailToRespondentSolicitor(any());
-        verify(notificationService, never()).sendContestedConsentGeneralOrderEmailRespondentSolicitor(any());
-        verify(notificationService, never()).sendContestedGeneralOrderEmailRespondent(any());
     }
 
     @Test
