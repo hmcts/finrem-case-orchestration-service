@@ -91,7 +91,7 @@ public class CCDConfigConstant {
     public static final String WALES_FRC_LIST = "walesFRCList";
     public static final String WALES_FRC_LIST_CT = "walesList";
     public static final String HIGHCOURT_FRC_LIST = "highCourtFRCList";
-    public static final String HIGHCOURT_FRC_LIST_CT = "highCourtList";
+    public static final String HIGHCOURT_FRC_LIST_CT = "hcCourtList";
 
     //Regions
     public static final String LONDON = "london";
