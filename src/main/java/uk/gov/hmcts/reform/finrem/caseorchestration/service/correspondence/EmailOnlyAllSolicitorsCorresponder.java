@@ -16,7 +16,7 @@ public abstract class EmailOnlyAllSolicitorsCorresponder extends CorresponderBas
     }
 
     @Override
-    public void sendCorrespondence(CaseDetails caseDetails, String authToken) {
+    public void sendCorrespondence(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authToken) {
         if (shouldSendApplicantSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to applicant for case: {}", caseDetails.getId());
             this.emailApplicantSolicitor(caseDetails);

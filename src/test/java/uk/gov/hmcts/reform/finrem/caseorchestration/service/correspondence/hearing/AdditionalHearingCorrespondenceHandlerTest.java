@@ -26,6 +26,8 @@ public class AdditionalHearingCorrespondenceHandlerTest extends HearingCorrespon
     public void setUpTest() {
         applicantAndRespondentMultiLetterCorresponder = new AdditionalHearingCorresponder(bulkPrintService, notificationService, documentHelper);
         caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
+        caseDetailsBefore = TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing-before.json", objectMapper);
+
 
         when(documentHelper.convertToAdditionalHearingDocumentData(any())).thenReturn(getAdditionalHearingDocumentData());
         when(documentHelper.getBulkPrintDocumentFromCaseDocument(any())).thenReturn(getBulkPrintDocument());
@@ -35,7 +37,7 @@ public class AdditionalHearingCorrespondenceHandlerTest extends HearingCorrespon
 
     @Test
     public void shouldGetDocumentsToPrint() {
-        List<BulkPrintDocument> documentsToPrint = applicantAndRespondentMultiLetterCorresponder.getDocumentsToPrint(caseDetails);
+        List<BulkPrintDocument> documentsToPrint = applicantAndRespondentMultiLetterCorresponder.getDocumentsToPrint(caseDetails, caseDetailsBefore);
         assertEquals(2, documentsToPrint.size());
     }
 

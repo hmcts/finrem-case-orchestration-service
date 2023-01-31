@@ -73,7 +73,7 @@ public class ConsentHearingService {
         }
     }
 
-    public void submitHearing(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authorisationToken) {
+    public void generateHearingDocumentsForCase(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authorisationToken) {
         log.info("In submit Hearing for case id {}", caseDetails.getId());
 
         Map<String, Object> caseData = caseDetails.getData();
@@ -110,7 +110,7 @@ public class ConsentHearingService {
         }
     }
 
-    private ConsentedHearingDataWrapper generateHearingDocument(CaseDetails caseDetails,
+    public ConsentedHearingDataWrapper generateHearingDocument(CaseDetails caseDetails,
                                                                 ConsentedHearingDataWrapper hearingData,
                                                                 List<String> hearingIdsToProcess,
                                                                 List<BulkPrintDocument> documents,

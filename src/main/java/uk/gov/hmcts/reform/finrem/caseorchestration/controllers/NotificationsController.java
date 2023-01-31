@@ -73,7 +73,7 @@ public class NotificationsController extends BaseController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
-        hwfNotificationsService.sendCorrespondence(caseDetails, authToken);
+        hwfNotificationsService.sendCorrespondence(caseDetails, callbackRequest.getCaseDetailsBefore(), authToken);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
@@ -92,7 +92,7 @@ public class NotificationsController extends BaseController {
         validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
-        assignToJudgeCorrespondenceService.sendCorrespondence(caseDetails, authToken);
+        assignToJudgeCorrespondenceService.sendCorrespondence(caseDetails, callbackRequest.getCaseDetailsBefore(), authToken);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
@@ -631,9 +631,10 @@ public class NotificationsController extends BaseController {
         validateCaseData(callbackRequest);
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         Map<String, Object> caseData = caseDetails.getData();
 
-        updateFrcCorrespondenceService.sendCorrespondence(caseDetails, authToken);
+        updateFrcCorrespondenceService.sendCorrespondence(caseDetails, caseDetailsBefore, authToken);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }

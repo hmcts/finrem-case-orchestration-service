@@ -15,14 +15,14 @@ public class HwfCorrespondenceService {
     private final HwfConsentedApplicantCorresponder hwfConsentedApplicantCorresponder;
     private final HwfContestedApplicantCorresponder hwfContestedApplicantCorresponder;
 
-    public void sendCorrespondence(CaseDetails caseDetails, String authToken) {
+    public void sendCorrespondence(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authToken) {
         log.info("Send HWF correspondence for case: {}", caseDetails.getId());
         if (caseDataService.isConsentedApplication(caseDetails)) {
             log.info("Send HWF Consented correspondence for case: {}", caseDetails.getId());
-            hwfConsentedApplicantCorresponder.sendCorrespondence(caseDetails, authToken);
+            hwfConsentedApplicantCorresponder.sendCorrespondence(caseDetails, caseDetailsBefore, authToken);
         } else if (caseDataService.isContestedApplication(caseDetails)) {
             log.info("Send HWF Contested correspondence for case: {}", caseDetails.getId());
-            hwfContestedApplicantCorresponder.sendCorrespondence(caseDetails, authToken);
+            hwfContestedApplicantCorresponder.sendCorrespondence(caseDetails, caseDetailsBefore, authToken);
         }
     }
 

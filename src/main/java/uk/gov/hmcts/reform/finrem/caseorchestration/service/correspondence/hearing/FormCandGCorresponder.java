@@ -41,7 +41,7 @@ public class FormCandGCorresponder extends HearingCorresponder {
     }
 
     @Override
-    public List<BulkPrintDocument> getDocumentsToPrint(CaseDetails caseDetails) {
+    public List<BulkPrintDocument> getDocumentsToPrint(CaseDetails caseDetails, CaseDetails caseDetailsBefore) {
         String caseId = caseDetails.getId() == null ? "noId" : caseDetails.getId().toString();
         return getHearingCaseDocuments(caseDetails.getData(), caseId);
     }

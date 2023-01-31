@@ -29,6 +29,7 @@ public class HwfConsentedApplicantCorresponderTest {
     HwfConsentedApplicantCorresponder hwfConsentedApplicantCorresponder;
 
     private CaseDetails caseDetails;
+    private CaseDetails caseDetailsBefore;
     private CaseDocument caseDocument;
 
     protected static final String AUTHORISATION_TOKEN = "authorisationToken";
@@ -37,6 +38,7 @@ public class HwfConsentedApplicantCorresponderTest {
     public void setUp() throws Exception {
         hwfConsentedApplicantCorresponder = new HwfConsentedApplicantCorresponder(bulkPrintService, notificationService, helpWithFessDocumentService);
         caseDetails = CaseDetails.builder().build();
+        caseDetailsBefore = CaseDetails.builder().build();
         caseDocument = CaseDocument.builder().build();
         when(helpWithFessDocumentService.generateHwfSuccessfulNotificationLetter(caseDetails, AUTHORISATION_TOKEN,
             DocumentHelper.PaperNotificationRecipient.APPLICANT)).thenReturn(
@@ -56,7 +58,7 @@ public class HwfConsentedApplicantCorresponderTest {
     public void shouldSendLetterToApplicant() {
 
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
-        hwfConsentedApplicantCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
+        hwfConsentedApplicantCorresponder.sendCorrespondence(caseDetails, caseDetailsBefore, AUTHORISATION_TOKEN);
         verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails);
     }
 
@@ -64,7 +66,7 @@ public class HwfConsentedApplicantCorresponderTest {
     public void shouldSendEmailToApplicant() {
 
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
-        hwfConsentedApplicantCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
+        hwfConsentedApplicantCorresponder.sendCorrespondence(caseDetails, caseDetailsBefore, AUTHORISATION_TOKEN);
         verify(notificationService).sendConsentedHWFSuccessfulConfirmationEmail(caseDetails);
     }
 }

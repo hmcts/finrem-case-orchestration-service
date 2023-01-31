@@ -52,7 +52,7 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
         when(caseDataService.isConsentedApplication(caseDetailsBefore)).thenReturn(true);
 
-        service.submitHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
+        service.generateHearingDocumentsForCase(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
         verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
         verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
@@ -70,7 +70,7 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
         when(caseDataService.isConsentedApplication(caseDetailsBefore)).thenReturn(true);
 
-        service.submitHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
+        service.generateHearingDocumentsForCase(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
         verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
         verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
@@ -89,7 +89,7 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
         when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
 
-        service.submitHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
+        service.generateHearingDocumentsForCase(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
         verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
         verify(bulkPrintService).printRespondentDocuments(any(), any(), any());

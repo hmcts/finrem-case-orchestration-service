@@ -22,7 +22,8 @@ public abstract class SingleLetterOrEmailAllPartiesCorresponder extends Correspo
         this.bulkPrintService = bulkPrintService;
     }
 
-    public void sendCorrespondence(CaseDetails caseDetails, String authToken) {
+    @Override
+    public void sendCorrespondence(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authToken) {
         sendApplicantCorrespondence(caseDetails, authToken);
         sendRespondentCorrespondence(caseDetails, authToken);
     }

@@ -70,8 +70,9 @@ public class ApprovedOrderNoticeOfHearingService {
     }
 
     public void printHearingNoticePackAndSendToApplicantAndRespondent(CaseDetails caseDetails,
+                                                                      CaseDetails caseDetailsBefore,
                                                                       String authorisationToken) {
-        approvedOrderNoticeOfHearingCorresponder.sendCorrespondence(caseDetails, authorisationToken);
+        approvedOrderNoticeOfHearingCorresponder.sendCorrespondence(caseDetails, caseDetailsBefore, authorisationToken);
     }
 
 

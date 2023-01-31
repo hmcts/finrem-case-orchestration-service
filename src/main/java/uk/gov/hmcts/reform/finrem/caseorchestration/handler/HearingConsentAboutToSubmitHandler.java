@@ -34,7 +34,8 @@ public class HearingConsentAboutToSubmitHandler implements CallbackHandler<Map<S
         CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         log.info("Received request for event type {} for case id {}", EventType.LIST_FOR_HEARING_CONSENTED, caseDetails.getId());
 
-        service.submitHearing(caseDetails, caseDetailsBefore, userAuthorisation);
+
+        service.generateHearingDocumentsForCase(caseDetails, caseDetailsBefore, userAuthorisation);
         return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseDetails.getData()).build();
     }
 }

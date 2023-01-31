@@ -32,12 +32,14 @@ public class AssignToJudgeCorresponderTest {
     private static final String AUTHORISATION_TOKEN = "authToken";
 
     private CaseDetails caseDetails;
+    private CaseDetails caseDetailsBefore;
     private CaseDocument caseDocument;
 
     @Before
     public void setUp() throws Exception {
         assignToJudgeCorresponder = new AssignToJudgeCorresponder(notificationService, bulkPrintService, assignedToJudgeDocumentService);
         caseDetails = CaseDetails.builder().build();
+        caseDetailsBefore = CaseDetails.builder().build();
         caseDocument = CaseDocument.builder().build();
         when(assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, AUTHORISATION_TOKEN,
             DocumentHelper.PaperNotificationRecipient.APPLICANT)).thenReturn(
@@ -68,7 +70,7 @@ public class AssignToJudgeCorresponderTest {
     @Test
     public void shouldEmailApplicantSolcitor() {
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
-        assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
+        assignToJudgeCorresponder.sendCorrespondence(caseDetails, caseDetailsBefore, AUTHORISATION_TOKEN);
         verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);
         verify(notificationService).sendAssignToJudgeConfirmationEmailToApplicantSolicitor(caseDetails);
     }
@@ -76,7 +78,7 @@ public class AssignToJudgeCorresponderTest {
     @Test
     public void emailRespondentSolicitor() {
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
-        assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
+        assignToJudgeCorresponder.sendCorrespondence(caseDetails, caseDetailsBefore, AUTHORISATION_TOKEN);
         verify(notificationService).isRespondentSolicitorDigitalAndEmailPopulated(caseDetails);
         verify(notificationService).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
     }
@@ -85,7 +87,7 @@ public class AssignToJudgeCorresponderTest {
     public void shouldSendLetterToApplicantAndRespondentSolicitor() {
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
-        assignToJudgeCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
+        assignToJudgeCorresponder.sendCorrespondence(caseDetails, caseDetailsBefore, AUTHORISATION_TOKEN);
 
         verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(caseDetails, AUTHORISATION_TOKEN,
             DocumentHelper.PaperNotificationRecipient.RESPONDENT);

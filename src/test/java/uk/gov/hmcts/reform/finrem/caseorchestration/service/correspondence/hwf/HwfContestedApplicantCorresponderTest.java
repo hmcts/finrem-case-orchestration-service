@@ -21,6 +21,7 @@ public class HwfContestedApplicantCorresponderTest {
     NotificationService notificationService;
 
     private CaseDetails caseDetails;
+    private CaseDetails caseDetailsBefore;
 
     protected static final String AUTHORISATION_TOKEN = "authorisationToken";
 
@@ -33,7 +34,7 @@ public class HwfContestedApplicantCorresponderTest {
     @Test
     public void shouldEmailApplicant() {
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
-        hwfContestedApplicantCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
+        hwfContestedApplicantCorresponder.sendCorrespondence(caseDetails, caseDetailsBefore, AUTHORISATION_TOKEN);
         verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);
         verify(notificationService).sendContestedHwfSuccessfulConfirmationEmail(caseDetails);
     }
@@ -41,7 +42,7 @@ public class HwfContestedApplicantCorresponderTest {
     @Test
     public void shouldNotEmailApplicant() {
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
-        hwfContestedApplicantCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
+        hwfContestedApplicantCorresponder.sendCorrespondence(caseDetails, caseDetailsBefore, AUTHORISATION_TOKEN);
         verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);
         verifyNoMoreInteractions(notificationService);
     }

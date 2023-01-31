@@ -37,6 +37,7 @@ public class FormCandGCorresponderTest extends HearingCorrespondenceBaseTest {
     @Before
     public void setUp() throws Exception {
         caseDetails = caseDetails(NO_VALUE);
+        caseDetailsBefore = CaseDetails.builder().build();
         applicantAndRespondentMultiLetterCorresponder =
             new FormCandGCorresponder(bulkPrintService, notificationService,
                 new DocumentHelper(objectMapper, new CaseDataService()), objectMapper);
@@ -44,7 +45,7 @@ public class FormCandGCorresponderTest extends HearingCorrespondenceBaseTest {
 
     @Test
     public void getDocumentsToPrint() {
-        List<BulkPrintDocument> documentsToPrint = applicantAndRespondentMultiLetterCorresponder.getDocumentsToPrint(caseDetails);
+        List<BulkPrintDocument> documentsToPrint = applicantAndRespondentMultiLetterCorresponder.getDocumentsToPrint(caseDetails, caseDetailsBefore);
         assertEquals(5, documentsToPrint.size());
     }
 

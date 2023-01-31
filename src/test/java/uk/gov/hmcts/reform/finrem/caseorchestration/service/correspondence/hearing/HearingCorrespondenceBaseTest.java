@@ -26,6 +26,7 @@ public abstract class HearingCorrespondenceBaseTest {
     @Mock
     DocumentHelper documentHelper;
     CaseDetails caseDetails;
+    CaseDetails caseDetailsBefore;
     MultiLetterOrEmailAllPartiesCorresponder applicantAndRespondentMultiLetterCorresponder;
 
 
@@ -35,7 +36,7 @@ public abstract class HearingCorrespondenceBaseTest {
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
 
-        applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, "authToken");
+        applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, caseDetailsBefore, "authToken");
 
         verify(notificationService).sendPrepareForHearingEmailRespondent(caseDetails);
         verify(notificationService).sendPrepareForHearingEmailApplicant(caseDetails);
@@ -48,7 +49,7 @@ public abstract class HearingCorrespondenceBaseTest {
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
 
-        applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, "authToken");
+        applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, caseDetailsBefore, "authToken");
 
         verify(bulkPrintService).printRespondentDocuments(any(CaseDetails.class), anyString(), anyList());
     }
@@ -59,7 +60,7 @@ public abstract class HearingCorrespondenceBaseTest {
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
 
-        applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, "authToken");
+        applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, caseDetailsBefore, "authToken");
 
         verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), anyString(), anyList());
         verify(notificationService).sendPrepareForHearingEmailRespondent(caseDetails);
@@ -72,7 +73,7 @@ public abstract class HearingCorrespondenceBaseTest {
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
 
-        applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, "authToken");
+        applicantAndRespondentMultiLetterCorresponder.sendCorrespondence(caseDetails, caseDetailsBefore, "authToken");
 
         verify(bulkPrintService).printRespondentDocuments(any(CaseDetails.class), anyString(), anyList());
         verify(notificationService).sendPrepareForHearingEmailApplicant(caseDetails);

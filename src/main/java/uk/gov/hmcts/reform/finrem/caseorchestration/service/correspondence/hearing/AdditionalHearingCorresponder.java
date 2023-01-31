@@ -31,7 +31,7 @@ public class AdditionalHearingCorresponder extends HearingCorresponder {
     }
 
     @Override
-    public List<BulkPrintDocument> getDocumentsToPrint(CaseDetails caseDetails) {
+    public List<BulkPrintDocument> getDocumentsToPrint(CaseDetails caseDetails, CaseDetails caseDetailsBefore) {
         List<AdditionalHearingDocumentData> additionalHearingDocumentData =
             documentHelper.convertToAdditionalHearingDocumentData(
                 caseDetails.getData().get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION));

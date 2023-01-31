@@ -22,19 +22,21 @@ public class UpdateFrcCorrespondenceServiceTest {
     NotificationService notificationService;
 
     private CaseDetails caseDetails;
+    private CaseDetails caseDetailsBefore;
 
     @Before
     public void setUp() throws Exception {
         updateFrcCorrespondenceService =
             new UpdateFrcCorrespondenceService(updateFrcEmailAllLitigantsCorresponder, notificationService);
         caseDetails = CaseDetails.builder().build();
+        caseDetailsBefore = CaseDetails.builder().build();
     }
 
     @Test
     public void shouldSendCorrespondence() throws JsonProcessingException {
 
-        updateFrcCorrespondenceService.sendCorrespondence(caseDetails, AUTH_TOKEN);
-        verify(updateFrcEmailAllLitigantsCorresponder).sendCorrespondence(caseDetails, AUTH_TOKEN);
+        updateFrcCorrespondenceService.sendCorrespondence(caseDetails, caseDetailsBefore, AUTH_TOKEN);
+        verify(updateFrcEmailAllLitigantsCorresponder).sendCorrespondence(caseDetails, caseDetailsBefore, AUTH_TOKEN);
         verify(notificationService).sendUpdateFrcInformationEmailToCourt(caseDetails);
 
     }

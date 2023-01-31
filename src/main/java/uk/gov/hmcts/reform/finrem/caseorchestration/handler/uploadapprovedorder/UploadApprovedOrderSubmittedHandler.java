@@ -41,8 +41,10 @@ public class UploadApprovedOrderSubmittedHandler
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest, String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         if (isAnotherHearingToBeListed(caseDetails)) {
-            approvedOrderNoticeOfHearingService.printHearingNoticePackAndSendToApplicantAndRespondent(caseDetails, userAuthorisation);
+            approvedOrderNoticeOfHearingService.printHearingNoticePackAndSendToApplicantAndRespondent(caseDetails, caseDetailsBefore,
+                userAuthorisation);
         }
         return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseDetails.getData()).build();
     }

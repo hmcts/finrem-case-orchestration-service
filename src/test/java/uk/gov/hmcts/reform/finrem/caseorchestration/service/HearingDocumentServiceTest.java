@@ -147,8 +147,9 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     @Test
     public void sendToBulkPrint() {
         CaseDetails caseDetails = caseDetails(NO_VALUE);
+        CaseDetails caseDetailsBefore = caseDetails(NO_VALUE);
 
-        hearingDocumentService.sendInitialHearingCorrespondence(caseDetails, AUTH_TOKEN);
+        hearingDocumentService.sendInitialHearingCorrespondence(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
         verify(bulkPrintService).printApplicantDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
         verify(bulkPrintService).printRespondentDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
@@ -160,10 +161,11 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     @Test
     public void sendToBulkPrint_multipleFormA() {
         CaseDetails caseDetails = caseDetails(YES_VALUE);
+        CaseDetails caseDetailsBefore = caseDetails(YES_VALUE);
 
         caseDetails.getData().put(FORM_A_COLLECTION, asList(pensionDocumentData(), pensionDocumentData(), pensionDocumentData()));
 
-        hearingDocumentService.sendInitialHearingCorrespondence(caseDetails, AUTH_TOKEN);
+        hearingDocumentService.sendInitialHearingCorrespondence(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
         when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(false);
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any())).thenReturn(true);

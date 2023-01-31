@@ -82,7 +82,7 @@ public class HearingConsentAboutToSubmitHandlerTest {
         Map<String, Object> caseData = handle.getData();
         List<ConsentedHearingDataWrapper> hearings = helper.getHearings(caseData);
         assertEquals("2012-05-19", hearings.get(0).getValue().hearingDate);
-        verify(service).submitHearing(any(), any(), any());
+        verify(service).generateHearingDocumentsForCase(any(), any(), any());
     }
 
     private CallbackRequest buildCallbackRequest() {

@@ -76,8 +76,8 @@ public class AdditionalHearingDocumentService {
         addAdditionalHearingDocumentToCaseData(caseDetails, document);
     }
 
-    public void sendAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
-        additionalHearingCorresponder.sendCorrespondence(caseDetails, authorisationToken);
+    public void sendAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails, CaseDetails caseDetailsBefore) {
+        additionalHearingCorresponder.sendCorrespondence(caseDetails, caseDetailsBefore, authorisationToken);
     }
 
     public void createAndStoreAdditionalHearingDocumentsFromApprovedOrder(String authorisationToken, CaseDetails caseDetails) {

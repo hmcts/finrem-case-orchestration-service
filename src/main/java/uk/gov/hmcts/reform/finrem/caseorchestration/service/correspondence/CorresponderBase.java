@@ -13,7 +13,7 @@ public abstract class CorresponderBase {
 
     protected final NotificationService notificationService;
 
-    public abstract void sendCorrespondence(CaseDetails caseDetails, String authToken);
+    public abstract void sendCorrespondence(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authToken);
 
     protected boolean shouldSendApplicantSolicitorEmail(CaseDetails caseDetails) {
         return notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);

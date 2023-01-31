@@ -97,8 +97,8 @@ public class HearingDocumentService {
         return caseDetails;
     }
 
-    public void sendInitialHearingCorrespondence(CaseDetails caseDetails, String authorisationToken) {
-        formCandGCorresponder.sendCorrespondence(caseDetails, authorisationToken);
+    public void sendInitialHearingCorrespondence(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authorisationToken) {
+        formCandGCorresponder.sendCorrespondence(caseDetails, caseDetailsBefore, authorisationToken);
     }
 
     /**

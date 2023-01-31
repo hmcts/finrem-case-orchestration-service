@@ -81,6 +81,7 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     ArgumentCaptor<List<BulkPrintDocument>> printDocumentsRequestDocumentListCaptor;
 
     private CaseDetails caseDetails;
+    private CaseDetails caseDetailsBefore;
 
     @Before
     public void setup() {
@@ -159,7 +160,7 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
                 .builder()
                 .binaryFileUrl(LATEST_DRAFT_ORDER_DOCUMENT_BIN_URL)
                 .build()));
-        approvedOrderNoticeOfHearingService.printHearingNoticePackAndSendToApplicantAndRespondent(caseDetails, AUTH_TOKEN);
+        approvedOrderNoticeOfHearingService.printHearingNoticePackAndSendToApplicantAndRespondent(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
         assertBulkPrintServiceInteraction();
 
@@ -179,7 +180,7 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
         caseDetails.getData().put(HEARING_NOTICE_DOCUMENT_PACK, buildHearingNoticePack());
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
-        approvedOrderNoticeOfHearingService.printHearingNoticePackAndSendToApplicantAndRespondent(caseDetails, AUTH_TOKEN);
+        approvedOrderNoticeOfHearingService.printHearingNoticePackAndSendToApplicantAndRespondent(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
         assertNotificationServiceInteraction();
     }

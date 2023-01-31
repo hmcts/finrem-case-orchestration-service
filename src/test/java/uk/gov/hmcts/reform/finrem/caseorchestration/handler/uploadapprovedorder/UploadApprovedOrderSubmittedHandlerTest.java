@@ -54,7 +54,8 @@ public class UploadApprovedOrderSubmittedHandlerTest extends UploadApprovedOrder
         uploadApprovedOrderSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(approvedOrderNoticeOfHearingService, times(1))
-            .printHearingNoticePackAndSendToApplicantAndRespondent(callbackRequest.getCaseDetails(), AUTH_TOKEN);
+            .printHearingNoticePackAndSendToApplicantAndRespondent(callbackRequest.getCaseDetails(), callbackRequest.getCaseDetailsBefore(),
+                AUTH_TOKEN);
     }
 
     @Test
@@ -63,7 +64,8 @@ public class UploadApprovedOrderSubmittedHandlerTest extends UploadApprovedOrder
         uploadApprovedOrderSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(approvedOrderNoticeOfHearingService, never())
-            .printHearingNoticePackAndSendToApplicantAndRespondent(callbackRequest.getCaseDetails(), AUTH_TOKEN);
+            .printHearingNoticePackAndSendToApplicantAndRespondent(callbackRequest.getCaseDetails(), callbackRequest.getCaseDetailsBefore(),
+                AUTH_TOKEN);
     }
 
     private void setHearingDirectionDetailsCollection(String value) {

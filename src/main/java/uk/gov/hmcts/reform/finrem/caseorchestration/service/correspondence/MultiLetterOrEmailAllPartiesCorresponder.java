@@ -24,32 +24,32 @@ public abstract class MultiLetterOrEmailAllPartiesCorresponder extends Correspon
     }
 
     @Override
-    public void sendCorrespondence(CaseDetails caseDetails, String authorisationToken) {
-        sendApplicantCorrespondence(authorisationToken, caseDetails);
-        sendRespondentCorrespondence(authorisationToken, caseDetails);
+    public void sendCorrespondence(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authorisationToken) {
+        sendApplicantCorrespondence(authorisationToken, caseDetails, caseDetailsBefore);
+        sendRespondentCorrespondence(authorisationToken, caseDetails, caseDetailsBefore);
     }
 
-    protected void sendApplicantCorrespondence(String authorisationToken, CaseDetails caseDetails) {
+    protected void sendApplicantCorrespondence(String authorisationToken, CaseDetails caseDetails, CaseDetails caseDetailsBefore) {
         if (shouldSendApplicantSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to applicant for case: {}", caseDetails.getId());
             this.emailApplicantSolicitor(caseDetails);
         } else {
             log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
-            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, getDocumentsToPrint(caseDetails));
+            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, getDocumentsToPrint(caseDetails, caseDetailsBefore));
         }
     }
 
-    public void sendRespondentCorrespondence(String authorisationToken, CaseDetails caseDetails) {
+    public void sendRespondentCorrespondence(String authorisationToken, CaseDetails caseDetails, CaseDetails caseDetailsBefore) {
         if (shouldSendRespondentSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to respondent for case: {}", caseDetails.getId());
             this.emailRespondentSolicitor(caseDetails);
         } else {
             log.info("Sending letter correspondence to respondent for case: {}", caseDetails.getId());
-            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, getDocumentsToPrint(caseDetails));
+            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, getDocumentsToPrint(caseDetails, caseDetailsBefore));
         }
     }
 
-    public abstract List<BulkPrintDocument> getDocumentsToPrint(CaseDetails caseDetails);
+    public abstract List<BulkPrintDocument> getDocumentsToPrint(CaseDetails caseDetails, CaseDetails caseDetailsBefore);
 
     protected abstract void emailApplicantSolicitor(CaseDetails caseDetails);
 

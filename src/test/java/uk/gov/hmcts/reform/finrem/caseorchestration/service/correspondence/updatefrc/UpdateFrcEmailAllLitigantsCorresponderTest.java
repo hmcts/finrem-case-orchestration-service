@@ -26,6 +26,7 @@ public class UpdateFrcEmailAllLitigantsCorresponderTest {
     UpdateFrcInfoRespondentDocumentService updateFrcInfoRespondentDocumentService;
 
     private CaseDetails caseDetails;
+    private CaseDetails caseDetailsBefore;
 
     protected static final String AUTHORISATION_TOKEN = "authorisationToken";
 
@@ -34,6 +35,7 @@ public class UpdateFrcEmailAllLitigantsCorresponderTest {
         updateFrcEmailAllLitigantsCorresponder =
             new UpdateFrcLetterOrEmailAllSolicitorsCorresponder(notificationService, bulkPrintService, updateFrcInfoRespondentDocumentService);
         caseDetails = CaseDetails.builder().build();
+        caseDetailsBefore = CaseDetails.builder().build();
     }
 
     @Test
@@ -41,7 +43,7 @@ public class UpdateFrcEmailAllLitigantsCorresponderTest {
 
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
-        updateFrcEmailAllLitigantsCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
+        updateFrcEmailAllLitigantsCorresponder.sendCorrespondence(caseDetails, caseDetailsBefore, AUTHORISATION_TOKEN);
         verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);
         verify(notificationService).isRespondentSolicitorDigitalAndEmailPopulated(caseDetails);
         verify(notificationService).sendUpdateFrcInformationEmailToAppSolicitor(caseDetails);
@@ -52,7 +54,7 @@ public class UpdateFrcEmailAllLitigantsCorresponderTest {
 
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(true);
-        updateFrcEmailAllLitigantsCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
+        updateFrcEmailAllLitigantsCorresponder.sendCorrespondence(caseDetails, caseDetailsBefore, AUTHORISATION_TOKEN);
         verify(notificationService).isRespondentSolicitorDigitalAndEmailPopulated(caseDetails);
         verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);
         verify(notificationService).sendUpdateFrcInformationEmailToRespondentSolicitor(caseDetails);

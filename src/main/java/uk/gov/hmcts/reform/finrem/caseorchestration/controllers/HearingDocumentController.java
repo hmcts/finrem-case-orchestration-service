@@ -102,10 +102,11 @@ public class HearingDocumentController extends BaseController {
             CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
             if (caseDetailsBefore != null && hearingDocumentService.alreadyHadFirstHearing(caseDetailsBefore)) {
                 log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
-                additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, caseDetails);
+                additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, caseDetails,
+                    callbackRequest.getCaseDetailsBefore());
             } else {
                 log.info("Sending Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
-                hearingDocumentService.sendInitialHearingCorrespondence(caseDetails, authorisationToken);
+                hearingDocumentService.sendInitialHearingCorrespondence(caseDetails, callbackRequest.getCaseDetailsBefore(), authorisationToken);
             }
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).warnings(warnings).build());
