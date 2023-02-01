@@ -91,7 +91,7 @@ public class CCDConfigConstant {
     public static final String WALES_FRC_LIST = "walesFRCList";
     public static final String WALES_FRC_LIST_CT = "walesList";
     public static final String HIGHCOURT_FRC_LIST = "highCourtFRCList";
-    public static final String HIGHCOURT_FRC_LIST_CT = "highCourtList";
+    public static final String HIGHCOURT_FRC_LIST_CT = "hcCourtList";
 
     //Regions
     public static final String LONDON = "london";
@@ -295,7 +295,6 @@ public class CCDConfigConstant {
     public static final String FORM_G = "formG";
     public static final String OUT_OF_FAMILY_COURT_RESOLUTION = "outOfFamilyCourtResolution";
     public static final String HEARING_ADDITIONAL_DOC = "additionalListOfHearingDocuments";
-    public static final String ADDITIONAL_HEARING_DOCUMENTS_OPTION = "additionalHearingDocumentsOption";
     public static final String OTHER_DOCS_COLLECTION = "otherCollection";
     public static final String GENERAL_LETTER = "generalLetterCollection";
     public static final String GENERAL_LETTER_BODY = "generalLetterBody";

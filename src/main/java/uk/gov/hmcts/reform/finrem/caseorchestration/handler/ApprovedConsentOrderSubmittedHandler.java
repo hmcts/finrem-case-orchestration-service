@@ -9,8 +9,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderAvailableCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderMadeCorresponder;
 
 import java.util.Map;
 
@@ -19,8 +19,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ApprovedConsentOrderSubmittedHandler implements CallbackHandler<Map<String, Object>> {
 
-    private final CaseDataService caseDataService;
-    private final NotificationService notificationService;
+    private final ConsentOrderMadeCorresponder consentOrderMadeCorresponder;
+    private final ConsentOrderAvailableCorresponder consentOrderAvailableCorresponder;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -33,10 +33,8 @@ public class ApprovedConsentOrderSubmittedHandler implements CallbackHandler<Map
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
                                                                                    String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
-
-        sendConsentOrderAvailableEmailNotifications(caseDetails, caseData);
-        sendConsentOrderMadeEmailNotifications(caseDetails, caseData);
+        consentOrderAvailableCorresponder.sendCorrespondence(caseDetails);
+        consentOrderMadeCorresponder.sendCorrespondence(caseDetails);
 
         return GenericAboutToStartOrSubmitCallbackResponse
             .<Map<String, Object>>builder()
@@ -44,30 +42,4 @@ public class ApprovedConsentOrderSubmittedHandler implements CallbackHandler<Map
             .build();
     }
 
-
-    private void sendConsentOrderAvailableEmailNotifications(CaseDetails caseDetails, Map<String, Object> caseData) {
-        notificationService.sendConsentOrderAvailableCtscEmail(caseDetails);
-
-        if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-            log.info("case - {}: Sending email notification for to Applicant Solicitor for 'Consent Order Available'", caseDetails.getId());
-            notificationService.sendConsentOrderAvailableEmailToApplicantSolicitor(caseDetails);
-        }
-        if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData)) {
-            log.info("case - {}: Sending email notification to Respondent Solicitor for 'Consent Order Available'", caseDetails.getId());
-            notificationService.sendConsentOrderAvailableEmailToRespondentSolicitor(caseDetails);
-        }
-    }
-
-    private void sendConsentOrderMadeEmailNotifications(CaseDetails caseDetails, Map<String, Object> caseData) {
-        if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)
-            && caseDataService.isConsentedApplication(caseDetails)) {
-            log.info("Sending email notification to Applicant Solicitor for 'Consent Order Made'");
-            notificationService.sendConsentOrderMadeConfirmationEmailToApplicantSolicitor(caseDetails);
-        }
-
-        if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData)) {
-            log.info("Sending email notification to Respondent Solicitor for 'Consent Order Made'");
-            notificationService.sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(caseDetails);
-        }
-    }
 }

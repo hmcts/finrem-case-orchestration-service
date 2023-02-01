@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -18,5 +18,5 @@ public class AmendedConsentOrder {
     @JsonProperty("amendedConsentOrder")
     private CaseDocument amendedConsentOrder;
     @JsonProperty("amendedConsentOrderDate")
-    private Date amendedConsentOrderDate;
+    private LocalDate amendedConsentOrderDate;
 }

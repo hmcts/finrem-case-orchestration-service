@@ -10,8 +10,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderAvailableCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderMadeCorresponder;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,10 +19,7 @@ import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_EMAIL;
@@ -51,9 +48,10 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
     private ApprovedConsentOrderSubmittedHandler handler;
 
     @Mock
-    private CaseDataService caseDataService;
+    private ConsentOrderMadeCorresponder consentOrderMadeCorresponder;
     @Mock
-    private NotificationService notificationService;
+    private ConsentOrderAvailableCorresponder consentOrderAvailableCorresponder;
+    private CaseDetails caseDetails;
 
 
     @Test
@@ -87,65 +85,14 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
     @Test
     public void givenConsentOrderCase_WhenAppAndRespConsentToEmail_ThenSendNotification() {
         CallbackRequest callbackRequest = getConsentedCallbackRequestForConsentOrder();
-        when(caseDataService.isConsentedApplication(callbackRequest.getCaseDetails())).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(callbackRequest.getCaseDetails())).thenReturn(true);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(callbackRequest.getCaseDetails().getData())).thenReturn(true);
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(notificationService).sendConsentOrderAvailableCtscEmail(any());
-        verify(notificationService).sendConsentOrderAvailableEmailToApplicantSolicitor(any());
-        verify(notificationService).sendConsentOrderAvailableEmailToRespondentSolicitor(any());
-        verify(notificationService).sendConsentOrderMadeConfirmationEmailToApplicantSolicitor(any());
-        verify(notificationService).sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(any());
+        verify(consentOrderMadeCorresponder).sendCorrespondence(caseDetails);
+        verify(consentOrderMadeCorresponder).sendCorrespondence(caseDetails);
+
     }
 
-    @Test
-    public void givenConsentOrderCase_WhenNoConsentToEmail_ThenNoNotificationSent() {
-        CallbackRequest callbackRequest = getConsentedCallbackRequestForConsentOrder();
-
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(callbackRequest.getCaseDetails())).thenReturn(false);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(callbackRequest.getCaseDetails().getData())).thenReturn(false);
-
-        handler.handle(callbackRequest, AUTH_TOKEN);
-
-        verify(notificationService).sendConsentOrderAvailableCtscEmail(any());
-        verify(notificationService, never()).sendConsentOrderAvailableEmailToApplicantSolicitor(any());
-        verify(notificationService, never()).sendConsentOrderAvailableEmailToRespondentSolicitor(any());
-        verify(notificationService, never()).sendConsentOrderMadeConfirmationEmailToApplicantSolicitor(any());
-        verify(notificationService, never()).sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(any());
-    }
-
-    @Test
-    public void givenVariationOrderCase_WhenAppAndRespConsentToEmail_ThenSendNotification() {
-        CallbackRequest callbackRequest = getConsentedCallbackRequestForVariationOrder();
-        when(caseDataService.isConsentedApplication(callbackRequest.getCaseDetails())).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(callbackRequest.getCaseDetails())).thenReturn(true);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(callbackRequest.getCaseDetails().getData())).thenReturn(true);
-
-        handler.handle(callbackRequest, AUTH_TOKEN);
-
-        verify(notificationService).sendConsentOrderAvailableCtscEmail(any());
-        verify(notificationService).sendConsentOrderAvailableEmailToApplicantSolicitor(any());
-        verify(notificationService).sendConsentOrderAvailableEmailToRespondentSolicitor(any());
-        verify(notificationService).sendConsentOrderMadeConfirmationEmailToApplicantSolicitor(any());
-        verify(notificationService).sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(any());
-    }
-
-    @Test
-    public void givenVariationOrderCase_WhenNoConsentToEmail_ThenNoNotificationSent() {
-        CallbackRequest callbackRequest = getConsentedCallbackRequestForVariationOrder();
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(callbackRequest.getCaseDetails())).thenReturn(false);
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(callbackRequest.getCaseDetails().getData())).thenReturn(false);
-
-        handler.handle(callbackRequest, AUTH_TOKEN);
-
-        verify(notificationService).sendConsentOrderAvailableCtscEmail(any());
-        verify(notificationService, never()).sendConsentOrderAvailableEmailToApplicantSolicitor(any());
-        verify(notificationService, never()).sendConsentOrderAvailableEmailToRespondentSolicitor(any());
-        verify(notificationService, never()).sendConsentOrderMadeConfirmationEmailToApplicantSolicitor(any());
-        verify(notificationService, never()).sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(any());
-    }
 
     protected CallbackRequest getConsentedCallbackRequestForConsentOrder() {
         Map<String, Object> caseData = new HashMap<>();
@@ -169,12 +116,13 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
             "A settlement or a transfer of property",
             "Property Adjustment Order");
         caseData.put("natureOfApplication2", natureOfApplication);
+        caseDetails = CaseDetails.builder()
+            .caseTypeId(CaseType.CONSENTED.getCcdType())
+            .id(12345L)
+            .data(caseData)
+            .build();
         return CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder()
-                .caseTypeId(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED.getCcdType())
-                .id(12345L)
-                .data(caseData)
-                .build())
+            .caseDetails(caseDetails)
             .build();
     }
 
