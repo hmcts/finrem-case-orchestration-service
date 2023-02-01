@@ -20,7 +20,8 @@ import java.time.LocalDate;
 public class ContestedGeneralOrder {
     private String generalOrderText;
     private CaseDocument additionalDocument;
-    private String selectJudge;
+    @JsonProperty("selectJudge")
+    private String judge;
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate dateOfOrder;
