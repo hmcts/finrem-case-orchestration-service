@@ -39,6 +39,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_RECITALS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
 
 @Service
 @RequiredArgsConstructor
@@ -100,6 +101,7 @@ public class GeneralOrderService {
             caseData.put("GeneralOrderCourt", ContestedCourtHelper.getSelectedCourt(caseDetails));
             caseData.put("GeneralOrderHeaderOne", "In the Family Court");
             caseData.put("GeneralOrderHeaderTwo", "sitting in the");
+            caseData.put("courtDetails", buildFrcCourtDetails(caseData));
         }
 
         caseData.put("GeneralOrderJudgeDetails",

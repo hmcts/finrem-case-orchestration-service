@@ -12,7 +12,7 @@ import java.util.List;
 
 @Component
 @Slf4j
-public abstract class MultiLetterOrEmailAllPartiesCorresponder extends CorresponderBase {
+public abstract class MultiLetterOrEmailAllPartiesCorresponder extends EmailAndLettersCorresponderBase {
 
     protected final BulkPrintService bulkPrintService;
 

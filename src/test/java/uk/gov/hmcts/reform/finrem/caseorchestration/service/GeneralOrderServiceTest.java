@@ -304,6 +304,11 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         assertThat(data.get("GeneralOrderHeaderOne"), is("In the Family Court"));
         assertThat(data.get("GeneralOrderHeaderTwo"), is("sitting in the"));
         assertThat(data.get("GeneralOrderCourtSitting"), is("SITTING AT the Family Court at the "));
+        Map<String, Object> court = (Map<String, Object>) data.get("courtDetails");
 
+        assertThat(court.get("courtName"), is("Nottingham County Court And Family Court"));
+        assertThat(court.get("courtAddress"), is("60 Canal Street, Nottingham NG1 7EJ"));
+        assertThat(court.get("phoneNumber"), is("0115 910 3504"));
+        assertThat(court.get("email"), is("FRCNottingham@justice.gov.uk"));
     }
 }
