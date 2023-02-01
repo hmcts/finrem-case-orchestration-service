@@ -22,7 +22,7 @@ public class HwfCorrespondenceService {
             hwfConsentedApplicantCorresponder.sendCorrespondence(caseDetails, authToken);
         } else if (caseDataService.isContestedApplication(caseDetails)) {
             log.info("Send HWF Contested correspondence for case: {}", caseDetails.getId());
-            hwfContestedApplicantCorresponder.sendCorrespondence(caseDetails, authToken);
+            hwfContestedApplicantCorresponder.sendCorrespondence(caseDetails);
         }
     }
 
