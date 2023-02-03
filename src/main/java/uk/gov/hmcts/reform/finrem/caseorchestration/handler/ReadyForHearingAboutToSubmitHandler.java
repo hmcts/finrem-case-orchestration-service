@@ -1,28 +1,27 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
-public class ReadyForHearingAboutToSubmitHandler
-    implements CallbackHandler<Map<String, Object>> {
+public class ReadyForHearingAboutToSubmitHandler extends FinremCallbackHandler {
 
-
-    private final ValidateHearingService validateHearingService;
-
+    @Autowired
+    public ReadyForHearingAboutToSubmitHandler(FinremCaseDetailsMapper mapper) {
+        super(mapper);
+    }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -32,18 +31,20 @@ public class ReadyForHearingAboutToSubmitHandler
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(
-        CallbackRequest callbackRequest,
-        String userAuthorisation) {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("About to submit Ready for hearing for case id {}", caseDetails.getId());
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
+                                                                              String userAuthorisation) {
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData caseData = caseDetails.getData();
+        log.info("Received request to update consented case with Case ID: {}", caseDetails.getId());
 
-        List<String> errors = validateHearingService.validateHearingErrors(caseDetails);
-        if (!errors.isEmpty()) {
-            return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseDetails.getData())
+        if (!isHearingDatePresent(caseData)) {
+            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
                 .errors(List.of("There is no hearing on the case.")).build();
         }
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData).build();
+    }
 
-        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseDetails.getData()).build();
+    private static boolean isHearingDatePresent(FinremCaseData caseData) {
+        return caseData.getHearingDate() != null && caseData.getHearingDate().isAfter(LocalDate.now().minusDays(1));
     }
 }
