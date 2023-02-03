@@ -1,5 +1,5 @@
 java:
-  devcpuRequests: 1
+  devcpuRequests: 250m
   devmemoryRequests: 1Gi
   devcpuLimits: 1
   devmemoryLimits: 1Gi
