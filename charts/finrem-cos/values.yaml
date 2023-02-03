@@ -22,6 +22,7 @@ java:
     maxReplicas: 4
     minReplicas: 2
     targetCPUUtilizationPercentage: 80 # Default is 80% target CPU utilization
+    targetMemoryUtilizationPercentage: 98
   keyVaults:
     finrem:
       secrets:
