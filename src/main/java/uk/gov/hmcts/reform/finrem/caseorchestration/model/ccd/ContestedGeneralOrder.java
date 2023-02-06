@@ -18,6 +18,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ContestedGeneralOrder {
+
     private String generalOrderText;
     private CaseDocument additionalDocument;
     @JsonProperty("selectJudge")
