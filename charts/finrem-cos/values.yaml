@@ -2,7 +2,7 @@ java:
   cpuRequests: 250m
   memoryRequests: 1Gi
   cpuLimits: 1
-  memoryLimits: 1Gi
+  memoryLimits: 2Gi
   aadIdentityName: finrem
   ingressHost: "finrem-cos-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
   applicationPort: '9000'
