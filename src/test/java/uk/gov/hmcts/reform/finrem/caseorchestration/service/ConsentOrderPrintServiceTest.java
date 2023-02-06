@@ -160,7 +160,7 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
 
         when(consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(any(CaseDetails.class), anyString()))
             .thenReturn(emptyList());
-        when(coverSheetService.generateRespondentCoverSheet(any(), eq(AUTH_TOKEN))).thenReturn(caseDocument);
+        when(coverSheetService.generateRespondentCoverSheet(caseDetails, eq(AUTH_TOKEN))).thenReturn(caseDocument);
 
         consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, AUTH_TOKEN);
 
@@ -176,8 +176,8 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
         List<BulkPrintDocument> bulkPrintDocuments = bulkPrintDocumentList();
 
-        when(coverSheetService.generateApplicantCoverSheet(any(), eq(AUTH_TOKEN))).thenReturn(caseDocument);
-        when(coverSheetService.generateRespondentCoverSheet(any(), eq(AUTH_TOKEN))).thenReturn(caseDocument);
+        when(coverSheetService.generateApplicantCoverSheet(caseDetails, eq(AUTH_TOKEN))).thenReturn(caseDocument);
+        when(coverSheetService.generateRespondentCoverSheet(caseDetails, eq(AUTH_TOKEN))).thenReturn(caseDocument);
         when(consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(caseDetails, AUTH_TOKEN))
             .thenReturn(bulkPrintDocuments);
 
@@ -191,8 +191,8 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
             = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
 
-        when(coverSheetService.generateApplicantCoverSheet(any(), eq(AUTH_TOKEN))).thenReturn(caseDocument);
-        when(coverSheetService.generateRespondentCoverSheet(any(), eq(AUTH_TOKEN))).thenReturn(caseDocument);
+        when(coverSheetService.generateApplicantCoverSheet(caseDetails, eq(AUTH_TOKEN))).thenReturn(caseDocument);
+        when(coverSheetService.generateRespondentCoverSheet(caseDetails, eq(AUTH_TOKEN))).thenReturn(caseDocument);
         when(consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(caseDetails, AUTH_TOKEN))
             .thenReturn(emptyList());
 

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
@@ -28,6 +29,8 @@ public class FinremCaseDetails implements CcdCaseDetails<FinremCaseData> {
     private String callbackResponseStatus;
     private LocalDateTime lastModified;
     private Classification securityClassification;
+    @JsonProperty("case_data")
+    @JsonAlias("data")
     private FinremCaseData data;
 
     @JsonProperty("case_type_id")

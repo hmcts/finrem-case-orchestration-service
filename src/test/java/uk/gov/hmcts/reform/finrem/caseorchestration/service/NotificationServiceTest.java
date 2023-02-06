@@ -1220,7 +1220,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void givenAppIsContestedAndApplicantSolicitorIsNotRegisteredOrAcceptingEmails_shouldSendLettersApplicantSolicitor() {
         when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any())).thenReturn(false);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(false);
 
         assertTrue(notificationService.isContestedApplicationAndApplicantOrRespondentSolicitorsIsNotRegisteredOrAcceptingEmails(any()));
@@ -1229,7 +1229,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void givenAppIsNotContestedAndApplicantSolicitorIsRegisteredAndAcceptingEmails_shouldNotSendLetters() {
         when(caseDataService.isContestedApplication(any())).thenReturn(false);
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
 
         Map<String, Object> caseData = new HashMap<>();

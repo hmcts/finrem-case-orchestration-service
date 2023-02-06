@@ -5,11 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.EmailOnlyAllSolicitorsCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.CaseDetailsEmailOnlyAllSolicitorsCorresponder;
 
 @Component
 @Slf4j
-public class ContestedConsentOrderApprovedCorresponder extends EmailOnlyAllSolicitorsCorresponder {
+public class ContestedConsentOrderApprovedCorresponder extends CaseDetailsEmailOnlyAllSolicitorsCorresponder {
 
     @Autowired
     public ContestedConsentOrderApprovedCorresponder(NotificationService notificationService) {

@@ -18,7 +18,8 @@ public class FinremCaseDetailsMapper {
     private final ObjectMapper objectMapper;
 
     public FinremCaseDetails mapToFinremCaseDetails(CaseDetails caseDetails) {
-
+        FinremCaseData data = objectMapper.convertValue(caseDetails.getData(), FinremCaseData.class);
+        data.setCcdCaseType(CaseType.forValue(caseDetails.getCaseTypeId()));
         return FinremCaseDetails.builder()
             .caseType(CaseType.forValue(caseDetails.getCaseTypeId()))
             .id(caseDetails.getId())
@@ -29,7 +30,7 @@ public class FinremCaseDetailsMapper {
             .callbackResponseStatus(caseDetails.getCallbackResponseStatus())
             .lastModified(caseDetails.getLastModified())
             .securityClassification(caseDetails.getSecurityClassification())
-            .data(objectMapper.convertValue(caseDetails.getData(), FinremCaseData.class))
+            .data(data)
             .build();
     }
 

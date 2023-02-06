@@ -158,6 +158,7 @@ public class FinremCaseDetailMapperTest {
 
     private static final String REFUSAL_ORDER_CALLBACK_REQUEST = "/fixtures/refusal-order-contested.json";
     private static final String CONTESTED_INTERIM_CALLBACK_REQUEST = "/fixtures/contested-interim-hearing.json";
+    public static final String BULK_PRINT_ADDITIONAL_HEARING_JSON = "/fixtures/bulkprint/bulk-print-additional-hearing.json";
     private static final String SOL_CONTEST_CALLBACK_REQUEST = "/fixtures/deserialisation/ccd-request-with-solicitor-contestApplicationIssued.json";
     private static final String BASIC_REQUEST = "/fixtures/deserialisation/basic-request.json";
 
@@ -180,6 +181,14 @@ public class FinremCaseDetailMapperTest {
         assertNotNull(finremCaseDetails);
     }
 
+    @Test
+    public void mapBulkPrintDetails() {
+        caseDetails = buildCaseDetailsFromJson(BULK_PRINT_ADDITIONAL_HEARING_JSON);
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        assertNotNull(finremCaseDetails);
+        assertEquals(finremCaseDetails.getData().getContactDetailsWrapper().getApplicantFmName(), "Test");
+    }
+
 
     @Test
     public void givenValidCallbackRequest_thenSuccessfullyMapped() {
@@ -189,6 +198,7 @@ public class FinremCaseDetailMapperTest {
         assertNotNull(caseDetails);
         FinremCaseData caseData = finremCaseDetails.getData();
         assertEquals(caseData.getContactDetailsWrapper().getApplicantRepresented(), YesOrNo.YES);
+        assertEquals(caseData.getContactDetailsWrapper().getApplicantFmName(), "Contested Applicant");
         assertEquals(caseData.getRegionWrapper().getDefaultCourtList().getNottinghamCourtList().getId(), "FR_s_NottinghamList_1");
     }
 

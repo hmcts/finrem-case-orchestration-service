@@ -14,6 +14,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
@@ -595,6 +596,11 @@ public class FinremCaseData {
     }
 
     @JsonIgnore
+    public boolean isApplicantSolicitorPopulated() {
+        return StringUtils.isNotEmpty(nullToEmpty(getAppSolicitorEmail()));
+    }
+
+    @JsonIgnore
     public String getAppSolicitorFirm() {
         return isConsentedApplication()
             ? getContactDetailsWrapper().getSolicitorFirm()
@@ -604,6 +610,12 @@ public class FinremCaseData {
     @JsonIgnore
     public String getRespondentSolicitorName() {
         return getContactDetailsWrapper().getRespondentSolicitorName();
+    }
+
+
+    @JsonIgnore
+    public boolean isRespondentSolicitorPopulated() {
+        return StringUtils.isNotEmpty(nullToEmpty(getContactDetailsWrapper().getRespondentSolicitorEmail()));
     }
 
     @JsonIgnore

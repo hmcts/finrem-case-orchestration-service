@@ -11,7 +11,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_US
 
 public class AssignCaseAccessRequestMapperTest extends BaseServiceTest {
 
-    @Autowired private AssignCaseAccessRequestMapper assignCaseAccessRequestMapper;
+    @Autowired
+    private AssignCaseAccessRequestMapper assignCaseAccessRequestMapper;
 
     @Test
     public void mapToAssignCaseAccessRequest() {

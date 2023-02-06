@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
@@ -451,13 +452,25 @@ public class NotificationService {
             && YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED)));
     }
 
+    @Deprecated
     public boolean isApplicantSolicitorDigitalAndEmailPopulated(CaseDetails caseDetails) {
         return caseDataService.isApplicantSolicitorEmailPopulated(caseDetails)
             && checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString());
     }
 
+    public boolean isApplicantSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
+        return caseDetails.getData().isApplicantSolicitorPopulated()
+            && checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString());
+    }
+
+    @Deprecated
     public boolean isRespondentSolicitorDigitalAndEmailPopulated(CaseDetails caseDetails) {
         return caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseDetails.getData())
+            && checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
+    }
+
+    public boolean isRespondentSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
+        return caseDetails.getData().isRespondentSolicitorPopulated()
             && checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
     }
 

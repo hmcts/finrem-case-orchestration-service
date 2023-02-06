@@ -331,6 +331,15 @@ public final class CaseHearingFunctions {
             .build(), Map.class);
     }
 
+    public static FrcCourtDetails buildConsentedFrcCourtDetailsObject() {
+        return FrcCourtDetails.builder()
+            .courtName(OrchestrationConstants.CTSC_COURT_NAME)
+            .courtAddress(OrchestrationConstants.CTSC_COURT_ADDRESS)
+            .phoneNumber(OrchestrationConstants.CTSC_PHONE_NUMBER)
+            .email((OrchestrationConstants.CTSC_EMAIL_ADDRESS))
+            .build();
+    }
+
     public static String getCourtDetailsString() {
         try (InputStream inputStream = CaseHearingFunctions.class.getResourceAsStream(COURT_DETAILS_JSON_PATH)) {
             return IOUtils.toString(inputStream, UTF_8);

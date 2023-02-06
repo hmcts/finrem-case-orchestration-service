@@ -35,6 +35,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.EMPTY_LIST;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -104,8 +105,8 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
 
         sendOrderContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(bulkPrintService, never()).printApplicantDocuments(any(), any(), any());
-        verify(bulkPrintService, never()).printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService, never()).printApplicantDocuments(callbackRequest.getCaseDetails(), AUTH_TOKEN, EMPTY_LIST);
+        verify(bulkPrintService, never()).printRespondentDocuments(callbackRequest.getCaseDetails(), AUTH_TOKEN, EMPTY_LIST);
     }
 
     @Test
@@ -119,8 +120,8 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
             CallbackRequest.builder().caseDetails(generalOrderContestedCaseDetails()).build();
         sendOrderContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
-        verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), any(), any());
+        verify(bulkPrintService).printRespondentDocuments(any(CaseDetails.class), any(), any());
     }
 
     @Test
@@ -132,8 +133,8 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
             CallbackRequest.builder().caseDetails(generalOrderContestedCaseDetails()).build();
         sendOrderContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(bulkPrintService, never()).printApplicantDocuments(any(), any(), any());
-        verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService, never()).printApplicantDocuments(any(CaseDetails.class), any(), any());
+        verify(bulkPrintService).printRespondentDocuments(any(CaseDetails.class), any(), any());
     }
 
     @Test
@@ -141,7 +142,8 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
 
         doThrow(new InvalidCaseDataException(BAD_REQUEST.value(), "CCD address field applicantAddress"
-            + " needs to contain both first line of address and postcode")).when(bulkPrintService).printApplicantDocuments(any(), any(), any());
+            + " needs to contain both first line of address and postcode")).when(bulkPrintService)
+            .printApplicantDocuments(any(CaseDetails.class), any(), any());
 
         CallbackRequest callbackRequest =
             CallbackRequest.builder().caseDetails(generalOrderContestedCaseDetailsWithoutSolicitorAddress()).build();
@@ -151,8 +153,8 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         assertThat(response.getErrors().size(), is(1));
         assertThat(response.getErrors().get(0), is("CCD address field applicantAddress"
             + " needs to contain both first line of address and postcode"));
-        verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
-        verify(bulkPrintService, never()).printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), any(), any());
+        verify(bulkPrintService, never()).printRespondentDocuments(any(CaseDetails.class), any(), any());
     }
 
     @Test
@@ -165,8 +167,8 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
 
         sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 
-        verify(bulkPrintService).printApplicantDocuments(any(), any(), bulkPrintArgumentCaptor.capture());
-        verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), any(), bulkPrintArgumentCaptor.capture());
+        verify(bulkPrintService).printRespondentDocuments(any(CaseDetails.class), any(), any());
 
         List<String> expectedBulkPrintDocuments = asList("HearingOrderBinaryURL", "AdditionalHearingDocumentURL", "OtherHearingOrderDocumentsURL");
 
@@ -183,8 +185,8 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
 
         sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 
-        verify(bulkPrintService).printApplicantDocuments(any(), any(), bulkPrintArgumentCaptor.capture());
-        verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), any(), bulkPrintArgumentCaptor.capture());
+        verify(bulkPrintService).printRespondentDocuments(any(CaseDetails.class), any(), any());
 
         String notExpectedBulkPrintDocument = "AdditionalHearingDocumentURL";
 
@@ -210,7 +212,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
 
         sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 
-        verify(bulkPrintService).printApplicantDocuments(any(), any(), bulkPrintArgumentCaptor.capture());
+        verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), any(), bulkPrintArgumentCaptor.capture());
 
         List<String> expectedBulkPrintDocuments = asList("AdditionalHearingDocumentURL", "OtherHearingOrderDocumentsURL");
 
@@ -226,7 +228,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
 
         sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 
-        verify(bulkPrintService).printApplicantDocuments(any(), any(), bulkPrintArgumentCaptor.capture());
+        verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), any(), bulkPrintArgumentCaptor.capture());
 
         String notExpectedBulkPrintDocument = "AdditionalHearingDocumentURL";
 
@@ -245,7 +247,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
 
         sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 
-        verify(bulkPrintService).printApplicantDocuments(any(), any(), bulkPrintArgumentCaptor.capture());
+        verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), any(), bulkPrintArgumentCaptor.capture());
 
         List<String> expectedBulkPrintDocuments = asList("HearingOrderBinaryURL", "OtherHearingOrderDocumentsURL");
 

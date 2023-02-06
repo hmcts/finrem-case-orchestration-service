@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ClientDocumen
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -302,6 +304,16 @@ public class TestSetUpUtils {
         } catch (Exception exception) {
             throw new IllegalStateException(exception.getMessage(), exception);
         }
+    }
+
+    public static CaseDetails finremCaseDetailsFromResource(String json, ObjectMapper mapper) {
+        FinremCallbackRequestDeserializer deserializer = new FinremCallbackRequestDeserializer(mapper);
+        return deserializer.deserialize(json).getCaseDetails();
+    }
+
+    public static FinremCaseDetails finremCaseDetailsPojoFromResource(String json, ObjectMapper mapper) {
+        FinremCallbackRequestDeserializer deserializer = new FinremCallbackRequestDeserializer(mapper);
+        return deserializer.deserializeFinremCallbackRequest(json).getCaseDetails();
     }
 
     private static void populateRespondentNameAndAddressConsented(Map<String, Object> caseData) {

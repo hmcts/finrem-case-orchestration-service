@@ -377,7 +377,7 @@ public class DocumentHelper {
         CaseDocument caseDocument = nullCheckAndConvertToCaseDocument(data.get(documentName));
         return caseDocument != null
             ? Optional.of(BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl())
-                .fileName(caseDocument.getDocumentFilename()).build())
+            .fileName(caseDocument.getDocumentFilename()).build())
             : Optional.empty();
     }
 
@@ -460,7 +460,7 @@ public class DocumentHelper {
     }
 
     public enum PaperNotificationRecipient {
-        APPLICANT, RESPONDENT, SOLICITOR
+        APPLICANT, RESPONDENT, SOLICITOR, APP_SOLICITOR, RESP_SOLICITOR
     }
 
     public CaseDocument nullCheckAndConvertToCaseDocument(Object object) {

@@ -219,6 +219,7 @@ public class CaseDataService {
         return isAddressConfidential(caseData, APPLICANT_CONFIDENTIAL_ADDRESS);
     }
 
+
     public boolean isRespondentAddressConfidential(Map<String, Object> caseData) {
         return isAddressConfidential(caseData, RESPONDENT_CONFIDENTIAL_ADDRESS);
     }

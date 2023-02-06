@@ -299,8 +299,8 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
             = interimHearingList.stream().map(InterimHearingData::getValue).toList();
 
         List<Map<String, Object>> interimDataMap = interimHearingItems.stream()
-                .map(obj -> new ObjectMapper().convertValue(obj, new TypeReference<Map<String, Object>>() {
-                })).toList();
+            .map(obj -> new ObjectMapper().convertValue(obj, new TypeReference<Map<String, Object>>() {
+            })).toList();
         interimDataMap.forEach(data -> verifyData(callbackRequest, data));
     }
 
@@ -341,8 +341,8 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
     public void shouldCreateNotificationRequestForRespSolicitorForConsentedJourneyForHearing() {
         CallbackRequest callbackRequest = buildHearingCallbackRequest(CONSENTED_HEARING_JSON);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        caseData.put(RESP_SOLICITOR_REFERENCE,TEST_RESP_SOLICITOR_REFERENCE);
-        caseData.put("divorceCaseNumber",TEST_DIVORCE_CASE_NUMBER);
+        caseData.put(RESP_SOLICITOR_REFERENCE, TEST_RESP_SOLICITOR_REFERENCE);
+        caseData.put("divorceCaseNumber", TEST_DIVORCE_CASE_NUMBER);
         caseData.put("rSolicitorEmail", TEST_RESP_SOLICITOR_EMAIL);
         caseData.put(RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_NAME);
 
