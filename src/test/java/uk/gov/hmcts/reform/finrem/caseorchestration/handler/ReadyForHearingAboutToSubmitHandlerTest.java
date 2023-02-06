@@ -11,16 +11,20 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIST_FOR_HEARING_COLLECTION_CONSENTED;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReadyForHearingAboutToSubmitHandlerTest extends BaseHandlerTest {
@@ -86,6 +90,21 @@ public class ReadyForHearingAboutToSubmitHandlerTest extends BaseHandlerTest {
     }
 
 
+    @Test
+    public void givenConsentedCase_WhenHearingListingSchedulesOnly_ThenShouldBeReadyForHearing() {
+
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        ConsentedHearingDataElement consentedHearingDataElement = new ConsentedHearingDataElement();
+        consentedHearingDataElement.setHearingDate(LocalDate.now().plusMonths(1).toString());
+        List<ConsentedHearingDataWrapper> listForHearings = new ArrayList<>();
+        listForHearings.add(new ConsentedHearingDataWrapper(LIST_FOR_HEARING_COLLECTION_CONSENTED, consentedHearingDataElement));
+        finremCallbackRequest.getCaseDetails().getData().setListForHearings(listForHearings);
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        assertNull(response.getErrors());
+    }
+
+
     private FinremCallbackRequest buildCallbackRequest() {
         return FinremCallbackRequest
             .<FinremCaseDetails>builder()
@@ -95,4 +114,6 @@ public class ReadyForHearingAboutToSubmitHandlerTest extends BaseHandlerTest {
                 .data(new FinremCaseData()).build())
             .build();
     }
+
+
 }

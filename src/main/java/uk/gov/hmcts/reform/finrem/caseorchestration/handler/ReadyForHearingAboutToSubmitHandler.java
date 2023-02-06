@@ -1,13 +1,16 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedHearingHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
@@ -17,6 +20,7 @@ import java.util.List;
 @Slf4j
 @Service
 public class ReadyForHearingAboutToSubmitHandler extends FinremCallbackHandler {
+
 
     @Autowired
     public ReadyForHearingAboutToSubmitHandler(FinremCaseDetailsMapper mapper) {
@@ -45,6 +49,13 @@ public class ReadyForHearingAboutToSubmitHandler extends FinremCallbackHandler {
     }
 
     private static boolean isHearingDatePresent(FinremCaseData caseData) {
-        return caseData.getHearingDate() != null && caseData.getHearingDate().isAfter(LocalDate.now().minusDays(1));
+
+        ConsentedHearingHelper helper = new ConsentedHearingHelper(new ObjectMapper());
+        ConsentedHearingDataWrapper listForHearings = helper.getHearings(caseData).stream()
+            .filter(hearing -> !hearing.getValue().getHearingDate().isEmpty()
+                && LocalDate.parse(hearing.getValue().getHearingDate()).isAfter(LocalDate.now().minusDays(1)))
+            .findAny().orElse(null);
+
+        return listForHearings != null || (caseData.getHearingDate() != null && caseData.getHearingDate().isAfter(LocalDate.now().minusDays(1)));
     }
 }
