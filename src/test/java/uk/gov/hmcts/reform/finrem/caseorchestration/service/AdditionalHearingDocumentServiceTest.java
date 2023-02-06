@@ -439,7 +439,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         verify(bulkPrintService, timeout(100).times(1))
             .printRespondentDocuments(any(CaseDetails.class), any(), any());
         verify(bulkPrintService, timeout(100).times(1))
-            .printRespondentDocuments(any(CaseDetails.class), any(), any());
+            .printApplicantDocuments(any(CaseDetails.class), any(), any());
     }
 
     @Test
@@ -455,7 +455,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         verify(bulkPrintService, timeout(100).times(0))
             .printRespondentDocuments(any(CaseDetails.class), any(), any());
         verify(bulkPrintService, timeout(100).times(0))
-            .printRespondentDocuments(any(CaseDetails.class), any(), any());
+            .printApplicantDocuments(any(CaseDetails.class), any(), any());
     }
 
     @Test
@@ -471,7 +471,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         verify(bulkPrintService, timeout(100).times(1))
             .printRespondentDocuments(any(CaseDetails.class), any(), any());
         verify(bulkPrintService, timeout(100).times(0))
-            .printRespondentDocuments(any(CaseDetails.class), any(), any());
+            .printApplicantDocuments(any(CaseDetails.class), any(), any());
     }
 
     @Test
@@ -487,6 +487,6 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         verify(bulkPrintService, timeout(100).times(0))
             .printRespondentDocuments(any(CaseDetails.class), any(), any());
         verify(bulkPrintService, timeout(100).times(1))
-            .printRespondentDocuments(any(CaseDetails.class), any(), any());
+            .printApplicantDocuments(any(CaseDetails.class), any(), any());
     }
 }
