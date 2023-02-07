@@ -19,11 +19,11 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class ReadyForHearingAboutToSubmitHandler extends FinremCallbackHandler {
+public class ReadyForHearingConsentedAboutToSubmitHandler extends FinremCallbackHandler {
 
 
     @Autowired
-    public ReadyForHearingAboutToSubmitHandler(FinremCaseDetailsMapper mapper) {
+    public ReadyForHearingConsentedAboutToSubmitHandler(FinremCaseDetailsMapper mapper) {
         super(mapper);
     }
 

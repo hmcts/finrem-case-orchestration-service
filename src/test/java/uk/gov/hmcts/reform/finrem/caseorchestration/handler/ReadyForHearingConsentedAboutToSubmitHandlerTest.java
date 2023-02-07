@@ -27,16 +27,16 @@ import static org.junit.Assert.assertNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIST_FOR_HEARING_COLLECTION_CONSENTED;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ReadyForHearingAboutToSubmitHandlerTest extends BaseHandlerTest {
+public class ReadyForHearingConsentedAboutToSubmitHandlerTest extends BaseHandlerTest {
 
-    private ReadyForHearingAboutToSubmitHandler handler;
+    private ReadyForHearingConsentedAboutToSubmitHandler handler;
 
     private static final String AUTH_TOKEN = "token:)";
 
     @Before
     public void setup() {
         FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
-        handler = new ReadyForHearingAboutToSubmitHandler(finremCaseDetailsMapper);
+        handler = new ReadyForHearingConsentedAboutToSubmitHandler(finremCaseDetailsMapper);
     }
 
     @Test
