@@ -73,17 +73,11 @@
           }
         }
       ],
-      "additionalListOfHearingDocuments": [
-        {
-          "value": {
-            "additionalHearingDocument": {
-              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b1532b0a-3759-4d45-8c66-d1a8e5f3273b",
-              "document_filename": "dummy.pdf",
-              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b1532b0a-3759-4d45-8c66-d1a8e5f3273b/binary"
-            }
-          }
-        }
-      ],
+      "additionalListOfHearingDocuments": {
+        "document_url": "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336",
+        "document_filename": "api.docx",
+        "document_binary_url": "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336/binary"
+      },
       "applicantSolicitorConsentForEmails": "Yes",
       "applicantSolicitorDXnumber": null,
       "isAdmin": "Yes",
