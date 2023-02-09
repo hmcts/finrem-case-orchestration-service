@@ -67,19 +67,6 @@ public class ReadyForHearingConsentedAboutToSubmitHandlerTest extends BaseHandle
             is(false));
     }
 
-    @Test
-    public void givenConsentedCase_WhenHearingListed_ThenShouldBeReadyForHearing() {
-        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
-        finremCallbackRequest.getCaseDetails().getData().setHearingDate(LocalDate.now().plusMonths(1));
-
-        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
-            handler.handle(finremCallbackRequest, AUTH_TOKEN);
-
-        FinremCaseData responseData = response.getData();
-        assertEquals(LocalDate.now().plusMonths(1), responseData.getHearingDate());
-        assertNull(response.getErrors());
-    }
-
 
     @Test
     public void givenConsentedCase_WhenHearingNotListed_ThenShouldNotBeReadyForHearing() {

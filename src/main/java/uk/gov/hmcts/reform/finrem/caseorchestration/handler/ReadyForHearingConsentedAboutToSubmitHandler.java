@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDa
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
@@ -39,7 +38,7 @@ public class ReadyForHearingConsentedAboutToSubmitHandler extends FinremCallback
                                                                               String userAuthorisation) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseData caseData = caseDetails.getData();
-        log.info("Received request to update consented case with Case ID: {}", caseDetails.getId());
+        log.info("Received request to invoke event {} for Case ID: {}", EventType.READY_FOR_HEARING, caseDetails.getId());
 
         if (!isHearingDatePresent(caseData)) {
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder().data(caseData)
@@ -52,10 +51,9 @@ public class ReadyForHearingConsentedAboutToSubmitHandler extends FinremCallback
 
         ConsentedHearingHelper helper = new ConsentedHearingHelper(new ObjectMapper());
         ConsentedHearingDataWrapper listForHearings = helper.getHearings(caseData).stream()
-            .filter(hearing -> !hearing.getValue().getHearingDate().isEmpty()
-                && LocalDate.parse(hearing.getValue().getHearingDate()).isAfter(LocalDate.now().minusDays(1)))
+            .filter(hearing -> !hearing.getValue().getHearingDate().isEmpty())
             .findAny().orElse(null);
 
-        return listForHearings != null || (caseData.getHearingDate() != null && caseData.getHearingDate().isAfter(LocalDate.now().minusDays(1)));
+        return listForHearings != null;
     }
 }
