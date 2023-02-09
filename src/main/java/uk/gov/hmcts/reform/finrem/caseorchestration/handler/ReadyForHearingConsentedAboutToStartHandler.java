@@ -18,17 +18,17 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class ReadyForHearingConsentedAboutToSubmitHandler extends FinremCallbackHandler {
+public class ReadyForHearingConsentedAboutToStartHandler extends FinremCallbackHandler {
 
 
     @Autowired
-    public ReadyForHearingConsentedAboutToSubmitHandler(FinremCaseDetailsMapper mapper) {
+    public ReadyForHearingConsentedAboutToStartHandler(FinremCaseDetailsMapper mapper) {
         super(mapper);
     }
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
+        return CallbackType.ABOUT_TO_START.equals(callbackType)
             && CaseType.CONSENTED.equals(caseType)
             && EventType.READY_FOR_HEARING.equals(eventType);
     }

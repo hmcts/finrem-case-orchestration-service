@@ -27,43 +27,43 @@ import static org.junit.Assert.assertNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIST_FOR_HEARING_COLLECTION_CONSENTED;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ReadyForHearingConsentedAboutToSubmitHandlerTest extends BaseHandlerTest {
+public class ReadyForHearingConsentedAboutToStartHandlerTest extends BaseHandlerTest {
 
-    private ReadyForHearingConsentedAboutToSubmitHandler handler;
+    private ReadyForHearingConsentedAboutToStartHandler handler;
 
     private static final String AUTH_TOKEN = "token:)";
 
     @Before
     public void setup() {
         FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(new ObjectMapper().registerModule(new JavaTimeModule()));
-        handler = new ReadyForHearingConsentedAboutToSubmitHandler(finremCaseDetailsMapper);
+        handler = new ReadyForHearingConsentedAboutToStartHandler(finremCaseDetailsMapper);
     }
 
     @Test
     public void canHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.READY_FOR_HEARING),
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.READY_FOR_HEARING),
             is(true));
     }
 
     @Test
     public void canNotHandleWrongCaseType() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.READY_FOR_HEARING),
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.READY_FOR_HEARING),
             is(false));
     }
 
     @Test
     public void canNotHandleWrongEvent() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.CLOSE),
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.CLOSE),
             is(false));
     }
 
     @Test
     public void canNotHandleWrongCallbackType() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.READY_FOR_HEARING),
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.READY_FOR_HEARING),
             is(false));
     }
 
