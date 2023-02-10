@@ -306,14 +306,9 @@ public class TestSetUpUtils {
         }
     }
 
-    public static CaseDetails finremCaseDetailsFromResource(String json, ObjectMapper mapper) {
+    public static FinremCaseDetails finremCaseDetailsFromResource(String jsonPath, ObjectMapper mapper) {
         FinremCallbackRequestDeserializer deserializer = new FinremCallbackRequestDeserializer(mapper);
-        return deserializer.deserialize(json).getCaseDetails();
-    }
-
-    public static FinremCaseDetails finremCaseDetailsPojoFromResource(String json, ObjectMapper mapper) {
-        FinremCallbackRequestDeserializer deserializer = new FinremCallbackRequestDeserializer(mapper);
-        return deserializer.deserializeFinremCallbackRequest(json).getCaseDetails();
+        return deserializer.deserializeFinremCallbackRequest(jsonPath).getCaseDetails();
     }
 
     private static void populateRespondentNameAndAddressConsented(Map<String, Object> caseData) {

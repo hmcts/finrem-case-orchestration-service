@@ -20,7 +20,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element.element;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ApprovedOrderNoticeOfHearingCorrespondenceHandlerTest extends HearingCorrespondenceBaseTest {
+public class ApprovedOrderNoticeOfHearingCorresponderTest extends HearingCorrespondenceBaseTest {
 
     private static final String LATEST_DRAFT_ORDER_DOCUMENT_BIN_URL = "http://dm-store/1frea-ldo-doc/binary";
     private static final String GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL = "http://dm-store/1f3a-gads-doc/binary";

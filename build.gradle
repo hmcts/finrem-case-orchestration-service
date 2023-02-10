@@ -182,8 +182,10 @@ sonarqube {
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/service/payments/config/**',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/service/payments/model/**',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/handler/FinremCallbackRequest.java',
+                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/service/serialisation/FinremCallbackRequestDeserializer.java',
+                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/service/correspondence/FinremSingleLetterOrEmailApplicantCorresponder.java',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/controllers/GenericAboutToStartOrSubmitCallbackResponse.java'
-        ]
+    ]
 
     properties {
         property "sonar.projectKey", "finrem-case-orchestration"
@@ -378,7 +380,7 @@ dependencies {
     functionalImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
     functionalImplementation group: 'io.jsonwebtoken', name: 'jjwt', version: versions.jjwt
     functionalImplementation group: 'junit', name: 'junit', version: versions.junit
-    functionalImplementation ("net.serenity-bdd:serenity-core:3.2.5") {
+    functionalImplementation("net.serenity-bdd:serenity-core:3.2.5") {
         exclude group: "commons-net", module: "commons-net"
         exclude group: "org.apache.commons", module: "commons-compress"
     }
@@ -403,15 +405,15 @@ dependencies {
     contractImplementation group: 'au.com.dius.pact.consumer', name: 'junit', version: versions.pact
 }
 
-tasks.withType(Jar){
+tasks.withType(Jar) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-tasks.withType(Tar){
+tasks.withType(Tar) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-tasks.withType(Zip){
+tasks.withType(Zip) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 

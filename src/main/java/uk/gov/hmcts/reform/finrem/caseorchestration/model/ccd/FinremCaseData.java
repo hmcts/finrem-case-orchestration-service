@@ -683,63 +683,91 @@ public class FinremCaseData {
 
     @JsonIgnore
     private String getMidlandsCourt(RegionMidlandsFrc frc, CourtListWrapper courtList) {
-        return Map.of(
-                RegionMidlandsFrc.NOTTINGHAM, getCourtListIdOrDefault(courtList.getNottinghamCourt()),
-                RegionMidlandsFrc.BIRMINGHAM, getCourtListIdOrDefault(courtList.getBirminghamCourt()))
-            .get(frc).getSelectedCourtId();
+        if (frc != null) {
+            return Map.of(
+                    RegionMidlandsFrc.NOTTINGHAM, getCourtListIdOrDefault(courtList.getNottinghamCourt()),
+                    RegionMidlandsFrc.BIRMINGHAM, getCourtListIdOrDefault(courtList.getBirminghamCourt()))
+                .get(frc).getSelectedCourtId();
+        } else {
+            return StringUtils.EMPTY;
+        }
     }
 
     @JsonIgnore
     private String getNorthEastCourt(RegionNorthEastFrc frc, CourtListWrapper courtList) {
-        return Map.of(
-            RegionNorthEastFrc.CLEVELAND, getCourtListIdOrDefault(courtList
-                .getClevelandCourt(isConsentedApplication())),
-            RegionNorthEastFrc.HS_YORKSHIRE, getCourtListIdOrDefault(courtList.getHumberCourt()),
-            RegionNorthEastFrc.NW_YORKSHIRE, getCourtListIdOrDefault(courtList.getNwYorkshireCourt())
-        ).get(frc).getSelectedCourtId();
+        if (frc != null) {
+            return Map.of(
+                RegionNorthEastFrc.CLEVELAND, getCourtListIdOrDefault(courtList
+                    .getClevelandCourt(isConsentedApplication())),
+                RegionNorthEastFrc.HS_YORKSHIRE, getCourtListIdOrDefault(courtList.getHumberCourt()),
+                RegionNorthEastFrc.NW_YORKSHIRE, getCourtListIdOrDefault(courtList.getNwYorkshireCourt())
+            ).get(frc).getSelectedCourtId();
+        } else {
+            return StringUtils.EMPTY;
+        }
     }
 
     @JsonIgnore
     private String getNorthWestCourt(RegionNorthWestFrc frc, CourtListWrapper courtList) {
-        return Map.of(
-            RegionNorthWestFrc.MANCHESTER, getCourtListIdOrDefault(courtList.getManchesterCourt()),
-            RegionNorthWestFrc.LANCASHIRE, getCourtListIdOrDefault(courtList.getLancashireCourt()),
-            RegionNorthWestFrc.LIVERPOOL, getCourtListIdOrDefault(courtList.getLiverpoolCourt())
-        ).get(frc).getSelectedCourtId();
+        if (frc != null) {
+            return Map.of(
+                RegionNorthWestFrc.MANCHESTER, getCourtListIdOrDefault(courtList.getManchesterCourt()),
+                RegionNorthWestFrc.LANCASHIRE, getCourtListIdOrDefault(courtList.getLancashireCourt()),
+                RegionNorthWestFrc.LIVERPOOL, getCourtListIdOrDefault(courtList.getLiverpoolCourt())
+            ).get(frc).getSelectedCourtId();
+        } else {
+            return StringUtils.EMPTY;
+        }
     }
 
     @JsonIgnore
     private String getSouthWestCourt(RegionSouthWestFrc frc, CourtListWrapper courtList) {
-        return Map.of(
-                RegionSouthWestFrc.BRISTOL, getCourtListIdOrDefault(courtList.getBristolCourt()),
-                RegionSouthWestFrc.DEVON, getCourtListIdOrDefault(courtList.getDevonCourt()),
-                RegionSouthWestFrc.DORSET, getCourtListIdOrDefault(courtList.getDorsetCourt()))
-            .get(frc).getSelectedCourtId();
+        if (frc != null) {
+            return Map.of(
+                    RegionSouthWestFrc.BRISTOL, getCourtListIdOrDefault(courtList.getBristolCourt()),
+                    RegionSouthWestFrc.DEVON, getCourtListIdOrDefault(courtList.getDevonCourt()),
+                    RegionSouthWestFrc.DORSET, getCourtListIdOrDefault(courtList.getDorsetCourt()))
+                .get(frc).getSelectedCourtId();
+        } else {
+            return StringUtils.EMPTY;
+        }
     }
 
     @JsonIgnore
     private String getSouthEastCourt(RegionSouthEastFrc frc, CourtListWrapper courtList) {
-        return Map.of(
-            RegionSouthEastFrc.BEDFORDSHIRE, getCourtListIdOrDefault(courtList.getBedfordshireCourt()),
-            RegionSouthEastFrc.KENT, getCourtListIdOrDefault(courtList.getKentSurreyCourt()),
-            RegionSouthEastFrc.THAMES_VALLEY, getCourtListIdOrDefault(courtList.getThamesValleyCourt())
-        ).get(frc).getSelectedCourtId();
+        if (frc != null) {
+            return Map.of(
+                RegionSouthEastFrc.BEDFORDSHIRE, getCourtListIdOrDefault(courtList.getBedfordshireCourt()),
+                RegionSouthEastFrc.KENT, getCourtListIdOrDefault(courtList.getKentSurreyCourt()),
+                RegionSouthEastFrc.THAMES_VALLEY, getCourtListIdOrDefault(courtList.getThamesValleyCourt())
+            ).get(frc).getSelectedCourtId();
+        } else {
+            return StringUtils.EMPTY;
+        }
     }
 
     @JsonIgnore
     private String getWalesCourt(RegionWalesFrc frc, CourtListWrapper courtList) {
-        return Map.of(
-            RegionWalesFrc.NORTH_WALES, getCourtListIdOrDefault(courtList.getNorthWalesCourt()),
-            RegionWalesFrc.NEWPORT, getCourtListIdOrDefault(courtList.getNewportCourt()),
-            RegionWalesFrc.SWANSEA, getCourtListIdOrDefault(courtList.getSwanseaCourt())
-        ).get(frc).getSelectedCourtId();
+        if (frc != null) {
+            return Map.of(
+                RegionWalesFrc.NORTH_WALES, getCourtListIdOrDefault(courtList.getNorthWalesCourt()),
+                RegionWalesFrc.NEWPORT, getCourtListIdOrDefault(courtList.getNewportCourt()),
+                RegionWalesFrc.SWANSEA, getCourtListIdOrDefault(courtList.getSwanseaCourt())
+            ).get(frc).getSelectedCourtId();
+        } else {
+            return StringUtils.EMPTY;
+        }
     }
 
     @JsonIgnore
     private String getHighCourt(RegionHighCourtFrc frc, CourtListWrapper courtList) {
-        return Map.of(
-            RegionHighCourtFrc.HIGHCOURT, getCourtListIdOrDefault(courtList.getHighCourt())
-        ).get(frc).getSelectedCourtId();
+        if (frc != null) {
+            return Map.of(
+                RegionHighCourtFrc.HIGHCOURT, getCourtListIdOrDefault(courtList.getHighCourt())
+            ).get(frc).getSelectedCourtId();
+        } else {
+            return StringUtils.EMPTY;
+        }
     }
 
     @JsonIgnore

@@ -175,7 +175,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.state", is(CONSENT_ORDER_MADE.toString())));
 
         verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), any());
-        verify(notificationService).sendConsentOrderAvailableCtscEmail(any());
+        verify(notificationService).sendConsentOrderAvailableCtscEmail(any(CaseDetails.class));
         verify(consentOrderAvailableCorresponder).sendCorrespondence(any());
     }
 
@@ -198,7 +198,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.state", is(CONSENT_ORDER_MADE.toString())));
 
         verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), any());
-        verify(notificationService).sendConsentOrderAvailableCtscEmail(any());
+        verify(notificationService).sendConsentOrderAvailableCtscEmail(any(CaseDetails.class));
         verify(consentOrderAvailableCorresponder).sendCorrespondence(any());
     }
 

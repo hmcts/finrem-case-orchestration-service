@@ -129,6 +129,8 @@ public abstract class BaseServiceTest extends BaseTest {
             .build();
     }
 
+
+
     protected CallbackRequest getConsentedCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, "David");
@@ -203,7 +205,12 @@ public abstract class BaseServiceTest extends BaseTest {
         caseData.getContactDetailsWrapper().setRespondentSolicitorReference(TEST_RESP_SOLICITOR_REFERENCE);
         caseData.setDivorceCaseNumber(TEST_DIVORCE_CASE_NUMBER);
         caseData.setCcdCaseType(CaseType.CONSENTED);
-
+        caseData.getGeneralApplicationWrapper().setGeneralApplicationReferToJudgeEmail(TEST_JUDGE_EMAIL);
+        caseData.getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.MIDLANDS);
+        caseData.getRegionWrapper().getDefaultRegionWrapper().setMidlandsFrcList(RegionMidlandsFrc.NOTTINGHAM);
+        caseData.getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper()
+            .setNottinghamCourtList(NottinghamCourt.NOTTINGHAM_COUNTY_COURT_AND_FAMILY_COURT);
+        caseData.setBulkPrintLetterIdRes(NOTTINGHAM);
         return FinremCallbackRequest.builder()
             .caseDetails(FinremCaseDetails.builder()
                 .caseType(CaseType.CONSENTED)

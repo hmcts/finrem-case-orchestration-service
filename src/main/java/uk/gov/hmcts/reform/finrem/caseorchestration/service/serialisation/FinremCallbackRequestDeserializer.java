@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 
+import java.io.File;
 import java.io.IOException;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -37,7 +39,27 @@ public class FinremCallbackRequestDeserializer implements Deserializer<CallbackR
         }
     }
 
+
     public FinremCallbackRequest deserializeFinremCallbackRequest(String source) {
+        return deserializeFinrem(resourceContentAsString(source));
+    }
+
+    private String resourceContentAsString(String resourcePath) {
+        return readJsonNodeFromFile(resourcePath).toString();
+    }
+
+    private JsonNode readJsonNodeFromFile(String jsonPath) {
+        try {
+            return mapper.readTree(
+                new File(getClass()
+                    .getResource(jsonPath)
+                    .toURI()));
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    private FinremCallbackRequest deserializeFinrem(String source) {
         mapper.registerModule(new JavaTimeModule());
         mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 

@@ -66,6 +66,7 @@ public class BulkPrintService {
         return printDocumentsWithCoversheet(caseDetails, generateApplicantCoverSheet(caseDetails, authorisationToken), caseDocuments);
     }
 
+    @Deprecated
     public UUID printRespondentDocuments(CaseDetails caseDetails, String authorisationToken,
                                          List<BulkPrintDocument> caseDocuments) {
         return printDocumentsWithCoversheet(caseDetails, generateRespondentCoverSheet(caseDetails, authorisationToken), caseDocuments);

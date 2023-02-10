@@ -157,6 +157,17 @@ public class DocumentHelper {
             .collect(Collectors.toList());
     }
 
+    public List<CaseDocument> getFormADocumentsData(FinremCaseData caseData) {
+        return ofNullable(caseData.getCopyOfPaperFormA())
+            .map(this::convertToPensionCollectionDataList)
+            .orElse(emptyList())
+            .stream()
+            .map(PensionCollectionData::getTypedCaseDocument)
+            .map(TypedCaseDocument::getPensionDocument)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+    }
+
     public List<CaseDocument> getConsentedInContestedPensionDocumentsData(Map<String, Object> caseData) {
         return ofNullable(caseData.get(CONTESTED_CONSENT_PENSION_COLLECTION))
             .map(this::convertToPensionCollectionDataList)

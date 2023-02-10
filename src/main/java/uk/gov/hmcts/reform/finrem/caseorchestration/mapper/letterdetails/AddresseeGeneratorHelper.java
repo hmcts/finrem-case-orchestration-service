@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -8,7 +9,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterAddressToType;
-
 
 import java.util.Map;
 import java.util.Objects;
@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
+@Slf4j
 public class AddresseeGeneratorHelper {
 
     public static final String ADDRESS_MAP = "addressMap";
@@ -25,6 +26,7 @@ public class AddresseeGeneratorHelper {
 
     public static Addressee generateAddressee(FinremCaseDetails caseDetails,
                                               DocumentHelper.PaperNotificationRecipient recipient) {
+
         return getAddressee(caseDetails.getData(), recipient);
     }
 
