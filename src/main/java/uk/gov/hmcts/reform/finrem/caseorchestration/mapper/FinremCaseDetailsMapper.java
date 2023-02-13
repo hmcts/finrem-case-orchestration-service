@@ -10,6 +10,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 
+import java.util.Map;
+
 @Component
 @Slf4j
 @RequiredArgsConstructor
@@ -25,6 +27,21 @@ public class FinremCaseDetailsMapper {
             .id(caseDetails.getId())
             .jurisdiction(caseDetails.getJurisdiction())
             .state(State.forValue(caseDetails.getState()))
+            .createdDate(caseDetails.getCreatedDate())
+            .securityLevel(caseDetails.getSecurityLevel())
+            .callbackResponseStatus(caseDetails.getCallbackResponseStatus())
+            .lastModified(caseDetails.getLastModified())
+            .securityClassification(caseDetails.getSecurityClassification())
+            .data(data)
+            .build();
+    }
+
+    public CaseDetails mapToCaseDetails(FinremCaseDetails caseDetails) {
+        Map data = objectMapper.convertValue(caseDetails.getData(), Map.class);
+        return CaseDetails.builder().caseTypeId(caseDetails.getCaseType().getCcdType())
+            .id(caseDetails.getId())
+            .jurisdiction(caseDetails.getJurisdiction())
+            .state(caseDetails.getState().getStateId())
             .createdDate(caseDetails.getCreatedDate())
             .securityLevel(caseDetails.getSecurityLevel())
             .callbackResponseStatus(caseDetails.getCallbackResponseStatus())

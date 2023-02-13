@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocument;
@@ -26,6 +27,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDo
 public class FinremFormCandGCorresponderTest extends FinremHearingCorrespondenceBaseTest {
 
     private ObjectMapper objectMapper = new ObjectMapper();
+    private FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
 
     private static final String DATE_OF_HEARING = "2019-01-01";
 
@@ -34,7 +36,7 @@ public class FinremFormCandGCorresponderTest extends FinremHearingCorrespondence
         caseDetails = caseDetails(NO_VALUE);
         applicantAndRespondentMultiLetterCorresponder =
             new FinremFormCandGCorresponder(bulkPrintService, notificationService,
-                new DocumentHelper(objectMapper, new CaseDataService()), objectMapper);
+                new DocumentHelper(objectMapper, new CaseDataService(), finremCaseDetailsMapper), objectMapper);
     }
 
     @Test

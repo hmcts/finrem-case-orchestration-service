@@ -61,7 +61,7 @@ public class DocumentHelperTest {
         objectMapper.registerModule(new JavaTimeModule());
         CaseDataService caseDataService = new CaseDataService();
         finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
-        documentHelper = new DocumentHelper(objectMapper, caseDataService);
+        documentHelper = new DocumentHelper(objectMapper, caseDataService, finremCaseDetailsMapper);
     }
 
     @Test

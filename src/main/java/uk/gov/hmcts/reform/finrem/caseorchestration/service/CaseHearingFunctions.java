@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 
 import java.io.IOException;
@@ -290,10 +291,28 @@ public final class CaseHearingFunctions {
         return null;
     }
 
+    @Deprecated
     public static Map<String, Object> buildFrcCourtDetails(Map<String, Object> data) {
         try {
             Map<String, Object> courtDetailsMap = new ObjectMapper().readValue(getCourtDetailsString(), HashMap.class);
             Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(data.get(getSelectedCourt(data)));
+
+            return new ObjectMapper().convertValue(FrcCourtDetails.builder()
+                .courtName((String) courtDetails.get(COURT_DETAILS_NAME_KEY))
+                .courtAddress((String) courtDetails.get(COURT_DETAILS_ADDRESS_KEY))
+                .phoneNumber((String) courtDetails.get(COURT_DETAILS_PHONE_KEY))
+                .email((String) courtDetails.get(COURT_DETAILS_EMAIL_KEY))
+                .build(), Map.class);
+        } catch (IOException | NullPointerException e) {
+            return null;
+        }
+    }
+
+
+    public static Map<String, Object> buildFrcCourtDetails(FinremCaseData data) {
+        try {
+            Map<String, Object> courtDetailsMap = new ObjectMapper().readValue(getCourtDetailsString(), HashMap.class);
+            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(data.getSelectedCourt());
 
             return new ObjectMapper().convertValue(FrcCourtDetails.builder()
                 .courtName((String) courtDetails.get(COURT_DETAILS_NAME_KEY))

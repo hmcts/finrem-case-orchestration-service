@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 
@@ -31,6 +32,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class FormCandGCorresponderTest extends HearingCorrespondenceBaseTest {
 
     private ObjectMapper objectMapper = new ObjectMapper();
+    private FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
 
     private static final String DATE_OF_HEARING = "2019-01-01";
 
@@ -39,7 +41,7 @@ public class FormCandGCorresponderTest extends HearingCorrespondenceBaseTest {
         caseDetails = caseDetails(NO_VALUE);
         applicantAndRespondentMultiLetterCorresponder =
             new FormCandGCorresponder(bulkPrintService, notificationService,
-                new DocumentHelper(objectMapper, new CaseDataService()), objectMapper);
+                new DocumentHelper(objectMapper, new CaseDataService(), finremCaseDetailsMapper), objectMapper);
     }
 
     @Test

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Before;
@@ -182,12 +183,25 @@ public class FinremCaseDetailMapperTest {
     }
 
     @Test
-    public void mapBulkPrintDetails() {
+    public void mapFinremCaseDetailsToCaseDetails() {
+        caseDetails = buildCaseDetailsFromJson(BASIC_REQUEST);
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        CaseDetails caseDetails_a = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
+        assertEquals(caseDetails, caseDetails_a);
+    }
+
+    @Test
+    public void mapBulkPrintDetails() throws JsonProcessingException {
         caseDetails = buildCaseDetailsFromJson(BULK_PRINT_ADDITIONAL_HEARING_JSON);
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         assertNotNull(finremCaseDetails);
         assertEquals(finremCaseDetails.getData().getContactDetailsWrapper().getApplicantFmName(), "Test");
+        CaseDetails caseDetails_a = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
+        String caseDetailsString = objectMapper.writeValueAsString(caseDetails);
+        String caseDetails_a_String = objectMapper.writeValueAsString(caseDetails_a);
+        assertEquals(objectMapper.readTree(caseDetailsString), objectMapper.readTree(caseDetails_a_String));
     }
+
 
 
     @Test
