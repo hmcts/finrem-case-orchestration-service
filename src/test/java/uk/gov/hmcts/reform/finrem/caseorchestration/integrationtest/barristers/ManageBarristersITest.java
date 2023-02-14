@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.PrdOrganisationConfig
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.CcdCallbackController;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.IntegrationTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
@@ -95,7 +96,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdServiceTes
     ManageBarristerTestConfiguration.class, PrdOrganisationService.class, PrdOrganisationConfiguration.class,
     AssignCaseAccessService.class, CaseAssignedRoleService.class, CcdCallbackController.class,
     CallbackDispatchService.class, NotificationService.class, NotificationServiceConfiguration.class,
-    NotificationRequestMapper.class, DocumentConfiguration.class})
+    NotificationRequestMapper.class, DocumentConfiguration.class, FinremCaseDetailsMapper.class})
 public class ManageBarristersITest implements IntegrationTest {
 
     private static final String SERVICE_AUTH_TOKEN = "serviceAuth";
