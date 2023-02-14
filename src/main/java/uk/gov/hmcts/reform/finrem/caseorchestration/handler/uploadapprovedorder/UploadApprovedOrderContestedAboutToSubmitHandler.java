@@ -17,22 +17,22 @@ import java.util.Map;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UploadApprovedOrderAboutToStartHandler
+public class UploadApprovedOrderContestedAboutToSubmitHandler
     implements CallbackHandler<Map<String, Object>> {
 
     private final UploadApprovedOrderService uploadApprovedOrderService;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return CallbackType.ABOUT_TO_START.equals(callbackType)
+        return CallbackType.ABOUT_TO_SUBMIT.equals(callbackType)
             && CaseType.CONTESTED.equals(caseType)
             && EventType.UPLOAD_APPROVED_ORDER.equals(eventType);
     }
 
-    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
-                                                                                   String userAuthorisation) {
+    @Override
+    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(
+        CallbackRequest callbackRequest, String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseData = uploadApprovedOrderService.prepareFieldsForOrderApprovedCoverLetter(caseDetails);
-        return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData).build();
+        return uploadApprovedOrderService.handleUploadApprovedOrderAboutToSubmit(caseDetails, userAuthorisation);
     }
 }

@@ -26,7 +26,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UploadApprovedOrderSubmittedHandler
+public class UploadApprovedOrderContestedSubmittedHandler
     implements CallbackHandler<Map<String, Object>> {
 
     private final ApprovedOrderNoticeOfHearingService approvedOrderNoticeOfHearingService;
