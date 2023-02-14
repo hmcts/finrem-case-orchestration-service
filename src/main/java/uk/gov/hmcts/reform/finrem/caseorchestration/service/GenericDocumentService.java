@@ -66,7 +66,8 @@ public class GenericDocumentService {
     }
 
     public CaseDocument stampDocument(CaseDocument document, String authorisationToken) {
-        Document stampedDocument = documentClient.stampDocument(toDocument(document), authorisationToken);
+        Document stampedDocument = documentClient.stampDocument(
+            toDocument(convertDocumentIfNotPdfAlready(document,authorisationToken)), authorisationToken);
         return toCaseDocument(stampedDocument);
     }
 
