@@ -10,10 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 public class FinremAdditionalHearingCorresponder extends FinremHearingCorresponder {
 
@@ -32,16 +29,15 @@ public class FinremAdditionalHearingCorresponder extends FinremHearingCorrespond
         List<BulkPrintDocument> documents = new ArrayList<>();
 
         List<AdditionalHearingDocumentCollection> additionalHearingDocuments = caseDetails.getData().getAdditionalHearingDocuments();
-        AdditionalHearingDocument additionalHearingDocument = Optional.ofNullable(additionalHearingDocuments)
-            .map(Collection::stream)
-            .orElseGet(Stream::empty)
-            .reduce((first, second) -> second).get().getValue();
 
-        if (additionalHearingDocument != null) {
+        if (additionalHearingDocuments != null && !additionalHearingDocuments.isEmpty()) {
+            AdditionalHearingDocument additionalHearingDocument =
+                caseDetails.getData().getAdditionalHearingDocuments().stream().reduce((first, second) -> second).get().getValue();
             BulkPrintDocument additionalDoc
                 = documentHelper.getBulkPrintDocumentFromCaseDocument(additionalHearingDocument.getDocument());
             documents.add(additionalDoc);
         }
+
         if (caseDetails.getData().getAdditionalListOfHearingDocuments() != null) {
             BulkPrintDocument additionalUploadedDoc
                 = documentHelper.getBulkPrintDocumentFromCaseDocument(caseDetails.getData().getAdditionalListOfHearingDocuments());
