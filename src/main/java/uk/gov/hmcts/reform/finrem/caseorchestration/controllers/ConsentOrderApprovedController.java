@@ -25,7 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
@@ -161,7 +161,7 @@ public class ConsentOrderApprovedController extends BaseController {
             log.info("Pension Documents not empty for case - stamping Pension Documents and adding to approvedOrder for case {}",
                 caseDetails.getId());
 
-            List<PensionCollectionData> stampedPensionDocs = consentOrderApprovedDocumentService.stampPensionDocuments(
+            List<PensionTypeCollection> stampedPensionDocs = consentOrderApprovedDocumentService.stampPensionDocuments(
                 getPensionDocuments(caseData), authToken);
             log.info("Generated StampedPensionDocs = {} for case {}", stampedPensionDocs, caseDetails.getId());
             approvedOrder.setPensionDocuments(stampedPensionDocs);
@@ -199,7 +199,7 @@ public class ConsentOrderApprovedController extends BaseController {
         });
     }
 
-    private List<PensionCollectionData> getPensionDocuments(Map<String, Object> caseData) {
+    private List<PensionTypeCollection> getPensionDocuments(Map<String, Object> caseData) {
         return mapper.convertValue(caseData.get(PENSION_DOCS_COLLECTION), new TypeReference<>() {
         });
     }

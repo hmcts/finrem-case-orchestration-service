@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchFieldExistsException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -24,6 +25,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionDocumentType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ClientDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
@@ -74,7 +79,7 @@ public class TestSetUpUtils {
     public static final String INTE_BINARY_URL = INTE_DOC_URL + "/binary";
     public static final String INTE_FILE_NAME = "dummy1.pdf";
     public static final String REJECTED_ORDER_TYPE = "General Order";
-    public static final String PENSION_TYPE = "PPF1";
+    public static final String PENSION_TYPE = "Form PPF1";
     public static final String PENSION_ID = "1";
 
     public static final int INTERNAL_SERVER_ERROR = HttpStatus.INTERNAL_SERVER_ERROR.value();
@@ -181,16 +186,16 @@ public class TestSetUpUtils {
         return caseDocument;
     }
 
-    public static TypedCaseDocument pensionDocument() {
-        TypedCaseDocument document = new TypedCaseDocument();
+    public static PensionType pensionDocument() {
+        PensionType document = new PensionType();
         document.setPensionDocument(caseDocument());
-        document.setTypeOfDocument(PENSION_TYPE);
+        document.setTypeOfDocument(PensionDocumentType.forValue(PENSION_TYPE));
 
         return document;
     }
 
-    public static PensionCollectionData pensionDocumentData() {
-        PensionCollectionData document = new PensionCollectionData();
+    public static PensionTypeCollection pensionDocumentData() {
+        PensionTypeCollection document = new PensionTypeCollection();
         document.setTypedCaseDocument(pensionDocument());
         document.setId(PENSION_ID);
 
@@ -338,6 +343,14 @@ public class TestSetUpUtils {
     public static CaseDetails caseDetailsFromResource(String resourcePath, ObjectMapper mapper) {
         try (InputStream resourceAsStream = TestSetUpUtils.class.getResourceAsStream(resourcePath)) {
             return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+        } catch (Exception exception) {
+            throw new IllegalStateException(exception.getMessage(), exception);
+        }
+    }
+
+    public static FinremCaseDetails finremCaseDetailsFromResource(String resourcePath, ObjectMapper mapper) {
+        try (InputStream resourceAsStream = TestSetUpUtils.class.getResourceAsStream(resourcePath)) {
+            return mapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
         } catch (Exception exception) {
             throw new IllegalStateException(exception.getMessage(), exception);
         }

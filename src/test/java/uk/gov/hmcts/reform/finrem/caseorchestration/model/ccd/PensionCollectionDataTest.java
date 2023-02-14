@@ -13,7 +13,7 @@ public class PensionCollectionDataTest {
     private final String json = "{\n"
         + "          \"id\": \"1\",\n"
         + "          \"value\": {\n"
-        + "            \"typeOfDocument\": \"pdf\",\n"
+        + "            \"typeOfDocument\": \"Form P1\",\n"
         + "            \"uploadedDocument\": {\n"
         + "              \"document_url\": \"http://file1\",\n"
         + "              \"document_filename\": \"file1.pdf\",\n"
@@ -25,11 +25,11 @@ public class PensionCollectionDataTest {
     @Test
     public void shouldGetPensionCollectionData() throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
-        PensionCollectionData pensionCollectionData = objectMapper.readValue(json, PensionCollectionData.class);
+        PensionTypeCollection pensionCollectionData = objectMapper.readValue(json, PensionTypeCollection.class);
         assertThat(pensionCollectionData, is(notNullValue()));
         assertThat(pensionCollectionData.getId(), is("1"));
-        TypedCaseDocument typedCaseDocument = pensionCollectionData.getTypedCaseDocument();
-        assertThat(typedCaseDocument.getTypeOfDocument(), is("pdf"));
+        PensionType typedCaseDocument = pensionCollectionData.getTypedCaseDocument();
+        assertThat(typedCaseDocument.getTypeOfDocument(), is(PensionDocumentType.FORM_P1));
         assertThat(typedCaseDocument.getPensionDocument(), is(notNullValue()));
         CaseDocument pensionDocument = typedCaseDocument.getPensionDocument();
         assertThat(pensionDocument.getDocumentBinaryUrl(), is("http://file1.binary"));

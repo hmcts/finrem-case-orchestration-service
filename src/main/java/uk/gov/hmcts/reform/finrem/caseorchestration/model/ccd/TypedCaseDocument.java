@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Deprecated
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @AllArgsConstructor

@@ -22,24 +22,24 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @RunWith(MockitoJUnitRunner.class)
-public class UploadApprovedOrderAboutToStartHandlerTest extends UploadApprovedOrderBaseHandlerTest {
+public class UploadApprovedOrderContestedAboutToStartHandlerTest extends UploadApprovedOrderBaseHandlerTest {
 
     @InjectMocks
-    UploadApprovedOrderAboutToStartHandler uploadApprovedOrderAboutToStartHandler;
+    UploadApprovedOrderContestedAboutToStartHandler uploadApprovedOrderContestedAboutToStartHandler;
 
     @Mock
     UploadApprovedOrderService uploadApprovedOrderService;
 
     @Test
     public void givenContestedCase_whenAboutToStartUploadApprovedOrder_thenCanHandle() {
-        assertThat(uploadApprovedOrderAboutToStartHandler
+        assertThat(uploadApprovedOrderContestedAboutToStartHandler
                 .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.UPLOAD_APPROVED_ORDER),
             is(true));
     }
 
     @Test
     public void givenContestedCase_whenAboutToSubmitUploadApprovedOrder_thenCannotHandle() {
-        assertThat(uploadApprovedOrderAboutToStartHandler
+        assertThat(uploadApprovedOrderContestedAboutToStartHandler
                 .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.UPLOAD_APPROVED_ORDER),
             is(false));
     }
@@ -48,7 +48,7 @@ public class UploadApprovedOrderAboutToStartHandlerTest extends UploadApprovedOr
     public void givenContestedCase_whenAboutToStartUploadApprovedOrder_thenHandle() {
         when(uploadApprovedOrderService.prepareFieldsForOrderApprovedCoverLetter(callbackRequest.getCaseDetails()))
             .thenReturn(caseData);
-        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = uploadApprovedOrderAboutToStartHandler
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response = uploadApprovedOrderContestedAboutToStartHandler
             .handle(callbackRequest, AUTH_TOKEN);
 
         assertTrue(response.getData().containsKey(SUCCESS_KEY));

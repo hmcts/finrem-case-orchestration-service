@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -20,20 +21,23 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrde
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderDocumentCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -75,6 +79,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NOTICES_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_OTHER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
@@ -104,6 +109,7 @@ public class DocumentHelper {
 
     private final ObjectMapper objectMapper;
     private final CaseDataService caseDataService;
+    private final GenericDocumentService service;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     public static CtscContactDetails buildCtscContactDetails() {
@@ -146,8 +152,8 @@ public class DocumentHelper {
             .map(this::convertToPensionCollectionDataList)
             .orElse(emptyList())
             .stream()
-            .map(PensionCollectionData::getTypedCaseDocument)
-            .map(TypedCaseDocument::getPensionDocument)
+            .map(PensionTypeCollection::getTypedCaseDocument)
+            .map(PensionType::getPensionDocument)
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
     }
@@ -158,8 +164,8 @@ public class DocumentHelper {
             .map(this::convertToPensionCollectionDataList)
             .orElse(emptyList())
             .stream()
-            .map(PensionCollectionData::getTypedCaseDocument)
-            .map(TypedCaseDocument::getPensionDocument)
+            .map(PensionTypeCollection::getTypedCaseDocument)
+            .map(PensionType::getPensionDocument)
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
     }
@@ -169,7 +175,7 @@ public class DocumentHelper {
             .map(this::convertToPensionCollectionDataList)
             .orElse(emptyList())
             .stream()
-            .map(PensionCollectionData::getTypedCaseDocument)
+            .map(PensionTypeCollection::getTypedCaseDocument)
             .map(TypedCaseDocument::getPensionDocument)
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
@@ -180,8 +186,8 @@ public class DocumentHelper {
             .map(this::convertToPensionCollectionDataList)
             .orElse(emptyList())
             .stream()
-            .map(PensionCollectionData::getTypedCaseDocument)
-            .map(TypedCaseDocument::getPensionDocument)
+            .map(PensionTypeCollection::getTypedCaseDocument)
+            .map(PensionType::getPensionDocument)
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
     }
@@ -218,7 +224,7 @@ public class DocumentHelper {
         });
     }
 
-    private List<PensionCollectionData> convertToPensionCollectionDataList(Object object) {
+    private List<PensionTypeCollection> convertToPensionCollectionDataList(Object object) {
         return objectMapper.convertValue(object, new TypeReference<>() {
         });
     }
@@ -469,8 +475,31 @@ public class DocumentHelper {
             : Optional.empty();
     }
 
-    public List<BulkPrintDocument> getCollectionOfDocumentLinksAsBulkPrintDocuments(Map<String, Object> data, String collectionName) {
-        return getCaseDocumentsAsBulkPrintDocuments(getDocumentLinksFromCustomCollectionAsCaseDocuments(data, collectionName, null));
+    public List<BulkPrintDocument> getHearingDocumentsAsBulkPrintDocuments(Map<String, Object> data, String authorisationToken) {
+
+        List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
+        List<DocumentCollection> pdfDocuments = new ArrayList<>();
+        List<DocumentCollection> documentCollections = covertDocumentCollections(data.get(HEARING_ORDER_OTHER_COLLECTION));
+        documentCollections.forEach(doc -> {
+            CaseDocument caseDocument = doc.getValue();
+            CaseDocument pdfDocument = service.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken);
+            pdfDocuments.add(DocumentCollection
+                .builder()
+                .value(pdfDocument)
+                .build());
+            bulkPrintDocuments.add(getCaseDocumentAsBulkPrintDocument(pdfDocument));
+        });
+
+        data.put(HEARING_ORDER_OTHER_COLLECTION, pdfDocuments);
+        return bulkPrintDocuments;
+    }
+
+    private List<DocumentCollection> covertDocumentCollections(Object object) {
+        if (object == null) {
+            return Collections.emptyList();
+        }
+        return objectMapper.registerModule(new JavaTimeModule()).convertValue(object, new TypeReference<>() {
+        });
     }
 
     public List<CaseDocument> getDocumentLinksFromCustomCollectionAsCaseDocuments(Map<String, Object> data, String collectionName,
