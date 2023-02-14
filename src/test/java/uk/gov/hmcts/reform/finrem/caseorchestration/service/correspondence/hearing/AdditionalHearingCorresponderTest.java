@@ -18,7 +18,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AdditionalHearingCorrespondenceTest extends HearingCorrespondenceBaseTest {
+public class AdditionalHearingCorresponderTest extends HearingCorrespondenceBaseTest {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 

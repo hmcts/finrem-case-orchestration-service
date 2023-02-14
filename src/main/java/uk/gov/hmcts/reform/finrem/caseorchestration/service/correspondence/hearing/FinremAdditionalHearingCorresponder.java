@@ -3,13 +3,17 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hear
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 public class FinremAdditionalHearingCorresponder extends FinremHearingCorresponder {
 
@@ -27,12 +31,17 @@ public class FinremAdditionalHearingCorresponder extends FinremHearingCorrespond
     public List<BulkPrintDocument> getDocumentsToPrint(FinremCaseDetails caseDetails) {
         List<BulkPrintDocument> documents = new ArrayList<>();
 
-        AdditionalHearingDocument additionalHearingDocument =
-            caseDetails.getData().getAdditionalHearingDocuments().stream().reduce((first, second) -> second).get().getValue();
-        BulkPrintDocument additionalDoc
-            = documentHelper.getBulkPrintDocumentFromCaseDocument(additionalHearingDocument.getDocument());
-        documents.add(additionalDoc);
+        List<AdditionalHearingDocumentCollection> additionalHearingDocuments = caseDetails.getData().getAdditionalHearingDocuments();
+        AdditionalHearingDocument additionalHearingDocument = Optional.ofNullable(additionalHearingDocuments)
+            .map(Collection::stream)
+            .orElseGet(Stream::empty)
+            .reduce((first, second) -> second).get().getValue();
 
+        if (additionalHearingDocument != null) {
+            BulkPrintDocument additionalDoc
+                = documentHelper.getBulkPrintDocumentFromCaseDocument(additionalHearingDocument.getDocument());
+            documents.add(additionalDoc);
+        }
         if (caseDetails.getData().getAdditionalListOfHearingDocuments() != null) {
             BulkPrintDocument additionalUploadedDoc
                 = documentHelper.getBulkPrintDocumentFromCaseDocument(caseDetails.getData().getAdditionalListOfHearingDocuments());
