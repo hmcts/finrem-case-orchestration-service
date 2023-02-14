@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApproved
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderAvailableCorresponder;
 
 import javax.validation.constraints.NotNull;
 
@@ -60,7 +61,7 @@ public class ConsentOrderApprovedController extends BaseController {
     private final NotificationService notificationService;
     private final DocumentHelper documentHelper;
     private final ObjectMapper mapper;
-    private final CaseDataService caseDataService;
+    private final ConsentOrderAvailableCorresponder consentOrderAvailableCorresponder;
 
     @PostMapping(path = "/documents/consent-order-approved", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(summary = "'Consent Order Approved' callback handler. Generates relevant Consent Order Approved documents")
@@ -186,16 +187,8 @@ public class ConsentOrderApprovedController extends BaseController {
                 consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, authToken);
                 caseData.put(STATE, CONSENT_ORDER_MADE.toString());
                 notificationService.sendConsentOrderAvailableCtscEmail(caseDetails);
+                consentOrderAvailableCorresponder.sendCorrespondence(caseDetails);
 
-                if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-                    log.info("case - {}: Sending email notification for to Applicant Solicitor for 'Consent Order Available'", caseDetails.getId());
-                    notificationService.sendConsentOrderAvailableEmailToApplicantSolicitor(caseDetails);
-                }
-
-                if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData)) {
-                    log.info("case - {}: Sending email notification to Respondent Solicitor for 'Consent Order Available'", caseDetails.getId());
-                    notificationService.sendConsentOrderAvailableEmailToRespondentSolicitor(caseDetails);
-                }
             } catch (JsonProcessingException e) {
                 log.error("case - {}: Error encountered trying to update status and send for bulk print: {}", caseDetails.getId(), e.getMessage());
             }

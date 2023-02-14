@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -37,7 +36,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
@@ -55,7 +53,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.matchD
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.pensionDocumentData;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.variationDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
@@ -67,9 +64,6 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     private static final String DEFAULT_COVERSHEET_URL = "defaultCoversheetUrl";
     private static final String CONSENT_ORDER_APPROVED_COVER_LETTER_URL = "consentOrderApprovedCoverLetterUrl";
-    private static final String ORDER_LETTER_URL = "orderLetterUrl";
-    private static final String CONSENT_ORDER_URL = "consentOrderUrl";
-    private static final String PENSION_DOCUMENT_URL = "pensionDocumentUrl";
 
     @Autowired
     private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
@@ -79,6 +73,8 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     private DocumentHelper documentHelper;
     @Autowired
     private DocumentClient documentClientMock;
+    @Autowired
+    private GenericDocumentService genericDocumentService;
 
     @Value("${document.bulkPrintTemplate}")
     private String documentBulkPrintTemplate;
@@ -232,36 +228,6 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void whenPreparingApplicantLetterPack() throws Exception {
-        CaseDetails caseDetailsTemp = documentHelper.deepCopy(caseDetails, CaseDetails.class);
-        addConsentOrderApprovedDataToCaseDetails(caseDetailsTemp);
-
-        List<BulkPrintDocument> documents = consentOrderApprovedDocumentService.prepareApplicantLetterPack(caseDetailsTemp, AUTH_TOKEN);
-
-        System.out.println(documents);
-        assertThat(documents, hasSize(3));
-        assertThat(documents.get(0).getBinaryFileUrl(), is(ORDER_LETTER_URL));
-        assertThat(documents.get(1).getBinaryFileUrl(), is(CONSENT_ORDER_URL));
-        assertThat(documents.get(2).getBinaryFileUrl(), is(PENSION_DOCUMENT_URL));
-    }
-
-    @Test
-    public void whenPreparingApplicantLetterPack_paperApplication() throws Exception {
-        CaseDetails caseDetailsTemp = documentHelper.deepCopy(caseDetails, CaseDetails.class);
-        caseDetailsTemp.getData().put(PAPER_APPLICATION, YES_VALUE);
-        addConsentOrderApprovedDataToCaseDetails(caseDetailsTemp);
-
-        List<BulkPrintDocument> documents = consentOrderApprovedDocumentService.prepareApplicantLetterPack(caseDetailsTemp, AUTH_TOKEN);
-
-        System.out.println(documents);
-        assertThat(documents, hasSize(4));
-        assertThat(documents.get(0).getBinaryFileUrl(), is(CONSENT_ORDER_APPROVED_COVER_LETTER_URL));
-        assertThat(documents.get(1).getBinaryFileUrl(), is(ORDER_LETTER_URL));
-        assertThat(documents.get(2).getBinaryFileUrl(), is(CONSENT_ORDER_URL));
-        assertThat(documents.get(3).getBinaryFileUrl(), is(PENSION_DOCUMENT_URL));
-    }
-
-    @Test
     public void stampsAndPopulatesCaseDataForContestedConsentOrder() {
         when(documentClientMock.stampDocument(any(), anyString())).thenReturn(document());
         when(documentClientMock.annexStampDocument(any(), anyString())).thenReturn(document());
@@ -279,7 +245,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldConvertCollectionDocument() {
-        List<CaseDocument> documents = consentOrderApprovedDocumentService.approvedOrderCollection(caseDetails());
+        List<CaseDocument> documents = consentOrderApprovedDocumentService.approvedOrderCollection(caseDetails(), AUTH_TOKEN);
 
         assertThat(documents, hasSize(3));
     }
