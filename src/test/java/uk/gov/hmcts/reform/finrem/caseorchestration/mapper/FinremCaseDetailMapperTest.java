@@ -203,7 +203,6 @@ public class FinremCaseDetailMapperTest {
     }
 
 
-
     @Test
     public void givenValidCallbackRequest_thenSuccessfullyMapped() {
         caseDetails = buildCaseDetailsFromJson(REFUSAL_ORDER_CALLBACK_REQUEST);
