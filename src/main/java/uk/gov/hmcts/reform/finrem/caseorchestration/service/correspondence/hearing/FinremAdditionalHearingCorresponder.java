@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hear
 
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
@@ -31,10 +30,10 @@ public class FinremAdditionalHearingCorresponder extends FinremHearingCorrespond
         List<AdditionalHearingDocumentCollection> additionalHearingDocuments = caseDetails.getData().getAdditionalHearingDocuments();
 
         if (additionalHearingDocuments != null && !additionalHearingDocuments.isEmpty()) {
-            AdditionalHearingDocument additionalHearingDocument =
-                caseDetails.getData().getAdditionalHearingDocuments().stream().reduce((first, second) -> second).get().getValue();
+            AdditionalHearingDocumentCollection additionalHearingDocumentCollection =
+                additionalHearingDocuments.get(additionalHearingDocuments.size() - 1);
             BulkPrintDocument additionalDoc
-                = documentHelper.getBulkPrintDocumentFromCaseDocument(additionalHearingDocument.getDocument());
+                = documentHelper.getBulkPrintDocumentFromCaseDocument(additionalHearingDocumentCollection.getValue().getDocument());
             documents.add(additionalDoc);
         }
 
