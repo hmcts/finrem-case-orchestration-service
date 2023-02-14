@@ -35,6 +35,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -292,8 +293,10 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     public void givenFinremCaseDetails_whenAddGenApprovedDocs_thenCaseDocsAdded() {
         FinremCaseDetails finremCaseDetails = finremCaseDetails();
 
-        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(document());
-        when(documentClientMock.annexStampDocument(any(), anyString())).thenReturn(document());
+        when(pdfStampingServiceMock.stampDocument(any(Document.class), eq(AUTH_TOKEN), eq(false)))
+            .thenReturn(document());
+        when(pdfStampingServiceMock.stampDocument(any(Document.class), eq(AUTH_TOKEN), eq(true)))
+            .thenReturn(document());
 
         consentOrderApprovedDocumentService
            .addGeneratedApprovedConsentOrderDocumentsToCase(AUTH_TOKEN, finremCaseDetails);

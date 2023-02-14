@@ -53,11 +53,12 @@ public class GenericDocumentService {
     }
 
     public CaseDocument annexStampDocument(CaseDocument document, String authorisationToken) {
+        Document documentWithUrl = Document.builder().url(document.getDocumentUrl())
+            .binaryUrl(document.getDocumentBinaryUrl())
+            .fileName(document.getDocumentFilename())
+            .build();
         Document stampedDocument = pdfStampingService.stampDocument(
-            Document.builder().url(document.getDocumentUrl())
-                .binaryUrl(document.getDocumentBinaryUrl())
-                .fileName(document.getDocumentFilename())
-                .build(), authorisationToken, true);
+            documentWithUrl, authorisationToken, true);
         return toCaseDocument(stampedDocument);
     }
 
