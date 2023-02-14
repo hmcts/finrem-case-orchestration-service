@@ -128,6 +128,21 @@ public class CaseHearingFunctionsTest {
     }
 
     @Test
+    public void shouldPopulateReedleyCourtDetailsFinrem() {
+        Map<String, Object> caseData = ImmutableMap.of(
+            REGION, NORTHWEST,
+            NORTHWEST_FRC_LIST, LANCASHIRE,
+            LANCASHIRE_COURTLIST, REEDLEY);
+
+        Map<String, Object> stringObjectMap = CaseHearingFunctions.buildFrcCourtDetails(caseData);
+        assertThat(stringObjectMap.get(COURT_DETAILS_NAME_KEY), is("Reedley Family Hearing Centre"));
+        assertThat(stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY), is("Blackburn Family Court, 64 Victoria Street, Blackburn, BB1 6DJ"));
+        assertThat(stringObjectMap.get(COURT_DETAILS_PHONE_KEY), is("0300 303 0642"));
+        assertThat(stringObjectMap.get(COURT_DETAILS_EMAIL_KEY), is("LancashireandCumbriaFRC@justice.gov.uk"));
+    }
+
+
+    @Test
     public void shouldPopulateLeylandCourtDetails() {
         Map<String, Object> caseData = ImmutableMap.of(
             REGION, NORTHWEST,

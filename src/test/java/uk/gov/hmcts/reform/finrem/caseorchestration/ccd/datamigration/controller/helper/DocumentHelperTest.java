@@ -41,6 +41,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedFinremCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CTSC_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
@@ -102,6 +103,15 @@ public class DocumentHelperTest {
     @Test
     public void shouldGetFormADocuments() throws Exception {
         CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("validate-form-a-collection.json");
+        List<CaseDocument> pensionDocuments = documentHelper.getFormADocumentsData(
+            callbackRequest.getCaseDetails().getData());
+        assertThat(pensionDocuments.size(), is(2));
+    }
+
+
+    @Test
+    public void shouldGetFormADocumentsFinrem() throws Exception {
+        FinremCallbackRequest callbackRequest = prepareFinremCallbackRequestForLatestConsentedConsentOrder("validate-form-a-collection.json");
         List<CaseDocument> pensionDocuments = documentHelper.getFormADocumentsData(
             callbackRequest.getCaseDetails().getData());
         assertThat(pensionDocuments.size(), is(2));
@@ -323,8 +333,45 @@ public class DocumentHelperTest {
     }
 
     @Test
+    public void whenPreparingLetterToApplicantTemplateData_CtscDataIsPopulated_finrem() {
+        CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(defaultConsentedFinremCaseDetails(), APPLICANT);
+
+        CtscContactDetails ctscContactDetails = CtscContactDetails.builder()
+            .serviceCentre(CTSC_SERVICE_CENTRE)
+            .careOf(CTSC_CARE_OF)
+            .poBox(CTSC_PO_BOX)
+            .town(CTSC_TOWN)
+            .postcode(CTSC_POSTCODE)
+            .emailAddress(CTSC_EMAIL_ADDRESS)
+            .phoneNumber(CTSC_PHONE_NUMBER)
+            .openingHours(CTSC_OPENING_HOURS)
+            .build();
+
+        assertEquals(ctscContactDetails, preparedCaseDetails.getData().get(CTSC_CONTACT_DETAILS));
+    }
+
+    @Test
     public void whenPreparingLetterToRespondentTemplateData_CtscDataIsPopulated() {
         CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(defaultConsentedCaseDetails(), RESPONDENT);
+
+        CtscContactDetails ctscContactDetails = CtscContactDetails.builder()
+            .serviceCentre(CTSC_SERVICE_CENTRE)
+            .careOf(CTSC_CARE_OF)
+            .poBox(CTSC_PO_BOX)
+            .town(CTSC_TOWN)
+            .postcode(CTSC_POSTCODE)
+            .emailAddress(CTSC_EMAIL_ADDRESS)
+            .phoneNumber(CTSC_PHONE_NUMBER)
+            .openingHours(CTSC_OPENING_HOURS)
+            .build();
+
+        assertEquals(ctscContactDetails, preparedCaseDetails.getData().get(CTSC_CONTACT_DETAILS));
+    }
+
+
+    @Test
+    public void whenPreparingLetterToRespondentTemplateData_CtscDataIsPopulated_finrem() {
+        CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(defaultConsentedFinremCaseDetails(), RESPONDENT);
 
         CtscContactDetails ctscContactDetails = CtscContactDetails.builder()
             .serviceCentre(CTSC_SERVICE_CENTRE)

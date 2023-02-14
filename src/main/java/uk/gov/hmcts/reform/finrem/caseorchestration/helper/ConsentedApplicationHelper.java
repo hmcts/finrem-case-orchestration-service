@@ -83,28 +83,10 @@ public class ConsentedApplicationHelper {
         });
     }
 
-    public String getOrderApprovedFileName(FinremCaseData caseData) {
-        return Boolean.TRUE.equals(isVariationOrder(caseData))
-            ? documentConfiguration.getApprovedVariationOrderFileName()
-            : documentConfiguration.getApprovedConsentOrderFileName();
-    }
-
-    public String getOrderApprovedNotificationFileName(FinremCaseData caseData) {
-        return Boolean.TRUE.equals(isVariationOrder(caseData))
-            ? documentConfiguration.getApprovedVariationOrderNotificationFileName()
-            : documentConfiguration.getApprovedConsentOrderNotificationFileName();
-    }
-
     public String getNotApprovedOrderNotificationFileName(FinremCaseData caseData) {
         return Boolean.TRUE.equals(isVariationOrder(caseData))
             ? documentConfiguration.getVariationOrderNotApprovedCoverLetterFileName()
             : documentConfiguration.getConsentOrderNotApprovedCoverLetterFileName();
-    }
-
-    public String getRejectedOrderFileName(FinremCaseData caseData) {
-        return isVariationOrder(caseData)
-            ? documentConfiguration.getRejectedVariationOrderFileName()
-            : documentConfiguration.getRejectedOrderFileName();
     }
 
     public String getOrderType(FinremCaseData caseData) {
