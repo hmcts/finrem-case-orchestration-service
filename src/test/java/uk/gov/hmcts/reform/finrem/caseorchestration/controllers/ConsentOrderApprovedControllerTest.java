@@ -1,51 +1,63 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.stubbing.OngoingStubbing;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.ResultActions;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderAvailableCorresponder;
 
+import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static java.util.Collections.singletonList;
+import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.PENSION_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.pensionDocumentData;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.DOCUMENT_BINARY_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.CONSENT_ORDER_MADE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ConsentOrderApprovedControllerTest {
+@WebMvcTest(ConsentOrderApprovedController.class)
+public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
 
-    @Mock
-    private GenericDocumentService genericDocumentService;
-    @Mock
-    private DocumentConfiguration documentConfiguration;
-    @Mock
-    private DocumentHelper documentHelper;
-
-    private ObjectMapper mapper = new ObjectMapper();
-    @Mock
-    private CaseDataService caseDataService;
-    @Mock
-    private ConsentedApplicationHelper consentedApplicationHelper;
-    @InjectMocks
+    @MockBean
     private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
-
+    @MockBean
+    private GenericDocumentService genericDocumentService;
+    @MockBean
+    private ConsentOrderPrintService consentOrderPrintService;
+    @MockBean
+    private NotificationService notificationService;
+    @MockBean
+    private DocumentHelper documentHelper;
     @MockBean
     private ConsentOrderAvailableCorresponder consentOrderAvailableCorresponder;
 
@@ -231,45 +243,85 @@ public class ConsentOrderApprovedControllerTest {
     public void consentInContestedConsentOrderApprovedShouldProcessPensionDocs() throws Exception {
         doValidConsentInContestWithPensionData();
 
+        mvc.perform(post(contestedConsentOrderApprovedEndpoint())
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
 
-    @Before
-    public void setup() {
-        consentOrderApprovedDocumentService = new ConsentOrderApprovedDocumentService(genericDocumentService,
-            documentConfiguration, documentHelper, mapper, caseDataService, consentedApplicationHelper);
+        verify(consentOrderApprovedDocumentService).stampAndPopulateContestedConsentApprovedOrderCollection(any(), eq(AUTH_TOKEN));
     }
-
 
     @Test
-    public void givenFinremCaseDetails_whenAddGeneratedApprConsOrderDocsToCase_thenGenerateAndAddDocsToCase() {
-        CaseDocument uploadApproveOrder = CaseDocument.builder().documentFilename("testUploadAppOrder").build();
-        FinremCaseData finremCaseData = FinremCaseData.builder().consentOrderWrapper(
-                ConsentOrderWrapper.builder().uploadApprovedConsentOrder(uploadApproveOrder).build())
-            .build();
+    public void consentInContestedSendOrderShouldPrintDocsWhenNotApproved() throws Exception {
+        doValidCaseDataSetUp();
 
-        when(genericDocumentService.annexStampDocument(any(), any()))
-            .thenReturn(uploadApproveOrder);
-        when(genericDocumentService.generateDocument(any(), any(), any(), any()))
-            .thenReturn(uploadApproveOrder);
-        when(documentHelper.deepCopy(any(), any()))
-            .thenReturn(toCaseDetails(FinremCaseDetails.builder().data(finremCaseData).build()));
+        mvc.perform(post(contestedConsentSendOrderEndpoint())
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
 
-        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(1L).data(finremCaseData).build();
-        consentOrderApprovedDocumentService.addGeneratedApprovedConsentOrderDocumentsToCase("AUTH_TOKEN",
-            finremCaseDetails);
-
-        assertThat(finremCaseDetails.getData().getApprovedOrderCollection().get(0).getApprovedOrder()
-                .getConsentOrder().getDocumentFilename(),
-            is("testUploadAppOrder"));
+        verify(consentOrderApprovedDocumentService, never()).generateApprovedConsentOrderLetter(any(), eq(AUTH_TOKEN));
+        verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), eq(AUTH_TOKEN));
     }
 
-    private CaseDetails toCaseDetails(FinremCaseDetails finremCaseDetails) {
-        CaseDetails generateDocumentPayload = null;
-        try {
-            generateDocumentPayload = mapper.readValue(mapper.writeValueAsString(finremCaseDetails), CaseDetails.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+    @Test
+    public void consentInContestedSendOrderShouldPrintDocsWhenApproved() throws Exception {
+        doValidConsentOrderApprovedSetup();
+        when(consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(any(), eq(AUTH_TOKEN)))
+            .thenReturn(caseDocument());
 
-        return generateDocumentPayload;
+        ResultActions result = mvc.perform(post(contestedConsentSendOrderEndpoint())
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE));
+
+        result.andExpect(status().isOk());
+        verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), eq(AUTH_TOKEN));
+    }
+
+    private OngoingStubbing<CaseDocument> whenServiceGeneratesDocument() {
+        return when(consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(isA(CaseDetails.class), eq(AUTH_TOKEN)));
+    }
+
+    private OngoingStubbing<CaseDocument> whenServiceGeneratesNotificationLetter() {
+        return when(consentOrderApprovedDocumentService.generateApprovedConsentOrderCoverLetter(isA(CaseDetails.class), eq(AUTH_TOKEN)));
+    }
+
+    private OngoingStubbing<CaseDocument> whenAnnexStampingDocument() {
+        return when(genericDocumentService.annexStampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN)));
+    }
+
+    private OngoingStubbing<CaseDocument> whenStampingDocument() {
+        return when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN)));
+    }
+
+    private OngoingStubbing<List<PensionTypeCollection>> whenStampingPensionDocuments() {
+        return when(consentOrderApprovedDocumentService.stampPensionDocuments(any(), eq(AUTH_TOKEN)));
+    }
+
+    private void assertLetter(ResultActions result) throws Exception {
+        String path = "$.data.approvedOrderCollection[0].value.orderLetter.";
+        result.andExpect(jsonPath(path + "document_url", is(DOC_URL)))
+            .andExpect(jsonPath(path + "document_filename", is(FILE_NAME)))
+            .andExpect(jsonPath(path + DOCUMENT_BINARY_URL, is(BINARY_URL)));
+    }
+
+    private void assertConsentOrder(ResultActions result) throws Exception {
+        assertDocument(result, "$.data.approvedOrderCollection[0].value.consentOrder.");
+    }
+
+    private void assertPensionDocs(ResultActions result) throws Exception {
+        String path = "$.data.approvedOrderCollection[0].value.pensionDocuments[0].value.";
+        String docPath = "$.data.approvedOrderCollection[0].value.pensionDocuments[0].value.uploadedDocument.";
+        result.andExpect(jsonPath(path + "typeOfDocument", is(PENSION_TYPE)));
+        assertDocument(result, docPath);
+    }
+
+    private void assertDocument(ResultActions result, String path) throws Exception {
+        result.andExpect(jsonPath(path + "document_url", is(DOC_URL)))
+            .andExpect(jsonPath(path + "document_filename", is(FILE_NAME)))
+            .andExpect(jsonPath(path + DOCUMENT_BINARY_URL, is(BINARY_URL)));
     }
 }

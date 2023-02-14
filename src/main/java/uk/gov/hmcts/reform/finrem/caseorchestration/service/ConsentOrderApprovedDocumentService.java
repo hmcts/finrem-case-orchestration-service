@@ -18,8 +18,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderHolder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
@@ -251,15 +249,15 @@ public class ConsentOrderApprovedDocumentService {
                                     String approvedOrderCollectionFieldName,
                                     String authorisationToken) {
 
-        ConsentOrderHolder.ConsentOrderHolderBuilder consentOrderHolder = ConsentOrderHolder.builder();
+        ApprovedOrder.ApprovedOrderBuilder consentOrderHolder = ApprovedOrder.builder();
 
-        CaseDocument consentOrder = order.getValue().getConsentOrder();
+        CaseDocument consentOrder = order.getApprovedOrder().getConsentOrder();
         if (consentOrder != null) {
             CaseDocument pdfCaseDocument = genericDocumentService.convertDocumentIfNotPdfAlready(consentOrder, authorisationToken);
             documents.add(pdfCaseDocument);
             consentOrderHolder.consentOrder(pdfCaseDocument);
         }
-        CaseDocument orderLetter = order.getValue().getOrderLetter();
+        CaseDocument orderLetter = order.getApprovedOrder().getOrderLetter();
         if (orderLetter != null) {
             CaseDocument pdfCaseDocument = genericDocumentService.convertDocumentIfNotPdfAlready(orderLetter, authorisationToken);
             documents.add(pdfCaseDocument);
@@ -267,19 +265,19 @@ public class ConsentOrderApprovedDocumentService {
         }
 
         List<PensionTypeCollection> pensionTypeDocuments = new ArrayList<>();
-        List<PensionTypeCollection> pensionTypeDocs = covertPensionType(order.getValue().getPensionDocuments());
+        List<PensionTypeCollection> pensionTypeDocs = covertPensionType(order.getApprovedOrder().getPensionDocuments());
         if (!pensionTypeDocs.isEmpty()) {
             pensionTypeDocs.forEach(pd -> {
-                PensionDocumentType typeOfDocument = pd.getValue().getTypeOfDocument();
-                CaseDocument uploadedDocument = pd.getValue().getUploadedDocument();
+                PensionDocumentType typeOfDocument = pd.getTypedCaseDocument().getTypeOfDocument();
+                CaseDocument uploadedDocument = pd.getTypedCaseDocument().getPensionDocument();
                 CaseDocument pdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(uploadedDocument, authorisationToken);
                 documents.add(pdfDocument);
                 PensionTypeCollection ptc = PensionTypeCollection
                     .builder()
-                    .value(PensionType
+                    .typedCaseDocument(PensionType
                         .builder()
                         .typeOfDocument(typeOfDocument)
-                        .uploadedDocument(pdfDocument)
+                        .pensionDocument(pdfDocument)
                         .build())
                     .build();
                 pensionTypeDocuments.add(ptc);
@@ -288,7 +286,7 @@ public class ConsentOrderApprovedDocumentService {
         }
         ConsentOrderCollection consentOrderCollection = ConsentOrderCollection
             .builder()
-            .value(consentOrderHolder.build())
+            .approvedOrder(consentOrderHolder.build())
             .build();
         convertedData.add(consentOrderCollection);
         caseData.put(approvedOrderCollectionFieldName, convertedData);

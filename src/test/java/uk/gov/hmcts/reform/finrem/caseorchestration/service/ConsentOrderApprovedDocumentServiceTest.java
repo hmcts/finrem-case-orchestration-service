@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 
 import java.util.HashMap;
@@ -253,20 +252,6 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     private List<CaseDocument> getDocumentList(Map<String, Object> data) {
         return mapper.convertValue(data.get(CONTESTED_CONSENT_ORDER_COLLECTION), new TypeReference<>() {
         });
-    }
-
-    private void addConsentOrderApprovedDataToCaseDetails(CaseDetails caseDetails) throws Exception {
-        PensionTypeCollection pensionData = pensionDocumentData();
-        pensionData.getTypedCaseDocument().getPensionDocument().setDocumentBinaryUrl(PENSION_DOCUMENT_URL);
-
-        ApprovedOrder approvedOrder = ApprovedOrder.builder()
-            .consentOrder(caseDocument(CONSENT_ORDER_URL, CONSENT_ORDER_URL, CONSENT_ORDER_URL))
-            .pensionDocuments(singletonList(pensionData))
-            .orderLetter(caseDocument(ORDER_LETTER_URL, ORDER_LETTER_URL, ORDER_LETTER_URL))
-            .build();
-
-        caseDetails.getData().put(APPROVED_ORDER_COLLECTION, singletonList(CollectionElement.<ApprovedOrder>builder().value(approvedOrder).build()));
-        caseDetails.setData(mapper.readValue(mapper.writeValueAsString(caseDetails.getData()), HashMap.class));
     }
 
     private CaseDetails caseDetails() {
