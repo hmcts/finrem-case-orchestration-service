@@ -82,7 +82,7 @@ public class SendOrderContestedAboutToSubmitHandler
                 .get(hearingOrderCollectionData.size() - 1)
                 .getHearingOrderDocuments().getUploadDraftDocument();
 
-            List<HearingOrderCollectionData> hearings =  new ArrayList<>();
+            List<HearingOrderCollectionData> hearings =  new ArrayList<>(hearingOrderCollectionData);
             CaseDocument latestHearingOrderPdf = genericDocumentService.convertDocumentIfNotPdfAlready(latestHearingOrder, authToken);
             HearingOrderDocument document = HearingOrderDocument.builder().uploadDraftDocument(latestHearingOrderPdf).build();
             hearings.add(HearingOrderCollectionData.builder().hearingOrderDocuments(document).build());
