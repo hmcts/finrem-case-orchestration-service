@@ -43,6 +43,7 @@ public enum EventType {
     REGENERATE_FORM_C("FR_regenerateFormC"),
     CONSENT_APPLICATION_APPROVED_IN_CONTESTED("FR_consentOrderApproved"),
     UPDATE_CONTESTED_GENERAL_APPLICATION("updateGeneralApplication"),
+    READY_FOR_HEARING("FR_readyForHearing"),
 
     NOC_REQUEST("nocRequest"),
     @JsonEnumDefaultValue
