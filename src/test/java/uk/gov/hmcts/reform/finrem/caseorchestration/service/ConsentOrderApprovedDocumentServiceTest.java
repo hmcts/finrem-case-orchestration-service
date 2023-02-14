@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 
@@ -249,6 +250,19 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         assertThat(documents, hasSize(3));
     }
 
+    @Test
+    public void givenFinremCaseDetails_whenAddGenApprovedDocs_thenCaseDocsAdded() {
+        FinremCaseDetails finremCaseDetails = finremCaseDetails();
+
+        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(document());
+        when(documentClientMock.annexStampDocument(any(), anyString())).thenReturn(document());
+
+        consentOrderApprovedDocumentService
+           .addGeneratedApprovedConsentOrderDocumentsToCase(AUTH_TOKEN, finremCaseDetails);
+
+        assertThat(finremCaseDetails.getData().getApprovedOrderCollection(), hasSize(1));
+    }
+
     private List<CaseDocument> getDocumentList(Map<String, Object> data) {
         return mapper.convertValue(data.get(CONTESTED_CONSENT_ORDER_COLLECTION), new TypeReference<>() {
         });
@@ -256,5 +270,10 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     private CaseDetails caseDetails() {
         return TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print.json", mapper);
+    }
+
+    private FinremCaseDetails finremCaseDetails() {
+        return TestSetUpUtils.finremCaseDetailsFromResource(
+            "/fixtures/approvedOrder/consentedApprovedOrder.json", mapper);
     }
 }
