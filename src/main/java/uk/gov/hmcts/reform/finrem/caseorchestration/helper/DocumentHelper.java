@@ -176,7 +176,7 @@ public class DocumentHelper {
             .orElse(emptyList())
             .stream()
             .map(PensionTypeCollection::getTypedCaseDocument)
-            .map(TypedCaseDocument::getPensionDocument)
+            .map(PensionType::getPensionDocument)
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
     }
