@@ -54,7 +54,7 @@ public class HearingOrderControllerTest extends BaseControllerTest {
     @Test
     public void givenDraftDirectionOrderCollectionIsNotEmpty_whenStartingHearingOrderApproval_thenLatestDraftDirOrderIsPopulated() {
         DraftDirectionOrder draftDirectionOrder = DraftDirectionOrder.builder().build();
-        when(hearingOrderService.draftDirectionOrderCollectionTail(any())).thenReturn(Optional.of(draftDirectionOrder));
+        when(hearingOrderService.draftDirectionOrderCollectionTail(any(), any())).thenReturn(Optional.of(draftDirectionOrder));
 
         ResponseEntity<AboutToStartOrSubmitCallbackResponse> response = hearingOrderController.startHearingOrderApproval(AUTH_TOKEN,
             buildCallbackRequest());
@@ -64,7 +64,7 @@ public class HearingOrderControllerTest extends BaseControllerTest {
 
     @Test
     public void givenDraftDirectionOrderCollectionIsEmpty_whenStartingHearingOrderApproval_thenLatestDraftDirOrderIsCleared() {
-        when(hearingOrderService.draftDirectionOrderCollectionTail(any())).thenReturn(Optional.empty());
+        when(hearingOrderService.draftDirectionOrderCollectionTail(any(), any())).thenReturn(Optional.empty());
 
         CallbackRequest callbackRequest = buildCallbackRequest();
         callbackRequest.getCaseDetails().getData().put(LATEST_DRAFT_DIRECTION_ORDER, "any non-null value");
@@ -76,7 +76,7 @@ public class HearingOrderControllerTest extends BaseControllerTest {
 
     @Test
     public void givenLatestDraftDirectionOrderOverridesSolicitorCollection_whenStoringApprovedOrder_thenItIsAppendedToJudgesAmendedOrders() {
-        when(hearingOrderService.latestDraftDirectionOrderOverridesSolicitorCollection(any())).thenReturn(true);
+        when(hearingOrderService.latestDraftDirectionOrderOverridesSolicitorCollection(any(), any())).thenReturn(true);
 
         hearingOrderController.storeApprovedHearingOrder(AUTH_TOKEN, buildCallbackRequest());
 
@@ -87,7 +87,7 @@ public class HearingOrderControllerTest extends BaseControllerTest {
 
     @Test
     public void givenLatestDraftDirectionOrderDoesntOverrideSolicitorCollection_whenStoringApprovedOrder_thenItIsNotAppendedToJudgesAmendedOrders() {
-        when(hearingOrderService.latestDraftDirectionOrderOverridesSolicitorCollection(any())).thenReturn(false);
+        when(hearingOrderService.latestDraftDirectionOrderOverridesSolicitorCollection(any(), any())).thenReturn(false);
 
         hearingOrderController.storeApprovedHearingOrder(AUTH_TOKEN, buildCallbackRequest());
 
