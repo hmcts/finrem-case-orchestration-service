@@ -78,4 +78,5 @@ public class ConsentOrderWrapper {
     private String consentVariationOrderLabelL;
     private String otherDocLabel;
     private List<VariationDocumentTypeCollection> otherVariationCollection;
+    private CaseDocument uploadApprovedConsentOrder;
 }

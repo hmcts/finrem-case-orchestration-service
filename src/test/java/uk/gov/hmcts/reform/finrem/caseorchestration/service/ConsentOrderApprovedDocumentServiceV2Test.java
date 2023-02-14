@@ -11,9 +11,9 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderHolder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
@@ -137,20 +137,20 @@ public class ConsentOrderApprovedDocumentServiceV2Test extends BaseServiceTest {
 
     private void addConsentOrderApprovedDataToCaseDetails(CaseDetails caseDetails) throws Exception {
 
-        ConsentOrderHolder.ConsentOrderHolderBuilder builder = ConsentOrderHolder.builder();
+        ApprovedOrder.ApprovedOrderBuilder builder = ApprovedOrder.builder();
         builder.orderLetter(caseDocument(DOC_URL, FILE_NAME, BINARY_URL));
         builder.consentOrder(caseDocument(DOC_URL, FILE_NAME, BINARY_URL));
 
 
         List<PensionTypeCollection> pensionTypeCollections = new ArrayList<>();
         PensionType pensionType = PensionType.builder().typeOfDocument(PensionDocumentType.FORM_PPF1)
-            .uploadedDocument(caseDocument()).build();
-        PensionTypeCollection typeCollection = PensionTypeCollection.builder().value(pensionType).build();
+            .pensionDocument(caseDocument()).build();
+        PensionTypeCollection typeCollection = PensionTypeCollection.builder().typedCaseDocument(pensionType).build();
         pensionTypeCollections.add(typeCollection);
         builder.pensionDocuments(pensionTypeCollections);
 
         List<ConsentOrderCollection> approvedOrderCollection = new ArrayList<>();
-        approvedOrderCollection.add(ConsentOrderCollection.builder().value(builder.build()).build());
+        approvedOrderCollection.add(ConsentOrderCollection.builder().approvedOrder(builder.build()).build());
 
         caseDetails.getData().put(APPROVED_ORDER_COLLECTION, approvedOrderCollection);
     }

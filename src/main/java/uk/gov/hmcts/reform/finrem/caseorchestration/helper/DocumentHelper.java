@@ -21,10 +21,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderDocumentCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
@@ -146,8 +146,8 @@ public class DocumentHelper {
             .map(this::convertToPensionCollectionDataList)
             .orElse(emptyList())
             .stream()
-            .map(PensionCollectionData::getTypedCaseDocument)
-            .map(TypedCaseDocument::getPensionDocument)
+            .map(PensionTypeCollection::getTypedCaseDocument)
+            .map(PensionType::getPensionDocument)
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
     }
@@ -157,8 +157,8 @@ public class DocumentHelper {
             .map(this::convertToPensionCollectionDataList)
             .orElse(emptyList())
             .stream()
-            .map(PensionCollectionData::getTypedCaseDocument)
-            .map(TypedCaseDocument::getPensionDocument)
+            .map(PensionTypeCollection::getTypedCaseDocument)
+            .map(PensionType::getPensionDocument)
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
     }
@@ -168,8 +168,8 @@ public class DocumentHelper {
             .map(this::convertToPensionCollectionDataList)
             .orElse(emptyList())
             .stream()
-            .map(PensionCollectionData::getTypedCaseDocument)
-            .map(TypedCaseDocument::getPensionDocument)
+            .map(PensionTypeCollection::getTypedCaseDocument)
+            .map(PensionType::getPensionDocument)
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
     }
@@ -206,7 +206,7 @@ public class DocumentHelper {
         });
     }
 
-    private List<PensionCollectionData> convertToPensionCollectionDataList(Object object) {
+    private List<PensionTypeCollection> convertToPensionCollectionDataList(Object object) {
         return objectMapper.convertValue(object, new TypeReference<>() {
         });
     }

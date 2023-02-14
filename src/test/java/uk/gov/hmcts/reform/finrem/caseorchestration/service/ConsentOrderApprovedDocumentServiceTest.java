@@ -18,7 +18,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementUploadService;
 
@@ -240,8 +242,8 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         Mockito.reset(pdfStampingServiceMock);
         when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, false)).thenReturn(document());
 
-        List<PensionCollectionData> pensionDocuments = asList(pensionDocumentData(), pensionDocumentData());
-        List<PensionCollectionData> stampPensionDocuments = consentOrderApprovedDocumentService.stampPensionDocuments(pensionDocuments, AUTH_TOKEN);
+        List<PensionTypeCollection> pensionDocuments = asList(pensionDocumentData(), pensionDocumentData());
+        List<PensionTypeCollection> stampPensionDocuments = consentOrderApprovedDocumentService.stampPensionDocuments(pensionDocuments, AUTH_TOKEN);
 
         stampPensionDocuments.forEach(data -> assertCaseDocument(data.getTypedCaseDocument().getPensionDocument()));
         verify(pdfStampingServiceMock, times(2)).stampDocument(document(), AUTH_TOKEN, false);
@@ -252,11 +254,11 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         Mockito.reset(pdfStampingServiceMock);
         when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, false)).thenReturn(document());
 
-        PensionCollectionData pensionCollectionDataWithNullDocument = pensionDocumentData();
+        PensionTypeCollection pensionCollectionDataWithNullDocument = pensionDocumentData();
         pensionCollectionDataWithNullDocument.getTypedCaseDocument().setPensionDocument(null);
-        List<PensionCollectionData> pensionDocuments = asList(pensionDocumentData(), pensionCollectionDataWithNullDocument);
+        List<PensionTypeCollection> pensionDocuments = asList(pensionDocumentData(), pensionCollectionDataWithNullDocument);
 
-        List<PensionCollectionData> stampPensionDocuments = consentOrderApprovedDocumentService.stampPensionDocuments(pensionDocuments, AUTH_TOKEN);
+        List<PensionTypeCollection> stampPensionDocuments = consentOrderApprovedDocumentService.stampPensionDocuments(pensionDocuments, AUTH_TOKEN);
 
         assertThat(stampPensionDocuments, hasSize(1));
         stampPensionDocuments.forEach(data -> assertCaseDocument(data.getTypedCaseDocument().getPensionDocument()));
@@ -286,6 +288,19 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         assertThat(documents, hasSize(3));
     }
 
+    @Test
+    public void givenFinremCaseDetails_whenAddGenApprovedDocs_thenCaseDocsAdded() {
+        FinremCaseDetails finremCaseDetails = finremCaseDetails();
+
+        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(document());
+        when(documentClientMock.annexStampDocument(any(), anyString())).thenReturn(document());
+
+        consentOrderApprovedDocumentService
+           .addGeneratedApprovedConsentOrderDocumentsToCase(AUTH_TOKEN, finremCaseDetails);
+
+        assertThat(finremCaseDetails.getData().getApprovedOrderCollection(), hasSize(1));
+    }
+
     private List<CaseDocument> getDocumentList(Map<String, Object> data) {
         return mapper.convertValue(data.get(CONTESTED_CONSENT_ORDER_COLLECTION), new TypeReference<>() {
         });
@@ -293,5 +308,10 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     private CaseDetails caseDetails() {
         return TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print.json", mapper);
+    }
+
+    private FinremCaseDetails finremCaseDetails() {
+        return TestSetUpUtils.finremCaseDetailsFromResource(
+            "/fixtures/approvedOrder/consentedApprovedOrder.json", mapper);
     }
 }
