@@ -19,6 +19,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
@@ -176,6 +179,20 @@ public class TestSetUpUtils {
         caseDocument.setDocumentBinaryUrl(binaryUrl);
 
         return caseDocument;
+    }
+
+    public static PaymentDocument paymentDocument() {
+        PaymentDocument document = new PaymentDocument();
+        document.setUploadedDocument(caseDocument());
+        document.setTypeOfDocument(PaymentDocumentType.COPY_OF_PAPER_FORM_A);
+
+        return document;
+    }
+
+    public static PaymentDocumentCollection paymentDocumentCollection() {
+        PaymentDocumentCollection collection = new PaymentDocumentCollection();
+        collection.setValue(paymentDocument());
+        return collection;
     }
 
     public static PensionType pensionDocument() {
