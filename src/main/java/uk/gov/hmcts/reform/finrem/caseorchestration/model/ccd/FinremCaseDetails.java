@@ -28,6 +28,8 @@ public class FinremCaseDetails implements CcdCaseDetails<FinremCaseData> {
     private String callbackResponseStatus;
     private LocalDateTime lastModified;
     private Classification securityClassification;
+
+    @JsonProperty("case_data")
     private FinremCaseData data;
 
     @JsonProperty("case_type_id")
