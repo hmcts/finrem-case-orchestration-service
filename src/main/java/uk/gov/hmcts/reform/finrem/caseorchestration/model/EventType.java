@@ -46,6 +46,7 @@ public enum EventType {
     READY_FOR_HEARING("FR_readyForHearing"),
 
     NOC_REQUEST("nocRequest"),
+    SOLICITOR_DRAFT_DIRECTION_ORDER("FR_solicitorDraftDirectionOrder"),
     @JsonEnumDefaultValue
     NONE("");
 
