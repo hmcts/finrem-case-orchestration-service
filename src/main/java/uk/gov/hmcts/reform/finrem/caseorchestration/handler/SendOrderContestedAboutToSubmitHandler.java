@@ -76,16 +76,17 @@ public class SendOrderContestedAboutToSubmitHandler
         Map<String, Object> caseData = caseDetails.getData();
 
         List<HearingOrderCollectionData> hearingOrderCollectionData = documentHelper.getHearingOrderDocuments(caseData);
-
+        int index = hearingOrderCollectionData.size() - 1;
         if (hearingOrderCollectionData != null && !hearingOrderCollectionData.isEmpty()) {
             CaseDocument latestHearingOrder = hearingOrderCollectionData
-                .get(hearingOrderCollectionData.size() - 1)
+                .get(index)
                 .getHearingOrderDocuments().getUploadDraftDocument();
 
             List<HearingOrderCollectionData> hearings =  new ArrayList<>(hearingOrderCollectionData);
             CaseDocument latestHearingOrderPdf = genericDocumentService.convertDocumentIfNotPdfAlready(latestHearingOrder, authToken);
             HearingOrderDocument document = HearingOrderDocument.builder().uploadDraftDocument(latestHearingOrderPdf).build();
-            hearings.add(HearingOrderCollectionData.builder().hearingOrderDocuments(document).build());
+            hearings.remove(index);
+            hearings.add(index, HearingOrderCollectionData.builder().hearingOrderDocuments(document).build());
             caseData.put(HEARING_ORDER_COLLECTION, hearings);
 
             log.info("Received request to stampFinalOrder called with Case ID = {},"
