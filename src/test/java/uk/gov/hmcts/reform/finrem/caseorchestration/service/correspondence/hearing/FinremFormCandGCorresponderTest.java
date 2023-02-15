@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocumentTyp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -29,6 +31,9 @@ public class FinremFormCandGCorresponderTest extends FinremHearingCorrespondence
     private ObjectMapper objectMapper = new ObjectMapper();
     private FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
 
+    @Mock
+    private GenericDocumentService genericDocumentService;
+
     private static final String DATE_OF_HEARING = "2019-01-01";
 
     @Before
@@ -36,7 +41,7 @@ public class FinremFormCandGCorresponderTest extends FinremHearingCorrespondence
         caseDetails = caseDetails(NO_VALUE);
         applicantAndRespondentMultiLetterCorresponder =
             new FinremFormCandGCorresponder(bulkPrintService, notificationService,
-                new DocumentHelper(objectMapper, new CaseDataService(), finremCaseDetailsMapper), objectMapper);
+                new DocumentHelper(objectMapper, new CaseDataService(), genericDocumentService, finremCaseDetailsMapper), objectMapper);
     }
 
     @Test

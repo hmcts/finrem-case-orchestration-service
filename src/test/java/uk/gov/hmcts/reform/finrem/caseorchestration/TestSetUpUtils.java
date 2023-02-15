@@ -22,19 +22,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.State;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ClientDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.serialisation.FinremCallbackRequestDeserializer;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -184,6 +183,20 @@ public class TestSetUpUtils {
         caseDocument.setDocumentBinaryUrl(binaryUrl);
 
         return caseDocument;
+    }
+
+    public static PaymentDocument paymentDocument() {
+        PaymentDocument document = new PaymentDocument();
+        document.setUploadedDocument(caseDocument());
+        document.setTypeOfDocument(PaymentDocumentType.COPY_OF_PAPER_FORM_A);
+
+        return document;
+    }
+
+    public static PaymentDocumentCollection paymentDocumentCollection() {
+        PaymentDocumentCollection collection = new PaymentDocumentCollection();
+        collection.setValue(paymentDocument());
+        return collection;
     }
 
     public static PensionType pensionDocument() {
@@ -362,11 +375,6 @@ public class TestSetUpUtils {
         } catch (Exception exception) {
             throw new IllegalStateException(exception.getMessage(), exception);
         }
-    }
-
-    public static FinremCaseDetails finremCaseDetailsFromResource(String jsonPath, ObjectMapper mapper) {
-        FinremCallbackRequestDeserializer deserializer = new FinremCallbackRequestDeserializer(mapper);
-        return deserializer.deserializeFinremCallbackRequest(jsonPath).getCaseDetails();
     }
 
     private static void populateRespondentNameAndAddressConsented(Map<String, Object> caseData) {

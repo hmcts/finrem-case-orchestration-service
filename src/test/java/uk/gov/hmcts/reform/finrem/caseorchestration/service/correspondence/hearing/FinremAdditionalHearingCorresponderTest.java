@@ -17,10 +17,12 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class FinremAdditionalHearingCorresponderTest extends FinremHearingCorrespondenceBaseTest {
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper;
 
     @Before
     public void setUpTest() {
+        objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
         applicantAndRespondentMultiLetterCorresponder =
             new FinremAdditionalHearingCorresponder(bulkPrintService, notificationService, documentHelper);
         caseDetails = TestSetUpUtils.finremCaseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);

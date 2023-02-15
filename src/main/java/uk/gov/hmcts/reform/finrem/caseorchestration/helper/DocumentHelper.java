@@ -26,6 +26,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
@@ -161,22 +163,22 @@ public class DocumentHelper {
     @Deprecated
     public List<CaseDocument> getFormADocumentsData(Map<String, Object> caseData) {
         return ofNullable(caseData.get(FORM_A_COLLECTION))
-            .map(this::convertToPensionCollectionDataList)
+            .map(this::convertToPaymentDocumentCollectionList)
             .orElse(emptyList())
             .stream()
-            .map(PensionTypeCollection::getTypedCaseDocument)
-            .map(PensionType::getPensionDocument)
+            .map(PaymentDocumentCollection::getValue)
+            .map(PaymentDocument::getUploadedDocument)
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
     }
 
     public List<CaseDocument> getFormADocumentsData(FinremCaseData caseData) {
         return ofNullable(caseData.getCopyOfPaperFormA())
-            .map(this::convertToPensionCollectionDataList)
+            .map(this::convertToPaymentDocumentCollectionList)
             .orElse(emptyList())
             .stream()
-            .map(PensionTypeCollection::getTypedCaseDocument)
-            .map(TypedCaseDocument::getPensionDocument)
+            .map(PaymentDocumentCollection::getValue)
+            .map(PaymentDocument::getUploadedDocument)
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
     }
@@ -228,6 +230,13 @@ public class DocumentHelper {
         return objectMapper.convertValue(object, new TypeReference<>() {
         });
     }
+
+
+    private List<PaymentDocumentCollection> convertToPaymentDocumentCollectionList(Object object) {
+        return objectMapper.convertValue(object, new TypeReference<>() {
+        });
+    }
+
 
     public List<String> convertToList(Object object) {
         return objectMapper.convertValue(object, new TypeReference<>() {

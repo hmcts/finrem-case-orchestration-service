@@ -122,9 +122,9 @@ public class DocumentHelperTest {
     @Test
     public void shouldGetFormADocuments() throws Exception {
         CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("validate-form-a-collection.json");
-        List<CaseDocument> pensionDocuments = documentHelper.getFormADocumentsData(
+        List<CaseDocument> formADocuments = documentHelper.getFormADocumentsData(
             callbackRequest.getCaseDetails().getData());
-        assertThat(pensionDocuments.size(), is(2));
+        assertThat(formADocuments.size(), is(2));
     }
 
 
