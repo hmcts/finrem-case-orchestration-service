@@ -90,7 +90,7 @@ public class FinremCaseData {
     private CaseDocument d81Respondent;
     private List<PensionTypeCollection> pensionCollection;
     private List<PensionTypeCollection> consentPensionCollection;
-    private List<PensionTypeCollection> copyOfPaperFormA;
+    private List<PaymentDocumentCollection> copyOfPaperFormA;
     @JsonProperty("otherCollection")
     private List<OtherDocumentCollection> otherDocumentsCollection;
     private YesOrNo helpWithFeesQuestion;
