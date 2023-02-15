@@ -34,6 +34,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.paymentDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.paymentDocumentCollection;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.pensionDocumentData;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BIRMINGHAM;
@@ -416,7 +417,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         caseData.put(FAST_TRACK_DECISION, isFastTrackDecision);
         caseData.put(HEARING_DATE, DATE_OF_HEARING);
-        caseData.put(FORM_A_COLLECTION, singletonList(pensionDocumentData()));
+        caseData.put(FORM_A_COLLECTION, singletonList(paymentDocumentCollection()));
         caseData.put(FORM_C, caseDocument());
         caseData.put(FORM_G, caseDocument());
         caseData.put(OUT_OF_FAMILY_COURT_RESOLUTION, caseDocument());
