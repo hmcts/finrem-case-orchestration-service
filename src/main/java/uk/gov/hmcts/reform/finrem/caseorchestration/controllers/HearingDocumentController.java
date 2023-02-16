@@ -99,16 +99,18 @@ public class HearingDocumentController extends BaseController {
         }
 
         List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails, fastTrackWarningsList, nonFastTrackWarningsList);
-
+        log.info("Hearing date warning {} Case ID: {}",warnings, caseDetails.getId());
         if ((warnings.isEmpty() || fastTrackWarningsList.size() > 1 || nonFastTrackWarningsList.size() > 1)
             && caseDataService.isContestedApplication(caseDetails)) {
             CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
             if (caseDetailsBefore != null && hearingDocumentService.alreadyHadFirstHearing(caseDetailsBefore)) {
                 log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
                 additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, caseDetails);
+                log.info("Sent Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
             } else {
                 log.info("Sending Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
                 hearingDocumentService.sendInitialHearingCorrespondence(caseDetails, authorisationToken);
+                log.info("sent Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
             }
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).warnings(warnings).build());
