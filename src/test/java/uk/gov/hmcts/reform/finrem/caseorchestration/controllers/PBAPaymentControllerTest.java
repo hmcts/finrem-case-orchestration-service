@@ -220,6 +220,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     @Test
     public void shouldAssignApplicantSolicitor() throws Exception {
         doPBAPaymentReferenceAlreadyExistsSetup();
+        when(assignCaseAccessService.isCreatorRoleActiveOnCase(any())).thenReturn(false);
 
         mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
                 .content(requestContent.toString())
@@ -235,10 +236,9 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldNotAssignApplicantSolicitor_assignCaseAccessDraftCaseActive() throws Exception {
-        doPBASetUp(true);
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/pba-payment-app-sol-role-already-exists.json").toURI()));
+        doPBAPaymentReferenceAlreadyExistsSetup();
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(assignCaseAccessService.isCreatorRoleActiveOnCase(any())).thenReturn(true);
 
         mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
                 .content(requestContent.toString())
@@ -247,13 +247,13 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-
     }
 
     @Test
     public void shouldNotAssignApplicantSolicitor_organisationIdNoMatch() throws Exception {
         doPBAPaymentReferenceAlreadyExistsSetup();
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(assignCaseAccessService.isCreatorRoleActiveOnCase(any())).thenReturn(false);
         when(prdOrganisationService.retrieveOrganisationsData(AUTH_TOKEN)).thenReturn(OrganisationsResponse.builder()
             .contactInformation(singletonList(organisationContactInformation))
             .name(TEST_SOLICITOR_NAME)
@@ -275,6 +275,8 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/pba-payment-no-app-org.json").toURI()));
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(assignCaseAccessService.isCreatorRoleActiveOnCase(any())).thenReturn(false);
+
 
         mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
                 .content(requestContent.toString())
@@ -284,13 +286,13 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.errors", hasSize(2)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verifyNoInteractions(ccdDataStoreService);
-        verifyNoInteractions(assignCaseAccessService);
     }
 
     @Test
     public void shouldNotAssignApplicantSolicitor_acaApiFailure() throws Exception {
         doPBASetUp(true);
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(assignCaseAccessService.isCreatorRoleActiveOnCase(any())).thenReturn(false);
         doThrow(feignError()).when(assignCaseAccessService).assignCaseAccess(any(CaseDetails.class), eq(AUTH_TOKEN));
 
         mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)

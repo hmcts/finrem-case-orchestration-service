@@ -180,6 +180,19 @@ public class AssignCaseAccessService {
         return revokeCreatorRole(caseDetails, userToRemove.get().getUserId());
     }
 
+    public boolean isCreatorRoleActiveOnCase(CaseDetails caseDetails) {
+        log.info("About to start searching for creator role for caseId {}", caseDetails.getId());
+        List<CaseAssignmentUserRole> allRoles = getUserRoles(caseDetails.getId().toString())
+            .getCaseAssignmentUserRoles();
+        List<CaseAssignmentUserRole> creatorRoles = getCreatorRoles(allRoles);
+
+        if (creatorRoles.isEmpty()) {
+            log.info("No creator role found for caseId {}", caseDetails.getId());
+            return false;
+        }
+        else return true;
+    }
+
     public boolean isLegalCounselRepresentingOpposingLitigant(String userId,
                                                               String caseId,
                                                               Set<String> opposingCaseRoles) {
