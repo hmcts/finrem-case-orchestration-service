@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentRes
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdDataStoreService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
@@ -49,8 +48,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignE
 import static uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler.SERVER_ERROR_MSG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.AWAITING_HWF_DECISION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ROLE;
 
 @WebMvcTest(value = {PBAPaymentController.class, FeeLookupController.class})
 public class PBAPaymentControllerTest extends BaseControllerTest {
