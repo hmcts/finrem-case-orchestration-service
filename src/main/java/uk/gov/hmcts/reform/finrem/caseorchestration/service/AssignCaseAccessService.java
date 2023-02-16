@@ -189,8 +189,9 @@ public class AssignCaseAccessService {
         if (creatorRoles.isEmpty()) {
             log.info("No creator role found for caseId {}", caseDetails.getId());
             return false;
+        } else {
+            return true;
         }
-        else return true;
     }
 
     public boolean isLegalCounselRepresentingOpposingLitigant(String userId,

@@ -135,6 +135,32 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void shouldReturnTrueIfCaseHasCreatorRole() throws JsonProcessingException {
+        when(systemUserService.getSysUserToken()).thenReturn(TEST_S2S_TOKEN);
+
+        caseDataApi.stubFor(get(urlEqualTo("/case-users?case_ids=123"))
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withBody(mapper.writeValueAsString(generateResourceWhenCreatorOnCase()))));
+
+        CaseDetails caseDetails = buildCaseDetails();
+        assertTrue(assignCaseAccessService.isCreatorRoleActiveOnCase(caseDetails));
+    }
+
+    @Test
+    public void shouldReturnFalseIfCaseHasNoCreatorRole() throws JsonProcessingException {
+        when(systemUserService.getSysUserToken()).thenReturn(TEST_S2S_TOKEN);
+
+        caseDataApi.stubFor(get(urlEqualTo("/case-users?case_ids=123"))
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withBody(mapper.writeValueAsString(generateResourceWhenAppSolOnCase()))));
+
+    }
+
+    @Test
     public void shouldRevokeCreatorRoleWhenCreatorWasAppSolicitor() throws JsonProcessingException {
         when(systemUserService.getSysUserToken()).thenReturn(TEST_S2S_TOKEN);
 
@@ -291,6 +317,28 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
                 .caseDataId(TEST_CASE_ID)
                 .userId(TEST_USER_ID).build()
         );
+
+        return CaseAssignmentUserRolesResource.builder().caseAssignmentUserRoles(roles).build();
+    }
+
+    private CaseAssignmentUserRolesResource generateResourceWhenCreatorOnCase() {
+        List<CaseAssignmentUserRole> roles = List.of(
+            CaseAssignmentUserRole.builder()
+                .caseRole(CREATOR_ROLE)
+                .caseDataId(TEST_CASE_ID)
+                .userId(TEST_USER_ID).build()
+        );
+
+        return CaseAssignmentUserRolesResource.builder().caseAssignmentUserRoles(roles).build();
+    }
+
+    private CaseAssignmentUserRolesResource generateResourceWhenAppSolOnCase() {
+        List<CaseAssignmentUserRole> roles = List.of(
+            CaseAssignmentUserRole.builder()
+                .caseRole(APP_SOLICITOR_POLICY)
+                .caseDataId(TEST_CASE_ID)
+                .userId(TEST_USER_ID).build()
+            );
 
         return CaseAssignmentUserRolesResource.builder().caseAssignmentUserRoles(roles).build();
     }
