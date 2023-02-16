@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationContactInformation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
@@ -24,9 +25,12 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -41,14 +45,18 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.fee;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler.SERVER_ERROR_MSG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.AWAITING_HWF_DECISION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ROLE;
 
 @WebMvcTest(value = {PBAPaymentController.class, FeeLookupController.class})
 public class PBAPaymentControllerTest extends BaseControllerTest {
 
     private static final String PBA_PAYMENT_URL = "/case-orchestration/pba-payment";
+    private static final String ASSIGN_APPLICANT_SOLICITOR_URL = "/case-orchestration/assign-applicant-solicitor";
 
     @MockBean
     private FeeService feeService;
@@ -60,8 +68,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     private AssignCaseAccessService assignCaseAccessService;
     @MockBean
     private CcdDataStoreService ccdDataStoreService;
-    @MockBean
-    private FeatureToggleService featureToggleService;
     @MockBean
     private PrdOrganisationService prdOrganisationService;
 
@@ -89,8 +95,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     @Before
     public void setUp() {
         super.setUp();
-        when(featureToggleService.isAssignCaseAccessEnabled()).thenReturn(true);
-        when(featureToggleService.isUseUserTokenEnabled()).thenReturn(true);
 
         when(prdOrganisationService.retrieveOrganisationsData(AUTH_TOKEN)).thenReturn(OrganisationsResponse.builder()
             .contactInformation(singletonList(organisationContactInformation))
@@ -216,4 +220,88 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         verify(pbaPaymentService, never()).makePayment(anyString(), any());
     }
 
+    @Test
+    public void shouldAssignApplicantSolicitor() throws Exception {
+        doPBAPaymentReferenceAlreadyExistsSetup();
+
+        mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.authorisation3", is(notNullValue())))
+            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
+            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+        verify(ccdDataStoreService, times(1)).removeCreatorRole(any(CaseDetails.class), eq(AUTH_TOKEN));
+        verify(assignCaseAccessService, times(1)).assignCaseAccess(any(CaseDetails.class), eq(AUTH_TOKEN));
+    }
+
+    @Test
+    public void shouldNotAssignApplicantSolicitor_assignCaseAccessDraftCaseActive() throws Exception {
+        doPBASetUp(true);
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/pba-payment-app-sol-role-already-exists.json").toURI()));
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+
+        mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
+            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+
+    }
+
+    @Test
+    public void shouldNotAssignApplicantSolicitor_organisationIdNoMatch() throws Exception {
+        doPBAPaymentReferenceAlreadyExistsSetup();
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(prdOrganisationService.retrieveOrganisationsData(AUTH_TOKEN)).thenReturn(OrganisationsResponse.builder()
+            .contactInformation(singletonList(organisationContactInformation))
+            .name(TEST_SOLICITOR_NAME)
+            .organisationIdentifier("INCORRECT_IDENTIFIER")
+            .build());
+
+        mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors", hasSize(2)))
+            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+    }
+
+    @Test
+    public void shouldNotAssignApplicantSolicitor_organisationEmpty() throws Exception {
+        doPBASetUp(true);
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/pba-payment-no-app-org.json").toURI()));
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+
+        mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors", hasSize(2)))
+            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+        verifyNoInteractions(ccdDataStoreService);
+        verifyNoInteractions(assignCaseAccessService);
+    }
+
+    @Test
+    public void shouldNotAssignApplicantSolicitor_acaApiFailure() throws Exception {
+        doPBASetUp(true);
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        doThrow(feignError()).when(assignCaseAccessService).assignCaseAccess(any(CaseDetails.class), eq(AUTH_TOKEN));
+
+        mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors", hasSize(1)))
+            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+    }
 }
