@@ -57,7 +57,8 @@ public class HearingDocumentController extends BaseController {
     private final ObjectMapper objectMapper;
     private final CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
 
-    private final List<String> warningsList = new ArrayList<>();
+    private final List<String> nonFastTrackWarningsList = new ArrayList<>();
+    private final List<String> fastTrackWarningsList = new ArrayList<>();
 
     @PostMapping(path = "/documents/hearing", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(summary = "Handles Form C and G generation. Serves as a callback from CCD")
@@ -97,9 +98,10 @@ public class HearingDocumentController extends BaseController {
             caseDetails.getData().putAll(hearingDocumentService.generateHearingDocuments(authorisationToken, caseDetails));
         }
 
-        List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails, warningsList);
+        List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails, fastTrackWarningsList, nonFastTrackWarningsList);
 
-        if ((warnings.isEmpty() || warningsList.size() > 1)  && caseDataService.isContestedApplication(caseDetails)) {
+        if ((warnings.isEmpty() || fastTrackWarningsList.size() > 1 || nonFastTrackWarningsList.size() > 1)
+            && caseDataService.isContestedApplication(caseDetails)) {
             CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
             if (caseDetailsBefore != null && hearingDocumentService.alreadyHadFirstHearing(caseDetailsBefore)) {
                 log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
