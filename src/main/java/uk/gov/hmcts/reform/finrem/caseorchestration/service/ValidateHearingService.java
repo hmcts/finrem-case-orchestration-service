@@ -40,7 +40,7 @@ public class ValidateHearingService {
             ? ImmutableList.of(REQUIRED_FIELD_EMPTY_ERROR) : ImmutableList.of();
     }
 
-    public List<String> validateHearingWarnings(CaseDetails caseDetails) {
+    public List<String> validateHearingWarnings(CaseDetails caseDetails, List<String> warningsList) {
         Map<String, Object> caseData = caseDetails.getData();
         String issueDate = Objects.toString(caseData.get(ISSUE_DATE), "");
         String hearingDate = Objects.toString(caseData.get(HEARING_DATE), "");
@@ -52,12 +52,14 @@ public class ValidateHearingService {
         if (fastTrackApplication) {
             if (!isDateInBetweenIncludingEndPoints(issueLocalDate.plusWeeks(6), issueLocalDate.plusWeeks(10),
                 hearingLocalDate)) {
-                return ImmutableList.of(DATE_BETWEEN_6_AND_10_WEEKS);
+                warningsList.add(DATE_BETWEEN_6_AND_10_WEEKS);
+                return warningsList;
             }
         } else if (!isDateInBetweenIncludingEndPoints(issueLocalDate.plusWeeks(12), issueLocalDate.plusWeeks(16),
             hearingLocalDate)) {
-            return ImmutableList.of(DATE_BETWEEN_12_AND_16_WEEKS);
+            warningsList.add(DATE_BETWEEN_12_AND_16_WEEKS);
+            return warningsList;
         }
-        return ImmutableList.of();
+        return warningsList;
     }
 }

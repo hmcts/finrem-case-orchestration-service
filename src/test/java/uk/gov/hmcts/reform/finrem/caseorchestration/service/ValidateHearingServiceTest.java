@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -131,7 +132,7 @@ public class ValidateHearingServiceTest extends BaseServiceTest {
             );
 
         CaseDetails caseDetails = CaseDetails.builder().data(caseData).build();
-        return service.validateHearingWarnings(caseDetails);
+        return service.validateHearingWarnings(caseDetails, new ArrayList<>());
     }
 
     private List<String> doTestErrors(List<ImmutablePair<String, Object>> pairs) {

@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.Check
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Objects;
 
 import static org.hamcrest.Matchers.is;
@@ -78,7 +79,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
         }
 
         when(validateHearingService.validateHearingErrors(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
-        when(validateHearingService.validateHearingWarnings(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
+        when(validateHearingService.validateHearingWarnings(isA(CaseDetails.class), isA(List.class))).thenReturn(ImmutableList.of());
     }
 
     private void doRequestSetUp() throws IOException, URISyntaxException {
@@ -213,7 +214,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @Test
     public void shouldThrowWarningsWhenNotFastTrackDecision() throws Exception {
         when(validateHearingService.validateHearingErrors(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
-        when(validateHearingService.validateHearingWarnings(isA(CaseDetails.class)))
+        when(validateHearingService.validateHearingWarnings(isA(CaseDetails.class), isA(List.class)))
             .thenReturn(ImmutableList.of("Date of the hearing must be between 12 and 14 weeks."));
 
         requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
@@ -231,7 +232,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @Test
     public void shouldThrowWarningsWhenFastTrackDecision() throws Exception {
         when(validateHearingService.validateHearingErrors(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
-        when(validateHearingService.validateHearingWarnings(isA(CaseDetails.class)))
+        when(validateHearingService.validateHearingWarnings(isA(CaseDetails.class), isA(List.class)))
             .thenReturn(ImmutableList.of("Date of the Fast Track hearing must be between 6 and 10 weeks."));
 
         requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
@@ -249,7 +250,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @Test
     public void shouldSuccessfullyValidate() throws Exception {
         when(validateHearingService.validateHearingErrors(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
-        when(validateHearingService.validateHearingWarnings(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
+        when(validateHearingService.validateHearingWarnings(isA(CaseDetails.class), isA(List.class))).thenReturn(ImmutableList.of());
 
         requestContent = objectMapper.readTree(new File(Objects.requireNonNull(getClass()
             .getResource("/fixtures/contested/validate-hearing-successfully.json")).toURI()));
