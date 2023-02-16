@@ -1,0 +1,59 @@
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.uploadapprovedorder;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
+
+import java.time.LocalDate;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
+
+@RunWith(MockitoJUnitRunner.class)
+public class UploadApprovedOrderConsentedAboutToStartHandlerTest {
+
+    @Mock
+    private IdamService idamService;
+    @InjectMocks
+    private UploadApprovedOrderConsentedAboutToStartHandler uploadApprovedOrderConsentedAboutToStartHandler;
+
+    @Test
+    public void givenConsentedCase_whenAboutToStartUploadApprovedOrder_thenCanHandle() {
+        assertThat(uploadApprovedOrderConsentedAboutToStartHandler
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.UPLOAD_APPROVED_ORDER),
+            is(true));
+    }
+
+    @Test
+    public void givenConsentedCase_whenSubmittedUploadApprovedOrder_thenCannotHandle() {
+        assertThat(uploadApprovedOrderConsentedAboutToStartHandler
+                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.UPLOAD_APPROVED_ORDER),
+            is(false));
+    }
+
+    @Test
+    public void givenUploadConsentedApproveOrder_whenHandle_thenAddDefaultJudgeAndCurrentDate() {
+
+        FinremCaseData finremCaseData = FinremCaseData.builder().build();
+        FinremCaseDetails finremCaseDetails = FinremCaseDetails.builder().id(1L).data(finremCaseData).build();
+        FinremCallbackRequest callbackRequest = FinremCallbackRequest.builder().caseDetails(finremCaseDetails).build();
+        when(idamService.getIdamSurname("auth")).thenReturn("judge");
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> response =
+            uploadApprovedOrderConsentedAboutToStartHandler.handle(callbackRequest, "auth");
+
+        assertThat(response.getData().getOrderDirectionJudgeName(), is("judge"));
+        assertThat(response.getData().getOrderDirectionDate(), is(LocalDate.now()));
+    }
+}
