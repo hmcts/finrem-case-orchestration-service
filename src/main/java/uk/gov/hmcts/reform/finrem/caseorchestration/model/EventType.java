@@ -44,7 +44,14 @@ public enum EventType {
     CONSENT_APPLICATION_APPROVED_IN_CONTESTED("FR_consentOrderApproved"),
     UPDATE_CONTESTED_GENERAL_APPLICATION("updateGeneralApplication"),
     READY_FOR_HEARING("FR_readyForHearing"),
-
+    REFER_TO_JUDGE("FR_referToJudge"),
+    REFER_TO_JUDGE_FROM_ORDER_MADE("FR_referToJudgeFromOrderMade"),
+    REFER_TO_JUDGE_FROM_CONSENT_ORDER_APPROVED("FR_referToJudgeFromConsOrdApproved"),
+    REFER_TO_JUDGE_FROM_CONSENT_ORDER_MADE("FR_referToJudgeFromConsOrdMade"),
+    REFER_TO_JUDGE_FROM_AWAITING_RESPONSE("FR_referToJudgeFromAwaitingResponse"),
+    REFER_TO_JUDGE_FROM_RESPOND_TO_ORDER("FR_referToJudgeFromRespondToOrder"),
+    REFER_TO_JUDGE_FROM_CLOSE("FR_referToJudgeFromClose"),
+    REASSIGN_JUDGE("FR_reassignJudge"),
     NOC_REQUEST("nocRequest"),
     @JsonEnumDefaultValue
     NONE("");
