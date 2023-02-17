@@ -57,8 +57,8 @@ public class HearingDocumentController extends BaseController {
     private final ObjectMapper objectMapper;
     private final CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
 
-    private final List<String> nonFastTrackWarningsList = new ArrayList<>();
-    private final List<String> fastTrackWarningsList = new ArrayList<>();
+    private List<String> nonFastTrackWarningsList = new ArrayList<>();
+    private List<String> fastTrackWarningsList = new ArrayList<>();
 
     @PostMapping(path = "/documents/hearing", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(summary = "Handles Form C and G generation. Serves as a callback from CCD")
@@ -112,10 +112,8 @@ public class HearingDocumentController extends BaseController {
                 hearingDocumentService.sendInitialHearingCorrespondence(caseDetails, authorisationToken);
                 log.info("sent Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
             }
-
-            boolean fastFlag = fastTrackWarningsList.removeAll(fastTrackWarningsList);
-            boolean nonFastFlag = nonFastTrackWarningsList.removeAll(nonFastTrackWarningsList);
-            log.info("fastFlag {}, nonFastFlag{}, Case ID: {}",fastFlag, nonFastFlag, caseDetails.getId());
+            fastTrackWarningsList = new ArrayList<>();
+            nonFastTrackWarningsList = new ArrayList<>();
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).warnings(warnings).build());
     }
