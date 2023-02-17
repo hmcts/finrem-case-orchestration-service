@@ -32,6 +32,7 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_COVER_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
 
 @Slf4j
@@ -75,16 +76,24 @@ public class SendOrderContestedAboutToSubmitHandler
         Map<String, Object> caseData = caseDetails.getData();
 
         List<HearingOrderCollectionData> hearingOrderCollectionData = documentHelper.getHearingOrderDocuments(caseData);
-
+        int index = hearingOrderCollectionData.size() - 1;
         if (hearingOrderCollectionData != null && !hearingOrderCollectionData.isEmpty()) {
             CaseDocument latestHearingOrder = hearingOrderCollectionData
-                .get(hearingOrderCollectionData.size() - 1)
+                .get(index)
                 .getHearingOrderDocuments().getUploadDraftDocument();
 
-            log.info("Received request to stampFinalOrder called with Case ID = {}, latestHearingOrder = {}", caseDetails.getId(),
-                latestHearingOrder);
+            List<HearingOrderCollectionData> hearings =  new ArrayList<>(hearingOrderCollectionData);
+            CaseDocument latestHearingOrderPdf = genericDocumentService.convertDocumentIfNotPdfAlready(latestHearingOrder, authToken);
+            HearingOrderDocument document = HearingOrderDocument.builder().uploadDraftDocument(latestHearingOrderPdf).build();
+            hearings.remove(index);
+            hearings.add(index, HearingOrderCollectionData.builder().hearingOrderDocuments(document).build());
+            caseData.put(HEARING_ORDER_COLLECTION, hearings);
 
-            stampAndAddToCollection(caseData, latestHearingOrder, authToken);
+            log.info("Received request to stampFinalOrder called with Case ID = {},"
+                    + " latestHearingOrder = {}, latestHearingOrderPdf {}", caseDetails.getId(),
+                latestHearingOrder, latestHearingOrderPdf);
+
+            stampAndAddToCollection(caseData, latestHearingOrderPdf, authToken);
         }
     }
 
