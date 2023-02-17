@@ -60,7 +60,7 @@ public class HearingDocumentService {
                 documentConfiguration.getFormCNonFastTrackTemplate(), documentConfiguration.getFormCFileName()));
 
         CompletableFuture<CaseDocument> formG = supplyAsync(() -> genericDocumentService.generateDocument(pair.getRight(), pair.getLeft(),
-            documentConfiguration.getFormGTemplate(), documentConfiguration.getFormGFileName()));
+            documentConfiguration.getFormGTemplate(pair.getLeft()), documentConfiguration.getFormGFileName()));
 
         return formCNonFastTrack
             .thenCombine(formG, this::createDocumentMap).join();

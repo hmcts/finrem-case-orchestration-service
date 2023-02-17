@@ -285,7 +285,7 @@ public class GeneralApplicationDirectionsService {
         caseData.put(LETTER_DATE, String.valueOf(LocalDate.now()));
 
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
-            documentConfiguration.getGeneralApplicationOrderTemplate(),
+            documentConfiguration.getGeneralApplicationOrderTemplate(caseDetails),
             documentConfiguration.getGeneralApplicationOrderFileName());
     }
 
@@ -301,7 +301,7 @@ public class GeneralApplicationDirectionsService {
         caseData.put(LETTER_DATE, String.valueOf(LocalDate.now()));
 
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
-            documentConfiguration.getGeneralApplicationHearingNoticeTemplate(),
+            documentConfiguration.getGeneralApplicationHearingNoticeTemplate(caseDetails),
             documentConfiguration.getGeneralApplicationHearingNoticeFileName());
     }
 

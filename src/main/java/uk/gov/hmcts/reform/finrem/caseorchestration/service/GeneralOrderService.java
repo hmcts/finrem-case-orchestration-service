@@ -77,7 +77,7 @@ public class GeneralOrderService {
 
     private CaseDocument applyGenerateDocument(CaseDetails caseDetails, String authorisationToken) {
         return genericDocumentService.generateDocument(authorisationToken, addExtraFields.apply(caseDetails),
-            documentConfiguration.getGeneralOrderTemplate(),
+            documentConfiguration.getGeneralOrderTemplate(caseDetails),
             documentConfiguration.getGeneralOrderFileName());
     }
 

@@ -232,7 +232,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         verify(genericDocumentService, times(1)).generateDocument(
             eq(AUTH_TOKEN),
             documentGenerationRequestCaseDetailsCaptor.capture(),
-            eq(documentConfiguration.getGeneralApplicationOrderTemplate()),
+            eq(documentConfiguration.getGeneralApplicationOrderTemplate(caseDetails)),
             eq(documentConfiguration.getGeneralApplicationOrderFileName()));
         verify(bulkPrintService, times(1)).printApplicantDocuments(any(), eq(AUTH_TOKEN),
             printDocumentsRequestDocumentListCaptor.capture());

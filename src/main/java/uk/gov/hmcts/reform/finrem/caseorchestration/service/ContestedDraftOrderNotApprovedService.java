@@ -56,7 +56,7 @@ public class ContestedDraftOrderNotApprovedService {
 
     private CaseDocument applyGenerateDocument(CaseDetails caseDetails, String authorisationToken) {
         return genericDocumentService.generateDocument(authorisationToken, addExtraFields.apply(caseDetails),
-            documentConfiguration.getContestedDraftOrderNotApprovedTemplate(),
+            documentConfiguration.getContestedDraftOrderNotApprovedTemplate(caseDetails),
             documentConfiguration.getContestedDraftOrderNotApprovedFileName());
     }
 

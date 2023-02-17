@@ -156,7 +156,7 @@ public class ContestedDraftOrderNotApprovedServiceTest extends BaseServiceTest {
 
     void verifyAdditionalFieldsWithSingularReason() {
         verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
-            eq(documentConfiguration.getContestedDraftOrderNotApprovedTemplate()),
+            eq(documentConfiguration.getContestedDraftOrderNotApprovedTemplate(caseDetailsArgumentCaptor.capture())),
             eq(documentConfiguration.getContestedDraftOrderNotApprovedFileName()));
 
         Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();

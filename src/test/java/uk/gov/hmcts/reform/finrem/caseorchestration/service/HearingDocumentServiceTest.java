@@ -434,7 +434,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
             eq(documentConfiguration.getFormCFastTrackTemplate()), eq(documentConfiguration.getFormCFileName()));
         verify(genericDocumentService, never()).generateDocument(any(), any(), eq(documentConfiguration.getFormCNonFastTrackTemplate()), any());
-        verify(genericDocumentService, never()).generateDocument(any(), any(), eq(documentConfiguration.getFormGTemplate()), any());
+        verify(genericDocumentService, never()).generateDocument(any(), any(), eq(documentConfiguration.getFormGTemplate(any())), any());
 
         Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
         assertThat(data.get("formCCreatedDate"), is(notNullValue()));
@@ -462,7 +462,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         verify(genericDocumentService, never())
             .generateDocument(any(), any(), eq(documentConfiguration.getFormCFastTrackTemplate()), any());
         verify(genericDocumentService)
-            .generateDocument(eq(AUTH_TOKEN), any(), eq(documentConfiguration.getFormGTemplate()), eq(documentConfiguration.getFormGFileName()));
+            .generateDocument(eq(AUTH_TOKEN), any(), eq(documentConfiguration.getFormGTemplate(any())), eq(documentConfiguration.getFormGFileName()));
 
         Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
         assertThat(data.get("formCCreatedDate"), is(notNullValue()));
