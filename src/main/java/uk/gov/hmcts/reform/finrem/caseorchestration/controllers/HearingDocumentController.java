@@ -112,6 +112,10 @@ public class HearingDocumentController extends BaseController {
                 hearingDocumentService.sendInitialHearingCorrespondence(caseDetails, authorisationToken);
                 log.info("sent Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
             }
+
+            boolean fastFlag = fastTrackWarningsList.removeAll(fastTrackWarningsList);
+            boolean nonFastFlag = nonFastTrackWarningsList.removeAll(nonFastTrackWarningsList);
+            log.info("fastFlag {}, nonFastFlag{}, Case ID: {}",fastFlag, nonFastFlag, caseDetails.getId());
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).warnings(warnings).build());
     }
