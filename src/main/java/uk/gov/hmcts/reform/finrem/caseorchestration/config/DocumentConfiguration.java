@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.config;
 
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Getter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -13,6 +15,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class DocumentConfiguration {
     private String bulkPrintTemplate;
     private String bulkPrintFileName;
+    @Getter(AccessLevel.NONE)
     private String miniFormTemplate;
     private String miniFormHighCourtTemplate;
     private String miniFormFileName;
@@ -24,11 +27,13 @@ public class DocumentConfiguration {
     private String formCFastTrackTemplate;
     private String formCNonFastTrackTemplate;
     private String formCFileName;
+    @Getter(AccessLevel.NONE)
     private String formGTemplate;
     private String formGHighCourtTemplate;
     private String formGFileName;
     private String outOfFamilyCourtResolutionTemplate;
     private String outOfFamilyCourtResolutionName;
+    @Getter(AccessLevel.NONE)
     private String contestedMiniFormTemplate;
     private String contestedMiniFormHighCourtTemplate;
     private String contestedMiniFormFileName;
@@ -37,6 +42,7 @@ public class DocumentConfiguration {
     private String contestedDraftMiniFormFileName;
     private String generalLetterTemplate;
     private String generalLetterFileName;
+    @Getter(AccessLevel.NONE)
     private String approvedConsentOrderTemplate;
     private String approvedConsentOrderHighCourtTemplate;
     private String approvedConsentOrderFileName;
@@ -55,20 +61,25 @@ public class DocumentConfiguration {
     private String variationOrderNotApprovedCoverLetterFileName;
     private String consentOrderNotApprovedReplyCoversheetTemplate;
     private String consentOrderNotApprovedReplyCoversheetFileName;
+    @Getter(AccessLevel.NONE)
     private String generalOrderTemplate;
     private String generalOrderHighCourtTemplate;
     private String generalOrderFileName;
+    @Getter(AccessLevel.NONE)
     private String contestedDraftOrderNotApprovedTemplate;
     private String contestedDraftOrderNotApprovedHighCourtTemplate;
     private String contestedDraftOrderNotApprovedFileName;
+    @Getter(AccessLevel.NONE)
     private String contestedOrderApprovedCoverLetterTemplate;
     private String contestedOrderApprovedCoverLetterHighCourtTemplate;
     private String contestedOrderApprovedCoverLetterFileName;
     private String manualPaymentTemplate;
     private String manualPaymentFileName;
+    @Getter(AccessLevel.NONE)
     private String generalApplicationHearingNoticeTemplate;
     private String generalApplicationHearingNoticeHighCourtTemplate;
     private String generalApplicationHearingNoticeFileName;
+    @Getter(AccessLevel.NONE)
     private String generalApplicationOrderTemplate;
     private String generalApplicationOrderHighCourtTemplate;
     private String generalApplicationOrderFileName;
