@@ -76,8 +76,9 @@ public class SendOrderContestedAboutToSubmitHandler
         Map<String, Object> caseData = caseDetails.getData();
 
         List<HearingOrderCollectionData> hearingOrderCollectionData = documentHelper.getHearingOrderDocuments(caseData);
-        int index = hearingOrderCollectionData.size() - 1;
+
         if (hearingOrderCollectionData != null && !hearingOrderCollectionData.isEmpty()) {
+            int index = hearingOrderCollectionData.size() - 1;
             CaseDocument latestHearingOrder = hearingOrderCollectionData
                 .get(index)
                 .getHearingOrderDocuments().getUploadDraftDocument();
