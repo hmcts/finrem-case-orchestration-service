@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.IdamAuthApi;
 import uk.gov.hmcts.reform.idam.client.OAuth2Configuration;
 import uk.gov.hmcts.reform.idam.client.models.TokenRequest;
-import uk.gov.hmcts.reform.idam.client.models.TokenResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
@@ -21,11 +20,8 @@ public class IdamAuthService {
     private final OAuth2Configuration oAuth2Configuration;
 
     public String getAccessToken(String username, String password) {
-        TokenRequest tokenRequest = buildTokenRequest(username, password);
-        TokenResponse tokenResponse = idamAuthApi.generateOpenIdToken(tokenRequest);
-        return BEARER_AUTH_TYPE + " " + tokenResponse.accessToken;
+        return BEARER_AUTH_TYPE + " " + idamAuthApi.generateOpenIdToken(buildTokenRequest(username, password)).accessToken;
     }
-
 
     public UserDetails getUserByUserId(String authorisation, String userId) {
         return idamAuthApi.getUserByUserId(authorisation, userId);
