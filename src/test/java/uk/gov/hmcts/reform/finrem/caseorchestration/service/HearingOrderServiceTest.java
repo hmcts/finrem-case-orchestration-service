@@ -83,8 +83,8 @@ public class HearingOrderServiceTest extends BaseServiceTest {
             .purposeOfDocument(draftDirectionOrders.get(0).getValue().getPurposeOfDocument())
             .build());
 
-        assertThat(hearingOrderService.latestDraftDirectionOrderOverridesSolicitorCollection(CaseDetails.builder().data(caseData).build()),
-            is(false));
+        assertThat(hearingOrderService.latestDraftDirectionOrderOverridesSolicitorCollection(CaseDetails.builder()
+                .data(caseData).build(), AUTH_TOKEN), is(true));
     }
 
     @Test
@@ -95,8 +95,8 @@ public class HearingOrderServiceTest extends BaseServiceTest {
             .purposeOfDocument("some other purpose")
             .build());
 
-        assertThat(hearingOrderService.latestDraftDirectionOrderOverridesSolicitorCollection(CaseDetails.builder().data(caseData).build()),
-            is(true));
+        assertThat(hearingOrderService.latestDraftDirectionOrderOverridesSolicitorCollection(CaseDetails.builder()
+                .data(caseData).build(), AUTH_TOKEN), is(true));
     }
 
     @Test
