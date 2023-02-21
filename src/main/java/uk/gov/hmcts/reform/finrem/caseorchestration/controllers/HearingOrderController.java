@@ -106,7 +106,8 @@ public class HearingOrderController extends BaseController {
         prepareFieldsForOrderApprovedCoverLetter(caseDetails, authorisationToken);
 
         Map<String, Object> caseData = caseDetails.getData();
-        Optional<DraftDirectionOrder> draftDirectionOrderCollectionTail = hearingOrderService.draftDirectionOrderCollectionTail(caseDetails);
+        Optional<DraftDirectionOrder> draftDirectionOrderCollectionTail
+            = hearingOrderService.draftDirectionOrderCollectionTail(caseDetails, authorisationToken);
         if (draftDirectionOrderCollectionTail.isPresent()) {
             caseData.put(LATEST_DRAFT_DIRECTION_ORDER, draftDirectionOrderCollectionTail.get());
         } else {
@@ -135,7 +136,7 @@ public class HearingOrderController extends BaseController {
         contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, authorisationToken);
         caseDataService.moveCollection(caseData, DRAFT_DIRECTION_DETAILS_COLLECTION, DRAFT_DIRECTION_DETAILS_COLLECTION_RO);
 
-        if (hearingOrderService.latestDraftDirectionOrderOverridesSolicitorCollection(caseDetails)) {
+        if (hearingOrderService.latestDraftDirectionOrderOverridesSolicitorCollection(caseDetails, authorisationToken)) {
             hearingOrderService.appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(caseDetails);
         }
 
