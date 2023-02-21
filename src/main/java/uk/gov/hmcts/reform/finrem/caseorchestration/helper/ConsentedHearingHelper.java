@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,8 +31,14 @@ public class ConsentedHearingHelper {
 
     private final ObjectMapper objectMapper;
 
+
     public List<ConsentedHearingDataWrapper> getHearings(Map<String, Object> caseData) {
         return Optional.ofNullable(caseData.get(LIST_FOR_HEARING_COLLECTION_CONSENTED))
+            .map(this::convertToHearingDataList).orElse(new ArrayList<>());
+    }
+
+    public List<ConsentedHearingDataWrapper> getHearings(FinremCaseData caseData) {
+        return Optional.ofNullable(caseData.getListForHearings())
             .map(this::convertToHearingDataList).orElse(new ArrayList<>());
     }
 

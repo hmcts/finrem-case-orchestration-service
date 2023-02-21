@@ -74,7 +74,7 @@
         {
           "id": "1",
           "value": {
-            "typeOfDocument": "pdf",
+            "typeOfDocument": "Form P1",
             "uploadedDocument": {
               "document_url": "http://file1",
               "document_filename": "file1",

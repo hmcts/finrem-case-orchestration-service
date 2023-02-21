@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
@@ -17,9 +18,11 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ContestedGeneralOrder {
     private String generalOrderText;
     private CaseDocument additionalDocument;
+    @JsonProperty("selectJudge")
     private String judge;
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -27,5 +30,4 @@ public class ContestedGeneralOrder {
     private String additionalComments;
     @JsonProperty("generalOrder_addressTo")
     private String generalOrderAddressTo;
-    private String selectJudge;
 }

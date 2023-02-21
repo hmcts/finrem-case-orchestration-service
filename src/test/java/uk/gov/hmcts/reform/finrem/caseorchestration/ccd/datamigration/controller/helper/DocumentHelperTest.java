@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -13,11 +16,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +37,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_CARE_OF;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_EMAIL_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_OPENING_HOURS;
@@ -40,19 +51,27 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_TOWN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CTSC_CONTACT_DETAILS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.DOCUMENT_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_OTHER_COLLECTION;
 
+@RunWith(MockitoJUnitRunner.class)
 public class DocumentHelperTest {
 
     private static final String PATH = "/fixtures/latestConsentedConsentOrder/";
-
+    private static final String DOC_URL = "http://dm-store/lhjbyuivu87y989hijbb";
+    private static final String BINARY_URL = DOC_URL + "/binary";
+    private static final String FILE_NAME = "app_docs.docx";
     private ObjectMapper objectMapper;
     private DocumentHelper documentHelper;
+    @Mock
+    private GenericDocumentService service;
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @Before
@@ -61,7 +80,7 @@ public class DocumentHelperTest {
         objectMapper.registerModule(new JavaTimeModule());
         CaseDataService caseDataService = new CaseDataService(objectMapper);
         finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
-        documentHelper = new DocumentHelper(objectMapper, caseDataService);
+        documentHelper = new DocumentHelper(objectMapper, caseDataService, service);
     }
 
     @Test
@@ -153,6 +172,26 @@ public class DocumentHelperTest {
 
         assertFalse(documentHelper.hasAnotherHearing(caseData));
     }
+
+    @Test
+    public void getHearingDocumentsAsBulkPrintDocuments() {
+        Map<String, Object> caseData = new HashMap<>();
+        DocumentCollection dc = DocumentCollection
+            .builder()
+            .value(caseDocument(DOCUMENT_URL, FILE_NAME, BINARY_URL))
+            .build();
+        List<DocumentCollection> documentCollections = new ArrayList<>();
+        documentCollections.add(dc);
+        caseData.put(HEARING_ORDER_OTHER_COLLECTION, documentCollections);
+
+        when(service.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
+        List<BulkPrintDocument> hearingDocuments = documentHelper.getHearingDocumentsAsBulkPrintDocuments(caseData, AUTHORIZATION_HEADER);
+        assertEquals(hearingDocuments.get(0).getFileName(), "app_docs.pdf");
+        assertEquals(hearingDocuments.get(0).getBinaryFileUrl(), BINARY_URL);
+
+        verify(service).convertDocumentIfNotPdfAlready(any(), any());
+    }
+
 
     @Test
     public void shouldGetRespondToOrderDocuments() throws Exception {
