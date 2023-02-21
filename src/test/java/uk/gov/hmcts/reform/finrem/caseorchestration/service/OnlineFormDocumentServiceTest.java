@@ -72,7 +72,8 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
         assertCaseDocument(onlineFormDocumentService.generateMiniFormA(AUTH_TOKEN, CaseDetails.builder().build()));
 
         verify(genericDocumentService).generateDocument(AUTH_TOKEN, CaseDetails.builder().build(),
-            documentConfiguration.getMiniFormTemplate(any()), documentConfiguration.getMiniFormFileName());
+            documentConfiguration.getMiniFormTemplate(CaseDetails.builder().build()),
+            documentConfiguration.getMiniFormFileName());
     }
 
     @Test
@@ -90,7 +91,8 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
             .generateConsentedInContestedMiniFormA(consentedInContestedCaseDetails(payload), AUTH_TOKEN));
 
         verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
-            eq(documentConfiguration.getMiniFormTemplate(any())), eq(documentConfiguration.getMiniFormFileName()));
+            eq(documentConfiguration.getMiniFormTemplate(CaseDetails.builder().build())),
+            eq(documentConfiguration.getMiniFormFileName()));
 
         verifyAdditionalFields(caseDetailsArgumentCaptor.getValue().getData());
     }
@@ -102,7 +104,8 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
             .generateConsentedInContestedMiniFormA(consentedInContestedCaseDetails(payload), AUTH_TOKEN));
 
         verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
-            eq(documentConfiguration.getMiniFormTemplate(any())), eq(documentConfiguration.getMiniFormFileName()));
+            eq(documentConfiguration.getMiniFormTemplate(CaseDetails.builder().build())),
+            eq(documentConfiguration.getMiniFormFileName()));
 
         verifyAdditionalFields(caseDetailsArgumentCaptor.getValue().getData());
     }

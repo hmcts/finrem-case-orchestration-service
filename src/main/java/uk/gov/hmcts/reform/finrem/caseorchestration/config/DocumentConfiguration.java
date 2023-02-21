@@ -126,11 +126,6 @@ public class DocumentConfiguration {
         return isHighCourtSelected(caseDetails) ? approvedConsentOrderHighCourtTemplate : approvedConsentOrderTemplate;
     }
 
-    @Deprecated
-    public String getContestedDraftOrderNotApprovedTemplate() {
-        return contestedDraftOrderNotApprovedTemplate;
-    }
-
     public String getContestedDraftOrderNotApprovedTemplate(CaseDetails caseDetails) {
         return isHighCourtSelected(caseDetails) ? contestedDraftOrderNotApprovedHighCourtTemplate
             : contestedDraftOrderNotApprovedTemplate;
