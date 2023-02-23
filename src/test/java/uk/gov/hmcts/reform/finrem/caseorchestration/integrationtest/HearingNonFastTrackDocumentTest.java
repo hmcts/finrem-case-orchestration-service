@@ -36,6 +36,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGener
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -61,7 +62,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ISSUE_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OUT_OF_FAMILY_COURT_RESOLUTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.DATE_BETWEEN_12_AND_16_WEEKS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.REQUIRED_FIELD_EMPTY_ERROR;
 
 @RunWith(SpringRunner.class)
@@ -195,6 +195,8 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
 
     private String expectedCaseData() throws JsonProcessingException {
         CaseDetails caseDetails = request.getCaseDetails();
+        caseDetails.getData().put("hearingDate", LocalDate.now().plusDays(100));
+        caseDetails.getData().put("issueDate", LocalDate.now());
         caseDetails.getData().put("formC", caseDocument());
         caseDetails.getData().put("formG", caseDocument());
         caseDetails.getData().put(OUT_OF_FAMILY_COURT_RESOLUTION, caseDocument());
@@ -204,15 +206,18 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         return objectMapper.writeValueAsString(
             AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDetails.getData())
-                .warnings(ImmutableList.of(DATE_BETWEEN_12_AND_16_WEEKS))
+                .warnings(ImmutableList.of())
                 .build());
     }
 
     private DocumentGenerationRequest documentRequest(String template, String fileName) {
+        CaseDetails caseDetails = request.getCaseDetails();
+        caseDetails.getData().put("hearingDate", LocalDate.now().plusDays(100));
+        caseDetails.getData().put("issueDate", LocalDate.now());
         return DocumentGenerationRequest.builder()
             .template(template)
             .fileName(fileName)
-            .values(Collections.singletonMap("caseDetails", request.getCaseDetails()))
+            .values(Collections.singletonMap("caseDetails", caseDetails))
             .build();
     }
 
