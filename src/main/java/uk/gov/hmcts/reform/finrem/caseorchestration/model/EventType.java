@@ -53,6 +53,7 @@ public enum EventType {
     REFER_TO_JUDGE_FROM_CLOSE("FR_referToJudgeFromClose"),
     REASSIGN_JUDGE("FR_reassignJudge"),
     NOC_REQUEST("nocRequest"),
+    MANUAL_PAYMENT("FR_manualPayment"),
     @JsonEnumDefaultValue
     NONE("");
 

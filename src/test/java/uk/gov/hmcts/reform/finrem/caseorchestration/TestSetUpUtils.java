@@ -73,6 +73,7 @@ public class TestSetUpUtils {
     public static final String DOC_URL = "http://dm-store/lhjbyuivu87y989hijbb";
     public static final String BINARY_URL = DOC_URL + "/binary";
     public static final String FILE_NAME = "app_docs.pdf";
+    public static final String DOC_FILE_NAME = "app_docs.docx";
     public static final String VARIATION_FILE_NAME = "ApprovedVariationOrderLetter.pdf";
     public static final String INTE_DOC_URL = "http://dm-store/documents/e9ca7c4a-1f75-4b46-b0dc-744abc2dc0d3";
     public static final String INTE_BINARY_URL = INTE_DOC_URL + "/binary";
