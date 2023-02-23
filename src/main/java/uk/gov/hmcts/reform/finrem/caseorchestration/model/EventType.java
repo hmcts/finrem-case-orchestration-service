@@ -47,6 +47,7 @@ public enum EventType {
 
     NOC_REQUEST("nocRequest"),
     MANUAL_PAYMENT("FR_manualPayment"),
+    MANAGE_INTERVENERS("manageInterveners"),
     @JsonEnumDefaultValue
     NONE("");
 
