@@ -220,7 +220,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     @Test
     public void shouldAssignApplicantSolicitor() throws Exception {
         doPBAPaymentReferenceAlreadyExistsSetup();
-        when(assignCaseAccessService.isCreatorRoleActiveOnCase(any())).thenReturn(false);
+        when(assignCaseAccessService.isCreatorRoleActiveOnCase(any())).thenReturn(true);
 
         mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
                 .content(requestContent.toString())
@@ -238,7 +238,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     public void shouldNotAssignApplicantSolicitor_assignCaseAccessDraftCaseActive() throws Exception {
         doPBAPaymentReferenceAlreadyExistsSetup();
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-        when(assignCaseAccessService.isCreatorRoleActiveOnCase(any())).thenReturn(true);
+        when(assignCaseAccessService.isCreatorRoleActiveOnCase(any())).thenReturn(false);
 
         mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
                 .content(requestContent.toString())

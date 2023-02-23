@@ -106,7 +106,7 @@ public class PBAPaymentController extends BaseController {
         validateCaseData(callbackRequest);
         final Map<String, Object> mapOfCaseData = caseDetails.getData();
 
-        if (!assignCaseAccessService.isCreatorRoleActiveOnCase(caseDetails)) {
+        if (assignCaseAccessService.isCreatorRoleActiveOnCase(caseDetails)) {
             try {
                 String applicantOrgId = getApplicantOrgId(caseDetails);
 
