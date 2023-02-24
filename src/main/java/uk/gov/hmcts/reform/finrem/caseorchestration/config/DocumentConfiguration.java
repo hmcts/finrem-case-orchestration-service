@@ -19,13 +19,19 @@ public class DocumentConfiguration {
     private String miniFormTemplate;
     private String miniFormHighCourtTemplate;
     private String miniFormFileName;
+    @Getter(AccessLevel.NONE)
     private String rejectedOrderTemplate;
+    private String rejectedOrderHighCourtTemplate;
     private String rejectedOrderFileName;
     private String rejectedVariationOrderFileName;
     private String coversheetFileName;
     private String rejectedOrderDocType;
+    @Getter(AccessLevel.NONE)
     private String formCFastTrackTemplate;
+    private String formCFastTrackHighCourtTemplate;
+    @Getter(AccessLevel.NONE)
     private String formCNonFastTrackTemplate;
+    private String formCNonFastTrackHighCourtTemplate;
     private String formCFileName;
     @Getter(AccessLevel.NONE)
     private String formGTemplate;
@@ -87,7 +93,9 @@ public class DocumentConfiguration {
     private String generalApplicationRejectionFileName;
     private String additionalHearingTemplate;
     private String additionalHearingFileName;
+    @Getter(AccessLevel.NONE)
     private String generalApplicationInterimHearingNoticeTemplate;
+    private String generalApplicationInterimHearingNoticeHighCourtTemplate;
     private String generalApplicationInterimHearingNoticeFileName;
     private String nocLetterNotificationSolicitorTemplate;
     private String nocLetterNotificationSolicitorFileName;
@@ -99,7 +107,9 @@ public class DocumentConfiguration {
     private String updateFRCInformationSolicitorFilename;
     private String updateFRCInformationLitigantTemplate;
     private String updateFRCInformationLitigantFilename;
+    @Getter(AccessLevel.NONE)
     private String hearingNoticeConsentedTemplate;
+    private String hearingNoticeConsentedHighCourtTemplate;
     private String hearingNoticeConsentedFileName;
     private String barristerAddedTemplate;
     private String barristerAddedFilename;
@@ -112,6 +122,18 @@ public class DocumentConfiguration {
 
     public String getMiniFormTemplate(CaseDetails caseDetails) {
         return isHighCourtSelected(caseDetails) ? miniFormHighCourtTemplate : miniFormTemplate;
+    }
+
+    public String getRejectedOrderTemplate(CaseDetails caseDetails) {
+        return isHighCourtSelected(caseDetails) ? rejectedOrderHighCourtTemplate : rejectedOrderTemplate;
+    }
+
+    public String getFormCFastTrackTemplate(CaseDetails caseDetails) {
+        return isHighCourtSelected(caseDetails) ? formCFastTrackHighCourtTemplate : formCFastTrackTemplate;
+    }
+
+    public String getFormCNonFastTrackTemplate(CaseDetails caseDetails) {
+        return isHighCourtSelected(caseDetails) ? formCNonFastTrackHighCourtTemplate : formCNonFastTrackTemplate;
     }
 
     public String getFormGTemplate(CaseDetails caseDetails) {
@@ -145,6 +167,17 @@ public class DocumentConfiguration {
         return isHighCourtSelected(caseDetails) ? generalApplicationOrderHighCourtTemplate
             : generalApplicationOrderTemplate;
     }
+
+    public String getGeneralApplicationInterimHearingNoticeTemplate(CaseDetails caseDetails) {
+        return isHighCourtSelected(caseDetails) ? generalApplicationInterimHearingNoticeHighCourtTemplate
+            : generalApplicationInterimHearingNoticeTemplate;
+    }
+
+    public String getHearingNoticeConsentedTemplate(CaseDetails caseDetails) {
+        return isHighCourtSelected(caseDetails) ? hearingNoticeConsentedHighCourtTemplate
+            : hearingNoticeConsentedTemplate;
+    }
+
 
     private boolean isHighCourtSelected(CaseDetails caseDetails) {
         if (caseDetails != null && caseDetails.getData() != null

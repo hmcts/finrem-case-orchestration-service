@@ -262,7 +262,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         verify(genericDocumentService, times(1)).generateDocument(
             eq(AUTH_TOKEN),
             documentGenerationRequestCaseDetailsCaptor.capture(),
-            eq(documentConfiguration.getGeneralApplicationInterimHearingNoticeTemplate()),
+            eq(documentConfiguration.getGeneralApplicationInterimHearingNoticeTemplate(caseDetails)),
             eq(documentConfiguration.getGeneralApplicationInterimHearingNoticeFileName()));
         verify(bulkPrintService, times(1)).printApplicantDocuments(any(), eq(AUTH_TOKEN),
             printDocumentsRequestDocumentListCaptor.capture());
@@ -300,7 +300,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         verify(genericDocumentService, times(1)).generateDocument(
             eq(AUTH_TOKEN),
             documentGenerationRequestCaseDetailsCaptor.capture(),
-            eq(documentConfiguration.getGeneralApplicationInterimHearingNoticeTemplate()),
+            eq(documentConfiguration.getGeneralApplicationInterimHearingNoticeTemplate(caseDetails)),
             eq(documentConfiguration.getGeneralApplicationInterimHearingNoticeFileName()));
         verify(bulkPrintService, times(1)).printApplicantDocuments(any(), eq(AUTH_TOKEN),
             printDocumentsRequestDocumentListCaptor.capture());

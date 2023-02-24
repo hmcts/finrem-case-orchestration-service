@@ -432,8 +432,10 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
     void verifyAdditionalFastTrackFields() {
         verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
-            eq(documentConfiguration.getFormCFastTrackTemplate()), eq(documentConfiguration.getFormCFileName()));
-        verify(genericDocumentService, never()).generateDocument(any(), any(), eq(documentConfiguration.getFormCNonFastTrackTemplate()), any());
+            eq(documentConfiguration.getFormCFastTrackTemplate(CaseDetails.builder().build())),
+            eq(documentConfiguration.getFormCFileName()));
+        verify(genericDocumentService, never()).generateDocument(any(), any(),
+            eq(documentConfiguration.getFormCNonFastTrackTemplate(CaseDetails.builder().build())), any());
         verify(genericDocumentService, never()).generateDocument(any(), any(),
             eq(documentConfiguration.getFormGTemplate(CaseDetails.builder().build())), any());
 
@@ -459,9 +461,11 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
     void verifyAdditionalNonFastTrackFields() {
         verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
-            eq(documentConfiguration.getFormCNonFastTrackTemplate()), eq(documentConfiguration.getFormCFileName()));
+            eq(documentConfiguration.getFormCNonFastTrackTemplate(CaseDetails.builder().build())),
+            eq(documentConfiguration.getFormCFileName()));
         verify(genericDocumentService, never())
-            .generateDocument(any(), any(), eq(documentConfiguration.getFormCFastTrackTemplate()), any());
+            .generateDocument(any(), any(),
+                eq(documentConfiguration.getFormCFastTrackTemplate(CaseDetails.builder().build())), any());
         verify(genericDocumentService)
             .generateDocument(eq(AUTH_TOKEN), any(), eq(documentConfiguration.getFormGTemplate(CaseDetails.builder().build())),
                 eq(documentConfiguration.getFormGFileName()));

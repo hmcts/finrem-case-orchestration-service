@@ -179,7 +179,7 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
     }
 
     private DocumentGenerationRequest formCDocumentRequest() {
-        return documentRequest(config.getFormCNonFastTrackTemplate(), config.getFormCFileName());
+        return documentRequest(config.getFormCNonFastTrackTemplate(CaseDetails.builder().build()), config.getFormCFileName());
     }
 
     private DocumentGenerationRequest coverSheetDocumentRequest() {

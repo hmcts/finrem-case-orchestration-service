@@ -146,7 +146,7 @@ public class ConsentHearingService {
         caseData.put("additionalInformationAboutHearing", hearingCaseData.get("additionalInformationAboutHearing"));
 
         CaseDocument hearingNotice = genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
-            documentConfiguration.getHearingNoticeConsentedTemplate(),
+            documentConfiguration.getHearingNoticeConsentedTemplate(caseDetailsCopy),
             documentConfiguration.getHearingNoticeConsentedFileName());
 
         hearingData.getValue().setHearingNotice(hearingNotice);

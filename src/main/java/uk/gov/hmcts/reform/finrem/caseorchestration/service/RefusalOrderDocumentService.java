@@ -103,7 +103,7 @@ public class RefusalOrderDocumentService {
         }
 
         return genericDocumentService.generateDocument(data.getRight(), addExtraFields.apply(data.getLeft()),
-            documentConfiguration.getRejectedOrderTemplate(),
+            documentConfiguration.getRejectedOrderTemplate(data.getLeft()),
             rejectOrderFileName);
     }
 
