@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
@@ -40,13 +41,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INCLUDES_REPRESENTATION_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_PHONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 
 @RestController
@@ -117,6 +121,16 @@ public class UpdateConsentedCaseController extends BaseController {
         updateRespondentSolicitorAddress(caseData);
         updateApplicantOrSolicitorContactDetails(caseData);
 
+        if (ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
+            && caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE)) {
+                if (isNoApplicantOrganisationPolicy(caseDetails)) {
+                    updateApplicantOrganisationPolicy(caseDetails);
+                }
+                if (isNoRespondentOrganisationPolicy(caseDetails)) {
+                    updateRespondentOrganisationPolicy(caseDetails);
+                }
+        }
+
         if (featureToggleService.isCaseworkerNoCEnabled()) {
 
             if (ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
@@ -155,6 +169,22 @@ public class UpdateConsentedCaseController extends BaseController {
     private void updateLatestConsentOrder(CallbackRequest callbackRequest) {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         caseData.put(LATEST_CONSENT_ORDER, consentOrderService.getLatestConsentOrderData(callbackRequest));
+    }
+
+    private void updateApplicantOrganisationPolicy (CaseDetails caseDetails) {
+        caseDetails.getData().put(APPLICANT_ORGANISATION_POLICY,
+            OrganisationPolicy.builder()
+                .orgPolicyReference(null)
+                .orgPolicyCaseAssignedRole(APP_SOLICITOR_POLICY)
+                .build());
+    }
+
+    private void updateRespondentOrganisationPolicy (CaseDetails caseDetails) {
+        caseDetails.getData().put(RESPONDENT_ORGANISATION_POLICY,
+            OrganisationPolicy.builder()
+                .orgPolicyReference(null)
+                .orgPolicyCaseAssignedRole(RESP_SOLICITOR_POLICY)
+                .build());
     }
 
     private void updateDivorceDetails(Map<String, Object> caseData) {
@@ -254,5 +284,13 @@ public class UpdateConsentedCaseController extends BaseController {
     private void persistOrgPolicies(Map<String, Object> caseData, CaseDetails originalDetails) {
         caseData.put(APPLICANT_ORGANISATION_POLICY, originalDetails.getData().get(APPLICANT_ORGANISATION_POLICY));
         caseData.put(RESPONDENT_ORGANISATION_POLICY, originalDetails.getData().get(RESPONDENT_ORGANISATION_POLICY));
+    }
+
+    private boolean isNoApplicantOrganisationPolicy(CaseDetails caseDetails) {
+        return caseDetails.getData().get(APPLICANT_ORGANISATION_POLICY) == null || caseDetails.getData().get(ORGANISATION_POLICY_ROLE) == null;
+    }
+
+    private boolean isNoRespondentOrganisationPolicy(CaseDetails caseDetails) {
+        return caseDetails.getData().get(RESPONDENT_ORGANISATION_POLICY) == null || caseDetails.getData().get(ORGANISATION_POLICY_ROLE) == null;
     }
 }
