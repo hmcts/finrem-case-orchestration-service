@@ -31,6 +31,4 @@ public class IntervenerConstant {
     public static final String DEL_INTERVENER_THREE_VALUE = "Delete Intervener3";
     public static final String DEL_INTERVENER_FOUR_VALUE = "Delete delIntervener4";
     public static final String INTERVENER_ADDED_TO_CASE = "added to case on";
-    public static final String MORE_DETAILS = "more details available at ";
-
 }
