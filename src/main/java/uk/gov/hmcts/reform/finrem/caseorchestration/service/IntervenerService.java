@@ -14,16 +14,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 
 import java.time.LocalDate;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.DEL_INTERVENER_ONE_CODE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_FOUR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_ONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_THREE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_TWO;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class IntervenerService {
-    public static final String INTERVENER_ONE = "intervener1";
-    public static final String INTERVENER_TWO = "intervener2";
-    public static final String INTERVENER_THREE = "intervener3";
-    public static final String INTERVENER_FOUR = "intervener4";
     public void setIntvenerDateAddedAndDefaultOrgIfNotRepresented(FinremCaseData caseData, Long caseId) {
-
         String valueCode = caseData.getIntervenersList().getValueCode();
         log.info("selected intervener {} for caseId {}", valueCode, caseId);
         switch (valueCode) {
@@ -33,6 +34,22 @@ public class IntervenerService {
             case INTERVENER_FOUR -> updateIntervenerFourDetails(caseData, caseId);
             default -> throw new IllegalArgumentException("Invalid intervener selected");
         }
+    }
+
+    public void removeIntervenerOneDetails(FinremCaseData caseData) {
+        caseData.setIntervenerOneWrapper(null);
+    }
+
+    public void removeIntervenerTwoDetails(FinremCaseData caseData) {
+        caseData.setIntervenerTwoWrapper(null);
+    }
+
+    public void removeIntervenerThreeDetails(FinremCaseData caseData) {
+        caseData.setIntervenerThreeWrapper(null);
+    }
+
+    public void removeIntervenerFourDetails(FinremCaseData caseData) {
+        caseData.setIntervenerFourWrapper(null);
     }
 
     private static void updateIntervenerFourDetails(FinremCaseData caseData, Long caseId) {

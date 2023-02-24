@@ -6,7 +6,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListEl
 import java.util.List;
 
 public interface IntervenerHandler {
-
     default DynamicRadioListElement getDynamicRadioListElements(String code, String label) {
         return DynamicRadioListElement.builder()
             .code(code)

@@ -18,10 +18,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import java.util.ArrayList;
 import java.util.List;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService.INTERVENER_FOUR;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService.INTERVENER_ONE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService.INTERVENER_THREE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService.INTERVENER_TWO;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_ADDED_TO_CASE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_FOUR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_ONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_THREE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_TWO;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.MORE_DETAILS;
 
 @Slf4j
 @Service
@@ -49,32 +51,48 @@ public class IntervenersAboutToStartHandler extends FinremCallbackHandler implem
         List<DynamicRadioListElement> dynamicListElements = new ArrayList<>();
         IntervenerOneWrapper intervenerOneWrapper = caseData.getIntervenerOneWrapper();
         if (intervenerOneWrapper.getIntervener1Name() != null) {
-            dynamicListElements.add(getDynamicRadioListElements(INTERVENER_ONE,
-                INTERVENER_ONE+" - "+ intervenerOneWrapper.getIntervener1Name()));
+            var label =  INTERVENER_ONE + " - "
+                + intervenerOneWrapper.getIntervener1Name()
+                + " - " + INTERVENER_ADDED_TO_CASE + " - "
+                + intervenerOneWrapper.getIntervener1DateAdded() + " - "
+                + MORE_DETAILS + INTERVENER_ONE + " Tab";;
+            dynamicListElements.add(getDynamicRadioListElements(INTERVENER_ONE, label));
         } else {
             dynamicListElements.add(getDynamicRadioListElements(INTERVENER_ONE, INTERVENER_ONE+" "+DEFAULT));
         }
 
         IntervenerTwoWrapper intervenerTwoWrapper = caseData.getIntervenerTwoWrapper();
         if (intervenerTwoWrapper.getIntervener2Name() != null) {
-            dynamicListElements.add(getDynamicRadioListElements(INTERVENER_TWO,
-                INTERVENER_TWO+" - "+ intervenerTwoWrapper.getIntervener2Name()));
+            var label =  INTERVENER_TWO + " - "
+                + intervenerTwoWrapper.getIntervener2Name()
+                + " - " + INTERVENER_ADDED_TO_CASE + " - "
+                + intervenerTwoWrapper.getIntervener2DateAdded() + " - "
+                + MORE_DETAILS + INTERVENER_TWO + " Tab";
+            dynamicListElements.add(getDynamicRadioListElements(INTERVENER_TWO, label));
         } else {
             dynamicListElements.add(getDynamicRadioListElements(INTERVENER_TWO, INTERVENER_TWO+" "+DEFAULT));
         }
 
         IntervenerThreeWrapper intervenerThreeWrapper = caseData.getIntervenerThreeWrapper();
         if (intervenerThreeWrapper.getIntervener3Name() != null) {
-            dynamicListElements.add(getDynamicRadioListElements(INTERVENER_THREE,
-                INTERVENER_THREE+" - "+ intervenerThreeWrapper.getIntervener3Name()));
+            var label =  INTERVENER_THREE + " - "
+                + intervenerThreeWrapper.getIntervener3Name()
+                + " - " + INTERVENER_ADDED_TO_CASE + " - "
+                + intervenerThreeWrapper.getIntervener3DateAdded() + " - "
+                + MORE_DETAILS + INTERVENER_THREE + " Tab";
+            dynamicListElements.add(getDynamicRadioListElements(INTERVENER_THREE, label));
         } else {
             dynamicListElements.add(getDynamicRadioListElements(INTERVENER_THREE, INTERVENER_THREE +" "+DEFAULT));
         }
 
         IntervenerFourWrapper intervenerFourWrapper = caseData.getIntervenerFourWrapper();
         if (intervenerFourWrapper.getIntervener4Name() != null) {
-            dynamicListElements.add(getDynamicRadioListElements(INTERVENER_FOUR,
-                INTERVENER_FOUR+" - "+intervenerFourWrapper.getIntervener4Name()));
+            var label =  INTERVENER_FOUR + " - "
+                + intervenerFourWrapper.getIntervener4Name()
+                + " - " + INTERVENER_ADDED_TO_CASE + " - "
+                + intervenerFourWrapper.getIntervener4DateAdded() + " - "
+                + MORE_DETAILS + INTERVENER_FOUR + " Tab";;
+            dynamicListElements.add(getDynamicRadioListElements(INTERVENER_FOUR, label));
         } else {
             dynamicListElements.add(getDynamicRadioListElements(INTERVENER_FOUR, INTERVENER_FOUR +" "+ DEFAULT));
         }

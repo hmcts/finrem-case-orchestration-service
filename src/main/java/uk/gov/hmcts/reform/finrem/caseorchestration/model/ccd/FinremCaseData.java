@@ -283,6 +283,7 @@ public class FinremCaseData {
     private CaseRole currentUserCaseRole;
     private CaseDocument outOfFamilyCourtResolution;
     private DynamicRadioList intervenersList;
+    private DynamicRadioList intervenerOptionList;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private IntervenerOneWrapper intervenerOneWrapper;

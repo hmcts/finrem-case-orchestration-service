@@ -22,7 +22,6 @@ import java.util.List;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class IntervenerOneWrapper {
-    private IntervenerOneOption intervener1Option;
     private String intervener1Name;
     private Address intervener1Address;
     private String intervener1Email;

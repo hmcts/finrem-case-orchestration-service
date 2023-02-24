@@ -23,7 +23,6 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class IntervenerThreeWrapper {
-    private IntervenerThreeOption intervener3Option;
     private String intervener3Name;
     private Address intervener3Address;
     private String intervener3Email;
