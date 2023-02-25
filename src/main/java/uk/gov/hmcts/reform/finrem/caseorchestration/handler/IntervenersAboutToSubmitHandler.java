@@ -45,11 +45,11 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
             callbackRequest.getEventType(), CallbackType.ABOUT_TO_SUBMIT, caseId);
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
-        String intervenerCode = caseData.getIntervenersList().getValueCode();
-        String operationCode = caseData.getIntervenerOptionList().getValueCode();
-        log.info("Choosen operation {} for intervener {} for case id: {}",operationCode, intervenerCode, caseId);
+        String selectedOperationCode = caseData.getIntervenerOptionList().getValueCode();
+        log.info("Choosen operation {} for intervener {} for case id: {}",
+            selectedOperationCode, caseData.getIntervenersList().getValueCode(), caseId);
 
-        switch (operationCode) {
+        switch (selectedOperationCode) {
             case ADD_INTERVENER_ONE_CODE -> service.setIntvenerDateAddedAndDefaultOrgIfNotRepresented(caseData, caseId);
             case ADD_INTERVENER_TWO_CODE -> service.setIntvenerDateAddedAndDefaultOrgIfNotRepresented(caseData, caseId);
             case ADD_INTERVENER_THREE_CODE ->
@@ -60,7 +60,7 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
             case DEL_INTERVENER_TWO_CODE -> service.removeIntervenerTwoDetails(caseData);
             case DEL_INTERVENER_THREE_CODE ->  service.removeIntervenerThreeDetails(caseData);
             case DEL_INTERVENER_FOUR_CODE -> service.removeIntervenerFourDetails(caseData);
-            default -> throw new IllegalArgumentException("Invalid intervener option received for case " + caseId);
+            default -> throw new IllegalArgumentException("Invalid option received for case " + caseId);
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
