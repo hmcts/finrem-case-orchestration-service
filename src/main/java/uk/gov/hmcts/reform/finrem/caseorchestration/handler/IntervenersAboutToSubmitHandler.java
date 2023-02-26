@@ -23,8 +23,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerC
 @Service
 public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
     private final IntervenerService service;
+
     public IntervenersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                           IntervenerService service ) {
+                                           IntervenerService service) {
         super(finremCaseDetailsMapper);
         this.service =  service;
     }

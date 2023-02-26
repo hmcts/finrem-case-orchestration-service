@@ -107,7 +107,7 @@ public class IntervenerService {
 
     private static void updateIntervenerOneDetails(FinremCaseData caseData, Long caseId) {
         IntervenerOneWrapper intervenerOneWrapper = caseData.getIntervenerOneWrapper();
-        if(intervenerOneWrapper.getIntervener1DateAdded() == null) {
+        if (intervenerOneWrapper.getIntervener1DateAdded() == null) {
             log.info("Intervener1 date intervener added to case {}", caseId);
             intervenerOneWrapper.setIntervener1DateAdded(LocalDate.now());
         }

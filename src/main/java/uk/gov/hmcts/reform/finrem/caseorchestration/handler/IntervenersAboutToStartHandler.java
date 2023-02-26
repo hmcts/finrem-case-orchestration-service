@@ -31,6 +31,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerC
 @Service
 public class IntervenersAboutToStartHandler extends FinremCallbackHandler implements IntervenerHandler {
     private static final String DEFAULT = "not added to case yet.";
+
     public IntervenersAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
         super(finremCaseDetailsMapper);
     }
@@ -57,7 +58,7 @@ public class IntervenersAboutToStartHandler extends FinremCallbackHandler implem
                 + intervenerOneWrapper.getIntervener1Name();
             dynamicListElements.add(getDynamicRadioListElements(INTERVENER_ONE, label));
         } else {
-            dynamicListElements.add(getDynamicRadioListElements(INTERVENER_ONE, INTERVENER_ONE_LABEL+": "+DEFAULT));
+            dynamicListElements.add(getDynamicRadioListElements(INTERVENER_ONE, INTERVENER_ONE_LABEL + ": " + DEFAULT));
         }
 
         IntervenerTwoWrapper intervenerTwoWrapper = caseData.getIntervenerTwoWrapper();
@@ -66,7 +67,7 @@ public class IntervenersAboutToStartHandler extends FinremCallbackHandler implem
                 + intervenerTwoWrapper.getIntervener2Name();
             dynamicListElements.add(getDynamicRadioListElements(INTERVENER_TWO, label));
         } else {
-            dynamicListElements.add(getDynamicRadioListElements(INTERVENER_TWO, INTERVENER_TWO_LABEL+": "+DEFAULT));
+            dynamicListElements.add(getDynamicRadioListElements(INTERVENER_TWO, INTERVENER_TWO_LABEL + ": " + DEFAULT));
         }
 
         IntervenerThreeWrapper intervenerThreeWrapper = caseData.getIntervenerThreeWrapper();
@@ -75,7 +76,7 @@ public class IntervenersAboutToStartHandler extends FinremCallbackHandler implem
                 + intervenerThreeWrapper.getIntervener3Name();
             dynamicListElements.add(getDynamicRadioListElements(INTERVENER_THREE, label));
         } else {
-            dynamicListElements.add(getDynamicRadioListElements(INTERVENER_THREE, INTERVENER_THREE_LABEL +": "+DEFAULT));
+            dynamicListElements.add(getDynamicRadioListElements(INTERVENER_THREE, INTERVENER_THREE_LABEL + ": " + DEFAULT));
         }
 
         IntervenerFourWrapper intervenerFourWrapper = caseData.getIntervenerFourWrapper();
@@ -84,7 +85,7 @@ public class IntervenersAboutToStartHandler extends FinremCallbackHandler implem
                 + intervenerFourWrapper.getIntervener4Name();
             dynamicListElements.add(getDynamicRadioListElements(INTERVENER_FOUR, label));
         } else {
-            dynamicListElements.add(getDynamicRadioListElements(INTERVENER_FOUR, INTERVENER_FOUR_LABEL +": "+ DEFAULT));
+            dynamicListElements.add(getDynamicRadioListElements(INTERVENER_FOUR, INTERVENER_FOUR_LABEL + ": " + DEFAULT));
         }
 
         DynamicRadioList dynamicList = getDynamicRadioList(dynamicListElements);
