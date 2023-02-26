@@ -296,6 +296,8 @@ public class FinremCaseData {
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private GeneralOrderWrapper generalOrderWrapper;
+
+    private DynamicMultiSelectList intervenerDocuments;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private InterimWrapper interimWrapper;

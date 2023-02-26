@@ -11,6 +11,7 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public enum EventType {
 
+    MULTI_SELECT("multiSelectList"),
     SEND_ORDER("FR_sendOrder"),
     PREPARE_FOR_HEARING("FR_prepareForHearing"),
     UPLOAD_CASE_FILES("FR_uploadCaseFiles"),
