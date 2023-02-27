@@ -10,6 +10,7 @@ public class IntervenerConstant {
     public static final String INTERVENER_TWO = "intervener2";
     public static final String INTERVENER_THREE = "intervener3";
     public static final String INTERVENER_FOUR = "intervener4";
+    public static final String INTERVENER_INVALID = "intervener5";
 
     public static final String INTERVENER_ONE_LABEL = "Intervener 1";
     public static final String INTERVENER_TWO_LABEL = "Intervener 2";

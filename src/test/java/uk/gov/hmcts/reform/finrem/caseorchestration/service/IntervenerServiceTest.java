@@ -21,10 +21,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 
 import java.util.List;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_FOUR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_INVALID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_ONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_THREE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_TWO;
@@ -208,6 +210,23 @@ public class IntervenerServiceTest extends BaseServiceTest {
         assertNotNull(finremCaseData.getIntervenerFourWrapper().getIntervener4Organisation().getOrgPolicyCaseAssignedRole());
     }
 
+    @Test
+    public void givenCase_whenInvalidIntervenerReceived_thenThrowError() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+
+        DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_INVALID).build();
+        List<DynamicRadioListElement> list = List.of(option);
+        DynamicRadioList dynamicRadioList = DynamicRadioList.builder().listItems(list).build();
+        finremCaseData.setIntervenersList(dynamicRadioList);
+        DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_INVALID).build();
+        finremCaseData.getIntervenersList().setValue(option1);
+
+        assertThatThrownBy(() ->
+            service.setIntvenerDateAddedAndDefaultOrgIfNotRepresented(finremCaseData, 123L)
+        ).isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Invalid intervener selected");
+    }
 
     private FinremCallbackRequest buildCallbackRequest() {
         return FinremCallbackRequest
