@@ -37,7 +37,7 @@ public class CcdServiceTest {
     @Test
     public void givenCallback_WhenExecuteEvent_ThenCcdApiCalled() {
         when(coreCaseDataApi.startEventForCaseWorker(any(), any(), any(), any(), any(), any(), any()))
-            .thenReturn(StartEventResponse.builder().build());
+            .thenReturn(StartEventResponse.builder().caseDetails(buildCaseDetails()).build());
         when(systemUserService.getIdamToken(AUTH_TOKEN)).thenReturn(IdamToken.builder().build());
 
         ccdService.executeCcdEventOnCase(AUTH_TOKEN, buildCaseDetails(), EventType.CLOSE.getCcdType());
