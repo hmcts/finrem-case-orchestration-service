@@ -51,8 +51,7 @@ public class CcdService {
             caseTypeId,
             caseId.toString(),
             true,
-            getCaseDataContent(caseDetails.getData(), startEventResponse));
-
+            getCaseDataContent(startEventResponse.getCaseDetails().getData(), startEventResponse));
     }
 
     private CaseDataContent getCaseDataContent(Object caseData,
