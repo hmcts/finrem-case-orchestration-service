@@ -15,7 +15,7 @@ public enum JudgeType {
     HIS_HONOUR_JUDGE("His Honour Judge"),
     HER_HONOUR_JUDGE("Her Honour Judge"),
     RECORDER("Recorder"),
-    Proper_Officer_Of_The_Court("Proper Officer of the Court");
+    PROPER_OFFICER_OF_THE_COURT("Proper Officer of the Court");
 
     private final String value;
 
