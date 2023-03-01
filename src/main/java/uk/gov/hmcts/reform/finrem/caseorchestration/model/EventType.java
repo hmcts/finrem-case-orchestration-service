@@ -46,6 +46,7 @@ public enum EventType {
     READY_FOR_HEARING("FR_readyForHearing"),
 
     NOC_REQUEST("nocRequest"),
+    MANUAL_PAYMENT("FR_manualPayment"),
     @JsonEnumDefaultValue
     NONE("");
 
