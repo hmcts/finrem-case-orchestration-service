@@ -38,7 +38,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -57,6 +56,9 @@ public class HearingDocumentController extends BaseController {
     private final CaseDataService caseDataService;
     private final ObjectMapper objectMapper;
     private final CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
+
+    private List<String> nonFastTrackWarningsList = new ArrayList<>();
+    private List<String> fastTrackWarningsList = new ArrayList<>();
 
     @PostMapping(path = "/documents/hearing", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(summary = "Handles Form C and G generation. Serves as a callback from CCD")
@@ -96,17 +98,22 @@ public class HearingDocumentController extends BaseController {
             caseDetails.getData().putAll(hearingDocumentService.generateHearingDocuments(authorisationToken, caseDetails));
         }
 
-        List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
-
-        if (caseDataService.isContestedApplication(caseDetails)) {
+        List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails, fastTrackWarningsList, nonFastTrackWarningsList);
+        log.info("Hearing date warning {} Case ID: {}",warnings, caseDetails.getId());
+        if ((warnings.isEmpty() || fastTrackWarningsList.size() > 1 || nonFastTrackWarningsList.size() > 1)
+            && caseDataService.isContestedApplication(caseDetails)) {
             CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
             if (caseDetailsBefore != null && hearingDocumentService.alreadyHadFirstHearing(caseDetailsBefore)) {
                 log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
                 additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, caseDetails);
+                log.info("Sent Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
             } else {
                 log.info("Sending Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
                 hearingDocumentService.sendInitialHearingCorrespondence(caseDetails, authorisationToken);
+                log.info("sent Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
             }
+            fastTrackWarningsList = new ArrayList<>();
+            nonFastTrackWarningsList = new ArrayList<>();
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).warnings(warnings).build());
     }
@@ -151,7 +158,7 @@ public class HearingDocumentController extends BaseController {
                 .stream()
                 .filter(e -> (e.getDirectionDetailsCollection() != null && e.getDirectionDetailsCollection().getDateOfHearing() != null))
                 .sorted(Comparator.comparing(e -> e.getDirectionDetailsCollection().getDateOfHearing()))
-                .collect(Collectors.toList());
+                .toList();
             caseData.put(DIRECTION_DETAILS_COLLECTION_CT, sortedDirectionDetailsCollectionList);
         }
     }

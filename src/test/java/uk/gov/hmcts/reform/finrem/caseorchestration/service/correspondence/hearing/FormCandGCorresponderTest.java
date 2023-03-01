@@ -4,11 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -18,7 +20,7 @@ import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.pensionDocumentData;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.paymentDocumentCollection;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_A_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
@@ -31,6 +33,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class FormCandGCorresponderTest extends HearingCorrespondenceBaseTest {
 
     private ObjectMapper objectMapper = new ObjectMapper();
+    @Mock
+    private GenericDocumentService service;
 
     private static final String DATE_OF_HEARING = "2019-01-01";
 
@@ -39,7 +43,7 @@ public class FormCandGCorresponderTest extends HearingCorrespondenceBaseTest {
         caseDetails = caseDetails(NO_VALUE);
         applicantAndRespondentMultiLetterCorresponder =
             new FormCandGCorresponder(bulkPrintService, notificationService,
-                new DocumentHelper(objectMapper, new CaseDataService()), objectMapper);
+                new DocumentHelper(objectMapper, new CaseDataService(objectMapper), service), objectMapper);
     }
 
     @Test
@@ -53,7 +57,7 @@ public class FormCandGCorresponderTest extends HearingCorrespondenceBaseTest {
 
         caseData.put(FAST_TRACK_DECISION, isFastTrackDecision);
         caseData.put(HEARING_DATE, DATE_OF_HEARING);
-        caseData.put(FORM_A_COLLECTION, singletonList(pensionDocumentData()));
+        caseData.put(FORM_A_COLLECTION, singletonList(paymentDocumentCollection()));
         caseData.put(FORM_C, caseDocument());
         caseData.put(FORM_G, caseDocument());
         caseData.put(OUT_OF_FAMILY_COURT_RESOLUTION, caseDocument());

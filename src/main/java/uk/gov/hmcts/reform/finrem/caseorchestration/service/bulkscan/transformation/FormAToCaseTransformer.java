@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -76,7 +77,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         ocrToCCDMapping = formAExceptionRecordToCcdMap();
     }
 
-    private final CaseDataService caseDataService = new CaseDataService();
+    private final CaseDataService caseDataService = new CaseDataService(new ObjectMapper());
 
     private static Map<String, String> formAExceptionRecordToCcdMap() {
         Map<String, String> exceptionRecordToCcdFieldsMap = new HashMap<>();

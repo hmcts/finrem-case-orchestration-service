@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApplicantRepresent
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApplicantRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApplicationNotApproved;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApplicationNotApprovedCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AssignToJudgeReason;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AuthorisationSignedBy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BenefitPayment;
@@ -30,7 +31,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildrenInfoCollec
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Complexity;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentNatureOfApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderHolder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
@@ -161,6 +161,8 @@ public class FinremCaseDetailMapperTest {
     private static final String SOL_CONTEST_CALLBACK_REQUEST = "/fixtures/deserialisation/ccd-request-with-solicitor-contestApplicationIssued.json";
     private static final String BASIC_REQUEST = "/fixtures/deserialisation/basic-request.json";
 
+    private static final String GA_REQUEST = "/fixtures/deserialisation/ccd-request-with-general-application.json";
+
 
     private CaseDetails caseDetails;
     private ObjectMapper objectMapper;
@@ -193,6 +195,13 @@ public class FinremCaseDetailMapperTest {
     @Test
     public void givenGeneralOrderFixture_whenDeserializeFromString_thenSuccessfullyDeserialize() {
         caseDetails = buildCaseDetailsFromJson(CONTESTED_INTERIM_CALLBACK_REQUEST);
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        assertNotNull(finremCaseDetails);
+    }
+
+    @Test
+    public void givenGeneralApplicationFixture_whenDeserializeFromString_thenSuccessfullyDeserialize() {
+        caseDetails = buildCaseDetailsFromJson(GA_REQUEST);
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         assertNotNull(finremCaseDetails);
     }
@@ -251,7 +260,7 @@ public class FinremCaseDetailMapperTest {
             AmendedConsentOrderCollection.builder()
                 .value(AmendedConsentOrder.builder()
                     .amendedConsentOrder(getTestDocument())
-                    .amendedConsentOrderDate(convertToDateViaInstant(LocalDate.of(2020, 1, 2)))
+                    .amendedConsentOrderDate(LocalDate.of(2020, 1, 2))
                     .build())
                 .build());
         assertNotNull(caseData.getAmendedConsentOrderCollection());
@@ -303,14 +312,14 @@ public class FinremCaseDetailMapperTest {
     private void assertApprovedOrderCollection(FinremCaseData caseData) {
         List<ConsentOrderCollection> expected = List.of(
             ConsentOrderCollection.builder()
-                .value(ConsentOrderHolder.builder()
+                .approvedOrder(ApprovedOrder.builder()
                     .consentOrder(getTestDocument())
                     .orderLetter(getTestDocument())
                     .pensionDocuments(List.of(
                         PensionTypeCollection.builder()
-                            .value(PensionType.builder()
+                            .typedCaseDocument(PensionType.builder()
                                 .typeOfDocument(PensionDocumentType.FORM_PPF)
-                                .uploadedDocument(getTestDocument())
+                                .pensionDocument(getTestDocument())
                                 .build())
                             .build()
                     ))
@@ -697,8 +706,9 @@ public class FinremCaseDetailMapperTest {
     private void assertPensionCollection(FinremCaseData caseData) {
         List<PensionTypeCollection> expected = List.of(
             PensionTypeCollection.builder()
-                .value(PensionType.builder()
-                    .uploadedDocument(getTestDocument())
+                .id("1")
+                .typedCaseDocument(PensionType.builder()
+                    .pensionDocument(getTestDocument())
                     .typeOfDocument(PensionDocumentType.FORM_P1)
                     .build())
                 .build()
@@ -907,13 +917,13 @@ public class FinremCaseDetailMapperTest {
     private void assertConsentedNotApprovedOrders(FinremCaseData caseData) {
         List<ConsentOrderCollection> expected = List.of(
             ConsentOrderCollection.builder()
-                .value(ConsentOrderHolder.builder()
+                .approvedOrder(ApprovedOrder.builder()
                     .consentOrder(getTestDocument())
                     .orderLetter(getTestDocument())
                     .pensionDocuments(List.of(PensionTypeCollection.builder()
-                        .value(PensionType.builder()
+                        .typedCaseDocument(PensionType.builder()
                             .typeOfDocument(PensionDocumentType.FORM_P1)
-                            .uploadedDocument(getTestDocument())
+                            .pensionDocument(getTestDocument())
                             .build())
                         .build()))
                     .build())
@@ -925,13 +935,13 @@ public class FinremCaseDetailMapperTest {
     private void assertContestedConsentedApprovedOrders(FinremCaseData caseData) {
         List<ConsentOrderCollection> expected = List.of(
             ConsentOrderCollection.builder()
-                .value(ConsentOrderHolder.builder()
+                .approvedOrder(ApprovedOrder.builder()
                     .consentOrder(getTestDocument())
                     .orderLetter(getTestDocument())
                     .pensionDocuments(List.of(PensionTypeCollection.builder()
-                        .value(PensionType.builder()
+                        .typedCaseDocument(PensionType.builder()
                             .typeOfDocument(PensionDocumentType.FORM_P1)
-                            .uploadedDocument(getTestDocument())
+                            .pensionDocument(getTestDocument())
                             .build())
                         .build()))
                     .build())

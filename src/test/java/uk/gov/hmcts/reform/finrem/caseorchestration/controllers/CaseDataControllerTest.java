@@ -249,7 +249,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldSuccessfullyPopulateApplicantSolicitorAddressContested() {
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
 
         CallbackRequest callbackRequest = buildCallbackRequest();
@@ -260,18 +259,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldNotPopulateApplicantSolicitorAddressContested_toggledOff() {
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
-        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
-
-        caseDataController.setContestedDefaultValues(AUTH_TOKEN, buildCallbackRequest());
-
-        verifyNoInteractions(updateSolicitorDetailsService);
-    }
-
-    @Test
     public void shouldNotPopulateApplicantSolicitorAddressContested_notRepresented() {
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
 
         caseDataController.setContestedDefaultValues(AUTH_TOKEN, buildCallbackRequest());
@@ -281,7 +269,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldSuccessfullyPopulateApplicantSolicitorAddressConsented() {
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
 
         CallbackRequest callbackRequest = buildCallbackRequest();
@@ -292,18 +279,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldNotPopulateApplicantSolicitorAddressConsented_toggledOff() {
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
-        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
-
-        caseDataController.setConsentedDefaultValues(AUTH_TOKEN, buildCallbackRequest());
-
-        verifyNoInteractions(updateSolicitorDetailsService);
-    }
-
-    @Test
     public void shouldNotPopulateApplicantSolicitorAddressConsented_notRepresented() {
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
 
         caseDataController.setConsentedDefaultValues(AUTH_TOKEN, buildCallbackRequest());

@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultCou
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Court implements CourtListWrapper {
     private Region region;
     private RegionMidlandsFrc midlandsList;
@@ -26,6 +28,8 @@ public class Court implements CourtListWrapper {
     private RegionSouthEastFrc southEastList;
     private RegionSouthWestFrc southWestList;
     private RegionWalesFrc walesList;
+
+    private RegionHighCourtFrc highCourtList;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     DefaultCourtListWrapper courtListWrapper;
@@ -145,5 +149,11 @@ public class Court implements CourtListWrapper {
     @Override
     public NorthWalesCourt getNorthWalesCourt() {
         return getDefaultCourtListWrapper().getNorthWalesCourtList();
+    }
+
+    @JsonIgnore
+    @Override
+    public HighCourt getHighCourt() {
+        return getDefaultCourtListWrapper().getHighCourt();
     }
 }

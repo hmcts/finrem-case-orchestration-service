@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,6 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ConsentedHearingDataElement {
     @JsonProperty("hearingType")
     public String hearingType;
@@ -37,6 +39,8 @@ public class ConsentedHearingDataElement {
     public String southWestFRCList;
     @JsonProperty("walesFRCList")
     public String walesFRCList;
+    @JsonProperty("highCourtFRCList")
+    public String highCourtFRCList;
     @JsonProperty("nottinghamCourtList")
     public String nottinghamCourtList;
     @JsonProperty("cfcCourtList")
@@ -73,6 +77,8 @@ public class ConsentedHearingDataElement {
     public String swanseaCourtList;
     @JsonProperty("northWalesCourtList")
     public String northWalesCourtList;
+    @JsonProperty("highCourtList")
+    public String highCourtList;
     @JsonProperty("additionalInformationAboutHearing")
     public String additionalInformationAboutHearing;
     @JsonProperty("promptForAnyDocument")

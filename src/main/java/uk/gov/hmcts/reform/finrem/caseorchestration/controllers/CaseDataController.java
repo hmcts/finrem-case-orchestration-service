@@ -250,8 +250,7 @@ public class CaseDataController extends BaseController {
     }
 
     private void setApplicantSolicitorOrganisationDetails(CaseDetails caseDetails, String authToken) {
-        if (featureToggleService.isRespondentJourneyEnabled()
-            && caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())) {
+        if (caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())) {
             solicitorService.setApplicantSolicitorOrganisationDetails(authToken, caseDetails);
         }
     }
