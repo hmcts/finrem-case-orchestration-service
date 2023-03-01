@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseControllerTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.NotificationsController;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
@@ -47,6 +48,8 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
     private BulkPrintService bulkPrintService;
     @MockBean
     GenericDocumentService genericDocumentServiceMock;
+    @MockBean
+    private AssignCaseAccessService assignCaseAccessService;
     @Autowired
     private DocumentConfiguration documentConfiguration;
 
