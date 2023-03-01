@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
@@ -32,7 +33,7 @@ public class ContactDetailsMapper {
     }
 
     private static void setupContactDetailsForApplicant(Map<String, Object> transformedCaseData) {
-        CaseDataService caseDataService = new CaseDataService();
+        CaseDataService caseDataService = new CaseDataService(new ObjectMapper());
 
         if (caseDataService.isApplicantRepresentedByASolicitor(transformedCaseData)) {
             transformedCaseData.put(CcdFields.APPLICANT_SOLICITOR, transformedCaseData.get(CcdFields.APPLICANT));
@@ -47,7 +48,7 @@ public class ContactDetailsMapper {
     }
 
     private static void setupAddressForRespondent(Map<String, Object> transformedCaseData) {
-        CaseDataService caseDataService = new CaseDataService();
+        CaseDataService caseDataService = new CaseDataService(new ObjectMapper());
         if (caseDataService.isRespondentRepresentedByASolicitor(transformedCaseData)) {
             transformedCaseData.put(CcdFields.RESPONDENT_SOLICITOR, transformedCaseData.get(CcdFields.RESPONDENT));
             transformedCaseData.remove(CcdFields.RESPONDENT);

@@ -43,7 +43,7 @@ public class FormCandGCorresponderTest extends HearingCorrespondenceBaseTest {
         caseDetails = caseDetails(NO_VALUE);
         applicantAndRespondentMultiLetterCorresponder =
             new FormCandGCorresponder(bulkPrintService, notificationService,
-                new DocumentHelper(objectMapper, new CaseDataService(), service), objectMapper);
+                new DocumentHelper(objectMapper, new CaseDataService(objectMapper), service), objectMapper);
     }
 
     @Test

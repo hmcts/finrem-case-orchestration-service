@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.barristers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
@@ -23,7 +24,7 @@ public class ManageBarristerTestConfiguration {
 
     @Bean
     public CaseDataService caseDataService() {
-        return new CaseDataService();
+        return new CaseDataService(new ObjectMapper());
     }
 
     @MockBean
