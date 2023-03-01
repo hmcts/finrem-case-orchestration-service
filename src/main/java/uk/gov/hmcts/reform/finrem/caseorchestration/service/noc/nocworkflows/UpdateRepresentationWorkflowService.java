@@ -21,6 +21,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOC_PARTY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 
@@ -63,7 +64,6 @@ public class UpdateRepresentationWorkflowService {
     private boolean isNoOrganisationsToAddOrRemove(CaseDetails caseDetails) {
         ChangeOrganisationRequest changeRequest = new ObjectMapper().registerModule(new JavaTimeModule())
             .convertValue(caseDetails.getData().get(CHANGE_ORGANISATION_REQUEST), ChangeOrganisationRequest.class);
-
         return isOrganisationsEmpty(changeRequest);
     }
 
@@ -91,6 +91,16 @@ public class UpdateRepresentationWorkflowService {
         return addedIsEmpty && removedIsEmpty;
     }
 
+    public boolean isNoApplicantOrganisationPolicy(Map<String, Object> caseData) {
+        return caseData.get(APPLICANT_ORGANISATION_POLICY) == null
+            || caseData.get(ORGANISATION_POLICY_ROLE).toString() == null;
+    }
+
+    public boolean isNoRespondentOrganisationPolicy(Map<String, Object> caseData) {
+        return caseData.get(RESPONDENT_ORGANISATION_POLICY) == null
+            || caseData.get(ORGANISATION_POLICY_ROLE) == null;
+    }
+
     private void persistDefaultOrganisationPolicy(CaseDetails caseDetails) {
         final boolean isApplicant = ((String) caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
 
@@ -111,6 +121,22 @@ public class UpdateRepresentationWorkflowService {
 
     private void persistDefaultRespondentOrganisationPolicy(CaseDetails caseDetails) {
         caseDetails.getData().put(RESPONDENT_ORGANISATION_POLICY,
+            OrganisationPolicy.builder()
+                .orgPolicyReference(null)
+                .orgPolicyCaseAssignedRole(RESP_SOLICITOR_POLICY)
+                .build());
+    }
+
+    public void updateApplicantOrganisationPolicy(Map<String, Object> caseData) {
+        caseData.put(APPLICANT_ORGANISATION_POLICY,
+            OrganisationPolicy.builder()
+                .orgPolicyReference(null)
+                .orgPolicyCaseAssignedRole(APP_SOLICITOR_POLICY)
+                .build());
+    }
+
+    public void updateRespondentOrganisationPolicy(Map<String, Object> caseData) {
+        caseData.put(RESPONDENT_ORGANISATION_POLICY,
             OrganisationPolicy.builder()
                 .orgPolicyReference(null)
                 .orgPolicyCaseAssignedRole(RESP_SOLICITOR_POLICY)

@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
@@ -39,19 +38,12 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 
-import static java.util.Optional.ofNullable;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INCLUDES_REPRESENTATION_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INCLUDES_REPRESENTATIVE_UPDATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IS_NOC_REJECTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOC_PARTY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ROLE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 
 @RestController
 @Slf4j
@@ -547,17 +539,6 @@ public class NotificationsController extends BaseController {
         validateCaseData(callbackRequest);
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-
-        if (ofNullable(caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE)).isPresent()
-            && caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE)) {
-            if (isNoApplicantOrganisationPolicy(caseDetails)) {
-                updateApplicantOrganisationPolicy(caseDetails);
-            }
-            if (isNoRespondentOrganisationPolicy(caseDetails)) {
-                updateRespondentOrganisationPolicy(caseDetails);
-            }
-        }
-
         if (!requiresNotifications(callbackRequest)) {
             return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
         }
@@ -596,29 +577,5 @@ public class NotificationsController extends BaseController {
         return featureToggleService.isCaseworkerNoCEnabled()
             && Optional.ofNullable(caseData.get(INCLUDES_REPRESENTATIVE_UPDATE))
             .map(updateField -> updateField.equals(YES_VALUE)).orElse(false);
-    }
-
-    private boolean isNoApplicantOrganisationPolicy(CaseDetails caseDetails) {
-        return caseDetails.getData().get(APPLICANT_ORGANISATION_POLICY) == null || caseDetails.getData().get(ORGANISATION_POLICY_ROLE) == null;
-    }
-
-    private boolean isNoRespondentOrganisationPolicy(CaseDetails caseDetails) {
-        return caseDetails.getData().get(RESPONDENT_ORGANISATION_POLICY) == null || caseDetails.getData().get(ORGANISATION_POLICY_ROLE) == null;
-    }
-
-    private void updateApplicantOrganisationPolicy (CaseDetails caseDetails) {
-        caseDetails.getData().put(APPLICANT_ORGANISATION_POLICY,
-            OrganisationPolicy.builder()
-                .orgPolicyReference(null)
-                .orgPolicyCaseAssignedRole(APP_SOLICITOR_POLICY)
-                .build());
-    }
-
-    private void updateRespondentOrganisationPolicy (CaseDetails caseDetails) {
-        caseDetails.getData().put(RESPONDENT_ORGANISATION_POLICY,
-            OrganisationPolicy.builder()
-                .orgPolicyReference(null)
-                .orgPolicyCaseAssignedRole(RESP_SOLICITOR_POLICY)
-                .build());
     }
 }

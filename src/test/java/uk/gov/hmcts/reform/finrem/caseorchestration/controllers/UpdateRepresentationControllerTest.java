@@ -6,7 +6,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.stubbing.OngoingStubbing;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -34,11 +36,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 
-@WebMvcTest(UpdateRepresentationController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 public class UpdateRepresentationControllerTest extends BaseControllerTest {
 
     private static final String PATH = "/fixtures/noticeOfChange/";
+    private static final String CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON = "/fixtures/contested/validate-hearing-successfully.json";
     private static final String VALID_AUTH_TOKEN = AUTH_TOKEN;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -51,6 +57,9 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
 
     @MockBean
     private FeatureToggleService featureToggleService;
+
+    @Autowired
+    private UpdateRepresentationController updateRepresentationController;
 
     protected String updateEndpoint() {
         return "/case-orchestration/apply-noc-decision";
@@ -158,8 +167,9 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
 
     @Test
     public void givenCaseworkerNocEnabled_whenSettingDefaults_thenNullifyFields() throws Exception {
-        doRequestSetUp();
+
         when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(true);
+        loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
 
         mvc.perform(post(setDefaultsEndpoint())
                 .content(requestContent.toString())
@@ -172,7 +182,6 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
 
     @Test
     public void givenCaseWorkerNocNotEnabled_whenSettingDefaults_thenDoNothing() throws Exception {
-        doRequestSetUp();
         when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(false);
 
         mvc.perform(post(setDefaultsEndpoint())
@@ -182,5 +191,20 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.updateIncludesRepresentativeChange", is("Yes")))
             .andExpect(jsonPath("$.data.nocParty", is("applicant")));
+    }
+
+    @Test
+    public void givenValidData_whenUpdateContactDetails_thenShouldAddDefaultOrganisationPolicy() throws Exception {
+        when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(true);
+        loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
+
+        mvc.perform(post(setDefaultsEndpoint())
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy").exists())
+            .andExpect(jsonPath("$.data.RespondentOrganisationPolicy").exists())
+            .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy.OrgPolicyCaseAssignedRole", is(APP_SOLICITOR_POLICY)))
+            .andExpect(jsonPath("$.data.RespondentOrganisationPolicy.OrgPolicyCaseAssignedRole", is(RESP_SOLICITOR_POLICY)));
     }
 }

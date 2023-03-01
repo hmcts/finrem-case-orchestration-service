@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 import java.util.Map;
 
@@ -41,6 +42,9 @@ public class UpdateRepresentationController extends BaseController {
 
     @Autowired
     private FeatureToggleService featureToggleService;
+
+    @Autowired
+    private UpdateRepresentationWorkflowService nocWorkflowService;
 
     @PostMapping(path = "/apply-noc-decision", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Applies Notice of Change Decision when initiated by solicitor and saves new sol's details to case")
@@ -75,13 +79,20 @@ public class UpdateRepresentationController extends BaseController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setNocDefaults(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @RequestBody CallbackRequest ccdRequest) {
+        CaseDetails caseDetails = ccdRequest.getCaseDetails();
         log.info("Received request to set default values for Update Contact Details Event for case {}",
-            ccdRequest.getCaseDetails().getId());
+            caseDetails.getId());
 
-        Map<String, Object> caseData = ccdRequest.getCaseDetails().getData();
+        Map<String, Object> caseData = caseDetails.getData();
         validateCaseData(ccdRequest);
 
         if (featureToggleService.isCaseworkerNoCEnabled()) {
+            if (nocWorkflowService.isNoApplicantOrganisationPolicy(caseData)) {
+                nocWorkflowService.updateApplicantOrganisationPolicy(caseData);
+            }
+            if (nocWorkflowService.isNoRespondentOrganisationPolicy(caseData)) {
+                nocWorkflowService.updateRespondentOrganisationPolicy(caseData);
+            }
             caseData.put(NOC_PARTY, null);
             caseData.put(INCLUDES_REPRESENTATIVE_UPDATE, null);
         }
