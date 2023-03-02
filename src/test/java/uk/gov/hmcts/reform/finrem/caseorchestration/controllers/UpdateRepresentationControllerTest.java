@@ -44,7 +44,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class UpdateRepresentationControllerTest extends BaseControllerTest {
 
     private static final String PATH = "/fixtures/noticeOfChange/";
-    private static final String CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON = "/fixtures/contested/validate-hearing-successfully.json";
+    private static final String NO_ORG_POLICIES_JSON = "no-org-policies.json";
     private static final String VALID_AUTH_TOKEN = AUTH_TOKEN;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -169,7 +169,7 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
     public void givenCaseworkerNocEnabled_whenSettingDefaults_thenNullifyFields() throws Exception {
 
         when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(true);
-        loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
+        loadRequestContentWith(PATH + NO_ORG_POLICIES_JSON);
 
         mvc.perform(post(setDefaultsEndpoint())
                 .content(requestContent.toString())
@@ -197,7 +197,7 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
     @Test
     public void givenValidData_whenUpdateContactDetails_thenShouldAddDefaultOrganisationPolicy() throws Exception {
         when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(true);
-        loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
+        loadRequestContentWith(PATH + NO_ORG_POLICIES_JSON);
 
         mvc.perform(post(setDefaultsEndpoint())
                 .content(requestContent.toString())

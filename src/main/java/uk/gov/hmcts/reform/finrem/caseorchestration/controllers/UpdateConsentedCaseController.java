@@ -220,6 +220,7 @@ public class UpdateConsentedCaseController extends BaseController {
         caseData.put("natureOfApplication3b", null);
     }
 
+
     private void updateApplicantOrSolicitorContactDetails(Map<String, Object> caseData) {
         Optional<Object> applicantRepresented = ofNullable(caseData.get(APPLICANT_REPRESENTED));
         if (equalsTo(Objects.toString(applicantRepresented.orElse("No")), "No")) {
@@ -228,6 +229,7 @@ public class UpdateConsentedCaseController extends BaseController {
             removeApplicantAddress(caseData);
         }
     }
+
 
     private void removeApplicantAddress(Map<String, Object> caseData) {
         caseData.put(APPLICANT_ADDRESS, null);

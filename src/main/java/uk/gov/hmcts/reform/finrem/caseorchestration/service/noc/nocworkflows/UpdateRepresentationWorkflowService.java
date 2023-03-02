@@ -93,7 +93,7 @@ public class UpdateRepresentationWorkflowService {
 
     public boolean isNoApplicantOrganisationPolicy(Map<String, Object> caseData) {
         return caseData.get(APPLICANT_ORGANISATION_POLICY) == null
-            || caseData.get(ORGANISATION_POLICY_ROLE).toString() == null;
+            || caseData.get(ORGANISATION_POLICY_ROLE) == null;
     }
 
     public boolean isNoRespondentOrganisationPolicy(Map<String, Object> caseData) {
