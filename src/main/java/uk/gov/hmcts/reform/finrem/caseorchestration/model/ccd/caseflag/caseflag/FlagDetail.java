@@ -29,7 +29,7 @@ public class FlagDetail {
     @JsonProperty("otherDescription")
     private String otherDescription;
     @JsonProperty("flagComment")
-    private boolean flagComment;
+    private String flagComment;
     @JsonProperty("dateTimeModified")
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime dateTimeModified;
@@ -37,7 +37,7 @@ public class FlagDetail {
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime dateTimeCreated;
     @JsonProperty("path")
-    private List<String> path;
+    private List<PathValue> path;
     @JsonProperty("hearingRelevant")
     private String hearingRelevant;
     @JsonProperty("flagCode")
