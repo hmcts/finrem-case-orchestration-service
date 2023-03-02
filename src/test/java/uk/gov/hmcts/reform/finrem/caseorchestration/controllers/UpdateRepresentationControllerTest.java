@@ -182,6 +182,7 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
 
     @Test
     public void givenCaseWorkerNocNotEnabled_whenSettingDefaults_thenDoNothing() throws Exception {
+        doRequestSetUp();
         when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(false);
 
         mvc.perform(post(setDefaultsEndpoint())
