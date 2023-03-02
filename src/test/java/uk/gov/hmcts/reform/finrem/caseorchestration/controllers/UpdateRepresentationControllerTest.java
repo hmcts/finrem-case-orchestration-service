@@ -167,7 +167,6 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
 
     @Test
     public void givenCaseworkerNocEnabled_whenSettingDefaults_thenNullifyFields() throws Exception {
-
         when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(true);
         loadRequestContentWith(PATH + NO_ORG_POLICIES_JSON);
 
