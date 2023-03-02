@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -37,10 +36,11 @@ public class ValidateHearingService {
         String fastTrackDecision = Objects.toString(caseData.get(FAST_TRACK_DECISION), "");
 
         return Stream.of(issueDate, hearingDate, fastTrackDecision).anyMatch(StringUtils::isBlank)
-            ? ImmutableList.of(REQUIRED_FIELD_EMPTY_ERROR) : ImmutableList.of();
+            ? List.of(REQUIRED_FIELD_EMPTY_ERROR) : List.of();
     }
 
-    public List<String> validateHearingWarnings(CaseDetails caseDetails) {
+    public List<String> validateHearingWarnings(CaseDetails caseDetails, List<String> fastTrackWarningsList,
+                                                List<String>  nonFastTrackWarningsList) {
         Map<String, Object> caseData = caseDetails.getData();
         String issueDate = Objects.toString(caseData.get(ISSUE_DATE), "");
         String hearingDate = Objects.toString(caseData.get(HEARING_DATE), "");
@@ -52,12 +52,14 @@ public class ValidateHearingService {
         if (fastTrackApplication) {
             if (!isDateInBetweenIncludingEndPoints(issueLocalDate.plusWeeks(6), issueLocalDate.plusWeeks(10),
                 hearingLocalDate)) {
-                return ImmutableList.of(DATE_BETWEEN_6_AND_10_WEEKS);
+                fastTrackWarningsList.add(DATE_BETWEEN_6_AND_10_WEEKS);
+                return fastTrackWarningsList;
             }
         } else if (!isDateInBetweenIncludingEndPoints(issueLocalDate.plusWeeks(12), issueLocalDate.plusWeeks(16),
             hearingLocalDate)) {
-            return ImmutableList.of(DATE_BETWEEN_12_AND_16_WEEKS);
+            nonFastTrackWarningsList.add(DATE_BETWEEN_12_AND_16_WEEKS);
+            return nonFastTrackWarningsList;
         }
-        return ImmutableList.of();
+        return List.of();
     }
 }

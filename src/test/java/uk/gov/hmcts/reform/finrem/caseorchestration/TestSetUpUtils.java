@@ -19,6 +19,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionDocumentType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
@@ -66,6 +69,7 @@ public class TestSetUpUtils {
     public static final String DOC_URL = "http://dm-store/lhjbyuivu87y989hijbb";
     public static final String BINARY_URL = DOC_URL + "/binary";
     public static final String FILE_NAME = "app_docs.pdf";
+    public static final String DOC_FILE_NAME = "app_docs.docx";
     public static final String VARIATION_FILE_NAME = "ApprovedVariationOrderLetter.pdf";
     public static final String INTE_DOC_URL = "http://dm-store/documents/e9ca7c4a-1f75-4b46-b0dc-744abc2dc0d3";
     public static final String INTE_BINARY_URL = INTE_DOC_URL + "/binary";
@@ -176,6 +180,20 @@ public class TestSetUpUtils {
         caseDocument.setDocumentBinaryUrl(binaryUrl);
 
         return caseDocument;
+    }
+
+    public static PaymentDocument paymentDocument() {
+        PaymentDocument document = new PaymentDocument();
+        document.setUploadedDocument(caseDocument());
+        document.setTypeOfDocument(PaymentDocumentType.COPY_OF_PAPER_FORM_A);
+
+        return document;
+    }
+
+    public static PaymentDocumentCollection paymentDocumentCollection() {
+        PaymentDocumentCollection collection = new PaymentDocumentCollection();
+        collection.setValue(paymentDocument());
+        return collection;
     }
 
     public static PensionType pensionDocument() {
