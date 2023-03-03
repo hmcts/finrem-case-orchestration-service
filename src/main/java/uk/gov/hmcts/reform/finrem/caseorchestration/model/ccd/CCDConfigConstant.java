@@ -538,6 +538,7 @@ public class CCDConfigConstant {
 
     //Get user based on role i.e applicant or respondent
     public static final String CASE_ROLE = "currentUserCaseRole";
+    public static final String CASE_ROLE_FOR_FIELD_SHOW = "currentUserCaseRoleLabel";
 
     //Interim FRC List Names
     public static final String INTERIM_HEARING_PREFIX = "interim_";
@@ -620,6 +621,7 @@ public class CCDConfigConstant {
     public static final String APPLICANT_BARRISTER_ROLE = "[APPBARRISTER]";
     public static final String RESPONDENT_BARRISTER_ROLE = "[RESPBARRISTER]";
     public static final String CASEWORKER_ROLE = "[CASEWORKER]";
+    public static final String CASEWORKER_ROLE_FIELD_SHOW_LABEL = "CASEWORKER";
     public static final String MANAGE_BARRISTER_PARTY = "barristerParty";
     public static final String MANAGE_BARRISTERS = "Manage Barristers";
 
