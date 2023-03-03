@@ -18,7 +18,6 @@ def versions = [
         bspCommonLib         : '0.0.51',
         ccdClient            : '4.8.6',
         commonsIo            : '2.7',
-        commonsFU            : '1.5',
         commonsLang3         : '3.11',
         junit                : '4.13.1',
         lombok               : '1.18.22',
@@ -323,7 +322,6 @@ dependencies {
     implementation group: 'com.sun.xml.bind', name: 'jaxb-osgi', version: versions.jaxbOsgi
     implementation group: 'com.jayway.jsonpath', name: 'json-path-assert', version: versions.jsonPathAssert
     implementation group: 'commons-io', name: 'commons-io', version: versions.commonsIo
-    implementation group: 'commons-fileupload', name: 'commons-fileupload', versions.commonsFU
     implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: versions.springDoc
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
     implementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
