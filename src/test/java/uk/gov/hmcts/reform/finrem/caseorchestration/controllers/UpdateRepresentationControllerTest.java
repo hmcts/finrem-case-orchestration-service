@@ -3,8 +3,11 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InjectMocks;
 import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -17,16 +20,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUser
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -60,6 +66,9 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
 
     @Autowired
     private UpdateRepresentationController updateRepresentationController;
+
+    @InjectMocks
+    private UpdateRepresentationWorkflowService updateRepresentationWorkflowService;
 
     protected String updateEndpoint() {
         return "/case-orchestration/apply-noc-decision";
@@ -195,8 +204,16 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
 
     @Test
     public void givenValidData_whenUpdateContactDetails_thenShouldAddDefaultOrganisationPolicy() throws Exception {
+
+        InputStream resourceAsStream = getClass().getResourceAsStream(PATH + NO_ORG_POLICIES_JSON);
+        DocumentContext documentContext = JsonPath.parse(resourceAsStream);
+        HashMap<String, Object> caseData = documentContext.read("$.case_details.case_data");
+
         when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(true);
         loadRequestContentWith(PATH + NO_ORG_POLICIES_JSON);
+
+        assertEquals(updateRepresentationWorkflowService.isNoApplicantOrganisationPolicy(caseData), true);
+        assertEquals(updateRepresentationWorkflowService.isNoRespondentOrganisationPolicy(caseData), true);
 
         mvc.perform(post(setDefaultsEndpoint())
                 .content(requestContent.toString())
