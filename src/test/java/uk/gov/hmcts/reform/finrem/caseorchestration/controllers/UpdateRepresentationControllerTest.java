@@ -3,8 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.jayway.jsonpath.DocumentContext;
-import com.jayway.jsonpath.JsonPath;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -26,13 +24,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -42,10 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ROLE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 
 @SpringBootTest
@@ -207,19 +200,8 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
 
     @Test
     public void givenValidData_whenUpdateContactDetails_thenShouldAddDefaultOrganisationPolicy() throws Exception {
-
-        InputStream resourceAsStream = getClass().getResourceAsStream(PATH + NO_ORG_POLICIES_JSON);
-        DocumentContext documentContext = JsonPath.parse(resourceAsStream);
-        HashMap<String, Object> caseData = documentContext.read("$.case_details.case_data");
-
         when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(true);
         loadRequestContentWith(PATH + NO_ORG_POLICIES_JSON);
-
-        assertEquals(updateRepresentationWorkflowService.isNoApplicantOrganisationPolicy(caseData), true);
-        assertEquals(updateRepresentationWorkflowService.isNoRespondentOrganisationPolicy(caseData), true);
-        assertEquals(caseData.get(APPLICANT_ORGANISATION_POLICY), null);
-        assertEquals(caseData.get(RESPONDENT_ORGANISATION_POLICY), null);
-        assertEquals(caseData.get(ORGANISATION_POLICY_ROLE), null);
 
         mvc.perform(post(setDefaultsEndpoint())
                 .content(requestContent.toString())

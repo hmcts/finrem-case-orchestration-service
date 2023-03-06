@@ -32,6 +32,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOC_PARTY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UpdateRepresentationWorkflowServiceTest {
@@ -85,9 +86,23 @@ public class UpdateRepresentationWorkflowServiceTest {
     }
 
     @Test
-    public void givenChangeRequestWithUnpopulatedOrg_whenHandleWorkflow_thenNoCallToAssignCaseAccessService() {
+    public void givenChangeRequestWithUnpopulatedOrg_whenHandleWorkflowApplicant_thenNoCallToAssignCaseAccessService() {
         setNoOrgsChangeOrganisationRequest();
         caseDetails.getData().put(NOC_PARTY, APPLICANT);
+        when(noticeOfChangeService.updateRepresentation(caseDetails, AUTH_TOKEN, caseDetails))
+            .thenReturn(caseDetails.getData());
+
+        AboutToStartOrSubmitCallbackResponse actualResponse = updateRepresentationWorkflowService
+            .handleNoticeOfChangeWorkflow(caseDetails, AUTH_TOKEN, caseDetails);
+
+        verify(assignCaseAccessService, never()).applyDecision(AUTH_TOKEN, caseDetails);
+        assertEquals(getChangeOrganisationRequest(actualResponse.getData()), getDefaultChangeRequest());
+    }
+
+    @Test
+    public void givenChangeRequestWithUnpopulatedOrg_whenHandleWorkflowRespondent_thenNoCallToAssignCaseAccessService() {
+        setNoOrgsChangeOrganisationRequest();
+        caseDetails.getData().put(NOC_PARTY, RESPONDENT);
         when(noticeOfChangeService.updateRepresentation(caseDetails, AUTH_TOKEN, caseDetails))
             .thenReturn(caseDetails.getData());
 
