@@ -24,7 +24,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASEWORKER_ROLE_FIELD_SHOW_LABEL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ROLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ROLE_FOR_FIELD_SHOW;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdServiceTest.AUTH_TOKEN;
 
@@ -97,8 +99,10 @@ public class ManageBarristerAboutToStartHandlerTest {
 
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>>
             response = manageBarristerAboutToStartHandler.handle(callbackRequest, AUTH_TOKEN);
-
+        String expected = APP_SOLICITOR_POLICY
+            .replace("[", "").replace("]","");
         assertThat(response.getData().get(CASE_ROLE), is(APP_SOLICITOR_POLICY));
+        assertThat(response.getData().get(CASE_ROLE_FOR_FIELD_SHOW), is(expected));
     }
 
     @Test
@@ -109,7 +113,10 @@ public class ManageBarristerAboutToStartHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>>
             response = manageBarristerAboutToStartHandler.handle(callbackRequest, AUTH_TOKEN);
 
+        String expected = RESP_SOLICITOR_POLICY
+            .replace("[", "").replace("]","");
         assertThat(response.getData().get(CASE_ROLE), is(RESP_SOLICITOR_POLICY));
+        assertThat(response.getData().get(CASE_ROLE_FOR_FIELD_SHOW), is(expected));
     }
 
     @Test
@@ -121,6 +128,7 @@ public class ManageBarristerAboutToStartHandlerTest {
             response = manageBarristerAboutToStartHandler.handle(callbackRequest, AUTH_TOKEN);
 
         assertThat(response.getData().get(CASE_ROLE), is(CASEWORKER_POLICY));
+        assertThat(response.getData().get(CASE_ROLE_FOR_FIELD_SHOW), is(CASEWORKER_ROLE_FIELD_SHOW_LABEL));
     }
 
     private CaseAssignedUserRolesResource getCaseAssignedUserRolesResource(String caseRole) {
