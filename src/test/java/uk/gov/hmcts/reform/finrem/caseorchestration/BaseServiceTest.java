@@ -197,6 +197,10 @@ public abstract class BaseServiceTest extends BaseTest {
 
     protected FinremCallbackRequest getConsentedNewCallbackRequest() {
         FinremCaseData caseData = new FinremCaseData();
+        caseData.getContactDetailsWrapper().setAppRespondentFmName("David");
+        caseData.getContactDetailsWrapper().setAppRespondentLName("Goodman");
+        caseData.getContactDetailsWrapper().setApplicantFmName("Victoria");
+        caseData.getContactDetailsWrapper().setApplicantLname("Goodman");
         caseData.getContactDetailsWrapper().setSolicitorEmail(TEST_SOLICITOR_EMAIL);
         caseData.getContactDetailsWrapper().setSolicitorName(TEST_SOLICITOR_NAME);
         caseData.getContactDetailsWrapper().setSolicitorReference(TEST_SOLICITOR_REFERENCE);
@@ -250,6 +254,8 @@ public abstract class BaseServiceTest extends BaseTest {
 
     protected FinremCallbackRequest getContestedNewCallbackRequest() {
         FinremCaseData caseData = getFinremCaseData();
+        caseData.getContactDetailsWrapper().setRespondentFmName("David");
+        caseData.getContactDetailsWrapper().setRespondentLname("Goodman");
         caseData.setCcdCaseType(CaseType.CONTESTED);
         return FinremCallbackRequest.builder()
             .caseDetails(FinremCaseDetails.builder()
@@ -281,6 +287,8 @@ public abstract class BaseServiceTest extends BaseTest {
 
     private FinremCaseData getFinremCaseData() {
         FinremCaseData caseData = new FinremCaseData();
+        caseData.getContactDetailsWrapper().setApplicantFmName("Victoria");
+        caseData.getContactDetailsWrapper().setApplicantLname("Goodman");
         caseData.getContactDetailsWrapper().setApplicantSolicitorEmail(TEST_SOLICITOR_EMAIL);
         caseData.getContactDetailsWrapper().setApplicantSolicitorName(TEST_SOLICITOR_NAME);
         caseData.getContactDetailsWrapper().setRespondentSolicitorEmail(TEST_RESP_SOLICITOR_EMAIL);

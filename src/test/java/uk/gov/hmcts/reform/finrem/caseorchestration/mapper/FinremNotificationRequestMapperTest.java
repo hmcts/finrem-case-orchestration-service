@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingTypeDirection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpdate;
@@ -33,8 +34,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.finrem
 public class FinremNotificationRequestMapperTest extends BaseServiceTest {
 
     private static final String TEST_JSON = "/fixtures/contested/interim-hearing-two-collection.json";
-
     protected static final String EMPTY_STRING = "";
+
     @Autowired
     FinremNotificationRequestMapper notificationRequestMapper;
 
@@ -51,6 +52,63 @@ public class FinremNotificationRequestMapperTest extends BaseServiceTest {
         assertEquals("consented", notificationRequest.getCaseType());
         assertEquals("consent", notificationRequest.getCaseOrderType());
         assertEquals("Consent", notificationRequest.getCamelCaseOrderType());
+        assertEquals("David Goodman", notificationRequest.getRespondentName());
+        assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
+    }
+
+
+    @Test
+    public void shouldReturnEmptyStringForSolicitorReferenceWhenNotProvided() {
+        FinremCaseDetails caseDetails = getContestedNewCallbackRequest().getCaseDetails();
+        caseDetails.getData().getContactDetailsWrapper().setSolicitorReference(null);
+        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(
+            caseDetails);
+
+        assertEquals("12345", notificationRequest.getCaseReferenceNumber());
+        assertEquals(EMPTY_STRING, notificationRequest.getSolicitorReferenceNumber());
+        assertEquals(TEST_DIVORCE_CASE_NUMBER, notificationRequest.getDivorceCaseNumber());
+        assertEquals(TEST_SOLICITOR_NAME, notificationRequest.getName());
+        assertEquals(TEST_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
+        assertEquals("contested", notificationRequest.getCaseType());
+        assertEquals("David Goodman", notificationRequest.getRespondentName());
+        assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
+    }
+
+    @Test
+    public void shouldReturnHearingTypeForPrepareForHearingContestedEventInvoke() {
+        FinremCaseDetails caseDetails = getContestedNewCallbackRequest().getCaseDetails();
+        caseDetails.getData().setHearingType(HearingTypeDirection.FDA);
+        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(
+            caseDetails);
+
+        assertEquals("12345", notificationRequest.getCaseReferenceNumber());
+        assertEquals("RG-123456789", notificationRequest.getSolicitorReferenceNumber());
+        assertEquals(TEST_DIVORCE_CASE_NUMBER, notificationRequest.getDivorceCaseNumber());
+        assertEquals(TEST_SOLICITOR_NAME, notificationRequest.getName());
+        assertEquals(TEST_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
+        assertEquals("contested", notificationRequest.getCaseType());
+        assertEquals("David Goodman", notificationRequest.getRespondentName());
+        assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
+        assertEquals("First Directions Appointment (FDA)", notificationRequest.getHearingType());
+    }
+
+
+    @Test
+    public void shouldCreateNotificationRequestForAppSolicitorForContestedJourney() {
+        FinremCaseDetails caseDetails = getContestedNewCallbackRequest().getCaseDetails();
+
+        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(
+            caseDetails);
+
+        assertEquals("12345", notificationRequest.getCaseReferenceNumber());
+        assertEquals(TEST_SOLICITOR_REFERENCE, notificationRequest.getSolicitorReferenceNumber());
+        assertEquals(TEST_DIVORCE_CASE_NUMBER, notificationRequest.getDivorceCaseNumber());
+        assertEquals(TEST_SOLICITOR_NAME, notificationRequest.getName());
+        assertEquals(TEST_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
+        assertEquals("contested", notificationRequest.getCaseType());
+        assertEquals("nottingham", notificationRequest.getSelectedCourt());
+        assertEquals("David Goodman", notificationRequest.getRespondentName());
+        assertEquals("Victoria Goodman", notificationRequest.getApplicantName());
     }
 
     @Test
