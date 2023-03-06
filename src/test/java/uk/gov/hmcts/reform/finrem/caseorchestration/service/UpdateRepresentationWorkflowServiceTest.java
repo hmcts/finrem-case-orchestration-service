@@ -29,10 +29,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOC_PARTY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UpdateRepresentationWorkflowServiceTest {
@@ -83,6 +86,15 @@ public class UpdateRepresentationWorkflowServiceTest {
 
         verify(assignCaseAccessService, times(1)).applyDecision(AUTH_TOKEN, caseDetails);
         assertEquals(getChangeOrganisationRequest(response.getData()), getDefaultChangeRequest());
+    }
+
+    @Test
+    public void checkIfExistingOrganisationPolicy() {
+        defaultChangeDetails.getData().put(APPLICANT_ORGANISATION_POLICY, null);
+        defaultChangeDetails.getData().put(RESPONDENT_ORGANISATION_POLICY, null);
+        defaultChangeDetails.getData().put(ORGANISATION_POLICY_ROLE, null);
+        assertEquals(updateRepresentationWorkflowService.isNoApplicantOrganisationPolicy(defaultChangeDetails.getData()), true);
+        assertEquals(updateRepresentationWorkflowService.isNoRespondentOrganisationPolicy(defaultChangeDetails.getData()), true);
     }
 
     @Test
