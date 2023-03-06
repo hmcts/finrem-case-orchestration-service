@@ -68,4 +68,11 @@
         <packageUrl regex="true">^(?!pkg:maven/org\.json/json@).+$</packageUrl>
         <cpe>cpe:/a:json-java_project:json-java</cpe>
     </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: commons-fileupload-1.4.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/commons\-fileupload/commons\-fileupload@.*$</packageUrl>
+        <cve>CVE-2023-24998</cve>
+    </suppress>
 </suppressions>
