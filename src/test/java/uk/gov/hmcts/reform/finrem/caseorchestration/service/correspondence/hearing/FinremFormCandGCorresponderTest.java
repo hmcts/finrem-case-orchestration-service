@@ -41,7 +41,7 @@ public class FinremFormCandGCorresponderTest extends FinremHearingCorrespondence
         caseDetails = caseDetails(NO_VALUE);
         applicantAndRespondentMultiLetterCorresponder =
             new FinremFormCandGCorresponder(bulkPrintService, notificationService,
-                new DocumentHelper(objectMapper, new CaseDataService(), genericDocumentService, finremCaseDetailsMapper), objectMapper);
+                new DocumentHelper(objectMapper, new CaseDataService(objectMapper), genericDocumentService, finremCaseDetailsMapper), objectMapper);
     }
 
     @Test
