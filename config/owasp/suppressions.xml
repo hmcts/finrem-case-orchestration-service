@@ -193,4 +193,7 @@
         <packageUrl regex="true">^(?!pkg:maven/org\.json/json@).+$</packageUrl>
         <cpe>cpe:/a:json-java_project:json-java</cpe>
     </suppress>
+    <suppress>
+        <cve>CVE-2023-24998</cve>
+    </suppress>
 </suppressions>
