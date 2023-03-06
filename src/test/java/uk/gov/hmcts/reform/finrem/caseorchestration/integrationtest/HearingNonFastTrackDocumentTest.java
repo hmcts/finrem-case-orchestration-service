@@ -122,6 +122,8 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
     @Before
     public void setUp() throws IOException {
         request = objectMapper.readValue(requestJson, CallbackRequest.class);
+        request.getCaseDetails().getData().put("hearingDate", LocalDate.now().plusDays(100));
+        request.getCaseDetails().getData().put("issueDate", LocalDate.now());
     }
 
     @Test
@@ -155,6 +157,7 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
             if (requestsMade > 0) {
                 Thread.sleep(100);
             }
+
             mvcResult = webClient.perform(MockMvcRequestBuilders.post(API_URL)
                 .content(objectMapper.writeValueAsString(request))
                 .header(AUTHORIZATION, AUTH_TOKEN)
