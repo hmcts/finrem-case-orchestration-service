@@ -1347,7 +1347,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().build();
         notificationService.sendBarristerAddedEmail(caseDetails, barrister);
         verify(notificationServiceConfiguration).getAddedBarrister();
-        verify(notificationRequestMapper).buildNotificationRequest(caseDetails, barrister);
+        verify(notificationRequestMapper).buildInterimHearingNotificationRequest(caseDetails, barrister);
     }
 
     @Test
@@ -1356,7 +1356,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().build();
         notificationService.sendBarristerRemovedEmail(caseDetails, barrister);
         verify(notificationServiceConfiguration).getRemovedBarrister();
-        verify(notificationRequestMapper).buildNotificationRequest(caseDetails, barrister);
+        verify(notificationRequestMapper).buildInterimHearingNotificationRequest(caseDetails, barrister);
     }
 
     @Test

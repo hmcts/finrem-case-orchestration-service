@@ -548,7 +548,14 @@ public class NotificationService {
             interimHearingData));
     }
 
+    @Deprecated
     public void sendConsentHearingNotificationEmailToApplicantSolicitor(CaseDetails caseDetails,
+                                                                        Map<String, Object> hearingData) {
+        sendConsentedHearingNotificationEmail(notificationRequestMapper.getNotificationRequestForConsentApplicantSolicitor(caseDetails,
+            hearingData));
+    }
+
+    public void sendConsentHearingNotificationEmailToApplicantSolicitor(FinremCaseDetails caseDetails,
                                                                         Map<String, Object> hearingData) {
         sendConsentedHearingNotificationEmail(notificationRequestMapper.getNotificationRequestForConsentApplicantSolicitor(caseDetails,
             hearingData));
@@ -559,11 +566,19 @@ public class NotificationService {
         sendNotificationEmail(notificationRequest, uri);
     }
 
+    @Deprecated
     public void sendConsentHearingNotificationEmailToRespondentSolicitor(CaseDetails caseDetails,
                                                                          Map<String, Object> hearingData) {
         sendConsentedHearingNotificationEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails,
             hearingData));
     }
+
+    public void sendConsentHearingNotificationEmailToRespondentSolicitor(FinremCaseDetails caseDetails,
+                                                                         Map<String, Object> hearingData) {
+        sendConsentedHearingNotificationEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails,
+            hearingData));
+    }
+
 
     @Deprecated
     public void sendInterimNotificationEmailToApplicantSolicitor(CaseDetails caseDetails) {
@@ -690,7 +705,7 @@ public class NotificationService {
     @Deprecated
     public void sendBarristerAddedEmail(CaseDetails caseDetails, Barrister barrister) {
         URI uri = buildUri(notificationServiceConfiguration.getAddedBarrister());
-        NotificationRequest notificationRequest = notificationRequestMapper.buildNotificationRequest(caseDetails, barrister);
+        NotificationRequest notificationRequest = notificationRequestMapper.buildInterimHearingNotificationRequest(caseDetails, barrister);
         sendNotificationEmail(notificationRequest, uri);
     }
 
@@ -703,7 +718,7 @@ public class NotificationService {
     @Deprecated
     public void sendBarristerRemovedEmail(CaseDetails caseDetails, Barrister barrister) {
         URI uri = buildUri(notificationServiceConfiguration.getRemovedBarrister());
-        NotificationRequest notificationRequest = notificationRequestMapper.buildNotificationRequest(caseDetails, barrister);
+        NotificationRequest notificationRequest = notificationRequestMapper.buildInterimHearingNotificationRequest(caseDetails, barrister);
         sendNotificationEmail(notificationRequest, uri);
     }
 

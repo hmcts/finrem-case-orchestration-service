@@ -17,14 +17,10 @@ import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftDirectionWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralLetterWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralOrderWrapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureApplicationWrapper;
@@ -36,7 +32,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCase
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -53,8 +48,6 @@ public class FinremCaseData {
     @JsonProperty(access = WRITE_ONLY)
     private String ccdCaseId;
 
-    @JsonIgnore
-    private CaseType ccdCaseType;
     private String divorceCaseNumber;
     private StageReached divorceStageReached;
     private CaseDocument divorceUploadEvidence1;
@@ -278,6 +271,7 @@ public class FinremCaseData {
     @JsonProperty("RespondentOrganisationPolicy")
     private OrganisationPolicy respondentOrganisationPolicy;
     private CaseRole currentUserCaseRole;
+    private CaseRole currentUserCaseRoleLabel;
     private CaseDocument outOfFamilyCourtResolution;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
@@ -481,22 +475,8 @@ public class FinremCaseData {
     }
 
     @JsonIgnore
-    public String getRespondentFullName() {
-        return CaseType.CONTESTED.equals(ccdCaseType)
-            ? getFullRespondentNameContested()
-            : getFullRespondentNameConsented();
-    }
-
-    @JsonIgnore
     public boolean isApplicantRepresentedByASolicitor() {
         return YesOrNo.YES.equals(getContactDetailsWrapper().getApplicantRepresented());
-    }
-
-    @JsonIgnore
-    public boolean isApplicantSolicitorAgreeToReceiveEmails() {
-        return CaseType.CONTESTED.equals(ccdCaseType)
-            ? YesOrNo.YES.equals(getContactDetailsWrapper().getApplicantSolicitorConsentForEmails())
-            : YesOrNo.YES.equals(getContactDetailsWrapper().getSolicitorAgreeToReceiveEmails());
     }
 
     @JsonIgnore
@@ -516,46 +496,8 @@ public class FinremCaseData {
     }
 
     @JsonIgnore
-    public boolean isConsentedInContestedCase() {
-        return CaseType.CONTESTED.equals(ccdCaseType) && getConsentOrderWrapper().getConsentD81Question() != null;
-    }
-
-    @JsonIgnore
     public boolean isApplicantSolicitorResponsibleToDraftOrder() {
         return SolicitorToDraftOrder.APPLICANT_SOLICITOR.equals(solicitorResponsibleForDraftingOrder);
-    }
-
-    @JsonIgnore
-    public boolean isConsentedApplication() {
-        return CaseType.CONSENTED.equals(ccdCaseType);
-    }
-
-    @JsonIgnore
-    public boolean isContestedApplication() {
-        return CaseType.CONTESTED.equals(ccdCaseType);
-    }
-
-    @JsonIgnore
-    public boolean isContestedPaperApplication() {
-        return isContestedApplication() && isPaperCase();
-    }
-
-    @JsonIgnore
-    public boolean isOrderApprovedCollectionPresent() {
-        return isContestedApplication()
-            ? isContestedOrderApprovedCollectionPresent()
-            : isConsentedOrderApprovedCollectionPresent();
-    }
-
-    @JsonIgnore
-    public boolean isConsentedOrderApprovedCollectionPresent() {
-        return approvedOrderCollection != null && !approvedOrderCollection.isEmpty();
-    }
-
-    @JsonIgnore
-    public boolean isContestedOrderApprovedCollectionPresent() {
-        return getConsentOrderWrapper().getContestedConsentedApprovedOrders() != null
-            && !getConsentOrderWrapper().getContestedConsentedApprovedOrders().isEmpty();
     }
 
     @JsonIgnore
@@ -608,6 +550,14 @@ public class FinremCaseData {
     }
 
     @JsonIgnore
+    public boolean isRespondentSolicitorEmailCommunicationEnabled() {
+        return !isPaperCase()
+            && isRespondentRepresentedByASolicitor()
+            && Objects.nonNull(getContactDetailsWrapper().getSolicitorEmail())
+            && isRespondentSolicitorAgreeToReceiveEmails();
+    }
+
+    @JsonIgnore
     public String getRespondentSolicitorName() {
         return getContactDetailsWrapper().getRespondentSolicitorName();
     }
@@ -625,39 +575,6 @@ public class FinremCaseData {
             .orElseGet(() -> fastTrackDecision.isYes());
     }
 
-    @JsonIgnore
-    public String getSelectedCourt() {
-        DefaultRegionWrapper regionWrapper = getRegionWrapper().getDefaultRegionWrapper();
-        CourtListWrapper courtList = regionWrapper.getDefaultCourtListWrapper();
-        return Map.of(
-            Region.MIDLANDS, getMidlandsCourt(regionWrapper.getMidlandsFrcList(), courtList),
-            Region.LONDON, getCourtListIdOrDefault(regionWrapper.getDefaultCourtListWrapper().getCfcCourtList())
-                .getSelectedCourtId(),
-            Region.NORTHEAST, getNorthEastCourt(regionWrapper.getNorthEastFrcList(), courtList),
-            Region.NORTHWEST, getNorthWestCourt(regionWrapper.getNorthWestFrcList(), courtList),
-            Region.SOUTHWEST, getSouthWestCourt(regionWrapper.getSouthWestFrcList(), courtList),
-            Region.SOUTHEAST, getSouthEastCourt(regionWrapper.getSouthEastFrcList(), courtList),
-            Region.WALES, getWalesCourt(regionWrapper.getWalesFrcList(), courtList),
-            Region.HIGHCOURT, getHighCourt(regionWrapper.getHighCourtFrcList(), courtList)
-        ).get(regionWrapper.getRegionList());
-    }
-
-    @JsonIgnore
-    public String getInterimSelectedCourt() {
-        InterimRegionWrapper interimWrapper = getRegionWrapper().getInterimRegionWrapper();
-        CourtListWrapper courtList = regionWrapper.getInterimCourtList();
-        return Map.of(
-            Region.MIDLANDS, getMidlandsCourt(interimWrapper.getInterimMidlandsFrcList(), courtList),
-            Region.LONDON, getCourtListIdOrDefault(interimWrapper.getCourtListWrapper().getInterimCfcCourtList())
-                .getSelectedCourtId(),
-            Region.NORTHEAST, getNorthEastCourt(interimWrapper.getInterimNorthEastFrcList(), courtList),
-            Region.NORTHWEST, getNorthWestCourt(interimWrapper.getInterimNorthWestFrcList(), courtList),
-            Region.SOUTHWEST, getSouthWestCourt(interimWrapper.getInterimSouthWestFrcList(), courtList),
-            Region.SOUTHEAST, getSouthEastCourt(interimWrapper.getInterimSouthEastFrcList(), courtList),
-            Region.WALES, getWalesCourt(interimWrapper.getInterimWalesFrcList(), courtList),
-            Region.HIGHCOURT, getHighCourt(interimWrapper.getInterimHighCourtFrcList(), courtList)
-        ).get(interimWrapper.getInterimRegionList());
-    }
 
     @JsonIgnore
     public String getGeneralApplicationSelectedCourt() {

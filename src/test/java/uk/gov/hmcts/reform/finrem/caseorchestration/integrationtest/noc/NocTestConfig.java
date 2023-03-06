@@ -29,7 +29,7 @@ public class NocTestConfig {
 
     @Bean
     public CaseDataService caseDataService() {
-        return new CaseDataService();
+        return new CaseDataService(new ObjectMapper());
     }
 
     @Bean

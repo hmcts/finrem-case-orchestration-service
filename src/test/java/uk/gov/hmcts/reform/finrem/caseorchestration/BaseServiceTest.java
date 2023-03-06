@@ -18,6 +18,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NottinghamCourt;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionMidlandsFrc;
@@ -26,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -123,6 +127,43 @@ public abstract class BaseServiceTest extends BaseTest {
         return CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
                 .caseTypeId(CaseType.CONSENTED.getCcdType())
+                .id(12345L)
+                .data(caseData)
+                .build())
+            .build();
+    }
+
+    protected FinremCallbackRequest getConsentedFinremCallbackRequestForVariationOrder() {
+        List<String> natureOfApplication = List.of("Lump Sum Order",
+            "Periodical Payment Order",
+            "Pension Sharing Order",
+            "Pension Attachment Order",
+            "Pension Compensation Sharing Order",
+            "Pension Compensation Attachment Order",
+            "A settlement or a transfer of property",
+            "Variation Order",
+            "Property Adjustment Order");
+        ContactDetailsWrapper contactDetailsWrapper = ContactDetailsWrapper.builder()
+            .appRespondentFmName("David")
+            .appRespondentLName("Goodman")
+            .applicantFmName("Victoria")
+            .applicantLname("Goodman")
+            .solicitorEmail(TEST_SOLICITOR_EMAIL)
+            .solicitorName(TEST_SOLICITOR_NAME)
+            .solicitorReference(TEST_SOLICITOR_REFERENCE)
+            .respondentSolicitorEmail(TEST_RESP_SOLICITOR_EMAIL)
+            .respondentSolicitorName(TEST_RESP_SOLICITOR_NAME)
+            .respondentSolicitorReference(TEST_RESP_SOLICITOR_REFERENCE)
+            .build();
+        FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(contactDetailsWrapper)
+            .divorceCaseNumber(TEST_DIVORCE_CASE_NUMBER)
+            .natureApplicationWrapper(NatureApplicationWrapper.builder()
+                .natureOfApplication2(Arrays.stream(NatureApplication.values()).toList()).build()).build();
+
+        return FinremCallbackRequest.builder()
+            .caseDetails(FinremCaseDetails.builder()
+                .caseType(CaseType.CONSENTED)
                 .id(12345L)
                 .data(caseData)
                 .build())
@@ -358,6 +399,14 @@ public abstract class BaseServiceTest extends BaseTest {
     protected CallbackRequest buildHearingCallbackRequest(String payloadJson) {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(payloadJson)) {
             return mapper.readValue(resourceAsStream, CallbackRequest.class);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected FinremCallbackRequest buildHearingFinremCallbackRequest(String payloadJson) {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(payloadJson)) {
+            return mapper.readValue(resourceAsStream, FinremCallbackRequest.class);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
