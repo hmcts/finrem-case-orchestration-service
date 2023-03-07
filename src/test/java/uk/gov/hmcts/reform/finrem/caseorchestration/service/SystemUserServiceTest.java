@@ -7,7 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.SystemUpdateUserConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.IdamToken;
+import uk.gov.hmcts.reform.finrem.caseorchestration.wrapper.IdamToken;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
 import java.util.Collections;

@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.IdamAuthApi;
 import uk.gov.hmcts.reform.idam.client.OAuth2Configuration;
@@ -30,13 +29,6 @@ public class IdamAuthService {
 
     public UserInfo getUserInfo(String bearerToken) {
         return idamAuthApi.retrieveUserInfo(bearerToken);
-    }
-
-    public UserDetails getUserDetails(String authorisation) {
-        String authToken = StringUtils.containsIgnoreCase(authorisation, "Bearer")
-            ? authorisation
-            : String.format("%s %s", "Bearer", authorisation);
-        return idamAuthApi.retrieveUserDetails(authToken);
     }
 
     private TokenRequest buildTokenRequest(String username, String password) {
