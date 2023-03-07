@@ -33,7 +33,10 @@ def versions = [
         idamClient           : '2.0.1',
         jjwt                 : '0.9.1',
         skyscreamer          : '1.5.0',
-        jaxbOsgi             : '2.3.3'
+        jaxbOsgi             : '2.3.3',
+        springHateoas        : '1.5.1',
+        tika                 : '2.4.1',
+        sendLetterClient     : '2.6.0',
 ]
 
 project.ext {
@@ -131,6 +134,7 @@ tasks.withType(Test) {
 }
 
 test {
+    maxHeapSize = "2g"
     failFast = true
 }
 
@@ -332,6 +336,10 @@ dependencies {
     implementation group: 'com.github.hmcts', name: 'bsp-common-lib', version: versions.bspCommonLib
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: versions.apacheLogging
     implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: versions.apacheLogging
+    implementation group: 'org.springframework.hateoas', name: 'spring-hateoas', version: versions.springHateoas
+    implementation group: 'org.apache.tika', name: 'tika-core', version: versions.tika
+    implementation group: 'com.github.hmcts', name: 'send-letter-client', version: versions.sendLetterClient
+    implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
     implementation("org.apache.poi:poi:5.2.3") {
         exclude group: "org.apache.commons", module: "commons-math3"
