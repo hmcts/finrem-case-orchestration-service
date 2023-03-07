@@ -89,17 +89,17 @@ public class UpdateRepresentationWorkflowServiceTest {
     }
 
     @Test
-    public void checkIfExistingApplicantOrganisationPolicy() {
+    public void givenUnpopulatedApplicantOrg_thenNoOrgShouldBeFound() {
         defaultChangeDetails.getData().put(APPLICANT_ORGANISATION_POLICY, null);
         defaultChangeDetails.getData().put(ORGANISATION_POLICY_ROLE, null);
-        assertEquals(updateRepresentationWorkflowService.isNoApplicantOrganisationPolicy(defaultChangeDetails.getData()), true);
+        assertEquals(updateRepresentationWorkflowService.isNoApplicantOrganisationPolicy(defaultChangeDetails), true);
     }
 
     @Test
-    public void checkIfExistingRespondentOrganisationPolicy() {
+    public void givenUnpopulatedRespondentOrg_thenNoOrgShouldBeFound() {
         defaultChangeDetails.getData().put(RESPONDENT_ORGANISATION_POLICY, null);
         defaultChangeDetails.getData().put(ORGANISATION_POLICY_ROLE, null);
-        assertEquals(updateRepresentationWorkflowService.isNoRespondentOrganisationPolicy(defaultChangeDetails.getData()), true);
+        assertEquals(updateRepresentationWorkflowService.isNoRespondentOrganisationPolicy(defaultChangeDetails), true);
     }
 
     @Test

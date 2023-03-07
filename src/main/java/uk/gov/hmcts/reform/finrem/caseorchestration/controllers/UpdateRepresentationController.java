@@ -87,11 +87,11 @@ public class UpdateRepresentationController extends BaseController {
         validateCaseData(ccdRequest);
 
         if (featureToggleService.isCaseworkerNoCEnabled()) {
-            if (nocWorkflowService.isNoApplicantOrganisationPolicy(caseData)) {
-                nocWorkflowService.updateApplicantOrganisationPolicy(caseData);
+            if (nocWorkflowService.isNoApplicantOrganisationPolicy(caseDetails)) {
+                nocWorkflowService.updateApplicantOrganisationPolicy(caseDetails);
             }
-            if (nocWorkflowService.isNoRespondentOrganisationPolicy(caseData)) {
-                nocWorkflowService.updateRespondentOrganisationPolicy(caseData);
+            if (nocWorkflowService.isNoRespondentOrganisationPolicy(caseDetails)) {
+                nocWorkflowService.updateRespondentOrganisationPolicy(caseDetails);
             }
             caseData.put(NOC_PARTY, null);
             caseData.put(INCLUDES_REPRESENTATIVE_UPDATE, null);

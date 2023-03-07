@@ -91,14 +91,14 @@ public class UpdateRepresentationWorkflowService {
         return addedIsEmpty && removedIsEmpty;
     }
 
-    public boolean isNoApplicantOrganisationPolicy(Map<String, Object> caseData) {
-        return caseData.get(APPLICANT_ORGANISATION_POLICY) == null
-            || caseData.get(ORGANISATION_POLICY_ROLE) == null;
+    public boolean isNoApplicantOrganisationPolicy(CaseDetails caseDetails) {
+        return caseDetails.getData().get(APPLICANT_ORGANISATION_POLICY) == null
+            || caseDetails.getData().get(ORGANISATION_POLICY_ROLE) == null;
     }
 
-    public boolean isNoRespondentOrganisationPolicy(Map<String, Object> caseData) {
-        return caseData.get(RESPONDENT_ORGANISATION_POLICY) == null
-            || caseData.get(ORGANISATION_POLICY_ROLE) == null;
+    public boolean isNoRespondentOrganisationPolicy(CaseDetails caseDetails) {
+        return caseDetails.getData().get(RESPONDENT_ORGANISATION_POLICY) == null
+            || caseDetails.getData().get(ORGANISATION_POLICY_ROLE) == null;
     }
 
     private void persistDefaultOrganisationPolicy(CaseDetails caseDetails) {
@@ -127,16 +127,16 @@ public class UpdateRepresentationWorkflowService {
                 .build());
     }
 
-    public void updateApplicantOrganisationPolicy(Map<String, Object> caseData) {
-        caseData.put(APPLICANT_ORGANISATION_POLICY,
+    public void updateApplicantOrganisationPolicy(CaseDetails caseDetails) {
+        caseDetails.getData().put(APPLICANT_ORGANISATION_POLICY,
             OrganisationPolicy.builder()
                 .orgPolicyReference(null)
                 .orgPolicyCaseAssignedRole(APP_SOLICITOR_POLICY)
                 .build());
     }
 
-    public void updateRespondentOrganisationPolicy(Map<String, Object> caseData) {
-        caseData.put(RESPONDENT_ORGANISATION_POLICY,
+    public void updateRespondentOrganisationPolicy(CaseDetails caseDetails) {
+        caseDetails.getData().put(RESPONDENT_ORGANISATION_POLICY,
             OrganisationPolicy.builder()
                 .orgPolicyReference(null)
                 .orgPolicyCaseAssignedRole(RESP_SOLICITOR_POLICY)
