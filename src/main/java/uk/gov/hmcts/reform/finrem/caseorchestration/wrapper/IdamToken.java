@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper;
+package uk.gov.hmcts.reform.finrem.caseorchestration.wrapper;
 
 import lombok.Builder;
 import lombok.Data;
