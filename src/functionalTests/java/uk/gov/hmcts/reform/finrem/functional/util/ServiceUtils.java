@@ -41,7 +41,9 @@ public class ServiceUtils {
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
-
+        System.out.println("HMCTS 111111");
+        System.out.println(evidenceManagementClientBaseUrl);
+        System.out.println("HMCTS 222222");
         Response response = SerenityRest.given()
             .headers(functionalTestUtils.getHeader())
             .multiPart("file", file, fileContentType)
