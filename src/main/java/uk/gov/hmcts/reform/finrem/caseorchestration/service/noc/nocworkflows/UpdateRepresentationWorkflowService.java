@@ -21,7 +21,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOC_PARTY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 
@@ -92,13 +91,11 @@ public class UpdateRepresentationWorkflowService {
     }
 
     public boolean isNoApplicantOrganisationPolicy(CaseDetails caseDetails) {
-        return caseDetails.getData().get(APPLICANT_ORGANISATION_POLICY) == null
-            || caseDetails.getData().get(ORGANISATION_POLICY_ROLE) == null;
+        return caseDetails.getData().get(APPLICANT_ORGANISATION_POLICY) == null;
     }
 
     public boolean isNoRespondentOrganisationPolicy(CaseDetails caseDetails) {
-        return caseDetails.getData().get(RESPONDENT_ORGANISATION_POLICY) == null
-            || caseDetails.getData().get(ORGANISATION_POLICY_ROLE) == null;
+        return caseDetails.getData().get(RESPONDENT_ORGANISATION_POLICY) == null;
     }
 
     private void persistDefaultOrganisationPolicy(CaseDetails caseDetails) {
