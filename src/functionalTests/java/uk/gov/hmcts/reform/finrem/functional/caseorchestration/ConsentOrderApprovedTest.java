@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.functional.caseorchestration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import net.serenitybdd.junit.runners.SerenityRunner;
 import org.json.JSONException;
@@ -37,6 +38,7 @@ public class ConsentOrderApprovedTest extends IntegrationTestBase {
 
     @Test
     public void verifyConsentOrderApprovedForConsentedCaseForApplicant() {
+        RestAssured.useRelaxedHTTPSValidation();
         CallbackRequest callbackRequest = null;
         InputStream resourceAsStream = getClass().getResourceAsStream(
             "/json/consented/approved-consent-order.json");
@@ -61,6 +63,7 @@ public class ConsentOrderApprovedTest extends IntegrationTestBase {
 
     @Test
     public void verifyConsentOrderApprovedForConsentedCaseWhenApplicantRepresentedBySolicitor() {
+        RestAssured.useRelaxedHTTPSValidation();
         CallbackRequest callbackRequest = null;
         InputStream resourceAsStream = getClass().getResourceAsStream(
             "/json/consented/approved-consent-order-with-applicant-solicitor.json");
