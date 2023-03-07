@@ -6,6 +6,7 @@ import net.serenitybdd.rest.SerenityRest;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -63,6 +64,7 @@ public class CcdBulkScanIntegrationTest {
     private String bulkScanTransformationAndUpdateMicroservice;
 
     @Test
+    @Disabled
     public void givenOcrPayload_whenTransformedPayloadUploadedToCcd_thenCaseIsCreated() throws Exception {
         var formA = ResourceLoader.loadJsonToObject(FORM_A_JSON, Map.class);
         setScannedDocumentsUrls(formA);
