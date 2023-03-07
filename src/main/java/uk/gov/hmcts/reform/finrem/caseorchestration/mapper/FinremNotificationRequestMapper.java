@@ -20,6 +20,9 @@ import java.util.List;
 import java.util.Objects;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_OPENING_HOURS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REJECT_REASON;
 
 @Service
 @Slf4j
@@ -83,6 +86,9 @@ public class FinremNotificationRequestMapper {
         notificationRequest.setName(solicitorCaseDataKeysWrapper.getSolicitorNameKey());
         notificationRequest.setNotificationEmail(solicitorCaseDataKeysWrapper.getSolicitorEmailKey());
         notificationRequest.setCaseType(getCaseType(caseDetails));
+        notificationRequest.setPhoneOpeningHours(CTSC_OPENING_HOURS);
+        notificationRequest.setGeneralApplicationRejectionReason(
+            Objects.toString( caseData.getGeneralApplicationWrapper().getGeneralApplicationRejectReason() , EMPTY_STRING));
         notificationRequest.setGeneralEmailBody(Objects.toString(caseData.getGeneralEmailBody(), EMPTY_STRING));
         notificationRequest.setApplicantName(Objects.toString(caseData.getFullApplicantName()));
         if (caseData.isConsentedApplication()) {
