@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -8,11 +10,13 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderDocumentCollection;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -61,6 +65,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class CaseDataService {
 
     public final Function<List<Map>, Map> getLastMapValue = listMap -> listMap.stream().reduce((first, second) -> second).get();
+
+    public final ObjectMapper objectMapper;
 
     public static String nullToEmpty(Object o) {
         return Objects.toString(o, "");
@@ -235,5 +241,16 @@ public class CaseDataService {
     public boolean isContestedOrderNotApprovedCollectionPresent(Map<String, Object> caseData) {
         return caseData.get(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION) != null
             && !((List<Map>) caseData.get(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION)).isEmpty();
+    }
+
+    public Map<String, Object> getPayloadOffFinremCaseData(FinremCaseData data) {
+        Map<String, Object> notificationRequestPayload;
+        try {
+            notificationRequestPayload =
+                objectMapper.readValue(objectMapper.writeValueAsString(data), HashMap.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Error while converting finrem case details pojo into map payload", e);
+        }
+        return notificationRequestPayload;
     }
 }
