@@ -177,6 +177,7 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
 
     @Test
     public void generateFormCAndFormGServiceError() throws Exception {
+
         idamServiceStub();
         generateEvidenceUploadServiceSuccessStub();
         generateDocumentServiceSuccessStub(pdfGenerationRequest(config.getFormCNonFastTrackTemplate()));
