@@ -1,7 +1,7 @@
 #!groovy
 import uk.gov.hmcts.contino.AppPipelineDsl
 
-@Library("Infrastructure")
+@Library("Infrastructure@enable-logging-on-ft")
 
 def type = "java"
 def product = "finrem"
