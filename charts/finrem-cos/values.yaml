@@ -12,13 +12,13 @@ java:
     IDAM_API_URL: "https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net"
     PRD_API_URL: "http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     IDAM_S2S_URL: "http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
-    DOCUMENT_GENERATOR_SERVICE_API_BASEURL: "http://finrem-dgcs-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     FINREM_NOTIFICATION_SERVICE_BASE_URL: "http://finrem-ns-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     PAYMENT_SERVICE_API_BASEURL: "http://finrem-ps-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
-    EVIDENCE_MANAGEMENT_SERVICE_BASEURL: "http://finrem-emca-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     ACA_SERVICE_API_BASEURL: "http://aac-manage-case-assignment-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     CCD_DATA_STORE_API_BASEURL: "http://ccd-data-store-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     IDAM_API_REDIRECT_URL: "https://finrem-frontend-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal/oauth2/callback"
+    DOCUMENT_MANAGEMENT_STORE_URL: "http://dm-store-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
+    SEND_LETTER_SERVICE_BASEURL: "http://rpe-send-letter-service-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     PAYMENT_API_URL: "http://payment-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     FEES_API_URL: "http://fees-register-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
   autoscaling:
@@ -42,3 +42,7 @@ java:
           alias: FINREM_SYSTEMUPDATE_PASSWORD
         - name: finrem-idam-client-secret
           alias: FINREM_IDAM_CLIENT_SECRET
+        - name: docmosis-api-key
+          alias: PDF_SERVICE_ACCESS_KEY
+        - name: docmosis-endpoint
+          alias: PDF_SERVICE_BASEURL

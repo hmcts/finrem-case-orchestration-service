@@ -5,11 +5,10 @@ import org.junit.Test;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.PdfDocumentRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 
 import java.io.IOException;
-import java.util.Collections;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -32,6 +31,7 @@ public class GenerateMiniFormATest extends AbstractDocumentTest {
 
     @Test
     public void generateMiniFormA() throws Exception {
+        generateEvidenceUploadServiceSuccessStub();
         generateDocumentServiceSuccessStub();
         idamServiceStub();
         generateDocument();
@@ -64,11 +64,12 @@ public class GenerateMiniFormATest extends AbstractDocumentTest {
     }
 
     @Override
-    protected DocumentGenerationRequest documentRequest() {
-        return DocumentGenerationRequest.builder()
-            .template(documentConfiguration.getMiniFormTemplate())
-            .fileName(documentConfiguration.getMiniFormFileName())
-            .values(Collections.singletonMap("caseDetails", request.getCaseDetails()))
+    protected PdfDocumentRequest pdfRequest() {
+        return PdfDocumentRequest.builder()
+            .accessKey("TESTPDFACCESS")
+            .outputName("result.pdf")
+            .templateName(documentConfiguration.getMiniFormTemplate())
+            .data(request.getCaseDetails().getData())
             .build();
     }
 

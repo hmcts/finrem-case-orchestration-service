@@ -84,6 +84,10 @@ public class FunctionalTestUtils {
                 + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword)));
     }
 
+    public String getAuthToken() {
+        return "Bearer " + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword);
+    }
+
     public String downloadPdfAndParseToString(String documentUrl) {
         Response document = SerenityRest.given()
             .relaxedHTTPSValidation()
