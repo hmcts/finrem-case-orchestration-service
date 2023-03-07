@@ -36,7 +36,7 @@ def versions = [
         jaxbOsgi             : '2.3.3',
         springHateoas        : '1.5.1',
         tika                 : '2.4.1',
-        sendLetterClient     : '2.6.0',
+        sendLetterClient     : '3.0.16',
 ]
 
 project.ext {
