@@ -6,6 +6,7 @@ import com.jayway.jsonpath.JsonPath;
 import io.restassured.response.Response;
 import net.serenitybdd.junit.runners.SerenityRunner;
 import org.json.JSONException;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.Disabled;
 import org.junit.runner.RunWith;
@@ -37,7 +38,7 @@ public class ConsentOrderApprovedTest extends IntegrationTestBase {
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
-    @Disabled
+    @Ignore
     public void verifyConsentOrderApprovedForConsentedCaseForApplicant() {
         CallbackRequest callbackRequest = null;
         InputStream resourceAsStream = getClass().getResourceAsStream(
@@ -62,7 +63,7 @@ public class ConsentOrderApprovedTest extends IntegrationTestBase {
     }
 
     @Test
-    @Disabled
+    @Ignore
     public void verifyConsentOrderApprovedForConsentedCaseWhenApplicantRepresentedBySolicitor() {
         CallbackRequest callbackRequest = null;
         InputStream resourceAsStream = getClass().getResourceAsStream(
