@@ -61,7 +61,7 @@ public class EvidenceManagementDownloadServiceConsumerTest extends BaseTest {
     @PactVerification()
     public void verifyDocumentDownloadFromDmStore() throws Exception {
         given(authTokenGenerator.generate()).willReturn(someServiceAuthToken);
-        ResponseEntity<byte[]> responses = evidenceManagementDownloadService.download("http://localhost:3405" + DOWNLOAD_FILE_URL);
+        ResponseEntity<byte[]> responses = evidenceManagementDownloadService.download("http://localhost:8889" + DOWNLOAD_FILE_URL);
         assertTrue(responses.getStatusCode().is2xxSuccessful());
     }
 
