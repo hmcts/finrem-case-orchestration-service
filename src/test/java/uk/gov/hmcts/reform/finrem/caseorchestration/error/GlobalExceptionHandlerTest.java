@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.error;
 
 import org.junit.Test;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -16,7 +15,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.noSuch
 import static uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler.SERVER_ERROR_MSG;
 
 public class GlobalExceptionHandlerTest {
-    private static final String SOME_MESSAGE = "some message";
     GlobalExceptionHandler exceptionHandler = new GlobalExceptionHandler();
 
     @Test
@@ -46,17 +44,5 @@ public class GlobalExceptionHandlerTest {
             noSuchFieldExistsCaseDataError());
         assertThat(actual.getStatusCodeValue(), is(INTERNAL_SERVER_ERROR));
         assertThat(actual.getBody(), is(SERVER_ERROR_MSG));
-    }
-
-    @Test
-    public void documentConversionExceptionException() {
-        DocumentConversionException documentConversionException =
-            new DocumentConversionException(SOME_MESSAGE, new Exception());
-
-        ResponseEntity<Object> response =
-            exceptionHandler.handleDocumentConversionException(documentConversionException);
-
-        assertThat(response.getStatusCode(), is(HttpStatus.INTERNAL_SERVER_ERROR));
-        assertThat(response.getBody(), is(GlobalExceptionHandler.SERVER_ERROR_MSG));
     }
 }

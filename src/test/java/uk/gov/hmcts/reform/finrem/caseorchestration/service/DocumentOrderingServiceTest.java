@@ -1,21 +1,19 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentgenerator;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.client.EvidenceManagementClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentOrderingService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementAuditService;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Map;
 
 import static java.util.Arrays.asList;
@@ -34,15 +32,15 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @ActiveProfiles("test-mock-feign-clients")
 public class DocumentOrderingServiceTest extends BaseServiceTest {
 
-    @MockBean
-    private EvidenceManagementAuditService evidenceManagementAuditService;
+    @Autowired
+    private EvidenceManagementClient evidenceManagementClientMock;
 
     @Autowired
     private DocumentOrderingService documentOrderingService;
 
     @Test(expected = IllegalStateException.class)
     public void givenCheckingForDocumentOrder_whenResponseWithoutTwoElementsReceived_thenIllegalStateExceptionIsThrown() {
-        when(evidenceManagementAuditService.audit(any(), eq(AUTH_TOKEN))).thenReturn(singletonList(FileUploadResponse.builder().build()));
+        when(evidenceManagementClientMock.auditFileUrls(eq(AUTH_TOKEN), any())).thenReturn(singletonList(FileUploadResponse.builder().build()));
         documentOrderingService.isDocumentModifiedLater(anyCaseDocument(), anyCaseDocument(), AUTH_TOKEN);
     }
 
@@ -75,10 +73,12 @@ public class DocumentOrderingServiceTest extends BaseServiceTest {
     }
 
     private void mockEvidenceManagementClientToReturnFirstDocumentIsLater() {
+        Date earlier = new Date();
+        Date later = new Date(earlier.getTime() + 1);
 
-        when(evidenceManagementAuditService.audit(any(), eq(AUTH_TOKEN))).thenReturn(asList(
-            FileUploadResponse.builder().modifiedOn(LocalDateTime.now().plusDays(2).toString()).build(),
-            FileUploadResponse.builder().modifiedOn(LocalDateTime.now().toString()).build()));
+        when(evidenceManagementClientMock.auditFileUrls(eq(AUTH_TOKEN), any())).thenReturn(asList(
+            FileUploadResponse.builder().modifiedOn(later).build(),
+            FileUploadResponse.builder().modifiedOn(earlier).build()));
     }
 
     private CaseDocument anyCaseDocument() {

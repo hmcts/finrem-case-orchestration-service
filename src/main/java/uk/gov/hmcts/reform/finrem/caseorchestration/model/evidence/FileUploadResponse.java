@@ -6,9 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 
-import java.time.LocalDateTime;
-
-import static uk.gov.hmcts.reform.finrem.caseorchestration.utils.FinremDateUtils.getLocalDateTime;
+import java.util.Date;
 
 /**
  * The class name FileUploadResponse is to maintain consistency. It was created in Evidence Management Client
@@ -26,15 +24,7 @@ public class FileUploadResponse {
     private String mimeType;
     private String createdBy;
     private String lastModifiedBy;
-    private String createdOn;
-    private String modifiedOn;
+    private Date createdOn;
+    private Date modifiedOn;
     private HttpStatus status;
-
-    public LocalDateTime getModifiedOn() {
-        return getLocalDateTime(this.modifiedOn);
-    }
-
-    public LocalDateTime getCreatedOn() {
-        return getLocalDateTime(this.createdOn);
-    }
 }
