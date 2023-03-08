@@ -67,7 +67,7 @@ public class OnlineFormDocumentService {
         log.info("Generating Consented Mini Form A for Case ID : {}", caseDetails.getId());
         CaseDetails  caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
-            documentConfiguration.getMiniFormTemplate(),
+            documentConfiguration.getMiniFormTemplate(caseDetails),
             documentConfiguration.getMiniFormFileName());
     }
 
@@ -75,7 +75,7 @@ public class OnlineFormDocumentService {
 
         log.info("Generating Contested Mini Form A for Case ID : {}", caseDetails.getId());
         return genericDocumentService.generateDocument(authorisationToken, translateOptions(caseDetails),
-            documentConfiguration.getContestedMiniFormTemplate(),
+            documentConfiguration.getContestedMiniFormTemplate(caseDetails),
             documentConfiguration.getContestedMiniFormFileName());
     }
 
@@ -129,7 +129,7 @@ public class OnlineFormDocumentService {
         prepareMiniFormFields(caseDetailsCopy);
 
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
-            documentConfiguration.getMiniFormTemplate(),
+            documentConfiguration.getMiniFormTemplate(caseDetails),
             documentConfiguration.getMiniFormFileName());
     }
 

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.migration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 
@@ -89,7 +90,7 @@ public class CourtDetailsMigration implements MigrationHandler {
     public static final String BIRMINGHAM_COURT_LIST_AC = "birminghamCourtList";
     public static final String HUMBER_COURT_LIST_AC = "humberCourtList";
     public static final String KENT_SURREY_COURT_LIST_AC = "kentSurreyCourtList";
-    private CaseDataService caseDataService = new CaseDataService();
+    private CaseDataService caseDataService = new CaseDataService(new ObjectMapper());
 
     public Map<String, Object> migrate(CaseDetails caseDetails) {
         if (migrationRequired(caseDetails)) {

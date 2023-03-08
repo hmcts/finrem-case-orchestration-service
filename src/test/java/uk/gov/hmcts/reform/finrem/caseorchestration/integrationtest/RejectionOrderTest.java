@@ -32,7 +32,7 @@ public class RejectionOrderTest extends AbstractDocumentTest {
     @Override
     protected DocumentGenerationRequest documentRequest() {
         return DocumentGenerationRequest.builder()
-            .template(documentConfiguration.getRejectedOrderTemplate())
+            .template(documentConfiguration.getRejectedOrderTemplate(CaseDetails.builder().build()))
             .fileName(documentConfiguration.getRejectedOrderFileName())
             .values(Collections.singletonMap("caseDetails", copyOf(request.getCaseDetails())))
             .build();
