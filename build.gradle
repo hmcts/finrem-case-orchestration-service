@@ -186,9 +186,7 @@ sonarqube {
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/service/payments/config/**',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/service/payments/model/**',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/handler/FinremCallbackRequest.java',
-                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/controllers/GenericAboutToStartOrSubmitCallbackResponse.java',
-                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/wrapper/IdamToken.java',
-                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/service/GenericDocumentService.java'
+                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/controllers/GenericAboutToStartOrSubmitCallbackResponse.java'
         ]
 
     properties {
