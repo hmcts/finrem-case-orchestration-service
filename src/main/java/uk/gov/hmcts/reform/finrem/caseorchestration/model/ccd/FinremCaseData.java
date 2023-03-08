@@ -272,6 +272,8 @@ public class FinremCaseData {
     private CaseRole currentUserCaseRole;
     private CaseRole currentUserCaseRoleLabel;
     private CaseDocument outOfFamilyCourtResolution;
+    private TypeOfApplication typeOfApplication;
+
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private RegionWrapper regionWrapper;

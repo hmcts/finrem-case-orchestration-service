@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CaseFlagsConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,14 +26,23 @@ public class CreateCaseService {
 
     public void setSupplementaryData(CallbackRequest callbackRequest, String authorisation) {
         String caseId = String.valueOf(callbackRequest.getCaseDetails().getId());
+        submitSupplementaryDataToCcd(authorisation, caseId);
+    }
+
+    public void setSupplementaryData(FinremCallbackRequest callbackRequest, String authorisation) {
+        String caseId = String.valueOf(callbackRequest.getCaseDetails().getId());
+        submitSupplementaryDataToCcd(authorisation, caseId);
+    }
+
+    private void submitSupplementaryDataToCcd(String authorisation, String caseId) {
         Map<String, Map<String, Map<String, Object>>> supplementaryDataFinancialRemedy = new HashMap<>();
         supplementaryDataFinancialRemedy.put("supplementary_data_updates",
             singletonMap("$set", singletonMap("HMCTSServiceId",
                 caseFlagsConfiguration.getHmctsId())));
 
         coreCaseDataApi.submitSupplementaryData(authorisation,
-                                                authTokenGenerator.generate(),
-                                                caseId,
-                                                supplementaryDataFinancialRemedy);
+            authTokenGenerator.generate(),
+            caseId,
+            supplementaryDataFinancialRemedy);
     }
 }
