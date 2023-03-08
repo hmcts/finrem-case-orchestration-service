@@ -147,8 +147,8 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         generateSendLetterSuccessStub();
         generateEvidenceDownloadServiceSuccessStub();
         generateEvidenceUploadServiceSuccessStub();
-        generateDocumentServiceSuccessStub(pdfGenerationRequest(config.getFormCNonFastTrackTemplate()));
-        generateDocumentServiceSuccessStub(pdfGenerationRequest(config.getFormGTemplate()));
+        generateDocumentServiceSuccessStub(pdfGenerationRequest(config.getFormCNonFastTrackTemplate(request.getCaseDetails())));
+        generateDocumentServiceSuccessStub(pdfGenerationRequest(config.getFormGTemplate(request.getCaseDetails())));
         generateDocumentServiceSuccessStub(pdfGenerationRequest(config.getOutOfFamilyCourtResolutionTemplate()));
 
         MvcResult mvcResult;
@@ -179,8 +179,8 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
     public void generateFormCAndFormGServiceError() throws Exception {
         idamServiceStub();
         generateEvidenceUploadServiceSuccessStub();
-        generateDocumentServiceSuccessStub(pdfGenerationRequest(config.getFormCNonFastTrackTemplate()));
-        generateDocumentServiceErrorStub(pdfGenerationRequest(config.getFormGTemplate()));
+        generateDocumentServiceSuccessStub(pdfGenerationRequest(config.getFormCNonFastTrackTemplate(request.getCaseDetails())));
+        generateDocumentServiceErrorStub(pdfGenerationRequest(config.getFormGTemplate(request.getCaseDetails())));
 
         webClient.perform(MockMvcRequestBuilders.post(API_URL)
             .content(objectMapper.writeValueAsString(request))
