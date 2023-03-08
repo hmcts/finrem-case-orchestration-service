@@ -19,7 +19,7 @@ public class ContestedOnlineFormTest extends GenerateMiniFormATest {
     @Override
     protected DocumentGenerationRequest documentRequest() {
         return DocumentGenerationRequest.builder()
-            .template(documentConfiguration.getContestedMiniFormTemplate())
+            .template(documentConfiguration.getContestedMiniFormTemplate(request.getCaseDetails()))
             .fileName(documentConfiguration.getContestedMiniFormFileName())
             .values(Collections.singletonMap("caseDetails",
                 copyWithOptionValueTranslation(request.getCaseDetails())))

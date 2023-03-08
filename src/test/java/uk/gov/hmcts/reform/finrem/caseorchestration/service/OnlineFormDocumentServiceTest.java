@@ -72,14 +72,16 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
         assertCaseDocument(onlineFormDocumentService.generateMiniFormA(AUTH_TOKEN, CaseDetails.builder().build()));
 
         verify(genericDocumentService).generateDocument(AUTH_TOKEN, CaseDetails.builder().build(),
-            documentConfiguration.getMiniFormTemplate(), documentConfiguration.getMiniFormFileName());
+            documentConfiguration.getMiniFormTemplate(CaseDetails.builder().build()),
+            documentConfiguration.getMiniFormFileName());
     }
 
     @Test
     public void generateContestedMiniFormA() {
-        assertCaseDocument(onlineFormDocumentService.generateContestedMiniFormA(AUTH_TOKEN, CaseDetails.builder().build()));
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        assertCaseDocument(onlineFormDocumentService.generateContestedMiniFormA(AUTH_TOKEN, caseDetails));
         verify(genericDocumentService).generateDocument(AUTH_TOKEN, CaseDetails.builder().build(),
-            documentConfiguration.getContestedMiniFormTemplate(), documentConfiguration.getContestedMiniFormFileName());
+            documentConfiguration.getContestedMiniFormTemplate(caseDetails), documentConfiguration.getContestedMiniFormFileName());
     }
 
     @Test
@@ -89,7 +91,8 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
             .generateConsentedInContestedMiniFormA(consentedInContestedCaseDetails(payload), AUTH_TOKEN));
 
         verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
-            eq(documentConfiguration.getMiniFormTemplate()), eq(documentConfiguration.getMiniFormFileName()));
+            eq(documentConfiguration.getMiniFormTemplate(CaseDetails.builder().build())),
+            eq(documentConfiguration.getMiniFormFileName()));
 
         verifyAdditionalFields(caseDetailsArgumentCaptor.getValue().getData());
     }
@@ -101,7 +104,8 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
             .generateConsentedInContestedMiniFormA(consentedInContestedCaseDetails(payload), AUTH_TOKEN));
 
         verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
-            eq(documentConfiguration.getMiniFormTemplate()), eq(documentConfiguration.getMiniFormFileName()));
+            eq(documentConfiguration.getMiniFormTemplate(CaseDetails.builder().build())),
+            eq(documentConfiguration.getMiniFormFileName()));
 
         verifyAdditionalFields(caseDetailsArgumentCaptor.getValue().getData());
     }
