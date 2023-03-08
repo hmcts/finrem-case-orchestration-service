@@ -24,6 +24,7 @@
    ]]></notes>
         <packageUrl regex="true">^pkg:maven/commons\-fileupload/commons\-fileupload@.*$</packageUrl>
         <cve>CVE-2021-37533</cve>
+        <cve>CVE-2023-24998</cve>
     </suppress>
     <suppress>
         <notes><![CDATA[
