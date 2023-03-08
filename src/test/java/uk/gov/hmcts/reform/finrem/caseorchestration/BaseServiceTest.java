@@ -69,9 +69,6 @@ public abstract class BaseServiceTest extends BaseTest {
     @Autowired
     protected FinremCaseDetailsMapper finremCaseDetailsMapper;
 
-    public static final byte[] SOME_BYTES = "ainhsdcnoih".getBytes();
-    private static final String TEST_JSON = "/fixtures/contested/interim-hearing-two-collection.json";
-
     protected CaseDetails buildCaseDetails() {
         Map<String, Object> caseData = new HashMap<>();
         List<String> natureOfApplication = List.of("Lump Sum Order",
@@ -84,6 +81,13 @@ public abstract class BaseServiceTest extends BaseTest {
             "Property Adjustment Order");
         caseData.put("natureOfApplication2", natureOfApplication);
         return CaseDetails.builder().id(Long.valueOf(123)).caseTypeId(CaseType.CONSENTED.getCcdType()).data(caseData).build();
+    }
+
+    protected FinremCaseDetails buildFinremCaseDetails() {
+        return FinremCaseDetails.builder()
+            .caseType(CaseType.CONTESTED)
+            .id(123L)
+            .build();
     }
 
     protected CallbackRequest getConsentedCallbackRequestForVariationOrder() {

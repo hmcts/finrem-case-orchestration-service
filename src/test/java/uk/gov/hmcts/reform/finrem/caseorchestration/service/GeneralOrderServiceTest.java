@@ -273,7 +273,8 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     void verifyAdditionalFieldsConsented() {
         verify(genericDocumentService, times(1))
             .generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
-                eq(documentConfiguration.getGeneralOrderTemplate()), eq(documentConfiguration.getGeneralOrderFileName()));
+                eq(documentConfiguration.getGeneralOrderTemplate(CaseDetails.builder().build())),
+                eq(documentConfiguration.getGeneralOrderFileName()));
 
         Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
         assertThat(data.get("DivorceCaseNumber"), is("DD12D12345"));
@@ -290,7 +291,8 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     void verifyAdditionalFieldsContested() {
         verify(genericDocumentService, times(1))
             .generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
-                eq(documentConfiguration.getGeneralOrderTemplate()), eq(documentConfiguration.getGeneralOrderFileName()));
+                eq(documentConfiguration.getGeneralOrderTemplate(CaseDetails.builder().build())),
+                eq(documentConfiguration.getGeneralOrderFileName()));
 
         Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
         assertThat(data.get("DivorceCaseNumber"), is("DD98D76543"));

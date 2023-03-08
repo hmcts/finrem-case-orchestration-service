@@ -83,14 +83,14 @@ public class ConsentOrderApprovedDocumentService {
         log.info("Generating Approved {} Order Letter {} from {} for bulk print, case: {}",
             caseData.get(ORDER_TYPE),
             fileName,
-            documentConfiguration.getApprovedConsentOrderTemplate(),
+            documentConfiguration.getApprovedConsentOrderTemplate(caseDetails),
             detailsCopy.getId());
 
         return genericDocumentService.generateDocument(authToken,
             caseDataService.isContestedApplication(caseDetails)
                 ? prepareCaseDetailsCopyForDocumentGeneratorWithContestedFields(caseDetails)
                 : detailsCopy,
-            documentConfiguration.getApprovedConsentOrderTemplate(),
+            documentConfiguration.getApprovedConsentOrderTemplate(caseDetails),
             fileName);
     }
 

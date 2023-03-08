@@ -5,10 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.PdfDocumentRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderRefusalTranslatorService;
 
 import java.io.IOException;
+import java.util.Collections;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -29,12 +30,11 @@ public class RejectionOrderTest extends AbstractDocumentTest {
     private static final String API_URL = "/case-orchestration/documents/consent-order-not-approved";
 
     @Override
-    protected PdfDocumentRequest pdfRequest() {
-        return PdfDocumentRequest.builder()
-            .accessKey("TESTPDFACCESS")
-            .outputName("result.pdf")
-            .templateName(documentConfiguration.getRejectedOrderTemplate())
-            .data(request.getCaseDetails().getData())
+    protected DocumentGenerationRequest documentRequest() {
+        return DocumentGenerationRequest.builder()
+            .template(documentConfiguration.getRejectedOrderTemplate(CaseDetails.builder().build()))
+            .fileName(documentConfiguration.getRejectedOrderFileName())
+            .values(Collections.singletonMap("caseDetails", copyOf(request.getCaseDetails())))
             .build();
     }
 
@@ -45,8 +45,6 @@ public class RejectionOrderTest extends AbstractDocumentTest {
 
     @Test
     public void generateConsentOrder() throws Exception {
-        generateEvidenceUploadServiceSuccessStub();
-        idamServiceStub();
         generateDocumentServiceSuccessStub();
 
         webClient.perform(MockMvcRequestBuilders.post(apiUrl())
