@@ -23,7 +23,7 @@ public class FinremCaseDetailsMapper {
             .caseType(CaseType.forValue(caseDetails.getCaseTypeId()))
             .id(caseDetails.getId())
             .jurisdiction(caseDetails.getJurisdiction())
-            .state(State.forValue(caseDetails.getState()))
+            .state(caseDetails.getState() != null ? State.forValue(caseDetails.getState()) : null)
             .createdDate(caseDetails.getCreatedDate())
             .securityLevel(caseDetails.getSecurityLevel())
             .callbackResponseStatus(caseDetails.getCallbackResponseStatus())

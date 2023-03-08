@@ -68,7 +68,7 @@ public class GenerateMiniFormATest extends AbstractDocumentTest {
         return PdfDocumentRequest.builder()
             .accessKey("TESTPDFACCESS")
             .outputName("result.pdf")
-            .templateName(documentConfiguration.getMiniFormTemplate())
+            .templateName(documentConfiguration.getMiniFormTemplate(request.getCaseDetails()))
             .data(request.getCaseDetails().getData())
             .build();
     }

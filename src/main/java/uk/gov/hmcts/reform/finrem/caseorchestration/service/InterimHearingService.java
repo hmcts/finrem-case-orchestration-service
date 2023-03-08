@@ -214,7 +214,7 @@ public class InterimHearingService {
         caseData.put("interimAdditionalInformationAboutHearing", interimHearingCaseData.get("interimAdditionalInformationAboutHearing"));
 
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
-            documentConfiguration.getGeneralApplicationInterimHearingNoticeTemplate(),
+            documentConfiguration.getGeneralApplicationInterimHearingNoticeTemplate(caseDetailsCopy),
             documentConfiguration.getGeneralApplicationInterimHearingNoticeFileName());
 
     }

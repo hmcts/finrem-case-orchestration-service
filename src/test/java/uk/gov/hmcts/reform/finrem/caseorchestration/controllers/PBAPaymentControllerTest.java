@@ -7,13 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationContactInformation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdDataStoreService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
@@ -66,8 +66,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     @MockBean
     private CcdDataStoreService ccdDataStoreService;
     @MockBean
-    private FeatureToggleService featureToggleService;
-    @MockBean
     private PrdOrganisationService prdOrganisationService;
 
     @Autowired
@@ -94,8 +92,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     @Before
     public void setUp() {
         super.setUp();
-        when(featureToggleService.isAssignCaseAccessEnabled()).thenReturn(true);
-        when(featureToggleService.isUseUserTokenEnabled()).thenReturn(true);
 
         when(prdOrganisationService.retrieveOrganisationsData(AUTH_TOKEN)).thenReturn(OrganisationsResponse.builder()
             .contactInformation(singletonList(organisationContactInformation))
@@ -224,7 +220,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     @Test
     public void shouldAssignApplicantSolicitor() throws Exception {
         doPBAPaymentReferenceAlreadyExistsSetup();
-        when(featureToggleService.isAssignCaseAccessEnabled()).thenReturn(true);
+        when(assignCaseAccessService.isCreatorRoleActiveOnCase(any())).thenReturn(true);
 
         mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
                 .content(requestContent.toString())
@@ -234,15 +230,15 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.authorisation3", is(notNullValue())))
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-        verify(ccdDataStoreService, times(1)).removeCreatorRole(any(), eq(AUTH_TOKEN));
-        verify(assignCaseAccessService, times(1)).assignCaseAccess(any(), eq(AUTH_TOKEN));
+        verify(ccdDataStoreService, times(1)).removeCreatorRole(any(CaseDetails.class), eq(AUTH_TOKEN));
+        verify(assignCaseAccessService, times(1)).assignCaseAccess(any(CaseDetails.class), eq(AUTH_TOKEN));
     }
 
     @Test
-    public void shouldNotAssignApplicantSolicitor_assignCaseAccessToggledOff() throws Exception {
+    public void shouldNotAssignApplicantSolicitor_assignCaseAccessDraftCaseActive() throws Exception {
         doPBAPaymentReferenceAlreadyExistsSetup();
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-        when(featureToggleService.isAssignCaseAccessEnabled()).thenReturn(false);
+        when(assignCaseAccessService.isCreatorRoleActiveOnCase(any())).thenReturn(false);
 
         mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
                 .content(requestContent.toString())
@@ -257,6 +253,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     public void shouldNotAssignApplicantSolicitor_organisationIdNoMatch() throws Exception {
         doPBAPaymentReferenceAlreadyExistsSetup();
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(assignCaseAccessService.isCreatorRoleActiveOnCase(any())).thenReturn(true);
         when(prdOrganisationService.retrieveOrganisationsData(AUTH_TOKEN)).thenReturn(OrganisationsResponse.builder()
             .contactInformation(singletonList(organisationContactInformation))
             .name(TEST_SOLICITOR_NAME)
@@ -278,6 +275,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/pba-payment-no-app-org.json").toURI()));
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(assignCaseAccessService.isCreatorRoleActiveOnCase(any())).thenReturn(true);
 
         mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
                 .content(requestContent.toString())
@@ -287,14 +285,14 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.errors", hasSize(2)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verifyNoInteractions(ccdDataStoreService);
-        verifyNoInteractions(assignCaseAccessService);
     }
 
     @Test
     public void shouldNotAssignApplicantSolicitor_acaApiFailure() throws Exception {
         doPBASetUp(true);
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-        doThrow(feignError()).when(assignCaseAccessService).assignCaseAccess(any(), eq(AUTH_TOKEN));
+        when(assignCaseAccessService.isCreatorRoleActiveOnCase(any())).thenReturn(true);
+        doThrow(feignError()).when(assignCaseAccessService).assignCaseAccess(any(CaseDetails.class), eq(AUTH_TOKEN));
 
         mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
                 .content(requestContent.toString())

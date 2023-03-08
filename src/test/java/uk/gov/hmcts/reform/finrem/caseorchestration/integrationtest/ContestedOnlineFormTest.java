@@ -19,7 +19,7 @@ public class ContestedOnlineFormTest extends GenerateMiniFormATest {
         return PdfDocumentRequest.builder()
             .accessKey("TESTPDFACCESS")
             .outputName("result.pdf")
-            .templateName(documentConfiguration.getContestedMiniFormTemplate())
+            .templateName(documentConfiguration.getContestedMiniFormTemplate(request.getCaseDetails()))
             .data(copyWithOptionValueTranslation(request.getCaseDetails()).getData())
             .build();
     }

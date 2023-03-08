@@ -46,7 +46,7 @@ public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
         return PdfDocumentRequest.builder()
             .accessKey("TESTPDFACCESS")
             .outputName("result.pdf")
-            .templateName(documentConfiguration.getFormCFastTrackTemplate())
+            .templateName(documentConfiguration.getFormCFastTrackTemplate(CaseDetails.builder().build()))
             .data(request.getCaseDetails().getData())
             .build();
     }

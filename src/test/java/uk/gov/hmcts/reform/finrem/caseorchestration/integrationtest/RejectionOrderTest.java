@@ -33,7 +33,7 @@ public class RejectionOrderTest extends AbstractDocumentTest {
         return PdfDocumentRequest.builder()
             .accessKey("TESTPDFACCESS")
             .outputName("result.pdf")
-            .templateName(documentConfiguration.getRejectedOrderTemplate())
+            .templateName(documentConfiguration.getRejectedOrderTemplate(CaseDetails.builder().build()))
             .data(request.getCaseDetails().getData())
             .build();
     }
