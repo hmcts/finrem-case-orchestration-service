@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CaseFlagsConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.io.InputStream;
 
@@ -56,6 +58,17 @@ public class CreateCaseServiceTest {
             times(1)).submitSupplementaryData(any(), any(), any(), any());
     }
 
+
+    @Test
+    public void givenFinremCallbackRequest_whenSetSupplementaryData_thenCallCcdSubmitSupplementaryData() {
+        FinremCallbackRequest callbackRequest =
+            FinremCallbackRequest.builder().caseDetails(FinremCaseDetails.builder().build()).build();
+
+        createCaseService.setSupplementaryData(callbackRequest, AUTH_TOKEN);
+
+        verify(coreCaseDataApi,
+            times(1)).submitSupplementaryData(any(), any(), any(), any());
+    }
 
     private CaseDetails getCase() {
         try (InputStream resourceAsStream = getClass()

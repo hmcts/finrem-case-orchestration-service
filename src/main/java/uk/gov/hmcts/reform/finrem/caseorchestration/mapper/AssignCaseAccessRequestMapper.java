@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.AssignCaseAccessRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 @Service
 @Slf4j
@@ -16,6 +17,15 @@ public class AssignCaseAccessRequestMapper {
             .case_id(caseDetails.getId().toString())
             .assignee_id(userId)
             .case_type_id(caseDetails.getCaseTypeId())
+            .build();
+    }
+
+    public AssignCaseAccessRequest mapToAssignCaseAccessRequest(FinremCaseDetails caseDetails, String userId) {
+        return AssignCaseAccessRequest
+            .builder()
+            .case_id(caseDetails.getId().toString())
+            .assignee_id(userId)
+            .case_type_id(caseDetails.getCaseType().toString())
             .build();
     }
 }
