@@ -3,7 +3,7 @@
   "case_details": {
     "id": "17878767",
     "jurisdiction": "DIVORCE",
-    "state": "applicationDrafted",
+    "state": "caseAdded",
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
       "typeOfApplication": "In connection to matrimonial and civil partnership proceedings",
