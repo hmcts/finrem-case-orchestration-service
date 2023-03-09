@@ -63,7 +63,7 @@ public class IntervenerService {
                 log.info("Intervener4 add default case role and organisation for case {}", caseId);
                 Organisation organisation = Organisation.builder().organisationID(null).organisationName(null).build();
                 intervenerFourWrapper.getIntervener4Organisation().setOrganisation(organisation);
-                intervenerFourWrapper.getIntervener4Organisation().setOrgPolicyCaseAssignedRole(CaseRole.APP_SOLICITOR.getValue());
+                intervenerFourWrapper.getIntervener4Organisation().setOrgPolicyCaseAssignedRole(CaseRole.INTVR_SOLICITOR_4.getValue());
                 intervenerFourWrapper.getIntervener4Organisation().setOrgPolicyReference(null);
             }
         }
@@ -81,7 +81,7 @@ public class IntervenerService {
                 log.info("Intervener3 add default case role and organisation for case {}", caseId);
                 Organisation organisation = Organisation.builder().organisationID(null).organisationName(null).build();
                 intervenerThreeWrapper.getIntervener3Organisation().setOrganisation(organisation);
-                intervenerThreeWrapper.getIntervener3Organisation().setOrgPolicyCaseAssignedRole(CaseRole.APP_SOLICITOR.getValue());
+                intervenerThreeWrapper.getIntervener3Organisation().setOrgPolicyCaseAssignedRole(CaseRole.INTVR_SOLICITOR_3.getValue());
                 intervenerThreeWrapper.getIntervener3Organisation().setOrgPolicyReference(null);
             }
         }
@@ -99,7 +99,7 @@ public class IntervenerService {
                 log.info("Intervener2 add default case role and organisation for case {}", caseId);
                 Organisation organisation = Organisation.builder().organisationID(null).organisationName(null).build();
                 intervenerTwoWrapper.getIntervener2Organisation().setOrganisation(organisation);
-                intervenerTwoWrapper.getIntervener2Organisation().setOrgPolicyCaseAssignedRole(CaseRole.APP_SOLICITOR.getValue());
+                intervenerTwoWrapper.getIntervener2Organisation().setOrgPolicyCaseAssignedRole(CaseRole.INTVR_SOLICITOR_2.getValue());
                 intervenerTwoWrapper.getIntervener2Organisation().setOrgPolicyReference(null);
             }
         }
@@ -116,7 +116,7 @@ public class IntervenerService {
             log.info("Intervener1 add default case role and organisation for case {}", caseId);
             Organisation organisation = Organisation.builder().organisationID(null).organisationName(null).build();
             intervenerOneWrapper.getIntervener1Organisation().setOrganisation(organisation);
-            intervenerOneWrapper.getIntervener1Organisation().setOrgPolicyCaseAssignedRole(CaseRole.APP_SOLICITOR.getValue());
+            intervenerOneWrapper.getIntervener1Organisation().setOrgPolicyCaseAssignedRole(CaseRole.INTVR_SOLICITOR_1.getValue());
             intervenerOneWrapper.getIntervener1Organisation().setOrgPolicyReference(null);
         }
     }
