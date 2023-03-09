@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
@@ -34,6 +35,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerC
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.DEL_INTERVENER_THREE_CODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.DEL_INTERVENER_TWO_CODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_FOUR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_INVALID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_ONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_THREE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_TWO;
@@ -274,6 +276,33 @@ public class IntervenersAboutToSubmitHandlerTest {
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(service).removeIntervenerFourDetails(any());
+    }
+
+    @Test
+    public void givenContestedCase_whenInvalidOptionReceived_thenHandlerThrowError() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        IntervenerFourWrapper fourWrapper = IntervenerFourWrapper
+            .builder().intervener4Name("Four name").intervener4Email("test@test.com").build();
+
+        finremCaseData.setIntervenerFourWrapper(fourWrapper);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertEquals(4, handleResp.getData().getIntervenersList().getListItems().size());
+
+        DynamicRadioListElement option4 = DynamicRadioListElement.builder().code(INTERVENER_FOUR).build();
+        handleResp.getData().getIntervenersList().setValue(option4);
+
+        midHandler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+
+        DynamicRadioListElement operation = DynamicRadioListElement.builder().code(INTERVENER_INVALID).build();
+        finremCaseData.getIntervenerOptionList().setValue(operation);
+
+        assertThatThrownBy(() ->
+            handler.handle(finremCallbackRequest, AUTH_TOKEN)
+        ).isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Invalid option received for case " + 123L);
     }
 
     private FinremCallbackRequest buildCallbackRequest() {

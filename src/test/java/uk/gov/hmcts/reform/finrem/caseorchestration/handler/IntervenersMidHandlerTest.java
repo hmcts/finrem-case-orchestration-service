@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
@@ -39,6 +40,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerC
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.DEL_INTERVENER_TWO_CODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.DEL_INTERVENER_TWO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_FOUR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_INVALID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_ONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_THREE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_TWO;
@@ -170,6 +172,27 @@ public class IntervenersMidHandlerTest {
         assertEquals(DEL_INTERVENER_FOUR_CODE, intervenerOptionList.getListItems().get(1).getCode());
         assertEquals(DEL_INTERVENER_FOUR_VALUE, intervenerOptionList.getListItems().get(1).getLabel());
     }
+
+    @Test
+    public void givenContestedCase_whenMidEventCalledWithInvalidOption_thenHandlerThrowError() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        IntervenerFourWrapper fourWrapper = IntervenerFourWrapper
+            .builder().intervener4Name("Four name").intervener4Email("test@test.com").build();
+
+        finremCallbackRequest.getCaseDetails().getData().setIntervenerFourWrapper(fourWrapper);
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertEquals(4, handleResp.getData().getIntervenersList().getListItems().size());
+
+        DynamicRadioListElement option4 = DynamicRadioListElement.builder().code(INTERVENER_INVALID).build();
+        handleResp.getData().getIntervenersList().setValue(option4);
+
+        assertThatThrownBy(() ->
+            midHandler.handle(finremCallbackRequest, AUTH_TOKEN)
+        ).isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Invalid intervener selected for caseId " + 123L);
+    }
+
 
     private FinremCallbackRequest buildCallbackRequest() {
         return FinremCallbackRequest
