@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -22,9 +21,6 @@ import java.util.Optional;
 @Service
 public class AmendApplicationAboutToStartHandler extends FinremCallbackHandler {
 
-    @Value("${service.pdf-service.uri}/rs/render")
-    private String pdfServiceEndpoint;
-
     public AmendApplicationAboutToStartHandler(FinremCaseDetailsMapper mapper) {
         super(mapper);
     }
@@ -39,10 +35,6 @@ public class AmendApplicationAboutToStartHandler extends FinremCallbackHandler {
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
-
-        log.info("Checking PDF_SERVICE_BASEURL secret set in PROD: {}", pdfServiceEndpoint);
-
-
         log.info("Handling amend application about to start callback for case id: {}", callbackRequest.getCaseDetails().getId());
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request to set nature of application for consented case with Case ID: {}", caseDetails.getId());

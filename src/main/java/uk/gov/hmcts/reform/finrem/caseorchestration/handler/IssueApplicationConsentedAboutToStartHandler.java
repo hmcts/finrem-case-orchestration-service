@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -13,6 +14,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnStartDefaultValueS
 @Slf4j
 @Service
 public class IssueApplicationConsentedAboutToStartHandler extends FinremCallbackHandler {
+
+    @Value("${service.pdf-service.uri}/rs/render")
+    private String pdfServiceEndpoint;
 
     private final OnStartDefaultValueService service;
 
@@ -33,6 +37,9 @@ public class IssueApplicationConsentedAboutToStartHandler extends FinremCallback
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        log.info("Checking PDF_SERVICE_BASEURL secret set in PROD: {}", pdfServiceEndpoint);
+
+
         log.info("Handling consented {} about to start callback for case id: {}",
             callbackRequest.getEventType(), callbackRequest.getCaseDetails().getId());
         service.defaultIssueDate(callbackRequest);
