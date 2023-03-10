@@ -29,63 +29,63 @@ public class IntervenerService {
     private final PrdOrganisationService organisationService;
     private final SystemUserService systemUserService;
 
-    public void setIntvenerDateAddedAndDefaultOrgIfNotRepresented(FinremCaseData caseData, String auth, Long caseId) {
+    public void setIntvenerDateAddedAndDefaultOrgIfNotRepresented(FinremCaseData caseData, Long caseId) {
         String valueCode = caseData.getIntervenersList().getValueCode();
         log.info("selected intervener {} for caseId {}", valueCode, caseId);
         switch (valueCode) {
-            case INTERVENER_ONE -> updateIntervenerOneDetails(caseData, auth, caseId);
-            case INTERVENER_TWO -> updateIntervenerTwoDetails(caseData, auth, caseId);
-            case INTERVENER_THREE -> updateIntervenerThreeDetails(caseData, auth, caseId);
-            case INTERVENER_FOUR -> updateIntervenerFourDetails(caseData, auth, caseId);
+            case INTERVENER_ONE -> updateIntervenerOneDetails(caseData, caseId);
+            case INTERVENER_TWO -> updateIntervenerTwoDetails(caseData, caseId);
+            case INTERVENER_THREE -> updateIntervenerThreeDetails(caseData, caseId);
+            case INTERVENER_FOUR -> updateIntervenerFourDetails(caseData, caseId);
             default -> throw new IllegalArgumentException("Invalid intervener selected");
         }
     }
 
-    public void removeIntervenerOneDetails(FinremCaseData caseData, String auth, Long caseId) {
+    public void removeIntervenerOneDetails(FinremCaseData caseData, Long caseId) {
         IntervenerOneWrapper intervenerOneWrapper = caseData.getIntervenerOneWrapper();
         if (intervenerOneWrapper.getIntervener1Represented().equals(YesOrNo.YES)) {
             log.info("revoke case role for intervener1 for case {}", caseId);
             String orgId = intervenerOneWrapper.getIntervener1Organisation().getOrganisation().getOrganisationID();
             String email = intervenerOneWrapper.getIntervener1SolEmail();
-            remokeIntervenerRole(caseId, email, orgId, CaseRole.INTVR_SOLICITOR_1.getValue(), auth);
+            remokeIntervenerRole(caseId, email, orgId, CaseRole.INTVR_SOLICITOR_1.getValue());
         }
         caseData.setIntervenerOneWrapper(null);
     }
 
-    public void removeIntervenerTwoDetails(FinremCaseData caseData, String auth, Long caseId) {
+    public void removeIntervenerTwoDetails(FinremCaseData caseData, Long caseId) {
         IntervenerTwoWrapper wrapper = caseData.getIntervenerTwoWrapper();
         if (wrapper.getIntervener2Represented().equals(YesOrNo.YES)) {
             log.info("revoke case role for intervener2 for case {}", caseId);
             String orgId = wrapper.getIntervener2Organisation().getOrganisation().getOrganisationID();
             String email = wrapper.getIntervener2SolEmail();
-            remokeIntervenerRole(caseId, email, orgId, CaseRole.INTVR_SOLICITOR_2.getValue(), auth);
+            remokeIntervenerRole(caseId, email, orgId, CaseRole.INTVR_SOLICITOR_2.getValue());
         }
         caseData.setIntervenerTwoWrapper(null);
     }
 
-    public void removeIntervenerThreeDetails(FinremCaseData caseData, String auth, Long caseId) {
+    public void removeIntervenerThreeDetails(FinremCaseData caseData, Long caseId) {
         IntervenerThreeWrapper wrapper = caseData.getIntervenerThreeWrapper();
         if (wrapper.getIntervener3Represented().equals(YesOrNo.YES)) {
             log.info("revoke case role for intervener3 for case {}", caseId);
             String orgId = wrapper.getIntervener3Organisation().getOrganisation().getOrganisationID();
             String email = wrapper.getIntervener3SolEmail();
-            remokeIntervenerRole(caseId, email, orgId, CaseRole.INTVR_SOLICITOR_3.getValue(), auth);
+            remokeIntervenerRole(caseId, email, orgId, CaseRole.INTVR_SOLICITOR_3.getValue());
         }
         caseData.setIntervenerThreeWrapper(null);
     }
 
-    public void removeIntervenerFourDetails(FinremCaseData caseData, String auth, Long caseId) {
+    public void removeIntervenerFourDetails(FinremCaseData caseData, Long caseId) {
         IntervenerFourWrapper wrapper = caseData.getIntervenerFourWrapper();
         if (wrapper.getIntervener4Represented().equals(YesOrNo.YES)) {
             log.info("revoke case role for intervener4 for case {}", caseId);
             String orgId = wrapper.getIntervener4Organisation().getOrganisation().getOrganisationID();
             String email = wrapper.getIntervener4SolEmail();
-            remokeIntervenerRole(caseId, email, orgId, CaseRole.INTVR_SOLICITOR_4.getValue(), auth);
+            remokeIntervenerRole(caseId, email, orgId, CaseRole.INTVR_SOLICITOR_4.getValue());
         }
         caseData.setIntervenerFourWrapper(null);
     }
 
-    private void updateIntervenerFourDetails(FinremCaseData caseData, String auth, Long caseId) {
+    private void updateIntervenerFourDetails(FinremCaseData caseData, Long caseId) {
         IntervenerFourWrapper intervenerFourWrapper = caseData.getIntervenerFourWrapper();
         if (intervenerFourWrapper != null &&  intervenerFourWrapper.getIntervener4DateAdded() == null) {
             log.info("Intervener4 date intervener added to case {}", caseId);
@@ -96,7 +96,7 @@ public class IntervenerService {
                 log.info("Add Intervener3 case role for case {}", caseId);
                 String orgId = intervenerFourWrapper.getIntervener4Organisation().getOrganisation().getOrganisationID();
                 String email = intervenerFourWrapper.getIntervener4SolEmail();
-                addIntervenerRole(caseId, email, orgId, caseRole, auth);
+                addIntervenerRole(caseId, email, orgId, caseRole);
             } else {
                 log.info("Intervener4 add default case role and organisation for case {}", caseId);
                 Organisation organisation = Organisation.builder().organisationID(null).organisationName(null).build();
@@ -107,7 +107,7 @@ public class IntervenerService {
         }
     }
 
-    private void updateIntervenerThreeDetails(FinremCaseData caseData, String auth, Long caseId) {
+    private void updateIntervenerThreeDetails(FinremCaseData caseData, Long caseId) {
         IntervenerThreeWrapper intervenerThreeWrapper = caseData.getIntervenerThreeWrapper();
         if (intervenerThreeWrapper != null &&  intervenerThreeWrapper.getIntervener3DateAdded() == null) {
             log.info("Intervener3 date intervener added to case {}", caseId);
@@ -118,7 +118,7 @@ public class IntervenerService {
                 log.info("Add Intervener3 case role for case {}", caseId);
                 String orgId = intervenerThreeWrapper.getIntervener3Organisation().getOrganisation().getOrganisationID();
                 String email = intervenerThreeWrapper.getIntervener3SolEmail();
-                addIntervenerRole(caseId, email, orgId, caseRole, auth);
+                addIntervenerRole(caseId, email, orgId, caseRole);
             } else {
                 log.info("Intervener3 add default case role and organisation for case {}", caseId);
                 Organisation organisation = Organisation.builder().organisationID(null).organisationName(null).build();
@@ -129,7 +129,7 @@ public class IntervenerService {
         }
     }
 
-    private void updateIntervenerTwoDetails(FinremCaseData caseData, String auth, Long caseId) {
+    private void updateIntervenerTwoDetails(FinremCaseData caseData, Long caseId) {
         IntervenerTwoWrapper intervenerTwoWrapper = caseData.getIntervenerTwoWrapper();
         if (intervenerTwoWrapper != null &&  intervenerTwoWrapper.getIntervener2DateAdded() == null) {
             log.info("Intervener2 date intervener added to case {}", caseId);
@@ -142,7 +142,7 @@ public class IntervenerService {
                 String email = intervenerTwoWrapper.getIntervener2SolEmail();
                 String orgPolicyCaseAssignedRole = intervenerTwoWrapper.getIntervener2Organisation().getOrgPolicyCaseAssignedRole();
                 log.info("Intervener2 before current case role {} for case {}", caseId, orgPolicyCaseAssignedRole);
-                addIntervenerRole(caseId, email, orgId, caseRole, auth);
+                addIntervenerRole(caseId, email, orgId, caseRole);
                 String orgPolicyCaseAssignedRole2 = intervenerTwoWrapper.getIntervener2Organisation().getOrgPolicyCaseAssignedRole();
                 log.info("Intervener2 before after case role {} for case {}", caseId, orgPolicyCaseAssignedRole2);
             } else {
@@ -155,7 +155,7 @@ public class IntervenerService {
         }
     }
 
-    private void updateIntervenerOneDetails(FinremCaseData caseData, String auth,  Long caseId) {
+    private void updateIntervenerOneDetails(FinremCaseData caseData, Long caseId) {
         IntervenerOneWrapper intervenerOneWrapper = caseData.getIntervenerOneWrapper();
         if (intervenerOneWrapper != null && intervenerOneWrapper.getIntervener1DateAdded() == null) {
             log.info("Intervener1 date intervener added to case {}", caseId);
@@ -168,7 +168,7 @@ public class IntervenerService {
                 String email = intervenerOneWrapper.getIntervener1SolEmail();
                 String orgPolicyCaseAssignedRole = intervenerOneWrapper.getIntervener1Organisation().getOrgPolicyCaseAssignedRole();
                 log.info("Intervener1 current case role {} for case {}", caseId, orgPolicyCaseAssignedRole);
-                addIntervenerRole(caseId, email, orgId, caseRole, auth);
+                addIntervenerRole(caseId, email, orgId, caseRole);
                 String orgPolicyCaseAssignedRole2 = intervenerOneWrapper.getIntervener1Organisation().getOrgPolicyCaseAssignedRole();
                 log.info("Intervener1 after case role {} for case {}", caseId, orgPolicyCaseAssignedRole2);
             } else {
@@ -181,7 +181,7 @@ public class IntervenerService {
         }
     }
 
-    private void addIntervenerRole(Long caseId, String email, String orgId, String caseRole, String auth) {
+    private void addIntervenerRole(Long caseId, String email, String orgId, String caseRole) {
         organisationService.findUserByEmail(email, systemUserService.getSysUserToken())
             .ifPresentOrElse(
                 userId -> assignCaseAccessService.grantCaseRoleToUser(caseId, userId, caseRole, orgId),
@@ -189,7 +189,7 @@ public class IntervenerService {
             );
     }
 
-    private void remokeIntervenerRole(Long caseId, String email, String orgId, String caseRole, String auth) {
+    private void remokeIntervenerRole(Long caseId, String email, String orgId, String caseRole) {
         organisationService.findUserByEmail(email, systemUserService.getSysUserToken())
             .ifPresentOrElse(
                 userId -> assignCaseAccessService.removeCaseRoleToUser(caseId, userId, caseRole, orgId),

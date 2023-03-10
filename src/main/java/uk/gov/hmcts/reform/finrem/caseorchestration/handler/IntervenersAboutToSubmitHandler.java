@@ -54,11 +54,11 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
             case ADD_INTERVENER_ONE_CODE,
                 ADD_INTERVENER_THREE_CODE,
                 ADD_INTERVENER_TWO_CODE,
-                ADD_INTERVENER_FOUR_CODE -> service.setIntvenerDateAddedAndDefaultOrgIfNotRepresented(caseData, userAuthorisation, caseId);
-            case DEL_INTERVENER_ONE_CODE -> service.removeIntervenerOneDetails(caseData, userAuthorisation, caseId);
-            case DEL_INTERVENER_TWO_CODE -> service.removeIntervenerTwoDetails(caseData, userAuthorisation, caseId);
-            case DEL_INTERVENER_THREE_CODE -> service.removeIntervenerThreeDetails(caseData, userAuthorisation, caseId);
-            case DEL_INTERVENER_FOUR_CODE -> service.removeIntervenerFourDetails(caseData, userAuthorisation, caseId);
+                ADD_INTERVENER_FOUR_CODE -> service.setIntvenerDateAddedAndDefaultOrgIfNotRepresented(caseData, caseId);
+            case DEL_INTERVENER_ONE_CODE -> service.removeIntervenerOneDetails(caseData, caseId);
+            case DEL_INTERVENER_TWO_CODE -> service.removeIntervenerTwoDetails(caseData, caseId);
+            case DEL_INTERVENER_THREE_CODE -> service.removeIntervenerThreeDetails(caseData, caseId);
+            case DEL_INTERVENER_FOUR_CODE -> service.removeIntervenerFourDetails(caseData, caseId);
             default -> throw new IllegalArgumentException("Invalid option received for case " + caseId);
         }
 
