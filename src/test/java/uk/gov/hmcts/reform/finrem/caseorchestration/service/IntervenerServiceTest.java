@@ -381,11 +381,12 @@ public class IntervenerServiceTest extends BaseServiceTest {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
-            Organisation.builder().organisationID(null).organisationName(null).build()
+            Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
         ).build();
         IntervenerThreeWrapper wrapper = IntervenerThreeWrapper
             .builder().intervener3Name("Two name").intervener3Email("test@test.com")
-            .intervener3Represented(YesOrNo.NO)
+            .intervener3SolEmail("test@test.com")
+            .intervener3Represented(YesOrNo.YES)
             .intervener3Organisation(organisationPolicy).build();
         finremCaseData.setIntervenerThreeWrapper(wrapper);
 
@@ -396,10 +397,14 @@ public class IntervenerServiceTest extends BaseServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_THREE).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
+        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
         service.setIntvenerDateAddedAndDefaultOrgIfNotRepresented(finremCaseData, CASE_ID);
 
         assertNotNull(finremCaseData.getIntervenerThreeWrapper().getIntervener3DateAdded());
-        assertNotNull(finremCaseData.getIntervenerThreeWrapper().getIntervener3Organisation().getOrgPolicyCaseAssignedRole());
+
+        verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
+            INTVR_SOLICITOR_3.getValue(), SOME_ORG_ID);
     }
 
     @Test
@@ -426,6 +431,36 @@ public class IntervenerServiceTest extends BaseServiceTest {
 
         assertNotNull(finremCaseData.getIntervenerFourWrapper().getIntervener4DateAdded());
         assertNotNull(finremCaseData.getIntervenerFourWrapper().getIntervener4Organisation().getOrgPolicyCaseAssignedRole());
+    }
+
+    @Test
+    public void givenContestedCase_whenAddingIntervener4AndIntv4Represent_thenSetIntvenerDateAddedAndDefaultOrg() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
+            Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
+        ).build();
+        IntervenerFourWrapper wrapper = IntervenerFourWrapper
+            .builder().intervener4Name("Two name").intervener4Email("test@test.com")
+            .intervener4Represented(YesOrNo.YES)
+            .intervener4SolEmail("test@test.com")
+            .intervener4Organisation(organisationPolicy).build();
+        finremCaseData.setIntervenerFourWrapper(wrapper);
+
+        DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_FOUR).build();
+        List<DynamicRadioListElement> list = List.of(option);
+        DynamicRadioList dynamicRadioList = DynamicRadioList.builder().listItems(list).build();
+        finremCaseData.setIntervenersList(dynamicRadioList);
+        DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_FOUR).build();
+        finremCaseData.getIntervenersList().setValue(option1);
+
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
+        when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
+        service.setIntvenerDateAddedAndDefaultOrgIfNotRepresented(finremCaseData, CASE_ID);
+
+        assertNotNull(finremCaseData.getIntervenerFourWrapper().getIntervener4DateAdded());
+        verify(assignCaseAccessService).grantCaseRoleToUser(CASE_ID, INTERVENER_USER_ID,
+            INTVR_SOLICITOR_4.getValue(), SOME_ORG_ID);
     }
 
     @Test
