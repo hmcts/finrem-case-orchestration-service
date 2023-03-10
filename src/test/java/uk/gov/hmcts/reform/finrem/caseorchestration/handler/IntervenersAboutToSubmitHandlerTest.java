@@ -99,7 +99,7 @@ public class IntervenersAboutToSubmitHandlerTest {
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(service).setIntvenerDateAddedAndDefaultOrgIfNotRepresented(any(), any());
+        verify(service).setIntvenerDateAddedAndDefaultOrgIfNotRepresented(any(), any(), any());
     }
 
     @Test
@@ -125,7 +125,7 @@ public class IntervenersAboutToSubmitHandlerTest {
 
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(service).removeIntervenerOneDetails(any());
+        verify(service).removeIntervenerOneDetails(any(), any(), any());
     }
 
     @Test
@@ -150,7 +150,7 @@ public class IntervenersAboutToSubmitHandlerTest {
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(service).setIntvenerDateAddedAndDefaultOrgIfNotRepresented(any(), any());
+        verify(service).setIntvenerDateAddedAndDefaultOrgIfNotRepresented(any(), any(), any());
     }
 
     @Test
@@ -176,7 +176,7 @@ public class IntervenersAboutToSubmitHandlerTest {
 
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(service).removeIntervenerTwoDetails(any());
+        verify(service).removeIntervenerTwoDetails(any(), any(), any());
     }
 
 
@@ -201,7 +201,7 @@ public class IntervenersAboutToSubmitHandlerTest {
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(service).setIntvenerDateAddedAndDefaultOrgIfNotRepresented(any(), any());
+        verify(service).setIntvenerDateAddedAndDefaultOrgIfNotRepresented(any(), any(), any());
     }
 
     @Test
@@ -225,7 +225,7 @@ public class IntervenersAboutToSubmitHandlerTest {
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(service).removeIntervenerThreeDetails(any());
+        verify(service).removeIntervenerThreeDetails(any(), any(), any());
     }
 
     @Test
@@ -250,7 +250,7 @@ public class IntervenersAboutToSubmitHandlerTest {
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(service).setIntvenerDateAddedAndDefaultOrgIfNotRepresented(any(), any());
+        verify(service).setIntvenerDateAddedAndDefaultOrgIfNotRepresented(any(), any(), any());
     }
 
     @Test
@@ -275,7 +275,7 @@ public class IntervenersAboutToSubmitHandlerTest {
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(service).removeIntervenerFourDetails(any());
+        verify(service).removeIntervenerFourDetails(any(), any(), any());
     }
 
     @Test
