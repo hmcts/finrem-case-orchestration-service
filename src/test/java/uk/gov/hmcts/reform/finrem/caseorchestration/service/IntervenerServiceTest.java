@@ -55,6 +55,8 @@ public class IntervenerServiceTest extends BaseServiceTest {
     private AssignCaseAccessService assignCaseAccessService;
     @Mock
     private PrdOrganisationService organisationService;
+    @Mock
+    private SystemUserService systemUserService;
 
     @InjectMocks
     private IntervenerService service;
@@ -94,6 +96,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .intervener1Represented(YesOrNo.YES).build();
         finremCaseData.setIntervenerOneWrapper(oneWrapper);
 
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
         service.removeIntervenerOneDetails(finremCaseData, AUTH_TOKEN, CASE_ID);
 
@@ -137,6 +140,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .intervener2Represented(YesOrNo.YES).build();
         finremCaseData.setIntervenerTwoWrapper(twoWrapper);
 
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
         service.removeIntervenerTwoDetails(finremCaseData, AUTH_TOKEN, CASE_ID);
 
@@ -176,6 +180,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .build();
         finremCaseData.setIntervenerThreeWrapper(threeWrapper);
 
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
         service.removeIntervenerThreeDetails(finremCaseData, AUTH_TOKEN, CASE_ID);
 
@@ -215,6 +220,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .build();
         finremCaseData.setIntervenerFourWrapper(fourWrapper);
 
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
         service.removeIntervenerFourDetails(finremCaseData, AUTH_TOKEN, CASE_ID);
 
@@ -245,6 +251,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
 
         service.setIntvenerDateAddedAndDefaultOrgIfNotRepresented(finremCaseData, AUTH_TOKEN, CASE_ID);
@@ -327,6 +334,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_TWO).build();
         finremCaseData.getIntervenersList().setValue(option1);
 
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(organisationService.findUserByEmail(INTERVENER_TEST_EMAIL, AUTH_TOKEN)).thenReturn(Optional.of(INTERVENER_USER_ID));
         service.setIntvenerDateAddedAndDefaultOrgIfNotRepresented(finremCaseData, AUTH_TOKEN, CASE_ID);
 

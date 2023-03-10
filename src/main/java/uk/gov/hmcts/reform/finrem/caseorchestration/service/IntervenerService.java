@@ -27,6 +27,7 @@ public class IntervenerService {
 
     private final AssignCaseAccessService assignCaseAccessService;
     private final PrdOrganisationService organisationService;
+    private final SystemUserService systemUserService;
 
     public void setIntvenerDateAddedAndDefaultOrgIfNotRepresented(FinremCaseData caseData, String auth, Long caseId) {
         String valueCode = caseData.getIntervenersList().getValueCode();
@@ -173,7 +174,7 @@ public class IntervenerService {
     }
 
     private void addIntervenerRole(Long caseId, String email, String orgId, String caseRole, String auth) {
-        organisationService.findUserByEmail(email, auth)
+        organisationService.findUserByEmail(email, systemUserService.getSysUserToken())
             .ifPresentOrElse(
                 userId -> assignCaseAccessService.grantCaseRoleToUser(caseId, userId, caseRole, orgId),
                 throwNoSuchUserException(email)
@@ -181,7 +182,7 @@ public class IntervenerService {
     }
 
     private void remokeIntervenerRole(Long caseId, String email, String orgId, String caseRole, String auth) {
-        organisationService.findUserByEmail(email, auth)
+        organisationService.findUserByEmail(email, systemUserService.getSysUserToken())
             .ifPresentOrElse(
                 userId -> assignCaseAccessService.removeCaseRoleToUser(caseId, userId, caseRole, orgId),
                 throwNoSuchUserException(email)
