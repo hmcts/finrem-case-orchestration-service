@@ -92,6 +92,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .builder()
             .intervener1Name("One name")
             .intervener1Email("test@test.com")
+            .intervener1SolEmail("test@test.com")
             .intervener1Organisation(organisationPolicy)
             .intervener1Represented(YesOrNo.YES).build();
         finremCaseData.setIntervenerOneWrapper(oneWrapper);
@@ -136,6 +137,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
             .builder()
             .intervener2Name("Two name")
             .intervener2Email("test@test.com")
+            .intervener2SolEmail("test@test.com")
             .intervener2Organisation(organisationPolicy)
             .intervener2Represented(YesOrNo.YES).build();
         finremCaseData.setIntervenerTwoWrapper(twoWrapper);
@@ -175,6 +177,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         ).build();
         IntervenerThreeWrapper threeWrapper = IntervenerThreeWrapper
             .builder().intervener3Name("Three name").intervener3Email("test@test.com")
+             .intervener3SolEmail("test@test.com")
             .intervener3Represented(YesOrNo.YES)
             .intervener3Organisation(organisationPolicy)
             .build();
@@ -216,6 +219,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         IntervenerFourWrapper fourWrapper = IntervenerFourWrapper
             .builder().intervener4Name("Four name").intervener4Email("test@test.com")
             .intervener4Represented(YesOrNo.YES)
+            .intervener4SolEmail("test@test.com")
             .intervener4Organisation(organisationPolicy)
             .build();
         finremCaseData.setIntervenerFourWrapper(fourWrapper);
@@ -240,6 +244,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         ).build();
         IntervenerOneWrapper oneWrapper = IntervenerOneWrapper
             .builder().intervener1Name("One name").intervener1Email("test@test.com")
+            .intervener1SolEmail("test@test.com")
             .intervener1Represented(YesOrNo.YES)
             .intervener1Organisation(organisationPolicy).build();
         finremCaseData.setIntervenerOneWrapper(oneWrapper);
@@ -323,6 +328,7 @@ public class IntervenerServiceTest extends BaseServiceTest {
         ).build();
         IntervenerTwoWrapper wrapper = IntervenerTwoWrapper
             .builder().intervener2Name("Two name").intervener2Email("test@test.com")
+            .intervener2SolEmail("test@test.com")
             .intervener2Represented(YesOrNo.YES)
             .intervener2Organisation(organisationPolicy).build();
         finremCaseData.setIntervenerTwoWrapper(wrapper);
