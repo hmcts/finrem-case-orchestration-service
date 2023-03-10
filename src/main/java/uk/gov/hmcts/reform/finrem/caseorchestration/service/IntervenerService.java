@@ -79,7 +79,7 @@ public class IntervenerService {
             log.info("revoke case role for intervener4 for case {}", caseId);
             String orgId = wrapper.getIntervener4Organisation().getOrganisation().getOrganisationID();
             String email = wrapper.getIntervener4Email();
-            addIntervenerRole(caseId, email, orgId, CaseRole.INTVR_SOLICITOR_4.getValue(), auth);
+            remokeIntervenerRole(caseId, email, orgId, CaseRole.INTVR_SOLICITOR_4.getValue(), auth);
         }
         caseData.setIntervenerFourWrapper(null);
     }
