@@ -140,7 +140,11 @@ public class IntervenerService {
                 log.info("Add Intervener2 case role for case {}", caseId);
                 String orgId = intervenerTwoWrapper.getIntervener2Organisation().getOrganisation().getOrganisationID();
                 String email = intervenerTwoWrapper.getIntervener2SolEmail();
+                String orgPolicyCaseAssignedRole = intervenerTwoWrapper.getIntervener2Organisation().getOrgPolicyCaseAssignedRole();
+                log.info("Intervener2 before current case role {} for case {}", caseId, orgPolicyCaseAssignedRole);
                 addIntervenerRole(caseId, email, orgId, caseRole, auth);
+                String orgPolicyCaseAssignedRole2 = intervenerTwoWrapper.getIntervener2Organisation().getOrgPolicyCaseAssignedRole();
+                log.info("Intervener2 before after case role {} for case {}", caseId, orgPolicyCaseAssignedRole2);
             } else {
                 log.info("Intervener2 add default case role and organisation for case {}", caseId);
                 Organisation organisation = Organisation.builder().organisationID(null).organisationName(null).build();
@@ -162,7 +166,11 @@ public class IntervenerService {
                 log.info("Add Intervener1 case role for case {}", caseId);
                 String orgId = intervenerOneWrapper.getIntervener1Organisation().getOrganisation().getOrganisationID();
                 String email = intervenerOneWrapper.getIntervener1SolEmail();
+                String orgPolicyCaseAssignedRole = intervenerOneWrapper.getIntervener1Organisation().getOrgPolicyCaseAssignedRole();
+                log.info("Intervener1 current case role {} for case {}", caseId, orgPolicyCaseAssignedRole);
                 addIntervenerRole(caseId, email, orgId, caseRole, auth);
+                String orgPolicyCaseAssignedRole2 = intervenerOneWrapper.getIntervener1Organisation().getOrgPolicyCaseAssignedRole();
+                log.info("Intervener1 after case role {} for case {}", caseId, orgPolicyCaseAssignedRole2);
             } else {
                 log.info("Intervener1 add default case role and organisation for case {}", caseId);
                 Organisation organisation = Organisation.builder().organisationID(null).organisationName(null).build();
