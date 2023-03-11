@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchUserException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
@@ -26,10 +27,12 @@ import java.util.Optional;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_1;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.INTVR_SOLICITOR_3;
@@ -479,6 +482,34 @@ public class IntervenerServiceTest extends BaseServiceTest {
             service.setIntvenerDateAddedAndDefaultOrgIfNotRepresented(finremCaseData, CASE_ID)
         ).isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Invalid intervener selected");
+    }
+
+    @Test
+    public void givenContestedCase_whenAddingIntervenerWithNonRegisterEmail_thenHandlerThrowException() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+        OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().organisation(
+            Organisation.builder().organisationID(SOME_ORG_ID).organisationName(SOME_ORG_ID).build()
+        ).build();
+        IntervenerFourWrapper wrapper = IntervenerFourWrapper
+            .builder().intervener4Name("Two name").intervener4Email(INTERVENER_TEST_EMAIL)
+            .intervener4Represented(YesOrNo.YES)
+            .intervener4SolEmail(INTERVENER_TEST_EMAIL)
+            .intervener4Organisation(organisationPolicy).build();
+        finremCaseData.setIntervenerFourWrapper(wrapper);
+
+        DynamicRadioListElement option = DynamicRadioListElement.builder().code(INTERVENER_FOUR).build();
+        List<DynamicRadioListElement> list = List.of(option);
+        DynamicRadioList dynamicRadioList = DynamicRadioList.builder().listItems(list).build();
+        finremCaseData.setIntervenersList(dynamicRadioList);
+        DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_FOUR).build();
+        finremCaseData.getIntervenersList().setValue(option1);
+
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
+        Throwable exception = assertThrows(NoSuchUserException.class,
+            () -> service.setIntvenerDateAddedAndDefaultOrgIfNotRepresented(finremCaseData, CASE_ID));
+        assertEquals("expecting exception to throw when user not found in am",
+            "Could not find the user with email " + INTERVENER_TEST_EMAIL, exception.getMessage());
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
