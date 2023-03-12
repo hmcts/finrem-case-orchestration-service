@@ -99,7 +99,7 @@ public class IntervenersAboutToSubmitHandlerTest {
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(service).setIntvenerDateAddedAndDefaultOrgIfNotRepresented(any(), any());
+        verify(service).setIntvenerDateAddedAndDefaultOrgIfNotRepresented(any());
     }
 
     @Test
@@ -150,7 +150,7 @@ public class IntervenersAboutToSubmitHandlerTest {
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(service).setIntvenerDateAddedAndDefaultOrgIfNotRepresented(any(), any());
+        verify(service).setIntvenerDateAddedAndDefaultOrgIfNotRepresented(any());
     }
 
     @Test
@@ -201,7 +201,7 @@ public class IntervenersAboutToSubmitHandlerTest {
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(service).setIntvenerDateAddedAndDefaultOrgIfNotRepresented(any(), any());
+        verify(service).setIntvenerDateAddedAndDefaultOrgIfNotRepresented(any());
     }
 
     @Test
@@ -250,7 +250,7 @@ public class IntervenersAboutToSubmitHandlerTest {
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(service).setIntvenerDateAddedAndDefaultOrgIfNotRepresented(any(), any());
+        verify(service).setIntvenerDateAddedAndDefaultOrgIfNotRepresented(any());
     }
 
     @Test
@@ -309,6 +309,8 @@ public class IntervenersAboutToSubmitHandlerTest {
         return FinremCallbackRequest
             .builder()
             .eventType(EventType.MANAGE_INTERVENERS)
+            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+                .data(new FinremCaseData()).build())
             .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
                 .data(new FinremCaseData()).build())
             .build();
