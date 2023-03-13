@@ -110,6 +110,7 @@ public class IntervenerService {
                 log.info("Add Intervener3 case role for case {}", caseId);
                 String orgId = intervenerFourWrapper.getIntervener4Organisation().getOrganisation().getOrganisationID();
                 String email = intervenerFourWrapper.getIntervener4SolEmail();
+                checkIfIntervenerFourSolDetailsChanged(caseDetailsBefore, orgId);
                 addIntervenerRole(caseId, email, orgId, caseRole);
             } else {
                 FinremCaseData beforeData = caseDetailsBefore.getData();
@@ -132,6 +133,70 @@ public class IntervenerService {
         }
     }
 
+    private void checkIfIntervenerFourSolDetailsChanged(FinremCaseDetails caseDetailsBefore, String orgId) {
+        FinremCaseData beforeData = caseDetailsBefore.getData();
+        IntervenerFourWrapper beforeIntv = beforeData.getIntervenerFourWrapper();
+
+        if (ObjectUtils.isNotEmpty(beforeIntv)
+            && beforeIntv.getIntervener4Represented() != null
+            && beforeIntv.getIntervener4Represented().equals(YesOrNo.YES)) {
+            String beforeOrgId = beforeIntv.getIntervener4Organisation().getOrganisation().getOrganisationID();
+            if (!beforeOrgId.equals(orgId)) {
+                remokeIntervenerRole(caseDetailsBefore.getId(), beforeIntv.getIntervener4SolEmail(),
+                    beforeOrgId,
+                    CaseRole.INTVR_SOLICITOR_4.getValue());
+            }
+        }
+    }
+
+    private void checkIfIntervenerThreeSolDetailsChanged(FinremCaseDetails caseDetailsBefore, String orgId) {
+        FinremCaseData beforeData = caseDetailsBefore.getData();
+        IntervenerThreeWrapper beforeIntv = beforeData.getIntervenerThreeWrapper();
+
+        if (ObjectUtils.isNotEmpty(beforeIntv)
+            && beforeIntv.getIntervener3Represented() != null
+            && beforeIntv.getIntervener3Represented().equals(YesOrNo.YES)) {
+            String beforeOrgId = beforeIntv.getIntervener3Organisation().getOrganisation().getOrganisationID();
+            if (!beforeOrgId.equals(orgId)) {
+                remokeIntervenerRole(caseDetailsBefore.getId(), beforeIntv.getIntervener3SolEmail(),
+                    beforeOrgId,
+                    CaseRole.INTVR_SOLICITOR_3.getValue());
+            }
+        }
+    }
+
+    private void checkIfIntervenerTwoSolDetailsChanged(FinremCaseDetails caseDetailsBefore, String orgId) {
+        FinremCaseData beforeData = caseDetailsBefore.getData();
+        IntervenerTwoWrapper beforeIntv = beforeData.getIntervenerTwoWrapper();
+
+        if (ObjectUtils.isNotEmpty(beforeIntv)
+            && beforeIntv.getIntervener2Represented() != null
+            && beforeIntv.getIntervener2Represented().equals(YesOrNo.YES)) {
+            String beforeOrgId = beforeIntv.getIntervener2Organisation().getOrganisation().getOrganisationID();
+            if (!beforeOrgId.equals(orgId)) {
+                remokeIntervenerRole(caseDetailsBefore.getId(), beforeIntv.getIntervener2SolEmail(),
+                    beforeOrgId,
+                    CaseRole.INTVR_SOLICITOR_2.getValue());
+            }
+        }
+    }
+
+    private void checkIfIntervenerOneSolDetailsChanged(FinremCaseDetails caseDetailsBefore, String orgId) {
+        FinremCaseData beforeData = caseDetailsBefore.getData();
+        IntervenerOneWrapper beforeIntv = beforeData.getIntervenerOneWrapper();
+
+        if (ObjectUtils.isNotEmpty(beforeIntv)
+            && beforeIntv.getIntervener1Represented() != null
+            && beforeIntv.getIntervener1Represented().equals(YesOrNo.YES)) {
+            String beforeOrgId = beforeIntv.getIntervener1Organisation().getOrganisation().getOrganisationID();
+            if (!beforeOrgId.equals(orgId)) {
+                remokeIntervenerRole(caseDetailsBefore.getId(), beforeIntv.getIntervener1SolEmail(),
+                    beforeOrgId,
+                    CaseRole.INTVR_SOLICITOR_1.getValue());
+            }
+        }
+    }
+
     private void updateIntervenerThreeDetails(FinremCallbackRequest callbackRequest) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
@@ -150,6 +215,7 @@ public class IntervenerService {
                 log.info("Add Intervener3 case role for case {}", caseId);
                 String orgId = intervenerThreeWrapper.getIntervener3Organisation().getOrganisation().getOrganisationID();
                 String email = intervenerThreeWrapper.getIntervener3SolEmail();
+                checkIfIntervenerThreeSolDetailsChanged(caseDetailsBefore, orgId);
                 addIntervenerRole(caseId, email, orgId, caseRole);
             } else {
                 FinremCaseData beforeData = caseDetailsBefore.getData();
@@ -190,6 +256,7 @@ public class IntervenerService {
                 log.info("Add Intervener2 case role for case {}", caseId);
                 String orgId = intervenerTwoWrapper.getIntervener2Organisation().getOrganisation().getOrganisationID();
                 String email = intervenerTwoWrapper.getIntervener2SolEmail();
+                checkIfIntervenerTwoSolDetailsChanged(caseDetailsBefore, orgId);
                 addIntervenerRole(caseId, email, orgId, caseRole);
             } else {
                 FinremCaseData beforeData = caseDetailsBefore.getData();
@@ -231,6 +298,7 @@ public class IntervenerService {
                 log.info("Add Intervener1 case role for case {}", caseId);
                 String orgId = intervenerOneWrapper.getIntervener1Organisation().getOrganisation().getOrganisationID();
                 String email = intervenerOneWrapper.getIntervener1SolEmail();
+                checkIfIntervenerOneSolDetailsChanged(caseDetailsBefore, orgId);
                 addIntervenerRole(caseId, email, orgId, caseRole);
             } else {
                 FinremCaseData beforeData = caseDetailsBefore.getData();
