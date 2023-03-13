@@ -32,7 +32,7 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_COVER_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_OTHER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
 
 @Slf4j
@@ -78,20 +78,29 @@ public class SendOrderContestedAboutToSubmitHandler
         List<HearingOrderCollectionData> hearingOrderCollectionData = documentHelper.getHearingOrderDocuments(caseData);
 
         if (hearingOrderCollectionData != null && !hearingOrderCollectionData.isEmpty()) {
+            int index = hearingOrderCollectionData.size() - 1;
             CaseDocument latestHearingOrder = hearingOrderCollectionData
-                .get(hearingOrderCollectionData.size() - 1)
+                .get(index)
                 .getHearingOrderDocuments().getUploadDraftDocument();
 
-            log.info("Received request to stampFinalOrder called with Case ID = {}, latestHearingOrder = {}", caseDetails.getId(),
-                latestHearingOrder);
+            List<HearingOrderCollectionData> hearings =  new ArrayList<>(hearingOrderCollectionData);
+            CaseDocument latestHearingOrderPdf = genericDocumentService.convertDocumentIfNotPdfAlready(latestHearingOrder, authToken);
+            HearingOrderDocument document = HearingOrderDocument.builder().uploadDraftDocument(latestHearingOrderPdf).build();
+            hearings.remove(index);
+            hearings.add(index, HearingOrderCollectionData.builder().hearingOrderDocuments(document).build());
+            caseData.put(HEARING_ORDER_COLLECTION, hearings);
 
-            stampAndAddToCollection(caseData, latestHearingOrder, authToken);
+            log.info("Received request to stampFinalOrder called with Case ID = {},"
+                    + " latestHearingOrder = {}, latestHearingOrderPdf {}", caseDetails.getId(),
+                latestHearingOrder, latestHearingOrderPdf);
+
+            stampAndAddToCollection(caseData, latestHearingOrderPdf, authToken);
         }
     }
 
     private void printAndMailGeneralOrderToParties(CaseDetails caseDetails, String authorisationToken) {
         if (contestedGeneralOrderPresent(caseDetails)) {
-            BulkPrintDocument generalOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(caseDetails.getData());
+            BulkPrintDocument generalOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(caseDetails.getData(), authorisationToken);
 
             if (paperNotificationService.shouldPrintForApplicant(caseDetails)) {
                 bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, singletonList(generalOrder));
@@ -107,7 +116,7 @@ public class SendOrderContestedAboutToSubmitHandler
         if (caseDataService.isContestedPaperApplication(caseDetails)) {
             Map<String, Object> caseData = caseDetails.getData();
 
-            List<BulkPrintDocument> hearingDocumentPack = createHearingDocumentPack(caseData);
+            List<BulkPrintDocument> hearingDocumentPack = createHearingDocumentPack(caseData, authorisationToken);
 
             if (paperNotificationService.shouldPrintForApplicant(caseDetails)) {
                 log.info("Received request to send hearing pack for applicant for case {}:", caseDetails.getId());
@@ -121,7 +130,7 @@ public class SendOrderContestedAboutToSubmitHandler
         }
     }
 
-    private List<BulkPrintDocument> createHearingDocumentPack(Map<String, Object> caseData) {
+    private List<BulkPrintDocument> createHearingDocumentPack(Map<String, Object> caseData, String authorisationToken) {
         List<BulkPrintDocument> hearingDocumentPack = new ArrayList<>();
 
         documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, CONTESTED_ORDER_APPROVED_COVER_LETTER).ifPresent(hearingDocumentPack::add);
@@ -133,8 +142,8 @@ public class SendOrderContestedAboutToSubmitHandler
                 caseDocument -> hearingDocumentPack.add(documentHelper.getCaseDocumentAsBulkPrintDocument(caseDocument)));
         }
 
-        List<BulkPrintDocument> otherHearingDocuments = documentHelper.getCollectionOfDocumentLinksAsBulkPrintDocuments(
-            caseData, HEARING_ORDER_OTHER_COLLECTION);
+        List<BulkPrintDocument> otherHearingDocuments = documentHelper.getHearingDocumentsAsBulkPrintDocuments(
+            caseData, authorisationToken);
 
         if (otherHearingDocuments != null) {
             hearingDocumentPack.addAll(otherHearingDocuments);

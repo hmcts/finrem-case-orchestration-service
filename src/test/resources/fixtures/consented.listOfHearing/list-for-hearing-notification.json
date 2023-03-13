@@ -4,7 +4,7 @@
   "case_details": {
     "id": "12345678",
     "jurisdiction": "divorce",
-    "state": "created",
+    "state": "caseAdded",
     "case_type_id": "FinancialRemedyMVP2",
     "case_data": {
       "isAdmin": "Yes",

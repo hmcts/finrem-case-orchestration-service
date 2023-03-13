@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsentedData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContestedData;
@@ -48,6 +49,8 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     private GeneralOrderService generalOrderService;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private DocumentHelper documentHelper;
     @Autowired
     private DocumentConfiguration documentConfiguration;
 
@@ -225,7 +228,12 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     @Test
     public void getsCorrectGeneralOrdersForPrintingConsented() throws Exception {
         CaseDetails details = consentedCaseDetails();
-        BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(details.getData());
+        CaseDocument caseDocument = documentHelper.convertToCaseDocument(details.getData().get(GENERAL_ORDER_LATEST_DOCUMENT));
+        CaseDocument pdfDoc = buildCaseDocument("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/",
+            "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary",
+            "test.pdf");
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, AUTH_TOKEN)).thenReturn(pdfDoc);
+        BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(details.getData(), AUTH_TOKEN);
         assertThat(latestGeneralOrder.getBinaryFileUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
     }
@@ -234,7 +242,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     public void getsZeroGeneralOrdersForPrintingWhenNoneConsented() throws Exception {
         CaseDetails details = consentedCaseDetails();
         details.getData().put(GENERAL_ORDER_LATEST_DOCUMENT, null);
-        BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(details.getData());
+        BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(details.getData(), AUTH_TOKEN);
         assertNull(latestGeneralOrder);
     }
 
@@ -265,7 +273,8 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     void verifyAdditionalFieldsConsented() {
         verify(genericDocumentService, times(1))
             .generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
-                eq(documentConfiguration.getGeneralOrderTemplate()), eq(documentConfiguration.getGeneralOrderFileName()));
+                eq(documentConfiguration.getGeneralOrderTemplate(CaseDetails.builder().build())),
+                eq(documentConfiguration.getGeneralOrderFileName()));
 
         Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
         assertThat(data.get("DivorceCaseNumber"), is("DD12D12345"));
@@ -282,7 +291,8 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     void verifyAdditionalFieldsContested() {
         verify(genericDocumentService, times(1))
             .generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
-                eq(documentConfiguration.getGeneralOrderTemplate()), eq(documentConfiguration.getGeneralOrderFileName()));
+                eq(documentConfiguration.getGeneralOrderTemplate(CaseDetails.builder().build())),
+                eq(documentConfiguration.getGeneralOrderFileName()));
 
         Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
         assertThat(data.get("DivorceCaseNumber"), is("DD98D76543"));
@@ -296,6 +306,11 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         assertThat(data.get("GeneralOrderHeaderOne"), is("In the Family Court"));
         assertThat(data.get("GeneralOrderHeaderTwo"), is("sitting in the"));
         assertThat(data.get("GeneralOrderCourtSitting"), is("SITTING AT the Family Court at the "));
+        Map<String, Object> court = (Map<String, Object>) data.get("courtDetails");
 
+        assertThat(court.get("courtName"), is("Nottingham County Court And Family Court"));
+        assertThat(court.get("courtAddress"), is("60 Canal Street, Nottingham NG1 7EJ"));
+        assertThat(court.get("phoneNumber"), is("0115 910 3504"));
+        assertThat(court.get("email"), is("FRCNottingham@justice.gov.uk"));
     }
 }

@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -125,13 +126,15 @@ public class ValidateHearingServiceTest extends BaseServiceTest {
     }
 
     private List<String> doTestWarnings(List<ImmutablePair<String, Object>> pairs) {
+        List<String> nonFastTrackWarningsList = new ArrayList<>();
+        List<String> fastTrackWarningsList = new ArrayList<>();
         ImmutableMap<String, Object> caseData = pairs.stream()
             .collect(collectingAndThen(
                 toMap(ImmutablePair::getLeft, ImmutablePair::getRight), ImmutableMap::copyOf)
             );
 
         CaseDetails caseDetails = CaseDetails.builder().data(caseData).build();
-        return service.validateHearingWarnings(caseDetails);
+        return service.validateHearingWarnings(caseDetails, fastTrackWarningsList, nonFastTrackWarningsList);
     }
 
     private List<String> doTestErrors(List<ImmutablePair<String, Object>> pairs) {

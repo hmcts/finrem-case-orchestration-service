@@ -34,7 +34,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.pensionDocumentData;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.paymentDocumentCollection;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BIRMINGHAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BIRMINGHAM_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ALLOCATED_TO;
@@ -161,7 +161,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     public void sendToBulkPrint_multipleFormA() {
         CaseDetails caseDetails = caseDetails(YES_VALUE);
 
-        caseDetails.getData().put(FORM_A_COLLECTION, asList(pensionDocumentData(), pensionDocumentData(), pensionDocumentData()));
+        caseDetails.getData().put(FORM_A_COLLECTION, asList(paymentDocumentCollection(), paymentDocumentCollection(), paymentDocumentCollection()));
 
         hearingDocumentService.sendInitialHearingCorrespondence(caseDetails, AUTH_TOKEN);
 
@@ -415,7 +415,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         caseData.put(FAST_TRACK_DECISION, isFastTrackDecision);
         caseData.put(HEARING_DATE, DATE_OF_HEARING);
-        caseData.put(FORM_A_COLLECTION, singletonList(pensionDocumentData()));
+        caseData.put(FORM_A_COLLECTION, singletonList(paymentDocumentCollection()));
         caseData.put(FORM_C, caseDocument());
         caseData.put(FORM_G, caseDocument());
         caseData.put(OUT_OF_FAMILY_COURT_RESOLUTION, caseDocument());
@@ -432,9 +432,12 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
     void verifyAdditionalFastTrackFields() {
         verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
-            eq(documentConfiguration.getFormCFastTrackTemplate()), eq(documentConfiguration.getFormCFileName()));
-        verify(genericDocumentService, never()).generateDocument(any(), any(), eq(documentConfiguration.getFormCNonFastTrackTemplate()), any());
-        verify(genericDocumentService, never()).generateDocument(any(), any(), eq(documentConfiguration.getFormGTemplate()), any());
+            eq(documentConfiguration.getFormCFastTrackTemplate(CaseDetails.builder().build())),
+            eq(documentConfiguration.getFormCFileName()));
+        verify(genericDocumentService, never()).generateDocument(any(), any(),
+            eq(documentConfiguration.getFormCNonFastTrackTemplate(CaseDetails.builder().build())), any());
+        verify(genericDocumentService, never()).generateDocument(any(), any(),
+            eq(documentConfiguration.getFormGTemplate(CaseDetails.builder().build())), any());
 
         Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
         assertThat(data.get("formCCreatedDate"), is(notNullValue()));
@@ -458,11 +461,14 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
     void verifyAdditionalNonFastTrackFields() {
         verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
-            eq(documentConfiguration.getFormCNonFastTrackTemplate()), eq(documentConfiguration.getFormCFileName()));
+            eq(documentConfiguration.getFormCNonFastTrackTemplate(CaseDetails.builder().build())),
+            eq(documentConfiguration.getFormCFileName()));
         verify(genericDocumentService, never())
-            .generateDocument(any(), any(), eq(documentConfiguration.getFormCFastTrackTemplate()), any());
+            .generateDocument(any(), any(),
+                eq(documentConfiguration.getFormCFastTrackTemplate(CaseDetails.builder().build())), any());
         verify(genericDocumentService)
-            .generateDocument(eq(AUTH_TOKEN), any(), eq(documentConfiguration.getFormGTemplate()), eq(documentConfiguration.getFormGFileName()));
+            .generateDocument(eq(AUTH_TOKEN), any(), eq(documentConfiguration.getFormGTemplate(CaseDetails.builder().build())),
+                eq(documentConfiguration.getFormGFileName()));
 
         Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
         assertThat(data.get("formCCreatedDate"), is(notNullValue()));

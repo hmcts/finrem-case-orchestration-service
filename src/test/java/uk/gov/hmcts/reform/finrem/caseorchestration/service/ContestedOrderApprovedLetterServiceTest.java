@@ -57,7 +57,7 @@ public class ContestedOrderApprovedLetterServiceTest extends BaseServiceTest {
         contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, AUTH_TOKEN);
 
         verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
-            eq(documentConfiguration.getContestedOrderApprovedCoverLetterTemplate()),
+            eq(documentConfiguration.getContestedOrderApprovedCoverLetterTemplate(caseDetails)),
             eq(documentConfiguration.getContestedOrderApprovedCoverLetterFileName()));
 
         verifyTemplateVariablesArePopulated();

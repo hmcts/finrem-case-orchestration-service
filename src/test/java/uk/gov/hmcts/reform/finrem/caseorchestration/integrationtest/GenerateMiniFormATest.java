@@ -66,7 +66,7 @@ public class GenerateMiniFormATest extends AbstractDocumentTest {
     @Override
     protected DocumentGenerationRequest documentRequest() {
         return DocumentGenerationRequest.builder()
-            .template(documentConfiguration.getMiniFormTemplate())
+            .template(documentConfiguration.getMiniFormTemplate(request.getCaseDetails()))
             .fileName(documentConfiguration.getMiniFormFileName())
             .values(Collections.singletonMap("caseDetails", request.getCaseDetails()))
             .build();

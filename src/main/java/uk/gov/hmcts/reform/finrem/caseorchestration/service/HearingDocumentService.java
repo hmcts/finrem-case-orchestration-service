@@ -57,10 +57,10 @@ public class HearingDocumentService {
     private Map<String, CaseDocument> generateFormCAndG(Pair<CaseDetails, String> pair) {
         CompletableFuture<CaseDocument> formCNonFastTrack =
             supplyAsync(() -> genericDocumentService.generateDocument(pair.getRight(), addNonFastTrackFields.apply(pair.getLeft()),
-                documentConfiguration.getFormCNonFastTrackTemplate(), documentConfiguration.getFormCFileName()));
+                documentConfiguration.getFormCNonFastTrackTemplate(pair.getLeft()), documentConfiguration.getFormCFileName()));
 
         CompletableFuture<CaseDocument> formG = supplyAsync(() -> genericDocumentService.generateDocument(pair.getRight(), pair.getLeft(),
-            documentConfiguration.getFormGTemplate(), documentConfiguration.getFormGFileName()));
+            documentConfiguration.getFormGTemplate(pair.getLeft()), documentConfiguration.getFormGFileName()));
 
         return formCNonFastTrack
             .thenCombine(formG, this::createDocumentMap).join();
@@ -77,7 +77,7 @@ public class HearingDocumentService {
         Map<String, CaseDocument> documentMap = new HashMap<>();
         documentMap.put(FORM_C,
             genericDocumentService.generateDocument(pair.getRight(), addFastTrackFields.apply(pair.getLeft()),
-                documentConfiguration.getFormCFastTrackTemplate(), documentConfiguration.getFormCFileName()));
+                documentConfiguration.getFormCFastTrackTemplate(pair.getLeft()), documentConfiguration.getFormCFileName()));
         return documentMap;
     }
 
