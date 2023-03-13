@@ -43,7 +43,7 @@ public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
     @Override
     protected DocumentGenerationRequest documentRequest() {
         return DocumentGenerationRequest.builder()
-            .template(documentConfiguration.getFormCFastTrackTemplate())
+            .template(documentConfiguration.getFormCFastTrackTemplate(CaseDetails.builder().build()))
             .fileName(documentConfiguration.getFormCFileName())
             .values(Collections.singletonMap("caseDetails", request.getCaseDetails()))
             .build();

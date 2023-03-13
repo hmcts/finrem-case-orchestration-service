@@ -31,7 +31,7 @@ public class ContestedOrderApprovedLetterService {
         populateTemplateVariables(caseDetailsCopy);
 
         CaseDocument approvedOrderCoverLetter = genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
-            documentConfiguration.getContestedOrderApprovedCoverLetterTemplate(),
+            documentConfiguration.getContestedOrderApprovedCoverLetterTemplate(caseDetails),
             documentConfiguration.getContestedOrderApprovedCoverLetterFileName());
 
         caseDetails.getData().put(CONTESTED_ORDER_APPROVED_COVER_LETTER, approvedOrderCoverLetter);
