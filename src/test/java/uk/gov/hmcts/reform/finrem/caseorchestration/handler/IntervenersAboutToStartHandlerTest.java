@@ -48,6 +48,13 @@ public class IntervenersAboutToStartHandlerTest {
     }
 
     @Test
+    public void givenConsentedCase_whenCallbackIsConsented_thenHandlerCanNotHandle() {
+        assertThat(handler
+                .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONSENTED, EventType.CLOSE),
+            is(false));
+    }
+
+    @Test
     public void givenContestedCase_whenEventIsManageInteveners_thenHandlerCanHandle() {
         assertThat(handler
                 .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.MANAGE_INTERVENERS),

@@ -110,7 +110,7 @@ public class IntervenerService {
                 log.info("Add Intervener3 case role for case {}", caseId);
                 String orgId = intervenerFourWrapper.getIntervener4Organisation().getOrganisation().getOrganisationID();
                 String email = intervenerFourWrapper.getIntervener4SolEmail();
-                checkIfIntervenerFourSolDetailsChanged(caseDetailsBefore, orgId);
+                checkIfIntervenerFourSolDetailsChanged(caseDetailsBefore, orgId, email);
                 addIntervenerRole(caseId, email, orgId, caseRole);
             } else {
                 FinremCaseData beforeData = caseDetailsBefore.getData();
@@ -133,7 +133,7 @@ public class IntervenerService {
         }
     }
 
-    private void checkIfIntervenerFourSolDetailsChanged(FinremCaseDetails caseDetailsBefore, String orgId) {
+    private void checkIfIntervenerFourSolDetailsChanged(FinremCaseDetails caseDetailsBefore, String orgId, String email) {
         FinremCaseData beforeData = caseDetailsBefore.getData();
         IntervenerFourWrapper beforeIntv = beforeData.getIntervenerFourWrapper();
 
@@ -141,7 +141,7 @@ public class IntervenerService {
             && beforeIntv.getIntervener4Represented() != null
             && beforeIntv.getIntervener4Represented().equals(YesOrNo.YES)) {
             String beforeOrgId = beforeIntv.getIntervener4Organisation().getOrganisation().getOrganisationID();
-            if (!beforeOrgId.equals(orgId)) {
+            if (!beforeOrgId.equals(orgId) || !beforeIntv.getIntervener4SolEmail().equals(email)) {
                 remokeIntervenerRole(caseDetailsBefore.getId(), beforeIntv.getIntervener4SolEmail(),
                     beforeOrgId,
                     CaseRole.INTVR_SOLICITOR_4.getValue());
@@ -149,7 +149,7 @@ public class IntervenerService {
         }
     }
 
-    private void checkIfIntervenerThreeSolDetailsChanged(FinremCaseDetails caseDetailsBefore, String orgId) {
+    private void checkIfIntervenerThreeSolDetailsChanged(FinremCaseDetails caseDetailsBefore, String orgId, String email) {
         FinremCaseData beforeData = caseDetailsBefore.getData();
         IntervenerThreeWrapper beforeIntv = beforeData.getIntervenerThreeWrapper();
 
@@ -157,7 +157,7 @@ public class IntervenerService {
             && beforeIntv.getIntervener3Represented() != null
             && beforeIntv.getIntervener3Represented().equals(YesOrNo.YES)) {
             String beforeOrgId = beforeIntv.getIntervener3Organisation().getOrganisation().getOrganisationID();
-            if (!beforeOrgId.equals(orgId)) {
+            if (!beforeOrgId.equals(orgId) || !beforeIntv.getIntervener3SolEmail().equals(email)) {
                 remokeIntervenerRole(caseDetailsBefore.getId(), beforeIntv.getIntervener3SolEmail(),
                     beforeOrgId,
                     CaseRole.INTVR_SOLICITOR_3.getValue());
@@ -165,7 +165,7 @@ public class IntervenerService {
         }
     }
 
-    private void checkIfIntervenerTwoSolDetailsChanged(FinremCaseDetails caseDetailsBefore, String orgId) {
+    private void checkIfIntervenerTwoSolDetailsChanged(FinremCaseDetails caseDetailsBefore, String orgId, String email) {
         FinremCaseData beforeData = caseDetailsBefore.getData();
         IntervenerTwoWrapper beforeIntv = beforeData.getIntervenerTwoWrapper();
 
@@ -173,7 +173,7 @@ public class IntervenerService {
             && beforeIntv.getIntervener2Represented() != null
             && beforeIntv.getIntervener2Represented().equals(YesOrNo.YES)) {
             String beforeOrgId = beforeIntv.getIntervener2Organisation().getOrganisation().getOrganisationID();
-            if (!beforeOrgId.equals(orgId)) {
+            if (!beforeOrgId.equals(orgId) || !beforeIntv.getIntervener2SolEmail().equals(email)) {
                 remokeIntervenerRole(caseDetailsBefore.getId(), beforeIntv.getIntervener2SolEmail(),
                     beforeOrgId,
                     CaseRole.INTVR_SOLICITOR_2.getValue());
@@ -181,7 +181,7 @@ public class IntervenerService {
         }
     }
 
-    private void checkIfIntervenerOneSolDetailsChanged(FinremCaseDetails caseDetailsBefore, String orgId) {
+    private void checkIfIntervenerOneSolDetailsChanged(FinremCaseDetails caseDetailsBefore, String orgId, String email) {
         FinremCaseData beforeData = caseDetailsBefore.getData();
         IntervenerOneWrapper beforeIntv = beforeData.getIntervenerOneWrapper();
 
@@ -189,7 +189,7 @@ public class IntervenerService {
             && beforeIntv.getIntervener1Represented() != null
             && beforeIntv.getIntervener1Represented().equals(YesOrNo.YES)) {
             String beforeOrgId = beforeIntv.getIntervener1Organisation().getOrganisation().getOrganisationID();
-            if (!beforeOrgId.equals(orgId)) {
+            if (!beforeOrgId.equals(orgId) || !beforeIntv.getIntervener1SolEmail().equals(email)) {
                 remokeIntervenerRole(caseDetailsBefore.getId(), beforeIntv.getIntervener1SolEmail(),
                     beforeOrgId,
                     CaseRole.INTVR_SOLICITOR_1.getValue());
@@ -215,7 +215,7 @@ public class IntervenerService {
                 log.info("Add Intervener3 case role for case {}", caseId);
                 String orgId = intervenerThreeWrapper.getIntervener3Organisation().getOrganisation().getOrganisationID();
                 String email = intervenerThreeWrapper.getIntervener3SolEmail();
-                checkIfIntervenerThreeSolDetailsChanged(caseDetailsBefore, orgId);
+                checkIfIntervenerThreeSolDetailsChanged(caseDetailsBefore, orgId, email);
                 addIntervenerRole(caseId, email, orgId, caseRole);
             } else {
                 FinremCaseData beforeData = caseDetailsBefore.getData();
@@ -256,7 +256,7 @@ public class IntervenerService {
                 log.info("Add Intervener2 case role for case {}", caseId);
                 String orgId = intervenerTwoWrapper.getIntervener2Organisation().getOrganisation().getOrganisationID();
                 String email = intervenerTwoWrapper.getIntervener2SolEmail();
-                checkIfIntervenerTwoSolDetailsChanged(caseDetailsBefore, orgId);
+                checkIfIntervenerTwoSolDetailsChanged(caseDetailsBefore, orgId, email);
                 addIntervenerRole(caseId, email, orgId, caseRole);
             } else {
                 FinremCaseData beforeData = caseDetailsBefore.getData();
@@ -298,7 +298,7 @@ public class IntervenerService {
                 log.info("Add Intervener1 case role for case {}", caseId);
                 String orgId = intervenerOneWrapper.getIntervener1Organisation().getOrganisation().getOrganisationID();
                 String email = intervenerOneWrapper.getIntervener1SolEmail();
-                checkIfIntervenerOneSolDetailsChanged(caseDetailsBefore, orgId);
+                checkIfIntervenerOneSolDetailsChanged(caseDetailsBefore, orgId, email);
                 addIntervenerRole(caseId, email, orgId, caseRole);
             } else {
                 FinremCaseData beforeData = caseDetailsBefore.getData();

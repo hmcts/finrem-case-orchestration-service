@@ -70,6 +70,13 @@ public class IntervenersMidHandlerTest {
     }
 
     @Test
+    public void givenConsentedCase_whenCallTypeConsented_thenHandlerCanNotHandle() {
+        assertThat(midHandler
+                .canHandle(CallbackType.MID_EVENT, CaseType.CONSENTED, EventType.CLOSE),
+            is(false));
+    }
+
+    @Test
     public void givenContestedCase_whenEventIsManageInteveners_thenHandlerCanHandleEvent() {
         assertThat(midHandler
                 .canHandle(CallbackType.MID_EVENT, CaseType.CONTESTED, EventType.MANAGE_INTERVENERS),
@@ -96,6 +103,24 @@ public class IntervenersMidHandlerTest {
         assertEquals(ADD_INTERVENER_ONE_VALUE, intervenerOptionList.getValue().getLabel());
         assertEquals(ADD_INTERVENER_ONE_CODE, intervenerOptionList.getListItems().get(0).getCode());
         assertEquals(ADD_INTERVENER_ONE_VALUE, intervenerOptionList.getListItems().get(0).getLabel());
+    }
+
+    @Test
+    public void givenContestedCase_whenMidEventCalledAndIntervSelectedToOperateNotValid_thenThrowException() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        assertEquals(4, handleResp.getData().getIntervenersList().getListItems().size());
+
+        DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_INVALID).build();
+        handleResp.getData().getIntervenersList().setValue(option1);
+
+        assertThatThrownBy(() ->
+            midHandler.handle(finremCallbackRequest, AUTH_TOKEN)
+        ).isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Invalid intervener selected for caseId " + 123L);
+
     }
 
     @Test
