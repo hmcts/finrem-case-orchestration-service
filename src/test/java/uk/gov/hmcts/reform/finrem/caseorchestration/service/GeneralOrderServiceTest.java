@@ -283,7 +283,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         assertThat(data.get("GeneralOrderCourt"), is("SITTING in private"));
         assertThat(data.get("GeneralOrderJudgeDetails"), is("His Honour Judge Consented"));
         assertThat(data.get("GeneralOrderRecitals"), is("Consented Recitals"));
-        assertThat(data.get("GeneralOrderDate"), is("01/01/2020"));
+        assertThat(data.get("GeneralOrderDate"), is("2020-01-01"));
         assertThat(data.get("GeneralOrderBodyText"), is("Test is dummy text for consented"));
         assertThat(data.get("GeneralOrderHeaderOne"), is("Sitting in the Family Court"));
     }
@@ -301,7 +301,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         assertThat(data.get("GeneralOrderCourt"), is("Nottingham County Court and Family Court"));
         assertThat(data.get("GeneralOrderJudgeDetails"), is("Her Honour Judge Contested"));
         assertThat(data.get("GeneralOrderRecitals"), is("Contested Recitals"));
-        assertThat(data.get("GeneralOrderDate"), is("01/06/2020"));
+        assertThat(data.get("GeneralOrderDate"), is("2020-06-01"));
         assertThat(data.get("GeneralOrderBodyText"), is("Test is dummy text for contested"));
         assertThat(data.get("GeneralOrderHeaderOne"), is("In the Family Court"));
         assertThat(data.get("GeneralOrderHeaderTwo"), is("sitting in the"));

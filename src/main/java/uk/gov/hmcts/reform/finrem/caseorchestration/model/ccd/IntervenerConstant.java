@@ -22,10 +22,15 @@ public class IntervenerConstant {
     public static final String ADD_INTERVENER_THREE_CODE = "addIntervener3";
     public static final String ADD_INTERVENER_FOUR_CODE = "addIntervener4";
 
-    public static final String ADD_INTERVENER_ONE_VALUE = "Add/Amend Intervener 1";
-    public static final String ADD_INTERVENER_TWO_VALUE = "Add/Amend Intervener 2";
-    public static final String ADD_INTERVENER_THREE_VALUE = "Add/Amend Intervener 3";
-    public static final String ADD_INTERVENER_FOUR_VALUE = "Add/Amend Intervener 4";
+    public static final String ADD_INTERVENER_ONE_VALUE = "Add Intervener 1";
+    public static final String ADD_INTERVENER_TWO_VALUE = "Add Intervener 2";
+    public static final String ADD_INTERVENER_THREE_VALUE = "Add Intervener 3";
+    public static final String ADD_INTERVENER_FOUR_VALUE = "Add Intervener 4";
+
+    public static final String UPDATE_INTERVENER_ONE_VALUE = "Amend Intervener 1";
+    public static final String UPDATE_INTERVENER_TWO_VALUE = "Amend Intervener 2";
+    public static final String UPDATE_INTERVENER_THREE_VALUE = "Amend Intervener 3";
+    public static final String UPDATE_INTERVENER_FOUR_VALUE = "Amend Intervener 4";
 
     public static final String DEL_INTERVENER_ONE_CODE = "delIntervener1";
     public static final String DEL_INTERVENER_TWO_CODE = "delIntervener2";

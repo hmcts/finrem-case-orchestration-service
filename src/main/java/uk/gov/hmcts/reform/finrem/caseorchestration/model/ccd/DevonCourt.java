@@ -10,14 +10,14 @@ import java.util.Arrays;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 @RequiredArgsConstructor
 public enum DevonCourt implements CourtList {
-    FR_devonList_1("FR_devonList_1"),
-    FR_devonList_2("FR_devonList_2"),
-    FR_devonList_3("FR_devonList_3"),
-    FR_devonList_4("FR_devonList_4"),
-    FR_devonList_5("FR_devonList_5"),
-    FR_devonList_6("FR_devonList_6"),
-    FR_devonList_7("FR_devonList_7"),
-    FR_devonList_8("FR_devonList_8");
+    PLYMOUTH("FR_devonList_1"),
+    EXETER("FR_devonList_2"),
+    TAUNTON("FR_devonList_3"),
+    TORQUAY("FR_devonList_4"),
+    BARNSTAPLE("FR_devonList_5"),
+    TRURO("FR_devonList_6"),
+    YEOVIL("FR_devonList_7"),
+    BODMIN("FR_devonList_8");
 
     private final String id;
 

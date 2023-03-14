@@ -1,0 +1,24 @@
+{
+  "token": "token_test",
+  "event_id": "FR_issueApplication",
+  "case_details": {
+    "id": 1234567890,
+    "jurisdiction": "DIVORCE",
+    "state": "caseAdded",
+    "case_type_id": "FinancialRemedyMVP2",
+    "case_data": {
+      "applicantFMName": "Poor",
+      "applicantLName": "Guy",
+      "appRespondentFMName": "test",
+      "appRespondentLName": "Korivi",
+      "divorceCaseNumber": "AB01D23456",
+      "servePensionProviderResponsibility": "applicantSolicitor",
+      "servePensionProvider": "Yes",
+      "civilPartnership": "No",
+      "servePensionProviderOther": "Other",
+      "orderDirectionDate": "2022-07-01",
+      "orderDirectionJudgeName": "Judgey",
+      "orderDirectionJudge": "Deputy District Judge"
+    }
+  }
+}

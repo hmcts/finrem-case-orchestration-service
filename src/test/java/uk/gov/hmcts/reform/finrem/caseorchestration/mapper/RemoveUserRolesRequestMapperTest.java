@@ -13,7 +13,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_US
 
 public class RemoveUserRolesRequestMapperTest extends BaseServiceTest {
 
-    @Autowired private RemoveUserRolesRequestMapper removeUserRolesRequestMapper;
+    @Autowired
+    private RemoveUserRolesRequestMapper removeUserRolesRequestMapper;
 
     @Test
     public void mapToAssignCaseAccessRequest() {
