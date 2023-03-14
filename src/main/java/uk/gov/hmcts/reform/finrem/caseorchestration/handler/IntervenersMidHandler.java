@@ -69,29 +69,16 @@ public class IntervenersMidHandler extends FinremCallbackHandler implements Inte
         String valueCode = caseData.getIntervenersList().getValueCode();
         List<DynamicRadioListElement> dynamicListElements = new ArrayList<>();
         switch (valueCode) {
-            case INTERVENER_ONE -> setIntervenerOptionList(caseDataBefore, dynamicListElements, ADD_INTERVENER_ONE_CODE);
-            case INTERVENER_TWO -> setIntervenerOptionList(caseDataBefore, dynamicListElements, ADD_INTERVENER_TWO_CODE);
-            case INTERVENER_THREE -> setIntervenerOptionList(caseDataBefore, dynamicListElements, ADD_INTERVENER_THREE_CODE);
-            case INTERVENER_FOUR -> setIntervenerOptionList(caseDataBefore, dynamicListElements, ADD_INTERVENER_FOUR_CODE);
+            case INTERVENER_ONE -> showIntervenerOneOption(caseDataBefore, dynamicListElements);
+            case INTERVENER_TWO -> showIntervenerTwoOption(caseDataBefore, dynamicListElements);
+            case INTERVENER_THREE -> showIntervenerThreeOption(caseDataBefore, dynamicListElements);
+            case INTERVENER_FOUR -> showIntervenerFourOption(caseDataBefore, dynamicListElements);
             default -> throw new IllegalArgumentException("Invalid intervener selected for caseId " + caseId);
         }
 
         caseData.setIntervenerOptionList(getDynamicRadioList(dynamicListElements));
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(caseData).build();
-    }
-
-    private void setIntervenerOptionList(FinremCaseData caseData,
-                                         List<DynamicRadioListElement> dynamicListElements,
-                                         String addIntvCode) {
-
-        switch (addIntvCode) {
-            case ADD_INTERVENER_ONE_CODE -> showIntervenerOneOption(caseData, dynamicListElements);
-            case ADD_INTERVENER_TWO_CODE -> showIntervenerTwoOption(caseData, dynamicListElements);
-            case ADD_INTERVENER_THREE_CODE -> showIntervenerThreeOption(caseData, dynamicListElements);
-            case ADD_INTERVENER_FOUR_CODE -> showIntervenerFourOption(caseData, dynamicListElements);
-            default -> throw new IllegalArgumentException("Invalid intervener selected for caseId ");
-        }
     }
 
     private void showIntervenerFourOption(FinremCaseData caseData, List<DynamicRadioListElement> dynamicListElements) {
