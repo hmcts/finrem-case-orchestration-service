@@ -97,8 +97,8 @@ public class InterimHearingServiceTest extends BaseServiceTest {
 
         interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
-        verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
-        verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), any(), any());
+        verify(bulkPrintService).printRespondentDocuments(any(CaseDetails.class), any(), any());
 
         Map<String, Object> caseData = caseDetails.getData();
         List<InterimHearingData> interimHearingList = interimHearingHelper.isThereAnExistingInterimHearing(caseData);
@@ -106,8 +106,8 @@ public class InterimHearingServiceTest extends BaseServiceTest {
         assertEquals("2000-10-10", interimHearingList.get(0).getValue().getInterimHearingDate());
         assertEquals("15:00", interimHearingList.get(0).getValue().getInterimHearingTime());
 
-        verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
-        verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), any(), any());
+        verify(bulkPrintService).printRespondentDocuments(any(CaseDetails.class), any(), any());
 
         verifyNonCollectionData(caseData);
         assertEquals(1, interimHearingList.size());
@@ -123,8 +123,8 @@ public class InterimHearingServiceTest extends BaseServiceTest {
 
         interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
-        verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
-        verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), any(), any());
+        verify(bulkPrintService).printRespondentDocuments(any(CaseDetails.class), any(), any());
 
         Map<String, Object> caseData = caseDetails.getData();
         List<InterimHearingData> interimHearingList = interimHearingHelper.isThereAnExistingInterimHearing(caseData);
@@ -132,8 +132,8 @@ public class InterimHearingServiceTest extends BaseServiceTest {
         assertEquals("2000-10-10", interimHearingList.get(0).getValue().getInterimHearingDate());
         assertEquals("2040-10-10", interimHearingList.get(1).getValue().getInterimHearingDate());
 
-        verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
-        verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), any(), any());
+        verify(bulkPrintService).printRespondentDocuments(any(CaseDetails.class), any(), any());
 
         verifyNonCollectionData(caseData);
         assertEquals(2, interimHearingList.size());
@@ -149,8 +149,8 @@ public class InterimHearingServiceTest extends BaseServiceTest {
 
         interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
-        verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
-        verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), any(), any());
+        verify(bulkPrintService).printRespondentDocuments(any(CaseDetails.class), any(), any());
 
         Map<String, Object> caseData = caseDetails.getData();
         List<InterimHearingData> interimHearingList = interimHearingHelper.isThereAnExistingInterimHearing(caseData);
@@ -171,8 +171,8 @@ public class InterimHearingServiceTest extends BaseServiceTest {
 
         interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
-        verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
-        verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), any(), any());
+        verify(bulkPrintService).printRespondentDocuments(any(CaseDetails.class), any(), any());
 
         List<InterimHearingData> interimHearingList = interimHearingHelper.isThereAnExistingInterimHearing(caseDetails.getData());
 
@@ -200,8 +200,8 @@ public class InterimHearingServiceTest extends BaseServiceTest {
         CaseDetails caseDetailsBefore = buildCaseDetails(TEST_NEW_JSON);
         interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
-        verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
-        verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), any(), any());
+        verify(bulkPrintService).printRespondentDocuments(any(CaseDetails.class), any(), any());
 
         List<InterimHearingData> interimHearingList = interimHearingHelper.isThereAnExistingInterimHearing(caseDetails.getData());
 

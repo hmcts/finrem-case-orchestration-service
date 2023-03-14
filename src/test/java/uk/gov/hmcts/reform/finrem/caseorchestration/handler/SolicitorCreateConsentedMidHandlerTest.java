@@ -3,10 +3,12 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedApplicationHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -35,9 +37,12 @@ public class SolicitorCreateConsentedMidHandlerTest {
     private SolicitorCreateConsentedMidHandler solicitorCreateConsentedMidHandler;
     public static final String AUTH_TOKEN = "4d73f8d4-2a8d-48e2-af91-11cbaa642345";
 
+    @Mock
+    DocumentConfiguration documentConfiguration;
+
     @Before
     public void setup() {
-        solicitorCreateConsentedMidHandler = new SolicitorCreateConsentedMidHandler(new ConsentedApplicationHelper());
+        solicitorCreateConsentedMidHandler = new SolicitorCreateConsentedMidHandler(new ConsentedApplicationHelper(documentConfiguration));
     }
 
     @Test

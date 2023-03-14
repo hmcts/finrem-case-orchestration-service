@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.client.CaseAssignmentApi;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.IdamAuthApi;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.AssignCaseAccessServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.AssignCaseAccessRequestMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.RestService;
@@ -53,4 +54,7 @@ public class ManageBarristerTestConfiguration {
 
     @MockBean
     private CheckSolicitorIsDigitalService checkSolicitorIsDigitalService;
+
+    @MockBean
+    private FinremNotificationRequestMapper finremNotificationRequestMapper;
 }

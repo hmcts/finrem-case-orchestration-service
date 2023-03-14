@@ -1,19 +1,17 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 @Component
 @Slf4j
-public abstract class EmailOnlyApplicantSolicitorCorresponder extends EmailOnlyCorresponderBase  {
+@RequiredArgsConstructor
+public abstract class CaseDetailsEmailOnlyApplicantSolicitorCorresponder extends EmailOnlyCorresponderBase<CaseDetails> {
 
-    @Autowired
-    public EmailOnlyApplicantSolicitorCorresponder(NotificationService notificationService) {
-        super(notificationService);
-    }
+    protected final NotificationService notificationService;
 
     @Override
     public void sendCorrespondence(CaseDetails caseDetails) {
@@ -21,6 +19,14 @@ public abstract class EmailOnlyApplicantSolicitorCorresponder extends EmailOnlyC
             log.info("Sending email correspondence to applicant for case: {}", caseDetails.getId());
             this.emailApplicantSolicitor(caseDetails);
         }
+    }
+
+    protected boolean shouldSendApplicantSolicitorEmail(CaseDetails caseDetails) {
+        return notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);
+    }
+
+    protected boolean shouldSendRespondentSolicitorEmail(CaseDetails caseDetails) {
+        return Boolean.FALSE;
     }
 
     protected abstract void emailApplicantSolicitor(CaseDetails caseDetails);
