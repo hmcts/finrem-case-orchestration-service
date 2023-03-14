@@ -18,11 +18,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 
 import java.time.LocalDate;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_FOUR;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_ONE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_THREE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_TWO;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -31,22 +26,6 @@ public class IntervenerService {
     private final AssignCaseAccessService assignCaseAccessService;
     private final PrdOrganisationService organisationService;
     private final SystemUserService systemUserService;
-
-    public void setIntvenerDateAddedAndDefaultOrgIfNotRepresented(FinremCallbackRequest callbackRequest) {
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
-        String valueCode = caseData.getIntervenersList().getValueCode();
-        Long caseId = callbackRequest.getCaseDetails().getId();
-
-        log.info("selected intervener {} for caseId {}", valueCode, caseId);
-
-        switch (valueCode) {
-            case INTERVENER_ONE -> updateIntervenerOneDetails(callbackRequest);
-            case INTERVENER_TWO -> updateIntervenerTwoDetails(callbackRequest);
-            case INTERVENER_THREE -> updateIntervenerThreeDetails(callbackRequest);
-            case INTERVENER_FOUR -> updateIntervenerFourDetails(callbackRequest);
-            default -> throw new IllegalArgumentException("Invalid intervener selected");
-        }
-    }
 
     public void removeIntervenerOneDetails(FinremCaseData caseData, Long caseId) {
         IntervenerOneWrapper intervenerOneWrapper = caseData.getIntervenerOneWrapper();
@@ -92,7 +71,7 @@ public class IntervenerService {
         caseData.setIntervenerFourWrapper(null);
     }
 
-    private void updateIntervenerFourDetails(FinremCallbackRequest callbackRequest) {
+    public void updateIntervenerFourDetails(FinremCallbackRequest callbackRequest) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseData caseData = caseDetails.getData();
@@ -128,6 +107,131 @@ public class IntervenerService {
                 }
                 log.info("Intervener4 add default case role and organisation for case {}", caseId);
                 setDefaultOrgForintervenerFour(intervenerFourWrapper);
+
+            }
+        }
+    }
+
+    public void updateIntervenerThreeDetails(FinremCallbackRequest callbackRequest) {
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        FinremCaseData caseData = caseDetails.getData();
+        Long caseId = callbackRequest.getCaseDetails().getId();
+
+        IntervenerThreeWrapper intervenerThreeWrapper = caseData.getIntervenerThreeWrapper();
+        if (intervenerThreeWrapper != null) {
+            if (intervenerThreeWrapper.getIntervener3DateAdded() == null) {
+                log.info("Intervener3 date intervener added to case {}", caseId);
+                intervenerThreeWrapper.setIntervener3DateAdded(LocalDate.now());
+            }
+
+            final String caseRole = CaseRole.INTVR_SOLICITOR_3.getValue();
+            if (intervenerThreeWrapper.getIntervener3Represented().equals(YesOrNo.YES)) {
+                log.info("Add Intervener3 case role for case {}", caseId);
+                String orgId = intervenerThreeWrapper.getIntervener3Organisation().getOrganisation().getOrganisationID();
+                String email = intervenerThreeWrapper.getIntervener3SolEmail();
+                checkIfIntervenerThreeSolDetailsChanged(caseDetailsBefore, orgId, email);
+                addIntervenerRole(caseId, email, orgId, caseRole);
+            } else {
+                FinremCaseData beforeData = caseDetailsBefore.getData();
+                IntervenerThreeWrapper beforeIntv = beforeData.getIntervenerThreeWrapper();
+                if (ObjectUtils.isNotEmpty(beforeIntv)
+                    && beforeIntv.getIntervener3Represented() != null
+                    && beforeIntv.getIntervener3Represented().equals(YesOrNo.YES)) {
+
+                    log.info("Intervener3 now not represented for case {}", caseId);
+                    remokeIntervenerRole(caseId, beforeIntv.getIntervener3SolEmail(),
+                        beforeIntv.getIntervener3Organisation().getOrganisation().getOrganisationID(),
+                        CaseRole.INTVR_SOLICITOR_3.getValue());
+                    intervenerThreeWrapper.setIntervener3SolEmail(null);
+                    intervenerThreeWrapper.setIntervener3SolName(null);
+                    intervenerThreeWrapper.setIntervener3SolPhone(null);
+                }
+                log.info("Intervener3 add default case role and organisation for case {}", caseId);
+                setDefaultOrgForintervenerThree(intervenerThreeWrapper);
+            }
+        }
+    }
+
+    public void updateIntervenerTwoDetails(FinremCallbackRequest callbackRequest) {
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        FinremCaseData caseData = caseDetails.getData();
+        Long caseId = callbackRequest.getCaseDetails().getId();
+
+        IntervenerTwoWrapper intervenerTwoWrapper = caseData.getIntervenerTwoWrapper();
+        if (intervenerTwoWrapper != null) {
+            if (intervenerTwoWrapper.getIntervener2DateAdded() == null) {
+                log.info("Intervener2 date intervener added to case {}", caseId);
+                intervenerTwoWrapper.setIntervener2DateAdded(LocalDate.now());
+            }
+
+            final String caseRole = CaseRole.INTVR_SOLICITOR_2.getValue();
+            if (intervenerTwoWrapper.getIntervener2Represented().equals(YesOrNo.YES)) {
+                log.info("Add Intervener2 case role for case {}", caseId);
+                String orgId = intervenerTwoWrapper.getIntervener2Organisation().getOrganisation().getOrganisationID();
+                String email = intervenerTwoWrapper.getIntervener2SolEmail();
+                checkIfIntervenerTwoSolDetailsChanged(caseDetailsBefore, orgId, email);
+                addIntervenerRole(caseId, email, orgId, caseRole);
+            } else {
+                FinremCaseData beforeData = caseDetailsBefore.getData();
+                IntervenerTwoWrapper beforeIntv = beforeData.getIntervenerTwoWrapper();
+                if (ObjectUtils.isNotEmpty(beforeIntv)
+                    && beforeIntv.getIntervener2Represented() != null
+                    && beforeIntv.getIntervener2Represented().equals(YesOrNo.YES)) {
+
+                    log.info("Intervener2 now not represented for case {}", caseId);
+                    remokeIntervenerRole(caseId, beforeIntv.getIntervener2SolEmail(),
+                        beforeIntv.getIntervener2Organisation().getOrganisation().getOrganisationID(),
+                        CaseRole.INTVR_SOLICITOR_2.getValue());
+                    intervenerTwoWrapper.setIntervener2SolEmail(null);
+                    intervenerTwoWrapper.setIntervener2SolName(null);
+                    intervenerTwoWrapper.setIntervener2SolPhone(null);
+                }
+                log.info("Intervener2 add default case role and organisation for case {}", caseId);
+                setDefaultOrgForintervenerTwo(intervenerTwoWrapper);
+
+            }
+        }
+    }
+
+    public void updateIntervenerOneDetails(FinremCallbackRequest callbackRequest) {
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        FinremCaseData caseData = caseDetails.getData();
+        Long caseId = callbackRequest.getCaseDetails().getId();
+
+        IntervenerOneWrapper intervenerOneWrapper = caseData.getIntervenerOneWrapper();
+        if (intervenerOneWrapper != null) {
+            if (intervenerOneWrapper.getIntervener1DateAdded() == null) {
+                log.info("Intervener1 date intervener added to case {}", caseId);
+                intervenerOneWrapper.setIntervener1DateAdded(LocalDate.now());
+            }
+
+            final String caseRole = CaseRole.INTVR_SOLICITOR_1.getValue();
+            if (intervenerOneWrapper.getIntervener1Represented().equals(YesOrNo.YES)) {
+                log.info("Add Intervener1 case role for case {}", caseId);
+                String orgId = intervenerOneWrapper.getIntervener1Organisation().getOrganisation().getOrganisationID();
+                String email = intervenerOneWrapper.getIntervener1SolEmail();
+                checkIfIntervenerOneSolDetailsChanged(caseDetailsBefore, orgId, email);
+                addIntervenerRole(caseId, email, orgId, caseRole);
+            } else {
+                FinremCaseData beforeData = caseDetailsBefore.getData();
+                IntervenerOneWrapper beforeIntv = beforeData.getIntervenerOneWrapper();
+                if (ObjectUtils.isNotEmpty(beforeIntv)
+                    && beforeIntv.getIntervener1Represented() != null
+                    && beforeIntv.getIntervener1Represented().equals(YesOrNo.YES)) {
+
+                    log.info("Intervener1 now not represented for case {}", caseId);
+                    remokeIntervenerRole(caseId, beforeIntv.getIntervener1SolEmail(),
+                        beforeIntv.getIntervener1Organisation().getOrganisation().getOrganisationID(),
+                        CaseRole.INTVR_SOLICITOR_1.getValue());
+                    intervenerOneWrapper.setIntervener1SolEmail(null);
+                    intervenerOneWrapper.setIntervener1SolName(null);
+                    intervenerOneWrapper.setIntervener1SolPhone(null);
+                }
+                log.info("Intervener1 add default case role and organisation for case {}", caseId);
+                setDefaultOrgForintervenerOne(intervenerOneWrapper);
 
             }
         }
@@ -193,131 +297,6 @@ public class IntervenerService {
                 remokeIntervenerRole(caseDetailsBefore.getId(), beforeIntv.getIntervener1SolEmail(),
                     beforeOrgId,
                     CaseRole.INTVR_SOLICITOR_1.getValue());
-            }
-        }
-    }
-
-    private void updateIntervenerThreeDetails(FinremCallbackRequest callbackRequest) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        FinremCaseData caseData = caseDetails.getData();
-        Long caseId = callbackRequest.getCaseDetails().getId();
-
-        IntervenerThreeWrapper intervenerThreeWrapper = caseData.getIntervenerThreeWrapper();
-        if (intervenerThreeWrapper != null) {
-            if (intervenerThreeWrapper.getIntervener3DateAdded() == null) {
-                log.info("Intervener3 date intervener added to case {}", caseId);
-                intervenerThreeWrapper.setIntervener3DateAdded(LocalDate.now());
-            }
-
-            final String caseRole = CaseRole.INTVR_SOLICITOR_3.getValue();
-            if (intervenerThreeWrapper.getIntervener3Represented().equals(YesOrNo.YES)) {
-                log.info("Add Intervener3 case role for case {}", caseId);
-                String orgId = intervenerThreeWrapper.getIntervener3Organisation().getOrganisation().getOrganisationID();
-                String email = intervenerThreeWrapper.getIntervener3SolEmail();
-                checkIfIntervenerThreeSolDetailsChanged(caseDetailsBefore, orgId, email);
-                addIntervenerRole(caseId, email, orgId, caseRole);
-            } else {
-                FinremCaseData beforeData = caseDetailsBefore.getData();
-                IntervenerThreeWrapper beforeIntv = beforeData.getIntervenerThreeWrapper();
-                if (ObjectUtils.isNotEmpty(beforeIntv)
-                    && beforeIntv.getIntervener3Represented() != null
-                    && beforeIntv.getIntervener3Represented().equals(YesOrNo.YES)) {
-
-                    log.info("Intervener3 now not represented for case {}", caseId);
-                    remokeIntervenerRole(caseId, beforeIntv.getIntervener3SolEmail(),
-                        beforeIntv.getIntervener3Organisation().getOrganisation().getOrganisationID(),
-                        CaseRole.INTVR_SOLICITOR_3.getValue());
-                    intervenerThreeWrapper.setIntervener3SolEmail(null);
-                    intervenerThreeWrapper.setIntervener3SolName(null);
-                    intervenerThreeWrapper.setIntervener3SolPhone(null);
-                }
-                log.info("Intervener3 add default case role and organisation for case {}", caseId);
-                setDefaultOrgForintervenerThree(intervenerThreeWrapper);
-            }
-        }
-    }
-
-    private void updateIntervenerTwoDetails(FinremCallbackRequest callbackRequest) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        FinremCaseData caseData = caseDetails.getData();
-        Long caseId = callbackRequest.getCaseDetails().getId();
-
-        IntervenerTwoWrapper intervenerTwoWrapper = caseData.getIntervenerTwoWrapper();
-        if (intervenerTwoWrapper != null) {
-            if (intervenerTwoWrapper.getIntervener2DateAdded() == null) {
-                log.info("Intervener2 date intervener added to case {}", caseId);
-                intervenerTwoWrapper.setIntervener2DateAdded(LocalDate.now());
-            }
-
-            final String caseRole = CaseRole.INTVR_SOLICITOR_2.getValue();
-            if (intervenerTwoWrapper.getIntervener2Represented().equals(YesOrNo.YES)) {
-                log.info("Add Intervener2 case role for case {}", caseId);
-                String orgId = intervenerTwoWrapper.getIntervener2Organisation().getOrganisation().getOrganisationID();
-                String email = intervenerTwoWrapper.getIntervener2SolEmail();
-                checkIfIntervenerTwoSolDetailsChanged(caseDetailsBefore, orgId, email);
-                addIntervenerRole(caseId, email, orgId, caseRole);
-            } else {
-                FinremCaseData beforeData = caseDetailsBefore.getData();
-                IntervenerTwoWrapper beforeIntv = beforeData.getIntervenerTwoWrapper();
-                if (ObjectUtils.isNotEmpty(beforeIntv)
-                    && beforeIntv.getIntervener2Represented() != null
-                    && beforeIntv.getIntervener2Represented().equals(YesOrNo.YES)) {
-
-                    log.info("Intervener2 now not represented for case {}", caseId);
-                    remokeIntervenerRole(caseId, beforeIntv.getIntervener2SolEmail(),
-                        beforeIntv.getIntervener2Organisation().getOrganisation().getOrganisationID(),
-                        CaseRole.INTVR_SOLICITOR_2.getValue());
-                    intervenerTwoWrapper.setIntervener2SolEmail(null);
-                    intervenerTwoWrapper.setIntervener2SolName(null);
-                    intervenerTwoWrapper.setIntervener2SolPhone(null);
-                }
-                log.info("Intervener2 add default case role and organisation for case {}", caseId);
-                setDefaultOrgForintervenerTwo(intervenerTwoWrapper);
-
-            }
-        }
-    }
-
-    private void updateIntervenerOneDetails(FinremCallbackRequest callbackRequest) {
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        FinremCaseData caseData = caseDetails.getData();
-        Long caseId = callbackRequest.getCaseDetails().getId();
-
-        IntervenerOneWrapper intervenerOneWrapper = caseData.getIntervenerOneWrapper();
-        if (intervenerOneWrapper != null) {
-            if (intervenerOneWrapper.getIntervener1DateAdded() == null) {
-                log.info("Intervener1 date intervener added to case {}", caseId);
-                intervenerOneWrapper.setIntervener1DateAdded(LocalDate.now());
-            }
-
-            final String caseRole = CaseRole.INTVR_SOLICITOR_1.getValue();
-            if (intervenerOneWrapper.getIntervener1Represented().equals(YesOrNo.YES)) {
-                log.info("Add Intervener1 case role for case {}", caseId);
-                String orgId = intervenerOneWrapper.getIntervener1Organisation().getOrganisation().getOrganisationID();
-                String email = intervenerOneWrapper.getIntervener1SolEmail();
-                checkIfIntervenerOneSolDetailsChanged(caseDetailsBefore, orgId, email);
-                addIntervenerRole(caseId, email, orgId, caseRole);
-            } else {
-                FinremCaseData beforeData = caseDetailsBefore.getData();
-                IntervenerOneWrapper beforeIntv = beforeData.getIntervenerOneWrapper();
-                if (ObjectUtils.isNotEmpty(beforeIntv)
-                    && beforeIntv.getIntervener1Represented() != null
-                    && beforeIntv.getIntervener1Represented().equals(YesOrNo.YES)) {
-
-                    log.info("Intervener1 now not represented for case {}", caseId);
-                    remokeIntervenerRole(caseId, beforeIntv.getIntervener1SolEmail(),
-                        beforeIntv.getIntervener1Organisation().getOrganisation().getOrganisationID(),
-                        CaseRole.INTVR_SOLICITOR_1.getValue());
-                    intervenerOneWrapper.setIntervener1SolEmail(null);
-                    intervenerOneWrapper.setIntervener1SolName(null);
-                    intervenerOneWrapper.setIntervener1SolPhone(null);
-                }
-                log.info("Intervener1 add default case role and organisation for case {}", caseId);
-                setDefaultOrgForintervenerOne(intervenerOneWrapper);
-
             }
         }
     }
