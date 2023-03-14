@@ -19,7 +19,8 @@
       "solicitorFirm": "FirmA",
       "solicitorName": "SolName1",
       "solicitorPhone": "1234567891",
-      "solicitorReference": "LL01"
+      "solicitorReference": "LL01",
+      "currentUserCaseRoleLabel": "RESPSOLICITOR"
     }
   }
 }
