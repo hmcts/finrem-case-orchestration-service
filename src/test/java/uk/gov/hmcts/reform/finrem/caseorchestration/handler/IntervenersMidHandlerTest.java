@@ -44,6 +44,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerC
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_ONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_THREE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_TWO;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.UPDATE_INTERVENER_FOUR_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.UPDATE_INTERVENER_ONE_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.UPDATE_INTERVENER_THREE_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.UPDATE_INTERVENER_TWO_VALUE;
 
 @RunWith(MockitoJUnitRunner.class)
 public class IntervenersMidHandlerTest {
@@ -212,9 +216,9 @@ public class IntervenersMidHandlerTest {
 
         assertEquals(2, intervenerOptionList.getListItems().size());
         assertEquals(ADD_INTERVENER_ONE_CODE, intervenerOptionList.getValue().getCode());
-        assertEquals(ADD_INTERVENER_ONE_VALUE, intervenerOptionList.getValue().getLabel());
+        assertEquals(UPDATE_INTERVENER_ONE_VALUE, intervenerOptionList.getValue().getLabel());
         assertEquals(ADD_INTERVENER_ONE_CODE, intervenerOptionList.getListItems().get(0).getCode());
-        assertEquals(ADD_INTERVENER_ONE_VALUE, intervenerOptionList.getListItems().get(0).getLabel());
+        assertEquals(UPDATE_INTERVENER_ONE_VALUE, intervenerOptionList.getListItems().get(0).getLabel());
         assertEquals(DEL_INTERVENER_ONE_CODE, intervenerOptionList.getListItems().get(1).getCode());
         assertEquals(DEL_INTERVENER_ONE_VALUE, intervenerOptionList.getListItems().get(1).getLabel());
     }
@@ -238,7 +242,7 @@ public class IntervenersMidHandlerTest {
 
         assertEquals(2, intervenerOptionList.getListItems().size());
         assertEquals(ADD_INTERVENER_TWO_CODE, intervenerOptionList.getListItems().get(0).getCode());
-        assertEquals(ADD_INTERVENER_TWO_VALUE, intervenerOptionList.getListItems().get(0).getLabel());
+        assertEquals(UPDATE_INTERVENER_TWO_VALUE, intervenerOptionList.getListItems().get(0).getLabel());
         assertEquals(DEL_INTERVENER_TWO_CODE, intervenerOptionList.getListItems().get(1).getCode());
         assertEquals(DEL_INTERVENER_TWO_VALUE, intervenerOptionList.getListItems().get(1).getLabel());
     }
@@ -263,7 +267,7 @@ public class IntervenersMidHandlerTest {
 
         assertEquals(2, intervenerOptionList.getListItems().size());
         assertEquals(ADD_INTERVENER_THREE_CODE, intervenerOptionList.getListItems().get(0).getCode());
-        assertEquals(ADD_INTERVENER_THREE_VALUE, intervenerOptionList.getListItems().get(0).getLabel());
+        assertEquals(UPDATE_INTERVENER_THREE_VALUE, intervenerOptionList.getListItems().get(0).getLabel());
         assertEquals(DEL_INTERVENER_THREE_CODE, intervenerOptionList.getListItems().get(1).getCode());
         assertEquals(DEL_INTERVENER_THREE_VALUE, intervenerOptionList.getListItems().get(1).getLabel());
     }
@@ -287,7 +291,7 @@ public class IntervenersMidHandlerTest {
 
         assertEquals(2, intervenerOptionList.getListItems().size());
         assertEquals(ADD_INTERVENER_FOUR_CODE, intervenerOptionList.getListItems().get(0).getCode());
-        assertEquals(ADD_INTERVENER_FOUR_VALUE, intervenerOptionList.getListItems().get(0).getLabel());
+        assertEquals(UPDATE_INTERVENER_FOUR_VALUE, intervenerOptionList.getListItems().get(0).getLabel());
         assertEquals(DEL_INTERVENER_FOUR_CODE, intervenerOptionList.getListItems().get(1).getCode());
         assertEquals(DEL_INTERVENER_FOUR_VALUE, intervenerOptionList.getListItems().get(1).getLabel());
     }
