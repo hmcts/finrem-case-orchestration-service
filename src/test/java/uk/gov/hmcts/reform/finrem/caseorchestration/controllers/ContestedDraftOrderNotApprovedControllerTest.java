@@ -199,8 +199,8 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
         verify(contestedDraftOrderNotApprovedService).getLatestRefusalReason(any());
-        verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
-        verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), any(), any());
+        verify(bulkPrintService).printRespondentDocuments(any(CaseDetails.class), any(), any());
     }
 
     @Test
@@ -215,8 +215,8 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
         verify(contestedDraftOrderNotApprovedService).getLatestRefusalReason(any());
-        verify(bulkPrintService, never()).printApplicantDocuments(any(), any(), any());
-        verify(bulkPrintService, never()).printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService, never()).printRespondentDocuments(any(CaseDetails.class), any(), any());
+        verify(bulkPrintService, never()).printRespondentDocuments(any(CaseDetails.class), any(), any());
     }
 
     @Test
@@ -228,8 +228,8 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
         verify(contestedDraftOrderNotApprovedService).getLatestRefusalReason(any());
-        verify(bulkPrintService, never()).printApplicantDocuments(any(), any(), any());
-        verify(bulkPrintService, never()).printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService, never()).printRespondentDocuments(any(CaseDetails.class), any(), any());
+        verify(bulkPrintService, never()).printRespondentDocuments(any(CaseDetails.class), any(), any());
     }
 
     private OngoingStubbing<Map<String, Object>> whenServicePopulatesCollection() {

@@ -5,22 +5,23 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderAvailableCorresponder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderMadeCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureApplicationWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.FinremConsentOrderAvailableCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.FinremConsentOrderMadeCorresponder;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_NAME;
@@ -28,16 +29,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RE
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ApprovedConsentOrderSubmittedHandlerTest {
@@ -48,10 +39,10 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
     private ApprovedConsentOrderSubmittedHandler handler;
 
     @Mock
-    private ConsentOrderMadeCorresponder consentOrderMadeCorresponder;
+    private FinremConsentOrderMadeCorresponder consentOrderMadeCorresponder;
     @Mock
-    private ConsentOrderAvailableCorresponder consentOrderAvailableCorresponder;
-    private CaseDetails caseDetails;
+    private FinremConsentOrderAvailableCorresponder consentOrderAvailableCorresponder;
+    private FinremCaseDetails caseDetails;
 
 
     @Test
@@ -84,73 +75,48 @@ public class ApprovedConsentOrderSubmittedHandlerTest {
 
     @Test
     public void givenConsentOrderCase_WhenAppAndRespConsentToEmail_ThenSendNotification() {
-        CallbackRequest callbackRequest = getConsentedCallbackRequestForConsentOrder();
+        FinremCallbackRequest callbackRequest = getConsentedCallbackRequestForConsentOrder();
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(consentOrderMadeCorresponder).sendCorrespondence(caseDetails);
-        verify(consentOrderMadeCorresponder).sendCorrespondence(caseDetails);
+        verify(consentOrderAvailableCorresponder).sendCorrespondence(caseDetails);
 
     }
 
+    protected FinremCallbackRequest getConsentedCallbackRequestForConsentOrder() {
+        FinremCaseData caseData = FinremCaseData.builder()
+            .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                .solicitorEmail(TEST_SOLICITOR_EMAIL)
+                .solicitorName(TEST_SOLICITOR_NAME)
+                .solicitorReference(TEST_SOLICITOR_REFERENCE)
+                .respondentSolicitorEmail(TEST_RESP_SOLICITOR_EMAIL)
+                .respondentSolicitorName(TEST_RESP_SOLICITOR_NAME)
+                .applicantSolicitorConsentForEmails(YesOrNo.YES)
+                .respondentSolicitorReference(TEST_RESP_SOLICITOR_REFERENCE)
+                .consentedRespondentRepresented(YesOrNo.YES)
+                .build())
+            .respSolNotificationsEmailConsent(YesOrNo.YES)
+            .divorceCaseNumber(TEST_DIVORCE_CASE_NUMBER)
+            .natureApplicationWrapper(NatureApplicationWrapper.builder()
+                .natureOfApplication2(List.of(NatureApplication.LUMP_SUM_ORDER,
+                    NatureApplication.PERIODICAL_PAYMENT_ORDER,
+                    NatureApplication.PENSION_SHARING_ORDER,
+                    NatureApplication.PENSION_ATTACHMENT_ORDER,
+                    NatureApplication.PENSION_COMPENSATION_SHARING_ORDER,
+                    NatureApplication.PENSION_COMPENSATION_ATTACHMENT_ORDER,
+                    NatureApplication.A_SETTLEMENT_OR_A_TRANSFER_OF_PROPERTY,
+                    NatureApplication.PROPERTY_ADJUSTMENT_ORDER))
+                .build()).build();
 
-    protected CallbackRequest getConsentedCallbackRequestForConsentOrder() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(SOLICITOR_EMAIL, TEST_SOLICITOR_EMAIL);
-        caseData.put(CONSENTED_SOLICITOR_NAME, TEST_SOLICITOR_NAME);
-        caseData.put(SOLICITOR_REFERENCE, TEST_SOLICITOR_REFERENCE);
-        caseData.put(RESP_SOLICITOR_EMAIL, TEST_RESP_SOLICITOR_EMAIL);
-        caseData.put(RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_NAME);
-        caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED, YES_VALUE);
-        caseData.put(RESP_SOLICITOR_REFERENCE, TEST_RESP_SOLICITOR_REFERENCE);
-        caseData.put(CONSENTED_RESPONDENT_REPRESENTED, YES_VALUE);
-        caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, YES_VALUE);
-
-        caseData.put(DIVORCE_CASE_NUMBER, TEST_DIVORCE_CASE_NUMBER);
-        List<String> natureOfApplication = List.of("Lump Sum Order",
-            "Periodical Payment Order",
-            "Pension Sharing Order",
-            "Pension Attachment Order",
-            "Pension Compensation Sharing Order",
-            "Pension Compensation Attachment Order",
-            "A settlement or a transfer of property",
-            "Property Adjustment Order");
-        caseData.put("natureOfApplication2", natureOfApplication);
-        caseDetails = CaseDetails.builder()
-            .caseTypeId(CaseType.CONSENTED.getCcdType())
+        caseDetails = FinremCaseDetails.builder()
+            .caseType(CaseType.CONSENTED)
             .id(12345L)
             .data(caseData)
             .build();
-        return CallbackRequest.builder()
+        return FinremCallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
     }
 
-    protected CallbackRequest getConsentedCallbackRequestForVariationOrder() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(SOLICITOR_EMAIL, TEST_SOLICITOR_EMAIL);
-        caseData.put(CONSENTED_SOLICITOR_NAME, TEST_SOLICITOR_NAME);
-        caseData.put(SOLICITOR_REFERENCE, TEST_SOLICITOR_REFERENCE);
-        caseData.put(RESP_SOLICITOR_EMAIL, TEST_RESP_SOLICITOR_EMAIL);
-        caseData.put(RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_NAME);
-        caseData.put(RESP_SOLICITOR_REFERENCE, TEST_RESP_SOLICITOR_REFERENCE);
-        caseData.put(DIVORCE_CASE_NUMBER, TEST_DIVORCE_CASE_NUMBER);
-        List<String> natureOfApplication = List.of("Lump Sum Order",
-            "Periodical Payment Order",
-            "Pension Sharing Order",
-            "Pension Attachment Order",
-            "Pension Compensation Sharing Order",
-            "Pension Compensation Attachment Order",
-            "A settlement or a transfer of property",
-            "Variation Order",
-            "Property Adjustment Order");
-        caseData.put("natureOfApplication2", natureOfApplication);
-        return CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder()
-                .caseTypeId(uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONSENTED.getCcdType())
-                .id(12345L)
-                .data(caseData)
-                .build())
-            .build();
-    }
 }

@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 
 import java.time.LocalDate;
@@ -33,6 +34,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedFinremCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultContestedCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
@@ -56,6 +58,7 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
     private DocumentClient documentClientMock;
 
     private CaseDetails caseDetails;
+    private FinremCaseDetails frCaseDetails;
 
     @Captor
     private ArgumentCaptor<DocumentGenerationRequest> documentGenerationRequestCaptor;
@@ -77,6 +80,20 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
 
         CaseDocument generateAssignedToJudgeNotificationLetter
             = assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN, APPLICANT);
+
+        assertCaseDocument(generateAssignedToJudgeNotificationLetter);
+        verify(documentClientMock).generatePdf(any(), anyString());
+    }
+
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    @Test
+    public void shouldGenerateAssignedToJudgeLetterForApplicantFinrem() {
+        frCaseDetails = defaultConsentedFinremCaseDetails();
+
+        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
+
+        CaseDocument generateAssignedToJudgeNotificationLetter
+            = assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(frCaseDetails, AUTH_TOKEN, APPLICANT);
 
         assertCaseDocument(generateAssignedToJudgeNotificationLetter);
         verify(documentClientMock).generatePdf(any(), anyString());
