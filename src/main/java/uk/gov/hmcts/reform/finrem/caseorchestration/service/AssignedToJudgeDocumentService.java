@@ -60,10 +60,39 @@ public class AssignedToJudgeDocumentService {
         return generatedAssignedToJudgeNotificationLetter;
     }
 
+    @Deprecated
     public CaseDocument generateConsentInContestedAssignedToJudgeNotificationLetter(CaseDetails caseDetails, String authToken,
                                                                                     DocumentHelper.PaperNotificationRecipient recipient) {
-        return generateConsentInContestedAssignedToJudgeNotificationLetter(
-            documentHelper.prepareLetterTemplateData(caseDetails, recipient), authToken);
+        final String templateId = documentConfiguration.getConsentInContestedAssignedToJudgeNotificationTemplate();
+        final String templateName = documentConfiguration.getConsentInContestedAssignedToJudgeNotificationFileName();
+
+        log.info("Generating Consent in Contested Assigned To Judge Notification Letter {} from {} for bulk print",
+            templateId, templateName);
+
+        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterTemplateData(caseDetails, recipient);
+
+        CaseDocument generatedAssignedToJudgeNotificationLetter = genericDocumentService.generateDocument(authToken,
+            caseDetailsForBulkPrint, templateId, templateName);
+
+        log.info("Generated Consent in Contested Assigned To Judge Notification Letter: {}", generatedAssignedToJudgeNotificationLetter);
+        return generatedAssignedToJudgeNotificationLetter;
+    }
+
+    public CaseDocument generateConsentInContestedAssignedToJudgeNotificationLetter(FinremCaseDetails caseDetails, String authToken,
+                                                                                    DocumentHelper.PaperNotificationRecipient recipient) {
+        final String templateId = documentConfiguration.getConsentInContestedAssignedToJudgeNotificationTemplate();
+        final String templateName = documentConfiguration.getConsentInContestedAssignedToJudgeNotificationFileName();
+
+        log.info("Generating Consent in Contested Assigned To Judge Notification Letter {} from {} for bulk print",
+            templateId, templateName);
+        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterTemplateData(caseDetails, recipient);
+
+        CaseDocument generatedAssignedToJudgeNotificationLetter = genericDocumentService.generateDocument(authToken,
+            caseDetailsForBulkPrint, templateId, templateName);
+
+        log.info("Generated Consent in Contested Assigned To Judge Notification Letter: {}", generatedAssignedToJudgeNotificationLetter);
+
+        return generatedAssignedToJudgeNotificationLetter;
     }
 
     private CaseDocument generateConsentInContestedAssignedToJudgeNotificationLetter(CaseDetails caseDetails, String authToken) {

@@ -74,8 +74,10 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
 
         paperNotificationService.printConsentInContestedAssignToJudgeConfirmationNotification(buildCaseDetails(), AUTH_TOKEN);
 
-        verify(assignedToJudgeDocumentService).generateConsentInContestedAssignedToJudgeNotificationLetter(any(), eq(AUTH_TOKEN), eq(APPLICANT));
-        verify(assignedToJudgeDocumentService).generateConsentInContestedAssignedToJudgeNotificationLetter(any(), eq(AUTH_TOKEN), eq(RESPONDENT));
+        verify(assignedToJudgeDocumentService).generateConsentInContestedAssignedToJudgeNotificationLetter(any(CaseDetails.class),
+            eq(AUTH_TOKEN), eq(APPLICANT));
+        verify(assignedToJudgeDocumentService).generateConsentInContestedAssignedToJudgeNotificationLetter(any(CaseDetails.class),
+            eq(AUTH_TOKEN), eq(RESPONDENT));
         verify(bulkPrintService, times(2)).sendDocumentForPrint(any(), any(CaseDetails.class));
     }
 
