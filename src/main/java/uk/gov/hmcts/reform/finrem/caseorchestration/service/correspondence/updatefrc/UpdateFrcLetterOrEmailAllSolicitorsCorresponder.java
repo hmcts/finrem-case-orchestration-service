@@ -8,12 +8,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SingleLetterOrEmailAllPartiesCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.CaseDetailsSingleLetterOrEmailAllPartiesCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.updatefrc.service.UpdateFrcInfoRespondentDocumentService;
 
 @Component
 @Slf4j
-public class UpdateFrcLetterOrEmailAllSolicitorsCorresponder extends SingleLetterOrEmailAllPartiesCorresponder {
+public class UpdateFrcLetterOrEmailAllSolicitorsCorresponder extends CaseDetailsSingleLetterOrEmailAllPartiesCorresponder {
 
     private final UpdateFrcInfoRespondentDocumentService updateFrcInfoRespondentDocumentService;
 

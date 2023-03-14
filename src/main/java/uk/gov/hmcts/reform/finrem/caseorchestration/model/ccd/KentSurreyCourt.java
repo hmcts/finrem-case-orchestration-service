@@ -12,7 +12,7 @@ import java.util.Arrays;
 public enum KentSurreyCourt implements CourtList {
     FR_kent_surreyList_1("FR_kent_surrey_hc_list_1"),
     FR_kent_surreyList_2("FR_kent_surrey_hc_list_2"),
-    FR_kent_surreyList_3("FR_kent_surrey_hc_list_3"),
+    KENT_DARTFORD_COURTS("FR_kent_surrey_hc_list_3"),
     FR_kent_surreyList_4("FR_kent_surrey_hc_list_4"),
     FR_kent_surreyList_5("FR_kent_surrey_hc_list_5"),
     FR_kent_surreyList_6("FR_kent_surrey_hc_list_6"),

@@ -218,8 +218,8 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
 
         generalApplicationDirectionsService.submitCollectionGeneralApplicationDirections(caseDetails, documents, AUTH_TOKEN);
 
-        verify(bulkPrintService, times(1)).printApplicantDocuments(any(), eq(AUTH_TOKEN), any());
-        verify(bulkPrintService, times(1)).printRespondentDocuments(any(), eq(AUTH_TOKEN), any());
+        verify(bulkPrintService, times(1)).printApplicantDocuments(any(CaseDetails.class), eq(AUTH_TOKEN), any());
+        verify(bulkPrintService, times(1)).printRespondentDocuments(any(CaseDetails.class), eq(AUTH_TOKEN), any());
     }
 
     @Test
@@ -234,9 +234,9 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             documentGenerationRequestCaseDetailsCaptor.capture(),
             eq(documentConfiguration.getGeneralApplicationOrderTemplate(caseDetails)),
             eq(documentConfiguration.getGeneralApplicationOrderFileName()));
-        verify(bulkPrintService, times(1)).printApplicantDocuments(any(), eq(AUTH_TOKEN),
+        verify(bulkPrintService, times(1)).printApplicantDocuments(any(CaseDetails.class), eq(AUTH_TOKEN),
             printDocumentsRequestDocumentListCaptor.capture());
-        verify(bulkPrintService, times(1)).printRespondentDocuments(any(), eq(AUTH_TOKEN), any());
+        verify(bulkPrintService, times(1)).printRespondentDocuments(any(CaseDetails.class), eq(AUTH_TOKEN), any());
 
         Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
         assertThat(data, allOf(
@@ -264,9 +264,9 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             documentGenerationRequestCaseDetailsCaptor.capture(),
             eq(documentConfiguration.getGeneralApplicationInterimHearingNoticeTemplate(caseDetails)),
             eq(documentConfiguration.getGeneralApplicationInterimHearingNoticeFileName()));
-        verify(bulkPrintService, times(1)).printApplicantDocuments(any(), eq(AUTH_TOKEN),
+        verify(bulkPrintService, times(1)).printApplicantDocuments(any(CaseDetails.class), eq(AUTH_TOKEN),
             printDocumentsRequestDocumentListCaptor.capture());
-        verify(bulkPrintService, times(1)).printRespondentDocuments(any(), eq(AUTH_TOKEN), any());
+        verify(bulkPrintService, times(1)).printRespondentDocuments(any(CaseDetails.class), eq(AUTH_TOKEN), any());
         verify(genericDocumentService, times(1)).convertDocumentIfNotPdfAlready(any(), eq(AUTH_TOKEN));
 
         Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
@@ -302,9 +302,9 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             documentGenerationRequestCaseDetailsCaptor.capture(),
             eq(documentConfiguration.getGeneralApplicationInterimHearingNoticeTemplate(caseDetails)),
             eq(documentConfiguration.getGeneralApplicationInterimHearingNoticeFileName()));
-        verify(bulkPrintService, times(1)).printApplicantDocuments(any(), eq(AUTH_TOKEN),
+        verify(bulkPrintService, times(1)).printApplicantDocuments(any(CaseDetails.class), eq(AUTH_TOKEN),
             printDocumentsRequestDocumentListCaptor.capture());
-        verify(bulkPrintService, times(1)).printRespondentDocuments(any(), eq(AUTH_TOKEN), any());
+        verify(bulkPrintService, times(1)).printRespondentDocuments(any(CaseDetails.class), eq(AUTH_TOKEN), any());
         verify(genericDocumentService, times(1)).convertDocumentIfNotPdfAlready(any(), eq(AUTH_TOKEN));
 
         Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();

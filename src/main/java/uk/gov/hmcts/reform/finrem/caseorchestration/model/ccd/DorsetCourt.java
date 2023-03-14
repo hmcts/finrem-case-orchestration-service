@@ -10,14 +10,14 @@ import java.util.Arrays;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 @RequiredArgsConstructor
 public enum DorsetCourt implements CourtList {
-    FR_DORSET_LIST_1("FR_dorsetList_1"),
-    FR_DORSET_LIST_2("FR_dorsetList_2"),
-    FR_DORSET_LIST_3("FR_dorsetList_3"),
-    FR_DORSET_LIST_4("FR_dorsetList_4"),
-    FR_DORSET_LIST_5("FR_dorsetList_5"),
-    FR_DORSET_LIST_6("FR_dorsetList_6"),
-    FR_DORSET_LIST_7("FR_dorsetList_7"),
-    FR_DORSET_LIST_8("FR_dorsetList_8");
+    BOURNEMOUTH("FR_dorsetList_1"),
+    WEYMOUTH("FR_dorsetList_2"),
+    WINCHESTER("FR_dorsetList_3"),
+    PORTSMOUTH("FR_dorsetList_4"),
+    SOUTHAMPTON("FR_dorsetList_5"),
+    ALDERSHOT("FR_dorsetList_6"),
+    BASINGSTOKE("FR_dorsetList_7"),
+    ISLE_OF_WIGHT("FR_dorsetList_8");
 
     private final String id;
 

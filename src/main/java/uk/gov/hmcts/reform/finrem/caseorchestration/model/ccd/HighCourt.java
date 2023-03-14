@@ -10,7 +10,7 @@ import java.util.Arrays;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 @RequiredArgsConstructor
 public enum HighCourt implements CourtList {
-    FR_highCourtList_1("FR_highCourtList_1");
+    HIGHCOURT_COURT("FR_highCourtList_1");
 
     private final String id;
 

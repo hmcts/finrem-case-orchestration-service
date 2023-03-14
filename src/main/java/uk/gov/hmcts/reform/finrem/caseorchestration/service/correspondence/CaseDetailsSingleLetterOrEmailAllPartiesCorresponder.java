@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -11,16 +11,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 @Component
 @Slf4j
-public abstract class SingleLetterOrEmailAllPartiesCorresponder extends EmailAndLettersCorresponderBase {
+@RequiredArgsConstructor
+public abstract class CaseDetailsSingleLetterOrEmailAllPartiesCorresponder extends EmailAndLettersCorresponderBase<CaseDetails> {
 
+    protected final NotificationService notificationService;
     protected final BulkPrintService bulkPrintService;
-
-    @Autowired
-    public SingleLetterOrEmailAllPartiesCorresponder(NotificationService notificationService,
-                                                     BulkPrintService bulkPrintService) {
-        super(notificationService);
-        this.bulkPrintService = bulkPrintService;
-    }
 
     public void sendCorrespondence(CaseDetails caseDetails, String authToken) {
         sendApplicantCorrespondence(caseDetails, authToken);
@@ -47,6 +42,14 @@ public abstract class SingleLetterOrEmailAllPartiesCorresponder extends EmailAnd
             bulkPrintService.sendDocumentForPrint(
                 getDocumentToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT), caseDetails);
         }
+    }
+
+    protected boolean shouldSendApplicantSolicitorEmail(CaseDetails caseDetails) {
+        return notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);
+    }
+
+    protected boolean shouldSendRespondentSolicitorEmail(CaseDetails caseDetails) {
+        return notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails);
     }
 
     public abstract CaseDocument getDocumentToPrint(CaseDetails caseDetails, String authorisationToken,

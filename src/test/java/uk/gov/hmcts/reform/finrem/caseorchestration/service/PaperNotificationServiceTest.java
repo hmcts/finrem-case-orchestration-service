@@ -47,7 +47,7 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
 
         verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(any(CaseDetails.class), eq(AUTH_TOKEN), eq(APPLICANT));
         verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(any(CaseDetails.class), eq(AUTH_TOKEN), eq(RESPONDENT));
-        verify(bulkPrintService, times(2)).sendDocumentForPrint(any(), any());
+        verify(bulkPrintService, times(2)).sendDocumentForPrint(any(), any(CaseDetails.class));
     }
 
     @Test
@@ -63,7 +63,7 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
             any(CaseDetails.class), eq(AUTH_TOKEN), eq(APPLICANT));
         verify(assignedToJudgeDocumentService).generateConsentInContestedAssignedToJudgeNotificationLetter(
             any(CaseDetails.class), eq(AUTH_TOKEN), eq(RESPONDENT));
-        verify(bulkPrintService).sendDocumentForPrint(any(), any());
+        verify(bulkPrintService).sendDocumentForPrint(any(), any(CaseDetails.class));
     }
 
     @Test
@@ -76,7 +76,7 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
 
         verify(assignedToJudgeDocumentService).generateConsentInContestedAssignedToJudgeNotificationLetter(any(), eq(AUTH_TOKEN), eq(APPLICANT));
         verify(assignedToJudgeDocumentService).generateConsentInContestedAssignedToJudgeNotificationLetter(any(), eq(AUTH_TOKEN), eq(RESPONDENT));
-        verify(bulkPrintService, times(2)).sendDocumentForPrint(any(), any());
+        verify(bulkPrintService, times(2)).sendDocumentForPrint(any(), any(CaseDetails.class));
     }
 
     @Test
@@ -88,7 +88,7 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
         paperNotificationService.printManualPaymentNotification(buildCaseDetails(), AUTH_TOKEN);
 
         verify(manualPaymentDocumentService).generateManualPaymentLetter(any(), any(), eq(APPLICANT));
-        verify(bulkPrintService).sendDocumentForPrint(any(), any());
+        verify(bulkPrintService).sendDocumentForPrint(any(), any(CaseDetails.class));
     }
 
     @Test
