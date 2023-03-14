@@ -1,6 +1,6 @@
 {
   "token": "token_test",
-  "event_id": "some_event_id",
+  "event_id": "FR_issueApplication",
   "case_details": {
     "id": 1234567890,
     "jurisdiction": "DIVORCE",
@@ -84,7 +84,7 @@
       "generalOrderJudgeType": "Her Honour Judge",
       "generalOrderJudgeName": "Contested",
       "generalOrderRecitals": "Contested Recitals",
-      "generalOrderDate": "01/06/2020",
+      "generalOrderDate": "2020-06-01",
       "generalOrderBodyText": "Test is dummy text for contested",
       "generalOrderAddressTo": "applicant",
       "generalOrderPreviewDocument": {

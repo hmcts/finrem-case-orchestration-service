@@ -193,8 +193,8 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     }
 
     private void assertBulkPrintServiceInteraction() {
-        verify(bulkPrintService, times(1)).printApplicantDocuments(any(), eq(AUTH_TOKEN), any());
-        verify(bulkPrintService, times(1)).printRespondentDocuments(any(), eq(AUTH_TOKEN),
+        verify(bulkPrintService, times(1)).printRespondentDocuments(any(CaseDetails.class), eq(AUTH_TOKEN), any());
+        verify(bulkPrintService, times(1)).printRespondentDocuments(any(CaseDetails.class), eq(AUTH_TOKEN),
             printDocumentsRequestDocumentListCaptor.capture());
     }
 

@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
@@ -35,15 +36,17 @@ public class FormCandGCorresponderTest extends HearingCorrespondenceBaseTest {
     private ObjectMapper objectMapper = new ObjectMapper();
     @Mock
     private GenericDocumentService service;
+    private FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
 
     private static final String DATE_OF_HEARING = "2019-01-01";
 
     @Before
     public void setUp() throws Exception {
+        objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
         caseDetails = caseDetails(NO_VALUE);
         applicantAndRespondentMultiLetterCorresponder =
             new FormCandGCorresponder(bulkPrintService, notificationService,
-                new DocumentHelper(objectMapper, new CaseDataService(objectMapper), service), objectMapper);
+                new DocumentHelper(objectMapper, new CaseDataService(objectMapper), service,finremCaseDetailsMapper), objectMapper);
     }
 
     @Test

@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementUploadService;
@@ -35,6 +36,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedFinremCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultContestedCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
@@ -60,6 +62,7 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
     @Autowired private IdamAuthService idamAuthService;
 
     private CaseDetails caseDetails;
+    private FinremCaseDetails frCaseDetails;
 
     @Captor
     private ArgumentCaptor<Map> mapArgumentCaptor;
@@ -94,6 +97,20 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
 
         assertCaseDocument(generateAssignedToJudgeNotificationLetter);
         verify(docmosisPdfGenerationServiceMock).generateDocFrom(any(), any());
+    }
+
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    @Test
+    public void shouldGenerateAssignedToJudgeLetterForApplicantFinrem() {
+        frCaseDetails = defaultConsentedFinremCaseDetails();
+
+        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
+
+        CaseDocument generateAssignedToJudgeNotificationLetter
+            = assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(frCaseDetails, AUTH_TOKEN, APPLICANT);
+
+        assertCaseDocument(generateAssignedToJudgeNotificationLetter);
+        verify(documentClientMock).generatePdf(any(), anyString());
     }
 
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
