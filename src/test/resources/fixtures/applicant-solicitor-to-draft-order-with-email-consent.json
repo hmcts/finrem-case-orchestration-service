@@ -38,7 +38,7 @@
       "applicantFMName": "Poor",
       "authorisation2b": "test",
       "currentUserCaseRole": "[APPSOLICITOR]",
-      "currentUserCaseRoleLabel": "APPSOLICITOR",
+      "currentUserForConsentedCaseRoleLabel": "APPSOLICITOR",
       "otherCollection": [
         {
           "id": "1",

@@ -34,7 +34,7 @@ public class CaseAssignedRoleControllerTest extends BaseControllerTest {
     private static final String GET_USER_ROLES = "/case-orchestration/get-user-roles";
     private static final String RESOURCE = "/fixtures/applicant-solicitor-to-draft-order-with-email-consent.json";
     private static final String SOLICITOR_ROLE_KEY = "currentUserCaseRole";
-    private static final String SOLICITOR_ROLE_LABEL_KEY = "currentUserCaseRoleLabel";
+    private static final String SOLICITOR_ROLE_LABEL_KEY = "currentUserForConsentedCaseRoleLabel";
     private static final String CASE_DETAILS_KEY = "case_details";
     private static final String OTHER_ROLE = "otherRole";
 
@@ -73,8 +73,8 @@ public class CaseAssignedRoleControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.currentUserCaseRole").exists())
             .andExpect(jsonPath("$.data.currentUserCaseRole")
                 .value(equalToIgnoringCase((String) caseDetails.getData().get(SOLICITOR_ROLE_KEY))))
-            .andExpect(jsonPath("$.data.currentUserCaseRoleLabel").exists())
-            .andExpect(jsonPath("$.data.currentUserCaseRoleLabel")
+            .andExpect(jsonPath("$.data.currentUserForConsentedCaseRoleLabel").exists())
+            .andExpect(jsonPath("$.data.currentUserForConsentedCaseRoleLabel")
                 .value(equalToIgnoringCase((String) caseDetails.getData().get(SOLICITOR_ROLE_LABEL_KEY))));
     }
 
