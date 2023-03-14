@@ -97,8 +97,10 @@ public abstract class BaseServiceTest extends BaseTest {
     }
 
     protected FinremCaseDetails buildFinremCaseDetails() {
-        FinremCaseData caseData = new FinremCaseData();
-        return FinremCaseDetails.builder().id(123L).caseType(CaseType.CONTESTED).data(caseData).build();
+        return FinremCaseDetails.builder()
+            .caseType(CaseType.CONTESTED)
+            .id(123L)
+            .build();
     }
 
     protected CallbackRequest getConsentedCallbackRequestForVariationOrder() {
