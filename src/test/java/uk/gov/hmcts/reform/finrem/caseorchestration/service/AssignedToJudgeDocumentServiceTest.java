@@ -104,13 +104,11 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
     public void shouldGenerateAssignedToJudgeLetterForApplicantFinrem() {
         frCaseDetails = defaultConsentedFinremCaseDetails();
 
-        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
-
         CaseDocument generateAssignedToJudgeNotificationLetter
             = assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(frCaseDetails, AUTH_TOKEN, APPLICANT);
 
         assertCaseDocument(generateAssignedToJudgeNotificationLetter);
-        verify(documentClientMock).generatePdf(any(), anyString());
+        verify(docmosisPdfGenerationServiceMock).generateDocFrom(any(), any());
     }
 
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
