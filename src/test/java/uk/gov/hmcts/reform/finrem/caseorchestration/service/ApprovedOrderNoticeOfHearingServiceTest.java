@@ -14,12 +14,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -52,6 +55,7 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     private static final String GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL = "http://dm-store/1f3a-gads-doc/binary";
     static final String CASE_DATA = "case_data";
     static final String CASE_DETAILS = "caseDetails";
+
 
     @Autowired
     private ApprovedOrderNoticeOfHearingService approvedOrderNoticeOfHearingService;
@@ -221,6 +225,7 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
             Matchers.hasEntry("CourtPhone", "0300 1235577"),
             Matchers.hasEntry("CourtEmail", "hastingsfamily@justice.gov.uk"),
             Matchers.hasEntry("ApplicantName", "Poor Guy"),
+            Matchers.hasEntry("AdditionalHearingDated", formattedNowDate),
             Matchers.<String, Object>hasEntry("HearingTime", "1pm"),
             Matchers.<String, Object>hasEntry("RespondentName", "test Korivi"),
             Matchers.<String, Object>hasEntry("HearingVenue",
