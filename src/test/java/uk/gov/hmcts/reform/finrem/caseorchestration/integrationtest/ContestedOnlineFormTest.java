@@ -1,8 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest;
 
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
-
-import java.util.Collections;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.PdfDocumentRequest;
 
 public class ContestedOnlineFormTest extends GenerateMiniFormATest {
 
@@ -17,12 +15,12 @@ public class ContestedOnlineFormTest extends GenerateMiniFormATest {
     }
 
     @Override
-    protected DocumentGenerationRequest documentRequest() {
-        return DocumentGenerationRequest.builder()
-            .template(documentConfiguration.getContestedMiniFormTemplate(request.getCaseDetails()))
-            .fileName(documentConfiguration.getContestedMiniFormFileName())
-            .values(Collections.singletonMap("caseDetails",
-                copyWithOptionValueTranslation(request.getCaseDetails())))
+    protected PdfDocumentRequest pdfRequest() {
+        return PdfDocumentRequest.builder()
+            .accessKey("TESTPDFACCESS")
+            .outputName("result.pdf")
+            .templateName(documentConfiguration.getContestedMiniFormTemplate(request.getCaseDetails()))
+            .data(copyWithOptionValueTranslation(request.getCaseDetails()).getData())
             .build();
     }
 }
