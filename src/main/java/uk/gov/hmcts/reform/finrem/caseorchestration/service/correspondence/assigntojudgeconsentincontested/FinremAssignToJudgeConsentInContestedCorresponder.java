@@ -34,12 +34,12 @@ public class FinremAssignToJudgeConsentInContestedCorresponder extends FinremSin
 
     @Override
     protected void emailApplicantSolicitor(FinremCaseDetails caseDetails) {
-        notificationService.sendAssignToJudgeConfirmationEmailToApplicantSolicitor(caseDetails);
+        // we don't want to send email as its for paper case
     }
 
     @Override
     protected void emailRespondentSolicitor(FinremCaseDetails caseDetails) {
-        notificationService.sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
+        // we don't want to send email as its for paper case
     }
 
 }
