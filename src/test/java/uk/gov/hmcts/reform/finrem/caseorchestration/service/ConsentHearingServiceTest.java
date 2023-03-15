@@ -75,8 +75,8 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
 
         service.submitHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
-        verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
-        verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), any(), any());
+        verify(bulkPrintService).printRespondentDocuments(any(CaseDetails.class), any(), any());
 
         List<ConsentedHearingDataWrapper> hearings = helper.getHearings(caseDetails.getData());
         assertEquals("2012-05-19", hearings.get(0).getValue().getHearingDate());
@@ -93,8 +93,8 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
 
         service.submitHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
-        verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
-        verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), any(), any());
+        verify(bulkPrintService).printRespondentDocuments(any(CaseDetails.class), any(), any());
 
         List<ConsentedHearingDataWrapper> hearings = helper.getHearings(caseDetails.getData());
         assertEquals("2012-05-19", hearings.get(0).getValue().getHearingDate());
@@ -112,8 +112,8 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
 
         service.submitHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
-        verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
-        verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), any(), any());
+        verify(bulkPrintService).printRespondentDocuments(any(CaseDetails.class), any(), any());
 
         List<ConsentedHearingDataWrapper> hearings = helper.getHearings(caseDetails.getData());
         assertEquals("2012-05-19", hearings.get(0).getValue().getHearingDate());

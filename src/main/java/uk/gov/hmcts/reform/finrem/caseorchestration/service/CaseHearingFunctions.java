@@ -9,13 +9,13 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -126,7 +126,7 @@ public final class CaseHearingFunctions {
 
     static UnaryOperator<CaseDetails> addFastTrackFields = caseDetails -> {
         Map<String, Object> data = caseDetails.getData();
-        data.put("formCCreatedDate", new Date());
+        data.put("formCCreatedDate", LocalDate.now());
         data.put("eventDatePlus21Days", LocalDate.now().plusDays(21));
 
         return caseDetails;
@@ -138,7 +138,7 @@ public final class CaseHearingFunctions {
         String hearingDate = Objects.toString(data.get(HEARING_DATE));
         LocalDate hearingLocalDate = LocalDate.parse(hearingDate);
 
-        data.put("formCCreatedDate", new Date());
+        data.put("formCCreatedDate", LocalDate.now());
         data.put("hearingDateLess35Days", hearingLocalDate.minusDays(35));
         data.put("hearingDateLess14Days", hearingLocalDate.minusDays(14));
 
@@ -290,10 +290,28 @@ public final class CaseHearingFunctions {
         return null;
     }
 
+    @Deprecated
     public static Map<String, Object> buildFrcCourtDetails(Map<String, Object> data) {
         try {
             Map<String, Object> courtDetailsMap = new ObjectMapper().readValue(getCourtDetailsString(), HashMap.class);
             Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(data.get(getSelectedCourt(data)));
+
+            return new ObjectMapper().convertValue(FrcCourtDetails.builder()
+                .courtName((String) courtDetails.get(COURT_DETAILS_NAME_KEY))
+                .courtAddress((String) courtDetails.get(COURT_DETAILS_ADDRESS_KEY))
+                .phoneNumber((String) courtDetails.get(COURT_DETAILS_PHONE_KEY))
+                .email((String) courtDetails.get(COURT_DETAILS_EMAIL_KEY))
+                .build(), Map.class);
+        } catch (IOException | NullPointerException e) {
+            return null;
+        }
+    }
+
+
+    public static Map<String, Object> buildFrcCourtDetails(FinremCaseData data) {
+        try {
+            Map<String, Object> courtDetailsMap = new ObjectMapper().readValue(getCourtDetailsString(), HashMap.class);
+            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(data.getSelectedCourt());
 
             return new ObjectMapper().convertValue(FrcCourtDetails.builder()
                 .courtName((String) courtDetails.get(COURT_DETAILS_NAME_KEY))
@@ -329,6 +347,15 @@ public final class CaseHearingFunctions {
             .phoneNumber(OrchestrationConstants.CTSC_PHONE_NUMBER)
             .email((OrchestrationConstants.CTSC_EMAIL_ADDRESS))
             .build(), Map.class);
+    }
+
+    public static FrcCourtDetails buildConsentedFrcCourtDetailsObject() {
+        return FrcCourtDetails.builder()
+            .courtName(OrchestrationConstants.CTSC_COURT_NAME)
+            .courtAddress(OrchestrationConstants.CTSC_COURT_ADDRESS)
+            .phoneNumber(OrchestrationConstants.CTSC_PHONE_NUMBER)
+            .email((OrchestrationConstants.CTSC_EMAIL_ADDRESS))
+            .build();
     }
 
     public static String getCourtDetailsString() {

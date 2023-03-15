@@ -9,12 +9,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.SingleLetterOrEmailAllPartiesCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.CaseDetailsSingleLetterOrEmailAllPartiesCorresponder;
 
 
 @Component
 @Slf4j
-public class AssignToJudgeCorresponder extends SingleLetterOrEmailAllPartiesCorresponder {
+public class AssignToJudgeCorresponder extends CaseDetailsSingleLetterOrEmailAllPartiesCorresponder {
 
     private final AssignedToJudgeDocumentService assignedToJudgeDocumentService;
 
@@ -41,4 +41,5 @@ public class AssignToJudgeCorresponder extends SingleLetterOrEmailAllPartiesCorr
     protected void emailRespondentSolicitor(CaseDetails caseDetails) {
         notificationService.sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
     }
+
 }

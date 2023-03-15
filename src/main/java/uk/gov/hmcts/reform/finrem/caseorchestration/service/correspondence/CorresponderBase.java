@@ -1,23 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+public abstract class CorresponderBase<D> {
 
-@Component
-@RequiredArgsConstructor
-@Slf4j
-public abstract class CorresponderBase {
+    protected abstract boolean shouldSendApplicantSolicitorEmail(D caseDetails);
 
-    protected final NotificationService notificationService;
-
-    protected boolean shouldSendApplicantSolicitorEmail(CaseDetails caseDetails) {
-        return notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);
-    }
-
-    protected boolean shouldSendRespondentSolicitorEmail(CaseDetails caseDetails) {
-        return notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails);
-    }
+    protected abstract boolean shouldSendRespondentSolicitorEmail(D caseDetails);
 }
