@@ -37,6 +37,7 @@ def versions = [
         springHateoas        : '1.5.1',
         tika                 : '2.4.1',
         sendLetterClient     : '2.6.0',
+        amClient             : '1.7.3',
 ]
 
 project.ext {
@@ -346,6 +347,9 @@ dependencies {
     implementation group: 'com.github.hmcts', name: 'send-letter-client', version: versions.sendLetterClient
     implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
+
+    implementation group: 'com.github.hmcts', name: 'ccd-case-document-am-client', version: versions.amClient
+    
     implementation("org.apache.poi:poi:5.2.3") {
         exclude group: "org.apache.commons", module: "commons-math3"
     }
