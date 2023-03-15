@@ -331,8 +331,9 @@ public class TestSetUpUtils {
             NatureApplication.PROPERTY_ADJUSTMENT_ORDER);
         caseData.getNatureApplicationWrapper().setNatureOfApplication2(natureOfApplications);
         populateApplicantNameAndAddress(caseData);
-        populateRespondentNameAndAddressConsented(caseData);
+        populateRespondentNameAndAddressContested(caseData);
         populateCourtDetails(caseData);
+        caseData.setCcdCaseType(CaseType.CONTESTED);
 
         return FinremCaseDetails.builder()
             .caseType(CaseType.CONTESTED)
@@ -465,6 +466,23 @@ public class TestSetUpUtils {
         caseData.put(CONTESTED_RESPONDENT_LAST_NAME, "Doe");
         caseData.put(RESPONDENT_ADDRESS, respondentAddress);
         caseData.put(CONTESTED_RESPONDENT_REPRESENTED, null);
+    }
+
+    private static void populateRespondentNameAndAddressContested(FinremCaseData caseData) {
+
+        Address respondentAddress = Address.builder().build();
+        respondentAddress.setAddressLine1("50 Respondent Street");
+        respondentAddress.setAddressLine2("Contested");
+        respondentAddress.setAddressLine3("Third Address Line");
+        respondentAddress.setCounty("London");
+        respondentAddress.setCountry("England");
+        respondentAddress.setPostTown("London");
+        respondentAddress.setPostCode("SW1");
+
+        caseData.getContactDetailsWrapper().setRespondentFmName("Jane");
+        caseData.getContactDetailsWrapper().setRespondentLname("Doe");
+        caseData.getContactDetailsWrapper().setRespondentAddress(respondentAddress);
+        caseData.getContactDetailsWrapper().setContestedRespondentRepresented(null);
     }
 
     public static DocumentGenerationRequest matchDocumentGenerationRequestTemplateAndFilename(String template, String filename) {
