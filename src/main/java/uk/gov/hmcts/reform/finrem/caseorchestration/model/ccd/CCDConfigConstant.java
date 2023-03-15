@@ -539,8 +539,6 @@ public class CCDConfigConstant {
     //Get user based on role i.e applicant or respondent
     public static final String CASE_ROLE = "currentUserCaseRole";
     public static final String CASE_ROLE_FOR_FIELD_SHOW = "currentUserCaseRoleLabel";
-    public static final String CASE_ROLE_FOR_CONSENTED_FIELD_SHOW = "currentUserForConsentedCaseRoleLabel";
-
     //Interim FRC List Names
     public static final String INTERIM_HEARING_PREFIX = "interim_";
     public static final String INTERIM_LONDON_FRC_LIST = "interim_londonFRCList";

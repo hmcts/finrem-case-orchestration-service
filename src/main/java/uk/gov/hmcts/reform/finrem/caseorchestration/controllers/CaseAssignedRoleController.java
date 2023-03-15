@@ -24,7 +24,7 @@ import java.util.Objects;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ROLE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ROLE_FOR_CONSENTED_FIELD_SHOW;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ROLE_FOR_FIELD_SHOW;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -51,7 +51,7 @@ public class CaseAssignedRoleController {
 
         Map<String, Object> caseData = service.setCaseAssignedUserRole(caseDetails, authToken);
         String caseRole = Objects.toString(caseData.get(CASE_ROLE));
-        caseData.put(CASE_ROLE_FOR_CONSENTED_FIELD_SHOW,
+        caseData.put(CASE_ROLE_FOR_FIELD_SHOW,
             caseRole.replace("[", "").replace("]",""));
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
