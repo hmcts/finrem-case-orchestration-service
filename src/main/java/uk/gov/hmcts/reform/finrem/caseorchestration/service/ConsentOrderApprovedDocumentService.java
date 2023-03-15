@@ -122,7 +122,7 @@ public class ConsentOrderApprovedDocumentService {
 
     private PensionTypeCollection stampPensionDocuments(PensionTypeCollection pensionDocument, String authToken) {
         CaseDocument document = pensionDocument.getTypedCaseDocument().getPensionDocument();
-        CaseDocument stampedDocument = genericDocumentService.stampDocument(document, authToken);
+        CaseDocument stampedDocument = genericDocumentService.stampDocument(document, authToken, false);
         PensionTypeCollection stampedPensionData = documentHelper.deepCopy(pensionDocument, PensionTypeCollection.class);
         stampedPensionData.getTypedCaseDocument().setPensionDocument(stampedDocument);
         return stampedPensionData;
@@ -166,7 +166,7 @@ public class ConsentOrderApprovedDocumentService {
         CaseDocument latestConsentOrder = getLatestConsentInContestedConsentOrder(caseData);
         CaseDocument pdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(latestConsentOrder, authToken);
         caseData.put(CONSENT_ORDER, pdfDocument);
-        CaseDocument stampedDoc = genericDocumentService.stampDocument(pdfDocument, authToken);
+        CaseDocument stampedDoc = genericDocumentService.stampDocument(pdfDocument, authToken, false);
         CaseDocument stampedAndAnnexedDoc = genericDocumentService.annexStampDocument(stampedDoc, authToken);
         log.info("Stamped Document and Annex doc = {}", stampedAndAnnexedDoc);
         return stampedAndAnnexedDoc;

@@ -23,6 +23,7 @@ import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
@@ -294,7 +295,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     }
 
     private OngoingStubbing<CaseDocument> whenStampingDocument() {
-        return when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN)));
+        return when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN), anyBoolean()));
     }
 
     private OngoingStubbing<List<PensionTypeCollection>> whenStampingPensionDocuments() {

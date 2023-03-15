@@ -259,12 +259,12 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
     public void givenFinalOrderSuccess_WhenHandle_ThenStampFinalOrder() {
         mockDocumentHelperToReturnDefaultExpectedDocuments();
         when(genericDocumentService.convertDocumentIfNotPdfAlready(isA(CaseDocument.class), eq(AUTH_TOKEN))).thenReturn(caseDocument());
-        when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN))).thenReturn(caseDocument());
+        when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN), eq(false))).thenReturn(caseDocument());
 
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response =
             sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 
-        verify(genericDocumentService).stampDocument(caseDocument(), AUTH_TOKEN);
+        verify(genericDocumentService).stampDocument(caseDocument(), AUTH_TOKEN, false);
 
         List<HearingOrderCollectionData> expectedFinalOrderCollection =
             (List<HearingOrderCollectionData>) response.getData().get(FINAL_ORDER_COLLECTION);
@@ -287,12 +287,12 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         mockDocumentHelperToReturnDefaultExpectedDocuments();
         when(documentHelper.getFinalOrderDocuments(any())).thenReturn(new ArrayList<>(List.of(HearingOrderCollectionData.builder().build())));
         when(genericDocumentService.convertDocumentIfNotPdfAlready(isA(CaseDocument.class), eq(AUTH_TOKEN))).thenReturn(caseDocument());
-        when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN))).thenReturn(caseDocument());
+        when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN), eq(false))).thenReturn(caseDocument());
 
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response =
             sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 
-        verify(genericDocumentService).stampDocument(caseDocument(), AUTH_TOKEN);
+        verify(genericDocumentService).stampDocument(eq(caseDocument()), eq(AUTH_TOKEN), eq(false));
 
         List<HearingOrderCollectionData> expectedFinalOrderCollection =
             (List<HearingOrderCollectionData>) response.getData().get(FINAL_ORDER_COLLECTION);

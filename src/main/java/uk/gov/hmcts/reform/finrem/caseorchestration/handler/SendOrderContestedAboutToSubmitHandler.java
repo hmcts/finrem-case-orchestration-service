@@ -158,7 +158,7 @@ public class SendOrderContestedAboutToSubmitHandler
 
     private void stampAndAddToCollection(Map<String, Object> caseData, CaseDocument latestHearingOrder, String authToken) {
         if (!isEmpty(latestHearingOrder)) {
-            CaseDocument stampedDocs = genericDocumentService.stampDocument(latestHearingOrder, authToken);
+            CaseDocument stampedDocs = genericDocumentService.stampDocument(latestHearingOrder, authToken, false);
             log.info("Stamped Documents = {}", stampedDocs);
 
             List<HearingOrderCollectionData> finalOrderCollection = Optional.ofNullable(documentHelper.getFinalOrderDocuments(caseData))

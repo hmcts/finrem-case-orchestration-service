@@ -48,22 +48,22 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldStampDocument() throws Exception {
-        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, false)).thenReturn(document());
+        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, false, false)).thenReturn(document());
 
-        CaseDocument stampDocument = genericDocumentService.stampDocument(caseDocument(), AUTH_TOKEN);
+        CaseDocument stampDocument = genericDocumentService.stampDocument(caseDocument(), AUTH_TOKEN, false);
 
         assertCaseDocument(stampDocument);
-        verify(pdfStampingServiceMock, times(1)).stampDocument(document(), AUTH_TOKEN, false);
+        verify(pdfStampingServiceMock, times(1)).stampDocument(document(), AUTH_TOKEN, false, false);
     }
 
     @Test
     public void shouldAnnexStampDocument() {
-        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, true)).thenReturn(document());
+        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, true, false)).thenReturn(document());
 
         CaseDocument stampDocument = genericDocumentService.annexStampDocument(caseDocument(), AUTH_TOKEN);
 
         assertCaseDocument(stampDocument);
-        verify(pdfStampingServiceMock, times(1)).stampDocument(document(), AUTH_TOKEN, true);
+        verify(pdfStampingServiceMock, times(1)).stampDocument(document(), AUTH_TOKEN, true, false);
     }
 
     @Test

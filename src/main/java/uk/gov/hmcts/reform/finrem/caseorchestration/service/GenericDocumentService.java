@@ -58,7 +58,7 @@ public class GenericDocumentService {
             .fileName(document.getDocumentFilename())
             .build();
         Document stampedDocument = pdfStampingService.stampDocument(
-            documentWithUrl, authorisationToken, true);
+            documentWithUrl, authorisationToken, true, false);
         return toCaseDocument(stampedDocument);
     }
 
@@ -75,13 +75,13 @@ public class GenericDocumentService {
         return toCaseDocument(storedDocument);
     }
 
-    public CaseDocument stampDocument(CaseDocument document, String authorisationToken) {
+    public CaseDocument stampDocument(CaseDocument document, String authorisationToken, boolean addHighCourtSeal) {
 
         Document stampedDocument = pdfStampingService.stampDocument(
             Document.builder().url(document.getDocumentUrl())
                 .binaryUrl(document.getDocumentBinaryUrl())
                 .fileName(document.getDocumentFilename())
-                .build(), authorisationToken, false);
+                .build(), authorisationToken, false, addHighCourtSeal);
         return toCaseDocument(stampedDocument);
     }
 

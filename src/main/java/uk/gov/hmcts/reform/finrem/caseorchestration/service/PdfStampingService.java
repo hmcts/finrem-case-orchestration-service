@@ -41,11 +41,11 @@ public class PdfStampingService {
 
     private final EvidenceManagementDownloadService emDownloadService;
 
-    public Document stampDocument(Document document, String authToken, boolean isAnnexNeeded) {
+    public Document stampDocument(Document document, String authToken, boolean isAnnexNeeded, boolean addHighCourtSeal) {
         log.info("Stamp document : {}", document);
         try {
             byte[] docInBytes = emDownloadService.download(document.getBinaryUrl()).getBody();
-            byte[] stampedDoc = stampDocument(docInBytes, isAnnexNeeded);
+            byte[] stampedDoc = stampDocument(docInBytes, isAnnexNeeded, addHighCourtSeal);
             MultipartFile multipartFile =
                 FinremMultipartFile.builder().name(document.getFileName()).content(stampedDoc)
                     .contentType(APPLICATION_PDF_CONTENT_TYPE).build();
@@ -60,7 +60,7 @@ public class PdfStampingService {
         }
     }
 
-    private byte[] stampDocument(byte[] inputDocInBytes, boolean isAnnexNeeded) throws Exception {
+    private byte[] stampDocument(byte[] inputDocInBytes, boolean isAnnexNeeded, boolean addHighCourtSeal) throws Exception {
         PDDocument doc = PDDocument.load(inputDocInBytes);
         doc.setAllSecurityToBeRemoved(true);
         PDPage page = doc.getPage(0);
@@ -68,7 +68,8 @@ public class PdfStampingService {
         log.info("PdfAnnexStampingInfo data  = {}", info);
 
         PDImageXObject annexImage = createFromByteArray(doc, imageAsBytes(info.getAnnexFile()), null);
-        PDImageXObject courtSealImage = createFromByteArray(doc, imageAsBytes(info.getCourtSealFile()), null);
+        PDImageXObject courtSealImage = addHighCourtSeal ? createFromByteArray(doc, imageAsBytes(info.getHighCourtSealFile()), null) :
+            createFromByteArray(doc, imageAsBytes(info.getCourtSealFile()), null);
         PDPageContentStream psdStream = new PDPageContentStream(doc, page, APPEND, true, true);
         psdStream.drawImage(courtSealImage, info.getCourtSealPositionX(), info.getCourtSealPositionY(),
             WIDTH_AND_HEIGHT, WIDTH_AND_HEIGHT);
