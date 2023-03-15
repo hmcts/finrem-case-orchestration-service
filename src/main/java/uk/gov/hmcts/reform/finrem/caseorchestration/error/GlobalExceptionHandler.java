@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import uk.gov.hmcts.reform.authorisation.exceptions.InvalidTokenException;
 import uk.gov.hmcts.reform.bsp.common.error.InvalidDataException;
@@ -66,6 +67,22 @@ public class GlobalExceptionHandler {
                     .errors(mergeLists(exception.getWarnings(), exception.getErrors()))
                     .build()
             );
+    }
+
+    @ExceptionHandler({DocumentConversionException.class})
+    public ResponseEntity<Object> handleDocumentConversionException(Exception exception) {
+        return handleException(exception);
+    }
+
+    private ResponseEntity<Object> handleException(Exception exception) {
+        log.error(exception.getMessage(), exception);
+
+        if (exception.getCause() != null && exception.getCause() instanceof HttpClientErrorException) {
+            HttpStatus httpClientErrorException = ((HttpClientErrorException) exception.getCause()).getStatusCode();
+            return ResponseEntity.status(httpClientErrorException).body(SERVER_ERROR_MSG);
+        }
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(SERVER_ERROR_MSG);
     }
 
     private List<String> mergeLists(List<String> warn, List<String> errors) {

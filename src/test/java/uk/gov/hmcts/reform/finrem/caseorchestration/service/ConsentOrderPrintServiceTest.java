@@ -10,13 +10,13 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.EvidenceManagementClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementAuditService;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -53,12 +53,9 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
     private final ArgumentCaptor<BulkPrintRequest> bulkPrintRequestArgumentCaptor = ArgumentCaptor.forClass(BulkPrintRequest.class);
     private final CaseDocument caseDocument = TestSetUpUtils.caseDocument();
 
-    @Autowired
-    private ObjectMapper mapper;
-    @Autowired
-    private ConsentOrderPrintService consentOrderPrintService;
-    @Autowired
-    private EvidenceManagementClient evidenceManagementClientMock;
+    @Autowired private ObjectMapper mapper;
+    @Autowired private ConsentOrderPrintService consentOrderPrintService;
+    @MockBean private EvidenceManagementAuditService evidenceManagementAuditService;
 
     @MockBean
     private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
@@ -254,11 +251,9 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         when(consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(caseDetails, AUTH_TOKEN))
             .thenReturn(bulkPrintDocumentList());
         when(consentOrderNotApprovedDocumentService.notApprovedConsentOrder(any())).thenReturn(singletonList(caseDocument));
-        Date now = new Date();
-        Date beforeNow = new Date(now.getTime() - 1);
-        when(evidenceManagementClientMock.auditFileUrls(eq(AUTH_TOKEN), any())).thenReturn(asList(
-            FileUploadResponse.builder().modifiedOn(now).build(),
-            FileUploadResponse.builder().modifiedOn(beforeNow).build()));
+        when(evidenceManagementAuditService.audit(any(), eq(AUTH_TOKEN))).thenReturn(asList(
+            FileUploadResponse.builder().modifiedOn(LocalDateTime.now().toString()).build(),
+            FileUploadResponse.builder().modifiedOn(LocalDateTime.now().minusDays(2).toString()).build()));
 
         consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, AUTH_TOKEN);
 
