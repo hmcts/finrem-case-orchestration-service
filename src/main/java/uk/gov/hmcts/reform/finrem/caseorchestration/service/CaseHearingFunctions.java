@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetai
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -77,6 +78,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENTFRC_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LANCASHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LANCASHIRE_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LETTER_DATE_FORMAT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIVERPOOL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIVERPOOL_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON;
@@ -126,8 +128,8 @@ public final class CaseHearingFunctions {
 
     static UnaryOperator<CaseDetails> addFastTrackFields = caseDetails -> {
         Map<String, Object> data = caseDetails.getData();
-        data.put("formCCreatedDate", LocalDate.now());
-        data.put("eventDatePlus21Days", LocalDate.now().plusDays(21));
+        data.put("formCCreatedDate", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()));
+        data.put("eventDatePlus21Days", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now().plusDays(21)));
 
         return caseDetails;
     };
@@ -138,9 +140,9 @@ public final class CaseHearingFunctions {
         String hearingDate = Objects.toString(data.get(HEARING_DATE));
         LocalDate hearingLocalDate = LocalDate.parse(hearingDate);
 
-        data.put("formCCreatedDate", LocalDate.now());
-        data.put("hearingDateLess35Days", hearingLocalDate.minusDays(35));
-        data.put("hearingDateLess14Days", hearingLocalDate.minusDays(14));
+        data.put("formCCreatedDate", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()));
+        data.put("hearingDateLess35Days", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(hearingLocalDate.minusDays(35)));
+        data.put("hearingDateLess14Days", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(hearingLocalDate.minusDays(14)));
 
         return caseDetails;
     };
