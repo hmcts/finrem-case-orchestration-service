@@ -48,12 +48,26 @@ public class AssignToJudgeConsentInContestedSubmittedHandlerTest {
     @Test
     public void givenACcdCallbackAboutToSubmit_WhenCanHandleCalled_thenHandlerCanNotHandle() {
         assertThat(handler
-                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.SOLICITOR_CREATE),
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.ASSIGN_TO_JUDGE_CONSENT),
             is(false));
     }
 
     @Test
-    public void givenACcdCallbackAssignToJudgeConsentInConsented_WhenHandle_thenAddSupplementary() {
+    public void givenACcdCallbackSubmittedConsented_WhenCanHandleCalled_thenHandlerCanNotHandle() {
+        assertThat(handler
+                .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.ASSIGN_TO_JUDGE_CONSENT),
+            is(false));
+    }
+
+    @Test
+    public void givenACcdCallbackSubmittedSolicitorCreate_WhenCanHandleCalled_thenHandlerCanNotHandle() {
+        assertThat(handler
+                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.SOLICITOR_CREATE),
+            is(false));
+    }
+
+    @Test
+    public void givenACcdCallbackAssignToJudgeConsentInConsented_WhenHandle_thenSendCorresponder() {
         FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
         handler.handle(callbackRequest, AUTH_TOKEN);
 
