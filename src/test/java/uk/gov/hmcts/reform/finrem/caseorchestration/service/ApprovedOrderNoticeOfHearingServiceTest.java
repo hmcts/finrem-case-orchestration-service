@@ -53,6 +53,7 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     static final String CASE_DATA = "case_data";
     static final String CASE_DETAILS = "caseDetails";
 
+
     @Autowired
     private ApprovedOrderNoticeOfHearingService approvedOrderNoticeOfHearingService;
     @Autowired
@@ -221,6 +222,7 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
             Matchers.hasEntry("CourtPhone", "0300 1235577"),
             Matchers.hasEntry("CourtEmail", "hastingsfamily@justice.gov.uk"),
             Matchers.hasEntry("ApplicantName", "Poor Guy"),
+            Matchers.hasEntry("AdditionalHearingDated", formattedNowDate),
             Matchers.<String, Object>hasEntry("HearingTime", "1pm"),
             Matchers.<String, Object>hasEntry("RespondentName", "test Korivi"),
             Matchers.<String, Object>hasEntry("HearingVenue",

@@ -632,4 +632,6 @@ public class CCDConfigConstant {
 
     //Hearing State
     public static final String PREPARE_FOR_HEARING_STATE = "prepareForHearing";
+
+    public static final String LETTER_DATE_FORMAT = "yyyy-MM-dd";
 }
