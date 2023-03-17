@@ -1,6 +1,10 @@
 # Financial Remedy Case Orchestration Service
 
 This application orchestrates a workflow based on the requested business requirement.
+## Overview
+<p align="center">
+  <img src="https://raw.githubusercontent.com/hmcts/reform-api-docs/master/docs/c4/finrem/images/structurizr-finrem-overview.png" width="800"/>
+</p>
 
 ## Getting started
 
