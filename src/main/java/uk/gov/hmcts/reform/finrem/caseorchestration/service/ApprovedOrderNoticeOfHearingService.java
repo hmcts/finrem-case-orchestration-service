@@ -15,8 +15,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.ApprovedOrderNoticeOfHearingCorresponder;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DIRECTION_DETAILS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NOTICE_DOCUMENT_PACK;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LETTER_DATE_FORMAT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element.element;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
@@ -143,7 +145,7 @@ public class ApprovedOrderNoticeOfHearingService {
         placeholdersMap.put("HearingDate", additionalHearingDirectionsCollection.getDateOfHearing());
         placeholdersMap.put("HearingTime", additionalHearingDirectionsCollection.getHearingTime());
         placeholdersMap.put("HearingLength", additionalHearingDirectionsCollection.getTimeEstimate());
-        placeholdersMap.put("AdditionalHearingDated", new Date());
+        placeholdersMap.put("AdditionalHearingDated", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()));
 
         placeholdersMap.put("CourtName", selectedFRCDetails.getCourtName());
         placeholdersMap.put("CourtAddress", selectedFRCDetails.getCourtAddress());
@@ -153,7 +155,7 @@ public class ApprovedOrderNoticeOfHearingService {
         placeholdersMap.put("CCDCaseNumber", caseDetails.getId());
         placeholdersMap.put("DivorceCaseNumber", nullToEmpty(caseDetails.getData().get(DIVORCE_CASE_NUMBER)));
         placeholdersMap.put("ApplicantName", documentHelper.getApplicantFullName(caseDetails));
-        placeholdersMap.put("RespondentName",  caseDataService.buildFullRespondentName(caseDetails));
+        placeholdersMap.put("RespondentName", caseDataService.buildFullRespondentName(caseDetails));
 
         return placeholdersMap;
     }
