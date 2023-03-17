@@ -128,8 +128,8 @@ public class UpdateRepresentationWorkflowService {
     public void updateApplicantOrganisationPolicy(CaseDetails caseDetails) {
         caseDetails.getData().put(APPLICANT_ORGANISATION_POLICY,
             OrganisationPolicy.builder()
-                .organisation(Organisation.builder().build())
-                .orgPolicyReference(null)
+                .organisation(Organisation.builder().organisationID("").organisationName("").build())
+                .orgPolicyReference("")
                 .orgPolicyCaseAssignedRole(APP_SOLICITOR_POLICY)
                 .build());
     }
@@ -137,8 +137,8 @@ public class UpdateRepresentationWorkflowService {
     public void updateRespondentOrganisationPolicy(CaseDetails caseDetails) {
         caseDetails.getData().put(RESPONDENT_ORGANISATION_POLICY,
             OrganisationPolicy.builder()
-                .organisation(Organisation.builder().build())
-                .orgPolicyReference(null)
+                .organisation(Organisation.builder().organisationID("").organisationName("").build())
+                .orgPolicyReference("")
                 .orgPolicyCaseAssignedRole(RESP_SOLICITOR_POLICY)
                 .build());
     }
