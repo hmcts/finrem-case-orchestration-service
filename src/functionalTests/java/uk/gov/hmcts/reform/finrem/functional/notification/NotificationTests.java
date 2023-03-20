@@ -42,7 +42,7 @@ public class NotificationTests extends IntegrationTestBase {
     public void verifyNotifyContestApplicationIssuedIsOkay() {
 
         utils.validatePostSuccess(contestApplicationIssuedApiUri,
-            "ccd-request-with-solicitor-contestApplicationIssued-v2.json", contestedDir);
+            "ccd-request-with-solicitor-contestApplicationIssued.json", contestedDir);
     }
 
     @Test

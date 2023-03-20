@@ -314,6 +314,25 @@ public class NotificationsControllerTest extends BaseControllerTest {
         verify(notificationService, never()).sendPrepareForHearingOrderSentEmailRespondent(any(CaseDetails.class));
     }
 
+
+    @Test
+    public void shouldSendContestedApplicationIssuedEmailWhenAgreed() {
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+
+        notificationsController.sendContestedApplicationIssuedEmail(buildCallbackRequest());
+
+        verify(notificationService).sendContestedApplicationIssuedEmailToApplicantSolicitor(any(CaseDetails.class));
+    }
+
+    @Test
+    public void shouldNotSendContestedApplicationIssuedEmailWhenNotAgreed() {
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+
+        notificationsController.sendContestedApplicationIssuedEmail(buildCallbackRequest());
+
+        verify(notificationService, never()).sendContestedApplicationIssuedEmailToApplicantSolicitor(any(CaseDetails.class));
+    }
+
     @Test
     public void sendDraftOrderEmailWhenApplicantSolicitorIsNominatedAndIsAcceptingEmails() {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
