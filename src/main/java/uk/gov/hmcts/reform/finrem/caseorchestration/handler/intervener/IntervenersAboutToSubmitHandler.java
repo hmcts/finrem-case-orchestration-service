@@ -1,14 +1,18 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.intervener;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.IntervenerAddedCorresponder;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.ADD_INTERVENER_FOUR_CODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.ADD_INTERVENER_ONE_CODE;
@@ -23,11 +27,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerC
 @Service
 public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
     private final IntervenerService service;
+    private final IntervenerAddedCorresponder intervenerAddedCorresponder;
 
     public IntervenersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                           IntervenerService service) {
+                                           IntervenerService service, IntervenerAddedCorresponder intervenerAddedCorresponder) {
         super(finremCaseDetailsMapper);
         this.service =  service;
+        this.intervenerAddedCorresponder = intervenerAddedCorresponder;
     }
 
     @Override
@@ -49,17 +55,24 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
         String selectedOperationCode = caseData.getIntervenerOptionList().getValueCode();
         log.info("selected operation choice {} for intervener {} for case id: {}",
             selectedOperationCode, caseData.getIntervenersList().getValueCode(), caseId);
+        IntervenerChangeDetails intervenerChangeDetails = null;
 
         switch (selectedOperationCode) {
-            case ADD_INTERVENER_ONE_CODE -> service.updateIntervenerOneDetails(callbackRequest);
-            case ADD_INTERVENER_TWO_CODE -> service.updateIntervenerTwoDetails(callbackRequest);
-            case ADD_INTERVENER_THREE_CODE -> service.updateIntervenerThreeDetails(callbackRequest);
-            case ADD_INTERVENER_FOUR_CODE -> service.updateIntervenerFourDetails(callbackRequest);
+            case ADD_INTERVENER_ONE_CODE -> intervenerChangeDetails = service.updateIntervenerOneDetails(callbackRequest, userAuthorisation);
+            case ADD_INTERVENER_TWO_CODE -> intervenerChangeDetails = service.updateIntervenerTwoDetails(callbackRequest);
+            case ADD_INTERVENER_THREE_CODE -> intervenerChangeDetails = service.updateIntervenerThreeDetails(callbackRequest);
+            case ADD_INTERVENER_FOUR_CODE -> intervenerChangeDetails = service.updateIntervenerFourDetails(callbackRequest);
             case DEL_INTERVENER_ONE_CODE -> service.removeIntervenerOneDetails(caseData, caseId);
             case DEL_INTERVENER_TWO_CODE -> service.removeIntervenerTwoDetails(caseData, caseId);
             case DEL_INTERVENER_THREE_CODE -> service.removeIntervenerThreeDetails(caseData, caseId);
             case DEL_INTERVENER_FOUR_CODE -> service.removeIntervenerFourDetails(caseData, caseId);
             default -> throw new IllegalArgumentException("Invalid option received for case " + caseId);
+        }
+
+        if(intervenerChangeDetails.getIntervenerAction().equals(IntervenerChangeDetails.IntervenerAction.ADDED)) {
+            intervenerAddedCorresponder.sendCorrespondence(callbackRequest.getCaseDetails(), userAuthorisation, intervenerChangeDetails);
+        } else if (intervenerChangeDetails.getIntervenerAction().equals(IntervenerChangeDetails.IntervenerAction.REMOVED)) {
+            //intervenerRemovedCorresponder
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()

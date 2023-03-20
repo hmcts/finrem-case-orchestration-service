@@ -15,6 +15,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.IntervenerAddedCorresponder;
 
 import java.time.LocalDate;
 
@@ -24,6 +26,8 @@ import java.time.LocalDate;
 public class IntervenerService {
 
     private final AssignCaseAccessService assignCaseAccessService;
+    private final IntervenerAddedCorresponder intervenerAddedCorresponder;
+    private IntervenerChangeDetails intervenerChangeDetails;
     private final PrdOrganisationService organisationService;
     private final SystemUserService systemUserService;
 
@@ -71,11 +75,13 @@ public class IntervenerService {
         caseData.setIntervenerFourWrapper(null);
     }
 
-    public void updateIntervenerFourDetails(FinremCallbackRequest callbackRequest) {
+    public IntervenerChangeDetails updateIntervenerFourDetails(FinremCallbackRequest callbackRequest) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseData caseData = caseDetails.getData();
         Long caseId = callbackRequest.getCaseDetails().getId();
+        IntervenerChangeDetails intervenerFourChangeDetails = new IntervenerChangeDetails(
+            IntervenerChangeDetails.IntervenerType.INTERVENER_FOUR, IntervenerChangeDetails.IntervenerAction.ADDED);
 
         IntervenerFourWrapper intervenerFourWrapper = caseData.getIntervenerFourWrapper();
         if (intervenerFourWrapper != null) {
@@ -110,13 +116,16 @@ public class IntervenerService {
 
             }
         }
+        return intervenerFourChangeDetails;
     }
 
-    public void updateIntervenerThreeDetails(FinremCallbackRequest callbackRequest) {
+    public IntervenerChangeDetails updateIntervenerThreeDetails(FinremCallbackRequest callbackRequest) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseData caseData = caseDetails.getData();
         Long caseId = callbackRequest.getCaseDetails().getId();
+        IntervenerChangeDetails intervenerThreeChangeDetails = new IntervenerChangeDetails(
+            IntervenerChangeDetails.IntervenerType.INTERVENER_THREE, IntervenerChangeDetails.IntervenerAction.ADDED);
 
         IntervenerThreeWrapper intervenerThreeWrapper = caseData.getIntervenerThreeWrapper();
         if (intervenerThreeWrapper != null) {
@@ -151,13 +160,16 @@ public class IntervenerService {
                 setDefaultOrgForintervenerThree(intervenerThreeWrapper);
             }
         }
+        return intervenerThreeChangeDetails;
     }
 
-    public void updateIntervenerTwoDetails(FinremCallbackRequest callbackRequest) {
+    public IntervenerChangeDetails updateIntervenerTwoDetails(FinremCallbackRequest callbackRequest) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseData caseData = caseDetails.getData();
         Long caseId = callbackRequest.getCaseDetails().getId();
+        IntervenerChangeDetails intervenerTwoChangeDetails = new IntervenerChangeDetails(
+            IntervenerChangeDetails.IntervenerType.INTERVENER_TWO, IntervenerChangeDetails.IntervenerAction.ADDED);
 
         IntervenerTwoWrapper intervenerTwoWrapper = caseData.getIntervenerTwoWrapper();
         if (intervenerTwoWrapper != null) {
@@ -193,13 +205,17 @@ public class IntervenerService {
 
             }
         }
+        return intervenerTwoChangeDetails;
     }
 
-    public void updateIntervenerOneDetails(FinremCallbackRequest callbackRequest) {
+    public IntervenerChangeDetails updateIntervenerOneDetails(FinremCallbackRequest callbackRequest, String authToken) {
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseData caseData = caseDetails.getData();
         Long caseId = callbackRequest.getCaseDetails().getId();
+        IntervenerChangeDetails intervenerOneChangeDetails =
+            new IntervenerChangeDetails(IntervenerChangeDetails.IntervenerType.INTERVENER_ONE,
+                IntervenerChangeDetails.IntervenerAction.ADDED);
 
         IntervenerOneWrapper intervenerOneWrapper = caseData.getIntervenerOneWrapper();
         if (intervenerOneWrapper != null) {
@@ -232,9 +248,9 @@ public class IntervenerService {
                 }
                 log.info("Intervener1 add default case role and organisation for case {}", caseId);
                 setDefaultOrgForintervenerOne(intervenerOneWrapper);
-
             }
         }
+        return intervenerOneChangeDetails;
     }
 
     private void checkIfIntervenerFourSolDetailsChanged(FinremCaseDetails caseDetailsBefore, String orgId, String email) {

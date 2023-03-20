@@ -670,6 +670,10 @@ public class FinremCaseData {
         return StringUtils.isNotEmpty(nullToEmpty(getContactDetailsWrapper().getRespondentSolicitorEmail()));
     }
 
+    public boolean isIntervenerSolOnePopulated() {
+        return StringUtils.isNotEmpty(nullToEmpty(getIntervenerOneWrapper().getIntervener1SolEmail()));
+    }
+
     @JsonIgnore
     public boolean isFastTrackApplication() {
         return Optional.ofNullable(caseAllocatedTo)

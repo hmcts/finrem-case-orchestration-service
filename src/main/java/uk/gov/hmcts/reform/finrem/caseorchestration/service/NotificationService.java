@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceCo
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
@@ -779,6 +780,12 @@ public class NotificationService {
     public boolean isRespondentSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
         return caseDetails.getData().isRespondentSolicitorPopulated()
             && checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
+    }
+
+    public boolean isIntervenerOneSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
+        return caseDetails.getData().isIntervenerSolOnePopulated()
+            && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
+            CaseRole.INTVR_SOLICITOR_1.getValue());
     }
 
     @Deprecated

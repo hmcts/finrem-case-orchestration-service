@@ -19,6 +19,11 @@ public class IntervenerChangeDetails {
 
     private final IntervenerType intervenerType;
     private final IntervenerAction intervenerAction;
-    private final String intervenerFullName;
+    public IntervenerType getIntervenerType() {
+        return intervenerType;
+    }
 
+    public IntervenerAction getIntervenerAction() {
+        return intervenerAction;
+    }
 }

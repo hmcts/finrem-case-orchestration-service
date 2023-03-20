@@ -30,7 +30,7 @@ public class IntervenerDocumentService {
             recipient);
 
         CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterTemplateData(caseDetails, recipient);
-
+        //intervenerADdedLetterDetails
         CaseDocument generateIntervenerAddedNotificationLetter =
             getCaseDocument(authToken, caseDetailsForBulkPrint);
 

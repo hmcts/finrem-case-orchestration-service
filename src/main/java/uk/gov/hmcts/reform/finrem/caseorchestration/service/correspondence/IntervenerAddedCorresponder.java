@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.interveners.IntervenerDocumentService;
@@ -21,28 +22,36 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
         this.intervenerDocumentService = intervenerDocumentService;
     }
 
-    public void sendCorrespondence(FinremCaseDetails caseDetails, String authToken) {
+    public void sendCorrespondence(FinremCaseDetails caseDetails, String authToken, IntervenerChangeDetails intervenerChangeDetails) {
         sendApplicantCorrespondence(caseDetails, authToken);
         sendRespondentCorrespondence(caseDetails, authToken);
-        //check if newly added to send letter to self
-        sendIntervenerOneCorrespondence(caseDetails, authToken);
-        //check intervener two is
+        if (intervenerChangeDetails.getIntervenerType().equals(IntervenerChangeDetails.IntervenerType.INTERVENER_ONE) &&
+            intervenerChangeDetails.getIntervenerAction().equals(IntervenerChangeDetails.IntervenerAction.ADDED)) {
+            sendIntervenerOneCorrespondence(caseDetails, authToken);
+        }
+
+
     }
 
     protected void sendIntervenerOneCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
-        if (caseDetails.getData().isIntervenerOneRepresentedByASolicitor()) {
+        if (shouldSendIntervenerOneSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to Intervener One for case: {}", caseDetails.getId());
+            //send email
         } else {
             log.info("Sending letter correspondence to Intervener One for case: {}", caseDetails.getId());
             bulkPrintService.sendDocumentForPrint(
                 getDocumentToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE), caseDetails);
-        }
+        } //map to generic intervener object 
     }
 
     @Override
     public CaseDocument getDocumentToPrint(FinremCaseDetails caseDetails, String authorisationToken,
                                            DocumentHelper.PaperNotificationRecipient recipient) {
         return intervenerDocumentService.generateIntervenerAddedNotificationLetter(caseDetails, authorisationToken,recipient);
+    }
+
+    protected boolean shouldSendIntervenerOneSolicitorEmail(FinremCaseDetails caseDetails) {
+        return notificationService.isIntervenerOneSolicitorDigitalAndEmailPopulated(caseDetails);
     }
 
     @Override
