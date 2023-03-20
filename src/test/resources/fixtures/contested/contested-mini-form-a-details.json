@@ -12,8 +12,10 @@
     "last_state_modified_date": "2020-08-05T14:37:15.69",
     "security_classification": "PUBLIC",
     "case_data": {
+      "caseNumber": "1596638099618923",
       "applicantFMName": "Applicant",
       "applicantLName": "Name",
+      "typeOfApplication": "In connection to matrimonial and civil partnership proceedings",
       "applicantAddress": {
         "County": "Greater London",
         "Country": "United Kingdom",
@@ -32,6 +34,8 @@
       "issueDate": "2022-01-01",
       "divorceCaseNumber": "DD12D12345",
       "applicantSolicitorName": "SolicitorName",
+      "applicantSolicitorEmail": "jocureca@mailinator.com",
+      "applicantSolicitorPhone": "+1 (454) 664-3749",
       "applicantSolicitorFirm": "SolicitorFirm",
       "solicitorReference": "SolicitorReference",
       "applicantSolicitorAddress": {

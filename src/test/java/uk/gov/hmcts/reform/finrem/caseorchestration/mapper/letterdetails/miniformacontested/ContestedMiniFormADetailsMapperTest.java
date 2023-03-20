@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AbstractLetterDetailsMapperTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BenefitPayment;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BenefitPaymentChecklist;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamDomesticViolence;
@@ -14,8 +15,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamOtherGrounds;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamPreviousAttendance;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.MiamUrgencyReason;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureOfApplicationSchedule;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PropertyAdjustmentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PropertyAdjustmentOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.ContestedMiniFormADetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 
@@ -27,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class ContestedMiniFormADetailsMapperTest extends AbstractLetterDetailsMapperTest {
 
     private static final String TEST_JSON = "/fixtures/contested/contested-mini-form-a-details.json";
+    private static final String SCHEDULE_1_TEST_JSON = "/fixtures/contested/contested-mini-form-a-details-schedule-1.json";
 
     @Autowired
     private ContestedMiniFormADetailsMapper contestedMiniFormADetailsMapper;
@@ -47,8 +51,20 @@ public class ContestedMiniFormADetailsMapperTest extends AbstractLetterDetailsMa
     }
 
     @Test
+    public void givenValidCaseData_whenBuildDocumentTemplateDetailsForScheduleApp_thenReturnExpectedTemplateDetails() {
+        setCaseDetails(SCHEDULE_1_TEST_JSON);
+        DocumentTemplateDetails expected = getExpectedContestedMiniFormADetailsScheduleOne();
+
+        DocumentTemplateDetails actual = contestedMiniFormADetailsMapper.buildDocumentTemplateDetails(caseDetails,
+            caseDetails.getData().getRegionWrapper().getDefaultCourtList());
+
+        assertEquals(expected.toString().trim(), actual.toString().trim());
+    }
+
+    @Test
     public void givenEmptyOrNullFields_whenBuildDocumentTemplateDetails_thenDoNotThrowException() {
-        FinremCaseDetails emptyDetails = FinremCaseDetails.builder().data(FinremCaseData.builder().build()).build();
+        FinremCaseDetails emptyDetails = FinremCaseDetails.builder().id(1596638099618923L)
+            .data(FinremCaseData.builder().build()).build();
 
         DocumentTemplateDetails actual = contestedMiniFormADetailsMapper.buildDocumentTemplateDetails(emptyDetails,
             emptyDetails.getData().getRegionWrapper().getDefaultCourtList());
@@ -58,6 +74,7 @@ public class ContestedMiniFormADetailsMapperTest extends AbstractLetterDetailsMa
 
     private ContestedMiniFormADetails getExpectedContestedMiniFormADetails() {
         return ContestedMiniFormADetails.builder()
+            .caseNumber("1596638099618923")
             .applicantFmName("Applicant")
             .applicantLName("Name")
             .applicantPhone("12345")
@@ -94,11 +111,52 @@ public class ContestedMiniFormADetailsMapperTest extends AbstractLetterDetailsMa
             .mortgageDetail("test3b")
             .propertyAddress("test3a")
             .paymentForChildrenDecision("Yes")
-            .benefitForChildrenDecision("No")
+            .benefitForChildrenDecision(YesOrNo.NO)
             .benefitPaymentChecklist(getBenefitPaymentChecklist())
             .claimingExemptionMiam("No")
             .familyMediatorMiam("No")
             .applicantAttendedMiam("Yes")
+            .miamExemptionsChecklist(getMiamExemptionsChecklist())
+            .miamDomesticViolenceChecklist(getMiamDomesticViolenceChecklist())
+            .miamUrgencyReasonChecklist(getMiamUrgencyReasonChecklist())
+            .miamPreviousAttendanceChecklist(MiamPreviousAttendance.FR_MS_MIAM_PREVIOUS_ATTENDANCE_CHECKLIST_VALUE_1.getText())
+            .miamOtherGroundsChecklist(MiamOtherGrounds.FR_MS_MIAM_OTHER_GROUNDS_CHECKLIST_VALUE_1.getText())
+            .propertyAdjustmentOrderDetail(getPropertyAdjustmentOrderDetail())
+            .build();
+    }
+
+    private ContestedMiniFormADetails getExpectedContestedMiniFormADetailsScheduleOne() {
+        return ContestedMiniFormADetails.builder()
+            .caseNumber("1596638099618923")
+            .applicantFmName("Mason Wall")
+            .applicantLName("Hodges")
+            .applicantPhone("+1 (472) 791-5734")
+            .applicantEmail("mypyj@mailinator.com")
+            .applicantAddress(getAddress("1 Rse Way"))
+            .applicantAddressConfidential("No")
+            .applicantRepresented("Yes")
+            .applicantSolicitorName("Kyra Taylor")
+            .applicantSolicitorFirm("Veniam ea delectus")
+            .solicitorReference("800")
+            .applicantSolicitorAddress(getAddress("1 Rse Way"))
+            .respondentFmName("Blaine Joseph")
+            .respondentLName("Lambert")
+            .respondentPhone("12345")
+            .respondentEmail("respondent@gmail.com")
+            .respondentRepresented("No")
+            .respondentAddressConfidential("No")
+            .respondentSolicitorAddress(getRespAddress())
+            .respondentAddress(getAddress("1 Rse Way"))
+            .divorceCaseNumber("1679071825739294")
+            .issueDate("2023-03-17")
+            .fastTrackDecision("Yes")
+            .natureOfApplicationChecklistSchedule(getNatureApplicationChecklistSchedule())
+            .paymentForChildrenDecision("Yes")
+            .benefitForChildrenDecisionSchedule(YesOrNo.NO)
+            .benefitPaymentChecklistSchedule(getBenefitPaymentChecklistSchedule())
+            .claimingExemptionMiam("Yes")
+            .familyMediatorMiam("No")
+            .applicantAttendedMiam("No")
             .miamExemptionsChecklist(getMiamExemptionsChecklist())
             .miamDomesticViolenceChecklist(getMiamDomesticViolenceChecklist())
             .miamUrgencyReasonChecklist(getMiamUrgencyReasonChecklist())
@@ -120,6 +178,12 @@ public class ContestedMiniFormADetailsMapperTest extends AbstractLetterDetailsMa
             .build();
     }
 
+
+    private Address getRespAddress() {
+        return Address.builder()
+            .build();
+    }
+
     private List<String> getNatureApplicationChecklist() {
         return List.of(
             NatureApplication.LUMP_SUM_ORDER.getText(),
@@ -132,11 +196,28 @@ public class ContestedMiniFormADetailsMapperTest extends AbstractLetterDetailsMa
             NatureApplication.PROPERTY_ADJUSTMENT_ORDER.getText());
     }
 
+    private List<String> getNatureApplicationChecklistSchedule() {
+        return List.of(
+            NatureOfApplicationSchedule.INTERIM_CHILD_PERIODICAL_PAYMENTS.getText(),
+            NatureOfApplicationSchedule.LUMP_SUM_ORDER.getText(),
+            NatureOfApplicationSchedule.A_SETTLEMENT_OR_A_TRANSFER_OF_PROPERTY.getText(),
+            NatureOfApplicationSchedule.PERIODICAL_PAYMENT_ORDER.getText(),
+            NatureOfApplicationSchedule.VARIATION_ORDER.getText());
+    }
+
     private List<String> getBenefitPaymentChecklist() {
         return List.of(
             BenefitPayment.BENEFIT_CHECKLIST_VALUE_1.getText(),
             BenefitPayment.BENEFIT_CHECKLIST_VALUE_2.getText(),
             BenefitPayment.BENEFIT_CHECKLIST_VALUE_3.getText()
+        );
+    }
+
+    private List<String> getBenefitPaymentChecklistSchedule() {
+        return List.of(
+            BenefitPaymentChecklist.STEP_CHILD_OR_STEP_CHILDREN.getValue(),
+            BenefitPaymentChecklist.IN_ADDITION_TO_CHILD_SUPPORT_MAINTENANCE_ALREADY_PAID.getValue(),
+            BenefitPaymentChecklist.EXPENSES_ARISING_FROM_A_CHILDS_DISABILITY.getValue()
         );
     }
 

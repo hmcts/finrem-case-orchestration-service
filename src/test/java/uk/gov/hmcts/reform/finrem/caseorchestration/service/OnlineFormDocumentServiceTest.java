@@ -12,6 +12,11 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.miniformacontested.ContestedMiniFormADetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -52,6 +57,9 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
     @MockBean
     private GenericDocumentService genericDocumentService;
 
+    @MockBean
+    private ContestedMiniFormADetailsMapper contestedMiniFormADetailsMapperMock;
+
     @Autowired
     private DocumentConfiguration documentConfiguration;
     @Autowired
@@ -65,6 +73,7 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
     @Before
     public void setUp() {
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any())).thenReturn(caseDocument());
     }
 
     @Test
@@ -75,6 +84,31 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
             documentConfiguration.getMiniFormTemplate(CaseDetails.builder().build()),
             documentConfiguration.getMiniFormFileName());
     }
+
+    @Test
+    public void generateMiniFormADirectFromMapWhenTypeOfApplicationNotPresentThenUseDefault() {
+        Map<String, Object> placeholdersMap = new HashMap<>();
+        when(contestedMiniFormADetailsMapperMock.getDocumentTemplateDetailsAsMap(any(), any())).thenReturn(placeholdersMap);
+        FinremCaseDetails finremCaseDetails = emptyCaseDetails();
+        finremCaseDetails.getData().setScheduleOneWrapper(ScheduleOneWrapper.builder().typeOfApplication(Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989).build());
+        assertCaseDocument(onlineFormDocumentService.generateContestedMiniForm(AUTH_TOKEN, emptyCaseDetails()));
+        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), eq(placeholdersMap),
+            eq(documentConfiguration.getContestedMiniFormTemplate(emptyCaseDetails())),
+            eq(documentConfiguration.getContestedMiniFormFileName()));
+    }
+
+    @Test
+    public void generateMiniFormADirectFromMapWhenTypeOfApplicationPresentThenUseChooseTemplate() {
+        Map<String, Object> placeholdersMap = new HashMap<>();
+        when(contestedMiniFormADetailsMapperMock.getDocumentTemplateDetailsAsMap(any(), any())).thenReturn(placeholdersMap);
+        FinremCaseDetails finremCaseDetails = emptyCaseDetails();
+        finremCaseDetails.getData().setScheduleOneWrapper(ScheduleOneWrapper.builder().typeOfApplication(Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989).build());
+        assertCaseDocument(onlineFormDocumentService.generateContestedMiniForm(AUTH_TOKEN, finremCaseDetails));
+        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), eq(placeholdersMap),
+            eq(documentConfiguration.getContestedMiniFormScheduleTemplate(finremCaseDetails)),
+            eq(documentConfiguration.getContestedMiniFormFileName()));
+    }
+
 
     @Test
     public void generateContestedMiniFormA() {
@@ -184,5 +218,10 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
         assertThat(data.get(CONSENTED_NATURE_OF_APPLICATION_7), is("test"));
 
         assertThat(data.get(CONSENTED_AUTHORISATION_FIRM), is("Authorised Firm"));
+    }
+
+
+    private FinremCaseDetails emptyCaseDetails() {
+        return FinremCaseDetails.builder().data(new FinremCaseData()).build();
     }
 }

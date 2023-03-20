@@ -1,0 +1,192 @@
+{
+  "token": "test_token",
+  "event_id": "FR_consentOrderApproved",
+  "case_details": {
+    "id": 1596638099618923,
+    "jurisdiction": "DIVORCE",
+    "state": "consentedOrderApproved",
+    "version": 1,
+    "case_type_id": "FinancialRemedyContested",
+    "created_date": "2020-08-05T14:34:59.683",
+    "last_modified": "2020-08-05T14:37:15.69",
+    "last_state_modified_date": "2020-08-05T14:37:15.69",
+    "security_classification": "PUBLIC",
+    "case_data": {
+      "caseNumber": "1596638099618923",
+      "isAdmin": "Yes",
+      "issueDate": "2023-03-17",
+      "miniFormA": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/a154c84e-1f45-4b62-a68e-e767da7ceedd",
+        "document_filename": "OnlineForm.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/a154c84e-1f45-4b62-a68e-e767da7ceedd/binary"
+      },
+      "regionList": "highcourt",
+      "highCourtList": "FR_highCourtList_1",
+      "applicantEmail": "mypyj@mailinator.com",
+      "applicantLName": "Hodges",
+      "applicantPhone": "+1 (472) 791-5734",
+      "netValueOfHome": "100",
+      "applicantFMName": "Mason Wall",
+      "respondentLName": "Lambert",
+      "applicantAddress": {
+        "County": "Greater London",
+        "Country": "United Kingdom",
+        "PostCode": "SE12 9SE",
+        "PostTown": "London",
+        "AddressLine1": "1 Rse Way",
+        "AddressLine2": "Line2",
+        "AddressLine3": "Line3"
+      },
+      "copyOfPaperFormA": [
+        {
+          "id": "db724fb9-a6e2-4d1e-89c6-a8dd27e98d39",
+          "value": {
+            "typeOfDocument": "Copy of paper form A",
+            "uploadedDocument": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e7f7ad4e-6627-4f14-98be-44c9addd8f92",
+              "document_filename": "fr_form_test.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e7f7ad4e-6627-4f14-98be-44c9addd8f92/binary"
+            }
+          }
+        }
+      ],
+      "highCourtFRCList": "highcourt",
+      "respondentFMName": "Blaine Joseph",
+      "respondentPhone": "12345",
+      "divorceCaseNumber": "1679071825739294",
+      "respondentEmail": "respondent@gmail.com",
+      "fastTrackDecision": "Yes",
+      "rSolicitorAddress": {},
+      "respondentAddress": {
+        "County": "Greater London",
+        "Country": "United Kingdom",
+        "PostCode": "SE12 9SE",
+        "PostTown": "London",
+        "AddressLine1": "1 Rse Way",
+        "AddressLine2": "Line2",
+        "AddressLine3": "Line3"
+      },
+      "typeOfApplication": "Under paragraph 1 or 2 of schedule 1 children act 1989",
+      "childrenCollection": [
+        {
+          "id": "525eb182-7187-46bb-869a-90d8610b8db8",
+          "value": {
+            "childGender": "Male",
+            "childFullname": "Hasad Petersen",
+            "childDateOfBirth": "1998-02-08",
+            "childApplicantRelation": "Guardian",
+            "childRespondentRelation": "Mother",
+            "childrenLivesInEnglandOrWales": "Yes"
+          }
+        }
+      ],
+      "familyMediatorMIAM": "No",
+      "solicitorReference": "800",
+      "consentOrderFRCName": "High Court Family Division",
+      "applicantRepresented": "Yes",
+      "consentOrderFRCEmail": "rcj.familyhighcourt@justice.gov.uk",
+      "consentOrderFRCPhone": "020 7947 7551",
+      "promptForAnyDocument": "No",
+      "reasonForFRCLocation": "Beatae Nam sed ut en",
+      "applicantAttendedMIAM": "No",
+      "claimingExemptionMIAM": "Yes",
+      "isApplicantsHomeCourt": "No",
+      "respondentRepresented": "No",
+      "applicantSolicitorFirm": "Veniam ea delectus",
+      "applicantSolicitorName": "Kyra Taylor",
+      "consentOrderFRCAddress": "High Court Family Division, Queens Building, Royal Courts of Justice, Strand, London, WC2A 2LL",
+      "variationOrderDocument": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/3504103d-af59-43bc-8e7c-6b81133e1e75",
+        "document_filename": "fr_form_test.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/3504103d-af59-43bc-8e7c-6b81133e1e75/binary"
+      },
+      "MIAMExemptionsChecklist": [
+        "domesticViolence",
+        "urgency",
+        "previousMIAMattendance",
+        "other"
+      ],
+      "applicantSolicitorEmail": "jocureca@mailinator.com",
+      "applicantSolicitorPhone": "+1 (454) 664-3749",
+      "fastTrackDecisionReason": [
+        "reason_1"
+      ],
+      "estimatedAssetsChecklist": [
+        "estimatedAssetsChecklist_1"
+      ],
+      "uploadAdditionalDocument": [],
+      "applicantSolicitorAddress": {
+        "County": "Greater London",
+        "Country": "United Kingdom",
+        "PostCode": "SE12 9SE",
+        "PostTown": "London",
+        "AddressLine1": "1 Rse Way",
+        "AddressLine2": "Line2",
+        "AddressLine3": "Line3"
+      },
+      "MIAMPreviousAttendanceChecklist": "FR_ms_MIAMPreviousAttendanceChecklist_Value_1",
+      "specialAssistanceRequired": "Quia delectus ab qu",
+      "MIAMOtherGroundsChecklist": "FR_ms_MIAMOtherGroundsChecklist_Value_1",
+      "MIAMUrgencyReasonChecklist": [
+        "FR_ms_MIAMUrgencyReasonChecklist_Value_1",
+        "FR_ms_MIAMUrgencyReasonChecklist_Value_3",
+        "FR_ms_MIAMUrgencyReasonChecklist_Value_5"
+      ],
+      "applicantSolicitorDXnumber": "583",
+      "paymentForChildrenDecision": "Yes",
+      "ApplicantOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "Y707HZM",
+          "OrganisationName": "FinRem-1-Org"
+        },
+        "OrgPolicyReference": "Fleming and Sullivan Plc",
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
+      },
+      "addToComplexityListOfCourts": "trueYes",
+      "promptForUrgentCaseQuestion": "No",
+      "RespondentOrganisationPolicy": {
+        "Organisation": {},
+        "OrgPolicyCaseAssignedRole": "[RESPSOLICITOR]"
+      },
+      "natureOfApplicationChecklist": [],
+      "potentialAllegationChecklist": [
+        "notApplicable"
+      ],
+      "specificArrangementsRequired": "Sunt eum facere aut",
+      "MIAMDomesticViolenceChecklist": [
+        "FR_ms_MIAMDomesticViolenceChecklist_Value_1",
+        "FR_ms_MIAMDomesticViolenceChecklist_Value_4",
+        "FR_ms_MIAMDomesticViolenceChecklist_Value_3",
+        "FR_ms_MIAMDomesticViolenceChecklist_Value_2"
+      ],
+      "benefitPaymentChecklistSchedule": [
+        "Step child or step children",
+        "In addition to child support maintenance already paid under a Child Support Agency assessment",
+        "To meet expenses arising from a child’s disability"
+      ],
+      "applicantSolicitorConsentForEmails": "Yes",
+      "benefitForChildrenDecisionSchedule": "No",
+      "natureOfApplicationChecklistSchedule": [
+        "Interim child periodical payments",
+        "Lump Sum Order",
+        "A settlement or a transfer of property",
+        "periodicalPaymentOrder",
+        "variationOrder"
+      ],
+      "propertyAdjutmentOrderDetail": [
+        {
+          "value": {
+            "propertAddress": "FirstAddress",
+            "nameForProperty": "FirstPropertyName"
+          }
+        },
+        {
+          "value": {
+            "propertAddress": "SecondAddress",
+            "nameForProperty": "SecondPropertyName"
+          }
+        }
+      ]
+    }
+  }
+}

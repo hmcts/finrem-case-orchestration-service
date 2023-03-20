@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PropertyAdjustmentOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ public class ContestedMiniFormADetails implements DocumentTemplateDetails {
     private String fastTrackDecision;
     private String issueDate;
     private String divorceCaseNumber;
+    private String caseNumber;
     private String applicantRepresented;
     @JsonProperty("applicantFMName")
     private String applicantFmName;
@@ -51,12 +53,15 @@ public class ContestedMiniFormADetails implements DocumentTemplateDetails {
     @JsonProperty("rSolicitorEmail")
     private String respondentSolicitorEmail;
     private List<String> natureOfApplicationChecklist;
+    private List<String> natureOfApplicationChecklistSchedule;
     private String propertyAddress;
     private String mortgageDetail;
     List<PropertyAdjustmentOrderCollection> propertyAdjustmentOrderDetail;
     private String paymentForChildrenDecision;
-    private String benefitForChildrenDecision;
+    private YesOrNo benefitForChildrenDecision;
+    private YesOrNo benefitForChildrenDecisionSchedule;
     private List<String> benefitPaymentChecklist;
+    private List<String> benefitPaymentChecklistSchedule;
     private String natureOfApplication7;
     private String authorisationName;
     private String authorisationFirm;
