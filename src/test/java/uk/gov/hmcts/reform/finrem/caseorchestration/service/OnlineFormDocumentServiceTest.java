@@ -100,7 +100,7 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void generateMiniFormADirectFromMapWhenTypeOfApplicationPresentThenUseChooseTemplate() {
+    public void generateMiniFormADirectFromMapWhenTypeOfApplicationPresentAndSchedule1ThenUseChooseTemplate() {
         Map<String, Object> placeholdersMap = new HashMap<>();
         when(contestedMiniFormADetailsMapperMock.getDocumentTemplateDetailsAsMap(any(), any())).thenReturn(placeholdersMap);
         FinremCaseDetails finremCaseDetails = emptyCaseDetails();
@@ -112,6 +112,18 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
             eq(documentConfiguration.getContestedMiniFormFileName()));
     }
 
+    @Test
+    public void generateMiniFormADirectFromMapWhenTypeOfApplicationPresentAndNotSchedule1ThenUseChooseTemplate() {
+        Map<String, Object> placeholdersMap = new HashMap<>();
+        when(contestedMiniFormADetailsMapperMock.getDocumentTemplateDetailsAsMap(any(), any())).thenReturn(placeholdersMap);
+        FinremCaseDetails finremCaseDetails = emptyCaseDetails();
+        finremCaseDetails.getData().setScheduleOneWrapper(ScheduleOneWrapper.builder()
+            .typeOfApplication(Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS).build());
+        assertCaseDocument(onlineFormDocumentService.generateContestedMiniForm(AUTH_TOKEN, finremCaseDetails));
+        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), eq(placeholdersMap),
+            eq(documentConfiguration.getContestedMiniFormTemplate(finremCaseDetails)),
+            eq(documentConfiguration.getContestedMiniFormFileName()));
+    }
 
     @Test
     public void generateContestedMiniFormA() {

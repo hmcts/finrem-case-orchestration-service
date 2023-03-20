@@ -173,11 +173,6 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
     }
 
 
-    private List<ChildDetailsCollectionElement> childrenDetails(FinremCaseData caseData) {
-        return caseData.getScheduleOneWrapper().getChildrenCollection();
-    }
-
-
     private List<String> getNatureOfApplicationChecklist(FinremCaseData caseData) {
         List<NatureApplication> natureApplicationList = caseData.getNatureApplicationWrapper()
             .getNatureOfApplicationChecklist();
