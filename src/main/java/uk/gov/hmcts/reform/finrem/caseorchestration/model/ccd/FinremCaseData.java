@@ -581,6 +581,22 @@ public class FinremCaseData {
             || YesOrNo.YES.equals(getContactDetailsWrapper().getConsentedRespondentRepresented());
     }
 
+    public boolean isIntervenerOneRepresentedByASolicitor() {
+        return YesOrNo.YES.equals(getIntervenerOneWrapper().getIntervener1Represented());
+    }
+
+    public boolean isIntervenerTwoRepresentedByASolicitor() {
+        return YesOrNo.YES.equals(getIntervenerTwoWrapper().getIntervener2Represented());
+    }
+
+    public boolean isIntervenerThreeRepresentedByASolicitor() {
+        return YesOrNo.YES.equals(getIntervenerThreeWrapper().getIntervener3Represented());
+    }
+
+    public boolean isIntervenerFourRepresentedByASolicitor() {
+        return YesOrNo.YES.equals(getIntervenerFourWrapper().getIntervener4Represented());
+    }
+
     @JsonIgnore
     public boolean isPaperCase() {
         return YesOrNo.YES.equals(paperApplication);

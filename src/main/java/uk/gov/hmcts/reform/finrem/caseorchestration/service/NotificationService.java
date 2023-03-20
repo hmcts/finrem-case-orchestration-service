@@ -793,7 +793,6 @@ public class NotificationService {
             || !isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails));
     }
 
-
     public boolean shouldPrintForApplicantSolicitor(CaseDetails caseDetails) {
         return caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())
             && !caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails);

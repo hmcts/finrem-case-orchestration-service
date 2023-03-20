@@ -60,6 +60,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_TOWN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENT_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMENDED_CONSENT_ORDER_COLLECTION;
@@ -357,6 +361,22 @@ public class DocumentHelper {
             reference = nullToEmpty((caseData.getContactDetailsWrapper().getRespondentSolicitorReference()));
             addresseeName = nullToEmpty((caseData.getContactDetailsWrapper().getRespondentSolicitorName()));
             addressToSendTo = caseData.getContactDetailsWrapper().getRespondentSolicitorAddress();
+        } else if (recipient == INTERVENER_ONE && !caseData.isIntervenerOneRepresentedByASolicitor()) {
+            log.info("Intervener One is not represented by a solicitor");
+            addresseeName = caseData.getIntervenerOneWrapper().getIntervener1Name();
+            addressToSendTo = caseData.getIntervenerOneWrapper().getIntervener1Address();
+        } else if (recipient == INTERVENER_TWO && !caseData.isIntervenerTwoRepresentedByASolicitor()) {
+            log.info("Intervener Two is not represented by a solicitor");
+            addresseeName = caseData.getIntervenerTwoWrapper().getIntervener2Name();
+            addressToSendTo = caseData.getIntervenerTwoWrapper().getIntervener2Address();
+        } else if (recipient == INTERVENER_THREE && !caseData.isIntervenerThreeRepresentedByASolicitor()) {
+            log.info("Intervener Three is not represented by a solicitor");
+            addresseeName = caseData.getIntervenerThreeWrapper().getIntervener3Name();
+            addressToSendTo = caseData.getIntervenerThreeWrapper().getIntervener3Address();
+        } else if (recipient == INTERVENER_FOUR && !caseData.isIntervenerFourRepresentedByASolicitor()) {
+            log.info("Intervener Four is not represented by a solicitor");
+            addresseeName = caseData.getIntervenerFourWrapper().getIntervener4Name();
+            addressToSendTo = caseData.getIntervenerFourWrapper().getIntervener4Address();
         } else {
             log.info("{} is not represented by a solicitor", recipient);
             addresseeName = recipient == APPLICANT
@@ -586,7 +606,8 @@ public class DocumentHelper {
     }
 
     public enum PaperNotificationRecipient {
-        APPLICANT, RESPONDENT, SOLICITOR, APP_SOLICITOR, RESP_SOLICITOR
+        APPLICANT, RESPONDENT, SOLICITOR, APP_SOLICITOR, RESP_SOLICITOR,
+        INTERVENER_ONE, INTERVENER_TWO, INTERVENER_THREE, INTERVENER_FOUR
     }
 
     public CaseDocument nullCheckAndConvertToCaseDocument(Object object) {

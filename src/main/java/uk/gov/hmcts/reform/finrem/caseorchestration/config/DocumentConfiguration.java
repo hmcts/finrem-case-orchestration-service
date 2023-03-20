@@ -116,6 +116,11 @@ public class DocumentConfiguration {
     private String barristerRemovedTemplate;
     private String barristerRemovedFilename;
 
+    private String intervenerAddedTemplate;
+    private String intervenerAddedFilename;
+    private String intervenerRemovedTemplate;
+    private String intervenerRemovedFilename;
+
     public String getGeneralOrderTemplate(CaseDetails caseDetails) {
         return isHighCourtSelected(caseDetails) ? generalOrderHighCourtTemplate : generalOrderTemplate;
     }
