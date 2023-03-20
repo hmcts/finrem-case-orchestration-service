@@ -86,9 +86,6 @@ public class OnlineFormDocumentService {
 
     public CaseDocument generateContestedMiniForm(String authorisationToken, FinremCaseDetails caseDetails) {
 
-        Map<String, Object> contestedMiniFormPlaceholdersMap = contestedMiniFormADetailsMapper.getDocumentTemplateDetailsAsMap(
-            caseDetails, caseDetails.getData().getRegionWrapper().getDefaultCourtList());
-
         log.info("Generating Contested Mini Form A for Case ID : {}", caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
         String contestedMiniFormTemplate;
@@ -104,6 +101,8 @@ public class OnlineFormDocumentService {
             }
         }
         log.info("Generating Contested Mini Form A for Case ID : {} using template {}", caseDetails.getId(), contestedMiniFormTemplate);
+        Map<String, Object> contestedMiniFormPlaceholdersMap = contestedMiniFormADetailsMapper.getDocumentTemplateDetailsAsMap(
+            caseDetails, caseDetails.getData().getRegionWrapper().getDefaultCourtList());
         return genericDocumentService.generateDocumentFromPlaceholdersMap(authorisationToken,
             contestedMiniFormPlaceholdersMap,
             contestedMiniFormTemplate,

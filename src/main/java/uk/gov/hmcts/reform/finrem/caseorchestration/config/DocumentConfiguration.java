@@ -154,7 +154,7 @@ public class DocumentConfiguration {
         return isHighCourtSelectedV2(caseDetails) ? contestedMiniFormHighCourtTemplate : contestedMiniFormTemplate;
     }
 
-  public String getContestedMiniFormScheduleTemplate(FinremCaseDetails caseDetails) {
+    public String getContestedMiniFormScheduleTemplate(FinremCaseDetails caseDetails) {
         return isHighCourtSelectedV2(caseDetails) ? contestedMiniFormHighCourtScheduleTemplate : contestedMiniFormScheduleTemplate;
     }
 

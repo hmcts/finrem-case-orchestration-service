@@ -90,8 +90,10 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
         Map<String, Object> placeholdersMap = new HashMap<>();
         when(contestedMiniFormADetailsMapperMock.getDocumentTemplateDetailsAsMap(any(), any())).thenReturn(placeholdersMap);
         FinremCaseDetails finremCaseDetails = emptyCaseDetails();
-        finremCaseDetails.getData().setScheduleOneWrapper(ScheduleOneWrapper.builder().typeOfApplication(Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989).build());
-        assertCaseDocument(onlineFormDocumentService.generateContestedMiniForm(AUTH_TOKEN, emptyCaseDetails()));
+        finremCaseDetails.getData().setScheduleOneWrapper(ScheduleOneWrapper.builder()
+            .typeOfApplication(Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989).build());
+        assertCaseDocument(onlineFormDocumentService.generateContestedMiniForm(AUTH_TOKEN,
+            emptyCaseDetails()));
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), eq(placeholdersMap),
             eq(documentConfiguration.getContestedMiniFormTemplate(emptyCaseDetails())),
             eq(documentConfiguration.getContestedMiniFormFileName()));
@@ -102,7 +104,8 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
         Map<String, Object> placeholdersMap = new HashMap<>();
         when(contestedMiniFormADetailsMapperMock.getDocumentTemplateDetailsAsMap(any(), any())).thenReturn(placeholdersMap);
         FinremCaseDetails finremCaseDetails = emptyCaseDetails();
-        finremCaseDetails.getData().setScheduleOneWrapper(ScheduleOneWrapper.builder().typeOfApplication(Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989).build());
+        finremCaseDetails.getData().setScheduleOneWrapper(ScheduleOneWrapper.builder()
+            .typeOfApplication(Schedule1OrMatrimonialAndCpList.SCHEDULE_1_CHILDREN_ACT_1989).build());
         assertCaseDocument(onlineFormDocumentService.generateContestedMiniForm(AUTH_TOKEN, finremCaseDetails));
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), eq(placeholdersMap),
             eq(documentConfiguration.getContestedMiniFormScheduleTemplate(finremCaseDetails)),
