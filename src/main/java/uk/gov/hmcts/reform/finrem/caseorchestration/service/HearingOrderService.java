@@ -25,7 +25,6 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DRAFT_DIRECTION_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.JUDGES_AMENDED_DIRECTION_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_DIRECTION_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
@@ -49,7 +48,7 @@ public class HearingOrderService {
                 judgeApprovedHearingOrder.get().getUploadDraftDocument(),
                 authorisationToken);
             CaseDocument stampedHearingOrder = genericDocumentService.stampDocument(latestDraftDirectionOrderDocument,
-                authorisationToken, isHighCourtSelected(caseDetails));
+                authorisationToken, documentHelper.getStampType(caseDetails.getData()));
             updateCaseDataForLatestDraftHearingOrder(caseData, stampedHearingOrder);
             updateCaseDataForLatestHearingOrderCollection(caseData, stampedHearingOrder);
             appendDocumentToHearingOrderCollection(caseDetails, stampedHearingOrder);
@@ -160,13 +159,5 @@ public class HearingOrderService {
     private List<CollectionElement<DirectionOrder>> convertToListOfDirectionOrder(Object value) {
         return objectMapper.convertValue(value, new TypeReference<>() {
         });
-    }
-
-    public boolean isHighCourtSelected(CaseDetails caseDetails) {
-        if (caseDetails != null && caseDetails.getData() != null
-            && caseDetails.getData().get(HIGHCOURT_COURTLIST) != null) {
-            return true;
-        }
-        return false;
     }
 }

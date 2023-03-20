@@ -30,11 +30,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -82,6 +84,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NOTICES_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_OTHER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
@@ -260,6 +263,11 @@ public class DocumentHelper {
 
     public List<AdditionalHearingDocumentData> convertToAdditionalHearingDocumentData(Object object) {
         return objectMapper.convertValue(object, new TypeReference<>() {
+        });
+    }
+
+    public List<PensionTypeCollection> getPensionDocuments(Map<String, Object> caseData) {
+        return objectMapper.convertValue(caseData.get(PENSION_DOCS_COLLECTION), new TypeReference<>() {
         });
     }
 
@@ -473,7 +481,7 @@ public class DocumentHelper {
             .map(caseDocument -> BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl())
                 .fileName(caseDocument.getDocumentFilename())
                 .build())
-            .toList();
+            .collect(Collectors.toList());
     }
 
     public Optional<BulkPrintDocument> getDocumentLinkAsBulkPrintDocument(Map<String, Object> data, String documentName) {
@@ -594,5 +602,22 @@ public class DocumentHelper {
             return objectMapper.convertValue(object, CaseDocument.class);
         }
         return null;
+    }
+
+    public boolean isHighCourtSelected(Map<String, Object> caseData) {
+        return caseData != null && caseData.get(HIGHCOURT_COURTLIST) != null;
+    }
+
+    public boolean isHighCourtSelected(FinremCaseData caseData) {
+        Region region = caseData.getRegionWrapper().getDefaultRegionWrapper().getRegionList();
+        return Region.HIGHCOURT.equals(region);
+    }
+
+    public StampType getStampType(Map<String, Object> caseData) {
+        return isHighCourtSelected(caseData) ? StampType.HIGH_COURT_STAMP : StampType.FAMILY_COURT_STAMP;
+    }
+
+    public StampType getStampType(FinremCaseData caseData) {
+        return isHighCourtSelected(caseData) ? StampType.HIGH_COURT_STAMP : StampType.FAMILY_COURT_STAMP;
     }
 }

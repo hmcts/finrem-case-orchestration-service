@@ -114,15 +114,15 @@ public class ConsentOrderApprovedDocumentService {
         return generatedApprovedConsentOrderNotificationLetter;
     }
 
-    public List<PensionTypeCollection> stampPensionDocuments(List<PensionTypeCollection> pensionList, String authToken) {
+    public List<PensionTypeCollection> stampPensionDocuments(List<PensionTypeCollection> pensionList, String authToken, StampType stampType) {
         return pensionList.stream()
             .filter(pensionCollectionData -> pensionCollectionData.getTypedCaseDocument().getPensionDocument() != null)
-            .map(pensionCollectionData -> stampPensionDocuments(pensionCollectionData, authToken)).collect(toList());
+            .map(pensionCollectionData -> stampPensionDocuments(pensionCollectionData, authToken, stampType)).collect(toList());
     }
 
-    private PensionTypeCollection stampPensionDocuments(PensionTypeCollection pensionDocument, String authToken) {
+    private PensionTypeCollection stampPensionDocuments(PensionTypeCollection pensionDocument, String authToken, StampType stampType) {
         CaseDocument document = pensionDocument.getTypedCaseDocument().getPensionDocument();
-        CaseDocument stampedDocument = genericDocumentService.stampDocument(document, authToken, false);
+        CaseDocument stampedDocument = genericDocumentService.stampDocument(document, authToken, stampType);
         PensionTypeCollection stampedPensionData = documentHelper.deepCopy(pensionDocument, PensionTypeCollection.class);
         stampedPensionData.getTypedCaseDocument().setPensionDocument(stampedDocument);
         return stampedPensionData;
@@ -166,8 +166,9 @@ public class ConsentOrderApprovedDocumentService {
         CaseDocument latestConsentOrder = getLatestConsentInContestedConsentOrder(caseData);
         CaseDocument pdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(latestConsentOrder, authToken);
         caseData.put(CONSENT_ORDER, pdfDocument);
-        CaseDocument stampedDoc = genericDocumentService.stampDocument(pdfDocument, authToken, false);
-        CaseDocument stampedAndAnnexedDoc = genericDocumentService.annexStampDocument(stampedDoc, authToken);
+        StampType stampType = documentHelper.getStampType(caseData);
+        CaseDocument stampedDoc = genericDocumentService.stampDocument(pdfDocument, authToken, stampType);
+        CaseDocument stampedAndAnnexedDoc = genericDocumentService.annexStampDocument(stampedDoc, authToken, stampType);
         log.info("Stamped Document and Annex doc = {}", stampedAndAnnexedDoc);
         return stampedAndAnnexedDoc;
     }
@@ -196,7 +197,8 @@ public class ConsentOrderApprovedDocumentService {
 
     private List<PensionTypeCollection> consentInContestedStampPensionDocuments(Map<String, Object> caseData, String authToken) {
         List<PensionTypeCollection> pensionDocs = getContestedConsentPensionDocuments(caseData);
-        return stampPensionDocuments(pensionDocs, authToken);
+        StampType stampType = documentHelper.getStampType(caseData);
+        return stampPensionDocuments(pensionDocs, authToken, stampType);
     }
 
     private List<PensionTypeCollection> getContestedConsentPensionDocuments(Map<String, Object> caseData) {
@@ -346,12 +348,12 @@ public class ConsentOrderApprovedDocumentService {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-
+        StampType stampType = documentHelper.getStampType(finremCaseDetails.getData());
         CaseDocument approvedConsentOrderLetter =
             generateApprovedConsentOrderLetter(generateDocumentPayload, userAuthorisation);
         CaseDocument consentOrderAnnexStamped =
             genericDocumentService.annexStampDocument(finremCaseDetails.getData().getLatestConsentOrder(),
-                userAuthorisation);
+                userAuthorisation, stampType);
 
         ApprovedOrder approvedOrder = ApprovedOrder.builder()
             .orderLetter(approvedConsentOrderLetter)
@@ -365,7 +367,7 @@ public class ConsentOrderApprovedDocumentService {
                     + "stamping Pension Documents and adding to approvedOrder for case {}",
                 finremCaseDetails.getId());
             List<PensionTypeCollection> stampedPensionDocs = stampPensionDocuments(consentPensionCollection,
-                userAuthorisation);
+                userAuthorisation, stampType);
             log.info("Generated StampedPensionDocs = {} for case {}", stampedPensionDocs, finremCaseDetails.getId());
             approvedOrder.setPensionDocuments(stampedPensionDocs);
         }

@@ -41,7 +41,7 @@ public class PdfStampingServiceTest {
         when(evidenceManagementDownloadService.download(document.getBinaryUrl()))
             .thenReturn(ResponseEntity.ok(imageAsBytes));
 
-        service.stampDocument(document, "auth", false, false);
+        service.stampDocument(document, "auth", false, StampType.FAMILY_COURT_STAMP);
     }
 
     @Test
@@ -55,7 +55,7 @@ public class PdfStampingServiceTest {
         when(evidenceManagementUploadServiceService.upload(any(), anyString()))
             .thenReturn(fileUploadResponse());
 
-        Document stampDocument = service.stampDocument(document, "auth", true, false);
+        Document stampDocument = service.stampDocument(document, "auth", true, StampType.FAMILY_COURT_STAMP);
 
         assertThat(stampDocument, not(equalTo(imageAsBytes)));
         assertThat(stampDocument.getFileName(), is(document.getFileName()));
@@ -74,7 +74,7 @@ public class PdfStampingServiceTest {
         when(evidenceManagementUploadServiceService.upload(any(), anyString()))
             .thenReturn(fileUploadResponse());
 
-        Document stampDocument = service.stampDocument(document, "auth", false, false);
+        Document stampDocument = service.stampDocument(document, "auth", false, StampType.FAMILY_COURT_STAMP);
 
         assertThat(stampDocument, not(equalTo(imageAsBytes)));
         assertThat(stampDocument.getFileName(), is(document.getFileName()));
@@ -93,7 +93,7 @@ public class PdfStampingServiceTest {
         when(evidenceManagementUploadServiceService.upload(any(), anyString()))
             .thenReturn(fileUploadResponse());
 
-        Document stampDocument = service.stampDocument(document, "auth", false, true);
+        Document stampDocument = service.stampDocument(document, "auth", false, StampType.FAMILY_COURT_STAMP);
 
         assertThat(stampDocument, not(equalTo(imageAsBytes)));
         assertThat(stampDocument.getFileName(), is(document.getFileName()));

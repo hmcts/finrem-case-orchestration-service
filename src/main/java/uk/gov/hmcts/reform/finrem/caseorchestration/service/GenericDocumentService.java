@@ -52,13 +52,13 @@ public class GenericDocumentService {
         documentManagementService.deleteDocument(documentUrl, authorisationToken);
     }
 
-    public CaseDocument annexStampDocument(CaseDocument document, String authorisationToken) {
+    public CaseDocument annexStampDocument(CaseDocument document, String authorisationToken, StampType stampType) {
         Document documentWithUrl = Document.builder().url(document.getDocumentUrl())
             .binaryUrl(document.getDocumentBinaryUrl())
             .fileName(document.getDocumentFilename())
             .build();
         Document stampedDocument = pdfStampingService.stampDocument(
-            documentWithUrl, authorisationToken, true, false);
+            documentWithUrl, authorisationToken, true, stampType);
         return toCaseDocument(stampedDocument);
     }
 
@@ -75,13 +75,13 @@ public class GenericDocumentService {
         return toCaseDocument(storedDocument);
     }
 
-    public CaseDocument stampDocument(CaseDocument document, String authorisationToken, boolean addHighCourtSeal) {
+    public CaseDocument stampDocument(CaseDocument document, String authorisationToken, StampType stampType) {
 
         Document stampedDocument = pdfStampingService.stampDocument(
             Document.builder().url(document.getDocumentUrl())
                 .binaryUrl(document.getDocumentBinaryUrl())
                 .fileName(document.getDocumentFilename())
-                .build(), authorisationToken, false, addHighCourtSeal);
+                .build(), authorisationToken, false, stampType);
         return toCaseDocument(stampedDocument);
     }
 
