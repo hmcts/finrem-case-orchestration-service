@@ -10,7 +10,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.bulkprint.BulkPrintCoverLetterDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.util.Map;
 
@@ -45,7 +47,9 @@ public class GenerateCoverSheetService {
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
     private final CaseDataService caseDataService;
+    private final BulkPrintCoverLetterDetailsMapper bulkPrintCoverLetterDetailsMapper;
 
+    @Deprecated
     public CaseDocument generateApplicantCoverSheet(final CaseDetails caseDetails, final String authorisationToken) {
         log.info("Generating Applicant cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
             documentConfiguration.getBulkPrintTemplate());
@@ -57,6 +61,14 @@ public class GenerateCoverSheetService {
             caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData()));
     }
 
+    public CaseDocument generateApplicantCoverSheet(final FinremCaseDetails caseDetails, final String authorisationToken) {
+        log.info("Generating Applicant cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
+            documentConfiguration.getBulkPrintTemplate());
+
+        return generateCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.APPLICANT);
+    }
+
+    @Deprecated
     public CaseDocument generateRespondentCoverSheet(final CaseDetails caseDetails, final String authorisationToken) {
         log.info("Generating Respondent cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
             documentConfiguration.getBulkPrintTemplate());
@@ -68,6 +80,14 @@ public class GenerateCoverSheetService {
             caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData()));
     }
 
+    public CaseDocument generateRespondentCoverSheet(final FinremCaseDetails caseDetails, final String authorisationToken) {
+        log.info("Generating Respondent cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
+            documentConfiguration.getBulkPrintTemplate());
+
+        return generateCoverSheet(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT);
+    }
+
+    @Deprecated
     private CaseDocument generateCoverSheet(CaseDetails caseDetails, String authorisationToken, String partyAddressCcdFieldName,
                                             String solicitorAddressCcdFieldName, String solicitorNameCcdFieldName,
                                             String partyFirstMiddleNameCcdFieldName, String partyLastNameCcdFieldName,
@@ -81,6 +101,18 @@ public class GenerateCoverSheetService {
             documentConfiguration.getBulkPrintFileName());
     }
 
+    private CaseDocument generateCoverSheet(FinremCaseDetails caseDetails,
+                                            String authorisationToken,
+                                            DocumentHelper.PaperNotificationRecipient recipient) {
+
+        Map<String, Object> placeholdersMap = bulkPrintCoverLetterDetailsMapper
+            .getLetterDetailsAsMap(caseDetails, recipient, caseDetails.getData().getRegionWrapper().getDefaultCourtList());
+
+        return genericDocumentService.generateDocumentFromPlaceholdersMap(authorisationToken, placeholdersMap,
+            documentConfiguration.getBulkPrintTemplate(), documentConfiguration.getBulkPrintFileName());
+    }
+
+    @Deprecated
     private void prepareCoverSheet(CaseDetails caseDetails, String partyAddressCcdFieldName,
                                    String solicitorAddressCcdFieldName, String solicitorNameCcdFieldName,
                                    String partyFirstMiddleNameCcdFieldName, String partyLastNameCcdFieldName,

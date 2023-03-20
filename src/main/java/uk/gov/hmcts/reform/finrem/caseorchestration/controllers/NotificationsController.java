@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.conse
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderNotApprovedSentCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedConsentOrderApprovedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ContestedConsentOrderNotApprovedCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.generalorder.GeneralOrderRaisedCorresponder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hwf.HwfCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.updatefrc.UpdateFrcCorrespondenceService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NocLetterNotificationService;
@@ -66,6 +67,7 @@ public class NotificationsController extends BaseController {
     private final ContestedConsentOrderNotApprovedCorresponder contestedConsentOrderNotApprovedCorresponder;
     private final ConsentOrderAvailableCorresponder consentOrderAvailableCorresponder;
     private final ConsentOrderNotApprovedSentCorresponder consentOrderNotApprovedSentCorresponder;
+    private final GeneralOrderRaisedCorresponder generalOrderRaisedCorresponder;
 
 
     @PostMapping(value = "/hwf-successful", consumes = APPLICATION_JSON_VALUE)
@@ -197,37 +199,9 @@ public class NotificationsController extends BaseController {
         log.info("Received request to send email for General Order raised for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-
-        if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-            if (caseDataService.isConsentedApplication(caseDetails)) {
-                log.info("Sending email notification to applicant Solicitor for 'Consented General Order'");
-                notificationService.sendConsentedGeneralOrderEmailToApplicantSolicitor(caseDetails);
-            } else {
-                if (caseDataService.isConsentedInContestedCase(caseDetails)) {
-                    log.info("Sending email notification to applicant Solicitor for 'Contested consent General Order'");
-                    notificationService.sendContestedConsentGeneralOrderEmailApplicantSolicitor(caseDetails);
-                } else {
-                    log.info("Sending email notification to applicant solicitor for 'Contested General Order'");
-                    notificationService.sendContestedGeneralOrderEmailApplicant(caseDetails);
-                }
-            }
-        }
-
         Map<String, Object> caseData = caseDetails.getData();
-        if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData)) {
-            if (caseDataService.isConsentedApplication(caseDetails)) {
-                log.info("Sending email notification to respondent Solicitor for 'Consented General Order'");
-                notificationService.sendConsentedGeneralOrderEmailToRespondentSolicitor(caseDetails);
-            } else {
-                if (caseDataService.isConsentedInContestedCase(caseDetails)) {
-                    log.info("Sending email notification to respondent Solicitor for 'Contested consent General Order'");
-                    notificationService.sendContestedConsentGeneralOrderEmailRespondentSolicitor(caseDetails);
-                } else {
-                    log.info("Sending email notification to respondent solicitor for 'Contested General Order'");
-                    notificationService.sendContestedGeneralOrderEmailRespondent(caseDetails);
-                }
-            }
-        }
+
+        generalOrderRaisedCorresponder.sendCorrespondence(callbackRequest.getCaseDetails());
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }

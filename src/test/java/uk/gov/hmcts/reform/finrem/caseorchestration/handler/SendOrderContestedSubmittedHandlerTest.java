@@ -117,7 +117,7 @@ public class SendOrderContestedSubmittedHandlerTest {
 
         sendOrderContestedSubmittedHandler.handle(createCallbackRequestWithFinalOrder(), AUTH_TOKEN);
 
-        verify(notificationService).sendContestOrderApprovedEmailApplicant(any());
+        verify(notificationService).sendContestOrderApprovedEmailApplicant(any(CaseDetails.class));
     }
 
     @Test
@@ -134,7 +134,7 @@ public class SendOrderContestedSubmittedHandlerTest {
 
         sendOrderContestedSubmittedHandler.handle(createCallbackRequestWithFinalOrder(), AUTH_TOKEN);
 
-        verify(notificationService).sendContestOrderApprovedEmailRespondent(any());
+        verify(notificationService).sendContestOrderApprovedEmailRespondent(any(CaseDetails.class));
     }
 
     @Test
@@ -143,7 +143,7 @@ public class SendOrderContestedSubmittedHandlerTest {
 
         sendOrderContestedSubmittedHandler.handle(createCallbackRequestWithFinalOrder(), AUTH_TOKEN);
 
-        verify(notificationService, never()).sendContestOrderApprovedEmailRespondent(any());
+        verify(notificationService, never()).sendContestOrderApprovedEmailRespondent(any(CaseDetails.class));
     }
 
     private CallbackRequest buildCallbackRequest() {

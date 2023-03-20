@@ -2,6 +2,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 
 import com.google.common.collect.ImmutableMap;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 
 import java.util.Map;
 import java.util.Objects;
@@ -338,12 +341,7 @@ public class ContestedCourtHelper {
 
     private static String getMidlandInterimHearingFRC(Map<String, Object> interimHearingData) {
         String midlandsList = (String) interimHearingData.get(INTERIM_MIDLANDS_FRC_LIST);
-        if (NOTTINGHAM.equalsIgnoreCase(midlandsList)) {
-            return NOTTINGHAM;
-        } else if (BIRMINGHAM.equalsIgnoreCase(midlandsList)) {
-            return BIRMINGHAM;
-        }
-        return EMPTY;
+        return getMidlandsCourtName(midlandsList);
     }
 
     public static String getSelectedHearingFrc(Map<String, Object> hearingData) {
@@ -454,12 +452,7 @@ public class ContestedCourtHelper {
 
     private static String getMidlandHearingFRC(Map<String, Object> hearingData) {
         String midlandsList = Objects.toString(hearingData.get(MIDLANDS_FRC_LIST),"");
-        if (NOTTINGHAM.equalsIgnoreCase(midlandsList)) {
-            return NOTTINGHAM;
-        } else if (BIRMINGHAM.equalsIgnoreCase(midlandsList)) {
-            return BIRMINGHAM;
-        }
-        return EMPTY;
+        return getMidlandsCourtName(midlandsList);
     }
 
     public static String getSelectedFrc(CaseDetails caseDetails) {
@@ -489,6 +482,37 @@ public class ContestedCourtHelper {
         }
         if (HIGHCOURT.equalsIgnoreCase(region)) {
             return getHighCourtFRC(caseData);
+        }
+        return EMPTY;
+    }
+
+    public static String getSelectedFrc(FinremCaseDetails caseDetails) {
+        FinremCaseData caseData = caseDetails.getData();
+        Region region = caseData.getRegionWrapper().getDefaultRegionWrapper().getRegionList();
+
+        if (MIDLANDS.equalsIgnoreCase(region.getValue())) {
+            return caseData.getRegionWrapper().getDefaultRegionWrapper().getMidlandsFrcList().getValue();
+        }
+        if (LONDON.equalsIgnoreCase(region.getValue())) {
+            return caseData.getRegionWrapper().getDefaultRegionWrapper().getLondonFrcList().getValue();
+        }
+        if (NORTHWEST.equalsIgnoreCase(region.getValue())) {
+            return caseData.getRegionWrapper().getDefaultRegionWrapper().getNorthWestFrcList().getValue();
+        }
+        if (NORTHEAST.equalsIgnoreCase(region.getValue())) {
+            return caseData.getRegionWrapper().getDefaultRegionWrapper().getNorthEastFrcList().getValue();
+        }
+        if (SOUTHEAST.equalsIgnoreCase(region.getValue())) {
+            return caseData.getRegionWrapper().getDefaultRegionWrapper().getSouthEastFrcList().getValue();
+        }
+        if (SOUTHWEST.equalsIgnoreCase(region.getValue())) {
+            return caseData.getRegionWrapper().getDefaultRegionWrapper().getSouthWestFrcList().getValue();
+        }
+        if (WALES.equalsIgnoreCase(region.getValue())) {
+            return caseData.getRegionWrapper().getDefaultRegionWrapper().getWalesFrcList().getValue();
+        }
+        if (HIGHCOURT.equalsIgnoreCase(region.getValue())) {
+            return caseData.getRegionWrapper().getDefaultRegionWrapper().getHighCourtFrcList().getValue();
         }
         return EMPTY;
     }
@@ -569,8 +593,13 @@ public class ContestedCourtHelper {
         return EMPTY;
     }
 
+
     private static String getMidlandFRC(Map mapOfCaseData) {
         String midlandsList = (String) mapOfCaseData.get(MIDLANDS_FRC_LIST);
+        return getMidlandsCourtName(midlandsList);
+    }
+
+    private static String getMidlandsCourtName(String midlandsList) {
         if (NOTTINGHAM.equalsIgnoreCase(midlandsList)) {
             return NOTTINGHAM;
         } else if (BIRMINGHAM.equalsIgnoreCase(midlandsList)) {
@@ -578,6 +607,8 @@ public class ContestedCourtHelper {
         }
         return EMPTY;
     }
+
+
 
     public static String getNottinghamCourt(Map<String, Object> caseData) {
         return nottinghamMap.getOrDefault(caseData.get(NOTTINGHAM_COURTLIST), "");
