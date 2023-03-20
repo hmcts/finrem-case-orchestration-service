@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -25,7 +24,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 @RunWith(MockitoJUnitRunner.class)
 public class AssignToJudgeConsentInContestedSubmittedHandlerTest {
 
-    @InjectMocks
     private AssignToJudgeConsentInContestedSubmittedHandler handler;
 
     @Mock
