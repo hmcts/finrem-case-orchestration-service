@@ -1,0 +1,159 @@
+{
+  "token" : "test_token",
+  "event_id" : "FR_issueApplication",
+  "case_details" : {
+    "case_data" : {
+      "isAdmin" : "Yes",
+      "issueDate" : "2023-03-19",
+      "miniFormA" : {
+        "document_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/2004f7e4-8dc4-45b1-9773-b9930131e50e",
+        "document_filename" : "OnlineForm.pdf",
+        "document_binary_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/2004f7e4-8dc4-45b1-9773-b9930131e50e/binary"
+      },
+      "regionList" : "highcourt",
+      "highCourtList" : "FR_highCourtList_1",
+      "applicantEmail" : "fr_res_barrister1@mailinator.com",
+      "applicantLName" : "Saunders",
+      "applicantPhone" : "+1 (808) 594-5637",
+      "netValueOfHome" : "100",
+      "applicantFMName" : "Coby Villarreal",
+      "respondentLName" : "Burks",
+      "applicantAddress" : {
+        "County" : "",
+        "Country" : "United Kingdom",
+        "PostCode" : "SW11 1PD",
+        "PostTown" : "London",
+        "AddressLine1" : "1 Rse Way",
+        "AddressLine2" : "",
+        "AddressLine3" : ""
+      },
+      "copyOfPaperFormA" : [
+        {
+          "id" : "bef83ad7-da66-4862-8bb8-b334fb5cc6f6",
+          "value" : {
+            "typeOfDocument" : "Copy of paper form A",
+            "uploadedDocument" : {
+              "document_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/0bbadccf-d5f3-4a93-8214-5f742b4a119f",
+              "document_filename" : "fr_form_test.pdf",
+              "document_binary_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/0bbadccf-d5f3-4a93-8214-5f742b4a119f/binary"
+            }
+          }
+        }
+      ],
+      "highCourtFRCList" : "highcourt",
+      "respondentFMName" : "Benjamin Hartman",
+      "divorceCaseNumber" : "1679254802107855",
+      "fastTrackDecision" : "No",
+      "rSolicitorAddress" : {},
+      "respondentAddress" : {
+        "County" : "",
+        "Country" : "United Kingdom",
+        "PostCode" : "SW11 1PD",
+        "PostTown" : "London",
+        "AddressLine1" : "1 Rse Way",
+        "AddressLine2" : "",
+        "AddressLine3" : ""
+      },
+      "typeOfApplication" : "Under paragraph 1 or 2 of schedule 1 children act 1989",
+      "childrenCollection" : [
+        {
+          "id" : "6aff45f6-c38d-479f-9660-5bf4b5e01b56",
+          "value" : {
+            "childGender" : "Female",
+            "childFullname" : "Hyatt Curry",
+            "childDateOfBirth" : "1975-05-07",
+            "childApplicantRelation" : "Step mother",
+            "childRespondentRelation" : "Mother",
+            "childrenLivesInEnglandOrWales" : "Yes"
+          }
+        }
+      ],
+      "familyMediatorMIAM" : "No",
+      "solicitorReference" : "405",
+      "consentOrderFRCName" : "High Court Family Division",
+      "applicantRepresented" : "Yes",
+      "consentOrderFRCEmail" : "rcj.familyhighcourt@justice.gov.uk",
+      "consentOrderFRCPhone" : "020 7947 7551",
+      "promptForAnyDocument" : "No",
+      "reasonForFRCLocation" : "Exercitation sit dol",
+      "applicantAttendedMIAM" : "No",
+      "claimingExemptionMIAM" : "Yes",
+      "isApplicantsHomeCourt" : "No",
+      "respondentRepresented" : "No",
+      "applicantSolicitorFirm" : "Sit enim sint ea dol",
+      "applicantSolicitorName" : "Kristen Peters",
+      "consentOrderFRCAddress" : "High Court Family Division, Queens Building, Royal Courts of Justice, Strand, London, WC2A 2LL",
+      "variationOrderDocument" : {
+        "document_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/03465468-c7eb-4724-8682-8b7b2281f70b",
+        "document_filename" : "fr_form_test.pdf",
+        "document_binary_url" : "http://dm-store-aat.service.core-compute-aat.internal/documents/03465468-c7eb-4724-8682-8b7b2281f70b/binary"
+      },
+      "MIAMExemptionsChecklist" : [
+        "domesticViolence",
+        "urgency"
+      ],
+      "applicantSolicitorEmail" : "fr_res_barrister1@mailinator.com",
+      "applicantSolicitorPhone" : "+1 (902) 337-9872",
+      "fastTrackDecisionReason" : [],
+      "estimatedAssetsChecklist" : [
+        "estimatedAssetsChecklist_1"
+      ],
+      "uploadAdditionalDocument" : [],
+      "applicantSolicitorAddress" : {
+        "County" : "",
+        "Country" : "United Kingdom",
+        "PostCode" : "SW11 1PD",
+        "PostTown" : "London",
+        "AddressLine1" : "1 Rse Way",
+        "AddressLine2" : "",
+        "AddressLine3" : ""
+      },
+      "specialAssistanceRequired" : "Ut cupidatat quo nih",
+      "MIAMUrgencyReasonChecklist" : [
+        "FR_ms_MIAMUrgencyReasonChecklist_Value_5"
+      ],
+      "applicantSolicitorDXnumber" : "104",
+      "paymentForChildrenDecision" : "Yes",
+      "ApplicantOrganisationPolicy" : {
+        "Organisation" : {
+          "OrganisationID" : "Y707HZM",
+          "OrganisationName" : "FinRem-1-Org"
+        },
+        "OrgPolicyReference" : "Boone Rosario Trading",
+        "OrgPolicyCaseAssignedRole" : "[APPSOLICITOR]"
+      },
+      "addToComplexityListOfCourts" : "trueYes",
+      "promptForUrgentCaseQuestion" : "No",
+      "RespondentOrganisationPolicy" : {
+        "Organisation" : {},
+        "OrgPolicyCaseAssignedRole" : "[RESPSOLICITOR]"
+      },
+      "natureOfApplicationChecklist" : [],
+      "potentialAllegationChecklist" : [
+        "notApplicable"
+      ],
+      "specificArrangementsRequired" : "Magni ut officia est",
+      "MIAMDomesticViolenceChecklist" : [
+        "FR_ms_MIAMDomesticViolenceChecklist_Value_1",
+        "FR_ms_MIAMDomesticViolenceChecklist_Value_2",
+        "FR_ms_MIAMDomesticViolenceChecklist_Value_3",
+        "FR_ms_MIAMDomesticViolenceChecklist_Value_4",
+        "FR_ms_MIAMDomesticViolenceChecklist_Value_9"
+      ],
+      "benefitPaymentChecklistSchedule" : [],
+      "applicantSolicitorConsentForEmails" : "Yes",
+      "benefitForChildrenDecisionSchedule" : "Yes",
+      "natureOfApplicationChecklistSchedule" : [
+        "Interim child periodical payments",
+        "Lump Sum Order",
+        "A settlement or a transfer of property",
+        "periodicalPaymentOrder",
+        "variationOrder"
+      ]
+    },
+    "id" : "12345678",
+    "jurisdiction" : "divorce",
+    "state" : "applicationIssued",
+    "case_type_id" : "FinancialRemedyContested"
+  }
+}
