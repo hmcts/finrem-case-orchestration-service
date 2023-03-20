@@ -80,6 +80,8 @@ public abstract class BaseServiceTest extends BaseTest {
     public static final String CASE_DETAILS = "caseDetails";
     public static final String CASE_DATA = "case_data";
 
+    public static final byte[] SOME_BYTES = "ainhsdcnoih".getBytes();
+
     private static final String TEST_JSON = "/fixtures/contested/interim-hearing-two-collection.json";
 
     protected CaseDetails buildCaseDetails() {

@@ -51,10 +51,10 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
             selectedOperationCode, caseData.getIntervenersList().getValueCode(), caseId);
 
         switch (selectedOperationCode) {
-            case ADD_INTERVENER_ONE_CODE,
-                ADD_INTERVENER_THREE_CODE,
-                ADD_INTERVENER_TWO_CODE,
-                ADD_INTERVENER_FOUR_CODE -> service.setIntvenerDateAddedAndDefaultOrgIfNotRepresented(callbackRequest);
+            case ADD_INTERVENER_ONE_CODE -> service.updateIntervenerOneDetails(callbackRequest);
+            case ADD_INTERVENER_TWO_CODE -> service.updateIntervenerTwoDetails(callbackRequest);
+            case ADD_INTERVENER_THREE_CODE -> service.updateIntervenerThreeDetails(callbackRequest);
+            case ADD_INTERVENER_FOUR_CODE -> service.updateIntervenerFourDetails(callbackRequest);
             case DEL_INTERVENER_ONE_CODE -> service.removeIntervenerOneDetails(caseData, caseId);
             case DEL_INTERVENER_TWO_CODE -> service.removeIntervenerTwoDetails(caseData, caseId);
             case DEL_INTERVENER_THREE_CODE -> service.removeIntervenerThreeDetails(caseData, caseId);
