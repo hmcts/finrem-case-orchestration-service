@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUser
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.searchuserrole.SearchCaseAssignedUserRolesRequest;
 
 import java.util.List;
 import java.util.Set;
@@ -29,6 +30,7 @@ import java.util.Set;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.delete;
 import static com.github.tomakehurst.wiremock.client.WireMock.deleteRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
@@ -304,6 +306,25 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
                 .withBody(mapper.writeValueAsString(generateResourceWithNoCreatorRole()))));
 
         assertTrue(assignCaseAccessService.isLegalCounselRepresentingOpposingLitigant(TEST_USER_ID, TEST_CASE_ID, opposingRoles));
+    }
+
+    @Test
+    public void shouldSearchForUserRoles() throws JsonProcessingException {
+
+        when(systemUserService.getSysUserToken()).thenReturn(TEST_S2S_TOKEN);
+
+        caseDataApi.stubFor(post(urlEqualTo("/case-users/search")).withRequestBody(equalToJson(mapper.writeValueAsString(
+                SearchCaseAssignedUserRolesRequest.builder()
+                    .caseIds(List.of(TEST_CASE_ID))
+                    .build())))
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withBody(mapper.writeValueAsString(generateResourceWhenCreatorWasSolicitor()))));
+
+        List<CaseAssignmentUserRole> caseAssignmentUserRoles = assignCaseAccessService.searchUserRoles(TEST_CASE_ID).getCaseAssignmentUserRoles();
+        assertTrue(caseAssignmentUserRoles.size() == 2);
+        assertTrue(caseAssignmentUserRoles.stream().anyMatch(role -> role.getCaseRole().equals(APP_SOLICITOR_POLICY)));
     }
 
     private CaseAssignmentUserRolesResource generateResourceWhenCreatorWasSolicitor() {
