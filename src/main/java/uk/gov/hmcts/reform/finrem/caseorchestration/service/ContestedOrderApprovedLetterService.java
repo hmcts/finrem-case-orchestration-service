@@ -11,11 +11,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_COVER_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LETTER_DATE_FORMAT;
 
 @Service
 @RequiredArgsConstructor
@@ -47,6 +49,6 @@ public class ContestedOrderApprovedLetterService {
             StringUtils.joinWith(" ",
                 caseDetails.getData().get(CONTESTED_ORDER_APPROVED_JUDGE_TYPE),
                 caseDetails.getData().get(CONTESTED_ORDER_APPROVED_JUDGE_NAME)));
-        caseData.put("letterDate", LocalDate.now());
+        caseData.put("letterDate", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()));
     }
 }
