@@ -32,35 +32,35 @@ public class CheckSolicitorIsDigitalServiceTest {
 
     @Test
     public void givenApplicantSolicitorIsDigital_whenIsApplicantSolicitorDigital_thenReturnTrue() {
-        when(assignCaseAccessService.getUserRoles(CASE_ID)).thenReturn(caseAssignmentUserRoles(APP_SOLICITOR_POLICY));
+        when(assignCaseAccessService.searchUserRoles(CASE_ID)).thenReturn(caseAssignmentUserRoles(APP_SOLICITOR_POLICY));
 
         assertTrue(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(CASE_ID));
     }
 
     @Test
     public void givenApplicantSolicitorIsNotDigital_whenIsApplicantSolicitorDigital_thenReturnFalse() {
-        when(assignCaseAccessService.getUserRoles(CASE_ID)).thenReturn(caseAssignmentUserRoles(RESP_SOLICITOR_POLICY));
+        when(assignCaseAccessService.searchUserRoles(CASE_ID)).thenReturn(caseAssignmentUserRoles(RESP_SOLICITOR_POLICY));
 
         assertFalse(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(CASE_ID));
     }
 
     @Test
     public void givenRespondentSolicitorIsDigital_whenIsRespondentSolicitorDigital_thenReturnTrue() {
-        when(assignCaseAccessService.getUserRoles(CASE_ID)).thenReturn(caseAssignmentUserRoles(RESP_SOLICITOR_POLICY));
+        when(assignCaseAccessService.searchUserRoles(CASE_ID)).thenReturn(caseAssignmentUserRoles(RESP_SOLICITOR_POLICY));
 
         assertTrue(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(CASE_ID));
     }
 
     @Test
     public void givenRespondentSolicitorIsNotDigital_whenIsRespondentSolicitorDigital_thenReturnFalse() {
-        when(assignCaseAccessService.getUserRoles(CASE_ID)).thenReturn(caseAssignmentUserRoles(APP_SOLICITOR_POLICY));
+        when(assignCaseAccessService.searchUserRoles(CASE_ID)).thenReturn(caseAssignmentUserRoles(APP_SOLICITOR_POLICY));
 
         assertFalse(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(CASE_ID));
     }
 
     @Test
     public void givenDataStoreResponseIsEmpty_whenIsSolicitorDigital_thenReturnFalse() {
-        when(assignCaseAccessService.getUserRoles(CASE_ID)).thenReturn(CaseAssignmentUserRolesResource.builder()
+        when(assignCaseAccessService.searchUserRoles(CASE_ID)).thenReturn(CaseAssignmentUserRolesResource.builder()
             .caseAssignmentUserRoles(Collections.emptyList()).build());
 
         assertFalse(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(CASE_ID));
@@ -69,7 +69,7 @@ public class CheckSolicitorIsDigitalServiceTest {
 
     @Test
     public void givenDataStoreResponseIsNull_whenIsSolicitorDigital_thenReturnFalse() {
-        when(assignCaseAccessService.getUserRoles(CASE_ID)).thenReturn(null);
+        when(assignCaseAccessService.searchUserRoles(CASE_ID)).thenReturn(null);
 
         assertFalse(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(CASE_ID));
         assertFalse(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(CASE_ID));
@@ -77,7 +77,7 @@ public class CheckSolicitorIsDigitalServiceTest {
 
     @Test
     public void givenResponseListIsNull_whenIsSolicitorDigital_thenReturnFalse() {
-        when(assignCaseAccessService.getUserRoles(CASE_ID)).thenReturn(CaseAssignmentUserRolesResource.builder().build());
+        when(assignCaseAccessService.searchUserRoles(CASE_ID)).thenReturn(CaseAssignmentUserRolesResource.builder().build());
 
         assertFalse(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(CASE_ID));
         assertFalse(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(CASE_ID));

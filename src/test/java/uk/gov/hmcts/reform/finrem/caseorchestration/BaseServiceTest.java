@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -29,6 +30,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -83,6 +86,8 @@ public abstract class BaseServiceTest extends BaseTest {
     public static final byte[] SOME_BYTES = "ainhsdcnoih".getBytes();
 
     private static final String TEST_JSON = "/fixtures/contested/interim-hearing-two-collection.json";
+
+    protected String formattedNowDate = DateTimeFormatter.ofPattern(CCDConfigConstant.LETTER_DATE_FORMAT).format(LocalDate.now());
 
     protected CaseDetails buildCaseDetails() {
         Map<String, Object> caseData = new HashMap<>();

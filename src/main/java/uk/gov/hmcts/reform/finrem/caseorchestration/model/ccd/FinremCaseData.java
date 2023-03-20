@@ -281,7 +281,7 @@ public class FinremCaseData {
     @JsonProperty("RespondentOrganisationPolicy")
     private OrganisationPolicy respondentOrganisationPolicy;
     private CaseRole currentUserCaseRole;
-    private CaseRole currentUserCaseRoleLabel;
+    private String currentUserCaseRoleLabel;
     private CaseDocument outOfFamilyCourtResolution;
     private TypeOfApplication typeOfApplication;
 
