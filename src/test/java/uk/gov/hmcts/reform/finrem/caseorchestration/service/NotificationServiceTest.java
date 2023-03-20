@@ -23,8 +23,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedHearingHelpe
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.InterimHearingItem;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
@@ -47,6 +50,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_JUDGE_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REFERRED_DETAIL;
@@ -1153,8 +1157,52 @@ public class NotificationServiceTest extends BaseServiceTest {
             .id(123450L).build()));
     }
 
+
+    @Test
+    public void shouldEmailApplicantSolicitorWhenApplicantSolicitorIsDigitalAndEmailIsPopulated() {
+        FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(
+            ContactDetailsWrapper.builder().applicantSolicitorEmail(APPLICANT_EMAIL).build()).build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
+
+        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString())).thenReturn(true);
+
+        assertTrue(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails));
+    }
+
+    @Test
+    public void shouldNotEmailApplicantSolicitorWhenApplicantSolicitorIsNotDigitalAndEmailIsPopulatedFinrem() {
+        FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(
+            ContactDetailsWrapper.builder().respondentSolicitorEmail(APPLICANT_EMAIL).build()).build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
+
+        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString())).thenReturn(false);
+
+        assertFalse(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails));
+    }
+
+    @Test
+    public void shouldNotEmailApplicantSolicitorWhenApplicantSolicitorIsDigitalAndEmailIsNotPopulatedFinrem() {
+        FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(
+            ContactDetailsWrapper.builder().applicantSolicitorEmail(null).build()).build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
+
+        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString())).thenReturn(false);
+
+        assertFalse(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails));
+    }
+
+
     @Test
     public void shouldNotEmailApplicantSolicitorWhenApplicantSolicitorIsNotRegisteredButIsAcceptingEmails() {
+        when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(false);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+
+        assertFalse(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(CaseDetails.builder()
+            .id(1234567890L).build()));
+    }
+
+    @Test
+    public void shouldNotEmailApplicantSolicitorWhenApplicantSolicitorIsNotDigital() {
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(false);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
 
@@ -1176,6 +1224,18 @@ public class NotificationServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().id(123456780L).data(caseData).build();
 
         assertTrue(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails));
+    }
+
+    @Test
+    public void shouldEmailRespondentSolicitorWhenRespondentSolicitorIsDigitalAndEmailPopulated() {
+
+        FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(
+            ContactDetailsWrapper.builder().respondentSolicitorEmail(RESP_SOLICITOR_EMAIL).build()).build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
+
+        when(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString())).thenReturn(true);
+
+        assertTrue(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails));
     }
 
     @Test
@@ -1218,9 +1278,31 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void shouldNotEmailRespondentSolicitorWhenRespondentSolicitorIsNotDigitalAndEmailIsPopulatedFinrem() {
+        FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(
+            ContactDetailsWrapper.builder().respondentSolicitorEmail(RESP_SOLICITOR_EMAIL).build()).build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
+
+        when(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString())).thenReturn(false);
+
+        assertFalse(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails));
+    }
+
+    @Test
+    public void shouldNotEmailRespondentSolicitorWhenRespondentSolicitorIsDigitalAndEmailIsNotPopulatedFinrem() {
+        FinremCaseData caseData = FinremCaseData.builder().contactDetailsWrapper(
+            ContactDetailsWrapper.builder().respondentSolicitorEmail(null).build()).build();
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder().id(123456780L).data(caseData).build();
+
+        when(checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString())).thenReturn(false);
+
+        assertFalse(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails));
+    }
+
+    @Test
     public void givenAppIsContestedAndApplicantSolicitorIsNotRegisteredOrAcceptingEmails_shouldSendLettersApplicantSolicitor() {
         when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any())).thenReturn(false);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(false);
 
         assertTrue(notificationService.isContestedApplicationAndApplicantOrRespondentSolicitorsIsNotRegisteredOrAcceptingEmails(any()));
@@ -1229,7 +1311,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void givenAppIsNotContestedAndApplicantSolicitorIsRegisteredAndAcceptingEmails_shouldNotSendLetters() {
         when(caseDataService.isContestedApplication(any())).thenReturn(false);
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
         when(checkSolicitorIsDigitalService.isApplicantSolicitorDigital(any())).thenReturn(true);
 
         Map<String, Object> caseData = new HashMap<>();
@@ -1265,7 +1347,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().build();
         notificationService.sendBarristerAddedEmail(caseDetails, barrister);
         verify(notificationServiceConfiguration).getAddedBarrister();
-        verify(notificationRequestMapper).buildNotificationRequest(caseDetails, barrister);
+        verify(notificationRequestMapper).buildInterimHearingNotificationRequest(caseDetails, barrister);
     }
 
     @Test
@@ -1274,7 +1356,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().build();
         notificationService.sendBarristerRemovedEmail(caseDetails, barrister);
         verify(notificationServiceConfiguration).getRemovedBarrister();
-        verify(notificationRequestMapper).buildNotificationRequest(caseDetails, barrister);
+        verify(notificationRequestMapper).buildInterimHearingNotificationRequest(caseDetails, barrister);
     }
 
     @Test

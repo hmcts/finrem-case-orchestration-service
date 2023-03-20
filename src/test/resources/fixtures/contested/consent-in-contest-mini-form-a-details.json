@@ -1,0 +1,88 @@
+{
+  "token": "test_token",
+  "event_id": "FR_consentOrderApproved",
+  "case_details": {
+    "id": 1596638099618923,
+    "jurisdiction": "DIVORCE",
+    "state": "consentedOrderApproved",
+    "version": 1,
+    "case_type_id": "FinancialRemedyContested",
+    "created_date": "2020-08-05T14:34:59.683",
+    "last_modified": "2020-08-05T14:37:15.69",
+    "last_state_modified_date": "2020-08-05T14:37:15.69",
+    "security_classification": "PUBLIC",
+    "case_data": {
+      "applicantFMName": "Applicant",
+      "applicantLName": "Name",
+      "respondentFMName": "Respondent",
+      "respondentLName": "Name",
+      "issueDate": "2022-01-01",
+      "divorceCaseNumber": "DD12D12345",
+      "applicantSolicitorName": "SolicitorName",
+      "applicantSolicitorFirm": "SolicitorFirm",
+      "solicitorReference": "SolicitorReference",
+      "applicantSolicitorAddress": {
+        "County": "Greater London",
+        "Country": "United Kingdom",
+        "PostCode": "SE12 9SE",
+        "PostTown": "London",
+        "AddressLine1": "50 ApplicantSolicitor Street",
+        "AddressLine2": "Line2",
+        "AddressLine3": "Line3"
+      },
+      "respondentRepresented": "Yes",
+      "respondentAddressConfidential": "No",
+      "respondentAddress": {
+        "County": "Greater London",
+        "Country": "United Kingdom",
+        "PostCode": "SE12 9SE",
+        "PostTown": "London",
+        "AddressLine1": "50 Respondent Street",
+        "AddressLine2": "Line2",
+        "AddressLine3": "Line3"
+      },
+      "respondentPhone": "12345",
+      "respondentEmail": "respondent@gmail.com",
+      "rSolicitorName": "RespSolicitorName",
+      "rSolicitorFirm": "RespSolicitorFirm",
+      "rSolicitorReference": "RespSolicitorReference",
+      "rSolicitorAddress": {
+        "County": "Greater London",
+        "Country": "United Kingdom",
+        "PostCode": "SE12 9SE",
+        "PostTown": "London",
+        "AddressLine1": "50 RespondentSolicitor Street",
+        "AddressLine2": "Line2",
+        "AddressLine3": "Line3"
+      },
+      "rSolicitorPhone": "12345",
+      "rSolicitorEmail": "respsolicitor@gmail.com",
+      "consentNatureOfApplicationChecklist": [
+        "Lump Sum Order",
+        "periodicalPaymentOrder",
+        "Pension Sharing Order",
+        "Pension Attachment Order",
+        "Pension Compensation Sharing Order",
+        "Pension Compensation Attachment Order",
+        "A settlement or a transfer of property",
+        "propertyAdjustmentOrder"
+      ],
+      "consentNatureOfApplicationAddress": "test3a",
+      "consentNatureOfApplicationMortgage": "test3b",
+      "consentOrderForChildrenQuestion1": "Yes",
+      "consentNatureOfApplication5": "Yes",
+      "consentNatureOfApplication6": [
+        "Step Child or Step Children",
+        "disability expenses",
+        "In addition to child support",
+        "training",
+        "When not habitually resident"
+      ],
+      "consentNatureOfApplication7": "testNature7",
+      "authorisationName": "testAuthName",
+      "authorisationFirm": "testAuthFirm",
+      "authorisation2b": "testAuth2b",
+      "authorisation3": "2022-05-05"
+    }
+  }
+}

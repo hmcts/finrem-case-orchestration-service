@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
@@ -31,7 +32,7 @@ public class ContactDetailsMapperTest {
     public static final String TEST_EMAIL = "solicitor@mail.com";
     public static final String TEST_PHONE = "077654567";
 
-    private CaseDataService caseDataService = new CaseDataService();
+    private CaseDataService caseDataService = new CaseDataService(new ObjectMapper());
 
     @Test
     public void applyAddressesMappingsShouldMapAllAddresses() {
