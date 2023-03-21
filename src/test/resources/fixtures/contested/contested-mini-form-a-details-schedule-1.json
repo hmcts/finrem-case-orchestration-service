@@ -124,6 +124,9 @@
         "AddressLine2": "Line2",
         "AddressLine3": "Line3"
       },
+      "mediatorRegistrationNumber": "MRX-01901",
+      "familyMediatorServiceName": "MRX Limited",
+      "soleTraderName": "Tikka MRX",
       "MIAMPreviousAttendanceChecklist": "FR_ms_MIAMPreviousAttendanceChecklist_Value_1",
       "specialAssistanceRequired": "Quia delectus ab qu",
       "MIAMOtherGroundsChecklist": "FR_ms_MIAMOtherGroundsChecklist_Value_1",

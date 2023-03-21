@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.Document
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -152,6 +153,9 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
             .claimingExemptionMiam(getYesOrNo(miamDetails.getClaimingExemptionMiam()))
             .familyMediatorMiam(getYesOrNo(miamDetails.getFamilyMediatorMiam()))
             .applicantAttendedMiam(getYesOrNo(miamDetails.getApplicantAttendedMiam()))
+            .mediatorRegistrationNumber(Objects.toString(caseData.getMediatorRegistrationNumber(), null))
+            .familyMediatorServiceName(Objects.toString(caseData.getFamilyMediatorServiceName(), null))
+            .soleTraderName(Objects.toString(caseData.getSoleTraderName(), null))
             .miamExemptionsChecklist(getMiamExemptionsChecklist(caseData))
             .miamDomesticViolenceChecklist(getMiamDomesticViolenceChecklist(caseData))
             .miamUrgencyReasonChecklist(getMiamUrgencyReasonsChecklist(caseData))
@@ -178,7 +182,7 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
 
         return Optional.ofNullable(natureApplicationList).orElse(Collections.emptyList()).stream()
             .map(NatureApplication::getText)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private List<String> getNatureOfApplicationChecklistSchedule(FinremCaseData caseData) {

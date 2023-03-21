@@ -67,6 +67,9 @@ public class ContestedMiniFormADetails implements DocumentTemplateDetails {
     private String authorisationFirm;
     private String authorisation2b;
     private String authorisation3;
+    private String mediatorRegistrationNumber;
+    private String familyMediatorServiceName;
+    private String soleTraderName;
     @JsonProperty("claimingExemptionMIAM")
     private String claimingExemptionMiam;
     @JsonProperty("familyMediatorMIAM")
