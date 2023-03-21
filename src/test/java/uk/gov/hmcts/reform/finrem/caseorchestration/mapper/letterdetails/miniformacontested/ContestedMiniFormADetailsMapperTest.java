@@ -18,7 +18,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.NatureOfApplicationSchedule;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PropertyAdjustmentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PropertyAdjustmentOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Schedule1OrMatrimonialAndCpList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.ContestedMiniFormADetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.DocumentTemplateDetails;
 
@@ -64,7 +66,9 @@ public class ContestedMiniFormADetailsMapperTest extends AbstractLetterDetailsMa
     @Test
     public void givenEmptyOrNullFields_whenBuildDocumentTemplateDetails_thenDoNotThrowException() {
         FinremCaseDetails emptyDetails = FinremCaseDetails.builder().id(1596638099618923L)
-            .data(FinremCaseData.builder().build()).build();
+            .data(FinremCaseData.builder().scheduleOneWrapper(ScheduleOneWrapper.builder()
+                .typeOfApplication(Schedule1OrMatrimonialAndCpList.MATRIMONIAL_AND_CIVIL_PARTNERSHIP_PROCEEDINGS).build())
+                .build()).build();
 
         DocumentTemplateDetails actual = contestedMiniFormADetailsMapper.buildDocumentTemplateDetails(emptyDetails,
             emptyDetails.getData().getRegionWrapper().getDefaultCourtList());
@@ -99,6 +103,7 @@ public class ContestedMiniFormADetailsMapperTest extends AbstractLetterDetailsMa
             .respondentSolicitorPhone("12345")
             .respondentSolicitorEmail("respsolicitor@gmail.com")
             .respondentSolicitorAddress(getAddress("50 RespondentSolicitor Street"))
+            .typeOfApplication("In connection to matrimonial and civil partnership proceedings")
             .divorceCaseNumber("DD12D12345")
             .issueDate("2022-01-01")
             .authorisationName("testAuthName")
@@ -151,6 +156,7 @@ public class ContestedMiniFormADetailsMapperTest extends AbstractLetterDetailsMa
             .respondentSolicitorAddress(getRespAddress())
             .respondentAddress(getAddress("1 Rse Way"))
             .divorceCaseNumber("1679071825739294")
+            .typeOfApplication("Under paragraph 1 or 2 of schedule 1 children act 1989")
             .issueDate("2023-03-17")
             .fastTrackDecision("Yes")
             .natureOfApplicationChecklistSchedule(getNatureApplicationChecklistSchedule())

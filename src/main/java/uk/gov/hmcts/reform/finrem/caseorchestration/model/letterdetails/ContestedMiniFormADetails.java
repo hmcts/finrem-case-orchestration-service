@@ -20,6 +20,7 @@ public class ContestedMiniFormADetails implements DocumentTemplateDetails {
     private String issueDate;
     private String divorceCaseNumber;
     private String caseNumber;
+    private String typeOfApplication;
     private String applicantRepresented;
     @JsonProperty("applicantFMName")
     private String applicantFmName;
