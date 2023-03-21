@@ -64,6 +64,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_OTHER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_COURTLIST;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DocumentHelperTest {
@@ -454,9 +455,9 @@ public class DocumentHelperTest {
     }
 
     @Test
-    public void shouldReturnFamilyCourtStampWhenCourtIsHighCourt() {
+    public void shouldReturnFamilyCourtStampWhenCourtIsLondon() {
         CaseDetails preparedCaseDetails = defaultConsentedCaseDetails();
-        preparedCaseDetails.getData().put(HIGHCOURT_COURTLIST, "london");
+        preparedCaseDetails.getData().put(LONDON_COURTLIST, "london");
         StampType actualStampType = documentHelper.getStampType(preparedCaseDetails.getData());
         assertEquals(StampType.FAMILY_COURT_STAMP, actualStampType);
     }
@@ -470,7 +471,7 @@ public class DocumentHelperTest {
     }
 
     @Test
-    public void shouldReturnFamilyCourtStampWhenCourtIsHighCourtInFinremCaseData() {
+    public void shouldReturnFamilyCourtStampWhenCourtIsLondonInFinremCaseData() {
         FinremCaseDetails preparedCaseDetails = defaultConsentedFinremCaseDetails();
         preparedCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.LONDON);
         StampType actualStampType = documentHelper.getStampType(preparedCaseDetails.getData());
