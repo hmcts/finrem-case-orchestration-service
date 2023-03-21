@@ -93,7 +93,7 @@ public class PdfStampingServiceTest {
         when(evidenceManagementUploadServiceService.upload(any(), anyString()))
             .thenReturn(fileUploadResponse());
 
-        Document stampDocument = service.stampDocument(document, "auth", false, StampType.FAMILY_COURT_STAMP);
+        Document stampDocument = service.stampDocument(document, "auth", false, StampType.HIGH_COURT_STAMP);
 
         assertThat(stampDocument, not(equalTo(imageAsBytes)));
         assertThat(stampDocument.getFileName(), is(document.getFileName()));
