@@ -15,7 +15,6 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseFlagsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
@@ -642,7 +641,6 @@ public class FinremCaseData {
             Region.HIGHCOURT, getHighCourt(regionWrapper.getHighCourtFrcList(), courtList)
         ).get(regionWrapper.getRegionList());
     }
-
 
 
     @JsonIgnore
