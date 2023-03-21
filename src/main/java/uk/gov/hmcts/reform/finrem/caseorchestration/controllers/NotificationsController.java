@@ -281,27 +281,6 @@ public class NotificationsController extends BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    @PostMapping(value = "/contest-application-issued", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send e-mail for Contested 'Application Issued'.")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Consent order available e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendContestedApplicationIssuedEmail(
-        @RequestBody CallbackRequest callbackRequest) {
-        log.info("Received request to send email for Contested 'Application Issued' for Case ID: {}", callbackRequest.getCaseDetails().getId());
-        validateCaseData(callbackRequest);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-
-        if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-            log.info("Sending Contested 'Application Issued' email notification to Applicant Solicitor");
-            notificationService.sendContestedApplicationIssuedEmailToApplicantSolicitor(caseDetails);
-        }
-
-        Map<String, Object> caseData = caseDetails.getData();
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
-    }
-
     @PostMapping(value = "/draft-order", consumes = APPLICATION_JSON_VALUE)
     @Operation(summary = "send e-mail for Solicitor To Draft Order")
     @ApiResponses(value = {
