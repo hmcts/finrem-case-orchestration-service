@@ -54,6 +54,7 @@ public enum EventType {
     REASSIGN_JUDGE("FR_reassignJudge"),
     NOC_REQUEST("nocRequest"),
     MANUAL_PAYMENT("FR_manualPayment"),
+    MANAGE_INTERVENERS("manageInterveners"),
     @JsonEnumDefaultValue
     NONE("");
 
