@@ -109,7 +109,8 @@ public class ConsentOrderApprovedController extends BaseController {
         CaseDetails caseDetails = callback.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
-        consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData, authToken);
+        consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData,
+                authToken, caseDetails.getId().toString());
         consentOrderApprovedDocumentService.generateAndPopulateConsentOrderLetter(caseDetails, authToken);
 
         return ResponseEntity.ok(
@@ -143,13 +144,15 @@ public class ConsentOrderApprovedController extends BaseController {
     }
 
     private void generateAndPrepareDocuments(String authToken, CaseDetails caseDetails) {
-        log.info("Generating and preparing documents for latest consent order, case {}", caseDetails.getId());
+        String caseId = caseDetails.getId().toString();
+        log.info("Generating and preparing documents for latest consent order, case {}", caseId);
 
         Map<String, Object> caseData = caseDetails.getData();
         CaseDocument latestConsentOrder = getLatestConsentOrder(caseData);
 
         CaseDocument approvedConsentOrderLetter = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, authToken);
-        CaseDocument consentOrderAnnexStamped = genericDocumentService.annexStampDocument(latestConsentOrder, authToken);
+        CaseDocument consentOrderAnnexStamped =
+            genericDocumentService.annexStampDocument(latestConsentOrder, authToken, caseId);
 
         ApprovedOrder.ApprovedOrderBuilder approvedOrderBuilder = ApprovedOrder.builder()
             .orderLetter(approvedConsentOrderLetter)
@@ -159,25 +162,25 @@ public class ConsentOrderApprovedController extends BaseController {
 
         if (!documentHelper.getPensionDocumentsData(caseData).isEmpty()) {
             log.info("Pension Documents not empty for case - stamping Pension Documents and adding to approvedOrder for case {}",
-                caseDetails.getId());
+                caseId);
 
             List<PensionTypeCollection> stampedPensionDocs = consentOrderApprovedDocumentService.stampPensionDocuments(
-                getPensionDocuments(caseData), authToken);
-            log.info("Generated StampedPensionDocs = {} for case {}", stampedPensionDocs, caseDetails.getId());
+                getPensionDocuments(caseData), authToken, caseId);
+            log.info("Generated StampedPensionDocs = {} for case {}", stampedPensionDocs, caseId);
             approvedOrder.setPensionDocuments(stampedPensionDocs);
         }
 
         List<CollectionElement<ApprovedOrder>> approvedOrders = singletonList(CollectionElement.<ApprovedOrder>builder()
             .value(approvedOrder).build());
-        log.info("Generated ApprovedOrders = {} for case {}", approvedOrders, caseDetails.getId());
+        log.info("Generated ApprovedOrders = {} for case {}", approvedOrders, caseId);
 
         caseData.put(APPROVED_ORDER_COLLECTION, approvedOrders);
 
-        log.info("Successfully generated documents for 'Consent Order Approved' for case {}", caseDetails.getId());
+        log.info("Successfully generated documents for 'Consent Order Approved' for case {}", caseId);
 
         if (documentHelper.getPensionDocumentsData(caseData).isEmpty()) {
             log.info("Case {} has no pension documents, updating status to {} and sending for bulk print",
-                caseDetails.getId(),
+                caseId,
                 CONSENT_ORDER_MADE.toString());
             try {
                 // Render Case Data with @JSONProperty names, required to re-use sendToBulkPrint code
@@ -189,7 +192,7 @@ public class ConsentOrderApprovedController extends BaseController {
                 consentOrderAvailableCorresponder.sendCorrespondence(caseDetails);
 
             } catch (JsonProcessingException e) {
-                log.error("case - {}: Error encountered trying to update status and send for bulk print: {}", caseDetails.getId(), e.getMessage());
+                log.error("case - {}: Error encountered trying to update status and send for bulk print: {}", caseId, e.getMessage());
             }
         }
     }

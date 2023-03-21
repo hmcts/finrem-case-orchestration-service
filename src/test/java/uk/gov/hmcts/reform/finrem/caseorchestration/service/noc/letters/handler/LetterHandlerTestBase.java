@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 
 public abstract class LetterHandlerTestBase {
@@ -73,7 +74,7 @@ public abstract class LetterHandlerTestBase {
             setUpCaseDocumentInteraction(noticeOfChangeLetterDetails,
                 nocDocumentService, "appDocFileName");
 
-        when(bulkPrintService.sendDocumentForPrint(caseDocumentApplicant, caseDetails)).thenReturn(UUID.fromString(DOCUMENT_UUID));
+        when(bulkPrintService.sendDocumentForPrint(caseDocumentApplicant, caseDetails, AUTH_TOKEN)).thenReturn(UUID.fromString(DOCUMENT_UUID));
 
         getLetterHandler().handle(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
@@ -85,7 +86,7 @@ public abstract class LetterHandlerTestBase {
         }
 
         verify(nocDocumentService).generateNoticeOfChangeLetter(AUTH_TOKEN, noticeOfChangeLetterDetails);
-        verify(bulkPrintService).sendDocumentForPrint(caseDocumentApplicant, caseDetails);
+        verify(bulkPrintService).sendDocumentForPrint(caseDocumentApplicant, caseDetails, AUTH_TOKEN);
     }
 
 

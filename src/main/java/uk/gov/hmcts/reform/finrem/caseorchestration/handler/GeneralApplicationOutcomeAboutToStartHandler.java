@@ -46,7 +46,8 @@ public class GeneralApplicationOutcomeAboutToStartHandler
         CallbackRequest callbackRequest,
         String userAuthorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Received on start request to outcome general application for Case ID: {}", caseDetails.getId());
+        String caseId = caseDetails.getId().toString();
+        log.info("Received on start request to outcome general application for Case ID: {}", caseId);
         Map<String, Object> caseData = caseDetails.getData();
 
         List<GeneralApplicationCollectionData> referredList = helper.getReferredList(caseData);
@@ -54,13 +55,13 @@ public class GeneralApplicationOutcomeAboutToStartHandler
         if (referredList.isEmpty() && caseData.get(GENERAL_APPLICATION_CREATED_BY) != null) {
             String outcome = Objects.toString(caseData.get(GENERAL_APPLICATION_OUTCOME_DECISION), null);
             log.info("general application has outcomed {} while existing ga not moved to collection for Case ID: {}",
-                outcome, caseDetails.getId());
+                outcome, caseId);
             if (referredList.isEmpty() && outcome != null) {
                 return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData)
                     .errors(List.of("There are no general application available for decision.")).build();
             }
-            log.info("setting outcome list if existing ga not moved to collection for Case ID: {}", caseDetails.getId());
-            setOutcomeListForNonCollectionGeneralApplication(caseData, index, userAuthorisation);
+            log.info("setting outcome list if existing ga not moved to collection for Case ID: {}", caseId);
+            setOutcomeListForNonCollectionGeneralApplication(caseData, index, userAuthorisation, caseId);
         } else {
             if (referredList.isEmpty()) {
                 return GenericAboutToStartOrSubmitCallbackResponse.<Map<String, Object>>builder().data(caseData)
@@ -80,8 +81,9 @@ public class GeneralApplicationOutcomeAboutToStartHandler
 
     private void setOutcomeListForNonCollectionGeneralApplication(Map<String, Object> caseData,
                                                                   AtomicInteger index,
-                                                                  String userAuthorisation) {
-        GeneralApplicationItems applicationItems = helper.getApplicationItems(caseData, userAuthorisation);
+                                                                  String userAuthorisation,
+                                                                  String caseId) {
+        GeneralApplicationItems applicationItems = helper.getApplicationItems(caseData, userAuthorisation, caseId);
         DynamicListElement dynamicListElements
             = getDynamicListElements(applicationItems.getGeneralApplicationCreatedBy(), getLabel(applicationItems, index.incrementAndGet()));
 

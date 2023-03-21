@@ -29,6 +29,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
@@ -108,7 +109,7 @@ public class ApprovedConsentOrderAboutToSubmitHandlerTest {
         assertNotNull(response.getData().get("otherCollection"));
 
         verify(consentOrderApprovedDocumentService).generateApprovedConsentOrderLetter(any(), any());
-        verify(genericDocumentService).annexStampDocument(any(), any());
+        verify(genericDocumentService).annexStampDocument(any(), any(), any());
         verify(documentHelper, times(2)).getPensionDocumentsData(any());
         verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), any());
     }
@@ -176,6 +177,6 @@ public class ApprovedConsentOrderAboutToSubmitHandlerTest {
     }
 
     private OngoingStubbing<CaseDocument> whenAnnexStampingDocument() {
-        return when(genericDocumentService.annexStampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN)));
+        return when(genericDocumentService.annexStampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN), anyString()));
     }
 }

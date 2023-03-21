@@ -5,7 +5,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.SystemUpdateUserConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.IdamToken;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
@@ -25,8 +24,6 @@ public class SystemUserServiceTest {
     private SystemUpdateUserConfiguration systemUpdateUserConfiguration;
     @Mock
     private IdamAuthService idamAuthService;
-    @Mock
-    private AuthTokenGenerator authTokenGenerator;
     @InjectMocks
     private SystemUserService systemUserService;
 
@@ -49,7 +46,7 @@ public class SystemUserServiceTest {
                 .roles(Collections.singletonList("role"))
                 .build());
 
-        IdamToken idamToken = systemUserService.getIdamToken(AUTH_TOKEN);
+        IdamToken idamToken = idamAuthService.getIdamToken(AUTH_TOKEN);
 
         assertThat(idamToken.getIdamOauth2Token()).isEqualTo(AUTH_TOKEN);
         assertThat(idamToken.getUserId()).isEqualTo("uid");

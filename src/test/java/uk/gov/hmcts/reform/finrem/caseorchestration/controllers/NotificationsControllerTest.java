@@ -146,7 +146,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         verify(notificationService).isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class));
         verifyNoMoreInteractions(notificationService);
-        verify(bulkPrintService).sendDocumentForPrint(any(), any(CaseDetails.class));
+        verify(bulkPrintService).sendDocumentForPrint(any(), any(CaseDetails.class), any());
     }
 
     @Test

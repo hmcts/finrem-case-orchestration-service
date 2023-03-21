@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.finrem.functional.util.FunctionalTestUtils;
 
 @RunWith(SpringRunner.class)
@@ -19,6 +20,9 @@ public abstract class IntegrationTestBase {
 
     @Rule
     public SpringIntegrationMethodRule springIntegration;
+
+    @Autowired
+    public CaseDocumentClient caseDocumentClient;
 
     @Autowired
     protected FunctionalTestUtils utils;

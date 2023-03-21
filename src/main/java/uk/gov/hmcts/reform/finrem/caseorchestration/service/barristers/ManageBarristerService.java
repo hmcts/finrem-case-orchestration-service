@@ -95,17 +95,21 @@ public class ManageBarristerService {
                                       List<Barrister> barristers,
                                       List<Barrister> barristersBeforeEvent,
                                       String authToken) {
-        BarristerChange barristerChange = barristerUpdateDifferenceCalculator.calculate(barristersBeforeEvent, barristers);
+        BarristerChange barristerChange =
+            barristerUpdateDifferenceCalculator.calculate(barristersBeforeEvent, barristers);
         List<Barrister> addedBarristers = barristerChange.getAdded().stream().toList();
         List<Barrister> removedBarristers = barristerChange.getRemoved().stream().toList();
 
-        addedBarristers.forEach(barrister -> sendNotifications(caseDetails, barrister, Pair.of(authToken, ADDED)));
-        removedBarristers.forEach(barrister -> sendNotifications(caseDetails, barrister, Pair.of(authToken, REMOVED)));
+        addedBarristers.forEach(barrister ->
+            sendNotifications(caseDetails, barrister, Pair.of(authToken, ADDED), authToken));
+        removedBarristers.forEach(barrister ->
+            sendNotifications(caseDetails, barrister, Pair.of(authToken, REMOVED), authToken));
     }
 
     private void sendNotifications(CaseDetails caseDetails,
                                    Barrister barrister,
-                                   Pair<String, BarristerChangeType> letterData) {
+                                   Pair<String, BarristerChangeType> letterData,
+                                   String authToken) {
         if (letterData.getRight().equals(ADDED)) {
             notificationService.sendBarristerAddedEmail(caseDetails, barrister);
         } else {
@@ -113,11 +117,16 @@ public class ManageBarristerService {
         }
 
         DocumentHelper.PaperNotificationRecipient recipient = getPaperNotificationRecipient(caseDetails, letterData);
-        barristerLetterService.sendBarristerLetter(caseDetails, barrister, BarristerLetterTuple.of(letterData, recipient));
+        barristerLetterService.sendBarristerLetter(
+            caseDetails,
+            barrister,
+            BarristerLetterTuple.of(letterData, recipient),
+            authToken);
     }
 
     public String getCaseRole(CaseDetails caseDetails, String authToken) {
-        CaseAssignedUserRolesResource caseRoleResource = caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, authToken);
+        CaseAssignedUserRolesResource caseRoleResource =
+            caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, authToken);
         log.info("Case assigned role resource is: {}", caseRoleResource.toString());
         String caseRole = isCaseRoleResourceNullOrEmpty(caseRoleResource)
             ? CASEWORKER_ROLE

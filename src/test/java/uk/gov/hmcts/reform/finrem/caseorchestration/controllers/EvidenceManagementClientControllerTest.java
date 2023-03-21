@@ -16,6 +16,7 @@ import java.util.List;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -38,7 +39,7 @@ public class EvidenceManagementClientControllerTest extends BaseControllerTest {
     public void shouldUploadFileTokenWhenHandleFileUploadIsInvokedWithValidInputs() throws Exception {
         MockMultipartFile file = jpegMultipartFile();
         List<MultipartFile> multipartFileList = Collections.singletonList(file);
-        given(emUploadService.upload(any(), any()))
+        given(emUploadService.upload(any(), any(), any()))
             .willReturn(prepareFileUploadResponse());
 
         mvc.perform(multipart(EM_CLIENT_UPLOAD_URL)
@@ -55,7 +56,7 @@ public class EvidenceManagementClientControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$[0].mimeType", is(MediaType.TEXT_PLAIN_VALUE)))
             .andExpect(jsonPath("$[0].status", is("OK")));
 
-        verify(emUploadService).upload(multipartFileList, AUTH_TOKEN);
+        verify(emUploadService).upload(multipartFileList, AUTH_TOKEN, anyString());
     }
 
     private List<FileUploadResponse> prepareFileUploadResponse() {

@@ -30,7 +30,7 @@ public class CcdServiceTest {
     @Mock
     private CaseEventsApi caseEventsApi;
     @Mock
-    private SystemUserService systemUserService;
+    private IdamAuthService idamAuthService;
     @InjectMocks
     private CcdService ccdService;
 
@@ -38,7 +38,7 @@ public class CcdServiceTest {
     public void givenCallback_WhenExecuteEvent_ThenCcdApiCalled() {
         when(coreCaseDataApi.startEventForCaseWorker(any(), any(), any(), any(), any(), any(), any()))
             .thenReturn(StartEventResponse.builder().caseDetails(buildCaseDetails()).build());
-        when(systemUserService.getIdamToken(AUTH_TOKEN)).thenReturn(IdamToken.builder().build());
+        when(idamAuthService.getIdamToken(AUTH_TOKEN)).thenReturn(IdamToken.builder().build());
 
         ccdService.executeCcdEventOnCase(AUTH_TOKEN, buildCaseDetails(), EventType.CLOSE.getCcdType());
 
@@ -50,7 +50,7 @@ public class CcdServiceTest {
     public void givenCallback_WhenExecuteGetEvents_ThenCcdApiCalled() {
         when(caseEventsApi.findEventDetailsForCase(any(), any(), any(), any(), any(), any()))
             .thenReturn(any());
-        when(systemUserService.getIdamToken(AUTH_TOKEN)).thenReturn(IdamToken.builder().build());
+        when(idamAuthService.getIdamToken(AUTH_TOKEN)).thenReturn(IdamToken.builder().build());
 
         ccdService.getCcdEventDetailsOnCase(AUTH_TOKEN, buildCaseDetails(), EventType.CLOSE.getCcdType());
 

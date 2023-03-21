@@ -46,7 +46,7 @@ public class PaperNotificationService {
                 caseDetails, authToken, APPLICANT);
 
             // Send notification letter to Bulk Print
-            bulkPrintService.sendDocumentForPrint(assignedToJudgeNotificationLetter, caseDetails);
+            bulkPrintService.sendDocumentForPrint(assignedToJudgeNotificationLetter, caseDetails, authToken);
             log.info("Applicant notification letter sent to Bulk Print: {} for Case ID: {}", assignedToJudgeNotificationLetter,
                 caseDetails.getId());
         }
@@ -54,7 +54,7 @@ public class PaperNotificationService {
         if (shouldPrintNotificationForRespondentSolicitor(caseDetails)) {
             UUID respondentLetterId = bulkPrintService.sendDocumentForPrint(
                 assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, authToken, RESPONDENT),
-                caseDetails);
+                caseDetails,authToken);
             log.info("Respondent notification letter sent to Bulk Print: {} for Case ID: {}", respondentLetterId, caseDetails.getId());
         }
     }
@@ -65,8 +65,11 @@ public class PaperNotificationService {
                 caseDetails.getId());
 
             CaseDocument applicantAssignedToJudgeNotificationLetter =
-                assignedToJudgeDocumentService.generateConsentInContestedAssignedToJudgeNotificationLetter(caseDetails, authToken, APPLICANT);
-            bulkPrintService.sendDocumentForPrint(applicantAssignedToJudgeNotificationLetter, caseDetails);
+                assignedToJudgeDocumentService.generateConsentInContestedAssignedToJudgeNotificationLetter(
+                    caseDetails,
+                    authToken,
+                    APPLICANT);
+            bulkPrintService.sendDocumentForPrint(applicantAssignedToJudgeNotificationLetter, caseDetails, authToken);
         }
 
 
@@ -76,14 +79,14 @@ public class PaperNotificationService {
 
             CaseDocument respondentAssignedToJudgeNotificationLetter =
                 assignedToJudgeDocumentService.generateConsentInContestedAssignedToJudgeNotificationLetter(caseDetails, authToken, RESPONDENT);
-            bulkPrintService.sendDocumentForPrint(respondentAssignedToJudgeNotificationLetter, caseDetails);
+            bulkPrintService.sendDocumentForPrint(respondentAssignedToJudgeNotificationLetter, caseDetails, authToken);
         }
     }
 
     public void printManualPaymentNotification(CaseDetails caseDetails, String authToken) {
         if (caseDataService.isContestedPaperApplication(caseDetails)) {
             CaseDocument applicantManualPaymentLetter = manualPaymentDocumentService.generateManualPaymentLetter(caseDetails, authToken, APPLICANT);
-            bulkPrintService.sendDocumentForPrint(applicantManualPaymentLetter, caseDetails);
+            bulkPrintService.sendDocumentForPrint(applicantManualPaymentLetter, caseDetails, authToken);
         }
     }
 
@@ -95,13 +98,13 @@ public class PaperNotificationService {
     private void printApplicantUpdateFrcInfoNotification(CaseDetails caseDetails, String authToken) {
         Optional<CaseDocument> applicantLetter = updateFrcInfoApplicantDocumentService.getUpdateFrcInfoLetter(caseDetails,
             authToken);
-        applicantLetter.ifPresent(letter -> bulkPrintService.sendDocumentForPrint(letter, caseDetails));
+        applicantLetter.ifPresent(letter -> bulkPrintService.sendDocumentForPrint(letter, caseDetails, authToken));
     }
 
     private void printRespondentUpdateFrcInfoNotification(CaseDetails caseDetails, String authToken) {
         Optional<CaseDocument> respondentLetter = updateFrcInfoRespondentDocumentService.getUpdateFrcInfoLetter(caseDetails,
             authToken);
-        respondentLetter.ifPresent(letter -> bulkPrintService.sendDocumentForPrint(letter, caseDetails));
+        respondentLetter.ifPresent(letter -> bulkPrintService.sendDocumentForPrint(letter, caseDetails, authToken));
     }
 
     public boolean shouldPrintForApplicant(CaseDetails caseDetails) {
@@ -123,12 +126,12 @@ public class PaperNotificationService {
     public void printApplicantRejectionGeneralApplication(CaseDetails caseDetails, String authToken) {
         CaseDocument applicantGeneralApplicationRejectDoc = rejectGeneralApplicationDocumentService.generateGeneralApplicationRejectionLetter(
             caseDetails, authToken, APPLICANT);
-        bulkPrintService.sendDocumentForPrint(applicantGeneralApplicationRejectDoc, caseDetails);
+        bulkPrintService.sendDocumentForPrint(applicantGeneralApplicationRejectDoc, caseDetails, authToken);
     }
 
     public void printRespondentRejectionGeneralApplication(CaseDetails caseDetails, String authToken) {
         CaseDocument applicantGeneralApplicationRejectDoc = rejectGeneralApplicationDocumentService.generateGeneralApplicationRejectionLetter(
             caseDetails, authToken, RESPONDENT);
-        bulkPrintService.sendDocumentForPrint(applicantGeneralApplicationRejectDoc, caseDetails);
+        bulkPrintService.sendDocumentForPrint(applicantGeneralApplicationRejectDoc, caseDetails, authToken);
     }
 }

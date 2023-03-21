@@ -116,18 +116,19 @@ public class DocumentValidationService {
     private DocumentValidationResponse validateRespondToOrderDocument(String authToken, Map<String, Object> caseData) {
         Optional<CaseDocument> caseDocument = documentHelper.getLatestRespondToOrderDocuments(caseData);
         return caseDocument
-            .map(document -> documentGeneratorValidationService.validateFileType(document.getDocumentBinaryUrl()))
+            .map(document -> documentGeneratorValidationService.validateFileType(
+                document.getDocumentBinaryUrl(), authToken))
             .orElseGet(() -> DocumentValidationResponse.builder().build());
     }
 
     private DocumentValidationResponse validateConsentOrderDocument(String authToken, Map<String, Object> caseData) {
         CaseDocument caseDocument = documentHelper.convertToCaseDocument(caseData.get(CONSENT_ORDER));
-        return documentGeneratorValidationService.validateFileType(caseDocument.getDocumentBinaryUrl());
+        return documentGeneratorValidationService.validateFileType(caseDocument.getDocumentBinaryUrl(), authToken);
     }
 
     private DocumentValidationResponse validateLatestConsentOrderDocument(String authToken, Map<String, Object> caseData) {
         CaseDocument caseDocument = documentHelper.getLatestAmendedConsentOrder(caseData);
-        return documentGeneratorValidationService.validateFileType(caseDocument.getDocumentBinaryUrl());
+        return documentGeneratorValidationService.validateFileType(caseDocument.getDocumentBinaryUrl(), authToken);
     }
 
     private DocumentValidationResponse validateDocuments(String authToken, List<CaseDocument> caseDocuments) {
@@ -152,6 +153,6 @@ public class DocumentValidationService {
 
     private CompletableFuture<DocumentValidationResponse> validate(String authToken, CaseDocument caseDocument) {
         return CompletableFuture.supplyAsync(() ->
-            documentGeneratorValidationService.validateFileType(caseDocument.getDocumentBinaryUrl()));
+            documentGeneratorValidationService.validateFileType(caseDocument.getDocumentBinaryUrl(), authToken));
     }
 }

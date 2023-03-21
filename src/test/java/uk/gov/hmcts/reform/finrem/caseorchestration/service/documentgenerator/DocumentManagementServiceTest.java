@@ -42,7 +42,7 @@ public class DocumentManagementServiceTest {
     public void setUp() {
         when(pdfGenerationService.generateDocFrom(TEMPLATE_NAME, PLACEHOLDERS)).thenReturn("welcome doc".getBytes());
         when(
-            evidenceManagementUploadService.upload(any(), anyString()))
+            evidenceManagementUploadService.upload(any(), anyString(), any()))
             .thenReturn(fileUploadResponse());
     }
 

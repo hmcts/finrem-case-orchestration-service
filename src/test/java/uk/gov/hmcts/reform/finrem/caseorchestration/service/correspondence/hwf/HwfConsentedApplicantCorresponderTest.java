@@ -57,7 +57,7 @@ public class HwfConsentedApplicantCorresponderTest {
 
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         hwfConsentedApplicantCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
-        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails);
+        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, AUTHORISATION_TOKEN);
     }
 
     @Test

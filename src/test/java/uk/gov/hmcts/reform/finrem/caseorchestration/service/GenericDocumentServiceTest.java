@@ -48,22 +48,22 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldStampDocument() throws Exception {
-        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, false)).thenReturn(document());
+        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, false, caseId)).thenReturn(document());
 
-        CaseDocument stampDocument = genericDocumentService.stampDocument(caseDocument(), AUTH_TOKEN);
+        CaseDocument stampDocument = genericDocumentService.stampDocument(caseDocument(), AUTH_TOKEN, caseId);
 
         assertCaseDocument(stampDocument);
-        verify(pdfStampingServiceMock, times(1)).stampDocument(document(), AUTH_TOKEN, false);
+        verify(pdfStampingServiceMock, times(1)).stampDocument(document(), AUTH_TOKEN, false, caseId);
     }
 
     @Test
     public void shouldAnnexStampDocument() {
-        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, true)).thenReturn(document());
+        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, true, caseId)).thenReturn(document());
 
-        CaseDocument stampDocument = genericDocumentService.annexStampDocument(caseDocument(), AUTH_TOKEN);
+        CaseDocument stampDocument = genericDocumentService.annexStampDocument(caseDocument(), AUTH_TOKEN, caseId);
 
         assertCaseDocument(stampDocument);
-        verify(pdfStampingServiceMock, times(1)).stampDocument(document(), AUTH_TOKEN, true);
+        verify(pdfStampingServiceMock, times(1)).stampDocument(document(), AUTH_TOKEN, true, caseId);
     }
 
     @Test
@@ -71,7 +71,7 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
         final String templateName = "template name";
         final String fileName = "file name";
 
-        when(evidenceManagementUploadService.upload(any(), any()))
+        when(evidenceManagementUploadService.upload(any(), any(), any()))
             .thenReturn(Collections.singletonList(
                 FileUploadResponse.builder()
                     .fileName("app_docs.pdf")
@@ -101,7 +101,7 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldBulkPrintDocument() {
-        genericDocumentService.bulkPrint(BulkPrintRequest.builder().build());
+        genericDocumentService.bulkPrint(BulkPrintRequest.builder().build(), AUTH_TOKEN);
 
         verify(bulkPrintDocumentGeneratorService, times(1)).send(any(), any());
     }

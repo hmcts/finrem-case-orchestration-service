@@ -29,7 +29,9 @@ public abstract class CaseDetailsSingleLetterOrEmailAllPartiesCorresponder exten
         } else {
             log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
             bulkPrintService.sendDocumentForPrint(
-                getDocumentToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.APPLICANT), caseDetails);
+                getDocumentToPrint(caseDetails,
+                    authorisationToken,
+                    DocumentHelper.PaperNotificationRecipient.APPLICANT), caseDetails, authorisationToken);
         }
     }
 
@@ -40,7 +42,10 @@ public abstract class CaseDetailsSingleLetterOrEmailAllPartiesCorresponder exten
         } else {
             log.info("Sending letter correspondence to respondent for case: {}", caseDetails.getId());
             bulkPrintService.sendDocumentForPrint(
-                getDocumentToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT), caseDetails);
+                getDocumentToPrint(
+                    caseDetails,
+                    authorisationToken,
+                    DocumentHelper.PaperNotificationRecipient.RESPONDENT), caseDetails, authorisationToken);
         }
     }
 

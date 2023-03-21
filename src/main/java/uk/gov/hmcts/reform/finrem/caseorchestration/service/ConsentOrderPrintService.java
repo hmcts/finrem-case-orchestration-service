@@ -85,7 +85,9 @@ public class ConsentOrderPrintService {
         return bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, applicantDocuments);
     }
 
-    private UUID sendConsentOrderForBulkPrintRespondent(CaseDocument coverSheet, CaseDetails caseDetails, String authorisationToken) {
+    private UUID sendConsentOrderForBulkPrintRespondent(CaseDocument coverSheet,
+                                                        CaseDetails caseDetails,
+                                                        String authorisationToken) {
         log.info("Sending order documents to recipient / solicitor for Bulk Print, case {}", caseDetails.getId());
 
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
@@ -113,7 +115,10 @@ public class ConsentOrderPrintService {
             bulkPrintDocuments.addAll(documentHelper.getCaseDocumentsAsBulkPrintDocuments(orderDocuments));
         }
 
-        return bulkPrintService.bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), bulkPrintDocuments);
+        return bulkPrintService.bulkPrintFinancialRemedyLetterPack(
+            caseDetails.getId(),
+            bulkPrintDocuments,
+            authorisationToken);
     }
 
     private boolean shouldPrintOrderApprovedDocuments(CaseDetails caseDetails, String authorisationToken) {

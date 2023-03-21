@@ -24,7 +24,7 @@ public abstract class CaseDetailsSingleLetterOrEmailApplicantCorresponder extend
             this.emailApplicantSolicitor(caseDetails);
         } else {
             log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
-            bulkPrintService.sendDocumentForPrint(getDocumentToPrint(caseDetails, authToken), caseDetails);
+            bulkPrintService.sendDocumentForPrint(getDocumentToPrint(caseDetails, authToken), caseDetails, authToken);
         }
     }
 

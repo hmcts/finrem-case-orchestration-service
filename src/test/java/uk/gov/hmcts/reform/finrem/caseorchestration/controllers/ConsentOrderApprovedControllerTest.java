@@ -23,6 +23,7 @@ import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
@@ -235,8 +236,10 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(consentOrderApprovedDocumentService, times(1)).stampAndPopulateContestedConsentApprovedOrderCollection(any(), eq(AUTH_TOKEN));
-        verify(consentOrderApprovedDocumentService, times(1)).generateAndPopulateConsentOrderLetter(any(), eq(AUTH_TOKEN));
+        verify(consentOrderApprovedDocumentService, times(1))
+            .stampAndPopulateContestedConsentApprovedOrderCollection(any(), eq(AUTH_TOKEN), anyString());
+        verify(consentOrderApprovedDocumentService, times(1))
+            .generateAndPopulateConsentOrderLetter(any(), eq(AUTH_TOKEN));
     }
 
     @Test
@@ -249,7 +252,8 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(consentOrderApprovedDocumentService).stampAndPopulateContestedConsentApprovedOrderCollection(any(), eq(AUTH_TOKEN));
+        verify(consentOrderApprovedDocumentService)
+            .stampAndPopulateContestedConsentApprovedOrderCollection(any(), eq(AUTH_TOKEN), any());
     }
 
     @Test
@@ -290,15 +294,15 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     }
 
     private OngoingStubbing<CaseDocument> whenAnnexStampingDocument() {
-        return when(genericDocumentService.annexStampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN)));
+        return when(genericDocumentService.annexStampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN), any()));
     }
 
     private OngoingStubbing<CaseDocument> whenStampingDocument() {
-        return when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN)));
+        return when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN), any()));
     }
 
     private OngoingStubbing<List<PensionTypeCollection>> whenStampingPensionDocuments() {
-        return when(consentOrderApprovedDocumentService.stampPensionDocuments(any(), eq(AUTH_TOKEN)));
+        return when(consentOrderApprovedDocumentService.stampPensionDocuments(any(), eq(AUTH_TOKEN), any()));
     }
 
     private void assertLetter(ResultActions result) throws Exception {

@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -36,6 +35,7 @@ public class DocumentConversionServiceTest {
 
     public static final String PDF_SERVICE_URI = "http://localhost:4001/rs/convert";
     public static final byte[] CONVERTED_BINARY = "converted".getBytes();
+    public static final String AUTH = "auth";
 
     @Autowired
     private DocumentConversionService documentConversionService;
@@ -65,10 +65,10 @@ public class DocumentConversionServiceTest {
             .andRespond(withSuccess(CONVERTED_BINARY, MediaType.APPLICATION_OCTET_STREAM));
 
         when(
-            evidenceManagementService.download(ArgumentMatchers.eq(documentToConvert.getBinaryUrl())))
-            .thenReturn(ResponseEntity.ok("bytes".getBytes()));
+            evidenceManagementService.download(ArgumentMatchers.eq(documentToConvert.getBinaryUrl()), AUTH))
+            .thenReturn("bytes".getBytes());
 
-        byte[] result = documentConversionService.convertDocumentToPdf(documentToConvert);
+        byte[] result = documentConversionService.convertDocumentToPdf(documentToConvert, AUTH);
         assertThat(result, is(notNullValue()));
         assertThat(result, is(CONVERTED_BINARY));
     }
@@ -80,11 +80,11 @@ public class DocumentConversionServiceTest {
             .andRespond(withSuccess(CONVERTED_BINARY, MediaType.APPLICATION_OCTET_STREAM));
 
         when(
-            evidenceManagementService.download(ArgumentMatchers.eq(documentToConvert.getBinaryUrl())))
-            .thenReturn(ResponseEntity.ok("bytes".getBytes()));
+            evidenceManagementService.download(ArgumentMatchers.eq(documentToConvert.getBinaryUrl()), AUTH))
+            .thenReturn("bytes".getBytes());
 
         documentToConvert.setFileName("file.pdf");
-        byte[] result = documentConversionService.convertDocumentToPdf(documentToConvert);
+        byte[] result = documentConversionService.convertDocumentToPdf(documentToConvert, AUTH);
     }
 
     @Test

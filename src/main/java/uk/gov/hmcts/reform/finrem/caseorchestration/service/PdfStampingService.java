@@ -41,15 +41,16 @@ public class PdfStampingService {
 
     private final EvidenceManagementDownloadService emDownloadService;
 
-    public Document stampDocument(Document document, String authToken, boolean isAnnexNeeded) {
+    public Document stampDocument(Document document, String authToken, boolean isAnnexNeeded, String caseId) {
         log.info("Stamp document : {}", document);
         try {
-            byte[] docInBytes = emDownloadService.download(document.getBinaryUrl()).getBody();
+            byte[] docInBytes = emDownloadService.download(document.getBinaryUrl(), authToken);
             byte[] stampedDoc = stampDocument(docInBytes, isAnnexNeeded);
             MultipartFile multipartFile =
                 FinremMultipartFile.builder().name(document.getFileName()).content(stampedDoc)
                     .contentType(APPLICATION_PDF_CONTENT_TYPE).build();
-            List<FileUploadResponse> uploadResponse = emUploadService.upload(Collections.singletonList(multipartFile), authToken);
+            List<FileUploadResponse> uploadResponse =
+                emUploadService.upload(Collections.singletonList(multipartFile), caseId, authToken);
             FileUploadResponse fileSaved = Optional.of(uploadResponse.get(0))
                 .filter(response -> response.getStatus() == HttpStatus.OK)
                 .orElseThrow(() -> new DocumentStorageException("Failed to store document"));

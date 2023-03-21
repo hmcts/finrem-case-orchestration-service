@@ -196,11 +196,13 @@ public class ConsentHearingService {
     private void addToBulkPrintList(CaseDetails caseDetails, Map<String, Object> hearingData,
                                     List<BulkPrintDocument> documents,String authorisationToken) {
         String isDocUploaded = nullToEmpty(hearingData.get(HEARING_PROMPT_FOR_DOCUMENT));
-        log.warn("Additional uploaded hearing document found for printing for case id {}", caseDetails.getId());
+        String caseId = caseDetails.getId().toString();
+        log.warn("Additional uploaded hearing document found for printing for case id {}", caseId);
         if (YES_VALUE.equalsIgnoreCase(isDocUploaded)) {
-            log.warn("Additional uploaded hearing document found for printing for case id {}", caseDetails.getId());
+            log.warn("Additional uploaded hearing document found for printing for case id {}", caseId);
             CaseDocument caseDocument = documentHelper.convertToCaseDocument(hearingData.get(HEARING_UPLOADED_DOCUMENT));
-            CaseDocument additionalUploadedDocuments = genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken);
+            CaseDocument additionalUploadedDocuments =
+                genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken, caseId);
             documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(additionalUploadedDocuments));
         }
     }

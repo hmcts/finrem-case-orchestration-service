@@ -72,7 +72,8 @@ public class HearingDocumentController extends BaseController {
         @NotNull @RequestBody @Parameter(description = "CaseData") CallbackRequest callbackRequest) throws IOException {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Received request for validating a hearing for Case ID: {}", caseDetails.getId());
+        String caseId = caseDetails.getId().toString();
+        log.info("Received request for validating a hearing for Case ID: {}", caseId);
 
         validateCaseData(callbackRequest);
 
@@ -86,7 +87,8 @@ public class HearingDocumentController extends BaseController {
         if (caseDetails.getData().get(HEARING_ADDITIONAL_DOC) != null) {
             CaseDocument caseDocument = objectMapper.convertValue(caseDetails.getData().get(HEARING_ADDITIONAL_DOC),
                 CaseDocument.class);
-            CaseDocument pdfDocument = additionalHearingDocumentService.convertToPdf(caseDocument, authorisationToken);
+            CaseDocument pdfDocument =
+                additionalHearingDocumentService.convertToPdf(caseDocument, authorisationToken, caseId);
             callbackRequest.getCaseDetails().getData().put(HEARING_ADDITIONAL_DOC, pdfDocument);
         }
 
@@ -99,18 +101,18 @@ public class HearingDocumentController extends BaseController {
         }
 
         List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails, fastTrackWarningsList, nonFastTrackWarningsList);
-        log.info("Hearing date warning {} Case ID: {}",warnings, caseDetails.getId());
+        log.info("Hearing date warning {} Case ID: {}",warnings, caseId);
         if ((warnings.isEmpty() || fastTrackWarningsList.size() > 1 || nonFastTrackWarningsList.size() > 1)
             && caseDataService.isContestedApplication(caseDetails)) {
             CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
             if (caseDetailsBefore != null && hearingDocumentService.alreadyHadFirstHearing(caseDetailsBefore)) {
-                log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
+                log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseId);
                 additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, caseDetails);
-                log.info("Sent Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
+                log.info("Sent Additional Hearing Document to bulk print for Contested Case ID: {}", caseId);
             } else {
-                log.info("Sending Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
+                log.info("Sending Forms A, C, G to bulk print for Contested Case ID: {}", caseId);
                 hearingDocumentService.sendInitialHearingCorrespondence(caseDetails, authorisationToken);
-                log.info("sent Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
+                log.info("sent Forms A, C, G to bulk print for Contested Case ID: {}", caseId);
             }
             fastTrackWarningsList = new ArrayList<>();
             nonFastTrackWarningsList = new ArrayList<>();

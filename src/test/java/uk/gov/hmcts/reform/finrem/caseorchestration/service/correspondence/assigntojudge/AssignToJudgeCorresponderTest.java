@@ -92,6 +92,6 @@ public class AssignToJudgeCorresponderTest {
         verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(caseDetails, AUTHORISATION_TOKEN,
             DocumentHelper.PaperNotificationRecipient.APPLICANT);
 
-        verify(bulkPrintService, times(2)).sendDocumentForPrint(caseDocument, caseDetails);
+        verify(bulkPrintService, times(2)).sendDocumentForPrint(caseDocument, caseDetails, AUTHORISATION_TOKEN);
     }
 }

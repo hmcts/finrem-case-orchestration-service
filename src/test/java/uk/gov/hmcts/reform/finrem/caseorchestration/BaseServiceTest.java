@@ -84,6 +84,8 @@ public abstract class BaseServiceTest extends BaseTest {
 
     private static final String TEST_JSON = "/fixtures/contested/interim-hearing-two-collection.json";
 
+    protected String caseId = "123123123";
+
     protected CaseDetails buildCaseDetails() {
         Map<String, Object> caseData = new HashMap<>();
         List<String> natureOfApplication = List.of("Lump Sum Order",

@@ -75,7 +75,7 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
         when(idamAuthService.getUserDetails(any())).thenReturn(UserDetails.builder().id("ID").build());
         when(docmosisPdfGenerationServiceMock.generateDocFrom(any(), any()))
             .thenReturn("".getBytes(StandardCharsets.UTF_8));
-        when(evidenceManagementUploadService.upload(any(), any()))
+        when(evidenceManagementUploadService.upload(any(), any(), any()))
             .thenReturn(Collections.singletonList(
                 FileUploadResponse.builder()
                     .fileName("app_docs.pdf")

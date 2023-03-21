@@ -71,12 +71,13 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
 
     @Deprecated()
     private void generateAndPrepareDocuments(String authToken, CaseDetails caseDetails, CaseDocument latestConsentOrder) {
-        log.info("Generating and preparing documents for latest consent order, case {}", caseDetails.getId());
+        String caseId = caseDetails.getId().toString();
+        log.info("Generating and preparing documents for latest consent order, case {}", caseId);
 
         Map<String, Object> caseData = caseDetails.getData();
 
         CaseDocument approvedConsentOrderLetter = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, authToken);
-        CaseDocument consentOrderAnnexStamped = genericDocumentService.annexStampDocument(latestConsentOrder, authToken);
+        CaseDocument consentOrderAnnexStamped = genericDocumentService.annexStampDocument(latestConsentOrder, authToken, caseId);
 
         ApprovedOrder.ApprovedOrderBuilder approvedOrderBuilder = ApprovedOrder.builder()
             .orderLetter(approvedConsentOrderLetter)
@@ -86,25 +87,25 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
 
         if (Boolean.FALSE.equals(isPensionDocumentsEmpty(caseData))) {
             log.info("Pension Documents not empty for case - stamping Pension Documents and adding to approvedOrder for case {}",
-                caseDetails.getId());
+                caseId);
 
             List<PensionTypeCollection> stampedPensionDocs = consentOrderApprovedDocumentService.stampPensionDocuments(
-                getPensionDocuments(caseData), authToken);
-            log.info("Generated StampedPensionDocs = {} for case {}", stampedPensionDocs, caseDetails.getId());
+                getPensionDocuments(caseData), authToken, caseId);
+            log.info("Generated StampedPensionDocs = {} for case {}", stampedPensionDocs, caseId);
             approvedOrder.setPensionDocuments(stampedPensionDocs);
         }
 
         List<CollectionElement<ApprovedOrder>> approvedOrders = singletonList(CollectionElement.<ApprovedOrder>builder()
             .value(approvedOrder).build());
-        log.info("Generated ApprovedOrders = {} for case {}", approvedOrders, caseDetails.getId());
+        log.info("Generated ApprovedOrders = {} for case {}", approvedOrders, caseId);
 
         caseData.put(APPROVED_ORDER_COLLECTION, approvedOrders);
 
-        log.info("Successfully generated documents for 'Consent Order Approved' for case {}", caseDetails.getId());
+        log.info("Successfully generated documents for 'Consent Order Approved' for case {}", caseId);
 
         if (Boolean.TRUE.equals(isPensionDocumentsEmpty(caseData))) {
             log.info("Case {} has no pension documents, updating status to {} and sending for bulk print",
-                caseDetails.getId(),
+                caseId,
                 CONSENT_ORDER_MADE);
             try {
                 // Render Case Data with @JSONProperty names, required to re-use sendToBulkPrint code
@@ -113,7 +114,7 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
                 consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, authToken);
                 caseData.put(STATE, CONSENT_ORDER_MADE.toString());
             } catch (JsonProcessingException e) {
-                log.error("case - {}: Error encountered trying to update status and send for bulk print: {}", caseDetails.getId(), e.getMessage());
+                log.error("case - {}: Error encountered trying to update status and send for bulk print: {}", caseId, e.getMessage());
             }
         }
     }

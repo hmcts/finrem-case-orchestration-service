@@ -109,7 +109,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     public void setUp() {
         caseDetails = defaultConsentedCaseDetails();
 
-        when(evidenceManagementUploadService.upload(any(), any()))
+        when(evidenceManagementUploadService.upload(any(), any(), any()))
             .thenReturn(Collections.singletonList(
                 FileUploadResponse.builder()
                     .fileName(FILE_NAME)
@@ -135,7 +135,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     @Test
     public void shouldGenerateApprovedVariationOrderLetterForConsented() {
 
-        when(evidenceManagementUploadService.upload(any(), any()))
+        when(evidenceManagementUploadService.upload(any(), any(), any()))
             .thenReturn(Collections.singletonList(
                 FileUploadResponse.builder()
                     .fileName(VARIATION_FILE_NAME)
@@ -185,7 +185,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     @Test
     public void shouldGenerateApprovedConsentOrderCoverLetterForApplicant() {
-        when(evidenceManagementUploadService.upload(any(), any()))
+        when(evidenceManagementUploadService.upload(any(), any(), any()))
             .thenReturn(Collections.singletonList(
                 FileUploadResponse.builder()
                     .fileName(FILE_NAME)
@@ -208,7 +208,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     @Test
     public void shouldGenerateApprovedConsentOrderCoverLetterForApplicantSolicitor() {
 
-        when(evidenceManagementUploadService.upload(any(), any()))
+        when(evidenceManagementUploadService.upload(any(), any(), any()))
             .thenReturn(Collections.singletonList(
                 FileUploadResponse.builder()
                     .fileName(document().getFileName())
@@ -241,44 +241,46 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     @Test
     public void shouldStampPensionDocuments() throws Exception {
         Mockito.reset(pdfStampingServiceMock);
-        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, false)).thenReturn(document());
+        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, false, caseId)).thenReturn(document());
 
         List<PensionTypeCollection> pensionDocuments = asList(pensionDocumentData(), pensionDocumentData());
-        List<PensionTypeCollection> stampPensionDocuments = consentOrderApprovedDocumentService.stampPensionDocuments(pensionDocuments, AUTH_TOKEN);
+        List<PensionTypeCollection> stampPensionDocuments =
+            consentOrderApprovedDocumentService.stampPensionDocuments(pensionDocuments, AUTH_TOKEN, caseId);
 
         stampPensionDocuments.forEach(data -> assertCaseDocument(data.getTypedCaseDocument().getPensionDocument()));
-        verify(pdfStampingServiceMock, times(2)).stampDocument(document(), AUTH_TOKEN, false);
+        verify(pdfStampingServiceMock, times(2)).stampDocument(document(), AUTH_TOKEN, false, caseId);
     }
 
     @Test
     public void givenNullDocumentInPensionDocuments_whenStampingDocuments_thenTheNullValueIsIgnored() throws Exception {
         Mockito.reset(pdfStampingServiceMock);
-        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, false)).thenReturn(document());
+        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, false, caseId)).thenReturn(document());
 
         PensionTypeCollection pensionCollectionDataWithNullDocument = pensionDocumentData();
         pensionCollectionDataWithNullDocument.getTypedCaseDocument().setPensionDocument(null);
         List<PensionTypeCollection> pensionDocuments = asList(pensionDocumentData(), pensionCollectionDataWithNullDocument);
 
-        List<PensionTypeCollection> stampPensionDocuments = consentOrderApprovedDocumentService.stampPensionDocuments(pensionDocuments, AUTH_TOKEN);
+        List<PensionTypeCollection> stampPensionDocuments =
+            consentOrderApprovedDocumentService.stampPensionDocuments(pensionDocuments, AUTH_TOKEN, caseId);
 
         assertThat(stampPensionDocuments, hasSize(1));
         stampPensionDocuments.forEach(data -> assertCaseDocument(data.getTypedCaseDocument().getPensionDocument()));
-        verify(pdfStampingServiceMock, times(1)).stampDocument(document(), AUTH_TOKEN, false);
+        verify(pdfStampingServiceMock, times(1)).stampDocument(document(), AUTH_TOKEN, false, caseId);
     }
 
     @Test
     public void stampsAndPopulatesCaseDataForContestedConsentOrder() throws Exception {
-        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, false)).thenReturn(document());
-        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, true)).thenReturn(document());
+        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, false, caseId)).thenReturn(document());
+        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, true, caseId)).thenReturn(document());
 
         CaseDetails caseDetails = defaultConsentedCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
         caseData.put(CONSENT_ORDER, caseDocument());
 
-        consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData, AUTH_TOKEN);
+        consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData, AUTH_TOKEN, caseId);
         assertThat(getDocumentList(caseData), hasSize(1));
 
-        consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData, AUTH_TOKEN);
+        consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData, AUTH_TOKEN, caseId);
         assertThat(getDocumentList(caseData), hasSize(2));
     }
 
@@ -293,9 +295,9 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     public void givenFinremCaseDetails_whenAddGenApprovedDocs_thenCaseDocsAdded() {
         FinremCaseDetails finremCaseDetails = finremCaseDetails();
 
-        when(pdfStampingServiceMock.stampDocument(any(Document.class), eq(AUTH_TOKEN), eq(false)))
+        when(pdfStampingServiceMock.stampDocument(any(Document.class), eq(AUTH_TOKEN), eq(false), caseId))
             .thenReturn(document());
-        when(pdfStampingServiceMock.stampDocument(any(Document.class), eq(AUTH_TOKEN), eq(true)))
+        when(pdfStampingServiceMock.stampDocument(any(Document.class), eq(AUTH_TOKEN), eq(true), caseId))
             .thenReturn(document());
 
         consentOrderApprovedDocumentService

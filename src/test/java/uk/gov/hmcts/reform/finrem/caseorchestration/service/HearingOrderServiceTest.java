@@ -47,14 +47,14 @@ public class HearingOrderServiceTest extends BaseServiceTest {
 
     @Test
     public void convertPdfDocument() {
-        when(genericDocumentService.stampDocument(any(), eq(AUTH_TOKEN))).thenReturn(caseDocument());
+        when(genericDocumentService.stampDocument(any(), eq(AUTH_TOKEN), caseId)).thenReturn(caseDocument());
 
         Map<String, Object> caseData = prepareCaseData(makeDraftDirectionOrderCollectionWithOneElement());
         CaseDetails caseDetails = CaseDetails.builder().data(caseData).build();
 
         hearingOrderService.convertToPdfAndStampAndStoreLatestDraftHearingOrder(caseDetails, AUTH_TOKEN);
 
-        verify(genericDocumentService).stampDocument(any(), eq(AUTH_TOKEN));
+        verify(genericDocumentService).stampDocument(any(), eq(AUTH_TOKEN), caseId);
 
         CaseDocument latestDraftHearingOrder = (CaseDocument) caseData.get(LATEST_DRAFT_HEARING_ORDER);
         assertThat(latestDraftHearingOrder, is(notNullValue()));

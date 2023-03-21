@@ -91,9 +91,9 @@ public class BarristerLetterServiceTest {
         barristerLetterTuple = BarristerLetterTuple.of(APPLICANT, AUTH_TOKEN, ADDED);
         barrister = applicantBarrister();
 
-        barristerLetterService.sendBarristerLetter(caseDetails, barrister, barristerLetterTuple);
+        barristerLetterService.sendBarristerLetter(caseDetails, barrister, barristerLetterTuple, AUTH_TOKEN);
 
-        verify(bulkPrintService, never()).sendDocumentForPrint(any(), any(CaseDetails.class));
+        verify(bulkPrintService, never()).sendDocumentForPrint(any(), any(CaseDetails.class), any());
     }
 
     @Test
@@ -102,9 +102,9 @@ public class BarristerLetterServiceTest {
         barristerLetterTuple = BarristerLetterTuple.of(RESPONDENT, AUTH_TOKEN, ADDED);
         barrister = respondentBarrister();
 
-        barristerLetterService.sendBarristerLetter(caseDetails, barrister, barristerLetterTuple);
+        barristerLetterService.sendBarristerLetter(caseDetails, barrister, barristerLetterTuple, AUTH_TOKEN);
 
-        verify(bulkPrintService, never()).sendDocumentForPrint(any(), any(CaseDetails.class));
+        verify(bulkPrintService, never()).sendDocumentForPrint(any(), any(CaseDetails.class), any());
     }
 
     @Test
@@ -121,11 +121,11 @@ public class BarristerLetterServiceTest {
         barristerLetterTuple = BarristerLetterTuple.of(APPLICANT, AUTH_TOKEN, ADDED);
         barrister = applicantBarrister();
 
-        barristerLetterService.sendBarristerLetter(caseDetails, barrister, barristerLetterTuple);
+        barristerLetterService.sendBarristerLetter(caseDetails, barrister, barristerLetterTuple, AUTH_TOKEN);
 
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
             placeholdersMapCaptor.capture(), eq(BARRISTER_ADDED_TEMPLATE), eq(BARRISTER_ADDED_FILENAME));
-        verify(bulkPrintService).sendDocumentForPrint(addedCaseDocument, caseDetails);
+        verify(bulkPrintService).sendDocumentForPrint(addedCaseDocument, caseDetails, AUTH_TOKEN);
 
         Map<String, Object> caseData = getPlaceholdersMap(placeholdersMapCaptor);
         assertThat(caseData.get("barristerFirmName"), is(BARR_FIRM_NAME));
@@ -146,11 +146,11 @@ public class BarristerLetterServiceTest {
         barristerLetterTuple = BarristerLetterTuple.of(APPLICANT, AUTH_TOKEN, REMOVED);
         barrister = applicantBarrister();
 
-        barristerLetterService.sendBarristerLetter(caseDetails, barrister, barristerLetterTuple);
+        barristerLetterService.sendBarristerLetter(caseDetails, barrister, barristerLetterTuple, AUTH_TOKEN);
 
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
             placeholdersMapCaptor.capture(), eq(BARRISTER_REMOVED_TEMPLATE), eq(BARRISTER_REMOVED_FILENAME));
-        verify(bulkPrintService).sendDocumentForPrint(removed, caseDetails);
+        verify(bulkPrintService).sendDocumentForPrint(removed, caseDetails, AUTH_TOKEN);
 
         Map<String, Object> caseData = getPlaceholdersMap(placeholdersMapCaptor);
         assertThat(caseData.get("barristerFirmName"), is(BARR_FIRM_NAME));
@@ -171,11 +171,11 @@ public class BarristerLetterServiceTest {
         barristerLetterTuple = BarristerLetterTuple.of(RESPONDENT, AUTH_TOKEN, ADDED);
         barrister = respondentBarrister();
 
-        barristerLetterService.sendBarristerLetter(caseDetails, barrister, barristerLetterTuple);
+        barristerLetterService.sendBarristerLetter(caseDetails, barrister, barristerLetterTuple, AUTH_TOKEN);
 
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
             placeholdersMapCaptor.capture(), eq(BARRISTER_ADDED_TEMPLATE), eq(BARRISTER_ADDED_FILENAME));
-        verify(bulkPrintService).sendDocumentForPrint(addedCaseDocument, caseDetails);
+        verify(bulkPrintService).sendDocumentForPrint(addedCaseDocument, caseDetails, AUTH_TOKEN);
 
         Map<String, Object> caseData = getPlaceholdersMap(placeholdersMapCaptor);
         assertThat(caseData.get("barristerFirmName"), is(BARR_FIRM_NAME));
@@ -196,11 +196,11 @@ public class BarristerLetterServiceTest {
         barristerLetterTuple = BarristerLetterTuple.of(RESPONDENT, AUTH_TOKEN, REMOVED);
         barrister = applicantBarrister();
 
-        barristerLetterService.sendBarristerLetter(caseDetails, barrister, barristerLetterTuple);
+        barristerLetterService.sendBarristerLetter(caseDetails, barrister, barristerLetterTuple, AUTH_TOKEN);
 
         verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
             placeholdersMapCaptor.capture(), eq(BARRISTER_REMOVED_TEMPLATE), eq(BARRISTER_REMOVED_FILENAME));
-        verify(bulkPrintService).sendDocumentForPrint(removed, caseDetails);
+        verify(bulkPrintService).sendDocumentForPrint(removed, caseDetails, AUTH_TOKEN);
 
         Map<String, Object> caseData = getPlaceholdersMap(placeholdersMapCaptor);
         assertThat(caseData.get("barristerFirmName"), is(BARR_FIRM_NAME));

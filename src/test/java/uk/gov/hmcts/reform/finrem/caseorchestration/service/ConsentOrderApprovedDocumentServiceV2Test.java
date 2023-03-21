@@ -93,7 +93,7 @@ public class ConsentOrderApprovedDocumentServiceV2Test extends BaseServiceTest {
     @Test
     public void whenPreparingApplicantLetterPack() throws Exception {
         Mockito.reset(genericDocumentService);
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), caseId)).thenReturn(caseDocument());
 
         CaseDetails caseDetailsTemp = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         when(genericDocumentService.generateDocument(any(), any(), any(), any()))
@@ -112,7 +112,7 @@ public class ConsentOrderApprovedDocumentServiceV2Test extends BaseServiceTest {
     @Test
     public void whenPreparingApplicantLetterPack_paperApplication() throws Exception {
         Mockito.reset(genericDocumentService);
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), caseId)).thenReturn(caseDocument());
 
         CaseDetails caseDetailsTemp = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         caseDetailsTemp.getData().put(PAPER_APPLICATION, YES_VALUE);

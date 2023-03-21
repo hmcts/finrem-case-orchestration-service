@@ -47,7 +47,7 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
 
         verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(any(CaseDetails.class), eq(AUTH_TOKEN), eq(APPLICANT));
         verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(any(CaseDetails.class), eq(AUTH_TOKEN), eq(RESPONDENT));
-        verify(bulkPrintService, times(2)).sendDocumentForPrint(any(), any(CaseDetails.class));
+        verify(bulkPrintService, times(2)).sendDocumentForPrint(any(), any(CaseDetails.class), any());
     }
 
     @Test
@@ -63,7 +63,7 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
             any(CaseDetails.class), eq(AUTH_TOKEN), eq(APPLICANT));
         verify(assignedToJudgeDocumentService).generateConsentInContestedAssignedToJudgeNotificationLetter(
             any(CaseDetails.class), eq(AUTH_TOKEN), eq(RESPONDENT));
-        verify(bulkPrintService).sendDocumentForPrint(any(), any(CaseDetails.class));
+        verify(bulkPrintService).sendDocumentForPrint(any(), any(CaseDetails.class), any());
     }
 
     @Test
@@ -76,7 +76,7 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
 
         verify(assignedToJudgeDocumentService).generateConsentInContestedAssignedToJudgeNotificationLetter(any(), eq(AUTH_TOKEN), eq(APPLICANT));
         verify(assignedToJudgeDocumentService).generateConsentInContestedAssignedToJudgeNotificationLetter(any(), eq(AUTH_TOKEN), eq(RESPONDENT));
-        verify(bulkPrintService, times(2)).sendDocumentForPrint(any(), any(CaseDetails.class));
+        verify(bulkPrintService, times(2)).sendDocumentForPrint(any(), any(CaseDetails.class), any());
     }
 
     @Test
@@ -88,7 +88,7 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
         paperNotificationService.printManualPaymentNotification(buildCaseDetails(), AUTH_TOKEN);
 
         verify(manualPaymentDocumentService).generateManualPaymentLetter(any(), any(), eq(APPLICANT));
-        verify(bulkPrintService).sendDocumentForPrint(any(), any(CaseDetails.class));
+        verify(bulkPrintService).sendDocumentForPrint(any(), any(CaseDetails.class), any());
     }
 
     @Test
@@ -136,7 +136,7 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
         when(rejectGeneralApplicationDocumentService.generateGeneralApplicationRejectionLetter(eq(caseDetails), any(), eq(APPLICANT)))
             .thenReturn(caseDocument);
         paperNotificationService.printApplicantRejectionGeneralApplication(caseDetails, AUTH_TOKEN);
-        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails);
+        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, any());
     }
 
     @Test
@@ -150,6 +150,6 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
         when(rejectGeneralApplicationDocumentService.generateGeneralApplicationRejectionLetter(eq(caseDetails), any(), eq(RESPONDENT)))
             .thenReturn(caseDocument);
         paperNotificationService.printRespondentRejectionGeneralApplication(caseDetails, AUTH_TOKEN);
-        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails);
+        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, any());
     }
 }

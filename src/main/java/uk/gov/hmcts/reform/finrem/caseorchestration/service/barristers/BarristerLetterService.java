@@ -39,10 +39,11 @@ public class BarristerLetterService {
 
     public void sendBarristerLetter(CaseDetails caseDetails,
                                     Barrister barrister,
-                                    BarristerLetterTuple barristerLetterTuple) {
+                                    BarristerLetterTuple barristerLetterTuple,
+                                    String authToken) {
         log.info("About to start sending barrister access letter for case {}", caseDetails.getId());
         Optional<CaseDocument> barristerLetter = getBarristerLetter(caseDetails, barrister, barristerLetterTuple);
-        barristerLetter.ifPresent(letter -> bulkPrintService.sendDocumentForPrint(letter, caseDetails));
+        barristerLetter.ifPresent(letter -> bulkPrintService.sendDocumentForPrint(letter, caseDetails, authToken));
     }
 
     private Optional<CaseDocument> getBarristerLetter(CaseDetails caseDetails,

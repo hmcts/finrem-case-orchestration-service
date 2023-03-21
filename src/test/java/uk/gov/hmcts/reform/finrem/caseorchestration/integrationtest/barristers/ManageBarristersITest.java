@@ -345,7 +345,7 @@ public class ManageBarristersITest implements IntegrationTest {
         URI uri = new URI(END_POINT_BARRISTER_ADDED);
 
         verify(restTemplate).exchange(eq(uri), eq(HttpMethod.POST), restRequestCaptor.capture(), eq(String.class));
-        verify(bulkPrintService).sendDocumentForPrint(eq(addedDocument), any(CaseDetails.class));
+        verify(bulkPrintService).sendDocumentForPrint(eq(addedDocument), any(CaseDetails.class), any());
 
         HttpEntity<NotificationRequest> notificationRequestHttpEntity = restRequestCaptor.getValue();
         assertEquals(notificationRequestHttpEntity.getBody().getBarristerReferenceNumber(), APP_BARR_ORG_ID);
@@ -371,7 +371,7 @@ public class ManageBarristersITest implements IntegrationTest {
         URI uri = new URI(END_POINT_BARRISTER_REMOVED);
 
         verify(restTemplate).exchange(eq(uri), eq(HttpMethod.POST), restRequestCaptor.capture(), eq(String.class));
-        verify(bulkPrintService).sendDocumentForPrint(eq(removedDocument), any(CaseDetails.class));
+        verify(bulkPrintService).sendDocumentForPrint(eq(removedDocument), any(CaseDetails.class), any());
 
         HttpEntity<NotificationRequest> notificationRequestHttpEntity = restRequestCaptor.getValue();
         assertEquals(notificationRequestHttpEntity.getBody().getBarristerReferenceNumber(), APP_BARR_ORG_ID);
@@ -394,7 +394,7 @@ public class ManageBarristersITest implements IntegrationTest {
         URI uri = new URI(END_POINT_BARRISTER_ADDED);
 
         verify(restTemplate).exchange(eq(uri), eq(HttpMethod.POST), restRequestCaptor.capture(), eq(String.class));
-        verify(bulkPrintService, never()).sendDocumentForPrint(any(), any(CaseDetails.class));
+        verify(bulkPrintService, never()).sendDocumentForPrint(any(), any(CaseDetails.class), any());
 
         HttpEntity<NotificationRequest> notificationRequestHttpEntity = restRequestCaptor.getValue();
         assertEquals(notificationRequestHttpEntity.getBody().getBarristerReferenceNumber(), APP_BARR_ORG_ID);

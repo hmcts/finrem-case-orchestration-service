@@ -46,19 +46,20 @@ public class DocumentManagementService {
         log.info("Generate and Store Document requested with templateName [{}], placeholders of size [{}]",
             templateName, placeholders.size());
 
+        String caseId = (String) placeholders.get("id");
         return storeDocument(
             generateDocumentFrom(templateName, placeholders),
-            fileName,
+            fileName, caseId,
             authorizationToken);
     }
 
-    public Document storeDocument(byte[] document, String fileName, String authorizationToken) {
+    public Document storeDocument(byte[] document, String fileName, String authorizationToken, String caseId) {
         log.info("Store document requested with document of size [{}]", document.length);
 
         FinremMultipartFile multipartFile = FinremMultipartFile.builder()
             .content(document).name(fileName).contentType(CONTENT_TYPE_APPLICATION_PDF).build();
         FileUploadResponse response = evidenceManagementUploadService
-            .upload(Collections.singletonList(multipartFile), authorizationToken).get(0);
+            .upload(Collections.singletonList(multipartFile), caseId, authorizationToken).get(0);
 
         return CONVERTER.apply(response);
     }

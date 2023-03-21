@@ -46,6 +46,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @ContextConfiguration(classes = {NocTestConfig.class, DocumentConfiguration.class, FinremCaseDetailsMapper.class})
 public class NocLettersNotificationsControllerTest extends BaseControllerTest {
 
+    public static final String AUTH_TOKEN = "authToken";
     @Autowired
     private NocLetterNotificationService nocLetterNotificationService;
     @Autowired
@@ -89,7 +90,7 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
                 .caseAssignmentUserRoles(List.of(CaseAssignmentUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
             .build());
 
-        notificationsController.sendNoticeOfChangeNotifications("authToken", buildCallbackRequest());
+        notificationsController.sendNoticeOfChangeNotifications(AUTH_TOKEN, buildCallbackRequest());
 
         verify(notificationService).sendNoticeOfChangeEmail(caseDetails);
         verify(genericDocumentServiceMock).generateDocumentFromPlaceholdersMap(eq("authToken"), placeholdersMapArgumentCaptor.capture(),
@@ -100,12 +101,12 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
 
         assertNotificationLetterDetails(letterAddedDetailsMap);
 
-        verify(genericDocumentServiceMock).generateDocumentFromPlaceholdersMap(eq("authToken"), placeholdersMapArgumentCaptor.capture(),
+        verify(genericDocumentServiceMock).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), placeholdersMapArgumentCaptor.capture(),
             eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorRevokedTemplate()),
             eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorRevokedFileName()));
 
-        verify(bulkPrintService).sendDocumentForPrint(litigantSolicitorAddedCaseDocument, caseDetails);
-        verify(bulkPrintService).sendDocumentForPrint(litigantSolicitorRemovedCaseDocument, caseDetails);
+        verify(bulkPrintService).sendDocumentForPrint(litigantSolicitorAddedCaseDocument, caseDetails, AUTH_TOKEN);
+        verify(bulkPrintService).sendDocumentForPrint(litigantSolicitorRemovedCaseDocument, caseDetails, AUTH_TOKEN);
 
     }
 
@@ -132,7 +133,7 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
 
         assertNotificationLetterDetails(letterAddedDetailsMap);
 
-        verify(bulkPrintService).sendDocumentForPrint(litigantSolicitorAddedCaseDocument, caseDetails);
+        verify(bulkPrintService).sendDocumentForPrint(litigantSolicitorAddedCaseDocument, caseDetails, AUTH_TOKEN);
     }
 
     @Override

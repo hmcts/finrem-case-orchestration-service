@@ -255,7 +255,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     @Test
     public void givenPaperApplicationInterimHearingRequired_thenInterimHearingNoticeIsPrinted() {
         caseDetails = caseDetailsFromResource("/fixtures/contested-interim-hearing.json", objectMapper);
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument(INTE_DOC_URL, INTE_FILE_NAME,
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), caseId)).thenReturn(caseDocument(INTE_DOC_URL, INTE_FILE_NAME,
             INTE_BINARY_URL));
         generalApplicationDirectionsService.submitInterimHearing(caseDetails, AUTH_TOKEN);
 
@@ -267,7 +267,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         verify(bulkPrintService, times(1)).printApplicantDocuments(any(CaseDetails.class), eq(AUTH_TOKEN),
             printDocumentsRequestDocumentListCaptor.capture());
         verify(bulkPrintService, times(1)).printRespondentDocuments(any(CaseDetails.class), eq(AUTH_TOKEN), any());
-        verify(genericDocumentService, times(1)).convertDocumentIfNotPdfAlready(any(), eq(AUTH_TOKEN));
+        verify(genericDocumentService, times(1)).convertDocumentIfNotPdfAlready(any(), eq(AUTH_TOKEN), caseId);
 
         Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
         assertThat(data, allOf(
@@ -293,7 +293,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     @Test
     public void givenApplicationIsNotPaperInterimHearingRequired_thenInterimHearingNoticeIsPrinted() {
         caseDetails = caseDetailsFromResource("/fixtures/contested-interim-hearing-nopaper.json", objectMapper);
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument(INTE_DOC_URL, INTE_FILE_NAME,
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), caseId)).thenReturn(caseDocument(INTE_DOC_URL, INTE_FILE_NAME,
             INTE_BINARY_URL));
         generalApplicationDirectionsService.submitInterimHearing(caseDetails, AUTH_TOKEN);
 
@@ -305,7 +305,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         verify(bulkPrintService, times(1)).printApplicantDocuments(any(CaseDetails.class), eq(AUTH_TOKEN),
             printDocumentsRequestDocumentListCaptor.capture());
         verify(bulkPrintService, times(1)).printRespondentDocuments(any(CaseDetails.class), eq(AUTH_TOKEN), any());
-        verify(genericDocumentService, times(1)).convertDocumentIfNotPdfAlready(any(), eq(AUTH_TOKEN));
+        verify(genericDocumentService, times(1)).convertDocumentIfNotPdfAlready(any(), eq(AUTH_TOKEN), caseId);
 
         Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
         assertThat(data, allOf(
