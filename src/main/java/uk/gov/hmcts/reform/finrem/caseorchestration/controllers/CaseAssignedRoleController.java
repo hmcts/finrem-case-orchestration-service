@@ -20,8 +20,11 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 
 import java.util.Map;
+import java.util.Objects;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ROLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ROLE_FOR_FIELD_SHOW;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -47,6 +50,9 @@ public class CaseAssignedRoleController {
         log.info("Retrieving case assigned user role for current user Case ID: {}", caseDetails.getId());
 
         Map<String, Object> caseData = service.setCaseAssignedUserRole(caseDetails, authToken);
+        String caseRole = Objects.toString(caseData.get(CASE_ROLE));
+        caseData.put(CASE_ROLE_FOR_FIELD_SHOW,
+            caseRole.replace("[", "").replace("]",""));
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
