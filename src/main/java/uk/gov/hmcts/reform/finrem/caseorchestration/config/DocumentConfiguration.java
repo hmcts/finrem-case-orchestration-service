@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
 
 @Data
@@ -151,11 +152,11 @@ public class DocumentConfiguration {
     }
 
     public String getContestedMiniFormTemplate(FinremCaseDetails caseDetails) {
-        return isHighCourtSelectedV2(caseDetails) ? contestedMiniFormHighCourtTemplate : contestedMiniFormTemplate;
+        return isHighCourtSelected(caseDetails) ? contestedMiniFormHighCourtTemplate : contestedMiniFormTemplate;
     }
 
     public String getContestedMiniFormScheduleTemplate(FinremCaseDetails caseDetails) {
-        return isHighCourtSelectedV2(caseDetails) ? contestedMiniFormHighCourtScheduleTemplate : contestedMiniFormScheduleTemplate;
+        return isHighCourtSelected(caseDetails) ? contestedMiniFormHighCourtScheduleTemplate : contestedMiniFormScheduleTemplate;
     }
 
 
@@ -202,12 +203,13 @@ public class DocumentConfiguration {
         return false;
     }
 
-    private boolean isHighCourtSelectedV2(FinremCaseDetails caseDetails) {
+    private boolean isHighCourtSelected(FinremCaseDetails caseDetails) {
         FinremCaseData caseData = caseDetails.getData();
         return ObjectUtils.isNotEmpty(caseData)
             && ObjectUtils.isNotEmpty(caseData.getRegionWrapper())
             && ObjectUtils.isNotEmpty(caseData.getRegionWrapper().getDefaultRegionWrapper())
             && ObjectUtils.isNotEmpty(caseData.getRegionWrapper().getDefaultRegionWrapper().getHighCourtFrcList())
-            && caseData.getRegionWrapper().getDefaultRegionWrapper().getHighCourtFrcList().getValue().equalsIgnoreCase("highcourt");
+            && caseData.getRegionWrapper().getDefaultRegionWrapper().getHighCourtFrcList()
+            .getValue().equalsIgnoreCase(HIGHCOURT);
     }
 }
