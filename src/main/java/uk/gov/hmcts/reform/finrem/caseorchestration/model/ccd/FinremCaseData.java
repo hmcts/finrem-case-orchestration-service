@@ -25,6 +25,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralLetterWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ReferToJudgeWrapper;
@@ -277,10 +281,24 @@ public class FinremCaseData {
     @JsonProperty("RespondentOrganisationPolicy")
     private OrganisationPolicy respondentOrganisationPolicy;
     private CaseRole currentUserCaseRole;
-    private CaseRole currentUserCaseRoleLabel;
+    private String currentUserCaseRoleLabel;
     private CaseDocument outOfFamilyCourtResolution;
     private TypeOfApplication typeOfApplication;
 
+    private DynamicRadioList intervenersList;
+    private DynamicRadioList intervenerOptionList;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private IntervenerOneWrapper intervenerOneWrapper;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private IntervenerTwoWrapper intervenerTwoWrapper;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private IntervenerThreeWrapper intervenerThreeWrapper;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private IntervenerFourWrapper intervenerFourWrapper;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private RegionWrapper regionWrapper;
@@ -422,6 +440,38 @@ public class FinremCaseData {
             this.regionWrapper = new RegionWrapper();
         }
         return regionWrapper;
+    }
+
+    @JsonIgnore
+    public IntervenerOneWrapper getIntervenerOneWrapper() {
+        if (intervenerOneWrapper == null) {
+            this.intervenerOneWrapper = new IntervenerOneWrapper();
+        }
+        return intervenerOneWrapper;
+    }
+
+    @JsonIgnore
+    public IntervenerTwoWrapper getIntervenerTwoWrapper() {
+        if (intervenerTwoWrapper == null) {
+            this.intervenerTwoWrapper = new IntervenerTwoWrapper();
+        }
+        return intervenerTwoWrapper;
+    }
+
+    @JsonIgnore
+    public IntervenerThreeWrapper getIntervenerThreeWrapper() {
+        if (intervenerThreeWrapper == null) {
+            this.intervenerThreeWrapper = new IntervenerThreeWrapper();
+        }
+        return intervenerThreeWrapper;
+    }
+
+    @JsonIgnore
+    public IntervenerFourWrapper getIntervenerFourWrapper() {
+        if (intervenerFourWrapper == null) {
+            this.intervenerFourWrapper = new IntervenerFourWrapper();
+        }
+        return intervenerFourWrapper;
     }
 
     @JsonIgnore

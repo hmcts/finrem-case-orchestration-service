@@ -108,26 +108,6 @@ public class NotificationsController extends BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    @PostMapping(value = "/assign-to-judge-consent-in-contested", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "Notify applicant and respondent when Judge assigned to case via letter")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Case assigned to Judge notification sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendConsentInContestedAssignToJudgeConfirmationPaperNotification(
-        @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
-        @RequestBody CallbackRequest callbackRequest) {
-
-        log.info("Received request to notify applicant and respondent for Judge successfully assigned to case for Case ID: {}",
-            callbackRequest.getCaseDetails().getId());
-        validateCaseData(callbackRequest);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-
-        paperNotificationService.printConsentInContestedAssignToJudgeConfirmationNotification(caseDetails, authToken);
-
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
-    }
-
     @PostMapping(value = "/order-not-approved", consumes = APPLICATION_JSON_VALUE)
     @Operation(summary = "send e-mail for consent/contest order not approved.")
     @ApiResponses(value = {
