@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUser
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.events.AuditEventsResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.searchuserrole.SearchCaseAssignedUserRolesRequest;
 
 import java.util.List;
 
@@ -57,6 +58,16 @@ public interface CaseDataApiV2 {
         @RequestParam("case_ids") String caseId,
         @RequestParam("user_ids") String userId
     );
+
+    @PostMapping(
+        value = "/case-users/search",
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    @ResponseBody
+    CaseAssignmentUserRolesResource searchCaseUserRoles(
+        @RequestHeader(AUTHORIZATION) String authorisation,
+        @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorization,
+        @RequestBody SearchCaseAssignedUserRolesRequest searchCaseAssignedUserRolesRequest);
 
     @DeleteMapping(
         value = "/case-users",

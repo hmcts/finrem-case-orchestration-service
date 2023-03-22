@@ -350,12 +350,12 @@ public class DocumentHelper {
         if (recipient == APPLICANT && caseData.isApplicantRepresentedByASolicitor()) {
             log.info("Applicant is represented by a solicitor");
             reference = nullToEmpty((caseData.getContactDetailsWrapper().getSolicitorReference()));
-            addresseeName = nullToEmpty((caseData.isConsentedApplication() ? CONSENTED_SOLICITOR_NAME : CONTESTED_SOLICITOR_NAME));
+            addresseeName = nullToEmpty(caseData.getAppSolicitorName());
             addressToSendTo = caseData.getAppSolicitorAddress();
         } else if (recipient == RESPONDENT && caseData.isRespondentRepresentedByASolicitor()) {
             log.info("Respondent is represented by a solicitor");
             reference = nullToEmpty((caseData.getContactDetailsWrapper().getRespondentSolicitorReference()));
-            addresseeName = nullToEmpty((caseData.getContactDetailsWrapper().getRespondentSolicitorName()));
+            addresseeName = nullToEmpty((caseData.getRespondentSolicitorName()));
             addressToSendTo = caseData.getContactDetailsWrapper().getRespondentSolicitorAddress();
         } else {
             log.info("{} is not represented by a solicitor", recipient);
