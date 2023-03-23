@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonBody;
 import static org.mockito.BDDMockito.given;
