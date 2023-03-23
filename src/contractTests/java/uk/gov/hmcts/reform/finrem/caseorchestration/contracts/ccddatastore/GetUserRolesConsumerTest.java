@@ -14,10 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.CaseDataApiV2;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DataStoreClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.AssignCaseAccessServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.searchuserrole.SearchCaseAssignedUserRolesRequest;
@@ -37,7 +35,7 @@ import static org.mockito.BDDMockito.given;
 
 @SpringBootTest({"ccd.data-store.api.baseurl: http://localhost:8981"})
 @TestPropertySource(locations = "classpath:application.properties")
-public class DataStoreClientConsumerTest extends BaseTest {
+public class GetUserRolesConsumerTest extends BaseTest {
 
     protected static final String CASE_REFERENCE = "1583841721773828";
     @Autowired
@@ -88,29 +86,6 @@ public class DataStoreClientConsumerTest extends BaseTest {
             .toPact();
     }
 
-
-//    @Pact(provider = "ccdDataStoreAPI_caseAssignedUserRoles", consumer = "fr_caseOrchestratorService")
-//    public RequestResponsePact generatePactFragmentForSearch(PactDslWithProvider builder) throws IOException {
-//        // @formatter:off
-//        return builder
-//            .given("User roles exists for a case and search is called")
-//            .uponReceiving("A Request to search user roles")
-//            .method("POST")
-//            .headers(SERVICE_AUTHORIZATION_HEADER, SERVICE_AUTH_TOKEN, AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN)
-//            .path("/case-users/search")
-//            .body(createJsonObject(buildSearchCaseAssignedUserRolesRequest(CASE_REFERENCE)))
-//            .willRespondWith().body(buildCaseAssignedRolesResponse())
-//            .status(HttpStatus.SC_OK)
-//            .toPact();
-//    }
-
-    private SearchCaseAssignedUserRolesRequest buildSearchCaseAssignedUserRolesRequest(String caseReference) {
-        return SearchCaseAssignedUserRolesRequest.builder()
-            .caseIds(List.of(caseReference))
-            .build();
-    }
-
-
     @Test
     @PactVerification(fragment = "generatePactFragment")
     public void verifyGetUserRoles() {
@@ -118,16 +93,6 @@ public class DataStoreClientConsumerTest extends BaseTest {
         given(authTokenGenerator.generate()).willReturn(SERVICE_AUTH_TOKEN);
         caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTHORIZATION_TOKEN);
     }
-//
-//    @Test
-//    @PactVerification(fragment = "generatePactFragmentForSearch")
-//    public void verifySearchUserRoles() {
-//
-//        given(systemUserService.getSysUserToken()).willReturn(AUTHORIZATION_TOKEN);
-//        given(authTokenGenerator.generate()).willReturn(SERVICE_AUTH_TOKEN);
-//        given(assignCaseAccessServiceConfiguration.getCaseAssignmentsUrl()).willReturn("http://localhost:8981");
-//        assignCaseAccessService.searchUserRoles(CASE_REFERENCE);
-//    }
 
 
     private DslPart buildCaseAssignedRolesResponse() {
