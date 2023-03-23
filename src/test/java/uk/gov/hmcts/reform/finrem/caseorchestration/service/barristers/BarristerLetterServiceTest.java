@@ -93,7 +93,7 @@ public class BarristerLetterServiceTest {
 
         barristerLetterService.sendBarristerLetter(caseDetails, barrister, barristerLetterTuple);
 
-        verify(bulkPrintService, never()).sendDocumentForPrint(any(), any());
+        verify(bulkPrintService, never()).sendDocumentForPrint(any(), any(CaseDetails.class));
     }
 
     @Test
@@ -104,7 +104,7 @@ public class BarristerLetterServiceTest {
 
         barristerLetterService.sendBarristerLetter(caseDetails, barrister, barristerLetterTuple);
 
-        verify(bulkPrintService, never()).sendDocumentForPrint(any(), any());
+        verify(bulkPrintService, never()).sendDocumentForPrint(any(), any(CaseDetails.class));
     }
 
     @Test

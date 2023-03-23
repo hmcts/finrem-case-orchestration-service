@@ -10,17 +10,17 @@ import java.util.Arrays;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 @RequiredArgsConstructor
 public enum BedfordshireCourt implements CourtList {
-    FR_bedfordshireList_1("FR_bedfordshireList_1"),
-    FR_bedfordshireList_2("FR_bedfordshireList_2"),
-    FR_bedfordshireList_3("FR_bedfordshireList_3"),
-    FR_bedfordshireList_4("FR_bedfordshireList_4"),
-    FR_bedfordshireList_5("FR_bedfordshireList_5"),
-    FR_bedfordshireList_6("FR_bedfordshireList_6"),
-    FR_bedfordshireList_7("FR_bedfordshireList_7"),
-    FR_bedfordshireList_8("FR_bedfordshireList_8"),
-    FR_bedfordshireList_9("FR_bedfordshireList_9"),
-    FR_bedfordshireList_10("FR_bedfordshireList_10"),
-    FR_bedfordshireList_11("FR_bedfordshireList_11");
+    PETERBOROUGH("FR_bedfordshireList_1"),
+    CAMBRIDGE("FR_bedfordshireList_2"),
+    BURY("FR_bedfordshireList_3"),
+    NORWICH("FR_bedfordshireList_4"),
+    IPSWICH("FR_bedfordshireList_5"),
+    CHELMSFORD("FR_bedfordshireList_6"),
+    SOUTHEND("FR_bedfordshireList_7"),
+    BEDFORD("FR_bedfordshireList_8"),
+    LUTON("FR_bedfordshireList_9"),
+    HERTFORD("FR_bedfordshireList_10"),
+    WATFORD("FR_bedfordshireList_11");
 
     private final String id;
 

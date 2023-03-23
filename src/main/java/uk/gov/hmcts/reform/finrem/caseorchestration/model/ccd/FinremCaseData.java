@@ -14,13 +14,21 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftDirectionWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralLetterWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.MiamWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureApplicationWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ReferToJudgeWrapper;
@@ -31,6 +39,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCase
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -46,6 +55,8 @@ public class FinremCaseData {
 
     @JsonProperty(access = WRITE_ONLY)
     private String ccdCaseId;
+    @JsonIgnore
+    private CaseType ccdCaseType;
 
     private String divorceCaseNumber;
     private StageReached divorceStageReached;
@@ -270,10 +281,24 @@ public class FinremCaseData {
     @JsonProperty("RespondentOrganisationPolicy")
     private OrganisationPolicy respondentOrganisationPolicy;
     private CaseRole currentUserCaseRole;
-    private CaseRole currentUserCaseRoleLabel;
+    private String currentUserCaseRoleLabel;
     private CaseDocument outOfFamilyCourtResolution;
     private TypeOfApplication typeOfApplication;
 
+    private DynamicRadioList intervenersList;
+    private DynamicRadioList intervenerOptionList;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private IntervenerOneWrapper intervenerOneWrapper;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private IntervenerTwoWrapper intervenerTwoWrapper;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private IntervenerThreeWrapper intervenerThreeWrapper;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private IntervenerFourWrapper intervenerFourWrapper;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private RegionWrapper regionWrapper;
@@ -418,6 +443,38 @@ public class FinremCaseData {
     }
 
     @JsonIgnore
+    public IntervenerOneWrapper getIntervenerOneWrapper() {
+        if (intervenerOneWrapper == null) {
+            this.intervenerOneWrapper = new IntervenerOneWrapper();
+        }
+        return intervenerOneWrapper;
+    }
+
+    @JsonIgnore
+    public IntervenerTwoWrapper getIntervenerTwoWrapper() {
+        if (intervenerTwoWrapper == null) {
+            this.intervenerTwoWrapper = new IntervenerTwoWrapper();
+        }
+        return intervenerTwoWrapper;
+    }
+
+    @JsonIgnore
+    public IntervenerThreeWrapper getIntervenerThreeWrapper() {
+        if (intervenerThreeWrapper == null) {
+            this.intervenerThreeWrapper = new IntervenerThreeWrapper();
+        }
+        return intervenerThreeWrapper;
+    }
+
+    @JsonIgnore
+    public IntervenerFourWrapper getIntervenerFourWrapper() {
+        if (intervenerFourWrapper == null) {
+            this.intervenerFourWrapper = new IntervenerFourWrapper();
+        }
+        return intervenerFourWrapper;
+    }
+
+    @JsonIgnore
     public ReferToJudgeWrapper getReferToJudgeWrapper() {
         if (referToJudgeWrapper == null) {
             this.referToJudgeWrapper = new ReferToJudgeWrapper();
@@ -476,6 +533,39 @@ public class FinremCaseData {
     }
 
     @JsonIgnore
+    public String getRespondentFullName() {
+        return CaseType.CONTESTED.equals(ccdCaseType)
+            ? getFullRespondentNameContested()
+            : getFullRespondentNameConsented();
+    }
+
+    @JsonIgnore
+    public boolean isConsentedInContestedCase() {
+        return CaseType.CONTESTED.equals(ccdCaseType) && getConsentOrderWrapper().getConsentD81Question() != null;
+    }
+
+
+    @JsonIgnore
+    public boolean isApplicantSolicitorResponsibleToDraftOrder() {
+        return SolicitorToDraftOrder.APPLICANT_SOLICITOR.equals(solicitorResponsibleForDraftingOrder);
+    }
+
+    @JsonIgnore
+    public boolean isConsentedApplication() {
+        return CaseType.CONSENTED.equals(ccdCaseType);
+    }
+
+    @JsonIgnore
+    public boolean isContestedApplication() {
+        return CaseType.CONTESTED.equals(ccdCaseType);
+    }
+
+    @JsonIgnore
+    public boolean isContestedPaperApplication() {
+        return isContestedApplication() && isPaperCase();
+    }
+
+    @JsonIgnore
     public boolean isApplicantRepresentedByASolicitor() {
         return YesOrNo.YES.equals(getContactDetailsWrapper().getApplicantRepresented());
     }
@@ -497,11 +587,6 @@ public class FinremCaseData {
     }
 
     @JsonIgnore
-    public boolean isApplicantSolicitorResponsibleToDraftOrder() {
-        return SolicitorToDraftOrder.APPLICANT_SOLICITOR.equals(solicitorResponsibleForDraftingOrder);
-    }
-
-    @JsonIgnore
     public boolean isAppAddressConfidential() {
         return YesOrNo.YES.equals(getContactDetailsWrapper().getApplicantAddressHiddenFromRespondent());
     }
@@ -518,6 +603,39 @@ public class FinremCaseData {
     }
 
     @JsonIgnore
+    public String getAppSolicitorName() {
+        return isConsentedApplication()
+            ? getContactDetailsWrapper().getSolicitorName()
+            : getContactDetailsWrapper().getApplicantSolicitorName();
+    }
+
+    @JsonIgnore
+    public Address getAppSolicitorAddress() {
+        return isConsentedApplication()
+            ? getContactDetailsWrapper().getSolicitorAddress()
+            : getContactDetailsWrapper().getApplicantSolicitorAddress();
+    }
+
+    @JsonIgnore
+    public String getAppSolicitorEmail() {
+        return isConsentedApplication()
+            ? getContactDetailsWrapper().getSolicitorEmail()
+            : getContactDetailsWrapper().getApplicantSolicitorEmail();
+    }
+
+    @JsonIgnore
+    public boolean isApplicantSolicitorPopulated() {
+        return StringUtils.isNotEmpty(nullToEmpty(getAppSolicitorEmail()));
+    }
+
+    @JsonIgnore
+    public String getAppSolicitorFirm() {
+        return isConsentedApplication()
+            ? getContactDetailsWrapper().getSolicitorFirm()
+            : getContactDetailsWrapper().getApplicantSolicitorFirm();
+    }
+
+    @JsonIgnore
     public boolean isRespondentSolicitorEmailCommunicationEnabled() {
         return !isPaperCase()
             && isRespondentRepresentedByASolicitor()
@@ -530,6 +648,12 @@ public class FinremCaseData {
         return getContactDetailsWrapper().getRespondentSolicitorName();
     }
 
+
+    @JsonIgnore
+    public boolean isRespondentSolicitorPopulated() {
+        return StringUtils.isNotEmpty(nullToEmpty(getContactDetailsWrapper().getRespondentSolicitorEmail()));
+    }
+
     @JsonIgnore
     public boolean isFastTrackApplication() {
         return Optional.ofNullable(caseAllocatedTo)
@@ -537,6 +661,140 @@ public class FinremCaseData {
             .orElseGet(() -> fastTrackDecision.isYes());
     }
 
+    @JsonIgnore
+    public String getSelectedCourt() {
+        DefaultRegionWrapper regionWrapper = getRegionWrapper().getDefaultRegionWrapper();
+        CourtListWrapper courtList = regionWrapper.getDefaultCourtListWrapper();
+        return Map.of(
+            Region.MIDLANDS, getMidlandsCourt(regionWrapper.getMidlandsFrcList(), courtList),
+            Region.LONDON, getCourtListIdOrDefault(regionWrapper.getDefaultCourtListWrapper().getCfcCourtList())
+                .getSelectedCourtId(),
+            Region.NORTHEAST, getNorthEastCourt(regionWrapper.getNorthEastFrcList(), courtList),
+            Region.NORTHWEST, getNorthWestCourt(regionWrapper.getNorthWestFrcList(), courtList),
+            Region.SOUTHWEST, getSouthWestCourt(regionWrapper.getSouthWestFrcList(), courtList),
+            Region.SOUTHEAST, getSouthEastCourt(regionWrapper.getSouthEastFrcList(), courtList),
+            Region.WALES, getWalesCourt(regionWrapper.getWalesFrcList(), courtList),
+            Region.HIGHCOURT, getHighCourt(regionWrapper.getHighCourtFrcList(), courtList)
+        ).get(regionWrapper.getRegionList());
+    }
 
+
+
+    @JsonIgnore
+    public String getGeneralApplicationSelectedCourt() {
+        GeneralApplicationRegionWrapper regionWrapper = getRegionWrapper().getGeneralApplicationRegionWrapper();
+        CourtListWrapper courtList = regionWrapper.getCourtListWrapper();
+        return Map.of(
+            Region.MIDLANDS, getMidlandsCourt(regionWrapper.getGeneralApplicationDirectionsMidlandsFrcList(),
+                courtList),
+            Region.LONDON, getCourtListIdOrDefault(regionWrapper.getCourtListWrapper()
+                .getGeneralApplicationDirectionsCfcCourtList()).getSelectedCourtId(),
+            Region.NORTHEAST, getNorthEastCourt(regionWrapper.getGeneralApplicationDirectionsNorthEastFrcList(),
+                courtList),
+            Region.NORTHWEST, getNorthWestCourt(regionWrapper.getGeneralApplicationDirectionsNorthWestFrcList(),
+                courtList),
+            Region.SOUTHWEST, getSouthWestCourt(regionWrapper.getGeneralApplicationDirectionsSouthWestFrcList(),
+                courtList),
+            Region.SOUTHEAST, getSouthEastCourt(regionWrapper.getGeneralApplicationDirectionsSouthEastFrcList(),
+                courtList),
+            Region.WALES, getWalesCourt(regionWrapper.getGeneralApplicationDirectionsWalesFrcList(), courtList),
+            Region.HIGHCOURT, getHighCourt(regionWrapper.getGeneralApplicationDirectionsHighCourtFrcList(), courtList)
+        ).get(regionWrapper.getGeneralApplicationDirectionsRegionList());
+    }
+
+    @JsonIgnore
+    private String getMidlandsCourt(RegionMidlandsFrc frc, CourtListWrapper courtList) {
+        if (frc != null) {
+            return Map.of(
+                    RegionMidlandsFrc.NOTTINGHAM, getCourtListIdOrDefault(courtList.getNottinghamCourt()),
+                    RegionMidlandsFrc.BIRMINGHAM, getCourtListIdOrDefault(courtList.getBirminghamCourt()))
+                .get(frc).getSelectedCourtId();
+        } else {
+            return StringUtils.EMPTY;
+        }
+    }
+
+    @JsonIgnore
+    private String getNorthEastCourt(RegionNorthEastFrc frc, CourtListWrapper courtList) {
+        if (frc != null) {
+            return Map.of(
+                RegionNorthEastFrc.CLEVELAND, getCourtListIdOrDefault(courtList
+                    .getClevelandCourt(isConsentedApplication())),
+                RegionNorthEastFrc.HS_YORKSHIRE, getCourtListIdOrDefault(courtList.getHumberCourt()),
+                RegionNorthEastFrc.NW_YORKSHIRE, getCourtListIdOrDefault(courtList.getNwYorkshireCourt())
+            ).get(frc).getSelectedCourtId();
+        } else {
+            return StringUtils.EMPTY;
+        }
+    }
+
+    @JsonIgnore
+    private String getNorthWestCourt(RegionNorthWestFrc frc, CourtListWrapper courtList) {
+        if (frc != null) {
+            return Map.of(
+                RegionNorthWestFrc.MANCHESTER, getCourtListIdOrDefault(courtList.getManchesterCourt()),
+                RegionNorthWestFrc.LANCASHIRE, getCourtListIdOrDefault(courtList.getLancashireCourt()),
+                RegionNorthWestFrc.LIVERPOOL, getCourtListIdOrDefault(courtList.getLiverpoolCourt())
+            ).get(frc).getSelectedCourtId();
+        } else {
+            return StringUtils.EMPTY;
+        }
+    }
+
+    @JsonIgnore
+    private String getSouthWestCourt(RegionSouthWestFrc frc, CourtListWrapper courtList) {
+        if (frc != null) {
+            return Map.of(
+                    RegionSouthWestFrc.BRISTOL, getCourtListIdOrDefault(courtList.getBristolCourt()),
+                    RegionSouthWestFrc.DEVON, getCourtListIdOrDefault(courtList.getDevonCourt()),
+                    RegionSouthWestFrc.DORSET, getCourtListIdOrDefault(courtList.getDorsetCourt()))
+                .get(frc).getSelectedCourtId();
+        } else {
+            return StringUtils.EMPTY;
+        }
+    }
+
+    @JsonIgnore
+    private String getSouthEastCourt(RegionSouthEastFrc frc, CourtListWrapper courtList) {
+        if (frc != null) {
+            return Map.of(
+                RegionSouthEastFrc.BEDFORDSHIRE, getCourtListIdOrDefault(courtList.getBedfordshireCourt()),
+                RegionSouthEastFrc.KENT, getCourtListIdOrDefault(courtList.getKentSurreyCourt()),
+                RegionSouthEastFrc.THAMES_VALLEY, getCourtListIdOrDefault(courtList.getThamesValleyCourt())
+            ).get(frc).getSelectedCourtId();
+        } else {
+            return StringUtils.EMPTY;
+        }
+    }
+
+    @JsonIgnore
+    private String getWalesCourt(RegionWalesFrc frc, CourtListWrapper courtList) {
+        if (frc != null) {
+            return Map.of(
+                RegionWalesFrc.NORTH_WALES, getCourtListIdOrDefault(courtList.getNorthWalesCourt()),
+                RegionWalesFrc.NEWPORT, getCourtListIdOrDefault(courtList.getNewportCourt()),
+                RegionWalesFrc.SWANSEA, getCourtListIdOrDefault(courtList.getSwanseaCourt())
+            ).get(frc).getSelectedCourtId();
+        } else {
+            return StringUtils.EMPTY;
+        }
+    }
+
+    @JsonIgnore
+    private String getHighCourt(RegionHighCourtFrc frc, CourtListWrapper courtList) {
+        if (frc != null) {
+            return Map.of(
+                RegionHighCourtFrc.HIGHCOURT, getCourtListIdOrDefault(courtList.getHighCourt())
+            ).get(frc).getSelectedCourtId();
+        } else {
+            return StringUtils.EMPTY;
+        }
+    }
+
+    @JsonIgnore
+    private CourtList getCourtListIdOrDefault(CourtList courtList) {
+        return Optional.ofNullable(courtList)
+            .orElse(new DefaultCourt());
+    }
 }
 

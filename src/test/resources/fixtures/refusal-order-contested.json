@@ -4,7 +4,7 @@
   "case_details": {
     "id": 1234567890,
     "jurisdiction": "DIVORCE",
-    "state": "caseAdded",
+    "state": "orderMade",
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
       "applicantRepresented": "Yes",
@@ -75,6 +75,7 @@
       "regionList": "midlands",
       "midlandsFRCList": "nottingham",
       "nottinghamCourtList": "FR_s_NottinghamList_1",
+      "civilPartnership": "No",
       "solicitorDXnumber": null,
       "appRespondentLName": "Korivi",
       "solicitorReference": "LL01",
@@ -99,12 +100,41 @@
       ],
       "refusalOrderJudgeType": "Her Honour Judge",
       "refusalOrderJudgeName": "Contested",
-      "refusalOrderDate": "2010-01-01",
+      "refusalOrderDate": "2020-06-01",
       "refusalOrderPreviewDocument": {
         "document_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d",
         "document_filename": "refusalOrderTestFilename.pdf",
         "document_binary_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"
       },
+      "MIAMExemptionsChecklist": [
+        "domesticViolence",
+        "urgency",
+        "previousMIAMattendance",
+        "other"
+      ],
+      "orderRefusalCollectionNew": [
+        {
+          "value": {
+            "orderRefusalAfterText": "testAfterText",
+            "orderRefusal": [
+              "Transferred to Applicant’s home Court",
+              "Insufficient information provided – A",
+              "Insufficient information provided – C",
+              "Order does not appear fair"
+            ],
+            "orderRefusalOther": "testOther",
+            "orderRefusalDocs": {
+              "document_url": "http://doc1",
+              "document_filename": "doc1",
+              "document_binary_url": "http://doc1.binary"
+            },
+            "orderRefusalJudge": "His Honour Judge",
+            "orderRefusalJudgeName": "Contested",
+            "orderRefusalDate": "2022-01-01",
+            "orderRefusalAddComments": "testComment"
+          }
+        }
+      ],
       "refusalOrderCollection": [
         {
           "id": "1234",

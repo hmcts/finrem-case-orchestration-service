@@ -1,10 +1,10 @@
 {
   "token": "token_test",
-  "event_id": "some_event_id",
+  "event_id": "FR_issueApplication",
   "case_details": {
     "id": 1234567890,
     "jurisdiction": "DIVORCE",
-    "state": "caseFileSubmitted",
+    "state": "caseAdded",
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
       "paperApplication": "Yes",
@@ -45,6 +45,39 @@
       "natureOfApplicationChecklist": [
         "periodicalPaymentOrder"
       ],
+      "draftDirectionDetailsCollection": [
+        {
+          "value": {
+            "isThisFinalYN": "Yes",
+            "isAnotherHearingYN": "Yes",
+            "typeOfHearing": "Final Hearing (FH)",
+            "timeEstimate": "standardTime",
+            "additionalTime": "additional time",
+            "listingInstructor": "listing Instructor",
+            "localCourt": {
+              "region": "london",
+              "londonList": "cfc",
+              "cfcCourtList": "FR_s_CFCList_1"
+            }
+          }
+        }
+      ],
+      "additionalHearingDocuments": [
+        {
+          "value": {
+            "additionalHearingDocument": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b1532b0a-3759-4d45-8c66-d1a8e5f3273b",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b1532b0a-3759-4d45-8c66-d1a8e5f3273b/binary"
+            }
+          }
+        }
+      ],
+      "additionalListOfHearingDocuments": {
+        "document_url": "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336",
+        "document_filename": "api.docx",
+        "document_binary_url": "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336/binary"
+      },
       "applicantSolicitorConsentForEmails": "Yes",
       "applicantSolicitorDXnumber": null,
       "isAdmin": "Yes",
@@ -54,11 +87,6 @@
         "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4f73432d-2889-47eb-bc16-84d021222dbc",
         "document_filename": "Form-C.pdf",
         "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4f73432d-2889-47eb-bc16-84d021222dbc/binary"
-      },
-      "additionalListOfHearingDocuments": {
-        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4f36599e-8b42-4802-9a9b-76e8be657668",
-        "document_filename": "additionalDoc.pdf",
-        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4f36599e-8b42-4802-9a9b-76e8be657668/binary"
       },
       "applicantSolicitorName": "Applicant Solicitor",
       "uploadCaseDocument": [],

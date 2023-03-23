@@ -5,13 +5,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -19,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOr
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocument;
@@ -107,6 +112,7 @@ public class DocumentHelper {
     private final ObjectMapper objectMapper;
     private final CaseDataService caseDataService;
     private final GenericDocumentService service;
+    private final FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     public static CtscContactDetails buildCtscContactDetails() {
         return CtscContactDetails.builder()
@@ -154,8 +160,20 @@ public class DocumentHelper {
             .collect(Collectors.toList());
     }
 
+    @Deprecated
     public List<CaseDocument> getFormADocumentsData(Map<String, Object> caseData) {
         return ofNullable(caseData.get(FORM_A_COLLECTION))
+            .map(this::convertToPaymentDocumentCollectionList)
+            .orElse(emptyList())
+            .stream()
+            .map(PaymentDocumentCollection::getValue)
+            .map(PaymentDocument::getUploadedDocument)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+    }
+
+    public List<CaseDocument> getFormADocumentsData(FinremCaseData caseData) {
+        return ofNullable(caseData.getCopyOfPaperFormA())
             .map(this::convertToPaymentDocumentCollectionList)
             .orElse(emptyList())
             .stream()
@@ -287,7 +305,7 @@ public class DocumentHelper {
         return Optional.empty();
     }
 
-
+    @Deprecated
     public CaseDetails prepareLetterTemplateData(CaseDetails caseDetails, PaperNotificationRecipient recipient) {
         // need to create a deep copy of CaseDetails.data, the copy is modified and sent later to Docmosis
         CaseDetails caseDetailsCopy = deepCopy(caseDetails, CaseDetails.class);
@@ -321,6 +339,37 @@ public class DocumentHelper {
         return prepareLetterTemplateData(caseDetailsCopy, reference, addresseeName, addressToSendTo, isConsentedApplication);
     }
 
+
+    public CaseDetails prepareLetterTemplateData(FinremCaseDetails caseDetails, PaperNotificationRecipient recipient) {
+        FinremCaseData caseData = caseDetails.getData();
+
+        String reference = "";
+        String addresseeName;
+        Address addressToSendTo;
+
+        if (recipient == APPLICANT && caseData.isApplicantRepresentedByASolicitor()) {
+            log.info("Applicant is represented by a solicitor");
+            reference = nullToEmpty((caseData.getContactDetailsWrapper().getSolicitorReference()));
+            addresseeName = nullToEmpty(caseData.getAppSolicitorName());
+            addressToSendTo = caseData.getAppSolicitorAddress();
+        } else if (recipient == RESPONDENT && caseData.isRespondentRepresentedByASolicitor()) {
+            log.info("Respondent is represented by a solicitor");
+            reference = nullToEmpty((caseData.getContactDetailsWrapper().getRespondentSolicitorReference()));
+            addresseeName = nullToEmpty((caseData.getRespondentSolicitorName()));
+            addressToSendTo = caseData.getContactDetailsWrapper().getRespondentSolicitorAddress();
+        } else {
+            log.info("{} is not represented by a solicitor", recipient);
+            addresseeName = recipient == APPLICANT
+                ? caseDetails.getData().getFullApplicantName()
+                : caseDetails.getData().getRespondentFullName();
+            addressToSendTo = recipient == APPLICANT ? caseData.getContactDetailsWrapper().getApplicantAddress() :
+                caseData.getContactDetailsWrapper().getRespondentAddress();
+        }
+
+        return prepareLetterTemplateData(caseDetails, reference, addresseeName, addressToSendTo);
+    }
+
+    @Deprecated
     private CaseDetails prepareLetterTemplateData(CaseDetails caseDetailsCopy, String reference, String addresseeName,
                                                   Map addressToSendTo,
                                                   boolean isConsentedApplication) {
@@ -352,6 +401,45 @@ public class DocumentHelper {
 
         return caseDetailsCopy;
     }
+
+
+    private CaseDetails prepareLetterTemplateData(FinremCaseDetails finremCaseDetails, String reference, String addresseeName,
+                                                  Address addressToSendTo) {
+
+        CaseDetails caseDetails = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
+        Map<String, Object> caseData = caseDetails.getData();
+        String ccdNumber = nullToEmpty((finremCaseDetails.getId()));
+        String applicantName = finremCaseDetails.getData().getFullApplicantName();
+        String respondentName = finremCaseDetails.getData().getRespondentFullName();
+
+        if (addressLineOneAndPostCodeAreBothNotEmpty(addressToSendTo)) {
+            Addressee addressee = Addressee.builder()
+                .name(addresseeName)
+                .formattedAddress(AddresseeGeneratorHelper.formatAddressForLetterPrinting(addressToSendTo))
+                .build();
+
+            caseData.put(CASE_NUMBER, ccdNumber);
+            caseData.put("reference", reference);
+            caseData.put(ADDRESSEE, addressee);
+            caseData.put("letterDate", String.valueOf(LocalDate.now()));
+            caseData.put("applicantName", applicantName);
+            caseData.put("respondentName", respondentName);
+            caseData.put(CTSC_CONTACT_DETAILS, buildCtscContactDetails());
+            caseData.put("courtDetails", buildFrcCourtDetails(finremCaseDetails.getData()));
+        } else {
+            log.info("Failed to prepare template data as not all required address details were present");
+            throw new IllegalArgumentException("Mandatory data missing from address when trying to generate document");
+        }
+
+        return caseDetails;
+    }
+
+    private boolean addressLineOneAndPostCodeAreBothNotEmpty(Address address) {
+        return ObjectUtils.isNotEmpty(address)
+            && StringUtils.isNotEmpty(address.getAddressLine1())
+            && StringUtils.isNotEmpty(address.getPostCode());
+    }
+
 
     public <T> T deepCopy(T object, Class<T> objectClass) {
         try {
@@ -392,7 +480,7 @@ public class DocumentHelper {
         CaseDocument caseDocument = nullCheckAndConvertToCaseDocument(data.get(documentName));
         return caseDocument != null
             ? Optional.of(BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl())
-                .fileName(caseDocument.getDocumentFilename()).build())
+            .fileName(caseDocument.getDocumentFilename()).build())
             : Optional.empty();
     }
 
@@ -498,7 +586,7 @@ public class DocumentHelper {
     }
 
     public enum PaperNotificationRecipient {
-        APPLICANT, RESPONDENT, SOLICITOR
+        APPLICANT, RESPONDENT, SOLICITOR, APP_SOLICITOR, RESP_SOLICITOR
     }
 
     public CaseDocument nullCheckAndConvertToCaseDocument(Object object) {

@@ -26,22 +26,15 @@ public class CheckSolicitorIsDigitalService {
     }
 
     private boolean isSolicitorDigital(String caseId, String caseRole) {
-        log.info("Checking if solicitor is digital for case id: {} and role: {}", caseId, caseRole);
-        CaseAssignmentUserRolesResource rolesResource = assignCaseAccessService.getUserRoles(caseId);
-
+        log.info("Checking if solicitor is digital for case: {} and role: {}", caseId, caseRole);
+        CaseAssignmentUserRolesResource rolesResource = assignCaseAccessService.searchUserRoles(caseId);
         if (rolesResource == null || rolesResource.getCaseAssignmentUserRoles() == null) {
-            log.info("No roles found for case id: {} and role: {}", caseId, caseRole);
+            log.info("No roles found for case: {}", caseId);
             return false;
         }
-        log.info("Found {} roles for case id: {} and role: {}", rolesResource.getCaseAssignmentUserRoles().size(), caseId, caseRole);
-        return isRolePresent(caseRole, rolesResource);
-    }
-
-    private boolean isRolePresent(String caseRole, CaseAssignmentUserRolesResource rolesResource) {
-        boolean foundRole = rolesResource.getCaseAssignmentUserRoles().stream()
+        log.info("Found {} roles for case: {}", rolesResource.getCaseAssignmentUserRoles().size(), caseId);
+        return rolesResource.getCaseAssignmentUserRoles().stream()
             .map(CaseAssignmentUserRole::getCaseRole)
             .anyMatch(caseRole::equals);
-        log.info("Found role: {} for case id: {}", foundRole, caseRole);
-        return foundRole;
     }
 }

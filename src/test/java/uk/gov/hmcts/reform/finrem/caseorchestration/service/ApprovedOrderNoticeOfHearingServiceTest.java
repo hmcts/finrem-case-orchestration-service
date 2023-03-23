@@ -53,6 +53,7 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     static final String CASE_DATA = "case_data";
     static final String CASE_DETAILS = "caseDetails";
 
+
     @Autowired
     private ApprovedOrderNoticeOfHearingService approvedOrderNoticeOfHearingService;
     @Autowired
@@ -193,8 +194,8 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
     }
 
     private void assertBulkPrintServiceInteraction() {
-        verify(bulkPrintService, times(1)).printApplicantDocuments(any(), eq(AUTH_TOKEN), any());
-        verify(bulkPrintService, times(1)).printRespondentDocuments(any(), eq(AUTH_TOKEN),
+        verify(bulkPrintService, times(1)).printRespondentDocuments(any(CaseDetails.class), eq(AUTH_TOKEN), any());
+        verify(bulkPrintService, times(1)).printRespondentDocuments(any(CaseDetails.class), eq(AUTH_TOKEN),
             printDocumentsRequestDocumentListCaptor.capture());
     }
 
@@ -221,6 +222,7 @@ public class ApprovedOrderNoticeOfHearingServiceTest extends BaseServiceTest {
             Matchers.hasEntry("CourtPhone", "0300 1235577"),
             Matchers.hasEntry("CourtEmail", "hastingsfamily@justice.gov.uk"),
             Matchers.hasEntry("ApplicantName", "Poor Guy"),
+            Matchers.hasEntry("AdditionalHearingDated", formattedNowDate),
             Matchers.<String, Object>hasEntry("HearingTime", "1pm"),
             Matchers.<String, Object>hasEntry("RespondentName", "test Korivi"),
             Matchers.<String, Object>hasEntry("HearingVenue",
