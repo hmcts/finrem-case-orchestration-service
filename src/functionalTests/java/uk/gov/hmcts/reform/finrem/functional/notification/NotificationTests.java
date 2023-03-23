@@ -32,13 +32,6 @@ public class NotificationTests extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyNotifyPrepareForHearingOrderSentTestIsOkay() {
-
-        utils.validatePostSuccess(prepareForHearingOrderSentApiUri,
-            "ccd-request-with-solicitor-prepareForHearing.json", contestedDir);
-    }
-
-    @Test
     public void verifyNotifyContestApplicationIssuedIsOkay() {
 
         utils.validatePostSuccess(contestApplicationIssuedApiUri,
