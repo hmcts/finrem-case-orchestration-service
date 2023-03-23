@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -39,7 +40,7 @@ public class ValidateHearingService {
             ? List.of(REQUIRED_FIELD_EMPTY_ERROR) : List.of();
     }
 
-    public List<String> validateHearingWarnings(CaseDetails caseDetails, List<String> fastTrackWarningsList,
+    public List<String> validateHearingWarnings(FinremCaseDetails caseDetails, List<String> fastTrackWarningsList,
                                                 List<String>  nonFastTrackWarningsList) {
         Map<String, Object> caseData = caseDetails.getData();
         String issueDate = Objects.toString(caseData.get(ISSUE_DATE), "");

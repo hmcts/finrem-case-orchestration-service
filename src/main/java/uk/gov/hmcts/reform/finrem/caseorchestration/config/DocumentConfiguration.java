@@ -6,6 +6,7 @@ import lombok.Getter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
 
@@ -128,15 +129,30 @@ public class DocumentConfiguration {
         return isHighCourtSelected(caseDetails) ? rejectedOrderHighCourtTemplate : rejectedOrderTemplate;
     }
 
+    @Deprecated
     public String getFormCFastTrackTemplate(CaseDetails caseDetails) {
         return isHighCourtSelected(caseDetails) ? formCFastTrackHighCourtTemplate : formCFastTrackTemplate;
     }
 
+    public String getFormCFastTrackTemplate(FinremCaseDetails caseDetails) {
+        return isHighCourtSelected(caseDetails) ? formCFastTrackHighCourtTemplate : formCFastTrackTemplate;
+    }
+
+    @Deprecated
     public String getFormCNonFastTrackTemplate(CaseDetails caseDetails) {
         return isHighCourtSelected(caseDetails) ? formCNonFastTrackHighCourtTemplate : formCNonFastTrackTemplate;
     }
 
+    public String getFormCNonFastTrackTemplate(FinremCaseDetails caseDetails) {
+        return isHighCourtSelected(caseDetails) ? formCNonFastTrackHighCourtTemplate : formCNonFastTrackTemplate;
+    }
+
+    @Deprecated
     public String getFormGTemplate(CaseDetails caseDetails) {
+        return isHighCourtSelected(caseDetails) ? formGHighCourtTemplate : formGTemplate;
+    }
+
+    public String getFormGTemplate(FinremCaseDetails caseDetails) {
         return isHighCourtSelected(caseDetails) ? formGHighCourtTemplate : formGTemplate;
     }
 
@@ -182,6 +198,14 @@ public class DocumentConfiguration {
     private boolean isHighCourtSelected(CaseDetails caseDetails) {
         if (caseDetails != null && caseDetails.getData() != null
             && caseDetails.getData().get(HIGHCOURT_COURTLIST) != null) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isHighCourtSelected(FinremCaseDetails caseDetails) {
+        if (caseDetails != null && caseDetails.getData() != null
+            && caseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().getDefaultCourtListWrapper().getHighCourtList() != null) {
             return true;
         }
         return false;

@@ -1,13 +1,13 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence;
 
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.util.List;
 
 public abstract class MultiLetterOrEmailAllPartiesCorresponder<D> extends EmailAndLettersCorresponderBase<D> {
 
-    @Override
-    public void sendCorrespondence(D caseDetails, String authorisationToken) {
+    public void sendCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
         sendApplicantCorrespondence(authorisationToken, caseDetails);
         sendRespondentCorrespondence(authorisationToken, caseDetails);
     }

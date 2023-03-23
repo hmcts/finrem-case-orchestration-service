@@ -147,7 +147,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     public void generateAdditionalHearingDocumentSuccess() throws Exception {
         doValidCaseDataSetUpForAdditionalHearing();
 
-        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
+        when(hearingDocumentService.alreadyHadFirstHearing(any(CaseDetails.class))).thenReturn(true);
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
 
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
@@ -157,7 +157,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
             .andExpect(status().isOk());
 
         verify(hearingDocumentService, times(0)).generateHearingDocuments(eq(AUTH_TOKEN), any());
-        verify(additionalHearingDocumentService, times(1)).createAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
+        verify(additionalHearingDocumentService, times(1)).createAdditionalHearingDocuments(eq(AUTH_TOKEN), any(CaseDetails.class));
     }
 
     @Test
@@ -266,7 +266,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @Test
     public void givenNoPreviousHearing_shouldPrintHearingDocumentsForRespondentSolicitor() throws Exception {
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
-        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(false);
+        when(hearingDocumentService.alreadyHadFirstHearing(any(CaseDetails.class))).thenReturn(false);
 
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/hearing-with-case-details-before.json").toURI()));
@@ -282,7 +282,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @Test
     public void givenNoPreviousHearing_shouldPrintHearingDocumentsForApplicantSolicitor() throws Exception {
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
-        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(false);
+        when(hearingDocumentService.alreadyHadFirstHearing(any(CaseDetails.class))).thenReturn(false);
 
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/hearing-with-case-details-before.json").toURI()));
@@ -298,7 +298,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @Test
     public void givenNoPreviousHearing_shouldPrintHearingDocumentsForApplicantSolicitorForPaperCase() throws Exception {
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
-        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(false);
+        when(hearingDocumentService.alreadyHadFirstHearing(any(CaseDetails.class))).thenReturn(false);
 
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/hearing-with-case-details-before.json").toURI()));
@@ -314,7 +314,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @Test
     public void givenHadPreviousHearing_thenPrintAdditionalHearingDocumentsForRespondentSolicitor() throws Exception {
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
-        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
+        when(hearingDocumentService.alreadyHadFirstHearing(any(CaseDetails.class))).thenReturn(true);
 
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/hearing-with-case-details-before.json").toURI()));
@@ -330,7 +330,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @Test
     public void givenHadPreviousHearing_thenPrintAdditionalHearingDocumentsForApplicantSolicitor() throws Exception {
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
-        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
+        when(hearingDocumentService.alreadyHadFirstHearing(any(CaseDetails.class))).thenReturn(true);
 
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/hearing-with-case-details-before.json").toURI()));

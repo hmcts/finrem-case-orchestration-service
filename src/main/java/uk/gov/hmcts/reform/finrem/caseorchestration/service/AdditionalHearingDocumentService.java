@@ -9,11 +9,15 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.additionalhearing.AdditionalHearingDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
@@ -60,8 +64,9 @@ public class AdditionalHearingDocumentService {
     private final CaseDataService caseDataService;
     private final NotificationService notificationService;
     private final AdditionalHearingCorresponder additionalHearingCorresponder;
+    private final AdditionalHearingDetailsMapper additionalHearingDetailsMapper;
 
-
+    @Deprecated
     public void createAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) throws JsonProcessingException {
         Map<String, Object> caseData = caseDetails.getData();
         Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
@@ -78,7 +83,37 @@ public class AdditionalHearingDocumentService {
         addAdditionalHearingDocumentToCaseData(caseDetails, document);
     }
 
-    public void sendAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
+    public void createAdditionalHearingDocuments(String authorisationToken, FinremCaseDetails caseDetails) {
+        FinremCaseData caseData = caseDetails.getData();
+
+        Map<String, Object> additionalHearingPlaceholdersMap = additionalHearingDetailsMapper
+            .getDocumentTemplateDetailsAsMap(caseDetails, caseData.getRegionWrapper().getDefaultCourtList());
+
+        CaseDocument document = generateAdditionalHearingDocument(additionalHearingPlaceholdersMap, authorisationToken);
+        Optional.ofNullable(document).ifPresent(doc ->
+            log.info("Additional Hearing Document generated: Filename = {}, Url = {}, binUrl = {}",
+                doc.getDocumentFilename(), doc.getDocumentUrl(), doc.getDocumentBinaryUrl()));
+        addAdditionalHearingDocumentToCaseData(caseDetails, document);
+    }
+
+    public void addAdditionalHearingDocumentToCaseData(FinremCaseDetails caseDetails, CaseDocument document) {
+        AdditionalHearingDocumentCollection generatedDocumentData = AdditionalHearingDocumentCollection.builder()
+            .value(AdditionalHearingDocument.builder()
+                .document(document)
+                .build())
+            .build();
+
+        FinremCaseData data = caseDetails.getData();
+        List<AdditionalHearingDocumentCollection> additionalHearingDocumentDataList =
+            Optional.ofNullable(data.getAdditionalHearingDocuments())
+                .orElse(new ArrayList<>(1));
+
+        additionalHearingDocumentDataList.add(generatedDocumentData);
+
+        data.setAdditionalHearingDocuments(additionalHearingDocumentDataList);
+    }
+
+    public void sendAdditionalHearingDocuments(String authorisationToken, FinremCaseDetails caseDetails) {
         additionalHearingCorresponder.sendCorrespondence(caseDetails, authorisationToken);
     }
 
@@ -255,4 +290,13 @@ public class AdditionalHearingDocumentService {
     public CaseDocument convertToPdf(CaseDocument document, String authorisationToken) {
         return genericDocumentService.convertDocumentIfNotPdfAlready(document, authorisationToken);
     }
+
+    private CaseDocument  generateAdditionalHearingDocument(Map<String, Object> placeholdersMap, String authorisationToken) {
+        log.info("Generating Additional Hearing Document for Case ID: {}", placeholdersMap.get("ccdCaseNumber"));
+
+        return genericDocumentService.generateDocumentFromPlaceholdersMap(authorisationToken, placeholdersMap,
+            documentConfiguration.getAdditionalHearingTemplate(),
+            documentConfiguration.getAdditionalHearingFileName());
+    }
+
 }

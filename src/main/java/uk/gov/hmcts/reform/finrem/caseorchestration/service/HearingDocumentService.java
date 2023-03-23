@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.FormCandGCorresponder;
 
 import java.util.HashMap;
@@ -108,8 +109,13 @@ public class HearingDocumentService {
      * both non-fast track and fast track cases. Fast track cases will have
      * additionally form G populated.</p>
      */
+    @Deprecated
     public boolean alreadyHadFirstHearing(CaseDetails caseDetails) {
         return caseDetails.getData().containsKey(FORM_C);
+    }
+
+    public boolean alreadyHadFirstHearing(FinremCaseDetails caseDetails) {
+        return caseDetails.getData().getFormC() != null;
     }
 
 }

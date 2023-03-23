@@ -127,6 +127,12 @@ public class DocumentHelper {
             .build();
     }
 
+    public Optional<BulkPrintDocument> getDocumentAsBulkPrintDocument(CaseDocument document) {
+        return document != null
+            ? Optional.of(BulkPrintDocument.builder().binaryFileUrl(document.getDocumentBinaryUrl()).build())
+            : Optional.empty();
+    }
+
     public CaseDocument getLatestAmendedConsentOrder(Map<String, Object> caseData) {
         Optional<AmendedConsentOrderData> reduce = ofNullable(caseData.get(AMENDED_CONSENT_ORDER_COLLECTION))
             .map(this::convertToAmendedConsentOrderDataList)
