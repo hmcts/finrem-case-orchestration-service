@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.functional.documents;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
@@ -14,10 +15,10 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
 import java.io.InputStream;
@@ -57,6 +58,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
     private String amendConsentOrderCollectionCheckUrl;
 
     private void setUpCaseDetails(String fileName) throws Exception {
+        objectMapper.registerModule(new JavaTimeModule());
         try (InputStream resourceAsStream =
                  getClass().getResourceAsStream(consentedDir + fileName)) {
             callbackRequest = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
@@ -142,30 +144,29 @@ public class DocumentValidationTests extends IntegrationTestBase {
 
     private CaseDocument convertToCaseDocument(Object object) {
         objectMapper = new ObjectMapper();
-
+        objectMapper.registerModule(new JavaTimeModule());
         return objectMapper.convertValue(object, CaseDocument.class);
     }
 
     private List<RespondToOrderData> convertToRespondToOrderDataList(Object object) {
         ObjectMapper objectMapper = new ObjectMapper();
-
+        objectMapper.registerModule(new JavaTimeModule());
         return objectMapper.convertValue(object, new TypeReference<List<RespondToOrderData>>() {
         });
     }
 
-    private List<PensionCollectionData> convertToPensionCollectionDataList(Object object) {
+    private List<PensionTypeCollection> convertToPensionCollectionDataList(Object object) {
         ObjectMapper objectMapper = new ObjectMapper();
-
-        return objectMapper.convertValue(object, new TypeReference<List<PensionCollectionData>>() {
-        });
+        objectMapper.registerModule(new JavaTimeModule());
+        return objectMapper.convertValue(object, new TypeReference<List<PensionTypeCollection>>() {});
     }
 
     private void setPensionCollectionData() {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> data = caseDetails.getData();
         Object pensionObject = data.get(PENSION_DOCS_COLLECTION);
-        List<PensionCollectionData> respondToOrderData = convertToPensionCollectionDataList(pensionObject);
-        TypedCaseDocument typedCaseDocument = respondToOrderData.get(0).getTypedCaseDocument();
+        List<PensionTypeCollection> respondToOrderData = convertToPensionCollectionDataList(pensionObject);
+        PensionType typedCaseDocument = respondToOrderData.get(0).getTypedCaseDocument();
         typedCaseDocument.setPensionDocument(generateCaseDocument(CONSENT_ORDER_JSON));
         data.put(PENSION_DOCS_COLLECTION, respondToOrderData);
         caseDetails.setData(data);
@@ -199,7 +200,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
 
     private List<AmendedConsentOrderData> convertToAmendedConsentOrderDataList(Object object) {
         ObjectMapper objectMapper = new ObjectMapper();
-
+        objectMapper.registerModule(new JavaTimeModule());
         return objectMapper.convertValue(object, new TypeReference<List<AmendedConsentOrderData>>() {
         });
     }

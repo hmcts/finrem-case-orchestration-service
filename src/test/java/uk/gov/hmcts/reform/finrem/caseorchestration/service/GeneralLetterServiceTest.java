@@ -86,6 +86,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
             + "SE12 9SE"));
         assertThat(data.get("applicantFullName"), is("Poor Guy"));
         assertThat(data.get("respondentFullName"), is("test Korivi"));
+        assertThat(data.get("generalLetterCreatedDate"), is(formattedNowDate));
     }
 
     @Test
@@ -174,7 +175,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
     public void whenGeneralLetterIsCreated_thenItGetsSentToBulkPrint() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/general-letter.json", mapper);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
-        verify(bulkPrintService, times(1)).sendDocumentForPrint(any(CaseDocument.class), any());
+        verify(bulkPrintService, times(1)).sendDocumentForPrint(any(CaseDocument.class), any(CaseDetails.class));
     }
 
     private void assertNameUsedForGeneralLetterAddressTo(int invocation, String generalLetterAddressTo, String expectedName) {

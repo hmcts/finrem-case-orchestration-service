@@ -10,10 +10,10 @@ import java.util.Arrays;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 @RequiredArgsConstructor
 public enum ThamesValleyCourt implements CourtList {
-    FR_thamesvalleyList_1("FR_thamesvalleyList_1"),
-    FR_thamesvalleyList_2("FR_thamesvalleyList_2"),
-    FR_thamesvalleyList_3("FR_thamesvalleyList_3"),
-    FR_thamesvalleyList_4("FR_thamesvalleyList_4");
+    OXFORD("FR_thamesvalleyList_1"),
+    READING("FR_thamesvalleyList_2"),
+    MILTON_KEYNES("FR_thamesvalleyList_3"),
+    SLOUGH("FR_thamesvalleyList_4");
 
     private final String id;
 

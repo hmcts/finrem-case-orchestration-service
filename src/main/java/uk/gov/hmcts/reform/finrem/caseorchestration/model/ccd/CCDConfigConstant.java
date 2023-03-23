@@ -90,6 +90,8 @@ public class CCDConfigConstant {
     public static final String SOUTHWEST_FRC_LIST_CT = "southWestList";
     public static final String WALES_FRC_LIST = "walesFRCList";
     public static final String WALES_FRC_LIST_CT = "walesList";
+    public static final String HIGHCOURT_FRC_LIST = "highCourtFRCList";
+    public static final String HIGHCOURT_FRC_LIST_CT = "hcCourtList";
 
     //Regions
     public static final String LONDON = "london";
@@ -99,6 +101,7 @@ public class CCDConfigConstant {
     public static final String SOUTHEAST = "southeast";
     public static final String SOUTHWEST = "southwest";
     public static final String WALES = "wales";
+    public static final String HIGHCOURT = "highcourt";
 
     //FRCs
     public static final String BEDFORDSHIRE = "bedfordshire";
@@ -140,6 +143,7 @@ public class CCDConfigConstant {
     public static final String MANCHESTER_COURTLIST = "manchesterCourtList";
     public static final String NEWPORT_COURTLIST = "newportCourtList";
     public static final String NORTH_WALES_COURTLIST = "northWalesCourtList";
+    public static final String HIGHCOURT_COURTLIST = "highCourtList";
     public static final String NOTTINGHAM_COURTLIST = "nottinghamCourtList";
     public static final String NWOTHER_COURTLIST = "otherNWCourtList";
     public static final String NWYORKSHIRE_COURTLIST = "nwyorkshireCourtList";
@@ -219,6 +223,9 @@ public class CCDConfigConstant {
     public static final String WELSHPOOL = "FR_northwalesList_4";
     public static final String MOLD = "FR_northwalesList_5";
 
+    //High court List
+    public static final String HIGHCOURT_COURT = "FR_highCourtList_1";
+
     //SouthEast Kent
     public static final String KENT_DARTFORD_COURTS = "FR_kent_surrey_hc_list_3";
 
@@ -288,7 +295,6 @@ public class CCDConfigConstant {
     public static final String FORM_G = "formG";
     public static final String OUT_OF_FAMILY_COURT_RESOLUTION = "outOfFamilyCourtResolution";
     public static final String HEARING_ADDITIONAL_DOC = "additionalListOfHearingDocuments";
-    public static final String ADDITIONAL_HEARING_DOCUMENTS_OPTION = "additionalHearingDocumentsOption";
     public static final String OTHER_DOCS_COLLECTION = "otherCollection";
     public static final String GENERAL_LETTER = "generalLetterCollection";
     public static final String GENERAL_LETTER_BODY = "generalLetterBody";
@@ -395,6 +401,7 @@ public class CCDConfigConstant {
     public static final String GENERAL_APPLICATION_DIRECTIONS_SOUTHEAST_FRC = "generalApplicationDirections_southEastFRCList";
     public static final String GENERAL_APPLICATION_DIRECTIONS_SOUTHWEST_FRC = "generalApplicationDirections_southWestFRCList";
     public static final String GENERAL_APPLICATION_DIRECTIONS_WALES_FRC = "generalApplicationDirections_walesFRCList";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_HIGHCOURT_FRC = "generalApplicationDirections_highCourtFRCList";
 
     // Generap Application CourtLists
     public static final String GENERAL_APPLICATION_DIRECTIONS_BEDFORDSHIRE_COURT = "generalApplicationDirections_bedfordshireCourtList";
@@ -531,6 +538,7 @@ public class CCDConfigConstant {
 
     //Get user based on role i.e applicant or respondent
     public static final String CASE_ROLE = "currentUserCaseRole";
+    public static final String CASE_ROLE_FOR_FIELD_SHOW = "currentUserCaseRoleLabel";
 
     //Interim FRC List Names
     public static final String INTERIM_HEARING_PREFIX = "interim_";
@@ -541,6 +549,7 @@ public class CCDConfigConstant {
     public static final String INTERIM_SOUTHEAST_FRC_LIST = "interim_southEastFRCList";
     public static final String INTERIM_SOUTHWEST_FRC_LIST = "interim_southWestFRCList";
     public static final String INTERIM_WALES_FRC_LIST = "interim_walesFRCList";
+    public static final String INTERIM_HIGHCOURT_FRC_LIST = "interim_highCourtFRCList";
 
     //Interim Documents
     public static final String INTERIM_HEARING_COLLECTION = "interimHearings";
@@ -612,6 +621,7 @@ public class CCDConfigConstant {
     public static final String APPLICANT_BARRISTER_ROLE = "[APPBARRISTER]";
     public static final String RESPONDENT_BARRISTER_ROLE = "[RESPBARRISTER]";
     public static final String CASEWORKER_ROLE = "[CASEWORKER]";
+    public static final String CASEWORKER_ROLE_FIELD_SHOW_LABEL = "CASEWORKER";
     public static final String MANAGE_BARRISTER_PARTY = "barristerParty";
     public static final String MANAGE_BARRISTERS = "Manage Barristers";
 
@@ -622,4 +632,6 @@ public class CCDConfigConstant {
 
     //Hearing State
     public static final String PREPARE_FOR_HEARING_STATE = "prepareForHearing";
+
+    public static final String LETTER_DATE_FORMAT = "yyyy-MM-dd";
 }

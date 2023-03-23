@@ -43,7 +43,15 @@ public enum State {
     CONSENTED_ORDER_NOT_APPROVED("consentedOrderNotApproved"),
     GENERAL_APPLICATION("generalApplication"),
     GENERAL_APPLICATION_AWAITING_JUDICIARY_RESPONSE("generalApplicationAwaitingJudiciaryResponse"),
-    GENERAL_APPLICATION_OUTCOME("generalApplicationOutcome");
+    GENERAL_APPLICATION_OUTCOME("generalApplicationOutcome"),
+    PREPARE_FOR_HEARING("prepareForHearing"),
+    CASE_FILE_SUBMITTED("caseFileSubmitted"),
+    CONSENT_PROCESS("consentProcess"),
+    CONSENT_ORDER_NOT_APPROVED("consentOrderNotApproved"),
+    AWAITING_JUDICIARY_RESPONSE("awaitingJudiciaryResponse"),
+    CASE_WORKER_REVIEW("caseWorkerReview"),
+    PAPER_CASE_ADDED("paperCaseAdded"),
+    READY_FOR_HEARING("readyForHearing");
 
     private final String stateId;
 
@@ -54,7 +62,7 @@ public enum State {
 
     public static State forValue(String value) {
         return Arrays.stream(State.values())
-            .filter(option -> value.equalsIgnoreCase(option.getStateId()))
+            .filter(option -> value.equals(option.getStateId()))
             .findFirst().orElseThrow(IllegalArgumentException::new);
     }
 }

@@ -16,7 +16,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleServ
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASEWORKER_ROLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASEWORKER_ROLE_FIELD_SHOW_LABEL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ROLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ROLE_FOR_FIELD_SHOW;
 
 @Slf4j
 @Service
@@ -42,8 +44,12 @@ public class ManageBarristerAboutToStartHandler implements CallbackHandler<Map<S
         CaseAssignedUserRolesResource userCaseRole = caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, userAuthorisation);
         if (userCaseRole.getCaseAssignedUserRoles() == null || userCaseRole.getCaseAssignedUserRoles().isEmpty()) {
             caseData.put(CASE_ROLE, CASEWORKER_ROLE);
+            caseData.put(CASE_ROLE_FOR_FIELD_SHOW, CASEWORKER_ROLE_FIELD_SHOW_LABEL);
         } else {
-            caseData.put(CASE_ROLE, userCaseRole.getCaseAssignedUserRoles().get(0).getCaseRole());
+            String caseRole = userCaseRole.getCaseAssignedUserRoles().get(0).getCaseRole();
+            caseData.put(CASE_ROLE, caseRole);
+            caseData.put(CASE_ROLE_FOR_FIELD_SHOW,
+                caseRole.replace("[", "").replace("]",""));
         }
 
         log.info("current user case role is {} for case {}", caseData.get(CASE_ROLE), caseDetails.getId());

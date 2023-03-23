@@ -9,12 +9,12 @@ import org.springframework.test.web.servlet.ResultActions;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.consentorder.ConsentOrderAvailableCorresponder;
 
 import java.util.List;
 
@@ -59,7 +59,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     @MockBean
     private DocumentHelper documentHelper;
     @MockBean
-    private CaseDataService caseDataService;
+    private ConsentOrderAvailableCorresponder consentOrderAvailableCorresponder;
 
     public String consentOrderApprovedEndpoint() {
         return "/case-orchestration/documents/consent-order-approved";
@@ -164,8 +164,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenAnnexStampingDocument().thenReturn(caseDocument());
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
@@ -176,9 +175,8 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.state", is(CONSENT_ORDER_MADE.toString())));
 
         verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), any());
-        verify(notificationService).sendConsentOrderAvailableCtscEmail(any());
-        verify(notificationService).sendConsentOrderAvailableEmailToApplicantSolicitor(any());
-        verify(notificationService).sendConsentOrderAvailableEmailToRespondentSolicitor(any());
+        verify(notificationService).sendConsentOrderAvailableCtscEmail(any(CaseDetails.class));
+        verify(consentOrderAvailableCorresponder).sendCorrespondence(any());
     }
 
     @Test
@@ -189,8 +187,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenAnnexStampingDocument().thenReturn(caseDocument());
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
@@ -201,9 +198,8 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.state", is(CONSENT_ORDER_MADE.toString())));
 
         verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), any());
-        verify(notificationService).sendConsentOrderAvailableCtscEmail(any());
-        verify(notificationService, never()).sendConsentOrderAvailableEmailToApplicantSolicitor(any());
-        verify(notificationService, never()).sendConsentOrderAvailableEmailToRespondentSolicitor(any());
+        verify(notificationService).sendConsentOrderAvailableCtscEmail(any(CaseDetails.class));
+        verify(consentOrderAvailableCorresponder).sendCorrespondence(any());
     }
 
     @Test
@@ -301,7 +297,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         return when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN)));
     }
 
-    private OngoingStubbing<List<PensionCollectionData>> whenStampingPensionDocuments() {
+    private OngoingStubbing<List<PensionTypeCollection>> whenStampingPensionDocuments() {
         return when(consentOrderApprovedDocumentService.stampPensionDocuments(any(), eq(AUTH_TOKEN)));
     }
 

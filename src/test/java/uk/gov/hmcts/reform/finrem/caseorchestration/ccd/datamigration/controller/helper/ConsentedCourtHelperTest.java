@@ -38,6 +38,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.EXETER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GLOUCESTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HERTFORD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IPSWICH;
@@ -748,6 +751,9 @@ public class ConsentedCourtHelperTest {
     @Test
     public void londonCourtListTest() {
         verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON, LONDON_COURTLIST,
+            "FR_londonList_13", "The Royal Courts of Justice");
+
+        verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON, LONDON_COURTLIST,
             "FR_londonList_11", "Bromley County Court and Family Court");
 
         verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON, LONDON_COURTLIST,
@@ -859,6 +865,15 @@ public class ConsentedCourtHelperTest {
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDS_FRC_LIST, "invalid", NOTTINGHAM_COURTLIST,
             "FR_nottinghamList_8", "");
+    }
+
+    @Test
+    public void highCourtListTest() {
+        verifyCorrectCourtReturned(HIGHCOURT, HIGHCOURT_FRC_LIST, HIGHCOURT, HIGHCOURT_COURTLIST,
+            "FR_highCourtList_1", "High Court Family Division");
+
+        verifyCorrectCourtReturned(HIGHCOURT, HIGHCOURT_FRC_LIST, HIGHCOURT, HIGHCOURT_COURTLIST,
+            "invalid", "");
     }
 
 

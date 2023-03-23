@@ -1,8 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -15,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApplicantRepresent
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApplicantRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApplicationNotApproved;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApplicationNotApprovedCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AssignToJudgeReason;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AuthorisationSignedBy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.BenefitPayment;
@@ -30,7 +33,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildrenInfoCollec
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Complexity;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentNatureOfApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderCollection;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderHolder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Court;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetail;
@@ -158,8 +160,11 @@ public class FinremCaseDetailMapperTest {
 
     private static final String REFUSAL_ORDER_CALLBACK_REQUEST = "/fixtures/refusal-order-contested.json";
     private static final String CONTESTED_INTERIM_CALLBACK_REQUEST = "/fixtures/contested-interim-hearing.json";
+    public static final String BULK_PRINT_ADDITIONAL_HEARING_JSON = "/fixtures/bulkprint/bulk-print-additional-hearing.json";
     private static final String SOL_CONTEST_CALLBACK_REQUEST = "/fixtures/deserialisation/ccd-request-with-solicitor-contestApplicationIssued.json";
     private static final String BASIC_REQUEST = "/fixtures/deserialisation/basic-request.json";
+
+    private static final String GA_REQUEST = "/fixtures/deserialisation/ccd-request-with-general-application.json";
 
 
     private CaseDetails caseDetails;
@@ -178,6 +183,36 @@ public class FinremCaseDetailMapperTest {
         assertNotNull(finremCaseDetails);
     }
 
+    @Test
+    public void mapFinremCaseDetailsToCaseDetails() {
+        caseDetails = buildCaseDetailsFromJson(BASIC_REQUEST);
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        CaseDetails caseDetailsFromPojo = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
+        assertEquals(caseDetails, caseDetailsFromPojo);
+    }
+
+    @Test
+    public void mapBulkPrintDetails() throws JsonProcessingException {
+        caseDetails = buildCaseDetailsFromJson(BULK_PRINT_ADDITIONAL_HEARING_JSON);
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        assertNotNull(finremCaseDetails);
+        assertEquals(finremCaseDetails.getData().getContactDetailsWrapper().getApplicantFmName(), "Test");
+    }
+
+
+    @Test
+    @Ignore
+    public void mapBulkPrintDetails_PojoCheck() throws JsonProcessingException {
+        caseDetails = buildCaseDetailsFromJson(BULK_PRINT_ADDITIONAL_HEARING_JSON);
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        assertNotNull(finremCaseDetails);
+        assertEquals(finremCaseDetails.getData().getContactDetailsWrapper().getApplicantFmName(), "Test");
+        CaseDetails caseDetailsFromPojo = finremCaseDetailsMapper.mapToCaseDetails(finremCaseDetails);
+        String caseDetailsString = objectMapper.writeValueAsString(caseDetails);
+        String caseDetailsPojoString = objectMapper.writeValueAsString(caseDetailsFromPojo);
+        assertEquals(objectMapper.readTree(caseDetailsString), objectMapper.readTree(caseDetailsPojoString));
+    }
+
 
     @Test
     public void givenValidCallbackRequest_thenSuccessfullyMapped() {
@@ -187,12 +222,20 @@ public class FinremCaseDetailMapperTest {
         assertNotNull(caseDetails);
         FinremCaseData caseData = finremCaseDetails.getData();
         assertEquals(caseData.getContactDetailsWrapper().getApplicantRepresented(), YesOrNo.YES);
+        assertEquals(caseData.getContactDetailsWrapper().getApplicantFmName(), "Contested Applicant");
         assertEquals(caseData.getRegionWrapper().getDefaultCourtList().getNottinghamCourtList().getId(), "FR_s_NottinghamList_1");
     }
 
     @Test
     public void givenGeneralOrderFixture_whenDeserializeFromString_thenSuccessfullyDeserialize() {
         caseDetails = buildCaseDetailsFromJson(CONTESTED_INTERIM_CALLBACK_REQUEST);
+        FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
+        assertNotNull(finremCaseDetails);
+    }
+
+    @Test
+    public void givenGeneralApplicationFixture_whenDeserializeFromString_thenSuccessfullyDeserialize() {
+        caseDetails = buildCaseDetailsFromJson(GA_REQUEST);
         FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(caseDetails);
         assertNotNull(finremCaseDetails);
     }
@@ -251,7 +294,7 @@ public class FinremCaseDetailMapperTest {
             AmendedConsentOrderCollection.builder()
                 .value(AmendedConsentOrder.builder()
                     .amendedConsentOrder(getTestDocument())
-                    .amendedConsentOrderDate(convertToDateViaInstant(LocalDate.of(2020, 1, 2)))
+                    .amendedConsentOrderDate(LocalDate.of(2020, 1, 2))
                     .build())
                 .build());
         assertNotNull(caseData.getAmendedConsentOrderCollection());
@@ -303,14 +346,14 @@ public class FinremCaseDetailMapperTest {
     private void assertApprovedOrderCollection(FinremCaseData caseData) {
         List<ConsentOrderCollection> expected = List.of(
             ConsentOrderCollection.builder()
-                .value(ConsentOrderHolder.builder()
+                .approvedOrder(ApprovedOrder.builder()
                     .consentOrder(getTestDocument())
                     .orderLetter(getTestDocument())
                     .pensionDocuments(List.of(
                         PensionTypeCollection.builder()
-                            .value(PensionType.builder()
+                            .typedCaseDocument(PensionType.builder()
                                 .typeOfDocument(PensionDocumentType.FORM_PPF)
-                                .uploadedDocument(getTestDocument())
+                                .pensionDocument(getTestDocument())
                                 .build())
                             .build()
                     ))
@@ -697,8 +740,9 @@ public class FinremCaseDetailMapperTest {
     private void assertPensionCollection(FinremCaseData caseData) {
         List<PensionTypeCollection> expected = List.of(
             PensionTypeCollection.builder()
-                .value(PensionType.builder()
-                    .uploadedDocument(getTestDocument())
+                .id("1")
+                .typedCaseDocument(PensionType.builder()
+                    .pensionDocument(getTestDocument())
                     .typeOfDocument(PensionDocumentType.FORM_P1)
                     .build())
                 .build()
@@ -907,13 +951,13 @@ public class FinremCaseDetailMapperTest {
     private void assertConsentedNotApprovedOrders(FinremCaseData caseData) {
         List<ConsentOrderCollection> expected = List.of(
             ConsentOrderCollection.builder()
-                .value(ConsentOrderHolder.builder()
+                .approvedOrder(ApprovedOrder.builder()
                     .consentOrder(getTestDocument())
                     .orderLetter(getTestDocument())
                     .pensionDocuments(List.of(PensionTypeCollection.builder()
-                        .value(PensionType.builder()
+                        .typedCaseDocument(PensionType.builder()
                             .typeOfDocument(PensionDocumentType.FORM_P1)
-                            .uploadedDocument(getTestDocument())
+                            .pensionDocument(getTestDocument())
                             .build())
                         .build()))
                     .build())
@@ -925,13 +969,13 @@ public class FinremCaseDetailMapperTest {
     private void assertContestedConsentedApprovedOrders(FinremCaseData caseData) {
         List<ConsentOrderCollection> expected = List.of(
             ConsentOrderCollection.builder()
-                .value(ConsentOrderHolder.builder()
+                .approvedOrder(ApprovedOrder.builder()
                     .consentOrder(getTestDocument())
                     .orderLetter(getTestDocument())
                     .pensionDocuments(List.of(PensionTypeCollection.builder()
-                        .value(PensionType.builder()
+                        .typedCaseDocument(PensionType.builder()
                             .typeOfDocument(PensionDocumentType.FORM_P1)
-                            .uploadedDocument(getTestDocument())
+                            .pensionDocument(getTestDocument())
                             .build())
                         .build()))
                     .build())

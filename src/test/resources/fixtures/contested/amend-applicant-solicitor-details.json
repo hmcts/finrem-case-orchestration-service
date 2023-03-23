@@ -1,9 +1,9 @@
 {
-  "event_id": "some_event_id",
+  "event_id": "FR_issueApplication",
   "case_details": {
     "id": "123",
     "jurisdiction": "DIVORCE",
-    "state": "applicationDrafted",
+    "state": "caseAdded",
     "case_type_id": "FinancialRemedyContested",
     "currentUserCaseRole": "[APPSOLICITOR]",
     "case_data": {
@@ -15,6 +15,7 @@
       "applicantPhone": "89897876765",
       "applicantEmail": "email01@email.com",
       "applicantRepresented": "No",
+      "applicantAddressConfidential" : "Yes",
       "applicantAddress": {
         "AddressLine1": "67 Pears Road",
         "AddressLine2": "",
@@ -32,6 +33,7 @@
       "respondentEmail": null,
       "respondentLName": "test",
       "respondentPhone": null,
+      "respondentAddressConfidential" : "No",
       "respondentFMName": "test",
       "divorceCaseNumber": "DD12D12345",
       "fastTrackDecision": "Yes",
@@ -63,7 +65,7 @@
   "case_details_before": {
     "id": "123",
     "jurisdiction": "DIVORCE",
-    "state": "applicationDrafted",
+    "state": "caseAdded",
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
       "updateIncludesRepresentativeChange": "No",

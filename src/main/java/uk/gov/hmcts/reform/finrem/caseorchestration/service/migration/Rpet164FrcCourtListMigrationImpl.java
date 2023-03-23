@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.migration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
@@ -156,7 +157,7 @@ public class Rpet164FrcCourtListMigrationImpl implements MigrationHandler {
     public static final String WELSHPOOL_OLD = "FR_WList_2";
     public static final String WREXHAM_OLD = "FR_WList_3";
     public static final String MOLD_OLD = "FR_WList_4";
-    private CaseDataService caseDataService = new CaseDataService();
+    private CaseDataService caseDataService = new CaseDataService(new ObjectMapper());
 
     @Override
     public Map<String, Object> migrate(CaseDetails caseDetails) {
