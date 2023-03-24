@@ -33,25 +33,17 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class ContestedHearingServiceTest extends BaseServiceTest {
 
-
-
     @Autowired
     private ContestedHearingService contestedHearingService;
-    @MockBean
-    private BulkPrintService bulkPrintService;
-    @MockBean
-    private NotificationService notificationService;
     @MockBean
     private AdditionalHearingDocumentService additionalHearingDocumentService;
     @MockBean
     private HearingDocumentService hearingDocumentService;
-    @MockBean
-    private ValidateHearingService validateHearingService;
-    @MockBean
-    private CaseDataService caseDataService;
 
+    @MockBean
+    GenericDocumentService genericDocumentService;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = null;
     private static final String PATH = "/fixtures/validate-hearing-successfully/";
 
     private static final String CONTESTED_CASE_WITH_FAST_TRACK_HEARING  = "/fixtures/contested/validate-hearing-with-fastTrackDecision.json";
@@ -64,6 +56,8 @@ public class ContestedHearingServiceTest extends BaseServiceTest {
 
     @Before
     public void init() throws Exception {
+        objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
         callbackRequest = buildFinremCallbackRequest(CONTESTED_CASE_WITH_FAST_TRACK_HEARING);
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
