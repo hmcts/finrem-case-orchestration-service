@@ -336,24 +336,6 @@ public class NotificationsController extends BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
 
-    @PostMapping(value = "/manual-payment", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send a manual payment letter")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Manual Payment letter sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendManualPaymentPaperNotification(
-        @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
-        @RequestBody CallbackRequest callbackRequest) {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Received request to send Manual Payment Letter for Case ID: {}", caseDetails.getId());
-        validateCaseData(callbackRequest);
-
-        paperNotificationService.printManualPaymentNotification(caseDetails, authToken);
-
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
-    }
-
     @PostMapping(value = "/general-application-refer-to-judge", consumes = APPLICATION_JSON_VALUE)
     @Operation(summary = "send general application refer to judge email")
     @ApiResponses(value = {

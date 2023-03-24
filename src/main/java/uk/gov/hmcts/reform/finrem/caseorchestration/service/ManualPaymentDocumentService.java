@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 @Service
 @Slf4j
@@ -18,7 +19,7 @@ public class ManualPaymentDocumentService {
     private final DocumentHelper documentHelper;
     private final HearingDocumentService hearingDocumentService;
 
-    public CaseDocument generateManualPaymentLetter(CaseDetails caseDetails, String authToken,
+    public CaseDocument generateManualPaymentLetter(FinremCaseDetails caseDetails, String authToken,
                                                     DocumentHelper.PaperNotificationRecipient recipient) {
         log.info("Generating Applicant Manual Payment Letter {} from {} for bulk print for {}",
             documentConfiguration.getManualPaymentFileName(),
@@ -29,10 +30,13 @@ public class ManualPaymentDocumentService {
 
         hearingDocumentService.addCourtFields(caseDetailsForBulkPrint);
 
-        CaseDocument manualPaymentLetter = genericDocumentService.generateDocument(authToken, caseDetailsForBulkPrint,
-            documentConfiguration.getManualPaymentTemplate(), documentConfiguration.getManualPaymentFileName());
+        CaseDocument manualPaymentLetter = genericDocumentService.generateDocument(authToken,
+            caseDetailsForBulkPrint,
+            documentConfiguration.getManualPaymentTemplate(),
+            documentConfiguration.getManualPaymentFileName());
 
         log.info("Generated Manual Payment Letter to {}: {}", recipient, manualPaymentLetter);
+
 
         return manualPaymentLetter;
     }
