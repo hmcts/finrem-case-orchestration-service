@@ -19,6 +19,7 @@ def versions = [
         ccdClient            : '4.8.6',
         commonsIo            : '2.7',
         commonsLang3         : '3.11',
+        hmctsNotify          : '3.17.0-RELEASE',
         junit                : '4.13.1',
         lombok               : '1.18.22',
         mockito              : '3.4.4',
@@ -362,6 +363,8 @@ dependencies {
     }
 
     implementation group: 'org.yaml', name: 'snakeyaml', version: '1.33'
+
+    implementation group: 'uk.gov.service.notify', name: 'notifications-java-client', version: versions.hmctsNotify
 
     developmentOnly group: 'org.springframework.boot', name: 'spring-boot-devtools'
 
