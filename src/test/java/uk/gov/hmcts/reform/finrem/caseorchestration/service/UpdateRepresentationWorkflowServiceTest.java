@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisation
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.NoticeOfChangeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
@@ -29,19 +28,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOC_PARTY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UpdateRepresentationWorkflowServiceTest {
@@ -92,50 +83,6 @@ public class UpdateRepresentationWorkflowServiceTest {
 
         verify(assignCaseAccessService, times(1)).applyDecision(AUTH_TOKEN, caseDetails);
         assertEquals(getChangeOrganisationRequest(response.getData()), getDefaultChangeRequest());
-    }
-
-    @Test
-    public void givenUnpopulatedApplicantOrg_thenNoOrgShouldBeFound() {
-        defaultChangeDetails.getData().put(APPLICANT_ORGANISATION_POLICY, null);
-        defaultChangeDetails.getData().put(ORGANISATION_POLICY_ROLE, null);
-        assertEquals(updateRepresentationWorkflowService.isNoApplicantOrganisationPolicy(defaultChangeDetails), true);
-    }
-
-    @Test
-    public void givenUnpopulatedRespondentOrg_thenNoOrgShouldBeFound() {
-        defaultChangeDetails.getData().put(RESPONDENT_ORGANISATION_POLICY, null);
-        defaultChangeDetails.getData().put(ORGANISATION_POLICY_ROLE, null);
-        assertEquals(updateRepresentationWorkflowService.isNoRespondentOrganisationPolicy(defaultChangeDetails), true);
-    }
-
-    @Test
-    public void givenPopulatedApplicantOrg_thenOrgShouldBeFound() {
-        caseDetails.getData().put(APPLICANT_REPRESENTED, YES_VALUE);
-        caseDetails.getData().put(APPLICANT_ORGANISATION_POLICY, OrganisationPolicy.builder()
-            .orgPolicyCaseAssignedRole(APP_SOLICITOR_POLICY)
-            .organisation(Organisation.builder().build())
-            .build());
-        assertEquals(updateRepresentationWorkflowService.isNoApplicantOrganisationPolicy(caseDetails), false);
-    }
-
-    @Test
-    public void givenPopulatedContestedRespondentOrg_thenOrgShouldBeFound() {
-        caseDetails.getData().put(CONTESTED_RESPONDENT_REPRESENTED, YES_VALUE);
-        caseDetails.getData().put(RESPONDENT_ORGANISATION_POLICY, OrganisationPolicy.builder()
-            .orgPolicyCaseAssignedRole(RESP_SOLICITOR_POLICY)
-            .organisation(Organisation.builder().build())
-            .build());
-        assertEquals(updateRepresentationWorkflowService.isNoRespondentOrganisationPolicy(caseDetails), false);
-    }
-
-    @Test
-    public void givenPopulatedConsentedRespondentOrg_thenOrgShouldBeFound() {
-        caseDetails.getData().put(CONSENTED_RESPONDENT_REPRESENTED, YES_VALUE);
-        caseDetails.getData().put(RESPONDENT_ORGANISATION_POLICY, OrganisationPolicy.builder()
-            .orgPolicyCaseAssignedRole(RESP_SOLICITOR_POLICY)
-            .organisation(Organisation.builder().build())
-            .build());
-        assertEquals(updateRepresentationWorkflowService.isNoRespondentOrganisationPolicy(caseDetails), false);
     }
 
     @Test

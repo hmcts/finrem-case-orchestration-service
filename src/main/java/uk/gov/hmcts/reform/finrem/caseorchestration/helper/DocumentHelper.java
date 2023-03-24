@@ -473,7 +473,7 @@ public class DocumentHelper {
             .map(caseDocument -> BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl())
                 .fileName(caseDocument.getDocumentFilename())
                 .build())
-            .toList();
+            .collect(Collectors.toList());
     }
 
     public Optional<BulkPrintDocument> getDocumentLinkAsBulkPrintDocument(Map<String, Object> data, String documentName) {

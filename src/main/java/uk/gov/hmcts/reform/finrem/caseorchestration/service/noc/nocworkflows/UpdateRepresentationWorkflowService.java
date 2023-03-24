@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
@@ -17,11 +16,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import java.util.Map;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOC_PARTY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 
@@ -91,22 +88,13 @@ public class UpdateRepresentationWorkflowService {
         return addedIsEmpty && removedIsEmpty;
     }
 
-    public boolean isNoApplicantOrganisationPolicy(CaseDetails caseDetails) {
-        return caseDetails.getData().get(APPLICANT_ORGANISATION_POLICY) == null;
-    }
-
-    public boolean isNoRespondentOrganisationPolicy(CaseDetails caseDetails) {
-        return caseDetails.getData().get(RESPONDENT_ORGANISATION_POLICY) == null;
-    }
-
     private void persistDefaultOrganisationPolicy(CaseDetails caseDetails) {
-        final boolean isApplicant = ((String) caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
-
-        if (isApplicant) {
+        if (noticeOfChangeService.hasInvalidOrgPolicy(caseDetails, true)) {
             persistDefaultApplicantOrganisationPolicy(caseDetails);
-            return;
         }
-        persistDefaultRespondentOrganisationPolicy(caseDetails);
+        if (noticeOfChangeService.hasInvalidOrgPolicy(caseDetails, false)) {
+            persistDefaultRespondentOrganisationPolicy(caseDetails);
+        }
     }
 
     private void persistDefaultApplicantOrganisationPolicy(CaseDetails caseDetails) {
@@ -121,24 +109,6 @@ public class UpdateRepresentationWorkflowService {
         caseDetails.getData().put(RESPONDENT_ORGANISATION_POLICY,
             OrganisationPolicy.builder()
                 .orgPolicyReference(null)
-                .orgPolicyCaseAssignedRole(RESP_SOLICITOR_POLICY)
-                .build());
-    }
-
-    public void updateApplicantOrganisationPolicy(CaseDetails caseDetails) {
-        caseDetails.getData().put(APPLICANT_ORGANISATION_POLICY,
-            OrganisationPolicy.builder()
-                .organisation(Organisation.builder().organisationID("").organisationName("").build())
-                .orgPolicyReference("")
-                .orgPolicyCaseAssignedRole(APP_SOLICITOR_POLICY)
-                .build());
-    }
-
-    public void updateRespondentOrganisationPolicy(CaseDetails caseDetails) {
-        caseDetails.getData().put(RESPONDENT_ORGANISATION_POLICY,
-            OrganisationPolicy.builder()
-                .organisation(Organisation.builder().organisationID("").organisationName("").build())
-                .orgPolicyReference("")
                 .orgPolicyCaseAssignedRole(RESP_SOLICITOR_POLICY)
                 .build());
     }

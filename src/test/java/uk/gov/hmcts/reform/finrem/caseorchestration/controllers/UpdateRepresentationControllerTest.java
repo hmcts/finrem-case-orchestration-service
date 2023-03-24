@@ -38,8 +38,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -196,20 +194,5 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.updateIncludesRepresentativeChange", is("Yes")))
             .andExpect(jsonPath("$.data.nocParty", is("applicant")));
-    }
-
-    @Test
-    public void givenValidData_whenUpdateContactDetails_thenShouldAddDefaultOrganisationPolicy() throws Exception {
-        when(featureToggleService.isCaseworkerNoCEnabled()).thenReturn(true);
-        loadRequestContentWith(PATH + NO_ORG_POLICIES_JSON);
-
-        mvc.perform(post(setDefaultsEndpoint())
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy").exists())
-            .andExpect(jsonPath("$.data.RespondentOrganisationPolicy").exists())
-            .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy.OrgPolicyCaseAssignedRole", is(APP_SOLICITOR_POLICY)))
-            .andExpect(jsonPath("$.data.RespondentOrganisationPolicy.OrgPolicyCaseAssignedRole", is(RESP_SOLICITOR_POLICY)));
     }
 }
