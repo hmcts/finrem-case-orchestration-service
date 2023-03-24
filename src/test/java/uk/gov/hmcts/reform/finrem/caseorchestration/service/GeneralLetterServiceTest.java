@@ -86,6 +86,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
             + "SE12 9SE"));
         assertThat(data.get("applicantFullName"), is("Poor Guy"));
         assertThat(data.get("respondentFullName"), is("test Korivi"));
+        assertThat(data.get("generalLetterCreatedDate"), is(formattedNowDate));
     }
 
     @Test

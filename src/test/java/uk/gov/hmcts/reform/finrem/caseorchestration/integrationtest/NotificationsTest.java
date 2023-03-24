@@ -106,7 +106,7 @@ public class NotificationsTest extends BaseTest {
     @Test
     public void notifyHwfSuccessful() throws Exception {
         stubForNotification(NOTIFY_HWF_SUCCESSFUL_CONTEXT_PATH, HttpStatus.OK.value());
-        when(assignCaseAccessService.getUserRoles(any())).thenReturn(CaseAssignmentUserRolesResource.builder()
+        when(assignCaseAccessService.searchUserRoles(any())).thenReturn(CaseAssignmentUserRolesResource.builder()
             .caseAssignmentUserRoles(List.of(CaseAssignmentUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
             .build());
         webClient.perform(MockMvcRequestBuilders.post(HWF_SUCCESSFUL_URL)
@@ -123,7 +123,7 @@ public class NotificationsTest extends BaseTest {
     @Test
     public void notifyConsentOrderAvailable() throws Exception {
         stubForNotification(NOTIFY_CONSENT_ORDER_AVAILABLE_CONTEXT_PATH, HttpStatus.OK.value());
-        when(assignCaseAccessService.getUserRoles(any())).thenReturn(CaseAssignmentUserRolesResource.builder()
+        when(assignCaseAccessService.searchUserRoles(any())).thenReturn(CaseAssignmentUserRolesResource.builder()
             .caseAssignmentUserRoles(List.of(CaseAssignmentUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
             .build());
         webClient.perform(MockMvcRequestBuilders.post(CONSENT_ORDER_AVAILABLE_URL)
@@ -140,7 +140,7 @@ public class NotificationsTest extends BaseTest {
     @Test
     public void notifyConsentOrderNotApproved() throws Exception {
         stubForNotification(NOTIFY_CONSENT_ORDER_NOT_APPROVED_CONTEXT_PATH, HttpStatus.OK.value());
-        when(assignCaseAccessService.getUserRoles(any())).thenReturn(CaseAssignmentUserRolesResource.builder()
+        when(assignCaseAccessService.searchUserRoles(any())).thenReturn(CaseAssignmentUserRolesResource.builder()
             .caseAssignmentUserRoles(List.of(CaseAssignmentUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
             .build());
         webClient.perform(MockMvcRequestBuilders.post(CONSENT_ORDER_NOT_APPROVED_URL)
@@ -157,10 +157,10 @@ public class NotificationsTest extends BaseTest {
     @Test
     public void notifyAssignToJudge() throws Exception {
         stubForNotification(NOTIFY_ASSIGN_TO_JUDGE_CONTEXT_PATH, HttpStatus.OK.value());
-        when(assignCaseAccessService.getUserRoles(any())).thenReturn(CaseAssignmentUserRolesResource.builder()
+        when(assignCaseAccessService.searchUserRoles(any())).thenReturn(CaseAssignmentUserRolesResource.builder()
             .caseAssignmentUserRoles(List.of(CaseAssignmentUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
             .build());
-        when(assignCaseAccessService.getUserRoles(any())).thenReturn(CaseAssignmentUserRolesResource.builder()
+        when(assignCaseAccessService.searchUserRoles(any())).thenReturn(CaseAssignmentUserRolesResource.builder()
             .caseAssignmentUserRoles(List.of(CaseAssignmentUserRole.builder().caseRole(RESP_SOLICITOR_POLICY).build()))
             .build());
         webClient.perform(MockMvcRequestBuilders.post(ASSIGNED_TO_JUDGE_URL)
@@ -177,7 +177,7 @@ public class NotificationsTest extends BaseTest {
     @Test
     public void notifyNoticeOfChange() throws Exception {
         stubForNotification(NOTIFY_NOTICE_OF_CHANGE_CONTEXT_PATH, HttpStatus.OK.value());
-        when(assignCaseAccessService.getUserRoles(any())).thenReturn(CaseAssignmentUserRolesResource.builder()
+        when(assignCaseAccessService.searchUserRoles(any())).thenReturn(CaseAssignmentUserRolesResource.builder()
             .caseAssignmentUserRoles(List.of(CaseAssignmentUserRole.builder().caseRole(APP_SOLICITOR_POLICY).build()))
             .build());
         webClient.perform(MockMvcRequestBuilders.post(NOTICE_OF_CHANGE_URL)

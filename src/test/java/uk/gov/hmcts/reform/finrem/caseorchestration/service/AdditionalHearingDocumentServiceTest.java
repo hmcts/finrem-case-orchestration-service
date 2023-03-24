@@ -194,7 +194,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         assertThat(data.get("HearingDate"), is("2021-01-01"));
         assertThat(data.get("HearingLength"), is("1 hour"));
         assertThat(data.get("HearingTime"), is("15:00"));
-        assertThat(data.get("AdditionalHearingDated"), is(notNullValue()));
+        assertThat(data.get("AdditionalHearingDated"), is(formattedNowDate));
 
         assertThat(data.get("CourtName"), is("Nottingham County Court And Family Court"));
         assertThat(data.get("CourtAddress"), is("60 Canal Street, Nottingham NG1 7EJ"));
