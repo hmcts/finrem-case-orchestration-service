@@ -1,12 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.spreadsheet;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -120,18 +118,6 @@ public class FinremCaseDataTest {
     }
 
     public void getFile(String fileUrl, String fileName) throws IOException {
-//        try (BufferedInputStream in = new BufferedInputStream(new URL(fileUrl).openStream());
-//             FileOutputStream fileOutputStream = new FileOutputStream(fileName)) {
-//            byte dataBuffer[] = new byte[1024];
-//            int bytesRead;
-//            while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
-//                fileOutputStream.write(dataBuffer, 0, bytesRead);
-//            }
-//        } catch (IOException e) {
-//            log.error("Error downloading file: {}", e.getMessage());
-//        }
-
-
         URL url = new URL(fileUrl);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
@@ -153,14 +139,7 @@ public class FinremCaseDataTest {
             entry = zipIn.getNextEntry();
 
         }
-
-//
-//        FileUtils.copyURLToFile(
-//            new URL(fileUrl),
-//            new File(fileName),
-//            10000,
-//            10000);
-//    }
+    }
 
     private void validateState(File configFile) throws IOException, InvalidFormatException {
         CCDConfigValidator ccdConfigValidator = new CCDConfigValidator();
@@ -172,5 +151,6 @@ public class FinremCaseDataTest {
         assert errors.isEmpty();
     }
 }
+
 
 
