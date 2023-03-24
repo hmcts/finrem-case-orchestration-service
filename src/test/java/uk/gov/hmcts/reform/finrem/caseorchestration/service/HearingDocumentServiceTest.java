@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.FinremAdditionalHearingCorresponder;
 
 import java.util.HashMap;
 import java.util.List;
@@ -89,6 +90,8 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
     @Autowired
     private HearingDocumentService hearingDocumentService;
+    @MockBean
+    private FinremAdditionalHearingCorresponder finremAdditionalHearingCorresponder;
     @Autowired
     private DocumentConfiguration documentConfiguration;
 

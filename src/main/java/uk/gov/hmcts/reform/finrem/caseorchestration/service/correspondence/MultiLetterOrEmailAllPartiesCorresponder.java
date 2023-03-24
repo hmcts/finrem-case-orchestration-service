@@ -7,7 +7,7 @@ import java.util.List;
 
 public abstract class MultiLetterOrEmailAllPartiesCorresponder<D> extends EmailAndLettersCorresponderBase<D> {
 
-    public void sendCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
+    public void sendCorrespondence(D caseDetails, String authorisationToken) {
         sendApplicantCorrespondence(authorisationToken, caseDetails);
         sendRespondentCorrespondence(authorisationToken, caseDetails);
     }

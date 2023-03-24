@@ -9,8 +9,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -32,6 +34,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class ContestedHearingServiceTest extends BaseServiceTest {
 
 
+
     @Autowired
     private ContestedHearingService contestedHearingService;
     @MockBean
@@ -50,30 +53,28 @@ public class ContestedHearingServiceTest extends BaseServiceTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private static final String PATH = "/fixtures/validate-hearing-successfully/";
+
+    private static final String CONTESTED_CASE_WITH_FAST_TRACK_HEARING  = "/fixtures/contested/validate-hearing-with-fastTrackDecision.json";
     private static final String fastTrack = "/fixtures/contested/validate-hearing-with-fastTrackDecision.json/";
     private static final String HEARING_TEST_PAYLOAD = "/fixtures/contested/hearing-with-case-details-before.json";
     private static final String AUTH_TOKEN = "tokien:)";
     public static final String HEARING_ADDITIONAL_DOC = "additionalListOfHearingDocuments";
-    private CallbackRequest callbackRequest;
+    private FinremCallbackRequest callbackRequest;
 
 
     @Before
-    public void init() {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        CaseDocument caseDocument = objectMapper.convertValue(caseDetails.getData().get(HEARING_ADDITIONAL_DOC),
-            CaseDocument.class);
-        //List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails, fastTrackWarningsList, nonFastTrackWarningsList);
+    public void init() throws Exception {
+        callbackRequest = buildFinremCallbackRequest(CONTESTED_CASE_WITH_FAST_TRACK_HEARING);
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
     }
 
 
     @Test
     public void givenContestedHearing_whenNot_PrepareForHearing_thenItShouldNotGenerateAndSendInitalCorrespondence() throws JsonProcessingException {
-        CaseDetails caseDetails = buildCaseDetails(HEARING_TEST_PAYLOAD);
-        CaseDetails caseDetailsBefore = buildCaseDetails(HEARING_TEST_PAYLOAD);
+        FinremCaseDetails caseDetails = buildCaseDetails(HEARING_TEST_PAYLOAD);
+        FinremCaseDetails caseDetailsBefore = buildCaseDetails(HEARING_TEST_PAYLOAD);
         when(additionalHearingDocumentService.convertToPdf(any(), any())).thenReturn(caseDocument());
-        when(caseDataService.isContestedApplication(caseDetails)).thenReturn(true);
-        when(caseDataService.isContestedApplication(caseDetailsBefore)).thenReturn(true);
 
         contestedHearingService.prepareForHearing(callbackRequest, AUTH_TOKEN);
 
@@ -135,9 +136,9 @@ public class ContestedHearingServiceTest extends BaseServiceTest {
 //    }
 
 
-    private CaseDetails buildCaseDetails(String testPayload) {
+    private FinremCaseDetails buildCaseDetails(String testPayload) {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(testPayload)) {
-            return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+            return objectMapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

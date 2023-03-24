@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollec
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.AdditionalHearingCorresponder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.FinremAdditionalHearingCorresponder;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -64,6 +65,7 @@ public class AdditionalHearingDocumentService {
     private final CaseDataService caseDataService;
     private final NotificationService notificationService;
     private final AdditionalHearingCorresponder additionalHearingCorresponder;
+    private final FinremAdditionalHearingCorresponder finremAdditionalHearingCorresponder;
     private final AdditionalHearingDetailsMapper additionalHearingDetailsMapper;
 
     @Deprecated
@@ -118,7 +120,7 @@ public class AdditionalHearingDocumentService {
     }
 
     public void sendAdditionalHearingDocuments(String authorisationToken, FinremCaseDetails caseDetails) {
-        additionalHearingCorresponder.sendCorrespondence(caseDetails, authorisationToken);
+        finremAdditionalHearingCorresponder.sendCorrespondence(caseDetails, authorisationToken);
     }
 
     public void createAndStoreAdditionalHearingDocumentsFromApprovedOrder(String authorisationToken, CaseDetails caseDetails) {
