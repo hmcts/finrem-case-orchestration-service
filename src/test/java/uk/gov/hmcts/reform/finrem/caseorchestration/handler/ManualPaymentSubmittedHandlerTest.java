@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ManualPaymentDocumen
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
@@ -36,41 +37,49 @@ class ManualPaymentSubmittedHandlerTest {
     private BulkPrintService printService;
 
     @Test
-    void givenContestedCase_whenCaseTypeIsConsented_thenHandlerWillNotHandle() {
+    void givenContestedPaperCase_whenCaseTypeIsConsented_thenHandlerWillNotHandle() {
         assertThat(handler
                 .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.MANUAL_PAYMENT),
             is(false));
     }
 
     @Test
-    void givenContestedCase_whenCallbackIsAboutToSubmit_thenHandlerWillNotHandle() {
+    void givenContestedPaperCase_whenCallbackIsAboutToSubmit_thenHandlerWillNotHandle() {
         assertThat(handler
                 .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.MANUAL_PAYMENT),
             is(false));
     }
 
     @Test
-    void givenContestedCase_whenWrongEvent_thenHandlerWillNotHandle() {
+    void givenContestedPaperCase_whenWrongEvent_thenHandlerWillNotHandle() {
         assertThat(handler
                 .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.CLOSE),
             is(false));
     }
 
     @Test
-    void givenContestedCase_whenAllCorrect_thenHandlerWillHandle() {
+    void givenContestedPaperCase_whenAllCorrect_thenHandlerWillHandle() {
         assertThat(handler
                 .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.MANUAL_PAYMENT),
             is(true));
     }
 
     @Test
-    void givenContestedCase_whenUseIssueApplicationAndIssueDateEnteredManually_thenHandle() {
+    void givenContestedPaperCase_whenManualPaymentEventInvoke_thenSendToBulkPrinte() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         when(service.generateManualPaymentLetter(finremCallbackRequest.getCaseDetails(),
             AUTH_TOKEN, APPLICANT)).thenReturn(caseDocument());
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(printService).sendDocumentForPrint(any(CaseDocument.class), any(FinremCaseDetails.class));
     }
+
+    @Test
+    void givenContestedCase_whenManualPaymentEventInvoke_thenDoNotSendToBulkPrint() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        verify(printService, never()).sendDocumentForPrint(any(CaseDocument.class), any(FinremCaseDetails.class));
+    }
+
 
     private FinremCallbackRequest buildCallbackRequest() {
         return FinremCallbackRequest
