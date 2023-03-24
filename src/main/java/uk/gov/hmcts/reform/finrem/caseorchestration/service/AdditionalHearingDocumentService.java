@@ -113,6 +113,10 @@ public class AdditionalHearingDocumentService {
         data.setAdditionalHearingDocuments(additionalHearingDocumentDataList);
     }
 
+    public void sendAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
+        additionalHearingCorresponder.sendCorrespondence(caseDetails, authorisationToken);
+    }
+
     public void sendAdditionalHearingDocuments(String authorisationToken, FinremCaseDetails caseDetails) {
         additionalHearingCorresponder.sendCorrespondence(caseDetails, authorisationToken);
     }

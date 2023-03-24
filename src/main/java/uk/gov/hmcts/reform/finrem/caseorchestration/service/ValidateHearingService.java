@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.time.LocalDate;
@@ -40,7 +41,7 @@ public class ValidateHearingService {
             ? List.of(REQUIRED_FIELD_EMPTY_ERROR) : List.of();
     }
 
-    public List<String> validateHearingWarnings(FinremCaseDetails caseDetails, List<String> fastTrackWarningsList,
+    public List<String> validateHearingWarnings(CaseDetails caseDetails, List<String> fastTrackWarningsList,
                                                 List<String>  nonFastTrackWarningsList) {
         Map<String, Object> caseData = caseDetails.getData();
         String issueDate = Objects.toString(caseData.get(ISSUE_DATE), "");
@@ -51,6 +52,26 @@ public class ValidateHearingService {
 
         boolean fastTrackApplication = isFastTrackApplication.apply(caseData);
         if (fastTrackApplication) {
+            if (!isDateInBetweenIncludingEndPoints(issueLocalDate.plusWeeks(6), issueLocalDate.plusWeeks(10),
+                hearingLocalDate)) {
+                fastTrackWarningsList.add(DATE_BETWEEN_6_AND_10_WEEKS);
+                return fastTrackWarningsList;
+            }
+        } else if (!isDateInBetweenIncludingEndPoints(issueLocalDate.plusWeeks(12), issueLocalDate.plusWeeks(16),
+            hearingLocalDate)) {
+            nonFastTrackWarningsList.add(DATE_BETWEEN_12_AND_16_WEEKS);
+            return nonFastTrackWarningsList;
+        }
+        return List.of();
+    }
+
+    public List<String> validateHearingWarnings(FinremCaseDetails caseDetails, List<String> fastTrackWarningsList,
+                                                List<String>  nonFastTrackWarningsList) {
+        FinremCaseData caseData = caseDetails.getData();
+        LocalDate issueLocalDate = caseData.getIssueDate();
+        LocalDate hearingLocalDate = caseData.getHearingDate();
+
+        if (caseData.isFastTrackApplication()) {
             if (!isDateInBetweenIncludingEndPoints(issueLocalDate.plusWeeks(6), issueLocalDate.plusWeeks(10),
                 hearingLocalDate)) {
                 fastTrackWarningsList.add(DATE_BETWEEN_6_AND_10_WEEKS);

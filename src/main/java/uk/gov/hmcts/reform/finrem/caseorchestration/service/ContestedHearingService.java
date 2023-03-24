@@ -5,18 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ADDITIONAL_DOC;
 
 @Component
 @RequiredArgsConstructor
@@ -28,7 +22,6 @@ public class ContestedHearingService {
     private final FinremHearingDocumentService hearingDocumentService;
     private final ValidateHearingService validateHearingService;
     private final CaseDataService caseDataService;
-
 
     private List<String> nonFastTrackWarningsList = new ArrayList<>();
     private List<String> fastTrackWarningsList = new ArrayList<>();
@@ -47,13 +40,13 @@ public class ContestedHearingService {
                 additionalHearingDocumentService.createAdditionalHearingDocuments(authorisationToken, caseDetails);
             }
         } else {
-            caseDetails.getData().getAdditionalListOfHearingDocuments(hearingDocumentService.generateHearingDocuments(authorisationToken, caseDetails));
+            hearingDocumentService.generateHearingDocuments(authorisationToken, caseDetails);
         }
 
         List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails, fastTrackWarningsList, nonFastTrackWarningsList);
-        log.info("Hearing date warning {} Case ID: {}",warnings, caseDetails.getId());
+        log.info("Hearing date warning {} Case ID: {}", warnings, caseDetails.getId());
         if ((warnings.isEmpty() || fastTrackWarningsList.size() > 1 || nonFastTrackWarningsList.size() > 1)
-            && caseDataService.isContestedApplication(caseDetails)) {
+            && caseDetails.getData().isContestedApplication()) {
             if (caseDetailsBefore != null && hearingDocumentService.alreadyHadFirstHearing(caseDetailsBefore)) {
                 log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
                 additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, caseDetails);

@@ -324,7 +324,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(additionalHearingDocumentService).sendAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
+        verify(additionalHearingDocumentService).sendAdditionalHearingDocuments(eq(AUTH_TOKEN), any(CaseDetails.class));
     }
 
     @Test
@@ -340,7 +340,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(additionalHearingDocumentService).sendAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
+        verify(additionalHearingDocumentService).sendAdditionalHearingDocuments(eq(AUTH_TOKEN), any(CaseDetails.class));
         verify(additionalHearingDocumentService).convertToPdf(any(), eq(AUTH_TOKEN));
     }
 
