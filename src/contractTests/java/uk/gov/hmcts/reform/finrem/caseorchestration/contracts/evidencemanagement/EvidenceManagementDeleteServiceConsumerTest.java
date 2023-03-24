@@ -2,30 +2,21 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.contracts.evidencemanagemen
 
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.junit.PactProviderRule;
-import au.com.dius.pact.consumer.junit.PactVerification;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import org.apache.http.HttpStatus;
 import org.json.JSONException;
 import org.junit.Rule;
-import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDeleteService;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.io.IOException;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.BDDMockito.given;
 
 @SpringBootTest
 public class EvidenceManagementDeleteServiceConsumerTest extends BaseTest {
@@ -69,18 +60,5 @@ public class EvidenceManagementDeleteServiceConsumerTest extends BaseTest {
             .willRespondWith()
             .status(HttpStatus.SC_NO_CONTENT)
             .toPact();
-    }
-
-    @Test
-    @PactVerification()
-    public void verifyDocumentDeletedInDmStore() throws Exception {
-        final UserDetails userDetails = UserDetails.builder().id(USER_ID_VALUE).build();
-        given(userService.getUserDetails(anyString())).willReturn(userDetails);
-        given(authTokenGenerator.generate()).willReturn(someServiceAuthToken);
-
-        final ResponseEntity<String> responseFromOperation = evidenceManagementDeleteService
-            .deleteFile("http://localhost:8889" + DELETE_FILE_URL, authorizationToken);
-        assertNotNull(responseFromOperation);
-        assertTrue(responseFromOperation.getStatusCode().value() == HttpStatus.SC_NO_CONTENT);
     }
 }

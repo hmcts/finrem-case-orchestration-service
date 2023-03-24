@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -20,6 +19,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.document.am.model.Document;
+import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
@@ -31,7 +32,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -42,7 +45,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static java.nio.file.Files.readAllBytes;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -63,10 +65,12 @@ public abstract class AbstractDocumentTest extends BaseTest {
     protected static final String GENERATE_DOCUMENT_CONTEXT_PATH = "/rs/render";
     protected static final String SEND_LETTERS_CONTEXT_PATH = "/letters";
 
-    protected static final String UPLOAD_DOCUMENT_CONTEXT_PATH = "/documents";
+    protected static final String UPLOAD_DOCUMENT_CONTEXT_PATH = "/cases/documents";
     private static final String TEMP_URL = "http://doc1";
     private static final String DELETE_DOCUMENT_CONTEXT_PATH = "/version/1/delete-pdf-document";
     private static final String IDAM_SERVICE_CONTEXT_PATH = "/details";
+
+    private static final String IDAM_SERVICE_USER_INFO = "/o/userinfo";
 
     @Autowired
     protected ObjectMapper objectMapper;
@@ -87,7 +91,7 @@ public abstract class AbstractDocumentTest extends BaseTest {
     public static WireMockClassRule documentGeneratorService = new WireMockClassRule(4001);
 
     @ClassRule
-    public static WireMockClassRule evidenceManagementService = new WireMockClassRule(3405);
+    public static WireMockClassRule evidenceManagementService = new WireMockClassRule(4455);
 
     @ClassRule
     public static WireMockClassRule idamService = new WireMockClassRule(4501);
@@ -132,10 +136,32 @@ public abstract class AbstractDocumentTest extends BaseTest {
                 .withBody(objectMapper.writeValueAsString(getResponse()))));
     }
 
+    private UploadResponse getResponse() {
+        Document document = buildDocument();
+        return new UploadResponse(Arrays.asList(document));
+    }
 
-    private ObjectNode getResponse() throws IOException {
-        final String response = new String(readAllBytes(Paths.get("src/test/resources/fixtures/fileuploadresponseGenerateMiniFormATest.json")));
-        return (ObjectNode) new ObjectMapper().readTree(response);
+    private Document buildDocument() {
+        Date dateToUse = java.sql.Timestamp.valueOf(LocalDateTime.of(2021, 11, 2, 12, 25, 30, 1234));
+        Document document = Document.builder()
+            .createdOn(dateToUse)
+            .createdBy("someUser")
+            .lastModifiedBy("someUser")
+            .modifiedOn(dateToUse)
+            .originalDocumentName("app_docs.pdf")
+            .mimeType("application/pdf")
+            .links(getLinks())
+            .build();
+        return document;
+    }
+
+    private Document.Links getLinks() {
+        Document.Links links = new Document.Links();
+        links.binary = new Document.Link();
+        links.self = new Document.Link();
+        links.binary.href = "http://dm-store/lhjbyuivu87y989hijbb/binary";
+        links.self.href = "http://dm-store/lhjbyuivu87y989hijbb";
+        return links;
     }
 
     void generateDocumentServiceSuccessStub() throws JsonProcessingException {
@@ -183,6 +209,12 @@ public abstract class AbstractDocumentTest extends BaseTest {
     void idamServiceStub() {
         idamService.stubFor(get(urlPathEqualTo(IDAM_SERVICE_CONTEXT_PATH))
             .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withBody("{\"roles\": [\"caseworker-divorce-financialremedy-courtadmin\"]}")));
+
+        idamService.stubFor(get(urlPathEqualTo(IDAM_SERVICE_USER_INFO))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)

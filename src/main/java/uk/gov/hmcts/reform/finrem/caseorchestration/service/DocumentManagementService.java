@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.FinremMultipartFile;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
@@ -36,7 +37,7 @@ public class DocumentManagementService {
     }
 
     public void deleteDocument(String fileUrl, String authToken) {
-        evidenceManagementDeleteService.deleteFile(fileUrl, authToken);
+        evidenceManagementDeleteService.delete(fileUrl, authToken);
     }
 
     public Document storeDocument(String templateName,
@@ -46,14 +47,14 @@ public class DocumentManagementService {
         log.info("Generate and Store Document requested with templateName [{}], placeholders of size [{}]",
             templateName, placeholders.size());
 
-        String caseId = (String) placeholders.get("id");
+        String caseId = ((CaseDetails) placeholders.get("caseDetails")).getId().toString();
         return storeDocument(
             generateDocumentFrom(templateName, placeholders),
             fileName, caseId,
             authorizationToken);
     }
 
-    public Document storeDocument(byte[] document, String fileName, String authorizationToken, String caseId) {
+    public Document storeDocument(byte[] document, String fileName, String caseId, String authorizationToken) {
         log.info("Store document requested with document of size [{}]", document.length);
 
         FinremMultipartFile multipartFile = FinremMultipartFile.builder()

@@ -55,6 +55,6 @@ public class DocumentManagementServiceTest {
     @Test
     public void deleteDocument() {
         service.deleteDocument(FILE_URL, AUTH_TOKEN);
-        verify(evidenceManagementDeleteService).deleteFile(FILE_URL, AUTH_TOKEN);
+        verify(evidenceManagementDeleteService).delete(FILE_URL, AUTH_TOKEN);
     }
 }

@@ -63,6 +63,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RunWith(MockitoJUnitRunner.class)
 public class SendOrderContestedAboutToSubmitHandlerTest {
 
+    public static final String CASE_ID = "123";
     @InjectMocks
     private SendOrderContestedAboutToSubmitHandler sendOrderContestedAboutToSubmitHandler;
     @Mock
@@ -265,7 +266,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response =
             sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 
-        verify(genericDocumentService).stampDocument(caseDocument(), AUTH_TOKEN, any());
+        verify(genericDocumentService).stampDocument(caseDocument(), AUTH_TOKEN, CASE_ID);
 
         List<HearingOrderCollectionData> expectedFinalOrderCollection =
             (List<HearingOrderCollectionData>) response.getData().get(FINAL_ORDER_COLLECTION);
@@ -286,20 +287,24 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
     @Test
     public void givenFinalOrderSuccessWithFinalOrder_WhenHandle_ThenStampDocument() {
         mockDocumentHelperToReturnDefaultExpectedDocuments();
-        when(documentHelper.getFinalOrderDocuments(any())).thenReturn(new ArrayList<>(List.of(HearingOrderCollectionData.builder().build())));
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(isA(CaseDocument.class), eq(AUTH_TOKEN), anyString())).thenReturn(caseDocument());
-        when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN), anyString())).thenReturn(caseDocument());
+        when(documentHelper.getFinalOrderDocuments(any()))
+            .thenReturn(new ArrayList<>(List.of(HearingOrderCollectionData.builder().build())));
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(isA(CaseDocument.class), eq(AUTH_TOKEN), anyString()))
+            .thenReturn(caseDocument());
+        when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN), anyString()))
+            .thenReturn(caseDocument());
 
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response =
             sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 
-        verify(genericDocumentService).stampDocument(caseDocument(), AUTH_TOKEN, anyString());
+        verify(genericDocumentService).stampDocument(caseDocument(), AUTH_TOKEN, CASE_ID);
 
         List<HearingOrderCollectionData> expectedFinalOrderCollection =
             (List<HearingOrderCollectionData>) response.getData().get(FINAL_ORDER_COLLECTION);
 
         assertThat(expectedFinalOrderCollection, hasSize(2));
-        assertThat(expectedFinalOrderCollection.get(1).getHearingOrderDocuments().getUploadDraftDocument(), is(caseDocument()));
+        assertThat(expectedFinalOrderCollection.get(1).getHearingOrderDocuments().getUploadDraftDocument(),
+            is(caseDocument()));
     }
 
     private void mockDocumentHelperToReturnDefaultExpectedDocuments() {
@@ -331,7 +336,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
     private CallbackRequest getEmptyCallbackRequest() {
         return CallbackRequest
             .builder()
-            .caseDetails(CaseDetails.builder().data(new HashMap<>()).build())
+            .caseDetails(CaseDetails.builder().id(123L).data(new HashMap<>()).build())
             .build();
 
     }

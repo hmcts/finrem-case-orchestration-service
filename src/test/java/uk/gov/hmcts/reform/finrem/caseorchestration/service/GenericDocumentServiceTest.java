@@ -96,7 +96,7 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
     public void shouldDeleteDocument() {
         genericDocumentService.deleteDocument(caseDocument().getDocumentUrl(), AUTH_TOKEN);
 
-        verify(evidenceManagementDeleteService, times(1)).deleteFile(caseDocument().getDocumentUrl(), AUTH_TOKEN);
+        verify(evidenceManagementDeleteService, times(1)).delete(caseDocument().getDocumentUrl(), AUTH_TOKEN);
     }
 
     @Test

@@ -16,7 +16,6 @@ import java.util.List;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -32,8 +31,10 @@ public class EvidenceManagementClientControllerTest extends BaseControllerTest {
     private static final String REQUEST_ID_HEADER = "requestId";
     private static final String CONTENT_TYPE_HEADER = "content-type";
     private static final String EM_CLIENT_UPLOAD_URL = "http://localhost/case-orchestration/emclientapi/upload";
+    public static final String CASE_ID = "123123123";
 
     @MockBean private EvidenceManagementUploadService emUploadService;
+    private static final String CASE_ID_HEADER = "caseTypeId";
 
     @Test
     public void shouldUploadFileTokenWhenHandleFileUploadIsInvokedWithValidInputs() throws Exception {
@@ -45,6 +46,7 @@ public class EvidenceManagementClientControllerTest extends BaseControllerTest {
         mvc.perform(multipart(EM_CLIENT_UPLOAD_URL)
                 .file(file)
                 .header(AUTHORIZATION_TOKEN_HEADER, AUTH_TOKEN)
+                .header(CASE_ID_HEADER, CASE_ID)
                 .header(CONTENT_TYPE_HEADER, MediaType.MULTIPART_FORM_DATA))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].fileUrl", is("http://localhost:8080/documents/6")))
@@ -56,7 +58,7 @@ public class EvidenceManagementClientControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$[0].mimeType", is(MediaType.TEXT_PLAIN_VALUE)))
             .andExpect(jsonPath("$[0].status", is("OK")));
 
-        verify(emUploadService).upload(multipartFileList, AUTH_TOKEN, anyString());
+        verify(emUploadService).upload(multipartFileList, CASE_ID, AUTH_TOKEN);
     }
 
     private List<FileUploadResponse> prepareFileUploadResponse() {

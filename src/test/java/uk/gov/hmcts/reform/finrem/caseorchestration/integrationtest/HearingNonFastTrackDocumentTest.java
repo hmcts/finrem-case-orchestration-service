@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
@@ -28,6 +27,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.document.am.model.Document;
+import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
@@ -39,10 +40,12 @@ import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -54,7 +57,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static java.nio.file.Files.readAllBytes;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -83,8 +85,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHeari
 public class HearingNonFastTrackDocumentTest extends BaseTest {
     private static final String IDAM_SERVICE_CONTEXT_PATH = "/details";
     private static final String GENERATE_DOCUMENT_CONTEXT_PATH = "/rs/render";
-    protected static final String UPLOAD_DOCUMENT_CONTEXT_PATH = "/documents";
-
+    protected static final String UPLOAD_DOCUMENT_CONTEXT_PATH = "/cases/documents";
+    private static final String IDAM_SERVICE_USER_INFO = "/o/userinfo";
     protected static final String SEND_LETTER_CONTEXT_PATH = "/letters";
 
     private static final String API_URL = "/case-orchestration/documents/hearing";
@@ -101,7 +103,7 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
     public static WireMockClassRule sendLetterService = new WireMockClassRule(4002);
 
     @ClassRule
-    public static WireMockClassRule dmStoreService = new WireMockClassRule(3405);
+    public static WireMockClassRule dmStoreService = new WireMockClassRule(4455);
 
     @ClassRule
     public static WireMockClassRule documentGeneratorBulkPrintService = new WireMockClassRule(4009);
@@ -285,7 +287,7 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                .withBody(objectMapper.writeValueAsString(document()))));
+                .withBody(objectMapper.writeValueAsString(getResponse()))));
     }
 
     private void generateDocumentServiceErrorStub(PdfDocumentRequest documentRequest) throws JsonProcessingException {
@@ -301,6 +303,12 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
     private void idamServiceStub() {
         idamService.stubFor(get(urlPathEqualTo(IDAM_SERVICE_CONTEXT_PATH))
             .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withBody("{\"roles\": [\"caseworker-divorce-financialremedy-courtadmin\"]}")));
+
+        idamService.stubFor(get(urlPathEqualTo(IDAM_SERVICE_USER_INFO))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
@@ -324,8 +332,31 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
                 .withBody(objectMapper.writeValueAsString(new SendLetterResponse(UUID.randomUUID())))));
     }
 
-    private ObjectNode getResponse() throws IOException {
-        final String response = new String(readAllBytes(Paths.get("src/test/resources/fixtures/fileuploadresponseGenerateMiniFormATest.json")));
-        return (ObjectNode) new ObjectMapper().readTree(response);
+    private UploadResponse getResponse() {
+        Document document = buildDocument();
+        return new UploadResponse(Arrays.asList(document));
+    }
+
+    private Document buildDocument() {
+        Date dateToUse = java.sql.Timestamp.valueOf(LocalDateTime.of(2021, 11, 2, 12, 25, 30, 1234));
+        Document document = Document.builder()
+            .createdOn(dateToUse)
+            .createdBy("someUser")
+            .lastModifiedBy("someUser")
+            .modifiedOn(dateToUse)
+            .originalDocumentName("app_docs.pdf")
+            .mimeType("application/pdf")
+            .links(getLinks())
+            .build();
+        return document;
+    }
+
+    private Document.Links getLinks() {
+        Document.Links links = new Document.Links();
+        links.binary = new Document.Link();
+        links.self = new Document.Link();
+        links.binary.href = "http://dm-store/lhjbyuivu87y989hijbb/binary";
+        links.self.href = "http://dm-store/lhjbyuivu87y989hijbb";
+        return links;
     }
 }
