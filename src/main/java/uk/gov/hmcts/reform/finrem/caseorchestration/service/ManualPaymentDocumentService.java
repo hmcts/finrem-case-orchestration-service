@@ -36,8 +36,6 @@ public class ManualPaymentDocumentService {
             documentConfiguration.getManualPaymentFileName());
 
         log.info("Generated Manual Payment Letter to {}: {}", recipient, manualPaymentLetter);
-
-
         return manualPaymentLetter;
     }
 }

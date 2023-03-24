@@ -54,7 +54,7 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void generateManualPaymentLetter() throws Exception {
+    public void shouldGenerateManualPaymentLetterForApplicantSolicitor() throws Exception {
         finremCaseDetails = contestedPaperFinremCaseDetails();
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
 
