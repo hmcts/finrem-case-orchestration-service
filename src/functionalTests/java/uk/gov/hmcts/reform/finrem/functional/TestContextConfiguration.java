@@ -33,10 +33,12 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
 import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClientApi;
 
 @Configuration
-@ComponentScan("uk.gov.hmcts.reform.finrem.functional")
-@EnableFeignClients(basePackageClasses = ServiceAuthorisationApi.class)
+@ComponentScan("uk.gov.hmcts")
+@EnableFeignClients(basePackageClasses = {ServiceAuthorisationApi.class,
+    CaseDocumentClientApi.class, ServiceAuthorisationApi.class})
 @PropertySource(value = {"classpath:application.properties"})
 @PropertySource(value = {"classpath:application-${env}.properties"})
 @Slf4j
