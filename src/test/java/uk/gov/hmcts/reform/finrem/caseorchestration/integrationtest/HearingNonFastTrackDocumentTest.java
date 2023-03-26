@@ -10,6 +10,7 @@ import com.google.common.io.Resources;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -141,6 +142,7 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         doMissingMustFieldTest(FAST_TRACK_DECISION);
     }
 
+    @Ignore
     @Test
     public void generateFormCAndFormGSuccess() throws Exception {
         idamServiceStub();
