@@ -9,7 +9,9 @@ import org.springframework.web.filter.CommonsRequestLoggingFilter;
 import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClientApi;
 
-@SpringBootApplication(scanBasePackages = "uk.gov.hmcts")
+@SpringBootApplication(scanBasePackages = {
+    "uk.gov.hmcts.reform.finrem", "uk.gov.hmcts.reform.bsp.common", "uk.gov.hmcts.reform.ccd.document.am.feign"
+})
 @EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.idam.client", "uk.gov.hmcts.reform.finrem"},
     basePackageClasses = {CaseDocumentClientApi.class, ServiceAuthorisationApi.class})
 @EnableCaching
