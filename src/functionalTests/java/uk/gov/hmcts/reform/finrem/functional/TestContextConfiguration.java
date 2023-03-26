@@ -37,7 +37,8 @@ import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClientApi;
 
 @Configuration
 @ComponentScan({"uk.gov.hmcts.reform.finrem.functional", "uk.gov.hmcts.reform.ccd.document.am.feign"})
-@EnableFeignClients(basePackageClasses = {ServiceAuthorisationApi.class, CaseDocumentClientApi.class})
+@EnableFeignClients(basePackages = "uk.gov.hmcts.reform.idam.client",
+    basePackageClasses = {ServiceAuthorisationApi.class, CaseDocumentClientApi.class})
 @PropertySource(value = {"classpath:application.properties"})
 @PropertySource(value = {"classpath:application-${env}.properties"})
 @Slf4j
