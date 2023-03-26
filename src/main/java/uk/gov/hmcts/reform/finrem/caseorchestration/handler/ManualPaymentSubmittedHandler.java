@@ -46,7 +46,7 @@ public class ManualPaymentSubmittedHandler extends FinremCallbackHandler {
             EventType.MANUAL_PAYMENT, caseDetails.getId());
         FinremCaseData caseData = caseDetails.getData();
 
-        if (caseData.isContestedPaperApplication()) {
+        if (caseData.isPaperCase()) {
             log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
             CaseDocument caseDocument =
                 service.generateManualPaymentLetter(caseDetails, userAuthorisation, APPLICANT);
