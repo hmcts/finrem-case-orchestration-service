@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocmosisPdfGenerationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentManagementService;
@@ -27,7 +28,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.tes
 public class DocumentManagementServiceTest {
 
     public static final String TEMPLATE_NAME = "templateName";
-    public static final ImmutableMap<String, Object> PLACEHOLDERS = ImmutableMap.of("key", "value");
+    public static final ImmutableMap<String, Object> PLACEHOLDERS =
+        ImmutableMap.of("caseDetails", CaseDetails.builder().id(123L).build());
     private static final String AUTH_TOKEN = "Bearer BBJHJbbIIBHBLB";
     private static final String FILE_NAME = "kbjh87y8y9JHVKKKJVJ";
     private static final String FILE_URL = "http://dm:80/documents/kbjh87y8y9JHVKKKJVJ";

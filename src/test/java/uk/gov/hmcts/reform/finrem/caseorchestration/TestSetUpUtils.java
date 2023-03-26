@@ -76,7 +76,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class TestSetUpUtils {
 
-    public static final String DOC_URL = "http://dm-store/lhjbyuivu87y989hijbb";
+    public static final String DOC_URL = "http://dm-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af64";
     public static final String BINARY_URL = DOC_URL + "/binary";
     public static final String FILE_NAME = "app_docs.pdf";
     public static final String DOC_FILE_NAME = "app_docs.docx";

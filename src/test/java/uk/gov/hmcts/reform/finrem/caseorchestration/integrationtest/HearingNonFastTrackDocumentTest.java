@@ -33,21 +33,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.PdfDocumentRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -65,8 +59,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
@@ -238,30 +230,6 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
                 .build());
     }
 
-    private DocumentGenerationRequest documentRequest(String template, String fileName) {
-        CaseDetails caseDetails = request.getCaseDetails();
-        caseDetails.getData().put("hearingDate", LocalDate.now().plusDays(100));
-        caseDetails.getData().put("issueDate", LocalDate.now());
-        return DocumentGenerationRequest.builder()
-            .template(template)
-            .fileName(fileName)
-            .values(Collections.singletonMap("caseDetails", caseDetails))
-            .build();
-    }
-
-    protected BulkPrintRequest bulkPrintRequest() {
-        List<BulkPrintDocument> caseDocuments = new ArrayList<>();
-        caseDocuments.add(BulkPrintDocument.builder()
-            .binaryFileUrl(BINARY_URL)
-            .fileName(FILE_NAME)
-            .build());
-        return BulkPrintRequest.builder()
-            .caseId("123")
-            .letterType("FINANCIAL_REMEDY_PACK")
-            .bulkPrintDocuments(caseDocuments)
-            .build();
-    }
-
     private void generateDocumentServiceSuccessStub(PdfDocumentRequest documentRequest) throws JsonProcessingException {
         documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
             .withRequestBody(equalToJson(objectMapper.writeValueAsString(pdfGenerationRequest(config.getBulkPrintTemplate())), true, true))
@@ -283,7 +251,7 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
     }
 
     private void generateEvidenceDownloadServiceSuccessStub() throws JsonProcessingException {
-        dmStoreService.stubFor(get(urlMatching("/([a-z1-9]*)/binary"))
+        dmStoreService.stubFor(get(urlMatching("\\/cases\\/documents\\/(.*?)\\/binary"))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
@@ -355,8 +323,10 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         Document.Links links = new Document.Links();
         links.binary = new Document.Link();
         links.self = new Document.Link();
-        links.binary.href = "http://dm-store/lhjbyuivu87y989hijbb/binary";
-        links.self.href = "http://dm-store/lhjbyuivu87y989hijbb";
+        links.binary.href =
+            "http://dm-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af64/binary";
+        links.self.href =
+            "http://dm-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af64";
         return links;
     }
 }

@@ -4,7 +4,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.documentgenerator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpMethod;
@@ -23,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.E
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
@@ -65,7 +65,7 @@ public class DocumentConversionServiceTest {
             .andRespond(withSuccess(CONVERTED_BINARY, MediaType.APPLICATION_OCTET_STREAM));
 
         when(
-            evidenceManagementService.download(ArgumentMatchers.eq(documentToConvert.getBinaryUrl()), AUTH))
+            evidenceManagementService.download(eq(documentToConvert.getBinaryUrl()), eq(AUTH)))
             .thenReturn("bytes".getBytes());
 
         byte[] result = documentConversionService.convertDocumentToPdf(documentToConvert, AUTH);
@@ -80,7 +80,7 @@ public class DocumentConversionServiceTest {
             .andRespond(withSuccess(CONVERTED_BINARY, MediaType.APPLICATION_OCTET_STREAM));
 
         when(
-            evidenceManagementService.download(ArgumentMatchers.eq(documentToConvert.getBinaryUrl()), AUTH))
+            evidenceManagementService.download(eq(documentToConvert.getBinaryUrl()), eq(AUTH)))
             .thenReturn("bytes".getBytes());
 
         documentToConvert.setFileName("file.pdf");

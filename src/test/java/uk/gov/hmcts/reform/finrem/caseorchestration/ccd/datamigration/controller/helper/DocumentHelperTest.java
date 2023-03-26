@@ -67,7 +67,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class DocumentHelperTest {
 
     private static final String PATH = "/fixtures/latestConsentedConsentOrder/";
-    private static final String DOC_URL = "http://dm-store/lhjbyuivu87y989hijbb";
+    private static final String DOC_URL = "http://dm-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af64";
     private static final String BINARY_URL = DOC_URL + "/binary";
     private static final String FILE_NAME = "app_docs.docx";
     private static final String TEST_CASE_ID = "123123";

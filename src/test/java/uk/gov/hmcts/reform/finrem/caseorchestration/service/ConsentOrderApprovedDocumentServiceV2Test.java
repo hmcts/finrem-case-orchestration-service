@@ -42,7 +42,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class ConsentOrderApprovedDocumentServiceV2Test extends BaseServiceTest {
 
     private static final String DEFAULT_COVERSHEET_URL = "defaultCoversheetUrl";
-    private static final String DOC_URL = "http://dm-store/lhjbyuivu87y989hijbb";
+    private static final String DOC_URL = "http://dm-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af64";
     private static final String BINARY_URL = DOC_URL + "/binary";
     private static final String FILE_NAME = "app_docs.docx";
     private static final String CONSENT_ORDER_APPROVED_COVER_LETTER_URL = "consentOrderApprovedCoverLetterUrl";
@@ -93,7 +93,7 @@ public class ConsentOrderApprovedDocumentServiceV2Test extends BaseServiceTest {
     @Test
     public void whenPreparingApplicantLetterPack() throws Exception {
         Mockito.reset(genericDocumentService);
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), caseId)).thenReturn(caseDocument());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(caseDocument());
 
         CaseDetails caseDetailsTemp = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         when(genericDocumentService.generateDocument(any(), any(), any(), any()))
@@ -112,7 +112,7 @@ public class ConsentOrderApprovedDocumentServiceV2Test extends BaseServiceTest {
     @Test
     public void whenPreparingApplicantLetterPack_paperApplication() throws Exception {
         Mockito.reset(genericDocumentService);
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), caseId)).thenReturn(caseDocument());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(caseDocument());
 
         CaseDetails caseDetailsTemp = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         caseDetailsTemp.getData().put(PAPER_APPLICATION, YES_VALUE);

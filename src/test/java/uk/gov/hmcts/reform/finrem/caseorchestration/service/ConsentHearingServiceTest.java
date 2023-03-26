@@ -69,7 +69,7 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
         CaseDetails caseDetails = buildCaseDetails(SINGLE_HEARING_TEST_PAYLOAD);
         CaseDetails caseDetailsBefore = buildCaseDetails(SINGLE_HEARING_TEST_PAYLOAD);
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), caseId)).thenReturn(caseDocument());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(caseDocument());
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
         when(caseDataService.isConsentedApplication(caseDetailsBefore)).thenReturn(true);
 
@@ -87,7 +87,7 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
         CaseDetails caseDetails = buildCaseDetails(MULTIPLE_HEARING_TEST_PAYLOAD);
         CaseDetails caseDetailsBefore = buildCaseDetails(MULTIPLE_HEARING_TEST_PAYLOAD);
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), caseId)).thenReturn(caseDocument());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(caseDocument());
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
         when(caseDataService.isConsentedApplication(caseDetailsBefore)).thenReturn(true);
 
@@ -108,7 +108,7 @@ public class ConsentHearingServiceTest extends BaseServiceTest  {
         when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
         when(caseDataService.isConsentedApplication(caseDetailsBefore)).thenReturn(true);
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), caseId)).thenReturn(caseDocument());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(caseDocument());
 
         service.submitHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 

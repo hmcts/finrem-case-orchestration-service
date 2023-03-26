@@ -159,8 +159,8 @@ public abstract class AbstractDocumentTest extends BaseTest {
         Document.Links links = new Document.Links();
         links.binary = new Document.Link();
         links.self = new Document.Link();
-        links.binary.href = "http://dm-store/lhjbyuivu87y989hijbb/binary";
-        links.self.href = "http://dm-store/lhjbyuivu87y989hijbb";
+        links.binary.href = "http://dm-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af64/binary";
+        links.self.href = "http://dm-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af64";
         return links;
     }
 

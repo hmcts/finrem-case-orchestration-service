@@ -84,7 +84,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void convertToPdf() {
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), eq(AUTH_TOKEN), caseId)).thenReturn(caseDocument());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), eq(AUTH_TOKEN), any())).thenReturn(caseDocument());
         CaseDocument caseDocument = caseDocument(DOC_URL, "app_docs.docx", BINARY_URL);
         CaseDocument toPdf = additionalHearingDocumentService.convertToPdf(caseDocument, AUTH_TOKEN, caseId);
         assertEquals("app_docs.pdf", toPdf.getDocumentFilename());
@@ -238,7 +238,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void createAndStoreAdditionalHearingDocuments_caseworkerUploadsOrder() throws JsonProcessingException {
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), caseId)).thenReturn(
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(
             CaseDocument.builder().documentBinaryUrl("docBin")
                 .documentFilename("docFilename.pdf")
                 .documentUrl("docUrl").build()
@@ -315,7 +315,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
     public void givenAdditionalDocumentsToBeStored_whenCreateAndStoreAdditionalHearingDocumentsFromApprovedOrder_thenStore() {
         CaseDocument expectedDocument = CaseDocument.builder().documentBinaryUrl("docBin").documentFilename("docFilename")
             .documentUrl("docUrl").build();
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), caseId)).thenReturn(expectedDocument);
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(expectedDocument);
         Map<String, Object> caseData = baseCaseData();
         List<HearingOrderCollectionData> hearingOrderCollectionData = buildHearingOrderCollectionData();
         caseData.put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);

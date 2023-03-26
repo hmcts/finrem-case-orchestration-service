@@ -295,9 +295,9 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     public void givenFinremCaseDetails_whenAddGenApprovedDocs_thenCaseDocsAdded() {
         FinremCaseDetails finremCaseDetails = finremCaseDetails();
 
-        when(pdfStampingServiceMock.stampDocument(any(Document.class), eq(AUTH_TOKEN), eq(false), caseId))
+        when(pdfStampingServiceMock.stampDocument(any(Document.class), eq(AUTH_TOKEN), eq(false), eq(caseId)))
             .thenReturn(document());
-        when(pdfStampingServiceMock.stampDocument(any(Document.class), eq(AUTH_TOKEN), eq(true), caseId))
+        when(pdfStampingServiceMock.stampDocument(any(Document.class), eq(AUTH_TOKEN), eq(true), eq(caseId)))
             .thenReturn(document());
 
         consentOrderApprovedDocumentService

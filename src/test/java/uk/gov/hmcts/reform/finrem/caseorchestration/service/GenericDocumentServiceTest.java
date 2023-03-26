@@ -75,7 +75,7 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
             .thenReturn(Collections.singletonList(
                 FileUploadResponse.builder()
                     .fileName("app_docs.pdf")
-                    .fileUrl("http://dm-store/lhjbyuivu87y989hijbb")
+                    .fileUrl("http://dm-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af64")
                     .build()));
         when(docmosisPdfGenerationServiceMock
             .generateDocFrom(any(), any())).thenReturn("".getBytes(StandardCharsets.UTF_8));

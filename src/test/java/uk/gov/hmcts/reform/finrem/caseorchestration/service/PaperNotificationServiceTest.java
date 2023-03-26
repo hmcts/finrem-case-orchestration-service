@@ -106,7 +106,7 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
         when(rejectGeneralApplicationDocumentService.generateGeneralApplicationRejectionLetter(eq(caseDetails), any(), eq(APPLICANT)))
             .thenReturn(caseDocument);
         paperNotificationService.printApplicantRejectionGeneralApplication(caseDetails, AUTH_TOKEN);
-        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, any());
+        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, AUTH_TOKEN);
     }
 
     @Test
@@ -120,6 +120,6 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
         when(rejectGeneralApplicationDocumentService.generateGeneralApplicationRejectionLetter(eq(caseDetails), any(), eq(RESPONDENT)))
             .thenReturn(caseDocument);
         paperNotificationService.printRespondentRejectionGeneralApplication(caseDetails, AUTH_TOKEN);
-        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, any());
+        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, AUTH_TOKEN);
     }
 }

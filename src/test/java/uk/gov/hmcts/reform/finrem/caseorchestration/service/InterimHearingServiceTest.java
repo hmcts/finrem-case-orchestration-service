@@ -93,7 +93,7 @@ public class InterimHearingServiceTest extends BaseServiceTest {
         CaseDetails caseDetailsBefore = buildCaseDetails(MODIFIED_DURING_MIGRATION_TEST_JSON);
 
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), caseId)).thenReturn(caseDocument());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(caseDocument());
 
         interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
@@ -119,7 +119,7 @@ public class InterimHearingServiceTest extends BaseServiceTest {
         CaseDetails caseDetailsBefore = buildCaseDetails(ONE_MIGRATED_MODIFIED_AND_ONE_ADDED_HEARING_JSON);
 
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), caseId)).thenReturn(caseDocument());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(caseDocument());
 
         interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
@@ -145,7 +145,7 @@ public class InterimHearingServiceTest extends BaseServiceTest {
         CaseDetails caseDetailsBefore = buildCaseDetails(ONE_MIGRATED_AND_ONE_ADDED_HEARING_JSON);
 
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), caseId)).thenReturn(caseDocument());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(caseDocument());
 
         interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
@@ -167,7 +167,7 @@ public class InterimHearingServiceTest extends BaseServiceTest {
         CaseDetails caseDetailsBefore = buildCaseDetails(TEST_NEW_JSON);
 
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), caseId)).thenReturn(caseDocument());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(caseDocument());
 
         interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
@@ -195,7 +195,7 @@ public class InterimHearingServiceTest extends BaseServiceTest {
         caseDetails.getData().put("respondentRepresented", "No");
 
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
-        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), caseId)).thenReturn(caseDocument());
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any(), any())).thenReturn(caseDocument());
 
         CaseDetails caseDetailsBefore = buildCaseDetails(TEST_NEW_JSON);
         interimHearingService.submitInterimHearing(caseDetails, caseDetailsBefore, AUTH_TOKEN);
