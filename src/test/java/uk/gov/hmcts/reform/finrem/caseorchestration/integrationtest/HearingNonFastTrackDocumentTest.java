@@ -328,7 +328,6 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
     }
 
     void generateConfirmLetterCreatedStub(UUID uuid) throws IOException {
-
         LetterStatus letterStatus = new LetterStatus(uuid, "Created", "checksum",
             ZonedDateTime.now(), ZonedDateTime.now().plusHours(1),
             ZonedDateTime.now().plusHours(2), Collections.emptyMap(), 1);
@@ -338,8 +337,6 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .withBody(objectMapper.writeValueAsString(letterStatus))));
-
-
     }
 
     private ObjectNode getResponse() throws IOException {
