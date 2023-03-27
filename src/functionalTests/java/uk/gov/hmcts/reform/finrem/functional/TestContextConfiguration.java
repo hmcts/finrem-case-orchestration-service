@@ -18,11 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.http.entity.ContentType;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
-import org.springframework.boot.autoconfigure.http.HttpMessageConvertersAutoConfiguration;
 import org.springframework.cloud.openfeign.EnableFeignClients;
-import org.springframework.cloud.openfeign.FeignAutoConfiguration;
 import org.springframework.cloud.openfeign.support.ResponseEntityDecoder;
 import org.springframework.cloud.openfeign.support.SpringDecoder;
 import org.springframework.cloud.openfeign.support.SpringMvcContract;
@@ -39,10 +36,9 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClientApi;
 
 @Configuration
-@ComponentScan({"uk.gov.hmcts.reform.finrem.functional", "uk.gov.hmcts.auth.provider.service"})
+@ComponentScan({"uk.gov.hmcts.reform.finrem.functional", "uk.gov.hmcts.reform.ccd.document.am.feign"})
 @EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.idam.client", "uk.gov.hmcts.reform.finrem"},
     basePackageClasses = {ServiceAuthorisationApi.class, CaseDocumentClientApi.class})
-@ImportAutoConfiguration({HttpMessageConvertersAutoConfiguration.class, FeignAutoConfiguration.class})
 @PropertySource(value = {"classpath:application.properties"})
 @PropertySource(value = {"classpath:application-${env}.properties"})
 @Slf4j
