@@ -67,6 +67,7 @@ class ManualPaymentSubmittedHandlerTest {
     @Test
     void givenContestedPaperCase_whenManualPaymentEventInvoke_thenSendToBulkPrinte() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        finremCallbackRequest.getCaseDetails().getData().setPaperApplication(YesOrNo.YES);
         when(service.generateManualPaymentLetter(finremCallbackRequest.getCaseDetails(),
             AUTH_TOKEN, APPLICANT)).thenReturn(caseDocument());
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
@@ -86,7 +87,7 @@ class ManualPaymentSubmittedHandlerTest {
             .builder()
             .eventType(EventType.ISSUE_APPLICATION)
             .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(FinremCaseData.builder().paperApplication(YesOrNo.YES).ccdCaseType(CONTESTED).build()).build())
+                .data(FinremCaseData.builder().ccdCaseType(CONTESTED).build()).build())
             .build();
     }
 }
