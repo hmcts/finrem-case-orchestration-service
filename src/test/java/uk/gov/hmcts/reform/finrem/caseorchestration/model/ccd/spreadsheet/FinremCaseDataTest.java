@@ -21,6 +21,7 @@ public class FinremCaseDataTest {
 
     ClassLoader classLoader = this.getClass().getClassLoader();
 
+
     @Test
     public void testContestedConfigFinRemCaseData() throws IOException, InvalidFormatException {
         File configFile = new File(classLoader.getResource("ccd-config-prod-contested.xlsx").getFile());
@@ -57,15 +58,15 @@ public class FinremCaseDataTest {
     }
 
 
-    @Test
-    public void testUnzip() throws IOException {
-
-        getFile(
-            "https://build.platform.hmcts.net/view/FinRem/job/HMCTS_d_to_i/job/finrem-ccd-definitions/job/master/lastSuccessfulBuild/artifact/definitions/*zip*/definitions.zip",
-            "defs.zip");
-        unzipFile();
-        assert true;
-    }
+//    @Test
+//    public void testUnzip() throws IOException {
+//
+//        getFile(
+//            "https://build.platform.hmcts.net/view/FinRem/job/HMCTS_d_to_i/job/finrem-ccd-definitions/job/master/lastSuccessfulBuild/artifact/definitions/*zip*/definitions.zip",
+//            "defs.zip");
+//        unzipFile();
+//        assert true;
+//    }
 
     public void unzipFile() throws IOException {
 
