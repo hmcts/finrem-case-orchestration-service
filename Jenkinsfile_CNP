@@ -49,8 +49,8 @@ withPipeline(type, product, component) {
     afterSuccess('checkout') {
         step ([
                 $class: 'CopyArtifact',
-                projectName: "HMCTS_d_to_i/finrem-case-orchestration-service/master",
-                filter: 'definitions.zip'
+                projectName: "HMCTS_d_to_i/finrem-ccd-definitions/master",
+                filter: '/definitions/*zip*/definitions.zip'
         ]);
     }
 
