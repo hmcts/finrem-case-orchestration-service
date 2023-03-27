@@ -69,6 +69,17 @@ public class TestContextConfiguration {
     }
 
     @Bean
+    public CaseDocumentClientApi getCaseDocumentClientApi(
+        @Value("${case_document_am.url}") String caseDocumentClientApi) {
+        return Feign.builder()
+            .requestInterceptor(requestInterceptor())
+            .encoder(new JacksonEncoder())
+            .decoder(feignDecoder())
+            .contract(new SpringMvcContract())
+            .target(CaseDocumentClientApi.class, caseDocumentClientApi);
+    }
+
+    @Bean
     public Decoder feignDecoder() {
         MappingJackson2HttpMessageConverter jacksonConverter =
             new MappingJackson2HttpMessageConverter(objectMapper());
