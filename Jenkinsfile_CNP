@@ -49,7 +49,7 @@ withPipeline(type, product, component) {
     afterSuccess('checkout') {
         step ([
                 $class: 'CopyArtifact',
-                projectName: "finrem-ccd-definition/job/master",
+                projectName: "finrem-ccd-definition",
                 filter: '/definitions/*zip*/definitions.zip'
         ]);
     }
