@@ -11,8 +11,8 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.sendletter.api.LetterWithPdfsRequest;
-import uk.gov.hmcts.reform.sendletter.api.SendLetterApi;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
+import uk.gov.hmcts.reform.sendletter.api.proxy.SendLetterApiProxy;
 
 import java.util.Collections;
 import java.util.UUID;
@@ -38,7 +38,7 @@ public class BulkPrintDocumentGeneratorServiceTest {
     @InjectMocks private BulkPrintDocumentGeneratorService service;
 
     @Mock private AuthTokenGenerator authTokenGenerator;
-    @Mock private SendLetterApi sendLetterApi;
+    @Mock private SendLetterApiProxy sendLetterApiProxy;
 
     @Test
     public void downloadDocuments() {
@@ -46,7 +46,7 @@ public class BulkPrintDocumentGeneratorServiceTest {
         UUID randomId = UUID.randomUUID();
         when(authTokenGenerator.generate()).thenReturn("random-string");
 
-        when(sendLetterApi.sendLetter(anyString(), any(LetterWithPdfsRequest.class)))
+        when(sendLetterApiProxy.sendLetter(anyString(), anyString(), any(LetterWithPdfsRequest.class)))
             .thenReturn(new SendLetterResponse(randomId));
 
         UUID letterId = service.send(getBulkPrintRequest(), singletonList("abc".getBytes()));
@@ -60,7 +60,7 @@ public class BulkPrintDocumentGeneratorServiceTest {
         when(authTokenGenerator.generate()).thenThrow(new RuntimeException());
         thrown.expect(RuntimeException.class);
         service.send(getBulkPrintRequest(), singletonList("abc".getBytes()));
-        verifyNoInteractions(sendLetterApi);
+        verifyNoInteractions(sendLetterApiProxy);
     }
 
     @Test
@@ -68,7 +68,7 @@ public class BulkPrintDocumentGeneratorServiceTest {
         when(authTokenGenerator.generate())
             .thenReturn("random-string");
 
-        when(sendLetterApi.sendLetter(anyString(), any(LetterWithPdfsRequest.class)))
+        when(sendLetterApiProxy.sendLetter(anyString(), anyString(), any(LetterWithPdfsRequest.class)))
             .thenThrow(new RuntimeException());
 
         thrown.expect(RuntimeException.class);
