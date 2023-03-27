@@ -7,8 +7,8 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.sendletter.api.LetterWithPdfsRequest;
-import uk.gov.hmcts.reform.sendletter.api.SendLetterApi;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
+import uk.gov.hmcts.reform.sendletter.api.proxy.SendLetterApiProxy;
 
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +31,7 @@ public class BulkPrintDocumentGeneratorService {
     private static final String FILE_NAMES = "fileNames";
 
     private final AuthTokenGenerator authTokenGenerator;
-    private final SendLetterApi sendLetterApi;
+    private final SendLetterApiProxy sendLetterApiProxy;
 
     /**
      * Note: the order of documents you send to this service is the order in which they will print.
@@ -49,7 +49,7 @@ public class BulkPrintDocumentGeneratorService {
             .map(getEncoder()::encodeToString)
             .collect(toList());
 
-        SendLetterResponse sendLetterResponse = sendLetterApi.sendLetter(authTokenGenerator.generate(),
+        SendLetterResponse sendLetterResponse = sendLetterApiProxy.sendLetter(authTokenGenerator.generate(), "true",
             new LetterWithPdfsRequest(documents, XEROX_TYPE_PARAMETER, getAdditionalData(caseId, letterType, bulkPrintRequest)));
 
         log.info("Letter service produced the following letter Id {} for case {}", sendLetterResponse.letterId, caseId);
