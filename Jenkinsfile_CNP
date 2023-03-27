@@ -65,7 +65,8 @@ withPipeline(type, product, component) {
 
         step ([
                 $class: 'CopyArtifact',
-                projectName: "FinRem/job/HMCTS_d_to_i/job/finrem-ccd-definition/job/master"
+                projectName: "FinRem/job/HMCTS_d_to_i/job/finrem-ccd-definition/job/master",
+                filter: "*.xlsx"
         ]);
 
     }
