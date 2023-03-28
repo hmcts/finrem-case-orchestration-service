@@ -56,9 +56,6 @@ withPipeline(type, product, component) {
                 projectName: "HMCTS_d_to_i/finrem-ccd-definitions/master",
                 target: "./definition_files"
         ]);
-        step ([
-            echo getDefinitionFiles()[0].path
-        ])
     }
 
     afterSuccess('functionalTest:aat') {
@@ -93,5 +90,6 @@ withPipeline(type, product, component) {
         enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
         env.CCD_DEFS = getCcdDefsJenkinsBranchToUse()
         println "Using CCD definitions from: " + env.CCD_DEFS
+        println getDefinitionFiles()[0].path
     }
 }
