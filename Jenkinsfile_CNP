@@ -67,9 +67,6 @@ withPipeline(type, product, component) {
                 reportName           : "AAT Functional Tests",
                 alwaysLinkToLastBuild: true
         ]
-        step ([
-            echo("The definition file artifacts are stored in: " + getDefinitionPath())
-        ]);
     }
 
     afterSuccess('functionalTest:preview') {
