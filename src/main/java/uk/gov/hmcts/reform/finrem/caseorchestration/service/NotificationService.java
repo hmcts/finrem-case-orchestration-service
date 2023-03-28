@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailS
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -892,14 +891,14 @@ public class NotificationService {
     }
 
     public void sendNoticeOfChangeEmailCaseworker(CaseDetails caseDetails) {
-        EmailTemplateNames template = getNoticeOfChangeTemplate(caseDetails);
+        EmailTemplateNames template = getNoticeOfChangeTemplateCaseworker(caseDetails);
         NotificationRequest notificationRequest = notificationRequestMapper
             .getNotificationRequestForNoticeOfChange(caseDetails);
         sendEmailIfSolicitorIsDigital(caseDetails, notificationRequest, template);
     }
 
     public void sendNoticeOfChangeEmailCaseworker(FinremCaseDetails caseDetails) {
-        EmailTemplateNames template = getNoticeOfChangeTemplate(caseDetails);
+        EmailTemplateNames template = getNoticeOfChangeTemplateCaseworker(caseDetails);
         NotificationRequest notificationRequest = finremNotificationRequestMapper
             .getNotificationRequestForNoticeOfChange(caseDetails);
         sendEmailIfSolicitorIsDigital(caseDetails, notificationRequest, template);

@@ -7,11 +7,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedHearingHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
@@ -36,6 +34,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -140,8 +139,6 @@ public class NotificationServiceTest extends BaseServiceTest {
     private CheckSolicitorIsDigitalService checkSolicitorIsDigitalService;
     @MockBean
     private CaseDataService caseDataService;
-    @SpyBean
-    private NotificationServiceConfiguration notificationServiceConfiguration;
 
     private CallbackRequest callbackRequest;
     private NotificationRequest notificationRequest;
@@ -150,8 +147,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Before
     public void setUp() {
         callbackRequest = getConsentedCallbackRequest();
-
-        NotificationRequest notificationRequest = new NotificationRequest();
+        notificationRequest = new NotificationRequest();
         when(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(CaseDetails.class))).thenReturn(notificationRequest);
         when(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(CaseDetails.class))).thenReturn(notificationRequest);
     }
@@ -408,7 +404,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     public void sendContestedGeneralOrderNotificationEmailApplicant() {
         notificationService.sendContestedGeneralOrderEmailApplicant(callbackRequest.getCaseDetails());
 
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
+        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_ORDER);
     }
 
@@ -561,7 +557,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         notificationService.sendNoticeOfChangeEmail(getContestedCallbackRequest().getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(getContestedCallbackRequest().getCaseDetails());
-        verify(notificationServiceConfiguration).getContestedNoticeOfChange();
+        //  verify(notificationServiceConfiguration).getContestedNoticeOfChange();
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_NOTICE_OF_CHANGE);
     }
 
@@ -576,7 +572,6 @@ public class NotificationServiceTest extends BaseServiceTest {
         notificationService.sendNoticeOfChangeEmail(getConsentedCallbackRequest().getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(getConsentedCallbackRequest().getCaseDetails());
-        verify(notificationServiceConfiguration).getConsentedNoticeOfChange();
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENTED_NOTICE_OF_CHANGE);
     }
 
@@ -591,7 +586,6 @@ public class NotificationServiceTest extends BaseServiceTest {
         notificationService.sendNoticeOfChangeEmail(getContestedCallbackRequest().getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(getContestedCallbackRequest().getCaseDetails());
-        verify(notificationServiceConfiguration).getContestedNoticeOfChange();
         verifyNoMoreInteractions(emailService);
     }
 
@@ -607,7 +601,6 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(getContestedCallbackRequestUpdateDetails()
             .getCaseDetails());
-        verify(notificationServiceConfiguration).getContestedNoCCaseworker();
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_NOC_CASEWORKER);
     }
 
@@ -624,7 +617,6 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(getConsentedCallbackRequestUpdateDetails()
             .getCaseDetails());
-        verify(notificationServiceConfiguration).getConsentedNoCCaseworker();
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENTED_NOC_CASEWORKER);
     }
 
@@ -638,8 +630,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         notificationService.sendNoticeOfChangeEmailCaseworker(getContestedCallbackRequest().getCaseDetails());
 
         verify(notificationRequestMapper).getNotificationRequestForNoticeOfChange(getContestedCallbackRequest().getCaseDetails());
-        verify(notificationServiceConfiguration).getContestedNoCCaseworker();
-        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_NOC_CASEWORKER);
+        verifyNoMoreInteractions(emailService);
     }
 
     public void sendUpdateFrcInformationEmailToAppSolicitor() {
@@ -883,8 +874,8 @@ public class NotificationServiceTest extends BaseServiceTest {
     public void givenBarristerAdded_sendAddedEmail() {
         Barrister barrister = new Barrister().toBuilder().build();
         CaseDetails caseDetails = CaseDetails.builder().build();
+        when(notificationRequestMapper.buildInterimHearingNotificationRequest(caseDetails, barrister)).thenReturn(notificationRequest);
         notificationService.sendBarristerAddedEmail(caseDetails, barrister);
-        verify(notificationServiceConfiguration).getAddedBarrister();
         verify(notificationRequestMapper).buildInterimHearingNotificationRequest(caseDetails, barrister);
     }
 
@@ -892,8 +883,8 @@ public class NotificationServiceTest extends BaseServiceTest {
     public void givenBarristerRemoved_sendRemovedEmail() {
         Barrister barrister = new Barrister().toBuilder().build();
         CaseDetails caseDetails = CaseDetails.builder().build();
+        when(notificationRequestMapper.buildInterimHearingNotificationRequest(caseDetails, barrister)).thenReturn(notificationRequest);
         notificationService.sendBarristerRemovedEmail(caseDetails, barrister);
-        verify(notificationServiceConfiguration).getRemovedBarrister();
         verify(notificationRequestMapper).buildInterimHearingNotificationRequest(caseDetails, barrister);
     }
 
@@ -912,12 +903,14 @@ public class NotificationServiceTest extends BaseServiceTest {
             .map(obj -> new ObjectMapper().convertValue(obj, new TypeReference<Map<String, Object>>() {
             })).toList();
 
+        when(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(CaseDetails.class), any())).thenReturn(notificationRequest);
 
         interimDataMap.forEach(data -> {
             notificationService.sendInterimHearingNotificationEmailToApplicantSolicitor(callbackRequest.getCaseDetails(), data);
             verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails(), data);
-            verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_INTERIM_HEARING);
+
         });
+        verify(emailService, times(2)).sendConfirmationEmail(notificationRequest, FR_CONTESTED_INTERIM_HEARING);
     }
 
     @Test
@@ -935,11 +928,13 @@ public class NotificationServiceTest extends BaseServiceTest {
             .map(obj -> new ObjectMapper().convertValue(obj, new TypeReference<Map<String, Object>>() {
             })).toList();
 
+        when(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(CaseDetails.class), any())).thenReturn(notificationRequest);
+
         interimDataMap.forEach(data -> {
             notificationService.sendInterimHearingNotificationEmailToRespondentSolicitor(callbackRequest.getCaseDetails(), data);
             verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails(), data);
-            verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_INTERIM_HEARING);
         });
+        verify(emailService, times(2)).sendConfirmationEmail(notificationRequest, FR_CONTESTED_INTERIM_HEARING);
     }
 
     @Test
@@ -949,6 +944,8 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         List<ConsentedHearingDataWrapper> hearings = helper.getHearings(caseData);
         List<String> hearingIdsToProcess = List.of("1f7e210d-87d8-4e98-8c48-db15d1dc0d14");
+        when(notificationRequestMapper.getNotificationRequestForConsentApplicantSolicitor(any(CaseDetails.class), any())).thenReturn(
+            notificationRequest);
 
         hearings.forEach(hearingData -> {
             if (hearingIdsToProcess.contains(hearingData.getId())) {
@@ -967,6 +964,8 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         List<ConsentedHearingDataWrapper> hearings = helper.getHearings(caseData);
         List<String> hearingIdsToProcess = List.of("1f7e210d-87d8-4e98-8c48-db15d1dc0d14");
+        when(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(CaseDetails.class), any())).thenReturn(notificationRequest);
+
 
         hearings.forEach(hearingData -> {
             if (hearingIdsToProcess.contains(hearingData.getId())) {
