@@ -41,7 +41,7 @@ def getCcdDefsJenkinsBranchToUse() {
 }
 
 def getDefinitionPath() {
-    return findFiles(glob: "**/cftlib.html").path;
+    return findFiles(glob: "**/definition_files").path;
 }
 
 // Vars for Kubernetes
