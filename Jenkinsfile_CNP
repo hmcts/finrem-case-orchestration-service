@@ -40,8 +40,8 @@ def getCcdDefsJenkinsBranchToUse() {
     return "https://build.platform.hmcts.net/view/FinRem/job/HMCTS_d_to_i/job/finrem-ccd-definitions/job/master/lastSuccessfulBuild/artifact/definitions/*zip*/definitions.zip"
 }
 
-def getArtifacts() {
-    return currentBuild.rawBuild.artifacts
+node {
+    final definitionFiles = findFiles(glob: 'definition_files/**/*')
 }
 
 // Vars for Kubernetes
@@ -56,7 +56,6 @@ withPipeline(type, product, component) {
                 projectName: "HMCTS_d_to_i/finrem-ccd-definitions/master",
                 target: "./definition_files"
         ]);
-
     }
 
     afterSuccess('functionalTest:aat') {
@@ -91,6 +90,8 @@ withPipeline(type, product, component) {
         enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
         env.CCD_DEFS = getCcdDefsJenkinsBranchToUse()
         println "Using CCD definitions from: " + env.CCD_DEFS
-        getArtifacts().each { println it.fileName }
+        definitionFiles.each {
+            println it.path
+        }
     }
 }
