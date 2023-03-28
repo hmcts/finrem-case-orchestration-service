@@ -64,7 +64,6 @@ public class NotificationServiceTest extends BaseServiceTest {
     private static final String END_POINT_ASSIGNED_TO_JUDGE = "http://localhost:8086/notify/assign-to-judge";
     private static final String END_POINT_CONSENT_ORDER_MADE = "http://localhost:8086/notify/consent-order-made";
     private static final String END_POINT_PREPARE_FOR_HEARING = "http://localhost:8086/notify/prepare-for-hearing";
-    private static final String END_POINT_PREPARE_FOR_HEARING_ORDER_SENT = "http://localhost:8086/notify/contested/prepare-for-hearing-order-sent";
     private static final String END_POINT_CONSENT_ORDER_NOT_APPROVED = "http://localhost:8086/notify/consent-order-not-approved";
     private static final String END_POINT_CONSENT_ORDER_NOT_APPROVED_SENT = "http://localhost:8086/notify/consent-order-not-approved-sent";
     private static final String END_POINT_CONSENT_ORDER_AVAILABLE = "http://localhost:8086/notify/consent-order-available";
@@ -280,57 +279,6 @@ public class NotificationServiceTest extends BaseServiceTest {
         }
 
         verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
-    }
-
-    @Test
-    public void sendPrepareForHearingAfterSentNotificationEmailApplicant() {
-        callbackRequest = getContestedCallbackRequest();
-
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_PREPARE_FOR_HEARING_ORDER_SENT))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendPrepareForHearingOrderSentEmailApplicant(callbackRequest.getCaseDetails());
-
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
-    }
-
-    @Test
-    public void throwExceptionWhenPrepareForHearingAfterSentNotificationEmailApplicantIsRequested() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_PREPARE_FOR_HEARING_ORDER_SENT))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
-        try {
-            notificationService.sendPrepareForHearingOrderSentEmailApplicant(callbackRequest.getCaseDetails());
-        } catch (Exception ex) {
-            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
-        }
-
-        verify(notificationRequestMapper).getNotificationRequestForApplicantSolicitor(callbackRequest.getCaseDetails());
-    }
-
-    @Test
-    public void throwExceptionWhenPrepareForHearingAfterSentNotificationEmailRespondentIsRequested() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_PREPARE_FOR_HEARING_ORDER_SENT))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
-        try {
-            notificationService.sendPrepareForHearingOrderSentEmailRespondent(callbackRequest.getCaseDetails());
-        } catch (Exception ex) {
-            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
-        }
-
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
-    }
-
-    @Test
-    public void sendPrepareForHearingAfterSentNotificationEmailRespondent() {
-        callbackRequest = getContestedCallbackRequest();
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_PREPARE_FOR_HEARING_ORDER_SENT))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendPrepareForHearingOrderSentEmailRespondent(callbackRequest.getCaseDetails());
-
-        verify(notificationRequestMapper).getNotificationRequestForRespondentSolicitor(callbackRequest.getCaseDetails());
     }
 
     @Test
