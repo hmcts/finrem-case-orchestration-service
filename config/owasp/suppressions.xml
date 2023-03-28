@@ -178,15 +178,7 @@
         ]]></notes>
         <packageUrl regex="true">^(?!pkg:maven/org\.json/json@).+$</packageUrl>
         <cpe>cpe:/a:json-java_project:json-java</cpe>
-    </suppress>
-    <suppress>
         <cve>CVE-2023-24998</cve>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[
-        suppress as transitive by notifications-java-client@3.17.0-RELEASE
-   ]]></notes>
-        <packageUrl regex="true">^pkg:maven/org\.json/json@.*$</packageUrl>
-        <cpe>cpe:/a:json-java_project:json-java</cpe>
+        <cve>CVE-2022-45688</cve>
     </suppress>
 </suppressions>
