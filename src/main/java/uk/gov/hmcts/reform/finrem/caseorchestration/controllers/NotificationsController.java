@@ -54,9 +54,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class NotificationsController extends BaseController {
 
     private final NotificationService notificationService;
-
-    private final EmailService emailService;
-
     private final PaperNotificationService paperNotificationService;
     private final GeneralEmailService generalEmailService;
     private final CaseDataService caseDataService;
