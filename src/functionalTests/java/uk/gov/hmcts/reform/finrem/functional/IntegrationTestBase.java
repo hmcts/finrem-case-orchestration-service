@@ -22,9 +22,6 @@ public abstract class IntegrationTestBase {
     public SpringIntegrationMethodRule springIntegration;
 
     @Autowired
-    public CaseDocumentClient caseDocumentClient;
-
-    @Autowired
     protected FunctionalTestUtils utils;
 
     public IntegrationTestBase() {

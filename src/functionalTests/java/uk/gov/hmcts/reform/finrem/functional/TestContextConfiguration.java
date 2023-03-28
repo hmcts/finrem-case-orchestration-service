@@ -33,12 +33,10 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
 import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClientApi;
 
 @Configuration
-@ComponentScan({"uk.gov.hmcts.reform.finrem.functional", "uk.gov.hmcts.reform.ccd.document.am.feign"})
-@EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.idam.client", "uk.gov.hmcts.reform.finrem"},
-    basePackageClasses = {ServiceAuthorisationApi.class, CaseDocumentClientApi.class})
+@ComponentScan("uk.gov.hmcts.reform.finrem.functional")
+@EnableFeignClients(basePackageClasses = ServiceAuthorisationApi.class)
 @PropertySource(value = {"classpath:application.properties"})
 @PropertySource(value = {"classpath:application-${env}.properties"})
 @Slf4j
@@ -66,17 +64,6 @@ public class TestContextConfiguration {
             .decoder(feignDecoder())
             .contract(new SpringMvcContract())
             .target(CoreCaseDataApi.class, coreCaseDataApiUrl);
-    }
-
-    @Bean
-    public CaseDocumentClientApi getCaseDocumentClientApi(
-        @Value("${case_document_am.url}") String caseDocumentClientApi) {
-        return Feign.builder()
-            .requestInterceptor(requestInterceptor())
-            .encoder(new JacksonEncoder())
-            .decoder(feignDecoder())
-            .contract(new SpringMvcContract())
-            .target(CaseDocumentClientApi.class, caseDocumentClientApi);
     }
 
     @Bean
