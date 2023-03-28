@@ -43,9 +43,6 @@ def getCcdDefsJenkinsBranchToUse() {
 // Vars for Kubernetes
 env.PACT_BROKER_FULL_URL = 'https://pact-broker.platform.hmcts.net'
 
-// Definitions files filepath
-definitionFilePath = findFiles(glob: "**/definition_files")[0].path
-
 withPipeline(type, product, component) {
     loadVaultSecrets(secrets)
 
@@ -55,11 +52,11 @@ withPipeline(type, product, component) {
                 projectName: "HMCTS_d_to_i/finrem-ccd-definitions/master",
                 target: "./definition_files"
         ]);
-        step ([
-            echo("The definition file artifacts are stored in: " + definitionFilePath)
-        ])
 
     }
+
+    // Definitions files filepath
+    definitionFilePath = findFiles(glob: "**/definition_files")[0].path
 
     afterSuccess('functionalTest:aat') {
         steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
@@ -69,6 +66,9 @@ withPipeline(type, product, component) {
                 reportName           : "AAT Functional Tests",
                 alwaysLinkToLastBuild: true
         ]
+        step ([
+            echo("The definition file artifacts are stored in: " + definitionFilePath)
+        ]);
     }
 
     afterSuccess('functionalTest:preview') {

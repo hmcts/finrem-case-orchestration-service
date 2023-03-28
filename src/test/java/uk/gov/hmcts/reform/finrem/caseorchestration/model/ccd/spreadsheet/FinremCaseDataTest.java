@@ -60,15 +60,15 @@ public class FinremCaseDataTest {
     }
 
 
-//    @Test
-//    public void testUnzip() throws IOException {
+//  @Test
+//  public void testUnzip() throws IOException {
 //
-//        getFile(
-//            "https://build.platform.hmcts.net/view/FinRem/job/HMCTS_d_to_i/job/finrem-ccd-definitions/job/master/lastSuccessfulBuild/artifact/definitions/*zip*/definitions.zip",
-//            "defs.zip");
-//        unzipFile();
-//        assert true;
-//    }
+//      getFile(
+//          "https://build.platform.hmcts.net/view/FinRem/job/HMCTS_d_to_i/job/finrem-ccd-definitions/job/master/lastSuccessfulBuild/artifact/definitions/*zip*/definitions.zip",
+//          "defs.zip");
+//      unzipFile();
+//      assert true;
+//  }
 
     public void unzipFile() throws IOException {
 
