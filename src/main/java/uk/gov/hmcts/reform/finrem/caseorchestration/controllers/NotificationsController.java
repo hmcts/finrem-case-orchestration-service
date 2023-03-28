@@ -237,34 +237,6 @@ public class NotificationsController extends BaseController {
         return ResponseEntity.ok(SubmittedCallbackResponse.builder().build());
     }
 
-    @PostMapping(value = "/prepare-for-hearing-order-sent", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send e-mail for 'Prepare for Hearing (after order sent)'.")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "'Prepare for Hearing (after send order)' e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendPrepareForHearingOrderSentEmail(
-        @RequestBody CallbackRequest callbackRequest) {
-
-        log.info("Received request to send email for 'Prepare for Hearing (after order sent)' for Case ID: {}",
-            callbackRequest.getCaseDetails().getId());
-        validateCaseData(callbackRequest);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
-
-        if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-            log.info("Sending email notification to Applicant Solicitor for 'Prepare for Hearing (after send order)'");
-            notificationService.sendPrepareForHearingOrderSentEmailApplicant(caseDetails);
-        }
-
-        if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData)) {
-            log.info("Sending email notification to Respondent Solicitor for 'Prepare for Hearing (after send order)'");
-            notificationService.sendPrepareForHearingOrderSentEmailRespondent(caseDetails);
-        }
-
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
-    }
-
     @PostMapping(value = "/contest-application-issued", consumes = APPLICATION_JSON_VALUE)
     @Operation(summary = "send e-mail for Contested 'Application Issued'.")
     @ApiResponses(value = {
