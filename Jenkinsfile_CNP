@@ -40,9 +40,7 @@ def getCcdDefsJenkinsBranchToUse() {
     return "https://build.platform.hmcts.net/view/FinRem/job/HMCTS_d_to_i/job/finrem-ccd-definitions/job/master/lastSuccessfulBuild/artifact/definitions/*zip*/definitions.zip"
 }
 
-def getDefinitionFiles() {
-    return findFiles(glob: '**/definition_files')
-}
+def currentDir = new File('.')
 
 // Vars for Kubernetes
 env.PACT_BROKER_FULL_URL = 'https://pact-broker.platform.hmcts.net'
@@ -90,6 +88,10 @@ withPipeline(type, product, component) {
         enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
         env.CCD_DEFS = getCcdDefsJenkinsBranchToUse()
         println "Using CCD definitions from: " + env.CCD_DEFS
-        println getDefinitionFiles()[0].path
+        currentDir.traverse { File file ->
+            if (file.name.startsWith('definition_files')) {
+                println file.name
+            }
+        }
     }
 }
