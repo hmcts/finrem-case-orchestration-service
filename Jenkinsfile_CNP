@@ -40,6 +40,10 @@ def getCcdDefsJenkinsBranchToUse() {
     return "https://build.platform.hmcts.net/view/FinRem/job/HMCTS_d_to_i/job/finrem-ccd-definitions/job/master/lastSuccessfulBuild/artifact/definitions/*zip*/definitions.zip"
 }
 
+def getDefinitionPath() {
+    return findFiles(glob: "**/cftlib.html").path;
+}
+
 // Vars for Kubernetes
 env.PACT_BROKER_FULL_URL = 'https://pact-broker.platform.hmcts.net'
 
@@ -55,9 +59,6 @@ withPipeline(type, product, component) {
 
     }
 
-    // Definitions files filepath
-    def definitionFilePath = findFiles(glob: "**/cftlib.html").path
-
     afterSuccess('functionalTest:aat') {
         steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
         publishHTML target: [
@@ -67,7 +68,7 @@ withPipeline(type, product, component) {
                 alwaysLinkToLastBuild: true
         ]
         step ([
-            echo("The definition file artifacts are stored in: " + definitionFilePath)
+            echo("The definition file artifacts are stored in: " + getDefinitionPath())
         ]);
     }
 
@@ -93,5 +94,6 @@ withPipeline(type, product, component) {
         enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
         env.CCD_DEFS = getCcdDefsJenkinsBranchToUse()
         println "Using CCD definitions from: " + env.CCD_DEFS
+        println "The definition file artifacts are stored in" + getDefinitionPath()
     }
 }
