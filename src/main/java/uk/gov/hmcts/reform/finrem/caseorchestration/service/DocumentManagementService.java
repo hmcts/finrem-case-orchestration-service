@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.FinremMultipartFile;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
@@ -43,11 +42,10 @@ public class DocumentManagementService {
     public Document storeDocument(String templateName,
                                   String fileName,
                                   Map<String, Object> placeholders,
-                                  String authorizationToken) {
+                                  String authorizationToken, String caseId) {
         log.info("Generate and Store Document requested with templateName [{}], placeholders of size [{}]",
             templateName, placeholders.size());
 
-        String caseId = getCaseId(placeholders);
         return storeDocument(
             generateDocumentFrom(templateName, placeholders),
             fileName, caseId,
@@ -63,18 +61,6 @@ public class DocumentManagementService {
             .upload(Collections.singletonList(multipartFile), caseId, authorizationToken).get(0);
 
         return CONVERTER.apply(response);
-    }
-
-    private static String getCaseId(Map<String, Object> placeholders) {
-        log.info("Retrieving case Id from" + placeholders);
-        String caseId;
-        Object caseDetails = placeholders.get("caseDetails");
-        if (caseDetails instanceof Map<?, ?>) {
-            caseId = ((Map) caseDetails).get("id").toString();
-        } else {
-            caseId = ((CaseDetails) caseDetails).getId().toString();
-        }
-        return caseId;
     }
 
     private static String toBinaryUrl(FileUploadResponse response) {

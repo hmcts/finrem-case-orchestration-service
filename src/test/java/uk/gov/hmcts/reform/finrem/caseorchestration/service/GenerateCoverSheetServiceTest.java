@@ -62,7 +62,7 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
     @Before
     public void setup() {
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
-        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any())).thenReturn(newDocument());
+        when(genericDocumentService.generateDocumentFromPlaceholdersMap(any(), any(), any(), any(), any())).thenReturn(newDocument());
     }
 
     @Test
@@ -237,7 +237,7 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
     private void assertCoversheetAddressFinrem(String formattedAddress) {
         verify(genericDocumentService, times(1)).generateDocumentFromPlaceholdersMap(any(),
             generateDocumentCaseDetailsCaptorFinrem.capture(),
-            any(), any());
+            any(), any(), caseId);
         Map<String, Object> data = getDataFromCaptor(generateDocumentCaseDetailsCaptorFinrem);
         Addressee addressee = mapper.convertValue(data.get(ADDRESSEE), Addressee.class);
         MatcherAssert.assertThat(addressee.getFormattedAddress(), is(formattedAddress));
@@ -246,7 +246,7 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
     private void assertAddresseeNameFinrem(int invocation, String name) {
         verify(genericDocumentService, times(invocation)).generateDocumentFromPlaceholdersMap(any(),
             generateDocumentCaseDetailsCaptorFinrem.capture(),
-            any(), any());
+            any(), any(), caseId);
         Map<String, Object> data = getDataFromCaptor(generateDocumentCaseDetailsCaptorFinrem);
         Addressee addressee = mapper.convertValue(data.get(ADDRESSEE), Addressee.class);
         MatcherAssert.assertThat(addressee.getName(), is(name));
@@ -256,7 +256,7 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
         verify(genericDocumentService, times(1)).generateDocumentFromPlaceholdersMap(any(),
             generateDocumentCaseDetailsCaptorFinrem.capture(),
             any(),
-            any());
+            any(), caseId);
         Map<String, Object> data = getDataFromCaptor(generateDocumentCaseDetailsCaptorFinrem);
 
         String expectedCourtContactDetails =

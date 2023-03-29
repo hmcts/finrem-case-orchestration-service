@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class LitigantSolicitorAddedNocDocumentServiceTest extends NocDocumentServiceBaseTest {
 
+    public static final String CASE_ID = "1234";
     @InjectMocks
     LitigantSolicitorAddedNocDocumentService litigantSolicitorAddedNocLetterGenerator;
 
@@ -31,9 +32,10 @@ public class LitigantSolicitorAddedNocDocumentServiceTest extends NocDocumentSer
         when(documentConfiguration.getNocLetterNotificationLitigantSolicitorAddedFileName()).thenReturn(DOC_FILENAME);
         when(
             genericDocumentService.generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN), notiicationLettersDetailsMapCaptor.capture(), eq(DOC_TEMPLATE),
-                eq(DOC_FILENAME))).thenReturn(new CaseDocument());
+                eq(DOC_FILENAME), eq(CASE_ID))).thenReturn(new CaseDocument());
         CaseDocument caseDocument =
-            litigantSolicitorAddedNocLetterGenerator.generateNoticeOfChangeLetter(AUTH_TOKEN, noticeOfChangeLetterDetails);
+            litigantSolicitorAddedNocLetterGenerator.generateNoticeOfChangeLetter(
+                AUTH_TOKEN, noticeOfChangeLetterDetails, CASE_ID);
 
         Map placeholdersMap = notiicationLettersDetailsMapCaptor.getValue();
         assertPlaceHoldersMap(placeholdersMap);

@@ -50,7 +50,7 @@ public class DocumentManagementServiceTest {
 
     @Test
     public void storeDocument() {
-        Document document = service.storeDocument(TEMPLATE_NAME, FILE_NAME, PLACEHOLDERS, AUTH_TOKEN);
+        Document document = service.storeDocument(TEMPLATE_NAME, FILE_NAME, PLACEHOLDERS, AUTH_TOKEN, "123");
         assertThat(document, is(equalTo(testDocument())));
     }
 

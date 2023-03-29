@@ -33,13 +33,14 @@ public class GenericDocumentService {
             caseData.put(DocumentHelper.CASE_NUMBER, caseDetailsCopy.getId());
         }
         Map<String, Object> caseDetailsMap = Collections.singletonMap(DOCUMENT_CASE_DETAILS_JSON_KEY, caseDetailsCopy);
-        return generateDocumentFromPlaceholdersMap(authorisationToken, caseDetailsMap, template, fileName);
+        return generateDocumentFromPlaceholdersMap(authorisationToken, caseDetailsMap, template, fileName,
+            caseDetailsCopy.getId().toString());
     }
 
     public CaseDocument generateDocumentFromPlaceholdersMap(String authorisationToken, Map placeholders,
-                                                            String template, String fileName) {
+                                                            String template, String fileName, String caseId) {
         Document generatedPdf = documentManagementService
-            .storeDocument(template, fileName, placeholders, authorisationToken);
+            .storeDocument(template, fileName, placeholders, authorisationToken, caseId);
         return toCaseDocument(generatedPdf);
     }
 

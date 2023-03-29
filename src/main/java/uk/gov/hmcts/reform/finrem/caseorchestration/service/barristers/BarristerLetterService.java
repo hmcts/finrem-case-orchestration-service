@@ -64,18 +64,18 @@ public class BarristerLetterService {
         log.info("Sending {} letter for case {}", documentData.getRight(), caseDetails.getId());
 
         return generateDocument(barristerLetterTuple.getAuthToken(), barristerLetterDetails,
-            documentData.getLeft(), documentData.getRight());
+            documentData.getLeft(), documentData.getRight(), caseDetails.getId().toString());
     }
 
     private Optional<CaseDocument> generateDocument(String authToken,
                                                     BarristerLetterDetails barristerLetterDetails,
                                                     String template,
-                                                    String filename) {
+                                                    String filename, String caseId) {
         return Optional.of(genericDocumentService.generateDocumentFromPlaceholdersMap(
             authToken,
             convertLetterDetailsToMap(barristerLetterDetails),
             template,
-            filename));
+            filename, caseId));
     }
 
     private boolean letterShouldNotBeSent(DocumentHelper.PaperNotificationRecipient recipient,

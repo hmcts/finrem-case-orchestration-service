@@ -55,10 +55,12 @@ public abstract class AbstractLetterHandler implements LetterHandler {
 
     public void handle(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String authToken) {
         log.info("In the LetterHandler for Recipient {} and Notice Type {} ", recipient, noticeType);
-        Optional<NoticeOfChangeLetterDetails> noticeOfChangeLetterDetails = getNoticeOfChangeLetterDetails(caseDetails, caseDetailsBefore);
+        Optional<NoticeOfChangeLetterDetails> noticeOfChangeLetterDetails =
+            getNoticeOfChangeLetterDetails(caseDetails, caseDetailsBefore);
         noticeOfChangeLetterDetails.ifPresent(letter -> {
             log.info("Got the letter details now call the document service to generate the Case Document ");
-            CaseDocument caseDocument = nocDocumentService.generateNoticeOfChangeLetter(authToken, letter);
+            CaseDocument caseDocument =
+                nocDocumentService.generateNoticeOfChangeLetter(authToken, letter, caseDetails.getId().toString());
             log.info("Generated the case document now send to bulk print");
             UUID uuid = bulkPrintService.sendDocumentForPrint(caseDocument, caseDetails, authToken);
             log.info("Document sent to bulkprint with UUID {}", uuid);
