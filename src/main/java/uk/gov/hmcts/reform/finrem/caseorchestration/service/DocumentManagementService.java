@@ -47,7 +47,7 @@ public class DocumentManagementService {
         log.info("Generate and Store Document requested with templateName [{}], placeholders of size [{}]",
             templateName, placeholders.size());
 
-        String caseId = ((CaseDetails) placeholders.get("caseDetails")).getId().toString();
+        String caseId = getCaseId(placeholders);
         return storeDocument(
             generateDocumentFrom(templateName, placeholders),
             fileName, caseId,
@@ -63,6 +63,17 @@ public class DocumentManagementService {
             .upload(Collections.singletonList(multipartFile), caseId, authorizationToken).get(0);
 
         return CONVERTER.apply(response);
+    }
+
+    private static String getCaseId(Map<String, Object> placeholders) {
+        String caseId;
+        Object caseDetails = placeholders.get("caseDetails");
+        if (caseDetails instanceof Map<?, ?>) {
+            caseId = ((Map) caseDetails).get("id").toString();
+        } else {
+            caseId = ((CaseDetails) caseDetails).getId().toString();
+        }
+        return caseId;
     }
 
     private static String toBinaryUrl(FileUploadResponse response) {
