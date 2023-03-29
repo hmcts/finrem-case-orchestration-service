@@ -68,7 +68,7 @@
       "divorceCaseNumber": "DD12D12345",
       "issueDate": "2019-03-04",
       "hearingDate": "2019-06-24",
-      "fastTrackDecision": "yes",
+      "fastTrackDecision": "Yes",
       "respondentAddress": {
         "County": "Essex",
         "Country": "United Kingdom",
@@ -133,7 +133,6 @@
         "FR_ms_MIAMDomesticViolenceChecklist_Value_8",
         "FR_ms_MIAMDomesticViolenceChecklist_Value_13",
         "FR_ms_MIAMDomesticViolenceChecklist_Value_15",
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_23",
         "FR_ms_MIAMDomesticViolenceChecklist_Value_22",
         "FR_ms_MIAMDomesticViolenceChecklist_Value_20",
         "FR_ms_MIAMDomesticViolenceChecklist_Value_19",
