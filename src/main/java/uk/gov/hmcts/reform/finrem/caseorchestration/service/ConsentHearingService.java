@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_PROMPT_FOR_DOCUMENT;
@@ -66,11 +67,14 @@ public class ConsentHearingService {
         FinremCaseData data = caseDetails.getData();
         if (!data.isPaperCase()) {
             List<ConsentedHearingDataWrapper> listForHearings = data.getListForHearings();
+            List<ConsentedHearingDataWrapper> listForHearingsBefore =
+                Optional.ofNullable(caseDetailsBefore.getData().getListForHearings()).orElse(new ArrayList<>());
             List<ConsentedHearingDataWrapper> hearingList = listForHearings;
+
 
             List<String> hearingIdsToProcess =
                 getNewOrDateTimeModifiedHearingIdsList(listForHearings,
-                    caseDetailsBefore.getData().getListForHearings());
+                    listForHearingsBefore);
 
             hearingList.forEach(hearingCaseData -> notify(caseDetails, hearingCaseData, hearingIdsToProcess));
         }
