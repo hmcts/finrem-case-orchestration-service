@@ -41,11 +41,11 @@ public class PdfStampingService {
 
     private final EvidenceManagementDownloadService emDownloadService;
 
-    public Document stampDocument(Document document, String authToken, boolean isAnnexNeeded) {
+    public Document stampDocument(Document document, String authToken, boolean isAnnexNeeded, StampType stampType) {
         log.info("Stamp document : {}", document);
         try {
             byte[] docInBytes = emDownloadService.download(document.getBinaryUrl()).getBody();
-            byte[] stampedDoc = stampDocument(docInBytes, isAnnexNeeded);
+            byte[] stampedDoc = stampDocument(docInBytes, isAnnexNeeded, stampType);
             MultipartFile multipartFile =
                 FinremMultipartFile.builder().name(document.getFileName()).content(stampedDoc)
                     .contentType(APPLICATION_PDF_CONTENT_TYPE).build();
@@ -60,7 +60,7 @@ public class PdfStampingService {
         }
     }
 
-    private byte[] stampDocument(byte[] inputDocInBytes, boolean isAnnexNeeded) throws Exception {
+    private byte[] stampDocument(byte[] inputDocInBytes, boolean isAnnexNeeded, StampType stampType) throws Exception {
         PDDocument doc = PDDocument.load(inputDocInBytes);
         doc.setAllSecurityToBeRemoved(true);
         PDPage page = doc.getPage(0);
@@ -68,10 +68,17 @@ public class PdfStampingService {
         log.info("PdfAnnexStampingInfo data  = {}", info);
 
         PDImageXObject annexImage = createFromByteArray(doc, imageAsBytes(info.getAnnexFile()), null);
-        PDImageXObject courtSealImage = createFromByteArray(doc, imageAsBytes(info.getCourtSealFile()), null);
+        PDImageXObject familySealImage = createFromByteArray(doc, imageAsBytes(info.getCourtSealFile()), null);
+        PDImageXObject highCourtSealImage = createFromByteArray(doc, imageAsBytes(info.getHighCourtSealFile()), null);
         PDPageContentStream psdStream = new PDPageContentStream(doc, page, APPEND, true, true);
-        psdStream.drawImage(courtSealImage, info.getCourtSealPositionX(), info.getCourtSealPositionY(),
-            WIDTH_AND_HEIGHT, WIDTH_AND_HEIGHT);
+
+        if (StampType.FAMILY_COURT_STAMP.equals(stampType)) {
+            psdStream.drawImage(familySealImage, info.getCourtSealPositionX(), info.getCourtSealPositionY(),
+                WIDTH_AND_HEIGHT, WIDTH_AND_HEIGHT);
+        } else if (StampType.HIGH_COURT_STAMP.equals(stampType)) {
+            psdStream.drawImage(highCourtSealImage, info.getHighCourtSealPositionX(), info.getHighCourtSealPositionY(),
+                WIDTH_AND_HEIGHT, WIDTH_AND_HEIGHT);
+        }
         if (isAnnexNeeded) {
             psdStream.drawImage(annexImage, info.getAnnexPositionX(), info.getAnnexPositionY(),
                 WIDTH_AND_HEIGHT, WIDTH_AND_HEIGHT);
