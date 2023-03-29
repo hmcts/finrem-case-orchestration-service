@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -25,7 +26,12 @@ public class FinremCaseDataTest {
 
     @Test
     public void testDefinitionFilesSavedInCorrectLocation() throws IOException {
-        System.out.println(Paths.get(".").toAbsolutePath());
+        Path dirPath = Paths.get("../").toAbsolutePath();
+        File directoryPath = dirPath.toFile();
+        String contents[] = directoryPath.list();
+        for (int i=0; i<contents.length; i++) {
+            System.out.println(contents[i]);
+        }
     }
 
     @Test
