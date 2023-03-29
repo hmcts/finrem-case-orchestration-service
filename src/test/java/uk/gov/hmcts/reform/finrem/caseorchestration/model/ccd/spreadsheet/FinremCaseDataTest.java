@@ -13,16 +13,22 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.logging.Logger
 
 @Slf4j
-@Ignore
+//@Ignore
 public class FinremCaseDataTest {
 
     ClassLoader classLoader = this.getClass().getClassLoader();
 
+    @Test
+    public void testDefinitionFilesSavedInCorrectLocation() throws IOException {
+        System.out.println(Paths.get(".").toAbsolutePath().normalize().toString());
+    }
 
     @Test
     public void testContestedConfigFinRemCaseData() throws IOException, InvalidFormatException {
