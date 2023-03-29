@@ -83,7 +83,7 @@ public abstract class BaseServiceTest extends BaseTest {
     protected FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @MockBean
-    private EmailService emailService;
+    protected EmailService emailService;
 
     public static final String CASE_DETAILS = "caseDetails";
     public static final String CASE_DATA = "case_data";
