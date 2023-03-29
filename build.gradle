@@ -319,6 +319,16 @@ dependencyManagement {
         dependencySet(group: 'org.springframework.security', version: '5.7.5') {
             entry 'spring-security-crypto'
         }
+        //CVE-2023-20861
+        dependencySet(group: 'org.springframework', version: '5.3.26') {
+            entry 'spring-aop'
+            entry 'spring-beans'
+            entry 'spring-context'
+            entry 'spring-core'
+            entry 'spring-expression'
+            entry 'spring-jcl'
+            entry 'spring-webmvc'
+        }
     }
 }
 
