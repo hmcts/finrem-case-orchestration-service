@@ -320,7 +320,7 @@ dependencyManagement {
             entry 'spring-security-crypto'
         }
         //CVE-2023-20861
-        dependencySet(group: 'org.springframework', version: '6.0.7') {
+        dependencySet(group: 'org.springframework', version: '6.0.4') {
             entry 'spring-aop'
             entry 'spring-beans'
             entry 'spring-context'
