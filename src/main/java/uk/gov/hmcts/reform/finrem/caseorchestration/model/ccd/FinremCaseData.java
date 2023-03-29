@@ -35,6 +35,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ReferToJud
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerDetails;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -355,6 +357,9 @@ public class FinremCaseData {
     private CaseDocument consentVariationOrderDocument;
 
     private YesOrNo isNocRejected;
+
+    @JsonIgnore
+    private IntervenerChangeDetails currentIntervenerChangeDetails;
 
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)

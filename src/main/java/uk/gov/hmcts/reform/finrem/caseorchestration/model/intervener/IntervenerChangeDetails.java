@@ -14,11 +14,14 @@ public class IntervenerChangeDetails {
 
     public enum IntervenerAction {
         ADDED,
-        REMOVED
+        REMOVED,
+        ADDED_SOL
     }
 
     private final IntervenerType intervenerType;
     private final IntervenerAction intervenerAction;
+    private IntervenerDetails intervenerDetails;
+
     public IntervenerType getIntervenerType() {
         return intervenerType;
     }
