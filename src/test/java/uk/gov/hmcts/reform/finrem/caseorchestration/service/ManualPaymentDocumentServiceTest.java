@@ -9,11 +9,12 @@ import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 
 import java.io.InputStream;
@@ -38,14 +39,12 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
     private ManualPaymentDocumentService manualPaymentDocumentService;
     @Autowired
     private ObjectMapper mapper;
-
     @MockBean
     private GenericDocumentService genericDocumentService;
-
     @Captor
     ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
 
-    private CaseDetails caseDetails;
+    private FinremCaseDetails finremCaseDetails;
 
     @Before
     public void setUp() {
@@ -56,11 +55,11 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateManualPaymentLetterForApplicantSolicitor() throws Exception {
-        caseDetails = contestedPaperCaseDetails();
+        finremCaseDetails = contestedPaperFinremCaseDetails();
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
 
         CaseDocument generatedManualPaymentLetter
-            = manualPaymentDocumentService.generateManualPaymentLetter(caseDetails, AUTH_TOKEN, APPLICANT);
+            = manualPaymentDocumentService.generateManualPaymentLetter(finremCaseDetails, AUTH_TOKEN, APPLICANT);
 
         assertCaseDocument(generatedManualPaymentLetter);
 
@@ -83,17 +82,16 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateManualPaymentLetterForApplicant() throws Exception {
-        caseDetails = contestedPaperCaseDetailsWithoutSolicitors();
+        finremCaseDetails = contestedPaperCaseDetailsWithoutSolicitors();
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
 
         CaseDocument generatedManualPaymentLetter
-            = manualPaymentDocumentService.generateManualPaymentLetter(caseDetails, AUTH_TOKEN, APPLICANT);
+            = manualPaymentDocumentService.generateManualPaymentLetter(finremCaseDetails, AUTH_TOKEN, APPLICANT);
 
         assertCaseDocument(generatedManualPaymentLetter);
 
         verify(genericDocumentService, times(1)).generateDocument(any(),
             documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
-
         Map<String, Object> caseData = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
 
         Addressee addressee = (Addressee) caseData.get(ADDRESSEE);
@@ -108,16 +106,16 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
         assertThat(frcCourtDetails.getEmail(), is("sussexfamily@Justice.gov.uk"));
     }
 
-    private CaseDetails contestedPaperCaseDetails() throws Exception {
+    private FinremCaseDetails contestedPaperFinremCaseDetails() throws Exception {
         try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/contested/paper-case.json")) {
-            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+            return mapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
         }
     }
 
-    private CaseDetails contestedPaperCaseDetailsWithoutSolicitors() throws Exception {
+    private FinremCaseDetails contestedPaperCaseDetailsWithoutSolicitors() throws Exception {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(
             "/fixtures/contested/paper-case-no-solicitors.json")) {
-            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+            return mapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
         }
     }
 
