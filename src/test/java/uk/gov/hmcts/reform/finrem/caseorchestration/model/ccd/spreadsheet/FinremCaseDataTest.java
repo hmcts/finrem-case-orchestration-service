@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.spreadsheet;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.junit.Ignore;
 import org.junit.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 
@@ -17,7 +16,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import java.util.logging.Logger
 
 @Slf4j
 //@Ignore
@@ -27,7 +25,7 @@ public class FinremCaseDataTest {
 
     @Test
     public void testDefinitionFilesSavedInCorrectLocation() throws IOException {
-        System.out.println(Paths.get(".").toAbsolutePath().normalize().toString());
+        System.out.println(Paths.get(".").toAbsolutePath());
     }
 
     @Test
