@@ -66,6 +66,7 @@ public class DocumentManagementService {
     }
 
     private static String getCaseId(Map<String, Object> placeholders) {
+        log.info("Retrieving case Id from" + placeholders);
         String caseId;
         Object caseDetails = placeholders.get("caseDetails");
         if (caseDetails instanceof Map<?, ?>) {
