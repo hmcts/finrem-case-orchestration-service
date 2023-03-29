@@ -108,26 +108,6 @@ public class NotificationsController extends BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    @PostMapping(value = "/assign-to-judge-consent-in-contested", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "Notify applicant and respondent when Judge assigned to case via letter")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Case assigned to Judge notification sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendConsentInContestedAssignToJudgeConfirmationPaperNotification(
-        @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
-        @RequestBody CallbackRequest callbackRequest) {
-
-        log.info("Received request to notify applicant and respondent for Judge successfully assigned to case for Case ID: {}",
-            callbackRequest.getCaseDetails().getId());
-        validateCaseData(callbackRequest);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-
-        paperNotificationService.printConsentInContestedAssignToJudgeConfirmationNotification(caseDetails, authToken);
-
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
-    }
-
     @PostMapping(value = "/order-not-approved", consumes = APPLICATION_JSON_VALUE)
     @Operation(summary = "send e-mail for consent/contest order not approved.")
     @ApiResponses(value = {
@@ -251,55 +231,6 @@ public class NotificationsController extends BaseController {
         }
 
         return ResponseEntity.ok(SubmittedCallbackResponse.builder().build());
-    }
-
-    @PostMapping(value = "/prepare-for-hearing-order-sent", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send e-mail for 'Prepare for Hearing (after order sent)'.")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "'Prepare for Hearing (after send order)' e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendPrepareForHearingOrderSentEmail(
-        @RequestBody CallbackRequest callbackRequest) {
-
-        log.info("Received request to send email for 'Prepare for Hearing (after order sent)' for Case ID: {}",
-            callbackRequest.getCaseDetails().getId());
-        validateCaseData(callbackRequest);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
-
-        if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-            log.info("Sending email notification to Applicant Solicitor for 'Prepare for Hearing (after send order)'");
-            notificationService.sendPrepareForHearingOrderSentEmailApplicant(caseDetails);
-        }
-
-        if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData)) {
-            log.info("Sending email notification to Respondent Solicitor for 'Prepare for Hearing (after send order)'");
-            notificationService.sendPrepareForHearingOrderSentEmailRespondent(caseDetails);
-        }
-
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
-    }
-
-    @PostMapping(value = "/contest-application-issued", consumes = APPLICATION_JSON_VALUE)
-    @Operation(summary = "send e-mail for Contested 'Application Issued'.")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200",
-            description = "Consent order available e-mail sent successfully",
-            content = {@Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))})})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendContestedApplicationIssuedEmail(
-        @RequestBody CallbackRequest callbackRequest) {
-        log.info("Received request to send email for Contested 'Application Issued' for Case ID: {}", callbackRequest.getCaseDetails().getId());
-        validateCaseData(callbackRequest);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-
-        if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-            log.info("Sending Contested 'Application Issued' email notification to Applicant Solicitor");
-            notificationService.sendContestedApplicationIssuedEmailToApplicantSolicitor(caseDetails);
-        }
-
-        Map<String, Object> caseData = caseDetails.getData();
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
     @PostMapping(value = "/draft-order", consumes = APPLICATION_JSON_VALUE)

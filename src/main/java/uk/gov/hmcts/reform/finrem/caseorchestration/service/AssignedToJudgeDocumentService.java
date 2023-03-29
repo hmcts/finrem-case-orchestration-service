@@ -60,21 +60,17 @@ public class AssignedToJudgeDocumentService {
         return generatedAssignedToJudgeNotificationLetter;
     }
 
-    public CaseDocument generateConsentInContestedAssignedToJudgeNotificationLetter(CaseDetails caseDetails, String authToken,
+    public CaseDocument generateConsentInContestedAssignedToJudgeNotificationLetter(FinremCaseDetails caseDetails, String authToken,
                                                                                     DocumentHelper.PaperNotificationRecipient recipient) {
-        return generateConsentInContestedAssignedToJudgeNotificationLetter(
-            documentHelper.prepareLetterTemplateData(caseDetails, recipient), authToken);
-    }
+        final String templateId = documentConfiguration.getConsentInContestedAssignedToJudgeNotificationTemplate();
+        final String templateName = documentConfiguration.getConsentInContestedAssignedToJudgeNotificationFileName();
 
-    private CaseDocument generateConsentInContestedAssignedToJudgeNotificationLetter(CaseDetails caseDetails, String authToken) {
         log.info("Generating Consent in Contested Assigned To Judge Notification Letter {} from {} for bulk print",
-            documentConfiguration.getConsentInContestedAssignedToJudgeNotificationTemplate(),
-            documentConfiguration.getConsentInContestedAssignedToJudgeNotificationFileName());
+            templateId, templateName);
+        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterTemplateData(caseDetails, recipient);
 
         CaseDocument generatedAssignedToJudgeNotificationLetter = genericDocumentService.generateDocument(authToken,
-            caseDetails,
-            documentConfiguration.getConsentInContestedAssignedToJudgeNotificationTemplate(),
-            documentConfiguration.getConsentInContestedAssignedToJudgeNotificationFileName());
+            caseDetailsForBulkPrint, templateId, templateName);
 
         log.info("Generated Consent in Contested Assigned To Judge Notification Letter: {}", generatedAssignedToJudgeNotificationLetter);
 
