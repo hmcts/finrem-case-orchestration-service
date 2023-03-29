@@ -187,4 +187,10 @@
         <packageUrl regex="true">^pkg:maven/org\.json/json@.*$</packageUrl>
         <cve>CVE-2022-45688</cve>
     </suppress>
+    <suppress until="2023-11-01">
+    <notes><![CDATA[file name: spring-aop-5.3.21.jar -
+    Revisiting in a few months when SpringBoot 3 is released]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework/spring\-*@.*$</packageUrl>
+        <cve>CVE-2023-20861</cve>
+    </suppress>
 </suppressions>
