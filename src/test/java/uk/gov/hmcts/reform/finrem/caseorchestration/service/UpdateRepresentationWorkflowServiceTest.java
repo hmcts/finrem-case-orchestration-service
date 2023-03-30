@@ -73,7 +73,6 @@ public class UpdateRepresentationWorkflowServiceTest {
         when(noticeOfChangeService.updateRepresentation(caseDetails, AUTH_TOKEN, caseDetails))
             .thenReturn(caseDetails.getData());
         when(noticeOfChangeService.hasInvalidOrgPolicy(caseDetails, true)).thenReturn(true);
-        when(noticeOfChangeService.hasInvalidOrgPolicy(caseDetails, true)).thenReturn(false);
         when(noticeOfChangeService.persistOriginalOrgPoliciesWhenRevokingAccess(caseDetails, caseDetails))
             .thenReturn(caseDetails);
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
@@ -93,7 +92,6 @@ public class UpdateRepresentationWorkflowServiceTest {
         when(noticeOfChangeService.updateRepresentation(caseDetails, AUTH_TOKEN, caseDetails))
             .thenReturn(caseDetails.getData());
         when(noticeOfChangeService.hasInvalidOrgPolicy(caseDetails, false)).thenReturn(true);
-        when(noticeOfChangeService.hasInvalidOrgPolicy(caseDetails, false)).thenReturn(false);
         when(noticeOfChangeService.persistOriginalOrgPoliciesWhenRevokingAccess(caseDetails, caseDetails))
             .thenReturn(caseDetails);
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
