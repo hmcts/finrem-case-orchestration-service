@@ -30,6 +30,52 @@
       "applicantFMName": "Contested Applicant",
       "applicantLName": "Name",
       "authorisation2b": "test",
+      "intervenerDocuments": {
+        "value": [
+          {
+            "code": "doc1.pdf",
+            "label": "doc1.pdf"
+          },
+          {
+            "code": "doc2.pdf",
+            "label": "doc2.pdf"
+          },
+          {
+            "code": "doc3.pdf",
+            "label": "doc3.pdf"
+          },
+          {
+            "code": "doc4.pdf",
+            "label": "doc4.pdf"
+          }
+        ],
+        "list_items": [
+          {
+            "code": "doc1.pdf",
+            "label": "doc1.pdf"
+          },
+          {
+            "code": "doc2.pdf",
+            "label": "doc2.pdf"
+          },
+          {
+            "code": "doc3.pdf",
+            "label": "doc3.pdf"
+          },
+          {
+            "code": "doc4.pdf",
+            "label": "doc4.pdf"
+          },
+          {
+            "code": "doc5.pdf",
+            "label": "doc5.pdf"
+          },
+          {
+            "code": "doc6.pdf",
+            "label": "doc6.pdf"
+          }
+        ]
+      },
       "otherCollection": [
         {
           "id": "c0c5b8cc-8bb5-41da-84bf-06be40b8fa77",

@@ -63,7 +63,7 @@ public class MultiSelectAboutToStartHandler extends FinremCallbackHandler {
 
     private DynamicMultiSelectList getDynamicMultiSelectList(List<DynamicMultiSelectListElement> dynamicMultiSelectListElement) {
         return DynamicMultiSelectList.builder()
-            .value(dynamicMultiSelectListElement.get(0))
+            .value(dynamicMultiSelectListElement)
             .listItems(dynamicMultiSelectListElement)
             .build();
     }
