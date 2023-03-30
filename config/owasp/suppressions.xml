@@ -13,13 +13,6 @@
          the latest version available at the moment (10.1.0-M16) is compromised]]></notes>
         <cve>CVE-2022-34305</cve>
     </suppress>
-
-    <suppress until="2023-09-01">
-        <notes><![CDATA[tomcat-embed-core-9.0.64.jar (pkg:maven/org.apache.tomcat.embed/tomcat-embed-core@9.0.64,
-        cpe:2.3:a:apache:tomcat:9.0.64]]></notes>
-        <cve>CVE-2022-34305</cve>
-    </suppress>
-
     <suppress until="2023-10-10">
         <notes><![CDATA[Junk CVE, only affects Amazon Corretto when hot patch is enabled]]></notes>
         <packageUrl regex="true">^pkg:maven/org\.apache\.logging\.log4j/log4j\-api@.*$</packageUrl>
@@ -101,21 +94,19 @@
         <packageUrl regex="true">^pkg:maven/org.yaml/snakeyaml@1.29</packageUrl>
         <cve>CVE-2022-25857</cve>
     </suppress>
-
     <suppress until="2023-09-15">
         <notes><![CDATA[
-   file name: tomcat-embed-core-9.0.64.jar
+   file name: tomcat-embed-core-9.0.69.jar
    ]]></notes>
         <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat\-embed\-core@.*$</packageUrl>
-        <cve>CVE-2022-34305</cve>
+        <cve>CVE-2023-28708</cve>
     </suppress>
-
     <suppress until="2023-09-15">
         <notes><![CDATA[
-   file name: tomcat-embed-websocket-9.0.64.jar
+   file name: tomcat-embed-websocket-9.0.69.jar
    ]]></notes>
         <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat\-embed\-websocket@.*$</packageUrl>
-        <cve>CVE-2022-34305</cve>
+        <cve>CVE-2023-28708</cve>
     </suppress>
     <suppress>
         <notes><![CDATA[file name: jackson-databind-2.13.3.jar]]></notes>

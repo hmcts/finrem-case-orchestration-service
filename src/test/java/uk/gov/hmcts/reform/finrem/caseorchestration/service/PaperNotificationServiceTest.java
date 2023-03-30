@@ -28,8 +28,6 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
     @MockBean
     private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
     @MockBean
-    private ManualPaymentDocumentService manualPaymentDocumentService;
-    @MockBean
     private BulkPrintService bulkPrintService;
     @MockBean
     private CaseDataService caseDataService;
@@ -47,18 +45,6 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
         verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(any(CaseDetails.class), eq(AUTH_TOKEN), eq(APPLICANT));
         verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(any(CaseDetails.class), eq(AUTH_TOKEN), eq(RESPONDENT));
         verify(bulkPrintService, times(2)).sendDocumentForPrint(any(), any(CaseDetails.class), any());
-    }
-
-    @Test
-    public void sendContestedManualPaymentLetters() {
-        when(caseDataService.isContestedApplication(any())).thenReturn(true);
-        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
-        when(caseDataService.isPaperApplication(any())).thenReturn(true);
-
-        paperNotificationService.printManualPaymentNotification(buildCaseDetails(), AUTH_TOKEN);
-
-        verify(manualPaymentDocumentService).generateManualPaymentLetter(any(), any(), eq(APPLICANT));
-        verify(bulkPrintService).sendDocumentForPrint(any(), any(CaseDetails.class), any());
     }
 
     @Test

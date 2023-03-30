@@ -177,6 +177,7 @@ public class ApprovedConsentOrderAboutToSubmitHandlerTest {
     }
 
     private OngoingStubbing<CaseDocument> whenAnnexStampingDocument() {
-        return when(genericDocumentService.annexStampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN), anyString()));
+        return when(genericDocumentService.annexStampDocument(isA(CaseDocument.class),
+            eq(AUTH_TOKEN), any(), anyString()));
     }
 }

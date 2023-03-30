@@ -48,22 +48,28 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldStampDocument() throws Exception {
-        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, false, caseId)).thenReturn(document());
+        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP, caseId))
+            .thenReturn(document());
 
-        CaseDocument stampDocument = genericDocumentService.stampDocument(caseDocument(), AUTH_TOKEN, caseId);
+        CaseDocument stampDocument =
+            genericDocumentService.stampDocument(caseDocument(), AUTH_TOKEN, StampType.FAMILY_COURT_STAMP, caseId);
 
         assertCaseDocument(stampDocument);
-        verify(pdfStampingServiceMock, times(1)).stampDocument(document(), AUTH_TOKEN, false, caseId);
+        verify(pdfStampingServiceMock, times(1))
+            .stampDocument(document(), AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP, caseId);
     }
 
     @Test
     public void shouldAnnexStampDocument() {
-        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, true, caseId)).thenReturn(document());
+        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, true, StampType.FAMILY_COURT_STAMP, caseId))
+            .thenReturn(document());
 
-        CaseDocument stampDocument = genericDocumentService.annexStampDocument(caseDocument(), AUTH_TOKEN, caseId);
+        CaseDocument stampDocument = genericDocumentService
+            .annexStampDocument(caseDocument(), AUTH_TOKEN, StampType.FAMILY_COURT_STAMP, caseId);
 
         assertCaseDocument(stampDocument);
-        verify(pdfStampingServiceMock, times(1)).stampDocument(document(), AUTH_TOKEN, true, caseId);
+        verify(pdfStampingServiceMock, times(1))
+            .stampDocument(document(), AUTH_TOKEN, true, StampType.FAMILY_COURT_STAMP, caseId);
     }
 
     @Test

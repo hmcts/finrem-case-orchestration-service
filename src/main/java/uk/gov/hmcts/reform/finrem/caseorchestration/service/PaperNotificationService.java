@@ -22,7 +22,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataServi
 public class PaperNotificationService {
 
     private final AssignedToJudgeDocumentService assignedToJudgeDocumentService;
-    private final ManualPaymentDocumentService manualPaymentDocumentService;
     private final RejectGeneralApplicationDocumentService rejectGeneralApplicationDocumentService;
     private final BulkPrintService bulkPrintService;
     private final CaseDataService caseDataService;
@@ -47,13 +46,6 @@ public class PaperNotificationService {
                 assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, authToken, RESPONDENT),
                 caseDetails,authToken);
             log.info("Respondent notification letter sent to Bulk Print: {} for Case ID: {}", respondentLetterId, caseDetails.getId());
-        }
-    }
-
-    public void printManualPaymentNotification(CaseDetails caseDetails, String authToken) {
-        if (caseDataService.isContestedPaperApplication(caseDetails)) {
-            CaseDocument applicantManualPaymentLetter = manualPaymentDocumentService.generateManualPaymentLetter(caseDetails, authToken, APPLICANT);
-            bulkPrintService.sendDocumentForPrint(applicantManualPaymentLetter, caseDetails, authToken);
         }
     }
 
