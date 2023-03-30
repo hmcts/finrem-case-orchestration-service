@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionTypeCollect
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 
 import java.util.HashMap;
 import java.util.List;
@@ -30,7 +31,6 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.CONSENT_ORDER_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
 
 @Slf4j
@@ -43,6 +43,7 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
     private final ConsentOrderPrintService consentOrderPrintService;
     private final DocumentHelper documentHelper;
     private final ObjectMapper mapper;
+
 
     @Override
     public boolean canHandle(final CallbackType callbackType, final CaseType caseType,
@@ -74,9 +75,9 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
         log.info("Generating and preparing documents for latest consent order, case {}", caseDetails.getId());
 
         Map<String, Object> caseData = caseDetails.getData();
-
+        StampType stampType = documentHelper.getStampType(caseData);
         CaseDocument approvedConsentOrderLetter = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, authToken);
-        CaseDocument consentOrderAnnexStamped = genericDocumentService.annexStampDocument(latestConsentOrder, authToken);
+        CaseDocument consentOrderAnnexStamped = genericDocumentService.annexStampDocument(latestConsentOrder, authToken, stampType);
 
         ApprovedOrder.ApprovedOrderBuilder approvedOrderBuilder = ApprovedOrder.builder()
             .orderLetter(approvedConsentOrderLetter)
@@ -89,7 +90,7 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
                 caseDetails.getId());
 
             List<PensionTypeCollection> stampedPensionDocs = consentOrderApprovedDocumentService.stampPensionDocuments(
-                getPensionDocuments(caseData), authToken);
+                documentHelper.getPensionDocuments(caseData), authToken, stampType);
             log.info("Generated StampedPensionDocs = {} for case {}", stampedPensionDocs, caseDetails.getId());
             approvedOrder.setPensionDocuments(stampedPensionDocs);
         }
@@ -120,11 +121,6 @@ public class ApprovedConsentOrderAboutToSubmitHandler implements CallbackHandler
 
     private CaseDocument getLatestConsentOrder(Map<String, Object> caseData) {
         return mapper.convertValue(caseData.get(LATEST_CONSENT_ORDER), new TypeReference<>() {
-        });
-    }
-
-    private List<PensionTypeCollection> getPensionDocuments(Map<String, Object> caseData) {
-        return mapper.convertValue(caseData.get(PENSION_DOCS_COLLECTION), new TypeReference<>() {
         });
     }
 
