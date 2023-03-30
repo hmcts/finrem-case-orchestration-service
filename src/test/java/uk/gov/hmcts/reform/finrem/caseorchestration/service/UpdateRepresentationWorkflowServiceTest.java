@@ -132,7 +132,7 @@ public class UpdateRepresentationWorkflowServiceTest {
     }
 
     @Test
-    public void givenChangeRequestWithUnpopulatedOrg_whenHandleWorkflowNoNOCParty_thenNoCallToAssignCaseAccessService() {
+    public void givenChangeRequestWithUnpopulatedOrg_whenHandleWorkflowNoNocParty_thenNoCallToAssignCaseAccessService() {
         setNoOrgsChangeOrganisationRequest();
         caseDetails.getData().put(NOC_PARTY, null);
         when(noticeOfChangeService.updateRepresentation(caseDetails, AUTH_TOKEN, caseDetails))
