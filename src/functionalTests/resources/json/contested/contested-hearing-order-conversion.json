@@ -95,8 +95,8 @@
       "latestDraftDirectionOrder": {
         "purposeOfDocument": "Draft order",
         "uploadDraftDocument": {
-          "document_url": "http://document-management-store:8080/documents/a9958f9f-997d-47aa-8c02-fb34f4703209",
-          "document_binary_url": "http://document-management-store:8080/documents/a9958f9f-997d-47aa-8c02-fb34f4703209/binary",
+          "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/13a203b6-6c33-4c71-aabe-66701808f63e",
+          "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/13a203b6-6c33-4c71-aabe-66701808f63e/binary",
           "document_filename": "approvedConvertedHearingOrder.docx"
         }
       },
