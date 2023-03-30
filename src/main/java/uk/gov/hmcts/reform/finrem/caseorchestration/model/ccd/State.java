@@ -53,7 +53,6 @@ public enum State {
     PAPER_CASE_ADDED("paperCaseAdded"),
     READY_FOR_HEARING("readyForHearing");
 
-
     private final String stateId;
 
     @JsonValue

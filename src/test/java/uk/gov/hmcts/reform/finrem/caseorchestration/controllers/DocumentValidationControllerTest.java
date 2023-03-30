@@ -21,6 +21,7 @@ import java.net.URISyntaxException;
 
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -67,7 +68,7 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors").doesNotExist());
-        verify(helper, never()).setConsentVariationOrderLabelField(any());
+        verify(helper, never()).setConsentVariationOrderLabelField(anyMap());
     }
 
     @Test
@@ -86,7 +87,7 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors").doesNotExist());
-        verify(helper).setConsentVariationOrderLabelField(any());
+        verify(helper).setConsentVariationOrderLabelField(anyMap());
     }
 
     @Test

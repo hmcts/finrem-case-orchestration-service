@@ -4,14 +4,13 @@ import com.google.common.io.Files;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -21,7 +20,11 @@ public class GenericDocumentService {
 
     private static final String DOCUMENT_CASE_DETAILS_JSON_KEY = "caseDetails";
 
-    private final DocumentClient documentClient;
+    private final DocumentManagementService documentManagementService;
+    private final BulkPrintDocumentService bulkPrintDocumentService;
+    private final BulkPrintDocumentGeneratorService bulkPrintDocumentGeneratorService;
+    private final DocumentConversionService documentConversionService;
+    private final PdfStampingService pdfStampingService;
 
     public CaseDocument generateDocument(String authorisationToken, CaseDetails caseDetailsCopy,
                                          String template, String fileName) {
@@ -35,24 +38,27 @@ public class GenericDocumentService {
 
     public CaseDocument generateDocumentFromPlaceholdersMap(String authorisationToken, Map placeholders,
                                                             String template, String fileName) {
-        Document generatedPdf = documentClient.generatePdf(
-            DocumentGenerationRequest.builder().template(template).fileName(fileName).values(placeholders).build(),
-            authorisationToken
-        );
+        Document generatedPdf = documentManagementService
+            .storeDocument(template, fileName, placeholders, authorisationToken);
         return toCaseDocument(generatedPdf);
     }
 
-
     public UUID bulkPrint(BulkPrintRequest bulkPrintRequest) {
-        return documentClient.bulkPrint(bulkPrintRequest);
+        final List<byte[]> documents = bulkPrintDocumentService.downloadDocuments(bulkPrintRequest);
+        return bulkPrintDocumentGeneratorService.send(bulkPrintRequest, documents);
     }
 
     public void deleteDocument(String documentUrl, String authorisationToken) {
-        documentClient.deleteDocument(documentUrl, authorisationToken);
+        documentManagementService.deleteDocument(documentUrl, authorisationToken);
     }
 
-    public CaseDocument annexStampDocument(CaseDocument document, String authorisationToken) {
-        Document stampedDocument = documentClient.annexStampDocument(toDocument(document), authorisationToken);
+    public CaseDocument annexStampDocument(CaseDocument document, String authorisationToken, StampType stampType) {
+        Document documentWithUrl = Document.builder().url(document.getDocumentUrl())
+            .binaryUrl(document.getDocumentBinaryUrl())
+            .fileName(document.getDocumentFilename())
+            .build();
+        Document stampedDocument = pdfStampingService.stampDocument(
+            documentWithUrl, authorisationToken, true, stampType);
         return toCaseDocument(stampedDocument);
     }
 
@@ -62,11 +68,20 @@ public class GenericDocumentService {
     }
 
     public CaseDocument convertDocumentToPdf(CaseDocument document, String authorisationToken) {
-        return toCaseDocument(documentClient.convertDocumentToPdf(authorisationToken, toDocument(document)));
+        Document requestDocument = toDocument(document);
+        byte[] convertedDocContent = documentConversionService.convertDocumentToPdf(requestDocument);
+        String filename = documentConversionService.getConvertedFilename(requestDocument.getFileName());
+        Document storedDocument = documentManagementService.storeDocument(convertedDocContent, filename, authorisationToken);
+        return toCaseDocument(storedDocument);
     }
 
-    public CaseDocument stampDocument(CaseDocument document, String authorisationToken) {
-        Document stampedDocument = documentClient.stampDocument(toDocument(document), authorisationToken);
+    public CaseDocument stampDocument(CaseDocument document, String authorisationToken, StampType stampType) {
+
+        Document stampedDocument = pdfStampingService.stampDocument(
+            Document.builder().url(document.getDocumentUrl())
+                .binaryUrl(document.getDocumentBinaryUrl())
+                .fileName(document.getDocumentFilename())
+                .build(), authorisationToken, false, stampType);
         return toCaseDocument(stampedDocument);
     }
 

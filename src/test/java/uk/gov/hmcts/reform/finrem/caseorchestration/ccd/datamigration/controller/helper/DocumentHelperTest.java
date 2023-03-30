@@ -19,9 +19,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCo
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -53,6 +55,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedFinremCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CTSC_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.DOCUMENT_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
@@ -60,6 +63,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_OTHER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_COURTLIST;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DocumentHelperTest {
@@ -78,9 +83,9 @@ public class DocumentHelperTest {
     public void setup() {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-        CaseDataService caseDataService = new CaseDataService();
+        CaseDataService caseDataService = new CaseDataService(objectMapper);
         finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
-        documentHelper = new DocumentHelper(objectMapper, caseDataService, service);
+        documentHelper = new DocumentHelper(objectMapper, caseDataService, service, finremCaseDetailsMapper);
     }
 
     @Test
@@ -121,6 +126,15 @@ public class DocumentHelperTest {
     @Test
     public void shouldGetFormADocuments() throws Exception {
         CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("validate-form-a-collection.json");
+        List<CaseDocument> formADocuments = documentHelper.getFormADocumentsData(
+            callbackRequest.getCaseDetails().getData());
+        assertThat(formADocuments.size(), is(2));
+    }
+
+
+    @Test
+    public void shouldGetFormADocumentsFinrem() throws Exception {
+        FinremCallbackRequest callbackRequest = prepareFinremCallbackRequestForLatestConsentedConsentOrder("validate-form-a-collection.json");
         List<CaseDocument> pensionDocuments = documentHelper.getFormADocumentsData(
             callbackRequest.getCaseDetails().getData());
         assertThat(pensionDocuments.size(), is(2));
@@ -362,6 +376,24 @@ public class DocumentHelperTest {
     }
 
     @Test
+    public void whenPreparingLetterToApplicantTemplateData_CtscDataIsPopulated_finrem() {
+        CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(defaultConsentedFinremCaseDetails(), APPLICANT);
+
+        CtscContactDetails ctscContactDetails = CtscContactDetails.builder()
+            .serviceCentre(CTSC_SERVICE_CENTRE)
+            .careOf(CTSC_CARE_OF)
+            .poBox(CTSC_PO_BOX)
+            .town(CTSC_TOWN)
+            .postcode(CTSC_POSTCODE)
+            .emailAddress(CTSC_EMAIL_ADDRESS)
+            .phoneNumber(CTSC_PHONE_NUMBER)
+            .openingHours(CTSC_OPENING_HOURS)
+            .build();
+
+        assertEquals(ctscContactDetails, preparedCaseDetails.getData().get(CTSC_CONTACT_DETAILS));
+    }
+
+    @Test
     public void whenPreparingLetterToRespondentTemplateData_CtscDataIsPopulated() {
         CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(defaultConsentedCaseDetails(), RESPONDENT);
 
@@ -377,6 +409,73 @@ public class DocumentHelperTest {
             .build();
 
         assertEquals(ctscContactDetails, preparedCaseDetails.getData().get(CTSC_CONTACT_DETAILS));
+    }
+
+
+    @Test
+    public void whenPreparingLetterToRespondentTemplateData_CtscDataIsPopulated_finrem() {
+        CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(defaultConsentedFinremCaseDetails(), RESPONDENT);
+
+        CtscContactDetails ctscContactDetails = CtscContactDetails.builder()
+            .serviceCentre(CTSC_SERVICE_CENTRE)
+            .careOf(CTSC_CARE_OF)
+            .poBox(CTSC_PO_BOX)
+            .town(CTSC_TOWN)
+            .postcode(CTSC_POSTCODE)
+            .emailAddress(CTSC_EMAIL_ADDRESS)
+            .phoneNumber(CTSC_PHONE_NUMBER)
+            .openingHours(CTSC_OPENING_HOURS)
+            .build();
+
+        assertEquals(ctscContactDetails, preparedCaseDetails.getData().get(CTSC_CONTACT_DETAILS));
+    }
+
+    @Test
+    public void shouldReturnTrueWhenCourtIsHighCourt() {
+        CaseDetails preparedCaseDetails = defaultConsentedCaseDetails();
+        preparedCaseDetails.getData().put(HIGHCOURT_COURTLIST, "highcourt");
+        boolean isHighCourt = documentHelper.isHighCourtSelected(preparedCaseDetails.getData());
+        assertTrue(isHighCourt);
+    }
+
+    @Test
+    public void shouldReturnTrueWhenCourtIsHighCourtInFinremCaseData() {
+        FinremCaseDetails preparedCaseDetails = defaultConsentedFinremCaseDetails();
+        preparedCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.HIGHCOURT);
+        boolean isHighCourt = documentHelper.isHighCourtSelected(preparedCaseDetails.getData());
+        assertTrue(isHighCourt);
+    }
+
+    @Test
+    public void shouldReturnHighCourtStampWhenCourtIsHighCourt() {
+        CaseDetails preparedCaseDetails = defaultConsentedCaseDetails();
+        preparedCaseDetails.getData().put(HIGHCOURT_COURTLIST, "highcourt");
+        StampType actualStampType = documentHelper.getStampType(preparedCaseDetails.getData());
+        assertEquals(StampType.HIGH_COURT_STAMP, actualStampType);
+    }
+
+    @Test
+    public void shouldReturnFamilyCourtStampWhenCourtIsLondon() {
+        CaseDetails preparedCaseDetails = defaultConsentedCaseDetails();
+        preparedCaseDetails.getData().put(LONDON_COURTLIST, "london");
+        StampType actualStampType = documentHelper.getStampType(preparedCaseDetails.getData());
+        assertEquals(StampType.FAMILY_COURT_STAMP, actualStampType);
+    }
+
+    @Test
+    public void shouldReturnHighCourtStampWhenCourtIsHighCourtInFinremCaseData() {
+        FinremCaseDetails preparedCaseDetails = defaultConsentedFinremCaseDetails();
+        preparedCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.HIGHCOURT);
+        StampType actualStampType = documentHelper.getStampType(preparedCaseDetails.getData());
+        assertEquals(StampType.HIGH_COURT_STAMP, actualStampType);
+    }
+
+    @Test
+    public void shouldReturnFamilyCourtStampWhenCourtIsLondonInFinremCaseData() {
+        FinremCaseDetails preparedCaseDetails = defaultConsentedFinremCaseDetails();
+        preparedCaseDetails.getData().getRegionWrapper().getDefaultRegionWrapper().setRegionList(Region.LONDON);
+        StampType actualStampType = documentHelper.getStampType(preparedCaseDetails.getData());
+        assertEquals(StampType.FAMILY_COURT_STAMP, actualStampType);
     }
 
     private CallbackRequest prepareCallbackRequestForLatestConsentedConsentOrder(String fileName) throws Exception {

@@ -11,6 +11,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedHearingHelpe
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.io.IOException;
@@ -21,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_PROMPT_FOR_DOCUMENT;
@@ -46,6 +49,7 @@ public class ConsentHearingService {
     private final ObjectMapper objectMapper;
     private final ConsentedHearingHelper helper;
 
+    @Deprecated
     public void sendNotification(CaseDetails caseDetails, CaseDetails caseDetailsBefore) {
         log.info("Hearing notification for case id {}", caseDetails.getId());
         Map<String, Object> caseData =  caseDetails.getData();
@@ -57,6 +61,26 @@ public class ConsentHearingService {
         }
     }
 
+    public void sendNotification(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore) {
+        log.info("Hearing notification for case id {}", caseDetails.getId());
+
+        FinremCaseData data = caseDetails.getData();
+        if (!data.isPaperCase()) {
+            List<ConsentedHearingDataWrapper> listForHearings = data.getListForHearings();
+            List<ConsentedHearingDataWrapper> listForHearingsBefore =
+                Optional.ofNullable(caseDetailsBefore.getData().getListForHearings()).orElse(new ArrayList<>());
+            List<ConsentedHearingDataWrapper> hearingList = listForHearings;
+
+
+            List<String> hearingIdsToProcess =
+                getNewOrDateTimeModifiedHearingIdsList(listForHearings,
+                    listForHearingsBefore);
+
+            hearingList.forEach(hearingCaseData -> notify(caseDetails, hearingCaseData, hearingIdsToProcess));
+        }
+    }
+
+    @Deprecated
     private void notify(CaseDetails caseDetails, ConsentedHearingDataWrapper hearingCaseData, List<String> hearingIdsToProcess) {
         if (hearingIdsToProcess.contains(hearingCaseData.getId())) {
             Map<String, Object> caseData = helper.convertToMap(hearingCaseData.getValue());
@@ -66,6 +90,22 @@ public class ConsentHearingService {
                 log.info("Email notification to Applicant Solicitor about hearing for case id {} sent.", caseDetails.getId());
             }
             if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseDetails.getData())) {
+                log.info("Sending email notification to Respondent Solicitor about hearing for case id {}", caseDetails.getId());
+                notificationService.sendConsentHearingNotificationEmailToRespondentSolicitor(caseDetails, caseData);
+                log.info("Email notification to Respondent Solicitor about hearing for case id {} sent", caseDetails.getId());
+            }
+        }
+    }
+
+    private void notify(FinremCaseDetails caseDetails, ConsentedHearingDataWrapper hearingCaseData, List<String> hearingIdsToProcess) {
+        if (hearingIdsToProcess.contains(hearingCaseData.getId())) {
+            Map<String, Object> caseData = helper.convertToMap(hearingCaseData.getValue());
+            if (caseDetails.isApplicantSolicitorAgreeToReceiveEmails()) {
+                log.info("Sending email notification to Applicant Solicitor about hearing for case id {}", caseDetails.getId());
+                notificationService.sendConsentHearingNotificationEmailToApplicantSolicitor(caseDetails, caseData);
+                log.info("Email notification to Applicant Solicitor about hearing for case id {} sent.", caseDetails.getId());
+            }
+            if (caseDetails.getData().isRespondentSolicitorEmailCommunicationEnabled()) {
                 log.info("Sending email notification to Respondent Solicitor about hearing for case id {}", caseDetails.getId());
                 notificationService.sendConsentHearingNotificationEmailToRespondentSolicitor(caseDetails, caseData);
                 log.info("Email notification to Respondent Solicitor about hearing for case id {} sent", caseDetails.getId());
@@ -146,7 +186,7 @@ public class ConsentHearingService {
         caseData.put("additionalInformationAboutHearing", hearingCaseData.get("additionalInformationAboutHearing"));
 
         CaseDocument hearingNotice = genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
-            documentConfiguration.getHearingNoticeConsentedTemplate(),
+            documentConfiguration.getHearingNoticeConsentedTemplate(caseDetailsCopy),
             documentConfiguration.getHearingNoticeConsentedFileName());
 
         hearingData.getValue().setHearingNotice(hearingNotice);
@@ -185,6 +225,7 @@ public class ConsentHearingService {
         }
     }
 
+    @Deprecated
     private List<String> getNewOrDateTimeModifiedHearingIdsList(CaseDetails caseDetails, CaseDetails caseDetailsBefore) {
         List<String> idsList = new ArrayList<>();
 
@@ -213,6 +254,25 @@ public class ConsentHearingService {
         return idsList;
     }
 
+    private List<String> getNewOrDateTimeModifiedHearingIdsList(List<ConsentedHearingDataWrapper> hearingList,
+                                                                List<ConsentedHearingDataWrapper> beforeHearingList) {
+        List<String> idsList = new ArrayList<>();
+
+        hearingList.forEach(data -> idsList.add(data.getId()));
+        beforeHearingList.forEach(data -> idsList.remove(data.getId()));
+
+        log.info("after removing List :: {}", idsList.size());
+
+        List<String> modifiedHearingIds = getModifiedHearingIds(hearingList, beforeHearingList);
+
+        if (!modifiedHearingIds.isEmpty()) {
+            idsList.addAll(modifiedHearingIds);
+        }
+        log.info("List of new and modified hearings {}", idsList);
+        return idsList;
+    }
+
+    @Deprecated
     private List<String> getModifiedHearingIds(Map<String, Object> caseData, Map<String, Object> caseDataBefore) {
         Map<String, String> currentMap = new HashMap<>();
         Map<String, String> beforeMap = new HashMap<>();
@@ -220,6 +280,28 @@ public class ConsentHearingService {
 
         List<ConsentedHearingDataWrapper> currentInterimHearingList = helper.getHearings(caseData);
         List<ConsentedHearingDataWrapper> beforeInterimHearingList = helper.getHearings(caseDataBefore);
+
+        if (!currentInterimHearingList.isEmpty() && !beforeInterimHearingList.isEmpty()) {
+            currentInterimHearingList.forEach(data -> currentMap.put(data.getId(), String.join("#",
+                data.getValue().getHearingDate(), data.getValue().getHearingTime())));
+
+            beforeInterimHearingList.forEach(data -> beforeMap.put(data.getId(), String.join("#",
+                data.getValue().getHearingDate(), data.getValue().getHearingTime())));
+
+            log.info("hearing beforeMap::" + beforeMap.size());
+            currentMap.entrySet().forEach(currentData -> beforeMap.entrySet()
+                .forEach(beforeData -> setList(currentData, beforeData, modifiedCollectionList)));
+        }
+
+        log.info("Modified hearing collection list::" + modifiedCollectionList);
+        return modifiedCollectionList;
+    }
+
+    private List<String> getModifiedHearingIds(List<ConsentedHearingDataWrapper> currentInterimHearingList,
+                                               List<ConsentedHearingDataWrapper> beforeInterimHearingList) {
+        Map<String, String> currentMap = new HashMap<>();
+        Map<String, String> beforeMap = new HashMap<>();
+        List<String> modifiedCollectionList = new ArrayList<>();
 
         if (!currentInterimHearingList.isEmpty() && !beforeInterimHearingList.isEmpty()) {
             currentInterimHearingList.forEach(data -> currentMap.put(data.getId(), String.join("#",

@@ -7,7 +7,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.SystemUpdateUserConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.wrapper.IdamToken;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.IdamToken;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.config.CacheConfiguration.REQUEST_SCOPED_CACHE_MANAGER;

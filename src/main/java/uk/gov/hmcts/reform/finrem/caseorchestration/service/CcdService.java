@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.wrapper.IdamToken;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.IdamToken;
 
 import java.util.List;
 
@@ -51,8 +51,7 @@ public class CcdService {
             caseTypeId,
             caseId.toString(),
             true,
-            getCaseDataContent(caseDetails.getData(), startEventResponse));
-
+            getCaseDataContent(startEventResponse.getCaseDetails().getData(), startEventResponse));
     }
 
     private CaseDataContent getCaseDataContent(Object caseData,

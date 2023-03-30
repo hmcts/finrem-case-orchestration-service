@@ -5,7 +5,7 @@
   "case_details": {
     "id": "100050018",
     "jurisdiction": "DIVORCE",
-    "state": "applicationDrafted",
+    "state": "caseAdded",
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
       "typeOfApplication": "In connection to matrimonial and civil partnership proceedings",

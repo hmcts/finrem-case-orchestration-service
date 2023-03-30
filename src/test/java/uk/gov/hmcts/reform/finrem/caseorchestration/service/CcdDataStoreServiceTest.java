@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.CcdDataStoreServiceCo
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.RemoveUserRolesRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseUsers;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.RemoveUserRolesRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.util.Arrays;
 
@@ -57,12 +58,26 @@ public class CcdDataStoreServiceTest extends BaseServiceTest {
         when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(TEST_USER_ID);
         when(removeUserRolesRequestMapper.mapToRemoveUserRolesRequest(any(CaseDetails.class), eq(TEST_USER_ID), eq(CREATOR_USER_ROLE)))
             .thenReturn(removeUserRolesRequest);
+        when(removeUserRolesRequestMapper.mapToRemoveUserRolesRequest(any(FinremCaseDetails.class), eq(TEST_USER_ID), eq(CREATOR_USER_ROLE)))
+            .thenReturn(removeUserRolesRequest);
         when(ccdDataStoreServiceConfiguration.getRemoveCaseRolesUrl()).thenReturn(TEST_URL);
     }
 
     @Test
     public void removeCreatorRole() {
         CaseDetails caseDetails = buildCaseDetails();
+
+        ccdDataStoreService.removeCreatorRole(caseDetails, AUTH_TOKEN);
+
+        verify(idamService, times(1)).getIdamUserId(AUTH_TOKEN);
+        verify(removeUserRolesRequestMapper, times(1)).mapToRemoveUserRolesRequest(caseDetails, TEST_USER_ID, CREATOR_USER_ROLE);
+        verify(ccdDataStoreServiceConfiguration, times(1)).getRemoveCaseRolesUrl();
+        verify(restService, times(1)).restApiDeleteCall(AUTH_TOKEN, TEST_URL, removeUserRolesRequest);
+    }
+
+    @Test
+    public void removeFinremCaseDetailsCreatorRole() {
+        FinremCaseDetails caseDetails = buildFinremCaseDetails();
 
         ccdDataStoreService.removeCreatorRole(caseDetails, AUTH_TOKEN);
 

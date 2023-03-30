@@ -10,11 +10,11 @@ import java.util.Arrays;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 @RequiredArgsConstructor
 public enum NorthWalesCourt implements CourtList {
-    FR_northwalesList_1("FR_northwalesList_1"),
-    FR_northwalesList_2("FR_northwalesList_2"),
-    FR_northwalesList_3("FR_northwalesList_3"),
-    FR_northwalesList_4("FR_northwalesList_4"),
-    FR_northwalesList_5("FR_northwalesList_5");
+    WREXHAM("FR_northwalesList_1"),
+    CAERNARFON("FR_northwalesList_2"),
+    PRESTATYN("FR_northwalesList_3"),
+    WELSHPOOL("FR_northwalesList_4"),
+    MOLD("FR_northwalesList_5");
 
     private final String id;
 
