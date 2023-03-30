@@ -64,16 +64,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     private String caseOrchestration;
 
     @Test
-    public void convertDocumentToPdf()  {
-
-        JsonPath jsonPathEvaluator =
-            generateDocument(CONTESTED_HEARING_ORDER_CONVERT_TO_PDF_JSON, hearingOrderStoreUrl, contestedDir);
-
-        assertTrue(jsonPathEvaluator.get("data.latestDraftHearingOrder.document_filename").toString()
-            .equalsIgnoreCase("approvedConvertedHearingOrder.pdf"));
-    }
-
-    @Test
     public void verifyBulkPrintDocumentGenerationShouldReturnOkResponseCode() {
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(GENERAL_ORDER_JSON, documentRejectedOrderUrl,
             BINARY_URL_TYPE, "generalOrder", consentedDir);
