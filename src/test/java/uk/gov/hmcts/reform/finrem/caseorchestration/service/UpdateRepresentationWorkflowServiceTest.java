@@ -68,8 +68,30 @@ public class UpdateRepresentationWorkflowServiceTest {
     }
 
     @Test
-    public void givenChangeRequestWithPopulatedOrg_whenHandleWorkflow_thenCallAssignCaseAccessService() {
+    public void givenChangeRequestWithPopulatedOrg_whenHandleWorkflowApplicant_thenCallAssignCaseAccessService() {
         setPopulatedChangeOrganisationRequest();
+        when(noticeOfChangeService.hasInvalidOrgPolicy(caseDetails, true))
+            .thenReturn(true);
+        when(noticeOfChangeService.updateRepresentation(caseDetails, AUTH_TOKEN, caseDetails))
+            .thenReturn(caseDetails.getData());
+        when(noticeOfChangeService.persistOriginalOrgPoliciesWhenRevokingAccess(caseDetails, caseDetails))
+            .thenReturn(caseDetails);
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
+        setDefaultChangeRequest();
+        response.setData(defaultChangeDetails.getData());
+        when(assignCaseAccessService.applyDecision(AUTH_TOKEN, caseDetails)).thenReturn(response);
+
+        updateRepresentationWorkflowService.handleNoticeOfChangeWorkflow(caseDetails, AUTH_TOKEN, caseDetails);
+
+        verify(assignCaseAccessService, times(1)).applyDecision(AUTH_TOKEN, caseDetails);
+        assertEquals(getChangeOrganisationRequest(response.getData()), getDefaultChangeRequest());
+    }
+
+    @Test
+    public void givenChangeRequestWithPopulatedOrg_whenHandleWorkflowRespondent_thenCallAssignCaseAccessService() {
+        setPopulatedChangeOrganisationRequest();
+        when(noticeOfChangeService.hasInvalidOrgPolicy(caseDetails, false))
+            .thenReturn(true);
         when(noticeOfChangeService.updateRepresentation(caseDetails, AUTH_TOKEN, caseDetails))
             .thenReturn(caseDetails.getData());
         when(noticeOfChangeService.persistOriginalOrgPoliciesWhenRevokingAccess(caseDetails, caseDetails))
