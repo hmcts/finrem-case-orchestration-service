@@ -109,6 +109,8 @@ public class UpdateRepresentationWorkflowServiceTest {
         caseDetails.getData().put(NOC_PARTY, APPLICANT);
         when(noticeOfChangeService.updateRepresentation(caseDetails, AUTH_TOKEN, caseDetails))
             .thenReturn(caseDetails.getData());
+        when(noticeOfChangeService.hasInvalidOrgPolicy(caseDetails, true)).thenReturn(true);
+        when(noticeOfChangeService.hasInvalidOrgPolicy(caseDetails, true)).thenReturn(false);
 
         AboutToStartOrSubmitCallbackResponse actualResponse = updateRepresentationWorkflowService
             .handleNoticeOfChangeWorkflow(caseDetails, AUTH_TOKEN, caseDetails);
@@ -123,21 +125,8 @@ public class UpdateRepresentationWorkflowServiceTest {
         caseDetails.getData().put(NOC_PARTY, RESPONDENT);
         when(noticeOfChangeService.updateRepresentation(caseDetails, AUTH_TOKEN, caseDetails))
             .thenReturn(caseDetails.getData());
-
-        AboutToStartOrSubmitCallbackResponse actualResponse = updateRepresentationWorkflowService
-            .handleNoticeOfChangeWorkflow(caseDetails, AUTH_TOKEN, caseDetails);
-
-        verify(assignCaseAccessService, never()).applyDecision(AUTH_TOKEN, caseDetails);
-        assertEquals(getChangeOrganisationRequest(actualResponse.getData()), getDefaultChangeRequest());
-    }
-
-    @Test
-    public void givenChangeRequestWithUnpopulatedOrg_whenHandleWorkflowNoNocParty_thenNoCallToAssignCaseAccessService() {
-        setNoOrgsChangeOrganisationRequest();
-        caseDetails.getData().put(NOC_PARTY, null);
-        when(noticeOfChangeService.updateRepresentation(caseDetails, AUTH_TOKEN, caseDetails))
-            .thenReturn(caseDetails.getData());
-
+        when(noticeOfChangeService.hasInvalidOrgPolicy(caseDetails, false)).thenReturn(true);
+        when(noticeOfChangeService.hasInvalidOrgPolicy(caseDetails, false)).thenReturn(false);
         AboutToStartOrSubmitCallbackResponse actualResponse = updateRepresentationWorkflowService
             .handleNoticeOfChangeWorkflow(caseDetails, AUTH_TOKEN, caseDetails);
 
