@@ -35,7 +35,7 @@ public class MultiSelectAboutToStartHandler extends FinremCallbackHandler {
                                                                               String userAuthorisation) {
         log.info("Handling contested {} about to start callback for case id: {}",
             callbackRequest.getEventType(), callbackRequest.getCaseDetails().getId());
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
+
 
         List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();
 
@@ -46,6 +46,7 @@ public class MultiSelectAboutToStartHandler extends FinremCallbackHandler {
         dynamicListElements.add(getDynamicMultiSelectListElement("doc5.pdf", "doc5.pdf"));
         dynamicListElements.add(getDynamicMultiSelectListElement("doc6.pdf", "doc6.pdf"));
 
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         DynamicMultiSelectList dynamicList = getDynamicMultiSelectList(dynamicListElements);
         caseData.setIntervenerDocuments(dynamicList);
 
