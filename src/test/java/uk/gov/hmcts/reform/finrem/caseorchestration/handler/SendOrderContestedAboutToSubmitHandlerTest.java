@@ -304,7 +304,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
             sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 
         verify(genericDocumentService).stampDocument(
-            eq(caseDocument()), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), CASE_ID);
+            eq(caseDocument()), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP), eq(CASE_ID));
 
         List<HearingOrderCollectionData> expectedFinalOrderCollection =
             (List<HearingOrderCollectionData>) response.getData().get(FINAL_ORDER_COLLECTION);

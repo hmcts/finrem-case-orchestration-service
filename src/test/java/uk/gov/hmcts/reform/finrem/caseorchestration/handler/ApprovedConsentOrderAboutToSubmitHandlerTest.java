@@ -109,7 +109,7 @@ public class ApprovedConsentOrderAboutToSubmitHandlerTest {
         assertNotNull(response.getData().get("otherCollection"));
 
         verify(consentOrderApprovedDocumentService).generateApprovedConsentOrderLetter(any(), any());
-        verify(genericDocumentService).annexStampDocument(any(), any(), any());
+        verify(genericDocumentService).annexStampDocument(any(), any(), any(), any());
         verify(documentHelper, times(2)).getPensionDocumentsData(any());
         verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), any());
     }

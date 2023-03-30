@@ -50,7 +50,7 @@ public class ManualPaymentSubmittedHandler extends FinremCallbackHandler {
             log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
             CaseDocument caseDocument =
                 service.generateManualPaymentLetter(caseDetails, userAuthorisation, APPLICANT);
-            printService.sendDocumentForPrint(caseDocument, caseDetails);
+            printService.sendDocumentForPrint(caseDocument, caseDetails, userAuthorisation);
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()

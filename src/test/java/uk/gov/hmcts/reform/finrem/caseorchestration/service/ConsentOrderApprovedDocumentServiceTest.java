@@ -255,9 +255,11 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     @Test
     public void givenNullDocumentInPensionDocuments_whenStampingDocuments_thenTheNullValueIsIgnored() throws Exception {
         Mockito.reset(pdfStampingServiceMock);
-        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP, caseId))
+        when(pdfStampingServiceMock.stampDocument(
+            document(), AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP, caseId))
             .thenReturn(document());
-        when(pdfStampingServiceMock.stampDocument(document(), AUTH_TOKEN, false, caseId)).thenReturn(document());
+        when(pdfStampingServiceMock.stampDocument(
+            document(), AUTH_TOKEN, false, StampType.FAMILY_COURT_STAMP, caseId)).thenReturn(document());
 
         PensionTypeCollection pensionCollectionDataWithNullDocument = pensionDocumentData();
         pensionCollectionDataWithNullDocument.getTypedCaseDocument().setPensionDocument(null);
