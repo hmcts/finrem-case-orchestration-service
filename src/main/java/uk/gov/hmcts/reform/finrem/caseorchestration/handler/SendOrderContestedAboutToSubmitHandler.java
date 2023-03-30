@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -158,7 +159,8 @@ public class SendOrderContestedAboutToSubmitHandler
 
     private void stampAndAddToCollection(Map<String, Object> caseData, CaseDocument latestHearingOrder, String authToken) {
         if (!isEmpty(latestHearingOrder)) {
-            CaseDocument stampedDocs = genericDocumentService.stampDocument(latestHearingOrder, authToken);
+            StampType stampType = documentHelper.getStampType(caseData);
+            CaseDocument stampedDocs = genericDocumentService.stampDocument(latestHearingOrder, authToken, stampType);
             log.info("Stamped Documents = {}", stampedDocs);
 
             List<HearingOrderCollectionData> finalOrderCollection = Optional.ofNullable(documentHelper.getFinalOrderDocuments(caseData))

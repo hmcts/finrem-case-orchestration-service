@@ -20,7 +20,6 @@ import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_FIRM;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FEES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FEE_AMOUNT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FEE_CODE;
@@ -105,7 +104,6 @@ public class PBAPaymentService {
         if (caseDataService.isConsentedApplication(caseDetails)) {
             return PaymentRequest.builder()
                 .accountNumber(dataJsonNode.path(PBA_NUMBER).asText())
-                .caseReference(dataJsonNode.path(DIVORCE_CASE_NUMBER).asText())
                 .customerReference(dataJsonNode.path(PBA_REFERENCE).asText())
                 .ccdCaseNumber(ccdCaseId)
                 .description(consentedDescription)
@@ -117,7 +115,6 @@ public class PBAPaymentService {
         } else {
             return PaymentRequest.builder()
                 .accountNumber(dataJsonNode.path(PBA_NUMBER).asText())
-                .caseReference(dataJsonNode.path(DIVORCE_CASE_NUMBER).asText())
                 .customerReference(dataJsonNode.path(PBA_REFERENCE).asText())
                 .ccdCaseNumber(ccdCaseId)
                 .description(contestedDescription)
@@ -136,7 +133,6 @@ public class PBAPaymentService {
         String description = caseDataService.isConsentedApplication(caseDetails) ? consentedDescription : contestedDescription;
         return PaymentRequestWithSiteID.builder()
             .accountNumber(dataJsonNode.path(PBA_NUMBER).asText())
-            .caseReference(dataJsonNode.path(DIVORCE_CASE_NUMBER).asText())
             .customerReference(dataJsonNode.path(PBA_REFERENCE).asText())
             .ccdCaseNumber(ccdCaseId)
             .description(description)
