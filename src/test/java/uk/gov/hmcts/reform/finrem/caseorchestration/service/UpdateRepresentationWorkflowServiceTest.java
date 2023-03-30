@@ -32,6 +32,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOC_PARTY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UpdateRepresentationWorkflowServiceTest {
@@ -50,6 +51,8 @@ public class UpdateRepresentationWorkflowServiceTest {
     @InjectMocks
     UpdateRepresentationWorkflowService updateRepresentationWorkflowService;
 
+    private ObjectMapper mapper = new ObjectMapper();
+
     private CaseDetails caseDetails;
 
     private CaseDetails defaultChangeDetails;
@@ -67,7 +70,7 @@ public class UpdateRepresentationWorkflowServiceTest {
     }
 
     @Test
-    public void givenChangeRequestWithPopulatedOrg_whenHandleWorkflow_thenCallAssignCaseAccessService() {
+    public void givenChangeRequestWithPopulatedOrg_whenHandleWorkflowApplicant_thenCallAssignCaseAccessService() {
         setPopulatedChangeOrganisationRequest();
         when(noticeOfChangeService.updateRepresentation(caseDetails, AUTH_TOKEN, caseDetails))
             .thenReturn(caseDetails.getData());
@@ -85,12 +88,47 @@ public class UpdateRepresentationWorkflowServiceTest {
     }
 
     @Test
-    public void givenChangeRequestWithUnpopulatedOrg_whenHandleWorkflow_thenNoCallToAssignCaseAccessService() {
+    public void givenChangeRequestWithPopulatedOrg_whenHandleWorkflowRespondent_thenCallAssignCaseAccessService() {
+        setPopulatedChangeOrganisationRequest();
+        when(noticeOfChangeService.updateRepresentation(caseDetails, AUTH_TOKEN, caseDetails))
+            .thenReturn(caseDetails.getData());
+        when(noticeOfChangeService.persistOriginalOrgPoliciesWhenRevokingAccess(caseDetails, caseDetails))
+            .thenReturn(caseDetails);
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
+        setDefaultChangeRequest();
+        response.setData(defaultChangeDetails.getData());
+        when(assignCaseAccessService.applyDecision(AUTH_TOKEN, caseDetails)).thenReturn(response);
+
+        updateRepresentationWorkflowService.handleNoticeOfChangeWorkflow(caseDetails, AUTH_TOKEN, caseDetails);
+
+        verify(assignCaseAccessService, times(1)).applyDecision(AUTH_TOKEN, caseDetails);
+        assertEquals(getChangeOrganisationRequest(response.getData()), getDefaultChangeRequest());
+    }
+
+    @Test
+    public void givenChangeRequestWithUnpopulatedOrg_whenHandleWorkflowApplicant_thenNoCallToAssignCaseAccessService() {
         setNoOrgsChangeOrganisationRequest();
         caseDetails.getData().put(NOC_PARTY, APPLICANT);
         when(noticeOfChangeService.updateRepresentation(caseDetails, AUTH_TOKEN, caseDetails))
             .thenReturn(caseDetails.getData());
+        when(noticeOfChangeService.hasInvalidOrgPolicy(caseDetails, true)).thenReturn(true);
+        when(noticeOfChangeService.hasInvalidOrgPolicy(caseDetails, false)).thenReturn(false);
 
+        AboutToStartOrSubmitCallbackResponse actualResponse = updateRepresentationWorkflowService
+            .handleNoticeOfChangeWorkflow(caseDetails, AUTH_TOKEN, caseDetails);
+
+        verify(assignCaseAccessService, never()).applyDecision(AUTH_TOKEN, caseDetails);
+        assertEquals(getChangeOrganisationRequest(actualResponse.getData()), getDefaultChangeRequest());
+    }
+
+    @Test
+    public void givenChangeRequestWithUnpopulatedOrg_whenHandleWorkflowRespondent_thenNoCallToAssignCaseAccessService() {
+        setNoOrgsChangeOrganisationRequest();
+        caseDetails.getData().put(NOC_PARTY, RESPONDENT);
+        when(noticeOfChangeService.updateRepresentation(caseDetails, AUTH_TOKEN, caseDetails))
+            .thenReturn(caseDetails.getData());
+        when(noticeOfChangeService.hasInvalidOrgPolicy(caseDetails, true)).thenReturn(false);
+        when(noticeOfChangeService.hasInvalidOrgPolicy(caseDetails, false)).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse actualResponse = updateRepresentationWorkflowService
             .handleNoticeOfChangeWorkflow(caseDetails, AUTH_TOKEN, caseDetails);
 
