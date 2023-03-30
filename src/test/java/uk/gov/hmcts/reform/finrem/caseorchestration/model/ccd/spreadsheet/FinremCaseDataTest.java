@@ -26,7 +26,7 @@ public class FinremCaseDataTest {
 
     @Test
     public void testDefinitionFilesSavedInCorrectLocation() throws IOException {
-        Path dirPath = Paths.get("./definition_files/definitions").toAbsolutePath();
+        Path dirPath = Paths.get("./definition_files/definitions/consented").toAbsolutePath();
         File directoryPath = dirPath.toFile();
         String contents[] = directoryPath.list();
         for (int i=0; i<contents.length; i++) {
