@@ -28,4 +28,8 @@ public class DynamicMultiSelectList {
      */
     @JsonProperty("list_items")
     private List<DynamicMultiSelectListElement> listItems;
+
+    public List<DynamicMultiSelectListElement> getValue() {
+        return value != null ? value.stream().toList() : null;
+    }
 }
