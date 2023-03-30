@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisation
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.NoticeOfChangeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.nocworkflows.UpdateRepresentationWorkflowService;
 
@@ -50,6 +51,8 @@ public class UpdateRepresentationWorkflowServiceTest {
 
     @InjectMocks
     UpdateRepresentationWorkflowService updateRepresentationWorkflowService;
+
+    private ObjectMapper mapper = new ObjectMapper();
 
     private CaseDetails caseDetails;
 
@@ -110,7 +113,7 @@ public class UpdateRepresentationWorkflowServiceTest {
         when(noticeOfChangeService.updateRepresentation(caseDetails, AUTH_TOKEN, caseDetails))
             .thenReturn(caseDetails.getData());
         when(noticeOfChangeService.hasInvalidOrgPolicy(caseDetails, true)).thenReturn(true);
-        when(noticeOfChangeService.hasInvalidOrgPolicy(caseDetails, true)).thenReturn(false);
+        when(noticeOfChangeService.hasInvalidOrgPolicy(caseDetails, false)).thenReturn(false);
 
         AboutToStartOrSubmitCallbackResponse actualResponse = updateRepresentationWorkflowService
             .handleNoticeOfChangeWorkflow(caseDetails, AUTH_TOKEN, caseDetails);
@@ -125,8 +128,8 @@ public class UpdateRepresentationWorkflowServiceTest {
         caseDetails.getData().put(NOC_PARTY, RESPONDENT);
         when(noticeOfChangeService.updateRepresentation(caseDetails, AUTH_TOKEN, caseDetails))
             .thenReturn(caseDetails.getData());
-        when(noticeOfChangeService.hasInvalidOrgPolicy(caseDetails, true)).thenReturn(true);
         when(noticeOfChangeService.hasInvalidOrgPolicy(caseDetails, true)).thenReturn(false);
+        when(noticeOfChangeService.hasInvalidOrgPolicy(caseDetails, false)).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse actualResponse = updateRepresentationWorkflowService
             .handleNoticeOfChangeWorkflow(caseDetails, AUTH_TOKEN, caseDetails);
 
