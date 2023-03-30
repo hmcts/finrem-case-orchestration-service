@@ -162,7 +162,7 @@ public class NoticeOfChangeService {
         return caseDetails;
     }
 
-    private boolean hasInvalidOrgPolicy(CaseDetails caseDetails, boolean isApplicant) {
+    public boolean hasInvalidOrgPolicy(CaseDetails caseDetails, boolean isApplicant) {
         Optional<OrganisationPolicy> orgPolicy = Optional.ofNullable(getOrgPolicy(caseDetails, isApplicant
             ? APPLICANT_ORGANISATION_POLICY
             : RESPONDENT_ORGANISATION_POLICY));
