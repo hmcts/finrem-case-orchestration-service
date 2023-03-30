@@ -68,11 +68,10 @@ public class UpdateRepresentationWorkflowServiceTest {
     }
 
     @Test
-    public void givenChangeRequestWithUnpopulatedOrg_whenHandleWorkflowApplicant_thenCallAssignCaseAccessService() {
+    public void givenChangeRequestWithPopulatedOrg_whenHandleWorkflowApplicant_thenCallAssignCaseAccessService() {
         setPopulatedChangeOrganisationRequest();
         when(noticeOfChangeService.updateRepresentation(caseDetails, AUTH_TOKEN, caseDetails))
             .thenReturn(caseDetails.getData());
-        when(noticeOfChangeService.hasInvalidOrgPolicy(caseDetails, true)).thenReturn(true);
         when(noticeOfChangeService.persistOriginalOrgPoliciesWhenRevokingAccess(caseDetails, caseDetails))
             .thenReturn(caseDetails);
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
@@ -87,11 +86,10 @@ public class UpdateRepresentationWorkflowServiceTest {
     }
 
     @Test
-    public void givenChangeRequestWithUnpopulatedOrg_whenHandleWorkflowRespondent_thenCallAssignCaseAccessService() {
+    public void givenChangeRequestWithPopulatedOrg_whenHandleWorkflowRespondent_thenCallAssignCaseAccessService() {
         setPopulatedChangeOrganisationRequest();
         when(noticeOfChangeService.updateRepresentation(caseDetails, AUTH_TOKEN, caseDetails))
             .thenReturn(caseDetails.getData());
-        when(noticeOfChangeService.hasInvalidOrgPolicy(caseDetails, false)).thenReturn(true);
         when(noticeOfChangeService.persistOriginalOrgPoliciesWhenRevokingAccess(caseDetails, caseDetails))
             .thenReturn(caseDetails);
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
@@ -106,7 +104,7 @@ public class UpdateRepresentationWorkflowServiceTest {
     }
 
     @Test
-    public void givenChangeRequestWithPopulatedOrg_whenHandleWorkflowApplicant_thenNoCallToAssignCaseAccessService() {
+    public void givenChangeRequestWithUnpopulatedOrg_whenHandleWorkflowApplicant_thenNoCallToAssignCaseAccessService() {
         setNoOrgsChangeOrganisationRequest();
         caseDetails.getData().put(NOC_PARTY, APPLICANT);
         when(noticeOfChangeService.updateRepresentation(caseDetails, AUTH_TOKEN, caseDetails))
@@ -122,7 +120,7 @@ public class UpdateRepresentationWorkflowServiceTest {
     }
 
     @Test
-    public void givenChangeRequestWithPopulatedOrg_whenHandleWorkflowRespondent_thenNoCallToAssignCaseAccessService() {
+    public void givenChangeRequestWithUnpopulatedOrg_whenHandleWorkflowRespondent_thenNoCallToAssignCaseAccessService() {
         setNoOrgsChangeOrganisationRequest();
         caseDetails.getData().put(NOC_PARTY, RESPONDENT);
         when(noticeOfChangeService.updateRepresentation(caseDetails, AUTH_TOKEN, caseDetails))
