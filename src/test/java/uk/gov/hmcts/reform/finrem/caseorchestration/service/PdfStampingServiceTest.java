@@ -27,6 +27,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.util.TestResource.fil
 public class PdfStampingServiceTest {
 
     public static final String COURT_SEAL_PDF = "/courtseal.pdf";
+    public static final String HIGH_COURT_SEAL_PDF = "/highcourtseal.pdf";
 
     @InjectMocks private PdfStampingService service;
 
@@ -40,7 +41,7 @@ public class PdfStampingServiceTest {
         when(evidenceManagementDownloadService.download(document.getBinaryUrl()))
             .thenReturn(ResponseEntity.ok(imageAsBytes));
 
-        service.stampDocument(document, "auth", false);
+        service.stampDocument(document, "auth", false, StampType.FAMILY_COURT_STAMP);
     }
 
     @Test
@@ -54,7 +55,7 @@ public class PdfStampingServiceTest {
         when(evidenceManagementUploadServiceService.upload(any(), anyString()))
             .thenReturn(fileUploadResponse());
 
-        Document stampDocument = service.stampDocument(document, "auth", true);
+        Document stampDocument = service.stampDocument(document, "auth", true, StampType.FAMILY_COURT_STAMP);
 
         assertThat(stampDocument, not(equalTo(imageAsBytes)));
         assertThat(stampDocument.getFileName(), is(document.getFileName()));
@@ -73,7 +74,26 @@ public class PdfStampingServiceTest {
         when(evidenceManagementUploadServiceService.upload(any(), anyString()))
             .thenReturn(fileUploadResponse());
 
-        Document stampDocument = service.stampDocument(document, "auth", false);
+        Document stampDocument = service.stampDocument(document, "auth", false, StampType.FAMILY_COURT_STAMP);
+
+        assertThat(stampDocument, not(equalTo(imageAsBytes)));
+        assertThat(stampDocument.getFileName(), is(document.getFileName()));
+        assertThat(stampDocument.getBinaryUrl(), is(document.getBinaryUrl()));
+        assertThat(stampDocument.getUrl(), is(document.getUrl()));
+    }
+
+    @Test
+    public void shouldAddStampToHighCourtDocument() throws Exception {
+        Document document = document();
+        byte[] imageAsBytes = service.imageAsBytes(HIGH_COURT_SEAL_PDF);
+
+        when(evidenceManagementDownloadService.download(document.getBinaryUrl()))
+            .thenReturn(ResponseEntity.ok(imageAsBytes));
+
+        when(evidenceManagementUploadServiceService.upload(any(), anyString()))
+            .thenReturn(fileUploadResponse());
+
+        Document stampDocument = service.stampDocument(document, "auth", false, StampType.HIGH_COURT_STAMP);
 
         assertThat(stampDocument, not(equalTo(imageAsBytes)));
         assertThat(stampDocument.getFileName(), is(document.getFileName()));
