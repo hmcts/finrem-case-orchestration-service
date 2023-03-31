@@ -62,7 +62,7 @@ public class CCDConfigValidator {
         Map.entry(COLLECTION, "List"),
         Map.entry(MULTI_SELECT_LIST, "List"),
         Map.entry(DYNAMIC_LIST, "DynamicList"),
-        Map.entry(DYNAMIC_RADIO_LIST, "DynamicList")
+        Map.entry(DYNAMIC_RADIO_LIST, "DynamicRadioList")
     );
 
     private Map<String, String> specialFieldTypes = Map.ofEntries(
