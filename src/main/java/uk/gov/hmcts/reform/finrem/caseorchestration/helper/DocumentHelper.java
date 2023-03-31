@@ -80,6 +80,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_A_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_UPLOADED_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NOTICES_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
@@ -254,6 +255,15 @@ public class DocumentHelper {
     public List<GeneralLetterData> convertToGeneralLetterData(Object object) {
         return objectMapper.convertValue(object, new TypeReference<>() {
         });
+    }
+
+    public CaseDocument getGeneralLetterUploadedDocument(Map<String, Object> caseData) {
+        if (isNull(caseData.get(GENERAL_LETTER_UPLOADED_DOCUMENT))) {
+            log.info("General letter uploaded document is not present for case");
+            return null;
+        }
+
+        return convertToCaseDocument(caseData.get(GENERAL_LETTER_UPLOADED_DOCUMENT));
     }
 
     public List<DirectionDetailsCollectionData> convertToDirectionDetailsCollectionData(Object object) {

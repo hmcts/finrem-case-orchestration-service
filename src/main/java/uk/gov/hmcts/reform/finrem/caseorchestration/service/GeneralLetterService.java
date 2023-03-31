@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -39,6 +40,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_PREVIEW;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_RECIPIENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_RECIPIENT_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_UPLOADED_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LETTER_DATE_FORMAT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
@@ -66,6 +68,11 @@ public class GeneralLetterService {
         log.info("Generating General letter for Case ID: {}", caseDetails.getId());
         CaseDocument document = generateGeneralLetterDocument(caseDetails, authorisationToken);
         addGeneralLetterToCaseData(caseDetails, document);
+        CaseDocument generalLetterUploadedDocument = documentHelper.getGeneralLetterUploadedDocument(caseDetails.getData());
+        if (generalLetterUploadedDocument != null) {
+            CaseDocument pdfDocument = genericDocumentService.convertDocumentIfNotPdfAlready(generalLetterUploadedDocument, authorisationToken);
+            caseDetails.getData().put(GENERAL_LETTER_UPLOADED_DOCUMENT, pdfDocument);
+        }
         printLatestGeneralLetter(caseDetails);
     }
 
@@ -156,8 +163,14 @@ public class GeneralLetterService {
     }
 
     private UUID printLatestGeneralLetter(CaseDetails caseDetails) {
+        List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         List<GeneralLetterData> generalLettersData = documentHelper.convertToGeneralLetterData(caseDetails.getData().get(GENERAL_LETTER));
         GeneralLetterData latestGeneralLetterData = generalLettersData.get(generalLettersData.size() - 1);
-        return bulkPrintService.sendDocumentForPrint(latestGeneralLetterData.getGeneralLetter().getGeneratedLetter(), caseDetails);
+        bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(latestGeneralLetterData.getGeneralLetter().getGeneratedLetter()));
+        CaseDocument generalLetterUploadedDocument = documentHelper.getGeneralLetterUploadedDocument(caseDetails.getData());
+        if (generalLetterUploadedDocument != null) {
+            bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(generalLetterUploadedDocument));
+        }
+        return bulkPrintService.bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), bulkPrintDocuments);
     }
 }
