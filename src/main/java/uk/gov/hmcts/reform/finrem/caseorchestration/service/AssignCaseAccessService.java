@@ -117,7 +117,7 @@ public class AssignCaseAccessService {
     private CaseAssignmentUserRolesRequest getCaseAssignmentUserRolesRequest(Long caseId, Set<String> users, String caseRole, String orgId) {
         final List<CaseAssignmentUserRoleWithOrganisation> caseAssignedRoles = users.stream()
             .map(user -> buildCaseAssignedUserRoles(caseId, caseRole, orgId, user))
-            .toList();
+            .collect(Collectors.toList());
 
         CaseAssignmentUserRolesRequest removeCaseAssignedUserRolesRequest = CaseAssignmentUserRolesRequest.builder()
             .caseAssignmentUserRolesWithOrganisation(caseAssignedRoles)
