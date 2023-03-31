@@ -3,10 +3,14 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.config;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
 
 @Data
@@ -42,6 +46,9 @@ public class DocumentConfiguration {
     @Getter(AccessLevel.NONE)
     private String contestedMiniFormTemplate;
     private String contestedMiniFormHighCourtTemplate;
+    @Getter(AccessLevel.NONE)
+    private String contestedMiniFormScheduleTemplate;
+    private String contestedMiniFormHighCourtScheduleTemplate;
     private String contestedMiniFormFileName;
     private String contestedDraftMiniFormTemplateSchedule;
     private String contestedDraftMiniFormTemplate;
@@ -149,6 +156,15 @@ public class DocumentConfiguration {
         return isHighCourtSelected(caseDetails) ? contestedMiniFormHighCourtTemplate : contestedMiniFormTemplate;
     }
 
+    public String getContestedMiniFormTemplate(FinremCaseDetails caseDetails) {
+        return isHighCourtSelected(caseDetails) ? contestedMiniFormHighCourtTemplate : contestedMiniFormTemplate;
+    }
+
+    public String getContestedMiniFormScheduleTemplate(FinremCaseDetails caseDetails) {
+        return isHighCourtSelected(caseDetails) ? contestedMiniFormHighCourtScheduleTemplate : contestedMiniFormScheduleTemplate;
+    }
+
+
     public String getApprovedConsentOrderTemplate(CaseDetails caseDetails) {
         return isHighCourtSelected(caseDetails) ? approvedConsentOrderHighCourtTemplate : approvedConsentOrderTemplate;
     }
@@ -190,5 +206,15 @@ public class DocumentConfiguration {
             return true;
         }
         return false;
+    }
+
+    private boolean isHighCourtSelected(FinremCaseDetails caseDetails) {
+        FinremCaseData caseData = caseDetails.getData();
+        return ObjectUtils.isNotEmpty(caseData)
+            && ObjectUtils.isNotEmpty(caseData.getRegionWrapper())
+            && ObjectUtils.isNotEmpty(caseData.getRegionWrapper().getDefaultRegionWrapper())
+            && ObjectUtils.isNotEmpty(caseData.getRegionWrapper().getDefaultRegionWrapper().getHighCourtFrcList())
+            && caseData.getRegionWrapper().getDefaultRegionWrapper().getHighCourtFrcList()
+            .getValue().equalsIgnoreCase(HIGHCOURT);
     }
 }

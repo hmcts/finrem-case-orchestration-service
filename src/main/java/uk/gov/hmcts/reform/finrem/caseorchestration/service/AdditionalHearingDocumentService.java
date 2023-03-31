@@ -19,8 +19,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocu
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hearing.AdditionalHearingCorresponder;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TIME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LETTER_DATE_FORMAT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TIME_ESTIMATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
@@ -95,8 +97,8 @@ public class AdditionalHearingDocumentService {
     }
 
     private void populateLatestDraftHearingOrderWithLatestEntry(CaseDetails caseDetails,
-                                                 List<HearingOrderCollectionData> hearingOrderCollectionData,
-                                                 String authorisationToken) {
+                                                                List<HearingOrderCollectionData> hearingOrderCollectionData,
+                                                                String authorisationToken) {
         hearingOrderCollectionData.forEach(element -> convertHearingOrderCollectionDocumentsToPdf(element, authorisationToken));
         caseDetails.getData().put(HEARING_ORDER_COLLECTION, hearingOrderCollectionData);
         caseDetails.getData().put(LATEST_DRAFT_HEARING_ORDER,
@@ -183,7 +185,7 @@ public class AdditionalHearingDocumentService {
         caseData.put("HearingDate", hearingDate);
         caseData.put("HearingTime", hearingTime);
         caseData.put("HearingLength", hearingLength);
-        caseData.put("AdditionalHearingDated", new Date());
+        caseData.put("AdditionalHearingDated", DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()));
 
         caseData.put("CourtName", selectedFRCDetails.getCourtName());
         caseData.put("CourtAddress", selectedFRCDetails.getCourtAddress());
@@ -250,7 +252,7 @@ public class AdditionalHearingDocumentService {
         element.getHearingOrderDocuments().setUploadDraftDocument(pdfApprovedOrder);
     }
 
-    public CaseDocument convertToPdf(CaseDocument document,String authorisationToken) {
+    public CaseDocument convertToPdf(CaseDocument document, String authorisationToken) {
         return genericDocumentService.convertDocumentIfNotPdfAlready(document, authorisationToken);
     }
 }

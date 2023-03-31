@@ -36,7 +36,6 @@ public class PaymentRequestWithSiteIdTest {
             + "}";
         PaymentRequestWithSiteID paymentRequest = mapper.readValue(json, PaymentRequestWithSiteID.class);
         assertThat(paymentRequest.getAccountNumber(), is("PBA1"));
-        assertThat(paymentRequest.getCaseReference(), is("caseRef"));
         assertThat(paymentRequest.getCcdCaseNumber(), is("123"));
         assertThat(paymentRequest.getCustomerReference(), is("custRef"));
         assertThat(paymentRequest.getDescription(), is("desc"));
