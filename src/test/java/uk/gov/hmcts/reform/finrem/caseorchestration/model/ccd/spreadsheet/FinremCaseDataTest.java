@@ -2,8 +2,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.spreadsheet;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeAll;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 
 import java.io.File;
@@ -23,7 +23,7 @@ public class FinremCaseDataTest {
 
     private String contestedFileNameWithPath = null;
 
-    @BeforeAll
+    @Before
     public void setUpDefinitionFiles() throws IOException {
         consentedFileNameWithPath = retrieveFileName("ccd-config-prod-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
         contestedFileNameWithPath = retrieveFileName("ccd-config-prod-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
@@ -34,10 +34,10 @@ public class FinremCaseDataTest {
     private String retrieveFileName(String filePrefix, String filePath) {
         Path dirPath = Paths.get(filePath).toAbsolutePath();
         File directoryPath = dirPath.toFile();
-        String contents[] = directoryPath.list();
-        for (int i = 0; i < contents.length; i++) {
-            if (contents[i].startsWith(filePrefix)) {
-                return filePath + "/" + contents[i];
+        String[] list = directoryPath.list();
+        for (int i = 0; i < list.length; i++) {
+            if (list[i].startsWith(filePrefix)) {
+                return filePath + "/" + list[i];
             }
         }
         return null;
