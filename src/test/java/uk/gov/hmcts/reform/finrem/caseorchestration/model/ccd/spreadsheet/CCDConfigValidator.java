@@ -41,6 +41,7 @@ public class CCDConfigValidator {
     protected static final int ROW_HEADERS = 2;
     protected static final String STATE_SHEET = "State";
     protected static final String DYNAMIC_LIST = "DynamicList";
+    protected static final String DYNAMIC_RADIO_LIST = "DynamicRadioList";
     private List<String> ccdFieldsToIgnore = Arrays.asList("Label", "OrderSummary", "CaseHistoryViewer", "CasePaymentHistoryViewer");
     private List<String> fixedListValues = Arrays.asList(FIXED_LIST, FIXED_RADIO_LIST);
     private List<String> alreadyProcessedCcdFields = new ArrayList<>();
@@ -60,7 +61,8 @@ public class CCDConfigValidator {
         Map.entry("OrganisationPolicy", "OrganisationPolicy"),
         Map.entry(COLLECTION, "List"),
         Map.entry(MULTI_SELECT_LIST, "List"),
-        Map.entry(DYNAMIC_LIST, "DynamicList")
+        Map.entry(DYNAMIC_LIST, "DynamicList"),
+        Map.entry(DYNAMIC_RADIO_LIST, "DynamicList")
     );
 
     private Map<String, String> specialFieldTypes = Map.ofEntries(
