@@ -15,6 +15,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CourtListWrapper;
@@ -36,7 +37,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.RegionWrap
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ScheduleOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerDetails;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -360,6 +360,8 @@ public class FinremCaseData {
 
     @JsonIgnore
     private IntervenerChangeDetails currentIntervenerChangeDetails;
+    @JsonIgnore
+    private Addressee currentAddressee;
 
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)

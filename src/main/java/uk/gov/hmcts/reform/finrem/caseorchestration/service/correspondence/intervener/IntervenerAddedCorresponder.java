@@ -7,7 +7,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.FinremSingleLetterOrEmailAllPartiesCorresponder;
@@ -28,11 +27,13 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
         this.intervenerOneDetailsMapper = intervenerOneDetailsMapper;
     }
 
-    public void sendCorrespondence(FinremCaseDetails caseDetails, String authToken, IntervenerChangeDetails intervenerChangeDetails) {
+    public void sendCorrespondence(FinremCaseDetails caseDetails, String authToken) {
         sendApplicantCorrespondence(caseDetails, authToken);
         sendRespondentCorrespondence(caseDetails, authToken);
-        if (intervenerChangeDetails.getIntervenerType().equals(IntervenerChangeDetails.IntervenerType.INTERVENER_ONE) &&
-            intervenerChangeDetails.getIntervenerAction().equals(IntervenerChangeDetails.IntervenerAction.ADDED)) {
+        if (caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerType()
+            .equals(IntervenerChangeDetails.IntervenerType.INTERVENER_ONE)
+            && caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerAction()
+            .equals(IntervenerChangeDetails.IntervenerAction.ADDED)) {
             sendIntervenerOneCorrespondence(caseDetails, authToken);
         }
     }
@@ -43,7 +44,7 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
             //send email
         } else {
             log.info("Sending letter correspondence to Intervener One for case: {}", caseDetails.getId());
-             caseDetails.getData().setCurrentIntervenerDetails(
+            caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(
                 intervenerOneDetailsMapper.mapToIntervenerDetails(caseDetails.getData().getIntervenerOneWrapper()));
 
             bulkPrintService.sendDocumentForPrint(
@@ -55,7 +56,7 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
     @Override
     public CaseDocument getDocumentToPrint(FinremCaseDetails caseDetails, String authorisationToken,
                                            DocumentHelper.PaperNotificationRecipient recipient) {
-        return intervenerDocumentService.generateIntervenerAddedNotificationLetter(caseDetails, authorisationToken ,recipient);
+        return intervenerDocumentService.generateIntervenerAddedNotificationLetter(caseDetails, authorisationToken, recipient);
     }
 
     protected boolean shouldSendIntervenerOneSolicitorEmail(FinremCaseDetails caseDetails) {

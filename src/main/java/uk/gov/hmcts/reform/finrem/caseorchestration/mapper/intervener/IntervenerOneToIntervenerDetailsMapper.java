@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerD
 public class IntervenerOneToIntervenerDetailsMapper {
 
     public IntervenerDetails mapToIntervenerDetails(IntervenerOneWrapper intervenerOneWrapper) {
-       return IntervenerDetails.builder()
+        return IntervenerDetails.builder()
             .intervenerName(intervenerOneWrapper.getIntervener1Name())
             .intervenerAddress(intervenerOneWrapper.getIntervener1Address())
             .intervenerEmail(intervenerOneWrapper.getIntervener1Email())

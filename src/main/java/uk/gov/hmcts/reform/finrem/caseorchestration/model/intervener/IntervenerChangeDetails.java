@@ -20,6 +20,7 @@ public class IntervenerChangeDetails {
 
     private final IntervenerType intervenerType;
     private final IntervenerAction intervenerAction;
+
     private IntervenerDetails intervenerDetails;
 
     public IntervenerType getIntervenerType() {
@@ -28,5 +29,13 @@ public class IntervenerChangeDetails {
 
     public IntervenerAction getIntervenerAction() {
         return intervenerAction;
+    }
+
+    public IntervenerDetails getIntervenerDetails() {
+        return intervenerDetails;
+    }
+
+    public void setIntervenerDetails(IntervenerDetails intervenerDetails) {
+        this.intervenerDetails = intervenerDetails;
     }
 }

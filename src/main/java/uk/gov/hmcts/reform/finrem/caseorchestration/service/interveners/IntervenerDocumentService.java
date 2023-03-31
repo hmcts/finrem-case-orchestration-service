@@ -3,34 +3,24 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.interveners;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.barristers.BarristerLetterDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerAddedLetterDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ADDRESSEE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_DATA;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_DETAILS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.AbstractLetterDetailsGenerator.LETTER_DATE_FORMAT;
 
 @Service
@@ -43,7 +33,7 @@ public class IntervenerDocumentService {
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
 
-    public CaseDocument generateIntervenerAddedNotificationLetter(FinremCaseDetails caseDetails, String authToken,
+    public CaseDocument generateIntervenerAddedNotificationLetter(FinremCaseDetails finremCaseDetails, String authToken,
                                                                   DocumentHelper.PaperNotificationRecipient recipient) {
 
         log.info("Generating Intervener Added Notification Letter {} from {} for bulk print for {}",
@@ -52,9 +42,9 @@ public class IntervenerDocumentService {
             recipient);
 
 
-        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterTemplateData(caseDetails, recipient);
-        IntervenerAddedLetterDetails intervenerAddedLetterDetails = generateLetterDetails(caseDetailsForBulkPrint,
-            recipient);
+        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterTemplateData(finremCaseDetails, recipient);
+        finremCaseDetails.getData().setCurrentAddressee((Addressee) caseDetailsForBulkPrint.getData().get(ADDRESSEE));
+        IntervenerAddedLetterDetails intervenerAddedLetterDetails = generateLetterDetails(finremCaseDetails);
 
         return getCaseDocument(authToken, intervenerAddedLetterDetails);
     }
@@ -81,19 +71,17 @@ public class IntervenerDocumentService {
             filename);
     }
 
-    private IntervenerAddedLetterDetails generateLetterDetails(CaseDetails caseDetails,
-                                                               DocumentHelper.PaperNotificationRecipient recipient){
+    private IntervenerAddedLetterDetails generateLetterDetails(FinremCaseDetails caseDetails) {
 
         return IntervenerAddedLetterDetails.builder()
             .courtDetails(CaseHearingFunctions.buildFrcCourtDetails(caseDetails.getData()))
-            .addressee((Addressee) caseDetails.getData().get(ADDRESSEE))
-            .divorceCaseNumber(Objects.toString(caseDetails.getData().get(DIVORCE_CASE_NUMBER), StringUtils.EMPTY))
-            .applicantName(documentHelper.getApplicantFullName(caseDetails))
-            .respondentName(documentHelper.getRespondentFullNameContested(caseDetails))
+            .addressee(caseDetails.getData().getCurrentAddressee())
+            .divorceCaseNumber(caseDetails.getData().getDivorceCaseNumber())
+            .applicantName(caseDetails.getData().getFullApplicantName())
+            .respondentName(caseDetails.getRespondentFullName())
             .letterDate(DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()))
             .caseNumber(caseDetails.getId().toString())
-            .intervenerFullName(intervenerDetails.getIntervenerName())
-            .intervenerSolicitorFirm(intervenerDetails.getIntervenerOrganisation().getOrganisation().getOrganisationName())
+            .intervenerFullName(caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerName())
             .build();
     }
 
