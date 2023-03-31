@@ -51,7 +51,6 @@ public class MultiSelectAboutToStartHandler extends FinremCallbackHandler {
         DynamicMultiSelectList dynamicList = getDynamicMultiSelectList(dynamicListElements, intervenerDocuments);
 
 
-
         caseData.setIntervenerDocuments(dynamicList);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
@@ -65,18 +64,18 @@ public class MultiSelectAboutToStartHandler extends FinremCallbackHandler {
             .build();
     }
 
-    private DynamicMultiSelectList getDynamicMultiSelectList(List<DynamicMultiSelectListElement> dynamicMultiSelectListElement, DynamicMultiSelectList intervenerDocuments) {
+    private DynamicMultiSelectList getDynamicMultiSelectList(List<DynamicMultiSelectListElement> dynamicMultiSelectListElement,
+                                                             DynamicMultiSelectList intervenerDocuments) {
 
         if (intervenerDocuments != null) {
-        return DynamicMultiSelectList.builder()
-            .value(intervenerDocuments.getValue())
-            .listItems(dynamicMultiSelectListElement)
-            .build();
-        }
-        else {
-                return DynamicMultiSelectList.builder()
-                    .listItems(dynamicMultiSelectListElement)
-                    .build();
+            return DynamicMultiSelectList.builder()
+                .value(intervenerDocuments.getValue())
+                .listItems(dynamicMultiSelectListElement)
+                .build();
+        } else {
+            return DynamicMultiSelectList.builder()
+                .listItems(dynamicMultiSelectListElement)
+                .build();
         }
     }
 }
