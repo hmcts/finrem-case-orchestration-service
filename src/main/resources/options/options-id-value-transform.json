@@ -96,5 +96,9 @@
   "consentNatureOfApplicationChecklistSchedule": {
     "periodicalPaymentOrder": "Periodical Payment Order",
     "propertyAdjustmentOrder": "Property Adjustment Order"
+  },
+  "natureOfApplicationChecklistSchedule": {
+    "periodicalPaymentOrder": "Periodical Payment Order",
+    "propertyAdjustmentOrder": "Property Adjustment Order"
   }
 }

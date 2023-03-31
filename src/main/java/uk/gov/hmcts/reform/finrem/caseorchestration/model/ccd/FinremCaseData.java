@@ -283,7 +283,6 @@ public class FinremCaseData {
     private CaseRole currentUserCaseRole;
     private String currentUserCaseRoleLabel;
     private CaseDocument outOfFamilyCourtResolution;
-    private TypeOfApplication typeOfApplication;
 
     private DynamicRadioList intervenersList;
     private DynamicRadioList intervenerOptionList;
