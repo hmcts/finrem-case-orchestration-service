@@ -31,13 +31,13 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
     ]
 }
 
-def getCcdDefsJenkinsBranchToUse() {
+def getProjectName() {
     def githubApi = new GithubAPI(this)
     for (label in githubApi.getLabelsbyPattern(env.BRANCH_NAME, "use-defs-pr-") ) {
         String prNumber = label.substring(label.indexOf("pr"))
-        return "https://build.platform.hmcts.net/view/FinRem/job/HMCTS_d_to_i/job/finrem-ccd-definitions/view/change-requests/job/" +prNumber.toUpperCase() + "/lastSuccessfulBuild/artifact/definitions/*zip*/definitions.zip"
+        return "HMCTS_d_to_i/finrem-ccd-definitions/PR-" + prNumber;
     }
-    return "https://build.platform.hmcts.net/view/FinRem/job/HMCTS_d_to_i/job/finrem-ccd-definitions/job/master/lastSuccessfulBuild/artifact/definitions/*zip*/definitions.zip"
+    return "HMCTS_d_to_i/finrem-ccd-definitions/master";
 }
 
 // Vars for Kubernetes
@@ -49,7 +49,7 @@ withPipeline(type, product, component) {
     afterSuccess('checkout') {
         step ([
                 $class: 'CopyArtifact',
-                projectName: "HMCTS_d_to_i/finrem-ccd-definitions/master",
+                projectName: getProjectName(),
                 target: "./definition_files"
         ]);
     }
