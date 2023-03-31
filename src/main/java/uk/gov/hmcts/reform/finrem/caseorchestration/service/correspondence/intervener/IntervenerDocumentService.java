@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.interveners;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.intervener;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;

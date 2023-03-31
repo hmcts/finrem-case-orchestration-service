@@ -10,10 +10,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerC
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.FinremSingleLetterOrEmailAllPartiesCorresponder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.interveners.IntervenerDocumentService;
 
-@Component
 @Slf4j
+@Component
 public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPartiesCorresponder {
 
     private final IntervenerDocumentService intervenerDocumentService;

@@ -93,8 +93,6 @@ public class IntervenersAboutToSubmitHandlerTest {
         IntervenerOneWrapper oneWrapper = IntervenerOneWrapper
             .builder().intervener1Name("One name").intervener1Email("test@test.com").build();
 
-
-
         finremCaseData.setIntervenerOneWrapper(oneWrapper);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
 
@@ -107,6 +105,7 @@ public class IntervenersAboutToSubmitHandlerTest {
 
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(ADD_INTERVENER_ONE_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
+
         IntervenerChangeDetails intervenerOneChangeDetails = new IntervenerChangeDetails(
             IntervenerChangeDetails.IntervenerType.INTERVENER_ONE, IntervenerChangeDetails.IntervenerAction.ADDED);
         when(service.updateIntervenerOneDetails(finremCallbackRequest)).thenReturn(intervenerOneChangeDetails);
@@ -126,9 +125,6 @@ public class IntervenersAboutToSubmitHandlerTest {
         finremCaseData.setIntervenerOneWrapper(oneWrapper);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        IntervenerChangeDetails intervenerOneChangeDetails = new IntervenerChangeDetails(
-            IntervenerChangeDetails.IntervenerType.INTERVENER_ONE, IntervenerChangeDetails.IntervenerAction.REMOVED);
-
         assertEquals(4, handleResp.getData().getIntervenersList().getListItems().size());
 
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_ONE).build();
@@ -138,9 +134,11 @@ public class IntervenersAboutToSubmitHandlerTest {
 
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(DEL_INTERVENER_ONE_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
-        Long caseId = finremCallbackRequest.getCaseDetails().getId();
 
-        when(service.removeIntervenerOneDetails(finremCaseData, caseId)).thenReturn(intervenerOneChangeDetails);
+        IntervenerChangeDetails intervenerOneChangeDetails = new IntervenerChangeDetails(
+            IntervenerChangeDetails.IntervenerType.INTERVENER_ONE, IntervenerChangeDetails.IntervenerAction.REMOVED);
+        when(service.removeIntervenerOneDetails(finremCaseData, finremCallbackRequest.getCaseDetails().getId()))
+            .thenReturn(intervenerOneChangeDetails);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(service).removeIntervenerOneDetails(any(), any());
@@ -157,9 +155,6 @@ public class IntervenersAboutToSubmitHandlerTest {
         finremCaseData.setIntervenerTwoWrapper(twoWrapper);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        IntervenerChangeDetails intervenerTwoChangeDetails = new IntervenerChangeDetails(
-            IntervenerChangeDetails.IntervenerType.INTERVENER_TWO, IntervenerChangeDetails.IntervenerAction.ADDED);
-
         assertEquals(4, handleResp.getData().getIntervenersList().getListItems().size());
 
         DynamicRadioListElement option1 = DynamicRadioListElement.builder().code(INTERVENER_TWO).build();
@@ -169,6 +164,9 @@ public class IntervenersAboutToSubmitHandlerTest {
 
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(ADD_INTERVENER_TWO_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
+
+        IntervenerChangeDetails intervenerTwoChangeDetails = new IntervenerChangeDetails(
+            IntervenerChangeDetails.IntervenerType.INTERVENER_TWO, IntervenerChangeDetails.IntervenerAction.ADDED);
         when(service.updateIntervenerTwoDetails(finremCallbackRequest)).thenReturn(intervenerTwoChangeDetails);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
@@ -179,8 +177,6 @@ public class IntervenersAboutToSubmitHandlerTest {
     public void givenContestedCase_whenSelectionMadeToRemoveIntervener2_thenHandle() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        Long caseId = finremCallbackRequest.getCaseDetails().getId();
-
 
         IntervenerTwoWrapper twoWrapper = IntervenerTwoWrapper
             .builder().intervener2Name("Two name").intervener2Email("test@test.com").build();
@@ -201,8 +197,8 @@ public class IntervenersAboutToSubmitHandlerTest {
 
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(DEL_INTERVENER_TWO_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
-        when(service.removeIntervenerTwoDetails(finremCaseData, caseId)).thenReturn(intervenerTwoChangeDetails);
-
+        when(service.removeIntervenerTwoDetails(finremCaseData, finremCallbackRequest.getCaseDetails().getId()))
+            .thenReturn(intervenerTwoChangeDetails);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(service).removeIntervenerTwoDetails(any(), any());
@@ -219,9 +215,6 @@ public class IntervenersAboutToSubmitHandlerTest {
         finremCaseData.setIntervenerThreeWrapper(threeWrapper);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        IntervenerChangeDetails intervenerThreeChangeDetails = new IntervenerChangeDetails(
-            IntervenerChangeDetails.IntervenerType.INTERVENER_THREE, IntervenerChangeDetails.IntervenerAction.ADDED);
-
         assertEquals(4, handleResp.getData().getIntervenersList().getListItems().size());
 
         DynamicRadioListElement option3 = DynamicRadioListElement.builder().code(INTERVENER_THREE).build();
@@ -231,6 +224,9 @@ public class IntervenersAboutToSubmitHandlerTest {
 
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(ADD_INTERVENER_THREE_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
+
+        IntervenerChangeDetails intervenerThreeChangeDetails = new IntervenerChangeDetails(
+            IntervenerChangeDetails.IntervenerType.INTERVENER_THREE, IntervenerChangeDetails.IntervenerAction.ADDED);
         when(service.updateIntervenerThreeDetails(finremCallbackRequest)).thenReturn(intervenerThreeChangeDetails);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
@@ -241,7 +237,6 @@ public class IntervenersAboutToSubmitHandlerTest {
     public void givenContestedCase_whenSelectionMadeToRemoveIntervener3_thenHandle() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        Long caseId = finremCallbackRequest.getCaseDetails().getId();
 
         IntervenerThreeWrapper threeWrapper = IntervenerThreeWrapper
             .builder().intervener3Name("Three name").intervener3Email("test@test.com").build();
@@ -261,7 +256,8 @@ public class IntervenersAboutToSubmitHandlerTest {
 
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(DEL_INTERVENER_THREE_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
-        when(service.removeIntervenerThreeDetails(finremCaseData, caseId)).thenReturn(intervenerThreeChangeDetails);
+        when(service.removeIntervenerThreeDetails(finremCaseData, finremCallbackRequest.getCaseDetails().getId()))
+            .thenReturn(intervenerThreeChangeDetails);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(service).removeIntervenerThreeDetails(any(), any());
@@ -277,9 +273,6 @@ public class IntervenersAboutToSubmitHandlerTest {
         finremCaseData.setIntervenerFourWrapper(fourWrapper);
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handleResp = startHandler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        IntervenerChangeDetails intervenerFourChangeDetails = new IntervenerChangeDetails(
-            IntervenerChangeDetails.IntervenerType.INTERVENER_FOUR, IntervenerChangeDetails.IntervenerAction.ADDED);
-
         assertEquals(4, handleResp.getData().getIntervenersList().getListItems().size());
 
         DynamicRadioListElement option4 = DynamicRadioListElement.builder().code(INTERVENER_FOUR).build();
@@ -287,9 +280,11 @@ public class IntervenersAboutToSubmitHandlerTest {
 
         midHandler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(ADD_INTERVENER_FOUR_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
+
+        IntervenerChangeDetails intervenerFourChangeDetails = new IntervenerChangeDetails(
+            IntervenerChangeDetails.IntervenerType.INTERVENER_FOUR, IntervenerChangeDetails.IntervenerAction.ADDED);
         when(service.updateIntervenerFourDetails(finremCallbackRequest)).thenReturn(intervenerFourChangeDetails);
 
 
@@ -301,7 +296,7 @@ public class IntervenersAboutToSubmitHandlerTest {
     public void givenContestedCase_whenSelectionMadeToRemoveIntervener4_thenHandle() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        Long caseId = finremCallbackRequest.getCaseDetails().getId();
+
 
         IntervenerFourWrapper fourWrapper = IntervenerFourWrapper
             .builder().intervener4Name("Four name").intervener4Email("test@test.com").build();
@@ -322,7 +317,8 @@ public class IntervenersAboutToSubmitHandlerTest {
 
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(DEL_INTERVENER_FOUR_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
-        when(service.removeIntervenerFourDetails(finremCaseData, caseId)).thenReturn(intervenerFourChangeDetails);
+        when(service.removeIntervenerFourDetails(finremCaseData, finremCallbackRequest.getCaseDetails().getId()))
+            .thenReturn(intervenerFourChangeDetails);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(service).removeIntervenerFourDetails(any(), any());
