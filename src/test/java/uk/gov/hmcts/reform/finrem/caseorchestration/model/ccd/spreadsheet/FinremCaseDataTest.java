@@ -17,11 +17,9 @@ import java.util.List;
 public class FinremCaseDataTest {
 
     ClassLoader classLoader = this.getClass().getClassLoader();
-    public static final String DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX = "./definition_files/definitions/consented/xlsx";
-    public static final String DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX = "./definition_files/definitions/contested/xlsx";
-
+    public static final String DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX = "./definition_files/definitions/consented";
+    public static final String DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX = "./definition_files/definitions";
     private String consentedFileNameWithPath = null;
-
     private String contestedFileNameWithPath = null;
     private boolean localMode = false;
 
