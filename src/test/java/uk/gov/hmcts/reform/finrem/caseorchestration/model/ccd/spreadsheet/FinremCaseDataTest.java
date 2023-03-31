@@ -7,17 +7,10 @@ import org.junit.jupiter.api.BeforeAll;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 @Slf4j
 //@Ignore
@@ -25,11 +18,10 @@ public class FinremCaseDataTest {
 
     public static final String DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX = "./definition_files/definitions/consented/xlsx";
     public static final String DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX = "./definition_files/definitions/contested/xlsx";
-    ClassLoader classLoader = this.getClass().getClassLoader();
 
-    String consentedFileNameWithPath = null;
+    private String consentedFileNameWithPath = null;
 
-    String contestedFileNameWithPath = null;
+    private String contestedFileNameWithPath = null;
 
     @BeforeAll
     public void setUpDefinitionFiles() throws IOException {
@@ -43,7 +35,7 @@ public class FinremCaseDataTest {
         Path dirPath = Paths.get(filePath).toAbsolutePath();
         File directoryPath = dirPath.toFile();
         String contents[] = directoryPath.list();
-        for (int i=0; i<contents.length; i++) {
+        for (int i = 0; i < contents.length; i++) {
             if (contents[i].startsWith(filePrefix)) {
                 return filePath + "/" + contents[i];
             }
