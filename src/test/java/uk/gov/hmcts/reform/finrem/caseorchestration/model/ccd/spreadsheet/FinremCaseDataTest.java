@@ -16,26 +16,31 @@ import java.util.List;
 //@Ignore
 public class FinremCaseDataTest {
 
+    ClassLoader classLoader = this.getClass().getClassLoader();
     public static final String DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX = "./definition_files/definitions/consented/xlsx";
     public static final String DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX = "./definition_files/definitions/contested/xlsx";
 
     private String consentedFileNameWithPath = null;
 
     private String contestedFileNameWithPath = null;
+    private boolean localMode = false;
 
     @Before
     public void setUpDefinitionFiles() {
-        consentedFileNameWithPath = retrieveFileName("ccd-config-prod-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
-        if (consentedFileNameWithPath == null) {
-            retrieveFileName("ccd-config-preview-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
-        }
-        contestedFileNameWithPath = retrieveFileName("ccd-config-prod-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
-        if (contestedFileNameWithPath == null) {
-            retrieveFileName("ccd-config-preview-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
+        if (localMode == false) {
+            consentedFileNameWithPath = retrieveFileName("ccd-config-prod-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
+            if (consentedFileNameWithPath == null) {
+                retrieveFileName("ccd-config-preview-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
+            }
+            contestedFileNameWithPath = retrieveFileName("ccd-config-prod-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
+            if (contestedFileNameWithPath == null) {
+                retrieveFileName("ccd-config-preview-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
+            }
+
+            System.out.println(consentedFileNameWithPath);
+            System.out.println(contestedFileNameWithPath);
         }
 
-        System.out.println(consentedFileNameWithPath);
-        System.out.println(contestedFileNameWithPath);
     }
 
     private String retrieveFileName(String filePrefix, String filePath) {
@@ -52,26 +57,26 @@ public class FinremCaseDataTest {
 
     @Test
     public void testContestedConfigFinRemCaseData() throws IOException, InvalidFormatException {
-        File configFile = new File(contestedFileNameWithPath);
+        File configFile = getFile("ccd-config-prod-contested.xlsx", contestedFileNameWithPath);
         validateConfig(configFile);
     }
 
     @Test
     public void testConsentedConfigFinRemCaseData() throws IOException, InvalidFormatException {
-        File configFile = new File(consentedFileNameWithPath);
+        File configFile = getFile("ccd-config-prod-consented.xlsx", consentedFileNameWithPath);
         validateConfig(configFile);
     }
 
     @Test
     public void testConsentedStateData() throws IOException, InvalidFormatException {
-        File configFile = new File(consentedFileNameWithPath);
+        File configFile = getFile("ccd-config-prod-consented.xlsx", consentedFileNameWithPath);
         validateState(configFile);
     }
 
 
     @Test
     public void testContestedStateData() throws IOException, InvalidFormatException {
-        File configFile = new File(contestedFileNameWithPath);
+        File configFile = getFile("ccd-config-prod-contested.xlsx", contestedFileNameWithPath);
         validateState(configFile);
     }
 
@@ -93,6 +98,12 @@ public class FinremCaseDataTest {
             errors.forEach(log::error);
         }
         assert errors.isEmpty();
+    }
+
+    private File getFile(String name, String fileNameWithPath) {
+        File configFile = localMode ? new File(classLoader.getResource(name).getFile())
+            : new File(fileNameWithPath);
+        return configFile;
     }
 }
 
