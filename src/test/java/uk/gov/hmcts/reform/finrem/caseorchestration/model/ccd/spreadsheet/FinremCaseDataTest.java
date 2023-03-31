@@ -24,9 +24,16 @@ public class FinremCaseDataTest {
     private String contestedFileNameWithPath = null;
 
     @Before
-    public void setUpDefinitionFiles() throws IOException {
+    public void setUpDefinitionFiles() {
         consentedFileNameWithPath = retrieveFileName("ccd-config-prod-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
+        if (consentedFileNameWithPath == null) {
+            retrieveFileName("ccd-config-preview-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
+        }
         contestedFileNameWithPath = retrieveFileName("ccd-config-prod-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
+        if (contestedFileNameWithPath == null) {
+            retrieveFileName("ccd-config-preview-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
+        }
+
         System.out.println(consentedFileNameWithPath);
         System.out.println(contestedFileNameWithPath);
     }
