@@ -17,8 +17,10 @@ import java.util.List;
 public class FinremCaseDataTest {
 
     ClassLoader classLoader = this.getClass().getClassLoader();
-    public static final String DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX = "./definition_files/definitions/consented";
-    public static final String DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX = "./definition_files/definitions";
+    //public static final String DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX = "./definition_files/definitions/consented/xlsx";
+    //public static final String DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX = "./definition_files/definitions/contested/xlsx";
+    public static final String DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX = "./";
+    public static final String DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX = "./";
     private String consentedFileNameWithPath = null;
     private String contestedFileNameWithPath = null;
     private boolean localMode = false;
@@ -26,11 +28,11 @@ public class FinremCaseDataTest {
     @Before
     public void setUpDefinitionFiles() {
         if (localMode == false) {
-            consentedFileNameWithPath = retrieveFileName("ccd-config-prod-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
+            consentedFileNameWithPath = retrieveFileName("", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
             if (consentedFileNameWithPath == null) {
                 retrieveFileName("ccd-config-preview-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
             }
-            contestedFileNameWithPath = retrieveFileName("ccd-config-prod-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
+            contestedFileNameWithPath = retrieveFileName("", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
             if (contestedFileNameWithPath == null) {
                 retrieveFileName("ccd-config-preview-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
             }
