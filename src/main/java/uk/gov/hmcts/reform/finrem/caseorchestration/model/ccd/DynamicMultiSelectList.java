@@ -30,6 +30,6 @@ public class DynamicMultiSelectList {
     private List<DynamicMultiSelectListElement> listItems;
 
     public List<DynamicMultiSelectListElement> getValue() {
-        return value != null ? value.stream().toList() : null;
+        return value != null ? value : null;
     }
 }
