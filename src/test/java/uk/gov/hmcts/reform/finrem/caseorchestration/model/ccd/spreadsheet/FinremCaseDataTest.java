@@ -36,7 +36,12 @@ public class FinremCaseDataTest {
           }
           System.out.println(consentedFileNameWithPath);
           System.out.println(contestedFileNameWithPath);
-          System.out.println("current directory files: " + retrieveFileName("", "./"));
+          Path dirPath = Paths.get("./").toAbsolutePath();
+          File directoryPath = dirPath.toFile();
+          String contents[] = directoryPath.list();
+          for (int i=0; i<contents.length; i++) {
+              System.out.println(contents[i]);
+          }
         }
 
     }
