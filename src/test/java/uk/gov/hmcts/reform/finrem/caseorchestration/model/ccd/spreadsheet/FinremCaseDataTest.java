@@ -36,7 +36,7 @@ public class FinremCaseDataTest {
           }
           System.out.println(consentedFileNameWithPath);
           System.out.println(contestedFileNameWithPath);
-          Path dirPath = Paths.get("./definition_files").toAbsolutePath();
+          Path dirPath = Paths.get("./definition_files/definitions").toAbsolutePath();
           File directoryPath = dirPath.toFile();
           String contents[] = directoryPath.list();
           for (int i=0; i<contents.length; i++) {
