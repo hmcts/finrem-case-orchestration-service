@@ -32,7 +32,7 @@ public class FinremCaseDataTest {
     @Before
     public void setUpDefinitionFiles() throws IOException {
         if (localMode == false) {
-            unzipFile("./");
+            //unzipFile("./");
             Path dirPath = Paths.get("./").toAbsolutePath();
             File directoryPath = dirPath.toFile();
             String contents[] = directoryPath.list();
