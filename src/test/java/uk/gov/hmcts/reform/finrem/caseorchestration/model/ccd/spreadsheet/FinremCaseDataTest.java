@@ -21,10 +21,8 @@ import java.util.zip.ZipInputStream;
 public class FinremCaseDataTest {
 
     ClassLoader classLoader = this.getClass().getClassLoader();
-    //public static final String DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX = "./definition_files/definitions/consented/xlsx";
-    //public static final String DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX = "./definition_files/definitions/contested/xlsx";
-    public static final String DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX = "./";
-    public static final String DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX = "./";
+    public static final String DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX = "./definition_files/definitions/consented/xlsx";
+    public static final String DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX = "./definition_files/definitions/contested/xlsx";
     private String consentedFileNameWithPath = null;
     private String contestedFileNameWithPath = null;
     private boolean localMode = false;
@@ -32,22 +30,17 @@ public class FinremCaseDataTest {
     @Before
     public void setUpDefinitionFiles() throws IOException {
         if (localMode == false) {
-            //unzipFile("./");
-            Path dirPath = Paths.get("./").toAbsolutePath();
-            File directoryPath = dirPath.toFile();
-            String contents[] = directoryPath.list();
-            for (int i=0; i<contents.length; i++) {
-                System.out.println(contents[i]);
-            }
-//          if (consentedFileNameWithPath == null) {
-//              retrieveFileName("ccd-config-preview-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
-//          }
-//          contestedFileNameWithPath = retrieveFileName("", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
-//          if (contestedFileNameWithPath == null) {
-//              retrieveFileName("ccd-config-preview-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
-//          }
-//          System.out.println(consentedFileNameWithPath);
-//          System.out.println(contestedFileNameWithPath);
+          consentedFileNameWithPath = retrieveFileName("ccd-config-prod-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
+          if (consentedFileNameWithPath == null) {
+            retrieveFileName("ccd-config-preview-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
+          }
+          contestedFileNameWithPath = retrieveFileName("ccd-config-prod-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
+          if (contestedFileNameWithPath == null) {
+            retrieveFileName("ccd-config-preview-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
+          }
+          System.out.println(consentedFileNameWithPath);
+          System.out.println(contestedFileNameWithPath);
+          System.out.println("current directory files: " + retrieveFileName("", "./"));
         }
 
     }
@@ -113,56 +106,6 @@ public class FinremCaseDataTest {
         File configFile = localMode ? new File(classLoader.getResource(name).getFile())
             : new File(fileNameWithPath);
         return configFile;
-    }
-
-    public void unzipFile(String directoryPath) throws IOException {
-
-        String fileZip = "file.pdf";
-        File destDir = new File(directoryPath);
-
-        byte[] buffer = new byte[1024];
-        ZipInputStream zis = new ZipInputStream(new FileInputStream(fileZip));
-        ZipEntry zipEntry = zis.getNextEntry();
-        while (zipEntry != null) {
-            File newFile = newFile(destDir, zipEntry);
-            if (zipEntry.isDirectory()) {
-                if (!newFile.isDirectory() && !newFile.mkdirs()) {
-                    throw new IOException("Failed to create directory " + newFile);
-                }
-            } else {
-                // fix for Windows-created archives
-                File parent = newFile.getParentFile();
-                if (!parent.isDirectory() && !parent.mkdirs()) {
-                    throw new IOException("Failed to create directory " + parent);
-                }
-
-                // write file content
-                FileOutputStream fos = new FileOutputStream(newFile);
-                int len;
-                while ((len = zis.read(buffer)) > 0) {
-                    fos.write(buffer, 0, len);
-                }
-                fos.close();
-            }
-            zipEntry = zis.getNextEntry();
-        }
-
-        zis.closeEntry();
-        zis.close();
-
-    }
-
-    public static File newFile(File destinationDir, ZipEntry zipEntry) throws IOException {
-        File destFile = new File(destinationDir, zipEntry.getName());
-
-        String destDirPath = destinationDir.getCanonicalPath();
-        String destFilePath = destFile.getCanonicalPath();
-
-        if (!destFilePath.startsWith(destDirPath + File.separator)) {
-            throw new IOException("Entry is outside of the target dir: " + zipEntry.getName());
-        }
-
-        return destFile;
     }
 }
 
