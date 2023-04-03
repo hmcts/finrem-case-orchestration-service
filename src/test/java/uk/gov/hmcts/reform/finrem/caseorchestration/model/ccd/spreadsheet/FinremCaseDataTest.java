@@ -7,14 +7,10 @@ import org.junit.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 @Slf4j
 //@Ignore
@@ -40,7 +36,7 @@ public class FinremCaseDataTest {
           }
           System.out.println(consentedFileNameWithPath);
           System.out.println(contestedFileNameWithPath);
-          System.out.println("current directory files: " + retrieveFileName("", ".//definition_files"));
+          System.out.println("current directory files: " + retrieveFileName("", ".//definition_files/functional-output"));
         }
 
     }
