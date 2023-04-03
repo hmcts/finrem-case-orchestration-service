@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
@@ -7,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerD
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class IntervenerOneToIntervenerDetailsMapper {
 
     public IntervenerDetails mapToIntervenerDetails(IntervenerOneWrapper intervenerOneWrapper) {
