@@ -40,7 +40,7 @@ public class FinremCaseDataTest {
           }
           System.out.println(consentedFileNameWithPath);
           System.out.println(contestedFileNameWithPath);
-          System.out.println("current directory files: " + retrieveFileName("", "./"));
+          System.out.println("current directory files: " + retrieveFileName("", ".//definition_files"));
         }
 
     }
