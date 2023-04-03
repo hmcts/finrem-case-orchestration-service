@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseControllerTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.NotificationsController;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerOneToIntervenerDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
@@ -37,7 +38,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDe
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(NotificationsController.class)
-@ContextConfiguration(classes = {NocTestConfig.class, DocumentConfiguration.class, FinremCaseDetailsMapper.class})
+@ContextConfiguration(classes = {NocTestConfig.class, DocumentConfiguration.class, FinremCaseDetailsMapper.class,
+    IntervenerOneToIntervenerDetailsMapper.class})
 public class NocLettersNotificationsControllerTest extends BaseControllerTest {
 
     @Autowired
