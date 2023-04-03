@@ -7,10 +7,14 @@ import org.junit.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 @Slf4j
 //@Ignore
@@ -26,19 +30,24 @@ public class FinremCaseDataTest {
     private boolean localMode = false;
 
     @Before
-    public void setUpDefinitionFiles() {
+    public void setUpDefinitionFiles() throws IOException {
         if (localMode == false) {
-            consentedFileNameWithPath = retrieveFileName("", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
-            if (consentedFileNameWithPath == null) {
-                retrieveFileName("ccd-config-preview-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
+            unzipFile("./");
+            Path dirPath = Paths.get("./").toAbsolutePath();
+            File directoryPath = dirPath.toFile();
+            String contents[] = directoryPath.list();
+            for (int i=0; i<contents.length; i++) {
+                System.out.println(contents[i]);
             }
-            contestedFileNameWithPath = retrieveFileName("", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
-            if (contestedFileNameWithPath == null) {
-                retrieveFileName("ccd-config-preview-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
-            }
-
-            System.out.println(consentedFileNameWithPath);
-            System.out.println(contestedFileNameWithPath);
+//          if (consentedFileNameWithPath == null) {
+//              retrieveFileName("ccd-config-preview-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
+//          }
+//          contestedFileNameWithPath = retrieveFileName("", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
+//          if (contestedFileNameWithPath == null) {
+//              retrieveFileName("ccd-config-preview-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
+//          }
+//          System.out.println(consentedFileNameWithPath);
+//          System.out.println(contestedFileNameWithPath);
         }
 
     }
@@ -105,7 +114,55 @@ public class FinremCaseDataTest {
             : new File(fileNameWithPath);
         return configFile;
     }
+
+    public void unzipFile(String directoryPath) throws IOException {
+
+        String fileZip = "defs.zip";
+        File destDir = new File(directoryPath);
+
+        byte[] buffer = new byte[1024];
+        ZipInputStream zis = new ZipInputStream(new FileInputStream(fileZip));
+        ZipEntry zipEntry = zis.getNextEntry();
+        while (zipEntry != null) {
+            File newFile = newFile(destDir, zipEntry);
+            if (zipEntry.isDirectory()) {
+                if (!newFile.isDirectory() && !newFile.mkdirs()) {
+                    throw new IOException("Failed to create directory " + newFile);
+                }
+            } else {
+                // fix for Windows-created archives
+                File parent = newFile.getParentFile();
+                if (!parent.isDirectory() && !parent.mkdirs()) {
+                    throw new IOException("Failed to create directory " + parent);
+                }
+
+                // write file content
+                FileOutputStream fos = new FileOutputStream(newFile);
+                int len;
+                while ((len = zis.read(buffer)) > 0) {
+                    fos.write(buffer, 0, len);
+                }
+                fos.close();
+            }
+            zipEntry = zis.getNextEntry();
+        }
+
+        zis.closeEntry();
+        zis.close();
+
+    }
+
+    public static File newFile(File destinationDir, ZipEntry zipEntry) throws IOException {
+        File destFile = new File(destinationDir, zipEntry.getName());
+
+        String destDirPath = destinationDir.getCanonicalPath();
+        String destFilePath = destFile.getCanonicalPath();
+
+        if (!destFilePath.startsWith(destDirPath + File.separator)) {
+            throw new IOException("Entry is outside of the target dir: " + zipEntry.getName());
+        }
+
+        return destFile;
+    }
 }
-
-
 
