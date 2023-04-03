@@ -117,7 +117,7 @@ public class FinremCaseDataTest {
 
     public void unzipFile(String directoryPath) throws IOException {
 
-        String fileZip = "defs.zip";
+        String fileZip = "file.pdf";
         File destDir = new File(directoryPath);
 
         byte[] buffer = new byte[1024];
