@@ -34,7 +34,7 @@ public class FinremCaseDataTest {
           if (contestedFileNameWithPath == null) {
             contestedFileNameWithPath = retrieveFileName("ccd-config-preview-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
           }
-          System.out.println(consentedFileNameWithPath);
+          System.out.println(consentedFileNameWithPath); //remove before final commit
           System.out.println(contestedFileNameWithPath);
         }
 
@@ -79,7 +79,7 @@ public class FinremCaseDataTest {
 
     private void validateConfig(File configFile) throws IOException, InvalidFormatException {
         CCDConfigValidator ccdConfigValidator = new CCDConfigValidator();
-        List<String> errors = ccdConfigValidator.validateCaseFieldsAgainstClassStructure(configFile, FinremCaseData.class);
+        List<String> errors = ccdConfigValidator.validateCaseFields(configFile, FinremCaseData.class);
         if (!errors.isEmpty()) {
             log.error("Errors found when validating config file: {}", configFile.getName());
             errors.forEach(log::error);
@@ -89,7 +89,7 @@ public class FinremCaseDataTest {
 
     private void validateState(File configFile) throws IOException, InvalidFormatException {
         CCDConfigValidator ccdConfigValidator = new CCDConfigValidator();
-        List<String> errors = ccdConfigValidator.validateStatesAgainstClassStructure(configFile);
+        List<String> errors = ccdConfigValidator.validateStates(configFile);
         if (!errors.isEmpty()) {
             log.error("Errors found when validating state: {}", configFile.getName());
             errors.forEach(log::error);

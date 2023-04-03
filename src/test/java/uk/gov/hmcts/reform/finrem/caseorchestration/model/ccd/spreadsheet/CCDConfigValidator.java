@@ -69,7 +69,7 @@ public class CCDConfigValidator {
         Map.entry("currentUserCaseRole", "CaseRole")
     );
 
-    public List<String> validateCaseFieldsAgainstClassStructure(File configFile, Class baseClassToCompareWith)
+    public List<String> validateCaseFields(File configFile, Class baseClassToCompareWith)
         throws IOException, InvalidFormatException {
 
         Workbook workbook = new XSSFWorkbook(configFile);
@@ -78,22 +78,23 @@ public class CCDConfigValidator {
         Sheet fixedListSheet = workbook.getSheet(FIXED_LISTS_SHEET);
         List<CcdFieldAttributes> caseFields = collateCaseFields(caseFieldSheet);
 
-        List<String> validationErrors = validateCaseFields(baseClassToCompareWith, complexTypeSheet, fixedListSheet, caseFields);
+        List<String> validationErrors = validateCaseFieldsAgainstClassStructure(baseClassToCompareWith, complexTypeSheet, fixedListSheet, caseFields);
+        validationErrors.addAll(validateClassStructureAgainstCaseFields(baseClassToCompareWith, complexTypeSheet, fixedListSheet, caseFields));
         return validationErrors;
     }
 
-    public List<String> validateStatesAgainstClassStructure(File configFile)
+    public List<String> validateStates(File configFile)
         throws IOException, InvalidFormatException {
 
         Workbook workbook = new XSSFWorkbook(configFile);
         Sheet stateSheet = workbook.getSheet(STATE_SHEET);
         List<StateAttributes> stateAttributes = collateStates(stateSheet);
 
-        List<String> validationErrors = validateStates(stateAttributes);
+        List<String> validationErrors = validateStatesAgainstClassStructure(stateAttributes);
         return validationErrors;
     }
 
-    private List<String> validateStates(List<StateAttributes> stateAttributes) {
+    private List<String> validateStatesAgainstClassStructure(List<StateAttributes> stateAttributes) {
         List<String> validationErrors = new ArrayList<>();
         for (StateAttributes stateAttribute : stateAttributes) {
             log.info("Validating state: {}", stateAttribute.getId());
@@ -108,7 +109,7 @@ public class CCDConfigValidator {
     }
 
 
-    private List<String> validateCaseFields(Class baseClassToCompareWith, Sheet complexTypeSheet, Sheet fixedListSheet,
+    private List<String> validateCaseFieldsAgainstClassStructure(Class baseClassToCompareWith, Sheet complexTypeSheet, Sheet fixedListSheet,
                                             List<CcdFieldAttributes> caseFields) {
         Set<Class> finremCaseDataClasses = new HashSet<>(Arrays.asList(baseClassToCompareWith));
         finremCaseDataClasses.addAll(new AccessingAllClassesInPackage().getWrappedClassesForClass(baseClassToCompareWith));
@@ -139,6 +140,39 @@ public class CCDConfigValidator {
             if (!found) {
                 validationErrors.add("No FinremCaseData Field Found for CCD Field Id: " + ccdFieldAttributes.getFieldId() + " Field Type: "
                     + ccdFieldAttributes.getFieldType());
+            }
+        }
+        return validationErrors;
+    }
+
+    private List<String> validateClassStructureAgainstCaseFields(Class baseClassToCompareWith, Sheet complexTypeSheet, Sheet fixedListSheet,
+                                                    List<CcdFieldAttributes> caseFields) {
+        Set<Class> finremCaseDataClasses = new HashSet<>(Arrays.asList(baseClassToCompareWith));
+        finremCaseDataClasses.addAll(new AccessingAllClassesInPackage().getWrappedClassesForClass(baseClassToCompareWith));
+
+        List<String> validationErrors = new ArrayList<>();
+        for (Class clazz : finremCaseDataClasses) {
+            for (Field field : clazz.getDeclaredFields()) {
+                log.info("Looking for FinremCaseData Field Id: {} and Field Type: {}", field.getName(), field.getType());
+                boolean found = false;
+                for (CcdFieldAttributes ccdFieldAttributes : caseFields) {
+                    if (ccdFieldAttributes.getFieldId().equals(field.getName())) {
+                        found = true;
+                        log.info("Found FinremCaseData Field Id: {} and Field Type: {}", field.getName(), field.getType());
+                        validationErrors.addAll(validateCCDField(complexTypeSheet, fixedListSheet, ccdFieldAttributes, found, field));
+                        break;
+                    } else {
+                        if (hasMatchingAnnotationForField(field, ccdFieldAttributes.getFieldId())) {
+                            found = true;
+                            log.info("Found annotation for FinremCaseData Field Id: {} and Field Type: {}", field.getName(), field.getType());
+                            validationErrors.addAll(validateCCDField(complexTypeSheet, fixedListSheet, ccdFieldAttributes, found, field));
+                            break;
+                        }
+                    }
+                }
+                if (!found) {
+                    validationErrors.add("No CCD Field Found for FinremCaseData Field Id: " + field.getName() + " Field Type: " + field.getType());
+                }
             }
         }
         return validationErrors;
