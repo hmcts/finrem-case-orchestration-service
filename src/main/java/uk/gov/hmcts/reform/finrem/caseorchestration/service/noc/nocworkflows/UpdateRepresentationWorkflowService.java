@@ -16,11 +16,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 import java.util.Map;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOC_PARTY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 
@@ -63,7 +61,6 @@ public class UpdateRepresentationWorkflowService {
     private boolean isNoOrganisationsToAddOrRemove(CaseDetails caseDetails) {
         ChangeOrganisationRequest changeRequest = new ObjectMapper().registerModule(new JavaTimeModule())
             .convertValue(caseDetails.getData().get(CHANGE_ORGANISATION_REQUEST), ChangeOrganisationRequest.class);
-
         return isOrganisationsEmpty(changeRequest);
     }
 
@@ -92,13 +89,12 @@ public class UpdateRepresentationWorkflowService {
     }
 
     private void persistDefaultOrganisationPolicy(CaseDetails caseDetails) {
-        final boolean isApplicant = ((String) caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
-
-        if (isApplicant) {
+        if (noticeOfChangeService.hasInvalidOrgPolicy(caseDetails, true)) {
             persistDefaultApplicantOrganisationPolicy(caseDetails);
-            return;
         }
-        persistDefaultRespondentOrganisationPolicy(caseDetails);
+        if (noticeOfChangeService.hasInvalidOrgPolicy(caseDetails, false)) {
+            persistDefaultRespondentOrganisationPolicy(caseDetails);
+        }
     }
 
     private void persistDefaultApplicantOrganisationPolicy(CaseDetails caseDetails) {
