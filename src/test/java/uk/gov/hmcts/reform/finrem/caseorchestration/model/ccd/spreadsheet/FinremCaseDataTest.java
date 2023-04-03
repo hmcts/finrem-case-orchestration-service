@@ -28,20 +28,14 @@ public class FinremCaseDataTest {
         if (localMode == false) {
           consentedFileNameWithPath = retrieveFileName("ccd-config-prod-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
           if (consentedFileNameWithPath == null) {
-            retrieveFileName("ccd-config-preview-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
+            consentedFileNameWithPath = retrieveFileName("ccd-config-preview-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
           }
           contestedFileNameWithPath = retrieveFileName("ccd-config-prod-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
           if (contestedFileNameWithPath == null) {
-            retrieveFileName("ccd-config-preview-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
+            contestedFileNameWithPath = retrieveFileName("ccd-config-preview-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
           }
           System.out.println(consentedFileNameWithPath);
           System.out.println(contestedFileNameWithPath);
-          Path dirPath = Paths.get("./definition_files/definitions/consented/xlsx").toAbsolutePath();
-          File directoryPath = dirPath.toFile();
-          String contents[] = directoryPath.list();
-          for (int i=0; i<contents.length; i++) {
-              System.out.println(contents[i]);
-          }
         }
 
     }
