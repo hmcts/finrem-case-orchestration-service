@@ -1,17 +1,20 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.hateoas.server.core.WebHandler;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,9 +22,11 @@ import java.util.List;
 @Slf4j
 @Service
 public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHandler {
-
-    public ShareSelectedDocumentsAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper) {
+    private final CaseAssignedRoleService caseAssignedRoleService;
+    public ShareSelectedDocumentsAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                                     CaseAssignedRoleService caseAssignedRoleService) {
         super(finremCaseDetailsMapper);
+        this.caseAssignedRoleService = caseAssignedRoleService;
     }
 
     @Override
@@ -34,9 +39,23 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
     @Override
     public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
                                                                               String userAuthorisation) {
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Invoking contested {} about to start callback for case id: {}",
-            callbackRequest.getEventType(), callbackRequest.getCaseDetails().getId());
-    //get the role, then choose all callectiion
+            callbackRequest.getEventType(), caseDetails.getId());
+
+        CaseAssignedUserRolesResource caseAssignedUserRole
+            = caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), userAuthorisation);
+        List<CaseAssignedUserRole> caseAssignedUserRoles = caseAssignedUserRole.getCaseAssignedUserRoles();
+
+        if (caseAssignedUserRoles != null) {
+            log.info("caseAssignedUserRoles {}", caseAssignedUserRoles);
+            caseAssignedUserRoles.forEach(x -> {
+                log.info("User Role {}", x.getCaseRole());
+                log.info("User Id {}", x.getUserId());
+            });
+        }
+
+
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         List<UploadCaseDocumentCollection> appOtherCollectionShared = caseData.getUploadCaseDocumentWrapper().getAppOtherCollection();
 
@@ -45,7 +64,7 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
 
         appOtherCollectionShared.forEach(doc -> dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId()
                 .toString(),doc.getValue().getCaseDocuments().getDocumentFilename())));
-        //"<a href="+doc.getValue().getCaseDocuments().getDocumentBinaryUrl()+">"+doc.getValue().getCaseDocuments().getDocumentFilename()+"</a>")
+
         DynamicMultiSelectList applicantDocuments = caseData.getApplicantDocuments();
         DynamicMultiSelectList dynamicList = getDynamicMultiSelectList(dynamicListElements, applicantDocuments);
 
@@ -76,5 +95,4 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
                     .build();
         }
     }
-
 }
