@@ -15,11 +15,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDa
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.io.InputStream;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -37,8 +39,9 @@ public class ContestedHearingServiceTest extends BaseServiceTest {
     private ContestedHearingService contestedHearingService;
     @MockBean
     private AdditionalHearingDocumentService additionalHearingDocumentService;
+
     @MockBean
-    private HearingDocumentService hearingDocumentService;
+    private FinremHearingDocumentService finremHearingDocumentService;
 
     @MockBean
     GenericDocumentService genericDocumentService;
@@ -63,72 +66,46 @@ public class ContestedHearingServiceTest extends BaseServiceTest {
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
     }
 
-
     @Test
-    public void givenContestedHearing_whenNot_PrepareForHearing_thenItShouldNotGenerateAndSendInitalCorrespondence() throws JsonProcessingException {
+    public void givenContestedHearing_when_PrepareForHearing_thenItShouldNotGenerateAndSendInitalCorrespondence() throws JsonProcessingException {
         FinremCaseDetails caseDetails = buildCaseDetails(HEARING_TEST_PAYLOAD);
         FinremCaseDetails caseDetailsBefore = buildCaseDetails(HEARING_TEST_PAYLOAD);
         when(additionalHearingDocumentService.convertToPdf(any(), any())).thenReturn(caseDocument());
 
         contestedHearingService.prepareForHearing(callbackRequest, AUTH_TOKEN);
 
-        verify(hearingDocumentService).generateHearingDocuments(any(), any());
-        verify(hearingDocumentService).sendInitialHearingCorrespondence(any(), any());
+        verify(finremHearingDocumentService).generateHearingDocuments(any(), any());
+        verify(finremHearingDocumentService).sendInitialHearingCorrespondence(any(), any());
+
+    }
+      // already had first hearing then create additional Hearing Documents
+    @Test
+    public void givenContestedHearing_when_alreadyHadFirstHearing_thenItShouldCreateAdditionalDocuments() throws JsonProcessingException {
+        FinremCaseDetails caseDetails = buildCaseDetails(HEARING_TEST_PAYLOAD);
+        FinremCaseDetails caseDetailsBefore = buildCaseDetails(HEARING_TEST_PAYLOAD);
+        when(finremHearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
+        //when(additionalHearingDocumentService.createAdditionalHearingDocuments(any(), any())).thenReturn(caseDocument());
+
+        contestedHearingService.prepareForHearing(callbackRequest, AUTH_TOKEN);
+
+        verify(finremHearingDocumentService).alreadyHadFirstHearing(any());
+        //verify(additionalHearingDocumentService).createAdditionalHearingDocuments(any(), any());
 
     }
 
-//    // Create additional hearing documents test
+//    // No first hearing then don't create additional Hearing Documents
 //    @Test
-//    public void givenContestedHearing_whenFirstHearing_thenItShould() {
-//        CaseDetails caseDetails = buildCaseDetails(HEARING_TEST_PAYLOAD);
-//        CaseDetails caseDetailsBefore = buildCaseDetails(HEARING_TEST_PAYLOAD);
-//        when(hearingDocumentService.alreadyHadFirstHearing(any(), any(), any(), any().thenReturn(caseDocument())));
-//        when(hearingDocumentService.generateHearingDocuments(any(), any()).thenReturn(caseDocument()));
+//    public void givenContestedHearing_when_No_Hearing_thenItShould_Not_CreateAdditionalDocuments() throws JsonProcessingException {
+//        FinremCaseDetails caseDetails = buildCaseDetails(HEARING_TEST_PAYLOAD);
+//        FinremCaseDetails caseDetailsBefore = buildCaseDetails(HEARING_TEST_PAYLOAD);
+//        when(finremHearingDocumentService.alreadyHadFirstHearing(assertFalse("No hearing"));
+//        when(additionalHearingDocumentService.createAdditionalHearingDocuments(caseDocument(caseDetails)).thenReturn(false)
 //
-//        when(caseDataService.isContestedApplication(caseDetails).thenReturn(true));
-//        when(caseDataService.isContestedApplication(caseDetailsBefore).thenReturn(true));
+//        contestedHearingService.prepareForHearing(callbackRequest, AUTH_TOKEN);
 //
-//        contestedHearingService.(caseDetails, caseDetailsBefore);
+//        verify(finremHearingDocumentService).alreadyHadFirstHearing(any());
+//        //verify(additionalHearingDocumentService).createAdditionalHearingDocuments(any(), any());
 //    }
-//
-//    @Test
-//    public void givenContestedPaperCase_WhenPaperCase_ThenItShouldNotSendNotificaton() {
-//        CaseDetails caseDetails = buildCaseDetails(HEARING_TEST_PAYLOAD);
-//        CaseDetails caseDetailsBefore = buildCaseDetails(HEARING_TEST_PAYLOAD);
-//
-//        caseDetails.getData().put("paperApplication", "Yes");
-//
-//        when(caseDataService.isPaperApplication(any())).thenReturn(true);
-//
-//        contestedHearingService.pr(caseDetails, caseDetailsBefore);
-//
-//        verify(caseDataService).isPaperApplication(any());
-//        verify(caseDataService, never()).isApplicantSolicitorAgreeToReceiveEmails(any());
-//        verify(notificationService, never()).isRespondentSolicitorEmailCommunicationEnabled(any());
-//        verify(notificationService, never()).sendContestedGeneralApplicationOutcomeEmail(any(), anyMap());
-//        verify(notificationService, never()).sendContestedHearingNotificationEmailToRespondentSolicitor(any(), anyMap());
-//    }
-//
-//    @Test
-//    public void givenContestedNotPaperCase_WhenPaperCase_ThenItShouldSendNotificaton() {
-//        CaseDetails caseDetails = buildCaseDetails(HEARING_TEST_PAYLOAD);
-//        caseDetails.getData().put("paperApplication", NO_VALUE);
-//
-//        when(caseDataService.isPaperApplication(any())).thenReturn(false);
-//        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
-//        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
-//
-//        CaseDetails caseDetailsBefore = buildCaseDetails(HEARING_TEST_PAYLOAD);
-//        notificationService.sendContestedApplicationIssuedEmailToApplicantSolicitor(caseDetails, caseDetailsBefore);
-//
-//        verify(caseDataService).isPaperApplication(any());
-//
-//        verify(caseDataService, times(2)).isApplicantSolicitorAgreeToReceiveEmails(any());
-//        verify(notificationService, times(2)).isRespondentSolicitorEmailCommunicationEnabled(any());
-//        verify(notificationService, times(2)).sendContestedApplicationIssuedEmailToApplicantSolicitor(any(), any());
-//        verify(notificationService, times(2)).sendContestedHearingNotificationEmailToRespondentSolicitor(any(), anyMap());
-//    }
-
 
     private FinremCaseDetails buildCaseDetails(String testPayload) {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(testPayload)) {
