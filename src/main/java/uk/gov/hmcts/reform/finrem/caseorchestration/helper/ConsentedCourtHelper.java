@@ -181,6 +181,7 @@ public class ConsentedCourtHelper {
         .put("FR_clevelandList_6", "South Shields County Court and Family Court")
         .put("FR_clevelandList_7", "North Shields County Court and Family Court")
         .put("FR_clevelandList_8", "Darlington County Court and Family Court")
+        .put("FR_clevelandList_9", "Darlington Magistrates Court")
         .build();
     private static Map<String, String> manchesterMap = ImmutableMap.<String, String>builder()
         .put("FR_manchesterList_1", "Manchester County and Family Court")
