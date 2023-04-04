@@ -112,7 +112,8 @@ public class CaseAssignedRoleServiceTest {
     public void getCaseAssignedUserRole() {
         mockMethodCalls(OTHER_ROLES, false);
 
-        CaseAssignedUserRolesResource caseAssignedUserRole1 = caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), AUTH_TOKEN);
+        CaseAssignedUserRolesResource caseAssignedUserRole1 =
+            caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), AUTH_TOKEN);
         assertEquals(OTHER_ROLES, caseAssignedUserRole1.getCaseAssignedUserRoles().get(0).getCaseRole());
     }
 
