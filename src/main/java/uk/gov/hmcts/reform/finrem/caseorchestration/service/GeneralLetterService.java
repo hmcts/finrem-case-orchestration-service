@@ -15,7 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterAddressToType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralLetterWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
@@ -132,16 +132,13 @@ public class GeneralLetterService {
     }
 
     private void addGeneralLetterToCaseData(FinremCaseDetails caseDetails, CaseDocument document) {
-        GeneralLetterData generatedLetterData = GeneralLetterData.builder()
-            .generalLetter(GeneralLetter.builder()
-                .generatedLetter(document)
-                .build())
-            .build();
-
-        List<GeneralLetterData> generalLetterCollection = Optional.ofNullable(caseDetails.getData()
+        List<GeneralLetterCollection> generalLetterCollection = Optional.ofNullable(caseDetails.getData()
             .getGeneralLetterWrapper().getGeneralLetterCollection())
             .orElse(new ArrayList<>(1));
-        generalLetterCollection.add(generatedLetterData);
+        generalLetterCollection.add(GeneralLetterCollection.builder().value(GeneralLetter.builder()
+                .generatedLetter(document)
+                .build())
+            .build());
         caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterCollection(generalLetterCollection);
     }
 
@@ -186,9 +183,9 @@ public class GeneralLetterService {
     private UUID printLatestGeneralLetter(FinremCaseDetails caseDetails) {
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         GeneralLetterWrapper generalLetterWrapper = caseDetails.getData().getGeneralLetterWrapper();
-        List<GeneralLetterData> generalLettersData = generalLetterWrapper.getGeneralLetterCollection();
-        GeneralLetterData latestGeneralLetterData = generalLettersData.get(generalLettersData.size() - 1);
-        bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(latestGeneralLetterData.getGeneralLetter().getGeneratedLetter()));
+        List<GeneralLetterCollection> generalLettersData = generalLetterWrapper.getGeneralLetterCollection();
+        GeneralLetterCollection latestGeneralLetterData = generalLettersData.get(generalLettersData.size() - 1);
+        bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(latestGeneralLetterData.getValue().getGeneratedLetter()));
         CaseDocument generalLetterUploadedDocument = generalLetterWrapper.getGeneralLetterUploadedDocument();
         if (generalLetterUploadedDocument != null) {
             bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(generalLetterUploadedDocument));

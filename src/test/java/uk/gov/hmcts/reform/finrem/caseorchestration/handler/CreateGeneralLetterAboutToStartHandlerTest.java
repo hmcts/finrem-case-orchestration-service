@@ -20,10 +20,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -55,6 +55,7 @@ public class CreateGeneralLetterAboutToStartHandlerTest {
                 .canHandle(CallbackType.ABOUT_TO_START, CaseType.CONTESTED, EventType.CREATE_GENERAL_LETTER_JUDGE),
             is(true));
     }
+
     @Test
     public void givenACcdCallbackAboutToSubmit_WhenCanHandleCalled_thenHandlerCanNotHandle() {
         assertThat(handler
