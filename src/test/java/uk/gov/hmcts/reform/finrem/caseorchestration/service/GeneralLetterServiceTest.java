@@ -9,11 +9,13 @@ import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterAddressToType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
 
 import java.io.InputStream;
@@ -23,11 +25,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -40,8 +42,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_UR
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ADDRESSEE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_PREVIEW;
 
 public class GeneralLetterServiceTest extends BaseServiceTest {
 
@@ -65,10 +65,10 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
 
     @Test
     public void generateGeneralLetter() {
-        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/general-letter.json", mapper);
+        FinremCaseDetails caseDetails = TestSetUpUtils.finremCaseDetailsFromResource("/fixtures/general-letter.json", mapper);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
 
-        List<GeneralLetterData> generalLetterData = (List<GeneralLetterData>) caseDetails.getData().get(GENERAL_LETTER);
+        List<GeneralLetterData> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
         assertThat(generalLetterData, hasSize(2));
 
         doCaseDocumentAssert(generalLetterData.get(0).getGeneralLetter().getGeneratedLetter());
@@ -92,10 +92,10 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
 
     @Test
     public void generateContestedGeneralLetter() {
-        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/contested/general-letter-contested.json", mapper);
+        FinremCaseDetails caseDetails = TestSetUpUtils.finremCaseDetailsFromResource("/fixtures/contested/general-letter-contested.json", mapper);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
 
-        List<GeneralLetterData> generalLetterData = (List<GeneralLetterData>) caseDetails.getData().get(GENERAL_LETTER);
+        List<GeneralLetterData> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
         assertThat(generalLetterData, hasSize(2));
 
         doCaseDocumentAssert(generalLetterData.get(0).getGeneralLetter().getGeneratedLetter());
@@ -118,10 +118,10 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
 
     @Test
     public void givenNoPreviousGeneralLettersGenerated_generateGeneralLetter() throws Exception {
-        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/general-letter-empty-collection.json", mapper);
+        FinremCaseDetails caseDetails = TestSetUpUtils.finremCaseDetailsFromResource("/fixtures/general-letter-empty-collection.json", mapper);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
 
-        List<GeneralLetterData> generalLetterData = (List<GeneralLetterData>) caseDetails.getData().get(GENERAL_LETTER);
+        List<GeneralLetterData> generalLetterData = caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterCollection();
         assertThat(generalLetterData, hasSize(1));
 
         doCaseDocumentAssert(generalLetterData.get(0).getGeneralLetter().getGeneratedLetter());
@@ -138,27 +138,27 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
     public void whenGeneralLetterAddressToChanges_differentNamesAreUsed() {
         AtomicInteger invocationCounter = new AtomicInteger(1);
         ImmutableMap.of(
-                "applicantSolicitor", "Solictor",
-                "respondentSolicitor", "Ms Patel",
-                "respondent", "test Korivi",
-                "other", "Mr Rajesh Kuthrappali"
+                GeneralLetterAddressToType.APPLICANT_SOLICITOR, "Solictor",
+                GeneralLetterAddressToType.RESPONDENT_SOLICITOR, "Ms Patel",
+                GeneralLetterAddressToType.RESPONDENT, "test Korivi",
+                GeneralLetterAddressToType.OTHER, "Mr Rajesh Kuthrappali"
             ).entrySet().stream()
             .forEach(entry -> assertNameUsedForGeneralLetterAddressTo(invocationCounter.getAndIncrement(), entry.getKey(), entry.getValue()));
     }
 
     @Test
     public void whenGeneralLetterPreviewCalled_thenPreviewDocumentIsAddedToCaseData() {
-        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/general-letter.json", mapper);
+        FinremCaseDetails caseDetails = TestSetUpUtils.finremCaseDetailsFromResource("/fixtures/general-letter.json", mapper);
 
-        assertThat(caseDetails.getData(), not(hasKey(GENERAL_LETTER_PREVIEW)));
+        assertNull(caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterPreview());
 
         generalLetterService.previewGeneralLetter(AUTH_TOKEN, caseDetails);
-        assertThat(caseDetails.getData(), hasKey(GENERAL_LETTER_PREVIEW));
+        assertNotNull(caseDetails.getData().getGeneralLetterWrapper().getGeneralLetterPreview());
     }
 
     @Test
     public void givenAddressIsMissing_whenCaseDataErrorsFetched_ThereIsAnError() {
-        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/general-letter-missing-address.json", mapper);
+        FinremCaseDetails caseDetails = TestSetUpUtils.finremCaseDetailsFromResource("/fixtures/general-letter-missing-address.json", mapper);
 
         List<String> errors = generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails);
         assertThat(errors, hasItem("Address is missing for recipient type respondent"));
@@ -166,7 +166,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
 
     @Test
     public void givenAddressIsPresent_whenCaseDataErrorsFetched_ThereIsNoError() {
-        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/general-letter.json", mapper);
+        FinremCaseDetails caseDetails = TestSetUpUtils.finremCaseDetailsFromResource("/fixtures/general-letter.json", mapper);
 
         List<String> errors = generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails);
         assertThat(errors, is(empty()));
@@ -174,19 +174,19 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
 
     @Test
     public void whenGeneralLetterIsCreated_thenItGetsSentToBulkPrint() {
-        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/general-letter.json", mapper);
+        FinremCaseDetails caseDetails = TestSetUpUtils.finremCaseDetailsFromResource("/fixtures/general-letter.json", mapper);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
         verify(bulkPrintService, times(1)).bulkPrintFinancialRemedyLetterPack(anyLong(), any());
     }
 
-    private void assertNameUsedForGeneralLetterAddressTo(int invocation, String generalLetterAddressTo, String expectedName) {
-        CaseDetails caseDetails;
+    private void assertNameUsedForGeneralLetterAddressTo(int invocation, GeneralLetterAddressToType generalLetterAddressTo, String expectedName) {
+        FinremCaseDetails caseDetails;
         try {
             caseDetails = caseDetails();
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e.getCause());
         }
-        caseDetails.getData().put("generalLetterAddressTo", generalLetterAddressTo);
+        caseDetails.getData().getGeneralLetterWrapper().setGeneralLetterAddressTo(generalLetterAddressTo);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
 
         verify(genericDocumentService, times(invocation)).generateDocument(any(),
@@ -195,9 +195,9 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         assertThat(addressee.getName(), is(expectedName));
     }
 
-    private CaseDetails caseDetails() throws Exception {
+    private FinremCaseDetails caseDetails() throws Exception {
         try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/general-letter.json")) {
-            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+            return mapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
         }
     }
 
