@@ -19,9 +19,6 @@ public class PaymentRequest {
     @JsonProperty(value = "account_number")
     private String accountNumber;
 
-    @JsonProperty(value = "case_reference")
-    private String caseReference;
-
     @JsonProperty(value = "ccd_case_number")
     private String ccdCaseNumber;
 

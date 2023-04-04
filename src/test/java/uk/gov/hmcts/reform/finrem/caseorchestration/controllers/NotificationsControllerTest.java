@@ -257,16 +257,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldSendPrepareForHearingOrderSentEmailWhenAgreed() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
-
-        notificationsController.sendPrepareForHearingOrderSentEmail(buildCallbackRequest());
-
-        verify(notificationService).sendPrepareForHearingOrderSentEmailApplicant(any(CaseDetails.class));
-    }
-
-    @Test
     public void shouldSendPrepareForHearingOrderSentEmailWhenRespondentIsRegisteredAndAgreedToEmails() {
         when(caseDataService.isConsentedApplication(any())).thenReturn(false);
         when(notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(any())).thenReturn(true);
@@ -284,53 +274,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         verify(notificationService, never()).sendPrepareForHearingEmailApplicant(any(CaseDetails.class));
         verify(notificationService, never()).sendPrepareForHearingEmailRespondent(any(CaseDetails.class));
-    }
-
-    @Test
-    public void shouldNotSendPrepareForHearingOrderSentEmailWhenNotAgreed() {
-        //when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
-
-        notificationsController.sendPrepareForHearingOrderSentEmail(buildCallbackRequest());
-
-        verify(notificationService, never()).sendPrepareForHearingOrderSentEmailApplicant(any(CaseDetails.class));
-    }
-
-    @Test
-    public void sendPrepareForHearingOrderSentEmail_shouldSendRespondentEmail() {
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
-
-        notificationsController.sendPrepareForHearingOrderSentEmail(buildCallbackRequest());
-
-        verify(notificationService).sendPrepareForHearingOrderSentEmailRespondent(any(CaseDetails.class));
-    }
-
-    @Test
-    public void sendPrepareForHearingOrderSentEmail_shouldNotSendRespondentEmail() {
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
-
-        notificationsController.sendPrepareForHearingOrderSentEmail(buildCallbackRequest());
-
-        verify(notificationService, never()).sendPrepareForHearingOrderSentEmailRespondent(any(CaseDetails.class));
-    }
-
-
-    @Test
-    public void shouldSendContestedApplicationIssuedEmailWhenAgreed() {
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
-
-        notificationsController.sendContestedApplicationIssuedEmail(buildCallbackRequest());
-
-        verify(notificationService).sendContestedApplicationIssuedEmailToApplicantSolicitor(any(CaseDetails.class));
-    }
-
-    @Test
-    public void shouldNotSendContestedApplicationIssuedEmailWhenNotAgreed() {
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
-
-        notificationsController.sendContestedApplicationIssuedEmail(buildCallbackRequest());
-
-        verify(notificationService, never()).sendContestedApplicationIssuedEmailToApplicantSolicitor(any(CaseDetails.class));
     }
 
     @Test

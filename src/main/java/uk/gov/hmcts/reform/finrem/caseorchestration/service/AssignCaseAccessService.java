@@ -22,6 +22,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUser
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.searchuserrole.SearchCaseAssignedUserRolesRequest;
+
 
 import java.util.List;
 import java.util.Optional;
@@ -115,7 +117,7 @@ public class AssignCaseAccessService {
     private CaseAssignmentUserRolesRequest getCaseAssignmentUserRolesRequest(Long caseId, Set<String> users, String caseRole, String orgId) {
         final List<CaseAssignmentUserRoleWithOrganisation> caseAssignedRoles = users.stream()
             .map(user -> buildCaseAssignedUserRoles(caseId, caseRole, orgId, user))
-            .toList();
+            .collect(Collectors.toList());
 
         CaseAssignmentUserRolesRequest removeCaseAssignedUserRolesRequest = CaseAssignmentUserRolesRequest.builder()
             .caseAssignmentUserRolesWithOrganisation(caseAssignedRoles)
@@ -213,6 +215,14 @@ public class AssignCaseAccessService {
             serviceAuthTokenGenerator.generate(),
             List.of(caseId));
     }
+
+    public CaseAssignmentUserRolesResource searchUserRoles(String caseId) {
+        return caseDataApi.searchCaseUserRoles(
+            systemUserService.getSysUserToken(),
+            serviceAuthTokenGenerator.generate(),
+            SearchCaseAssignedUserRolesRequest.builder().caseIds(List.of(caseId)).build());
+    }
+
 
     private List<CaseAssignmentUserRole> getCreatorRoles(List<CaseAssignmentUserRole> allRoles) {
         return allRoles.stream()

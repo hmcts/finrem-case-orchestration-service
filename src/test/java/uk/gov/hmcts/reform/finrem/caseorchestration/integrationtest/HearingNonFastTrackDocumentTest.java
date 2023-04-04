@@ -35,12 +35,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.PdfDocumentRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
+import uk.gov.hmcts.reform.sendletter.api.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -144,7 +146,9 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
     @Test
     public void generateFormCAndFormGSuccess() throws Exception {
         idamServiceStub();
-        generateSendLetterSuccessStub();
+        UUID uuid = UUID.randomUUID();
+        generateSendLetterSuccessStub(uuid);
+        generateConfirmLetterCreatedStub(uuid);
         generateEvidenceDownloadServiceSuccessStub();
         generateEvidenceUploadServiceSuccessStub();
         generateDocumentServiceSuccessStub(pdfGenerationRequest(config.getFormCNonFastTrackTemplate(request.getCaseDetails())));
@@ -315,13 +319,24 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
                 .withBody(objectMapper.writeValueAsString(getResponse()))));
     }
 
-    void generateSendLetterSuccessStub() throws IOException {
-
+    void generateSendLetterSuccessStub(UUID uuid) throws IOException {
         sendLetterService.stubFor(post(urlPathEqualTo(SEND_LETTER_CONTEXT_PATH))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                .withBody(objectMapper.writeValueAsString(new SendLetterResponse(UUID.randomUUID())))));
+                .withBody(objectMapper.writeValueAsString(new SendLetterResponse(uuid)))));
+    }
+
+    void generateConfirmLetterCreatedStub(UUID uuid) throws IOException {
+        LetterStatus letterStatus = new LetterStatus(uuid, "Created", "checksum",
+            ZonedDateTime.now(), ZonedDateTime.now().plusHours(1),
+            ZonedDateTime.now().plusHours(2), Collections.emptyMap(), 1);
+
+        sendLetterService.stubFor(get(urlPathEqualTo(SEND_LETTER_CONTEXT_PATH + "/" + uuid))
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withBody(objectMapper.writeValueAsString(letterStatus))));
     }
 
     private ObjectNode getResponse() throws IOException {
