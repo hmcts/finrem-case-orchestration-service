@@ -19,6 +19,7 @@ public enum OrderRefusalOption {
     TRANSFERRED_TO_APPLICANTS_HOME_COURT("Transferred to Applicant’s home Court"),
     ORDER_DOES_NOT_APPEAR_FAIR("Order does not appear fair"),
     PROVIDE_PENSION_VALUES_PROPERTY("Provide pension values/property"),
+    APPLICATION_FOR_VARIATION_ORDER_RECONSIDERED("Application for a consent/variation order reconsidered"),
     OTHER_PLEASE_SPECIFY("Other (please specify)");
 
     private final String id;
