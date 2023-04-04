@@ -23,6 +23,7 @@ import java.util.List;
 @Service
 public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHandler {
     private final CaseAssignedRoleService caseAssignedRoleService;
+
     public ShareSelectedDocumentsAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                      CaseAssignedRoleService caseAssignedRoleService) {
         super(finremCaseDetailsMapper);
