@@ -56,4 +56,10 @@ public class CaseAssignedRoleService {
         return dataStoreClient.getUserRoles(authToken, authTokenGenerator.generate(),
             caseDetails.getId().toString(), idamService.getIdamUserId(authToken));
     }
+
+    @Cacheable(cacheManager = REQUEST_SCOPED_CACHE_MANAGER, cacheNames = USER_ROLES_CACHE)
+    public CaseAssignedUserRolesResource getCaseAssignedUserRole(String caseId, String authToken) {
+        return dataStoreClient.getUserRoles(authToken, authTokenGenerator.generate(),
+            caseId, idamService.getIdamUserId(authToken));
+    }
 }

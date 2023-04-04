@@ -243,7 +243,7 @@ public class ManageBarristerServiceTest {
         caseDetails.getData().put(CASE_ROLE, APP_SOLICITOR_POLICY);
         BarristerChange barristerChange = buildBarristerChange();
         when(barristerUpdateDifferenceCalculator.calculate(any(), any())).thenReturn(barristerChange);
-        when(caseAssignedRoleService.getCaseAssignedUserRole(any(), any()))
+        when(caseAssignedRoleService.getCaseAssignedUserRole(any(CaseDetails.class), any()))
             .thenReturn(buildCaseAssignedUserRolesResource(APP_SOLICITOR_POLICY));
 
         manageBarristerService.notifyBarristerAccess(caseDetails,
