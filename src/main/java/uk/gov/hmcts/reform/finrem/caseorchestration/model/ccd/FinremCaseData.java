@@ -284,6 +284,7 @@ public class FinremCaseData {
     private String currentUserCaseRoleLabel;
     private CaseDocument outOfFamilyCourtResolution;
 
+    private DynamicMultiSelectList applicantDocuments;
     private DynamicRadioList intervenersList;
     private DynamicRadioList intervenerOptionList;
     @JsonUnwrapped
