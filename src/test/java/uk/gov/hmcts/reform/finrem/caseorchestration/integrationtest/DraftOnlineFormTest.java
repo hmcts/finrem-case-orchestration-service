@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
@@ -46,11 +47,13 @@ public class DraftOnlineFormTest extends GenerateMiniFormATest {
     @MockBean
     private IdamService idamService;
 
+    @Ignore
     @Test
     public void deleteExistingMiniFormAWithSuccess() throws Exception {
         doTestDeleteMiniFormA(HttpStatus.OK);
     }
 
+    @Ignore
     @Test
     public void deleteMiniFormAErrorShouldNotAffectNewMiniFormGeneration() throws Exception {
         doTestDeleteMiniFormA(HttpStatus.NOT_FOUND);

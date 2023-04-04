@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -45,6 +46,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doThrow;
@@ -259,12 +261,13 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
     public void givenFinalOrderSuccess_WhenHandle_ThenStampFinalOrder() {
         mockDocumentHelperToReturnDefaultExpectedDocuments();
         when(genericDocumentService.convertDocumentIfNotPdfAlready(isA(CaseDocument.class), eq(AUTH_TOKEN))).thenReturn(caseDocument());
-        when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN))).thenReturn(caseDocument());
+        when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP)))
+            .thenReturn(caseDocument());
 
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response =
             sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 
-        verify(genericDocumentService).stampDocument(caseDocument(), AUTH_TOKEN);
+        verify(genericDocumentService).stampDocument(caseDocument(), AUTH_TOKEN, StampType.FAMILY_COURT_STAMP);
 
         List<HearingOrderCollectionData> expectedFinalOrderCollection =
             (List<HearingOrderCollectionData>) response.getData().get(FINAL_ORDER_COLLECTION);
@@ -287,12 +290,13 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         mockDocumentHelperToReturnDefaultExpectedDocuments();
         when(documentHelper.getFinalOrderDocuments(any())).thenReturn(new ArrayList<>(List.of(HearingOrderCollectionData.builder().build())));
         when(genericDocumentService.convertDocumentIfNotPdfAlready(isA(CaseDocument.class), eq(AUTH_TOKEN))).thenReturn(caseDocument());
-        when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN))).thenReturn(caseDocument());
+        when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP)))
+            .thenReturn(caseDocument());
 
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response =
             sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 
-        verify(genericDocumentService).stampDocument(caseDocument(), AUTH_TOKEN);
+        verify(genericDocumentService).stampDocument(eq(caseDocument()), eq(AUTH_TOKEN), eq(StampType.FAMILY_COURT_STAMP));
 
         List<HearingOrderCollectionData> expectedFinalOrderCollection =
             (List<HearingOrderCollectionData>) response.getData().get(FINAL_ORDER_COLLECTION);
@@ -302,6 +306,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
     }
 
     private void mockDocumentHelperToReturnDefaultExpectedDocuments() {
+        when(documentHelper.getStampType(anyMap())).thenReturn(StampType.FAMILY_COURT_STAMP);
         when(documentHelper.getDocumentLinkAsBulkPrintDocument(any(), eq(LATEST_DRAFT_HEARING_ORDER))).thenReturn(
             Optional.of(BulkPrintDocument.builder().binaryFileUrl("HearingOrderBinaryURL").build()));
         when(documentHelper.getHearingDocumentsAsBulkPrintDocuments(any(), any())).thenReturn(
