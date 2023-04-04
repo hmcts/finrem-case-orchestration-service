@@ -6,32 +6,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 
 import java.io.InputStream;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ADDITIONAL_DOC;
 
 public class ContestedHearingServiceTest extends BaseServiceTest {
 
@@ -78,7 +62,7 @@ public class ContestedHearingServiceTest extends BaseServiceTest {
         verify(finremHearingDocumentService).sendInitialHearingCorrespondence(any(), any());
 
     }
-      // already had first hearing then create additional Hearing Documents
+
     @Test
     public void givenContestedHearing_when_alreadyHadFirstHearing_thenItShouldCreateAdditionalDocuments() throws JsonProcessingException {
         FinremCaseDetails caseDetails = buildCaseDetails(HEARING_TEST_PAYLOAD);
@@ -92,21 +76,7 @@ public class ContestedHearingServiceTest extends BaseServiceTest {
         //verify(additionalHearingDocumentService).createAdditionalHearingDocuments(any(), any());
 
     }
-
-//    // No first hearing then don't create additional Hearing Documents
-//    @Test
-//    public void givenContestedHearing_when_No_Hearing_thenItShould_Not_CreateAdditionalDocuments() throws JsonProcessingException {
-//        FinremCaseDetails caseDetails = buildCaseDetails(HEARING_TEST_PAYLOAD);
-//        FinremCaseDetails caseDetailsBefore = buildCaseDetails(HEARING_TEST_PAYLOAD);
-//        when(finremHearingDocumentService.alreadyHadFirstHearing(assertFalse("No hearing"));
-//        when(additionalHearingDocumentService.createAdditionalHearingDocuments(caseDocument(caseDetails)).thenReturn(false)
-//
-//        contestedHearingService.prepareForHearing(callbackRequest, AUTH_TOKEN);
-//
-//        verify(finremHearingDocumentService).alreadyHadFirstHearing(any());
-//        //verify(additionalHearingDocumentService).createAdditionalHearingDocuments(any(), any());
-//    }
-
+    
     private FinremCaseDetails buildCaseDetails(String testPayload) {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(testPayload)) {
             return objectMapper.readValue(resourceAsStream, FinremCallbackRequest.class).getCaseDetails();
