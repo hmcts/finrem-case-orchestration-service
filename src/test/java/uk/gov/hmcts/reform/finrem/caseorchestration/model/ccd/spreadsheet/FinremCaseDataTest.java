@@ -21,21 +21,21 @@ public class FinremCaseDataTest {
     public static final String DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX = "./definition_files/definitions/contested/xlsx";
     private String consentedFileNameWithPath = null;
     private String contestedFileNameWithPath = null;
-    private boolean localMode = false;
+    private Boolean localMode = false;
 
     @Before
-    public void setUpDefinitionFiles() throws IOException {
-        if (localMode == false) {
-          consentedFileNameWithPath = retrieveFileName("ccd-config-prod-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
-          if (consentedFileNameWithPath == null) {
-            consentedFileNameWithPath = retrieveFileName("ccd-config-preview-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
-          }
-          contestedFileNameWithPath = retrieveFileName("ccd-config-prod-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
-          if (contestedFileNameWithPath == null) {
-            contestedFileNameWithPath = retrieveFileName("ccd-config-preview-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
-          }
-          System.out.println(consentedFileNameWithPath); //remove before final commit
-          System.out.println(contestedFileNameWithPath);
+    public void setUpDefinitionFiles() {
+        if (localMode.booleanValue() == Boolean.FALSE) {
+            consentedFileNameWithPath = retrieveFileName("ccd-config-prod-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
+            if (consentedFileNameWithPath == null) {
+                consentedFileNameWithPath = retrieveFileName("ccd-config-preview-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
+            }
+            contestedFileNameWithPath = retrieveFileName("ccd-config-prod-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
+            if (contestedFileNameWithPath == null) {
+                contestedFileNameWithPath = retrieveFileName("ccd-config-preview-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
+            }
+            log.info("consentedFileNameWithPath : {}", consentedFileNameWithPath);
+            log.info("contestedFileNameWithPath : {}", contestedFileNameWithPath);
         }
 
     }
@@ -44,9 +44,10 @@ public class FinremCaseDataTest {
         Path dirPath = Paths.get(filePath).toAbsolutePath();
         File directoryPath = dirPath.toFile();
         String[] list = directoryPath.list();
-        for (int i = 0; i < list.length; i++) {
-            if (list[i].startsWith(filePrefix)) {
-                return filePath + "/" + list[i];
+        assert list != null;
+        for (String fileName : list) {
+            if (fileName.startsWith(filePrefix)) {
+                return "%s/%s".formatted(filePath, fileName);
             }
         }
         return null;
