@@ -141,7 +141,8 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
                 GeneralLetterAddressToType.APPLICANT_SOLICITOR, "Solictor",
                 GeneralLetterAddressToType.RESPONDENT_SOLICITOR, "Ms Patel",
                 GeneralLetterAddressToType.RESPONDENT, "test Korivi",
-                GeneralLetterAddressToType.OTHER, "Mr Rajesh Kuthrappali"
+                GeneralLetterAddressToType.OTHER, "Mr Rajesh Kuthrappali",
+                GeneralLetterAddressToType.APPLICANT, "Poor Guy"
             ).entrySet().stream()
             .forEach(entry -> assertNameUsedForGeneralLetterAddressTo(invocationCounter.getAndIncrement(), entry.getKey(), entry.getValue()));
     }
