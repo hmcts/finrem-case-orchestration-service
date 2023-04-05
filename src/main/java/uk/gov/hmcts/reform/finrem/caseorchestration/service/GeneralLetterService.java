@@ -147,7 +147,7 @@ public class GeneralLetterService {
         GeneralLetterAddressToType letterAddressToType = data.getGeneralLetterWrapper().getGeneralLetterAddressTo();
         Address recipientAddress = getRecipientAddress(caseDetails);
 
-        if (recipientAddress == null || recipientAddress.getPostCode().isEmpty()) {
+        if (recipientAddress == null || StringUtils.isEmpty(recipientAddress.getPostCode())) {
             return asList(String.format("Address is missing for recipient type %s", letterAddressToType.getValue()));
         } else {
             return emptyList();
