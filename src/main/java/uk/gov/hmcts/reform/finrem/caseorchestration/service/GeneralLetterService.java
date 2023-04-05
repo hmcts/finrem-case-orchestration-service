@@ -127,11 +127,11 @@ public class GeneralLetterService {
                 .name(StringUtils.joinWith(" ", data.get(respondentFmNameCcdField), data.get(respondentLastNameCcdField)))
                 .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) data.get(RESPONDENT_ADDRESS)));
         } else if ("applicant".equalsIgnoreCase(generalLetterAddressTo)) {
-                String applicantFmNameCcdField = APPLICANT_FIRST_MIDDLE_NAME;
-                String applicantLastNameCcdField = APPLICANT_LAST_NAME;
-                addresseeBuilder
-                    .name(StringUtils.joinWith(" ", data.get(applicantFmNameCcdField), data.get(applicantLastNameCcdField)))
-                    .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) data.get(APPLICANT_ADDRESS)));
+            String applicantFmNameCcdField = APPLICANT_FIRST_MIDDLE_NAME;
+            String applicantLastNameCcdField = APPLICANT_LAST_NAME;
+            addresseeBuilder
+                .name(StringUtils.joinWith(" ", data.get(applicantFmNameCcdField), data.get(applicantLastNameCcdField)))
+                .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) data.get(APPLICANT_ADDRESS)));
         } else if ("other".equalsIgnoreCase(generalLetterAddressTo)) {
             addresseeBuilder
                 .name((String) data.get(GENERAL_LETTER_RECIPIENT))
