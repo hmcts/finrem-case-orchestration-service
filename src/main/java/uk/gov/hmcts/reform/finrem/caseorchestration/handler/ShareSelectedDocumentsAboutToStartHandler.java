@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
@@ -8,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
@@ -47,33 +49,100 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
         CaseAssignedUserRolesResource caseAssignedUserRole
             = caseAssignedRoleService.getCaseAssignedUserRole(String.valueOf(caseDetails.getId()), userAuthorisation);
         List<CaseAssignedUserRole> caseAssignedUserRoles = caseAssignedUserRole.getCaseAssignedUserRoles();
-
+        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
         if (caseAssignedUserRoles != null) {
             log.info("caseAssignedUserRoles {}", caseAssignedUserRoles);
-            caseAssignedUserRoles.forEach(x -> {
-                log.info("User Role {}", x.getCaseRole());
-                log.info("User Id {}", x.getUserId());
+            caseAssignedUserRoles.forEach(role -> {
+                final String caseRole = role.getCaseRole();
+                log.info("User Role {}", caseRole);
+                if (caseRole.equals(CaseRole.APP_SOLICITOR.getValue())) {
+                    applicantSourceDocumentList(caseData);
+                }
             });
         }
 
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+            .data(caseData).build();
+    }
 
-        FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
-        List<UploadCaseDocumentCollection> appOtherCollectionShared = caseData.getUploadCaseDocumentWrapper().getAppOtherCollection();
+    private void applicantSourceDocumentList(FinremCaseData caseData) {
 
         List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();
 
+        List<UploadCaseDocumentCollection> appOtherCollection
+            = caseData.getUploadCaseDocumentWrapper().getAppOtherCollection();
+        if (ObjectUtils.isNotEmpty(appOtherCollection)) {
+            appOtherCollection.forEach(doc -> dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId()
+                .toString(), doc.getValue().getCaseDocuments().getDocumentFilename())));
+        }
 
-        appOtherCollectionShared.forEach(doc -> dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId()
-                .toString(),doc.getValue().getCaseDocuments().getDocumentFilename())));
+        List<UploadCaseDocumentCollection> appChronologiesCollection
+            = caseData.getUploadCaseDocumentWrapper().getAppChronologiesCollection();
+        if (ObjectUtils.isNotEmpty(appChronologiesCollection)) {
+            appChronologiesCollection.forEach(doc -> dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId()
+                .toString(), doc.getValue().getCaseDocuments().getDocumentFilename())));
+        }
+
+        List<UploadCaseDocumentCollection> appStatementsExhibitsCollection
+            = caseData.getUploadCaseDocumentWrapper().getAppStatementsExhibitsCollection();
+        if (ObjectUtils.isNotEmpty(appStatementsExhibitsCollection)) {
+            appStatementsExhibitsCollection.forEach(doc -> dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId()
+                .toString(), doc.getValue().getCaseDocuments().getDocumentFilename())));
+        }
+
+        List<UploadCaseDocumentCollection> appHearingBundlesCollection
+            = caseData.getUploadCaseDocumentWrapper().getAppHearingBundlesCollection();
+        if (ObjectUtils.isNotEmpty(appHearingBundlesCollection)) {
+            appHearingBundlesCollection.forEach(doc -> dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId()
+                .toString(), doc.getValue().getCaseDocuments().getDocumentFilename())));
+        }
+
+        List<UploadCaseDocumentCollection> appFormEExhibitsCollection
+            = caseData.getUploadCaseDocumentWrapper().getAppFormEExhibitsCollection();
+        if (ObjectUtils.isNotEmpty(appFormEExhibitsCollection)) {
+            appFormEExhibitsCollection.forEach(doc -> dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId()
+                .toString(), doc.getValue().getCaseDocuments().getDocumentFilename())));
+        }
+
+        List<UploadCaseDocumentCollection> appQaCollection
+            = caseData.getUploadCaseDocumentWrapper().getAppQaCollection();
+        if (ObjectUtils.isNotEmpty(appQaCollection)) {
+            appQaCollection.forEach(doc -> dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId()
+                .toString(), doc.getValue().getCaseDocuments().getDocumentFilename())));
+        }
+
+        List<UploadCaseDocumentCollection> appCaseSummariesCollection
+            = caseData.getUploadCaseDocumentWrapper().getAppCaseSummariesCollection();
+        if (ObjectUtils.isNotEmpty(appCaseSummariesCollection)) {
+            appCaseSummariesCollection.forEach(doc -> dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId()
+                .toString(), doc.getValue().getCaseDocuments().getDocumentFilename())));
+        }
+
+        List<UploadCaseDocumentCollection> appFormsHCollection
+            = caseData.getUploadCaseDocumentWrapper().getAppFormsHCollection();
+        if (ObjectUtils.isNotEmpty(appFormsHCollection)) {
+            appFormsHCollection.forEach(doc -> dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId()
+                .toString(), doc.getValue().getCaseDocuments().getDocumentFilename())));
+        }
+
+        List<UploadCaseDocumentCollection> appExpertEvidenceCollection
+            = caseData.getUploadCaseDocumentWrapper().getAppExpertEvidenceCollection();
+        if (ObjectUtils.isNotEmpty(appExpertEvidenceCollection)) {
+            appExpertEvidenceCollection.forEach(doc -> dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId()
+                .toString(), doc.getValue().getCaseDocuments().getDocumentFilename())));
+        }
+
+        List<UploadCaseDocumentCollection> appCorrespondenceDocsCollection
+            = caseData.getUploadCaseDocumentWrapper().getAppCorrespondenceDocsCollection();
+        if (ObjectUtils.isNotEmpty(appCorrespondenceDocsCollection)) {
+            appExpertEvidenceCollection.forEach(doc -> dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId()
+                .toString(), doc.getValue().getCaseDocuments().getDocumentFilename())));
+        }
 
         DynamicMultiSelectList applicantDocuments = caseData.getApplicantDocuments();
         DynamicMultiSelectList dynamicList = getDynamicMultiSelectList(dynamicListElements, applicantDocuments);
 
-
         caseData.setApplicantDocuments(dynamicList);
-
-        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(caseData).build();
     }
 
     private DynamicMultiSelectListElement getDynamicMultiSelectListElement(String code, String label) {
