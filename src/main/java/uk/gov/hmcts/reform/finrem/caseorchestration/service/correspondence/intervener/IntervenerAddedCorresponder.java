@@ -26,13 +26,12 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
         this.intervenerOneDetailsMapper = intervenerOneDetailsMapper;
     }
 
+    @Override
     public void sendCorrespondence(FinremCaseDetails caseDetails, String authToken) {
         sendApplicantCorrespondence(caseDetails, authToken);
         sendRespondentCorrespondence(caseDetails, authToken);
         if (caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerType()
-            .equals(IntervenerChangeDetails.IntervenerType.INTERVENER_ONE)
-            && caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerAction()
-            .equals(IntervenerChangeDetails.IntervenerAction.ADDED)) {
+            .equals(IntervenerChangeDetails.IntervenerType.INTERVENER_ONE)) {
             sendIntervenerOneCorrespondence(caseDetails, authToken);
         }
     }
@@ -64,12 +63,12 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
 
     @Override
     protected void emailApplicantSolicitor(FinremCaseDetails caseDetails) {
-
+        // TODO document why this method is empty
     }
 
     @Override
     protected void emailRespondentSolicitor(FinremCaseDetails caseDetails) {
-
+        // TODO document why this method is empty
     }
 
 }
