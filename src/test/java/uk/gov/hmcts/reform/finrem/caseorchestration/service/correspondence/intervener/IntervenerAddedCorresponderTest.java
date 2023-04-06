@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.intervener;
 
-import org.apache.http.auth.AUTH;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
