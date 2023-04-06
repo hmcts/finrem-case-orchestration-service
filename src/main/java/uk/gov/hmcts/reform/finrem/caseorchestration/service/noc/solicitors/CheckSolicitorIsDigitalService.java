@@ -36,7 +36,8 @@ public class CheckSolicitorIsDigitalService {
             log.info("No roles found for case: {}", caseId);
             return false;
         }
-        log.info("Found {} roles for case: {}", rolesResource.getCaseAssignmentUserRoles().size(), caseId);
+        log.info("Found {} roles, roles are {}, for case: {}", rolesResource.getCaseAssignmentUserRoles().size(),
+            rolesResource.getCaseAssignmentUserRoles(), caseId);
         return rolesResource.getCaseAssignmentUserRoles().stream()
             .map(CaseAssignmentUserRole::getCaseRole)
             .anyMatch(caseRole::equals);
