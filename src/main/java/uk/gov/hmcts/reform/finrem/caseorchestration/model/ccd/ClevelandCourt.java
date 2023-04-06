@@ -18,6 +18,7 @@ public enum ClevelandCourt implements CourtList {
     FR_CLEVELAND_HC_LIST_6("FR_cleaveland_hc_list_6"),
     FR_CLEVELAND_HC_LIST_7("FR_cleaveland_hc_list_7"),
     FR_CLEVELAND_HC_LIST_8("FR_cleaveland_hc_list_8"),
+    FR_CLEVELAND_HC_LIST_9("FR_cleaveland_hc_list_9"),
     FR_CLEVELAND_LIST_1("FR_clevelandList_1"),
     FR_CLEVELAND_LIST_2("FR_clevelandList_2"),
     FR_CLEVELAND_LIST_3("FR_clevelandList_3"),
@@ -25,7 +26,8 @@ public enum ClevelandCourt implements CourtList {
     FR_CLEVELAND_LIST_5("FR_clevelandList_5"),
     FR_CLEVELAND_LIST_6("FR_clevelandList_6"),
     FR_CLEVELAND_LIST_7("FR_clevelandList_7"),
-    FR_CLEVELAND_LIST_8("FR_clevelandList_8");
+    FR_CLEVELAND_LIST_8("FR_clevelandList_8"),
+    FR_CLEVELAND_LIST_9("FR_clevelandList_9");
 
     private final String id;
 
