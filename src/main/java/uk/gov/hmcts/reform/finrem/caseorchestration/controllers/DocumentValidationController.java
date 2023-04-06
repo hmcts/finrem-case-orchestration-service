@@ -66,17 +66,11 @@ public class DocumentValidationController extends BaseController {
         if (Boolean.TRUE.equals(isConsentedApplication(callbackRequest.getCaseDetails()))) {
             helper.setConsentVariationOrderLabelField(callbackRequest.getCaseDetails().getData());
         }
-        return ResponseEntity.ok(response(callbackRequest, field, authorisationToken));
-    }
-
-    private AboutToStartOrSubmitCallbackResponse response(CallbackRequest callbackRequest, String field, String authorisationToken) {
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        AboutToStartOrSubmitCallbackResponseBuilder builder = builder().data(caseData);
-        if (nonNull(caseData.get(field))) {
-            DocumentValidationResponse response = service.validateDocument(callbackRequest, field, authorisationToken);
-            return builder.errors(response.getErrors()).build();
-        }
-        return builder.build();
+        return ResponseEntity.ok(
+            AboutToStartOrSubmitCallbackResponse
+                .builder()
+                .data(callbackRequest.getCaseDetails().getData())
+                .build());
     }
 
     private Boolean isConsentedApplication(CaseDetails caseDetails) {
