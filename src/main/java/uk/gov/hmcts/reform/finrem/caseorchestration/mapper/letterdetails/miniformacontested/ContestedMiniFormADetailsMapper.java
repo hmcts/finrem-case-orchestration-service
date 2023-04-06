@@ -138,12 +138,19 @@ public class ContestedMiniFormADetailsMapper extends AbstractLetterDetailsMapper
         return builder
             .fastTrackDecision(getYesOrNo(caseData.getFastTrackDecision()))
             .divorceCaseNumber(caseData.getDivorceCaseNumber())
-            .typeOfApplication(caseData.getScheduleOneWrapper().getTypeOfApplication().getValue())
+            .typeOfApplication(getDefaultTypeOfApplicationIfNotPresent(caseData))
             .issueDate(String.valueOf(caseData.getIssueDate()))
             .authorisationName(caseData.getAuthorisationName())
             .authorisationFirm(contactDetails.getSolicitorFirm())
             .authorisation2b(caseData.getAuthorisation2b())
             .authorisation3(String.valueOf(caseData.getAuthorisation3()));
+    }
+
+    private String getDefaultTypeOfApplicationIfNotPresent(FinremCaseData caseData) {
+        if (ObjectUtils.isNotEmpty(caseData.getScheduleOneWrapper().getTypeOfApplication())) {
+            return caseData.getScheduleOneWrapper().getTypeOfApplication().getValue();
+        }
+        return TYPE_OF_APPLICATION_DEFAULT_TO;
     }
 
     private ContestedMiniFormADetails.ContestedMiniFormADetailsBuilder setMiamDetails(

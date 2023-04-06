@@ -575,6 +575,9 @@ public class ConsentedCourtHelperTest {
         verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, CLEAVELAND, CLEAVELAND_COURTLIST,
             "FR_clevelandList_8", "Darlington County Court and Family Court");
 
+        verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, CLEAVELAND, CLEAVELAND_COURTLIST,
+            "FR_clevelandList_9", "Darlington Magistrates Court");
+
         verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, "invalid", CLEAVELAND_COURTLIST,
             "FR_clevelandList_8", "");
 
