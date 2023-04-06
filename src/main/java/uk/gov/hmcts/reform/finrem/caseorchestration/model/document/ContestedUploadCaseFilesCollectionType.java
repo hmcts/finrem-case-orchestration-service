@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 public enum ContestedUploadCaseFilesCollectionType {
 
     APPLICANT_CORRESPONDENCE_COLLECTION("appCorrespondenceCollection"),
+    APPLICANT_CORRESPONDENCE_DOC_COLLECTION("appCorrespondenceDocsCollection"),
     APPLICANT_FR_FORM_COLLECTION("appFRFormsCollection"),
     APPLICANT_EVIDENCE_COLLECTION("appEvidenceCollection"),
     APPLICANT_TRIAL_BUNDLE_COLLECTION("appTrialBundleCollection"),
