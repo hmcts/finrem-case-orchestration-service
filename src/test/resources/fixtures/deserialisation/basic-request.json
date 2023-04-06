@@ -21,10 +21,6 @@
       "solicitorPhone": "1234567891",
       "solicitorReference": "LL01",
       "currentUserCaseRoleLabel": "[RESPSOLICITOR]",
-      "intervenerOneRepresentedByASolicitor": false,
-      "intervenerTwoRepresentedByASolicitor": false,
-      "intervenerThreeRepresentedByASolicitor": false,
-      "intervenerFourRepresentedByASolicitor": false,
       "intervenerSolOnePopulated": false
     }
   }
