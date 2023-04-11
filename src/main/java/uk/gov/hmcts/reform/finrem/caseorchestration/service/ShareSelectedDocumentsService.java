@@ -195,8 +195,6 @@ public class ShareSelectedDocumentsService {
             && ObjectUtils.isNotEmpty(caseData.getRespondentOrganisationPolicy().getOrganisation().getOrganisationID())) {
             roleList.add(caseData.getRespondentOrganisationPolicy().getOrgPolicyCaseAssignedRole());
         }
-        //Hack
-        roleList.add("[RESPSOLICITOR]");
         //intervener1
         IntervenerOneWrapper oneWrapper = caseData.getIntervenerOneWrapper();
         if (ObjectUtils.isNotEmpty(oneWrapper)
