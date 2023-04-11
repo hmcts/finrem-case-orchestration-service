@@ -296,17 +296,17 @@ public class RespondentShareDocumentsService {
 
     private static void copySelectedFormEFilesToApp(FinremCaseData caseData, String collId, String collName) {
         if (collName.equalsIgnoreCase(APP_FORM_E_EXHIBITS_COLLECTION.getCcdKey())) {
-            List<UploadCaseDocumentCollection> formEExhibits = caseData.getUploadCaseDocumentWrapper().getRespFormEExhibitsCollectionShared();
+            List<UploadCaseDocumentCollection> formEExhibits = caseData.getUploadCaseDocumentWrapper().getRespFormEExhibitsCollection();
             formEExhibits.forEach(sd -> {
                 if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                     List<UploadCaseDocumentCollection> list =
-                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getAppFormEExhibitsCollection())
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getAppFormEExhibitsCollectionShared())
                             .orElse(new ArrayList<>());
 
                     list.add(UploadCaseDocumentCollection.builder()
                         .value(sd.getValue()).build());
 
-                    caseData.getUploadCaseDocumentWrapper().setAppFormEExhibitsCollection(list);
+                    caseData.getUploadCaseDocumentWrapper().setAppFormEExhibitsCollectionShared(list);
                 }
             });
         }
@@ -314,17 +314,17 @@ public class RespondentShareDocumentsService {
 
     private static void copySelectedOtherFilesToApp(FinremCaseData caseData, String collId, String collName) {
         if (collName.equalsIgnoreCase(APP_OTHER_COLLECTION.getCcdKey())) {
-            List<UploadCaseDocumentCollection> otherCollection = caseData.getUploadCaseDocumentWrapper().getRespOtherCollectionShared();
+            List<UploadCaseDocumentCollection> otherCollection = caseData.getUploadCaseDocumentWrapper().getRespOtherCollection();
             otherCollection.forEach(d -> {
                 if (String.valueOf(d.getId()).equalsIgnoreCase(collId)) {
                     List<UploadCaseDocumentCollection> list =
-                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getAppOtherCollection())
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getAppOtherCollectionShared())
                             .orElse(new ArrayList<>());
 
                     list.add(UploadCaseDocumentCollection.builder()
                         .value(d.getValue()).build());
 
-                    caseData.getUploadCaseDocumentWrapper().setAppOtherCollection(list);
+                    caseData.getUploadCaseDocumentWrapper().setAppOtherCollectionShared(list);
                 }
             });
         }
@@ -332,17 +332,17 @@ public class RespondentShareDocumentsService {
 
     private static void copySelectedCorresFilesToApp(FinremCaseData caseData, String collId, String collName) {
         if (collName.equalsIgnoreCase(APP_CORRESPONDENCE_COLLECTION.getCcdKey())) {
-            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespCorrespondenceDocsCollShared();
+            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespCorrespondenceDocsColl();
             coll.forEach(sd -> {
                 if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                     List<UploadCaseDocumentCollection> list =
-                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getAppCorrespondenceCollection())
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getAppCorrespondenceDocsCollShared())
                             .orElse(new ArrayList<>());
 
                     list.add(UploadCaseDocumentCollection.builder()
                         .value(sd.getValue()).build());
 
-                    caseData.getUploadCaseDocumentWrapper().setAppCorrespondenceCollection(list);
+                    caseData.getUploadCaseDocumentWrapper().setAppCorrespondenceDocsCollShared(list);
                 }
             });
         }
@@ -350,17 +350,17 @@ public class RespondentShareDocumentsService {
 
     private static void copySelectedExpertFilesToApp(FinremCaseData caseData, String collId, String collName) {
         if (collName.equalsIgnoreCase(APP_EXPERT_EVIDENCE_COLLECTION.getCcdKey())) {
-            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespExpertEvidenceCollShared();
+            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespExpertEvidenceCollection();
             coll.forEach(sd -> {
                 if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                     List<UploadCaseDocumentCollection> list =
-                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getAppExpertEvidenceCollection())
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getAppExpertEvidenceCollectionShared())
                             .orElse(new ArrayList<>());
 
                     list.add(UploadCaseDocumentCollection.builder()
                         .value(sd.getValue()).build());
 
-                    caseData.getUploadCaseDocumentWrapper().setAppExpertEvidenceCollection(list);
+                    caseData.getUploadCaseDocumentWrapper().setAppExpertEvidenceCollectionShared(list);
                 }
             });
         }
@@ -368,17 +368,17 @@ public class RespondentShareDocumentsService {
 
     private static void copySelectedFormHFilesToApp(FinremCaseData caseData, String collId, String collName) {
         if (collName.equalsIgnoreCase(APP_FORMS_H_COLLECTION.getCcdKey())) {
-            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespFormsHCollectionShared();
+            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespFormsHCollection();
             coll.forEach(sd -> {
                 if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                     List<UploadCaseDocumentCollection> list =
-                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getAppFormsHCollection())
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getAppFormsHCollectionShared())
                             .orElse(new ArrayList<>());
 
                     list.add(UploadCaseDocumentCollection.builder()
                         .value(sd.getValue()).build());
 
-                    caseData.getUploadCaseDocumentWrapper().setAppFormsHCollection(list);
+                    caseData.getUploadCaseDocumentWrapper().setAppFormsHCollectionShared(list);
                 }
             });
         }
@@ -386,17 +386,17 @@ public class RespondentShareDocumentsService {
 
     private static void copySelectedHearingFilesToApp(FinremCaseData caseData, String collId, String collName) {
         if (collName.equalsIgnoreCase(APP_HEARING_BUNDLES_COLLECTION.getCcdKey())) {
-            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespHearingBundlesCollShared();
+            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespHearingBundlesCollection();
             coll.forEach(sd -> {
                 if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                     List<UploadCaseDocumentCollection> list =
-                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getAppHearingBundlesCollection())
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getAppHearingBundlesCollectionShared())
                             .orElse(new ArrayList<>());
 
                     list.add(UploadCaseDocumentCollection.builder()
                         .value(sd.getValue()).build());
 
-                    caseData.getUploadCaseDocumentWrapper().setAppHearingBundlesCollection(list);
+                    caseData.getUploadCaseDocumentWrapper().setAppHearingBundlesCollectionShared(list);
                 }
             });
         }
@@ -404,14 +404,14 @@ public class RespondentShareDocumentsService {
 
     private static void copySelectedSummariesFilesToApp(FinremCaseData caseData, String collId, String collName) {
         if (collName.equalsIgnoreCase(APP_CASE_SUMMARIES_COLLECTION.getCcdKey())) {
-            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespCaseSummariesCollectionShared();
+            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespCaseSummariesCollection();
             coll.forEach(sd -> {
                 if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                     List<UploadCaseDocumentCollection> list =
-                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getAppCaseSummariesCollection())
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getAppCaseSummariesCollectionShared())
                             .orElse(new ArrayList<>());
                     list.add(UploadCaseDocumentCollection.builder().value(sd.getValue()).build());
-                    caseData.getUploadCaseDocumentWrapper().setAppCaseSummariesCollection(list);
+                    caseData.getUploadCaseDocumentWrapper().setAppCaseSummariesCollectionShared(list);
                 }
             });
         }
@@ -419,17 +419,17 @@ public class RespondentShareDocumentsService {
 
     private static void copySelectedStmtExhibitsFilesToApp(FinremCaseData caseData, String collId, String collName) {
         if (collName.equalsIgnoreCase(APP_STATEMENTS_EXHIBITS_COLLECTION.getCcdKey())) {
-            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespStatementsExhibitsCollShared();
+            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespStatementsExhibitsCollection();
             coll.forEach(sd -> {
                 if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                     List<UploadCaseDocumentCollection> list =
-                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getAppStatementsExhibitsCollection())
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getAppStatementsExhibitsCollShared())
                             .orElse(new ArrayList<>());
 
                     list.add(UploadCaseDocumentCollection.builder()
                         .value(sd.getValue()).build());
 
-                    caseData.getUploadCaseDocumentWrapper().setAppStatementsExhibitsCollection(list);
+                    caseData.getUploadCaseDocumentWrapper().setAppStatementsExhibitsCollShared(list);
                 }
             });
         }
@@ -437,17 +437,17 @@ public class RespondentShareDocumentsService {
 
     private static void copySelectedQaFilesToApp(FinremCaseData caseData, String collId, String collName) {
         if (collName.equalsIgnoreCase(APP_QUESTIONNAIRES_ANSWERS_COLLECTION.getCcdKey())) {
-            List<UploadCaseDocumentCollection> qaCollection = caseData.getUploadCaseDocumentWrapper().getRespQaCollectionShared();
+            List<UploadCaseDocumentCollection> qaCollection = caseData.getUploadCaseDocumentWrapper().getRespQaCollection();
             qaCollection.forEach(sd -> {
                 if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                     List<UploadCaseDocumentCollection> list =
-                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getAppQaCollection())
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getAppQaCollectionShared())
                             .orElse(new ArrayList<>());
 
                     list.add(UploadCaseDocumentCollection.builder()
                         .value(sd.getValue()).build());
 
-                    caseData.getUploadCaseDocumentWrapper().setAppQaCollection(list);
+                    caseData.getUploadCaseDocumentWrapper().setAppQaCollectionShared(list);
                 }
             });
         }
@@ -455,17 +455,17 @@ public class RespondentShareDocumentsService {
 
     private static void copySelectedChronologiesFilesToApp(FinremCaseData caseData, String collId, String collName) {
         if (collName.equalsIgnoreCase(APP_CHRONOLOGIES_STATEMENTS_COLLECTION.getCcdKey())) {
-            List<UploadCaseDocumentCollection> chronologiesList = caseData.getUploadCaseDocumentWrapper().getRespChronologiesCollectionShared();
+            List<UploadCaseDocumentCollection> chronologiesList = caseData.getUploadCaseDocumentWrapper().getRespChronologiesCollection();
             chronologiesList.forEach(sd -> {
                 if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                     List<UploadCaseDocumentCollection> list =
-                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getAppChronologiesCollection())
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getAppChronologiesCollectionShared())
                             .orElse(new ArrayList<>());
 
                     list.add(UploadCaseDocumentCollection.builder()
                         .value(sd.getValue()).build());
 
-                    caseData.getUploadCaseDocumentWrapper().setAppChronologiesCollection(list);
+                    caseData.getUploadCaseDocumentWrapper().setAppChronologiesCollectionShared(list);
                 }
             });
         }
