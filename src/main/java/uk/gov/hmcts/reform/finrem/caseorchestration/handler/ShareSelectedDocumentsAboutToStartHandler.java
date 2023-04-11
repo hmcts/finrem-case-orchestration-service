@@ -64,7 +64,7 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
                 }
             });
 
-            DynamicMultiSelectList roleList = selectedDocumentsService.getRolesForAllSolicitorOnCase(caseDetails, caseRole.get());
+            DynamicMultiSelectList roleList = selectedDocumentsService.getApplicantToOtherSolicitorRoleList(caseDetails);
             caseData.setSolicitorRoleList(roleList);
         }
 
