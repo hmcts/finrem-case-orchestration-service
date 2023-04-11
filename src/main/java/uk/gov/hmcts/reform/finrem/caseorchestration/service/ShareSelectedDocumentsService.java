@@ -49,7 +49,7 @@ public class ShareSelectedDocumentsService {
             appOtherCollection.forEach(doc -> {
                 final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
                 dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + APP_OTHER_COLLECTION.getCcdKey(),
-                    filename));
+                    APP_OTHER_COLLECTION.getCcdKey() + "->" + filename));
             });
         }
 
@@ -59,7 +59,7 @@ public class ShareSelectedDocumentsService {
             appChronologiesCollection.forEach(doc -> {
                 final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
                 dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + APP_CHRONOLOGIES_STATEMENTS_COLLECTION.getCcdKey(),
-                    filename));
+                    APP_CHRONOLOGIES_STATEMENTS_COLLECTION.getCcdKey() + "->" + filename));
             });
         }
 
@@ -69,7 +69,7 @@ public class ShareSelectedDocumentsService {
             appStatementsExhibitsCollection.forEach(doc -> {
                 final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
                 dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + APP_STATEMENTS_EXHIBITS_COLLECTION.getCcdKey(),
-                    filename));
+                    APP_STATEMENTS_EXHIBITS_COLLECTION.getCcdKey() + "->" + filename));
             });
         }
 
@@ -79,7 +79,7 @@ public class ShareSelectedDocumentsService {
             appHearingBundlesCollection.forEach(doc -> {
                 final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
                 dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + APP_HEARING_BUNDLES_COLLECTION.getCcdKey(),
-                    filename));
+                    APP_HEARING_BUNDLES_COLLECTION.getCcdKey() + "->" + filename));
             });
         }
 
@@ -90,7 +90,7 @@ public class ShareSelectedDocumentsService {
             appFormEExhibitsCollection.forEach(doc -> {
                 final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
                 dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + APP_FORM_E_EXHIBITS_COLLECTION.getCcdKey(),
-                    filename));
+                    APP_FORM_E_EXHIBITS_COLLECTION.getCcdKey() + "->" + filename));
             });
         }
 
@@ -100,7 +100,7 @@ public class ShareSelectedDocumentsService {
             appQaCollection.forEach(doc -> {
                 final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
                 dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + APP_QUESTIONNAIRES_ANSWERS_COLLECTION.getCcdKey(),
-                    filename));
+                    APP_QUESTIONNAIRES_ANSWERS_COLLECTION.getCcdKey() + "->" + filename));
             });
         }
 
@@ -110,7 +110,7 @@ public class ShareSelectedDocumentsService {
             appCaseSummariesCollection.forEach(doc -> {
                 final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
                 dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + APP_CASE_SUMMARIES_COLLECTION.getCcdKey(),
-                    filename));
+                    APP_CASE_SUMMARIES_COLLECTION.getCcdKey() + "->" + filename));
             });
         }
 
@@ -120,7 +120,7 @@ public class ShareSelectedDocumentsService {
             appFormsHCollection.forEach(doc -> {
                 final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
                 dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + APP_FORMS_H_COLLECTION.getCcdKey(),
-                    filename));
+                    APP_FORMS_H_COLLECTION.getCcdKey() + "->" + filename));
             });
         }
 
@@ -131,7 +131,7 @@ public class ShareSelectedDocumentsService {
             appExpertEvidenceCollection.forEach(doc -> {
                 final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
                 dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + APP_EXPERT_EVIDENCE_COLLECTION.getCcdKey(),
-                    filename));
+                    APP_EXPERT_EVIDENCE_COLLECTION.getCcdKey() + "->" + filename));
             });
         }
 
@@ -142,7 +142,7 @@ public class ShareSelectedDocumentsService {
             appCorrespondenceDocsCollection.forEach(doc -> {
                 final String filename = doc.getValue().getCaseDocuments().getDocumentFilename();
                 dynamicListElements.add(getDynamicMultiSelectListElement(doc.getId() + "#" + APPLICANT_CORRESPONDENCE_DOC_COLLECTION.getCcdKey(),
-                    filename));
+                    APPLICANT_CORRESPONDENCE_DOC_COLLECTION.getCcdKey() + "->" + filename));
             });
         }
 
