@@ -19,19 +19,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_CASE_SUMMARIES_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_CHRONOLOGIES_STATEMENTS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_CORRESPONDENCE_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_EXPERT_EVIDENCE_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_FORMS_H_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_FORM_E_EXHIBITS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_HEARING_BUNDLES_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_OTHER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_QUESTIONNAIRES_ANSWERS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_STATEMENTS_EXHIBITS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESPONDENT_CORRESPONDENCE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESP_CASE_SUMMARIES_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESP_CORRESPONDENCE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESP_EXPERT_EVIDENCE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESP_FORM_E_EXHIBITS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESP_FORM_H_COLLECTION;
@@ -295,7 +286,7 @@ public class RespondentShareDocumentsService {
 
 
     private static void copySelectedFormEFilesToApp(FinremCaseData caseData, String collId, String collName) {
-        if (collName.equalsIgnoreCase(APP_FORM_E_EXHIBITS_COLLECTION.getCcdKey())) {
+        if (collName.equalsIgnoreCase(RESP_FORM_E_EXHIBITS_COLLECTION.getCcdKey())) {
             List<UploadCaseDocumentCollection> formEExhibits = caseData.getUploadCaseDocumentWrapper().getRespFormEExhibitsCollection();
             formEExhibits.forEach(sd -> {
                 if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
@@ -313,7 +304,7 @@ public class RespondentShareDocumentsService {
     }
 
     private static void copySelectedOtherFilesToApp(FinremCaseData caseData, String collId, String collName) {
-        if (collName.equalsIgnoreCase(APP_OTHER_COLLECTION.getCcdKey())) {
+        if (collName.equalsIgnoreCase(RESP_OTHER_COLLECTION.getCcdKey())) {
             List<UploadCaseDocumentCollection> otherCollection = caseData.getUploadCaseDocumentWrapper().getRespOtherCollection();
             otherCollection.forEach(d -> {
                 if (String.valueOf(d.getId()).equalsIgnoreCase(collId)) {
@@ -331,7 +322,7 @@ public class RespondentShareDocumentsService {
     }
 
     private static void copySelectedCorresFilesToApp(FinremCaseData caseData, String collId, String collName) {
-        if (collName.equalsIgnoreCase(APP_CORRESPONDENCE_COLLECTION.getCcdKey())) {
+        if (collName.equalsIgnoreCase(RESP_CORRESPONDENCE_COLLECTION.getCcdKey())) {
             List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespCorrespondenceDocsColl();
             coll.forEach(sd -> {
                 if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
@@ -349,7 +340,7 @@ public class RespondentShareDocumentsService {
     }
 
     private static void copySelectedExpertFilesToApp(FinremCaseData caseData, String collId, String collName) {
-        if (collName.equalsIgnoreCase(APP_EXPERT_EVIDENCE_COLLECTION.getCcdKey())) {
+        if (collName.equalsIgnoreCase(RESP_EXPERT_EVIDENCE_COLLECTION.getCcdKey())) {
             List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespExpertEvidenceCollection();
             coll.forEach(sd -> {
                 if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
@@ -367,7 +358,7 @@ public class RespondentShareDocumentsService {
     }
 
     private static void copySelectedFormHFilesToApp(FinremCaseData caseData, String collId, String collName) {
-        if (collName.equalsIgnoreCase(APP_FORMS_H_COLLECTION.getCcdKey())) {
+        if (collName.equalsIgnoreCase(RESP_FORM_H_COLLECTION.getCcdKey())) {
             List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespFormsHCollection();
             coll.forEach(sd -> {
                 if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
@@ -385,7 +376,7 @@ public class RespondentShareDocumentsService {
     }
 
     private static void copySelectedHearingFilesToApp(FinremCaseData caseData, String collId, String collName) {
-        if (collName.equalsIgnoreCase(APP_HEARING_BUNDLES_COLLECTION.getCcdKey())) {
+        if (collName.equalsIgnoreCase(RESP_HEARING_BUNDLES_COLLECTION.getCcdKey())) {
             List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespHearingBundlesCollection();
             coll.forEach(sd -> {
                 if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
@@ -403,7 +394,7 @@ public class RespondentShareDocumentsService {
     }
 
     private static void copySelectedSummariesFilesToApp(FinremCaseData caseData, String collId, String collName) {
-        if (collName.equalsIgnoreCase(APP_CASE_SUMMARIES_COLLECTION.getCcdKey())) {
+        if (collName.equalsIgnoreCase(RESP_CASE_SUMMARIES_COLLECTION.getCcdKey())) {
             List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespCaseSummariesCollection();
             coll.forEach(sd -> {
                 if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
@@ -418,7 +409,7 @@ public class RespondentShareDocumentsService {
     }
 
     private static void copySelectedStmtExhibitsFilesToApp(FinremCaseData caseData, String collId, String collName) {
-        if (collName.equalsIgnoreCase(APP_STATEMENTS_EXHIBITS_COLLECTION.getCcdKey())) {
+        if (collName.equalsIgnoreCase(RESP_STATEMENTS_EXHIBITS_COLLECTION.getCcdKey())) {
             List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespStatementsExhibitsCollection();
             coll.forEach(sd -> {
                 if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
@@ -436,7 +427,7 @@ public class RespondentShareDocumentsService {
     }
 
     private static void copySelectedQaFilesToApp(FinremCaseData caseData, String collId, String collName) {
-        if (collName.equalsIgnoreCase(APP_QUESTIONNAIRES_ANSWERS_COLLECTION.getCcdKey())) {
+        if (collName.equalsIgnoreCase(RESP_QUESTIONNAIRES_ANSWERS_COLLECTION.getCcdKey())) {
             List<UploadCaseDocumentCollection> qaCollection = caseData.getUploadCaseDocumentWrapper().getRespQaCollection();
             qaCollection.forEach(sd -> {
                 if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
@@ -454,7 +445,7 @@ public class RespondentShareDocumentsService {
     }
 
     private static void copySelectedChronologiesFilesToApp(FinremCaseData caseData, String collId, String collName) {
-        if (collName.equalsIgnoreCase(APP_CHRONOLOGIES_STATEMENTS_COLLECTION.getCcdKey())) {
+        if (collName.equalsIgnoreCase(RESP_CHRONOLOGIES_STATEMENTS_COLLECTION.getCcdKey())) {
             List<UploadCaseDocumentCollection> chronologiesList = caseData.getUploadCaseDocumentWrapper().getRespChronologiesCollection();
             chronologiesList.forEach(sd -> {
                 if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
