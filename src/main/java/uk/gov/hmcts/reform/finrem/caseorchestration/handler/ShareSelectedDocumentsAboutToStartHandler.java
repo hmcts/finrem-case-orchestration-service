@@ -13,8 +13,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ApplicantShareDocumentsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseAssignedRoleService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ShareSelectedDocumentsService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.RespondentShareDocumentsService;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -23,14 +24,17 @@ import java.util.concurrent.atomic.AtomicReference;
 @Service
 public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHandler {
     private final CaseAssignedRoleService caseAssignedRoleService;
-    private final ShareSelectedDocumentsService selectedDocumentsService;
+    private final ApplicantShareDocumentsService selectedDocumentsService;
+    private final RespondentShareDocumentsService respondentShareDocumentsService;
 
     public ShareSelectedDocumentsAboutToStartHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                                      CaseAssignedRoleService caseAssignedRoleService,
-                                                     ShareSelectedDocumentsService selectedDocumentsService) {
+                                                     ApplicantShareDocumentsService selectedDocumentsService,
+                                                     RespondentShareDocumentsService respondentShareDocumentsService) {
         super(finremCaseDetailsMapper);
         this.caseAssignedRoleService = caseAssignedRoleService;
         this.selectedDocumentsService = selectedDocumentsService;
+        this.respondentShareDocumentsService = respondentShareDocumentsService;
     }
 
     @Override
@@ -61,11 +65,18 @@ public class ShareSelectedDocumentsAboutToStartHandler extends FinremCallbackHan
                 if (caseRole.get().equals(CaseRole.APP_SOLICITOR.getValue())) {
                     DynamicMultiSelectList sourceDocumentList = selectedDocumentsService.applicantSourceDocumentList(caseDetails);
                     caseData.setSourceDocumentList(sourceDocumentList);
+                    DynamicMultiSelectList roleList = selectedDocumentsService.getApplicantToOtherSolicitorRoleList(caseDetails);
+                    caseData.setSolicitorRoleList(roleList);
+                }
+                if (caseRole.get().equals(CaseRole.RESP_SOLICITOR.getValue())) {
+                    DynamicMultiSelectList sourceDocumentList = respondentShareDocumentsService.respondentSourceDocumentList(caseDetails);
+                    caseData.setSourceDocumentList(sourceDocumentList);
+                    DynamicMultiSelectList roleList = respondentShareDocumentsService.getRespondentToOtherSolicitorRoleList(caseDetails);
+                    caseData.setSolicitorRoleList(roleList);
                 }
             });
 
-            DynamicMultiSelectList roleList = selectedDocumentsService.getApplicantToOtherSolicitorRoleList(caseDetails);
-            caseData.setSolicitorRoleList(roleList);
+
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()

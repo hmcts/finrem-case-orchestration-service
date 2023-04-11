@@ -34,7 +34,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Contes
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class ShareSelectedDocumentsService {
+public class ApplicantShareDocumentsService {
 
     public DynamicMultiSelectList applicantSourceDocumentList(FinremCaseDetails caseDetails) {
 
