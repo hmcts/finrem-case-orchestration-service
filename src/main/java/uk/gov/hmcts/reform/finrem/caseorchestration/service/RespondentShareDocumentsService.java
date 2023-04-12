@@ -19,6 +19,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_CASE_SUMMARIES_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_CHRONOLOGIES_STATEMENTS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_CORRESPONDENCE_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_EXPERT_EVIDENCE_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_FORMS_H_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_FORM_E_EXHIBITS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_HEARING_BUNDLES_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_OTHER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_QUESTIONNAIRES_ANSWERS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_STATEMENTS_EXHIBITS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESPONDENT_CORRESPONDENCE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESP_CASE_SUMMARIES_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION;
@@ -282,6 +292,83 @@ public class RespondentShareDocumentsService {
                 copySelectedOtherFilesToApp(caseData, collId, collName);
             });
         }
+
+
+        if (role.equals(CaseRole.INTVR_SOLICITOR_1.getValue())) {
+            documentList.forEach(doc -> {
+                String[] collectionIdAndFilename = doc.getCode().split("#");
+                String collId = collectionIdAndFilename[0];
+                String collName = collectionIdAndFilename[1];
+
+                copySelectedOtherFilesToIntv1(caseData, collId, collName);
+                copySelectedFormEFilesToIntv1(caseData, collId, collName);
+                copySelectedChronologiesFilesToIntv1(caseData, collId, collName);
+                copySelectedQaFilesToIntv1(caseData, collId, collName);
+                copySelectedStmtExhibitsFilesToIntv1(caseData, collId, collName);
+                copySelectedSummariesFilesToIntv1(caseData, collId, collName);
+                copySelectedHearingFilesToIntv1(caseData, collId, collName);
+                copySelectedFormHFilesToIntv1(caseData, collId, collName);
+                copySelectedExpertFilesToIntv1(caseData, collId, collName);
+                copySelectedCorresFilesToIntv1(caseData, collId, collName);
+            });
+        }
+
+        if (role.equals(CaseRole.INTVR_SOLICITOR_2.getValue())) {
+            documentList.forEach(doc -> {
+                String[] collectionIdAndFilename = doc.getCode().split("#");
+                String collId = collectionIdAndFilename[0];
+                String collName = collectionIdAndFilename[1];
+
+                copySelectedOtherFilesToIntv2(caseData, collId, collName);
+                copySelectedFormEFilesToIntv2(caseData, collId, collName);
+                copySelectedChronologiesFilesToIntv2(caseData, collId, collName);
+                copySelectedQaFilesToIntv2(caseData, collId, collName);
+                copySelectedStmtExhibitsFilesToIntv2(caseData, collId, collName);
+                copySelectedSummariesFilesToIntv2(caseData, collId, collName);
+                copySelectedHearingFilesToIntv2(caseData, collId, collName);
+                copySelectedFormHFilesToIntv2(caseData, collId, collName);
+                copySelectedExpertFilesToIntv2(caseData, collId, collName);
+                copySelectedCorresFilesToIntv2(caseData, collId, collName);
+            });
+        }
+
+        if (role.equals(CaseRole.INTVR_SOLICITOR_3.getValue())) {
+            documentList.forEach(doc -> {
+                String[] collectionIdAndFilename = doc.getCode().split("#");
+                String collId = collectionIdAndFilename[0];
+                String collName = collectionIdAndFilename[1];
+
+                copySelectedOtherFilesToIntv3(caseData, collId, collName);
+                copySelectedFormEFilesToIntv3(caseData, collId, collName);
+                copySelectedChronologiesFilesToIntv3(caseData, collId, collName);
+                copySelectedQaFilesToIntv3(caseData, collId, collName);
+                copySelectedStmtExhibitsFilesToIntv3(caseData, collId, collName);
+                copySelectedSummariesFilesToIntv3(caseData, collId, collName);
+                copySelectedHearingFilesToIntv3(caseData, collId, collName);
+                copySelectedFormHFilesToIntv3(caseData, collId, collName);
+                copySelectedExpertFilesToIntv3(caseData, collId, collName);
+                copySelectedCorresFilesToIntv3(caseData, collId, collName);
+            });
+        }
+
+        if (role.equals(CaseRole.INTVR_SOLICITOR_4.getValue())) {
+            documentList.forEach(doc -> {
+                String[] collectionIdAndFilename = doc.getCode().split("#");
+                String collId = collectionIdAndFilename[0];
+                String collName = collectionIdAndFilename[1];
+
+                copySelectedOtherFilesToIntv4(caseData, collId, collName);
+                copySelectedFormEFilesToIntv4(caseData, collId, collName);
+                copySelectedChronologiesFilesToIntv4(caseData, collId, collName);
+                copySelectedQaFilesToIntv4(caseData, collId, collName);
+                copySelectedStmtExhibitsFilesToIntv4(caseData, collId, collName);
+                copySelectedSummariesFilesToIntv4(caseData, collId, collName);
+                copySelectedHearingFilesToIntv4(caseData, collId, collName);
+                copySelectedFormHFilesToIntv4(caseData, collId, collName);
+                copySelectedExpertFilesToIntv4(caseData, collId, collName);
+                copySelectedCorresFilesToIntv4(caseData, collId, collName);
+            });
+        }
     }
 
 
@@ -462,4 +549,725 @@ public class RespondentShareDocumentsService {
         }
     }
 
+
+    private void copySelectedCorresFilesToIntv1(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_CORRESPONDENCE_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespCorrespondenceCollection();
+            coll.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> intv1Collection =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv1CorrespDocsShared())
+                            .orElse(new ArrayList<>());
+
+                    intv1Collection.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv1CorrespDocsShared(intv1Collection);
+                }
+            });
+        }
+    }
+
+    private void copySelectedExpertFilesToIntv1(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_EXPERT_EVIDENCE_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespExpertEvidenceCollection();
+            coll.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> intv1Collection =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv1ExpertEvidenceShared())
+                            .orElse(new ArrayList<>());
+
+                    intv1Collection.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv1ExpertEvidenceShared(intv1Collection);
+                }
+            });
+        }
+    }
+
+    private void copySelectedFormHFilesToIntv1(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_FORMS_H_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespFormsHCollection();
+            coll.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> intv1Collection =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv1FormHsShared())
+                            .orElse(new ArrayList<>());
+
+                    intv1Collection.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv1FormHsShared(intv1Collection);
+                }
+            });
+        }
+    }
+
+    private void copySelectedHearingFilesToIntv1(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_HEARING_BUNDLES_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespHearingBundlesCollection();
+            coll.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> intv1Collection =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv1HearingBundlesShared())
+                            .orElse(new ArrayList<>());
+
+                    intv1Collection.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv1HearingBundlesShared(intv1Collection);
+                }
+            });
+        }
+    }
+
+    private void copySelectedSummariesFilesToIntv1(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_CASE_SUMMARIES_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespCaseSummariesCollection();
+            coll.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> intv1Collection =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv1SummariesShared())
+                            .orElse(new ArrayList<>());
+
+                    intv1Collection.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv1SummariesShared(intv1Collection);
+                }
+            });
+        }
+    }
+
+    private void copySelectedStmtExhibitsFilesToIntv1(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_STATEMENTS_EXHIBITS_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespStatementsExhibitsCollection();
+            coll.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> intv1Collection =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv1StmtsExhibitsShared())
+                            .orElse(new ArrayList<>());
+
+                    intv1Collection.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv1StmtsExhibitsShared(intv1Collection);
+                }
+            });
+        }
+    }
+
+    private void copySelectedQaFilesToIntv1(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_QUESTIONNAIRES_ANSWERS_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> appQaCollection = caseData.getUploadCaseDocumentWrapper().getRespQaCollection();
+            appQaCollection.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> intv1AppQaCollection =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv1QaShared())
+                            .orElse(new ArrayList<>());
+
+                    intv1AppQaCollection.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv1QaShared(intv1AppQaCollection);
+                }
+            });
+        }
+    }
+
+    private void copySelectedChronologiesFilesToIntv1(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_CHRONOLOGIES_STATEMENTS_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> appChronologiesCollection = caseData.getUploadCaseDocumentWrapper().getRespChronologiesCollection();
+            appChronologiesCollection.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> intv1AppChronologiesCollection =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv1ChronologiesShared())
+                            .orElse(new ArrayList<>());
+
+                    intv1AppChronologiesCollection.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv1ChronologiesShared(intv1AppChronologiesCollection);
+                }
+            });
+        }
+    }
+
+    private void copySelectedFormEFilesToIntv1(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_FORM_E_EXHIBITS_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> appFormEExhibitsCollection = caseData.getUploadCaseDocumentWrapper().getRespFormEExhibitsCollection();
+            appFormEExhibitsCollection.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> intv1AppFormEExhibitsCollection =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv1FormEsExhibitsShared())
+                            .orElse(new ArrayList<>());
+
+                    intv1AppFormEExhibitsCollection.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv1FormEsExhibitsShared(intv1AppFormEExhibitsCollection);
+                }
+            });
+        }
+    }
+
+    private void copySelectedOtherFilesToIntv1(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_OTHER_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> appOtherCollection = caseData.getUploadCaseDocumentWrapper().getRespOtherCollection();
+            appOtherCollection.forEach(d -> {
+                if (String.valueOf(d.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> intv1AppOtherCollectionShared =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv1OtherShared())
+                            .orElse(new ArrayList<>());
+
+                    intv1AppOtherCollectionShared.add(UploadCaseDocumentCollection.builder()
+                        .value(d.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv1OtherShared(intv1AppOtherCollectionShared);
+                }
+            });
+        }
+    }
+
+    private void copySelectedCorresFilesToIntv2(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_CORRESPONDENCE_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespCorrespondenceCollection();
+            coll.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> list =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv2CorrespDocsShared())
+                            .orElse(new ArrayList<>());
+
+                    list.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv2CorrespDocsShared(list);
+                }
+            });
+        }
+    }
+
+    private void copySelectedExpertFilesToIntv2(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_EXPERT_EVIDENCE_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespExpertEvidenceCollection();
+            coll.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> list =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv2ExpertEvidenceShared())
+                            .orElse(new ArrayList<>());
+
+                    list.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv2ExpertEvidenceShared(list);
+                }
+            });
+        }
+    }
+
+    private void copySelectedFormHFilesToIntv2(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_FORMS_H_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespFormsHCollection();
+            coll.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> list =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv2FormHsShared())
+                            .orElse(new ArrayList<>());
+
+                    list.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv2FormHsShared(list);
+                }
+            });
+        }
+    }
+
+    private void copySelectedHearingFilesToIntv2(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_HEARING_BUNDLES_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespHearingBundlesCollection();
+            coll.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> list =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv2HearingBundlesShared())
+                            .orElse(new ArrayList<>());
+
+                    list.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv2HearingBundlesShared(list);
+                }
+            });
+        }
+    }
+
+    private void copySelectedSummariesFilesToIntv2(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_CASE_SUMMARIES_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespCaseSummariesCollection();
+            coll.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> list =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv2SummariesShared())
+                            .orElse(new ArrayList<>());
+
+                    list.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv2SummariesShared(list);
+                }
+            });
+        }
+    }
+
+    private void copySelectedStmtExhibitsFilesToIntv2(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_STATEMENTS_EXHIBITS_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespStatementsExhibitsCollection();
+            coll.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> list =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv2StmtsExhibitsShared())
+                            .orElse(new ArrayList<>());
+
+                    list.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv2StmtsExhibitsShared(list);
+                }
+            });
+        }
+    }
+
+    private void copySelectedQaFilesToIntv2(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_QUESTIONNAIRES_ANSWERS_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> appQaCollection = caseData.getUploadCaseDocumentWrapper().getRespQaCollection();
+            appQaCollection.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> list =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv2QaShared())
+                            .orElse(new ArrayList<>());
+
+                    list.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv2QaShared(list);
+                }
+            });
+        }
+    }
+
+    private void copySelectedChronologiesFilesToIntv2(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_CHRONOLOGIES_STATEMENTS_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> appChronologiesCollection = caseData.getUploadCaseDocumentWrapper().getRespChronologiesCollection();
+            appChronologiesCollection.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> list =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv2ChronologiesShared())
+                            .orElse(new ArrayList<>());
+
+                    list.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv2ChronologiesShared(list);
+                }
+            });
+        }
+    }
+
+    private void copySelectedFormEFilesToIntv2(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_FORM_E_EXHIBITS_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> appFormEExhibitsCollection = caseData.getUploadCaseDocumentWrapper().getRespFormEExhibitsCollection();
+            appFormEExhibitsCollection.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> list =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv2FormEsExhibitsShared())
+                            .orElse(new ArrayList<>());
+
+                    list.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv2FormEsExhibitsShared(list);
+                }
+            });
+        }
+    }
+
+    private void copySelectedOtherFilesToIntv2(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_OTHER_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> appOtherCollection = caseData.getUploadCaseDocumentWrapper().getRespOtherCollection();
+            appOtherCollection.forEach(d -> {
+                if (String.valueOf(d.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> list =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv2OtherShared())
+                            .orElse(new ArrayList<>());
+
+                    list.add(UploadCaseDocumentCollection.builder()
+                        .value(d.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv2OtherShared(list);
+                }
+            });
+        }
+    }
+
+
+    private void copySelectedCorresFilesToIntv3(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_CORRESPONDENCE_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespCorrespondenceCollection();
+            coll.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> list =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv3CorrespDocsShared())
+                            .orElse(new ArrayList<>());
+
+                    list.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv3CorrespDocsShared(list);
+                }
+            });
+        }
+    }
+
+    private void copySelectedExpertFilesToIntv3(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_EXPERT_EVIDENCE_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespExpertEvidenceCollection();
+            coll.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> list =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv3ExpertEvidenceShared())
+                            .orElse(new ArrayList<>());
+
+                    list.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv3ExpertEvidenceShared(list);
+                }
+            });
+        }
+    }
+
+    private void copySelectedFormHFilesToIntv3(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_FORMS_H_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespFormsHCollection();
+            coll.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> list =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv3FormHsShared())
+                            .orElse(new ArrayList<>());
+
+                    list.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv3FormHsShared(list);
+                }
+            });
+        }
+    }
+
+    private void copySelectedHearingFilesToIntv3(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_HEARING_BUNDLES_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespHearingBundlesCollection();
+            coll.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> list =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv3HearingBundlesShared())
+                            .orElse(new ArrayList<>());
+
+                    list.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv3HearingBundlesShared(list);
+                }
+            });
+        }
+    }
+
+    private void copySelectedSummariesFilesToIntv3(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_CASE_SUMMARIES_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespCaseSummariesCollection();
+            coll.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> list =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv3SummariesShared())
+                            .orElse(new ArrayList<>());
+
+                    list.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv3SummariesShared(list);
+                }
+            });
+        }
+    }
+
+    private void copySelectedStmtExhibitsFilesToIntv3(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_STATEMENTS_EXHIBITS_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespStatementsExhibitsCollection();
+            coll.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> list =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv3StmtsExhibitsShared())
+                            .orElse(new ArrayList<>());
+
+                    list.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv3StmtsExhibitsShared(list);
+                }
+            });
+        }
+    }
+
+    private void copySelectedQaFilesToIntv3(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_QUESTIONNAIRES_ANSWERS_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> appQaCollection = caseData.getUploadCaseDocumentWrapper().getRespQaCollection();
+            appQaCollection.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> list =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv3QaShared())
+                            .orElse(new ArrayList<>());
+
+                    list.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv3QaShared(list);
+                }
+            });
+        }
+    }
+
+    private void copySelectedChronologiesFilesToIntv3(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_CHRONOLOGIES_STATEMENTS_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> appChronologiesCollection = caseData.getUploadCaseDocumentWrapper().getRespChronologiesCollection();
+            appChronologiesCollection.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> list =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv3ChronologiesShared())
+                            .orElse(new ArrayList<>());
+
+                    list.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv3ChronologiesShared(list);
+                }
+            });
+        }
+    }
+
+    private void copySelectedFormEFilesToIntv3(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_FORM_E_EXHIBITS_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> appFormEExhibitsCollection = caseData.getUploadCaseDocumentWrapper().getRespFormEExhibitsCollection();
+            appFormEExhibitsCollection.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> list =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv3FormEsExhibitsShared())
+                            .orElse(new ArrayList<>());
+
+                    list.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv3FormEsExhibitsShared(list);
+                }
+            });
+        }
+    }
+
+    private void copySelectedOtherFilesToIntv3(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_OTHER_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> appOtherCollection = caseData.getUploadCaseDocumentWrapper().getRespOtherCollection();
+            appOtherCollection.forEach(d -> {
+                if (String.valueOf(d.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> list =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv3OtherShared())
+                            .orElse(new ArrayList<>());
+
+                    list.add(UploadCaseDocumentCollection.builder()
+                        .value(d.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv3OtherShared(list);
+                }
+            });
+        }
+    }
+
+    private void copySelectedCorresFilesToIntv4(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_CORRESPONDENCE_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespCorrespondenceCollection();
+            coll.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> list =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv4CorrespDocsShared())
+                            .orElse(new ArrayList<>());
+
+                    list.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv4CorrespDocsShared(list);
+                }
+            });
+        }
+    }
+
+    private void copySelectedExpertFilesToIntv4(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_EXPERT_EVIDENCE_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespExpertEvidenceCollection();
+            coll.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> list =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv4ExpertEvidenceShared())
+                            .orElse(new ArrayList<>());
+
+                    list.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv4ExpertEvidenceShared(list);
+                }
+            });
+        }
+    }
+
+    private void copySelectedFormHFilesToIntv4(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_FORMS_H_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespFormsHCollection();
+            coll.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> list =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv4FormHsShared())
+                            .orElse(new ArrayList<>());
+
+                    list.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv4FormHsShared(list);
+                }
+            });
+        }
+    }
+
+    private void copySelectedHearingFilesToIntv4(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_HEARING_BUNDLES_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespHearingBundlesCollection();
+            coll.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> list =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv4HearingBundlesShared())
+                            .orElse(new ArrayList<>());
+
+                    list.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv4HearingBundlesShared(list);
+                }
+            });
+        }
+    }
+
+    private void copySelectedSummariesFilesToIntv4(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_CASE_SUMMARIES_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespCaseSummariesCollection();
+            coll.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> list =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv4SummariesShared())
+                            .orElse(new ArrayList<>());
+
+                    list.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv4SummariesShared(list);
+                }
+            });
+        }
+    }
+
+    private void copySelectedStmtExhibitsFilesToIntv4(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_STATEMENTS_EXHIBITS_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> coll = caseData.getUploadCaseDocumentWrapper().getRespStatementsExhibitsCollection();
+            coll.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> list =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv4StmtsExhibitsShared())
+                            .orElse(new ArrayList<>());
+
+                    list.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv4StmtsExhibitsShared(list);
+                }
+            });
+        }
+    }
+
+    private void copySelectedQaFilesToIntv4(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_QUESTIONNAIRES_ANSWERS_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> appQaCollection = caseData.getUploadCaseDocumentWrapper().getRespQaCollection();
+            appQaCollection.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> list =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv4QaShared())
+                            .orElse(new ArrayList<>());
+
+                    list.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv4QaShared(list);
+                }
+            });
+        }
+    }
+
+    private void copySelectedChronologiesFilesToIntv4(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_CHRONOLOGIES_STATEMENTS_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> appChronologiesCollection = caseData.getUploadCaseDocumentWrapper().getRespChronologiesCollection();
+            appChronologiesCollection.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> list =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv4ChronologiesShared())
+                            .orElse(new ArrayList<>());
+
+                    list.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv4ChronologiesShared(list);
+                }
+            });
+        }
+    }
+
+    private void copySelectedFormEFilesToIntv4(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_FORM_E_EXHIBITS_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> appFormEExhibitsCollection = caseData.getUploadCaseDocumentWrapper().getRespFormEExhibitsCollection();
+            appFormEExhibitsCollection.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> list =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv4FormEsExhibitsShared())
+                            .orElse(new ArrayList<>());
+
+                    list.add(UploadCaseDocumentCollection.builder()
+                        .value(sd.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv4FormEsExhibitsShared(list);
+                }
+            });
+        }
+    }
+
+    private void copySelectedOtherFilesToIntv4(FinremCaseData caseData, String collId, String collName) {
+        if (collName.equalsIgnoreCase(APP_OTHER_COLLECTION.getCcdKey())) {
+            List<UploadCaseDocumentCollection> appOtherCollection = caseData.getUploadCaseDocumentWrapper().getRespOtherCollection();
+            appOtherCollection.forEach(d -> {
+                if (String.valueOf(d.getId()).equalsIgnoreCase(collId)) {
+                    List<UploadCaseDocumentCollection> list =
+                        Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv4OtherShared())
+                            .orElse(new ArrayList<>());
+
+                    list.add(UploadCaseDocumentCollection.builder()
+                        .value(d.getValue()).build());
+
+                    caseData.getUploadCaseDocumentWrapper().setIntv4OtherShared(list);
+                }
+            });
+        }
+    }
 }
