@@ -6,6 +6,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchUserException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerOneToIntervenerDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -27,6 +28,7 @@ public class IntervenerService {
     private final AssignCaseAccessService assignCaseAccessService;
     private final PrdOrganisationService organisationService;
     private final SystemUserService systemUserService;
+    private final IntervenerOneToIntervenerDetailsMapper intervenerOneToIntervenerDetailsMapper;
 
     public IntervenerChangeDetails removeIntervenerOneDetails(FinremCaseData caseData, Long caseId) {
         IntervenerOneWrapper intervenerOneWrapper = caseData.getIntervenerOneWrapper();
@@ -259,6 +261,8 @@ public class IntervenerService {
                 setDefaultOrgForintervenerOne(intervenerOneWrapper);
             }
         }
+        intervenerOneChangeDetails.setIntervenerDetails(
+            intervenerOneToIntervenerDetailsMapper.mapToIntervenerDetails(intervenerOneWrapper));
         return intervenerOneChangeDetails;
     }
 
