@@ -77,13 +77,13 @@ public class CCDConfigValidator {
         throws IOException, InvalidFormatException {
 
         List<Workbook> workbooks = Arrays.asList(new XSSFWorkbook(configFiles.get(0)), new XSSFWorkbook(configFiles.get(1)));
-        List<Sheet> complexTypeSheets = new ArrayList<>(Arrays.asList(workbooks.get(0).getSheet(COMPLEX_TYPES_SHEET)));
-        List<Sheet> fixedListSheets = new ArrayList<>(Arrays.asList(workbooks.get(0).getSheet(FIXED_LISTS_SHEET)));
+        List<Sheet> complexTypeSheets =
+            new ArrayList<>(Arrays.asList(workbooks.get(0).getSheet(COMPLEX_TYPES_SHEET), workbooks.get(1).getSheet(COMPLEX_TYPES_SHEET)));
+        List<Sheet> fixedListSheets =
+            new ArrayList<>(Arrays.asList(workbooks.get(0).getSheet(FIXED_LISTS_SHEET), workbooks.get(1).getSheet(FIXED_LISTS_SHEET)));
         List<CcdFieldAttributes> caseFields = collateCaseFields(workbooks.get(0).getSheet(CASE_FIELD_SHEET));
         List<String> validationErrors =
-            validateCaseFieldsAgainstClassStructure(baseClassToCompareWith, complexTypeSheets, fixedListSheets, caseFields);
-        complexTypeSheets.add(workbooks.get(1).getSheet(COMPLEX_TYPES_SHEET));
-        fixedListSheets.add(workbooks.get(1).getSheet(FIXED_LISTS_SHEET));
+            validateCaseFieldsAgainstClassStructure(baseClassToCompareWith, complexTypeSheets.get(0), fixedListSheets.get(0), caseFields);
         caseFields.addAll(collateCaseFields(workbooks.get(1).getSheet(CASE_FIELD_SHEET)));
         List<String> errors = validateClassStructureAgainstCaseFields(baseClassToCompareWith, complexTypeSheets, fixedListSheets, caseFields);
         errors.forEach(error -> {
@@ -120,8 +120,8 @@ public class CCDConfigValidator {
     }
 
 
-    private List<String> validateCaseFieldsAgainstClassStructure(Class baseClassToCompareWith, List<Sheet> complexTypeSheet,
-                                                                 List<Sheet> fixedListSheet,
+    private List<String> validateCaseFieldsAgainstClassStructure(Class baseClassToCompareWith, Sheet complexTypeSheet,
+                                                                 Sheet fixedListSheet,
                                                                  List<CcdFieldAttributes> caseFields) {
         Set<Class> finremCaseDataClasses = new HashSet<>(Arrays.asList(baseClassToCompareWith));
         finremCaseDataClasses.addAll(new AccessingAllClassesInPackage().getWrappedClassesForClass(baseClassToCompareWith));
@@ -135,7 +135,7 @@ public class CCDConfigValidator {
                     if (field.getName().equals(ccdFieldAttributes.getFieldId())) {
                         found = true;
                         log.info("Found CCD Field Id: {} and Field Type: {}", ccdFieldAttributes.getFieldId(), ccdFieldAttributes.getFieldType());
-                        List<String> errors = validateCCDField(complexTypeSheet, fixedListSheet, ccdFieldAttributes, found, field);
+                        List<String> errors = validateCCDField(Arrays.asList(complexTypeSheet), Arrays.asList(fixedListSheet), ccdFieldAttributes, found, field);
                         errors.forEach(error -> {
                             if (!validationErrors.contains(error)) {
                                 validationErrors.add(error);
@@ -148,7 +148,7 @@ public class CCDConfigValidator {
                             log.info(
                                 "Found annotation for CCD Field Id: {} and Field Type: {}", ccdFieldAttributes.getFieldId(),
                                 ccdFieldAttributes.getFieldType());
-                            List<String> errors = validateCCDField(complexTypeSheet, fixedListSheet, ccdFieldAttributes, found, field);
+                            List<String> errors = validateCCDField(Arrays.asList(complexTypeSheet), Arrays.asList(fixedListSheet), ccdFieldAttributes, found, field);
                             errors.forEach(error -> {
                                 if (!validationErrors.contains(error)) {
                                     validationErrors.add(error);
