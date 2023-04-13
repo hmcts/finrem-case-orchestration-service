@@ -38,6 +38,7 @@ public class ConsentOrderPrintService {
         Map<String, Object> caseData = caseDetails.getData();
 
         if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)) {
+            log.info("Sending approved order for applicant to bulk print for case {}", caseDetails.getId());
             UUID applicantLetterId = shouldPrintOrderApprovedDocuments(caseDetails, authorisationToken)
                 ? printApplicantConsentOrderApprovedDocuments(caseDetails, authorisationToken)
                 : printApplicantConsentOrderNotApprovedDocuments(caseDetails, authorisationToken);
@@ -45,10 +46,9 @@ public class ConsentOrderPrintService {
         }
 
         if (!notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)) {
+            log.info("Sending approved order for respondent to bulk print for case {}", caseDetails.getId());
             generateCoversheetForRespondentAndSendOrders(caseDetails, authorisationToken);
         }
-
-        log.info("Bulk print is successful, case {}", caseDetails.getId());
     }
 
     private void generateCoversheetForRespondentAndSendOrders(CaseDetails caseDetails, String authorisationToken) {
