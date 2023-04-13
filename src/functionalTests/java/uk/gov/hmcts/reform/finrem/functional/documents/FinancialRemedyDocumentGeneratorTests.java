@@ -4,6 +4,7 @@ import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import net.serenitybdd.junit.runners.SerenityRunner;
 import net.serenitybdd.rest.SerenityRest;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
@@ -69,6 +70,20 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
         assertTrue(jsonPathEvaluator.get("data.latestDraftHearingOrder.document_filename").toString()
             .equalsIgnoreCase("approvedConvertedHearingOrder.pdf"));
+    }
+
+    @Test
+    public void verifyBulkPrintDocumentGenerationShouldReturnOkResponseCode() {
+        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(GENERAL_ORDER_JSON, documentRejectedOrderUrl,
+            BINARY_URL_TYPE, "generalOrder", consentedDir);
+
+        String payload = utils.getJsonFromFile("bulk-print.json", consentedDir)
+            .replace("$DOCUMENT-BINARY-URL", documentUrl);
+        jsonPathEvaluator = utils.getResponseData(caseOrchestration + "/bulk-print", payload, "data");
+
+        if (jsonPathEvaluator.get("bulkPrintLetterIdRes") == null) {
+            Assert.fail("bulk Printing not successful");
+        }
     }
 
     @Test
