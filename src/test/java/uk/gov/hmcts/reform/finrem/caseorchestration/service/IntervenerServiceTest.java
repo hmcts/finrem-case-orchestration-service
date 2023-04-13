@@ -8,7 +8,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchUserException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerFourToIntervenerDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerOneToIntervenerDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerThreeToIntervenerDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerTwoToIntervenerDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
@@ -64,6 +67,12 @@ public class IntervenerServiceTest extends BaseServiceTest {
     private SystemUserService systemUserService;
     @Mock
     private IntervenerOneToIntervenerDetailsMapper intervenerOneToIntervenerDetailsMapper;
+    @Mock
+    private IntervenerTwoToIntervenerDetailsMapper intervenerTwoToIntervenerDetailsMapperDetails;
+    @Mock
+    private IntervenerThreeToIntervenerDetailsMapper intervenerThreeToIntervenerDetailsMapperDetails;
+    @Mock
+    private IntervenerFourToIntervenerDetailsMapper intervenerFourToIntervenerDetailsMapperDetails;
 
     @InjectMocks
     private IntervenerService service;

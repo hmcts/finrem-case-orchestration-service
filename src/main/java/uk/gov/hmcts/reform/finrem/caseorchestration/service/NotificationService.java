@@ -788,6 +788,24 @@ public class NotificationService {
             CaseRole.INTVR_SOLICITOR_1.getValue());
     }
 
+    public boolean isIntervenerTwoSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
+        return caseDetails.getData().isIntervenerSolTwoPopulated()
+            && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
+            CaseRole.INTVR_SOLICITOR_2.getValue());
+    }
+
+    public boolean isIntervenerThreeSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
+        return caseDetails.getData().isIntervenerSolThreePopulated()
+            && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
+            CaseRole.INTVR_SOLICITOR_3.getValue());
+    }
+
+    public boolean isIntervenerFourSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
+        return caseDetails.getData().isIntervenerSolFourPopulated()
+            && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
+            CaseRole.INTVR_SOLICITOR_4.getValue());
+    }
+
     @Deprecated
     public boolean isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(CaseDetails caseDetails) {
         return shouldEmailRespondentSolicitor(caseDetails.getData())

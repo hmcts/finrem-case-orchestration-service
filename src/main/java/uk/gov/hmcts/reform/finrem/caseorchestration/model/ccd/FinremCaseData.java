@@ -686,6 +686,21 @@ public class FinremCaseData {
     }
 
     @JsonIgnore
+    public boolean isIntervenerSolTwoPopulated() {
+        return StringUtils.isNotEmpty(nullToEmpty(getIntervenerTwoWrapper().getIntervener2SolEmail()));
+    }
+
+    @JsonIgnore
+    public boolean isIntervenerSolThreePopulated() {
+        return StringUtils.isNotEmpty(nullToEmpty(getIntervenerThreeWrapper().getIntervener3SolEmail()));
+    }
+
+    @JsonIgnore
+    public boolean isIntervenerSolFourPopulated() {
+        return StringUtils.isNotEmpty(nullToEmpty(getIntervenerFourWrapper().getIntervener4SolEmail()));
+    }
+
+    @JsonIgnore
     public boolean isFastTrackApplication() {
         return Optional.ofNullable(caseAllocatedTo)
             .map(caseAllocatedTo -> caseAllocatedTo.isYes())

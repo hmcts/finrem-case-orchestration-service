@@ -6,7 +6,10 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchUserException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerFourToIntervenerDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerOneToIntervenerDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerThreeToIntervenerDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerTwoToIntervenerDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -28,7 +31,10 @@ public class IntervenerService {
     private final AssignCaseAccessService assignCaseAccessService;
     private final PrdOrganisationService organisationService;
     private final SystemUserService systemUserService;
-    private final IntervenerOneToIntervenerDetailsMapper intervenerOneToIntervenerDetailsMapper;
+    private final IntervenerOneToIntervenerDetailsMapper intervenerOneDetailsMapper;
+    private final IntervenerTwoToIntervenerDetailsMapper intervenerTwoDetailsMapper;
+    private final IntervenerThreeToIntervenerDetailsMapper intervenerThreeDetailsMapper;
+    private final IntervenerFourToIntervenerDetailsMapper intervenerFourDetailsMapper;
 
     public IntervenerChangeDetails removeIntervenerOneDetails(FinremCaseData caseData, Long caseId) {
         IntervenerOneWrapper intervenerOneWrapper = caseData.getIntervenerOneWrapper();
@@ -127,6 +133,8 @@ public class IntervenerService {
 
             }
         }
+        intervenerFourChangeDetails.setIntervenerDetails(
+            intervenerFourDetailsMapper.mapToIntervenerDetails(intervenerFourWrapper));
         return intervenerFourChangeDetails;
     }
 
@@ -171,6 +179,8 @@ public class IntervenerService {
                 setDefaultOrgForintervenerThree(intervenerThreeWrapper);
             }
         }
+        intervenerThreeChangeDetails.setIntervenerDetails(
+            intervenerThreeDetailsMapper.mapToIntervenerDetails(intervenerThreeWrapper));
         return intervenerThreeChangeDetails;
     }
 
@@ -180,7 +190,8 @@ public class IntervenerService {
         FinremCaseData caseData = caseDetails.getData();
         Long caseId = callbackRequest.getCaseDetails().getId();
         IntervenerChangeDetails intervenerTwoChangeDetails = new IntervenerChangeDetails(
-            IntervenerChangeDetails.IntervenerType.INTERVENER_TWO, IntervenerChangeDetails.IntervenerAction.ADDED);
+            IntervenerChangeDetails.IntervenerType.INTERVENER_TWO,
+            IntervenerChangeDetails.IntervenerAction.ADDED);
 
         IntervenerTwoWrapper intervenerTwoWrapper = caseData.getIntervenerTwoWrapper();
         if (intervenerTwoWrapper != null) {
@@ -216,6 +227,8 @@ public class IntervenerService {
 
             }
         }
+        intervenerTwoChangeDetails.setIntervenerDetails(
+            intervenerTwoDetailsMapper.mapToIntervenerDetails(intervenerTwoWrapper));
         return intervenerTwoChangeDetails;
     }
 
@@ -262,7 +275,7 @@ public class IntervenerService {
             }
         }
         intervenerOneChangeDetails.setIntervenerDetails(
-            intervenerOneToIntervenerDetailsMapper.mapToIntervenerDetails(intervenerOneWrapper));
+            intervenerOneDetailsMapper.mapToIntervenerDetails(intervenerOneWrapper));
         return intervenerOneChangeDetails;
     }
 
