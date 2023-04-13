@@ -40,7 +40,6 @@ public class IssueApplicationContestedSubmittedHandler extends FinremCallbackHan
         validateCaseData(callbackRequest);
 
         corresponder.sendCorrespondence(callbackRequest.getCaseDetails());
-        log.info("Successfully email sent for contested 'Application Issued' for Case ID: {}", caseId);
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
             .data(callbackRequest.getCaseDetails().getData()).build();
