@@ -27,16 +27,15 @@ public class FinremCaseDataTest {
     @Before
     public void setUpDefinitionFiles() {
         if (localMode == false) {
-          consentedFileNameWithPath = retrieveFileName("ccd-config-prod-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
-          if (consentedFileNameWithPath == null) {
-            consentedFileNameWithPath = retrieveFileName("ccd-config-preview-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
-          }
-          contestedFileNameWithPath = retrieveFileName("ccd-config-prod-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
-          if (contestedFileNameWithPath == null) {
-            contestedFileNameWithPath = retrieveFileName("ccd-config-preview-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
-          }
+            consentedFileNameWithPath = retrieveFileName("ccd-config-prod-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
+            if (consentedFileNameWithPath == null) {
+                consentedFileNameWithPath = retrieveFileName("ccd-config-preview-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
+            }
+            contestedFileNameWithPath = retrieveFileName("ccd-config-prod-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
+            if (contestedFileNameWithPath == null) {
+                contestedFileNameWithPath = retrieveFileName("ccd-config-preview-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
+            }
         }
-
     }
 
     private String retrieveFileName(String filePrefix, String filePath) {
@@ -53,13 +52,15 @@ public class FinremCaseDataTest {
 
     @Test
     public void testContestedConfigFinRemCaseData() throws IOException, InvalidFormatException {
-        List<File> configFiles = Arrays.asList(getFile("ccd-config-prod-contested.xlsx", contestedFileNameWithPath), getFile("ccd-config-prod-consented.xlsx", consentedFileNameWithPath));
+        List<File> configFiles = Arrays.asList(getFile("ccd-config-prod-contested.xlsx", contestedFileNameWithPath),
+            getFile("ccd-config-prod-consented.xlsx", consentedFileNameWithPath));
         validateConfig(configFiles);
     }
 
     @Test
     public void testConsentedConfigFinRemCaseData() throws IOException, InvalidFormatException {
-        List<File> configFiles = Arrays.asList(getFile("ccd-config-prod-consented.xlsx", consentedFileNameWithPath), getFile("ccd-config-prod-contested.xlsx", contestedFileNameWithPath));
+        List<File> configFiles = Arrays.asList(getFile("ccd-config-prod-consented.xlsx", consentedFileNameWithPath),
+            getFile("ccd-config-prod-contested.xlsx", contestedFileNameWithPath));
         validateConfig(configFiles);
     }
 
@@ -77,12 +78,12 @@ public class FinremCaseDataTest {
 
     private void validateConfig(List<File> configFiles) throws IOException, InvalidFormatException {
         CCDConfigValidator ccdConfigValidator = new CCDConfigValidator();
-            List<String> errors = ccdConfigValidator.validateCaseFields(configFiles, FinremCaseData.class);
-            if (!errors.isEmpty()) {
-                log.error("Errors found when validating config files: %s and %s".formatted(configFiles.get(0).getName(), configFiles.get(1).getName()));
-                errors.forEach(log::error);
-            }
-            assert errors.isEmpty();
+        List<String> errors = ccdConfigValidator.validateCaseFields(configFiles, FinremCaseData.class);
+        if (!errors.isEmpty()) {
+            log.error("Errors found when validating config files: %s and %s".formatted(configFiles.get(0).getName(), configFiles.get(1).getName()));
+            errors.forEach(log::error);
+        }
+        assert errors.isEmpty();
     }
 
     private void validateState(File configFile) throws IOException, InvalidFormatException {

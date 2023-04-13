@@ -82,7 +82,6 @@ public class CCDConfigValidator {
         List<CcdFieldAttributes> caseFields = collateCaseFields(workbooks.get(0).getSheet(CASE_FIELD_SHEET));
         List<String> validationErrors =
             validateCaseFieldsAgainstClassStructure(baseClassToCompareWith, complexTypeSheets, fixedListSheets, caseFields);
-
         complexTypeSheets.add(workbooks.get(1).getSheet(COMPLEX_TYPES_SHEET));
         fixedListSheets.add(workbooks.get(1).getSheet(FIXED_LISTS_SHEET));
         caseFields.addAll(collateCaseFields(workbooks.get(1).getSheet(CASE_FIELD_SHEET)));
@@ -265,8 +264,8 @@ public class CCDConfigValidator {
             && specialFieldTypes.get(ccdFieldAttributes.getFieldId()).equals(field.getType().getSimpleName()));
     }
 
-    private List<String> validateCollectionField(List<Sheet> complexTypeSheets, List<Sheet> fixedListSheets, CcdFieldAttributes ccdFieldAttributes, Field field) {
-
+    private List<String> validateCollectionField(List<Sheet> complexTypeSheets, List<Sheet> fixedListSheets, CcdFieldAttributes ccdFieldAttributes,
+                                                 Field field) {
         log.info("CCD Field Id: {} with Field Type: {} is a collection of type {} with field type parameter of {}", ccdFieldAttributes.getFieldId(),
             ccdFieldAttributes.getFieldType(), field.getGenericType().getTypeName(), ccdFieldAttributes.getFieldTypeParameter());
         List<CcdFieldAttributes> complexTypeFields = getComplexType(complexTypeSheets, ccdFieldAttributes.getFieldTypeParameter());
