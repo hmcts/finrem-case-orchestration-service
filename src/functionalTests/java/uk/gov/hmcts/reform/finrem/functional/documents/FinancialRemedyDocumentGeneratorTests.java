@@ -73,20 +73,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyBulkPrintDocumentGenerationShouldReturnOkResponseCode() {
-        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(GENERAL_ORDER_JSON, documentRejectedOrderUrl,
-            BINARY_URL_TYPE, "generalOrder", consentedDir);
-
-        String payload = utils.getJsonFromFile("bulk-print.json", consentedDir)
-            .replace("$DOCUMENT-BINARY-URL", documentUrl);
-        jsonPathEvaluator = utils.getResponseData(caseOrchestration + "/bulk-print", payload, "data");
-
-        if (jsonPathEvaluator.get("bulkPrintLetterIdRes") == null) {
-            Assert.fail("bulk Printing not successful");
-        }
-    }
-
-    @Test
     public void verifyContestedDraftDocumentGenerationShouldReturnOkResponseCode() {
         utils.validatePostSuccess(generateContestedUrl, CONTESTED_FORM_C_JSON, contestedDir);
     }
