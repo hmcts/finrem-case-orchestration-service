@@ -70,6 +70,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
         assertTrue(jsonPathEvaluator.get("data.latestDraftHearingOrder.document_filename").toString()
             .equalsIgnoreCase("approvedConvertedHearingOrder.pdf"));
+
     }
 
     @Test
