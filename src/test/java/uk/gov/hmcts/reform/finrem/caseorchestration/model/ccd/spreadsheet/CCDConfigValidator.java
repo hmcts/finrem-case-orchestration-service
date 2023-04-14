@@ -135,7 +135,8 @@ public class CCDConfigValidator {
                     if (field.getName().equals(ccdFieldAttributes.getFieldId())) {
                         found = true;
                         log.info("Found CCD Field Id: {} and Field Type: {}", ccdFieldAttributes.getFieldId(), ccdFieldAttributes.getFieldType());
-                        List<String> errors = validateCCDField(Arrays.asList(complexTypeSheet), Arrays.asList(fixedListSheet), ccdFieldAttributes, found, field);
+                        List<String> errors =
+                            validateCCDField(Arrays.asList(complexTypeSheet), Arrays.asList(fixedListSheet), ccdFieldAttributes, found, field);
                         errors.forEach(error -> {
                             if (!validationErrors.contains(error)) {
                                 validationErrors.add(error);
@@ -148,7 +149,8 @@ public class CCDConfigValidator {
                             log.info(
                                 "Found annotation for CCD Field Id: {} and Field Type: {}", ccdFieldAttributes.getFieldId(),
                                 ccdFieldAttributes.getFieldType());
-                            List<String> errors = validateCCDField(Arrays.asList(complexTypeSheet), Arrays.asList(fixedListSheet), ccdFieldAttributes, found, field);
+                            List<String> errors =
+                                validateCCDField(Arrays.asList(complexTypeSheet), Arrays.asList(fixedListSheet), ccdFieldAttributes, found, field);
                             errors.forEach(error -> {
                                 if (!validationErrors.contains(error)) {
                                     validationErrors.add(error);
