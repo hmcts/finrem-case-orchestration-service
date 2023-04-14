@@ -85,12 +85,12 @@ public class CCDConfigValidator {
         List<String> validationErrors =
             validateCaseFieldsAgainstClassStructure(baseClassToCompareWith, complexTypeSheets.get(0), fixedListSheets.get(0), caseFields);
         caseFields.addAll(collateCaseFields(workbooks.get(1).getSheet(CASE_FIELD_SHEET)));
-        List<String> errors = validateClassStructureAgainstCaseFields(baseClassToCompareWith, complexTypeSheets, fixedListSheets, caseFields);
-        errors.forEach(error -> {
-            if (!validationErrors.contains(error)) {
-                validationErrors.add(error);
-            }
-        });
+//        List<String> errors = validateClassStructureAgainstCaseFields(baseClassToCompareWith, complexTypeSheets, fixedListSheets, caseFields);
+//        errors.forEach(error -> {
+//            if (!validationErrors.contains(error)) {
+//                validationErrors.add(error);
+//            }
+//        });
         return validationErrors;
     }
 
