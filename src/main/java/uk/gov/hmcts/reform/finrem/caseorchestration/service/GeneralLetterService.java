@@ -32,6 +32,9 @@ import static java.util.Collections.emptyList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ADDRESSEE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CTSC_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.buildCtscContactDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
@@ -123,6 +126,12 @@ public class GeneralLetterService {
             addresseeBuilder
                 .name(StringUtils.joinWith(" ", data.get(respondentFmNameCcdField), data.get(respondentLastNameCcdField)))
                 .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) data.get(RESPONDENT_ADDRESS)));
+        } else if ("applicant".equalsIgnoreCase(generalLetterAddressTo)) {
+            String applicantFmNameCcdField = APPLICANT_FIRST_MIDDLE_NAME;
+            String applicantLastNameCcdField = APPLICANT_LAST_NAME;
+            addresseeBuilder
+                .name(StringUtils.joinWith(" ", data.get(applicantFmNameCcdField), data.get(applicantLastNameCcdField)))
+                .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) data.get(APPLICANT_ADDRESS)));
         } else if ("other".equalsIgnoreCase(generalLetterAddressTo)) {
             addresseeBuilder
                 .name((String) data.get(GENERAL_LETTER_RECIPIENT))
@@ -170,6 +179,9 @@ public class GeneralLetterService {
                 break;
             case RESPONDENT:
                 recipientAddress = data.getContactDetailsWrapper().getRespondentAddress();
+                break;
+            case APPLICANT:
+                recipientAddress = data.getContactDetailsWrapper().getApplicantAddress();
                 break;
             case OTHER:
                 recipientAddress = data.getGeneralLetterWrapper().getGeneralLetterRecipientAddress();
