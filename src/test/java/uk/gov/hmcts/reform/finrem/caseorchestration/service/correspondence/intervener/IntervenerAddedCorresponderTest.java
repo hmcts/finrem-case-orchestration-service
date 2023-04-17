@@ -13,11 +13,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
@@ -73,6 +75,10 @@ public class IntervenerAddedCorresponderTest {
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails(
             IntervenerChangeDetails.IntervenerType.INTERVENER_ONE,
             IntervenerChangeDetails.IntervenerAction.ADDED);
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder()
+            .intervenerRepresented(YesOrNo.NO)
+            .build();
+        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
         when(intervenerAddedCorresponder.shouldSendIntervenerOneSolicitorEmail(finremCaseDetails)).thenReturn(false);
@@ -87,10 +93,36 @@ public class IntervenerAddedCorresponderTest {
     }
 
     @Test
+    public void shouldSendLetterCorrespondenceIfIntervenerIsRepresentedToAppAndRespIfNotRepresented() {
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails(
+            IntervenerChangeDetails.IntervenerType.INTERVENER_ONE,
+            IntervenerChangeDetails.IntervenerAction.ADDED);
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder()
+            .intervenerRepresented(YesOrNo.YES)
+            .build();
+        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
+
+        finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
+        finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
+        intervenerAddedCorresponder.sendCorrespondence(finremCaseDetails, AUTHORISATION_TOKEN);
+
+        verify(intervenerDocumentService, times(1))
+            .generateIntervenerSolicitorAddedLetter(finremCaseDetails, AUTHORISATION_TOKEN,
+                DocumentHelper.PaperNotificationRecipient.APPLICANT);
+        verify(intervenerDocumentService, times(1))
+            .generateIntervenerSolicitorAddedLetter(finremCaseDetails, AUTHORISATION_TOKEN,
+                DocumentHelper.PaperNotificationRecipient.RESPONDENT);
+    }
+
+    @Test
     public void shouldSendIntervenerOneLetterCorrespondenceIfNotRepresented() {
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails(
             IntervenerChangeDetails.IntervenerType.INTERVENER_ONE,
             IntervenerChangeDetails.IntervenerAction.ADDED);
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder()
+            .intervenerRepresented(YesOrNo.NO)
+            .build();
+        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
         when(intervenerAddedCorresponder.shouldSendIntervenerOneSolicitorEmail(finremCaseDetails)).thenReturn(false);
@@ -106,6 +138,10 @@ public class IntervenerAddedCorresponderTest {
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails(
             IntervenerChangeDetails.IntervenerType.INTERVENER_TWO,
             IntervenerChangeDetails.IntervenerAction.ADDED);
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder()
+            .intervenerRepresented(YesOrNo.NO)
+            .build();
+        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
         when(intervenerAddedCorresponder.shouldSendIntervenerTwoSolicitorEmail(finremCaseDetails)).thenReturn(false);
@@ -121,6 +157,10 @@ public class IntervenerAddedCorresponderTest {
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails(
             IntervenerChangeDetails.IntervenerType.INTERVENER_THREE,
             IntervenerChangeDetails.IntervenerAction.ADDED);
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder()
+            .intervenerRepresented(YesOrNo.NO)
+            .build();
+        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
         when(intervenerAddedCorresponder.shouldSendIntervenerThreeSolicitorEmail(finremCaseDetails)).thenReturn(false);
@@ -136,6 +176,10 @@ public class IntervenerAddedCorresponderTest {
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails(
             IntervenerChangeDetails.IntervenerType.INTERVENER_FOUR,
             IntervenerChangeDetails.IntervenerAction.ADDED);
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder()
+            .intervenerRepresented(YesOrNo.NO)
+            .build();
+        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
         when(intervenerAddedCorresponder.shouldSendIntervenerFourSolicitorEmail(finremCaseDetails)).thenReturn(false);
@@ -151,6 +195,10 @@ public class IntervenerAddedCorresponderTest {
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails(
             IntervenerChangeDetails.IntervenerType.INTERVENER_ONE,
             IntervenerChangeDetails.IntervenerAction.ADDED);
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder()
+            .intervenerRepresented(YesOrNo.YES)
+            .build();
+        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         finremCaseDetails = FinremCaseDetails.builder().data(finremCaseData).build();
         when(intervenerAddedCorresponder.shouldSendIntervenerOneSolicitorEmail(finremCaseDetails)).thenReturn(true);
@@ -164,6 +212,10 @@ public class IntervenerAddedCorresponderTest {
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails(
             IntervenerChangeDetails.IntervenerType.INTERVENER_TWO,
             IntervenerChangeDetails.IntervenerAction.ADDED);
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder()
+            .intervenerRepresented(YesOrNo.YES)
+            .build();
+        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         finremCaseDetails = FinremCaseDetails.builder()
             .data(finremCaseData).build();
@@ -178,6 +230,10 @@ public class IntervenerAddedCorresponderTest {
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails(
             IntervenerChangeDetails.IntervenerType.INTERVENER_THREE,
             IntervenerChangeDetails.IntervenerAction.ADDED);
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder()
+            .intervenerRepresented(YesOrNo.YES)
+            .build();
+        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         finremCaseDetails = FinremCaseDetails.builder()
             .data(finremCaseData).build();
@@ -192,6 +248,10 @@ public class IntervenerAddedCorresponderTest {
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails(
             IntervenerChangeDetails.IntervenerType.INTERVENER_FOUR,
             IntervenerChangeDetails.IntervenerAction.ADDED);
+        IntervenerDetails intervenerDetails = IntervenerDetails.builder()
+            .intervenerRepresented(YesOrNo.YES)
+            .build();
+        intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerChangeDetails);
         finremCaseDetails = FinremCaseDetails.builder()
             .data(finremCaseData).build();

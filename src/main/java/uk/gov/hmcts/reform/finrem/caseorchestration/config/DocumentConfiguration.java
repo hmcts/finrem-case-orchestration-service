@@ -125,6 +125,8 @@ public class DocumentConfiguration {
 
     private String intervenerAddedTemplate;
     private String intervenerAddedFilename;
+    private String intervenerAddedSolicitorTemplate;
+    private String intervenerAddedSolicitorFilename;
     private String intervenerRemovedTemplate;
     private String intervenerRemovedFilename;
 

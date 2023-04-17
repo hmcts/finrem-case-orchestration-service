@@ -11,7 +11,7 @@ import java.util.Map;
 @Data
 @Builder(toBuilder = true)
 @JsonIgnoreProperties
-public class IntervenerAddedLetterDetails implements ParentLetterDetails {
+public class IntervenerAddedSolicitorLetterDetails implements ParentLetterDetails {
     private Map<String, Object> courtDetails;
     private Addressee addressee;
     private String caseNumber;
@@ -21,4 +21,5 @@ public class IntervenerAddedLetterDetails implements ParentLetterDetails {
     private String applicantName;
     private String respondentName;
     private String intervenerFullName;
+    private String intervenerSolicitorFirm;
 }

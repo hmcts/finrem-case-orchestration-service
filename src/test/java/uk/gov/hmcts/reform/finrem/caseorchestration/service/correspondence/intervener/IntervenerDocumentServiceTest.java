@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
@@ -39,7 +41,11 @@ public class IntervenerDocumentServiceTest {
     private static final String INTERVENER_ADDED_TEMPLATE = "intervener_added_template";
     private static final String INTERVENER_ADDED_FILENAME = "intervener_added_filename";
 
+    private static final String INTERVENER_ADDED_SOLICITOR_TEMPLATE = "intervener_added_solicitor_template";
+    private static final String INTERVENER_ADDED_SOLICITOR_FILENAME = "intervener_added_solicitor_filename";
+
     private static final String INTERVENER_NAME = "intervenerName";
+    private static final String INTERVENER_SOLICITOR_FIRM = "intervenerSolicitorFirm";
 
     @Mock
     private DocumentConfiguration documentConfiguration;
@@ -65,8 +71,13 @@ public class IntervenerDocumentServiceTest {
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails(
             IntervenerChangeDetails.IntervenerType.INTERVENER_ONE,
             IntervenerChangeDetails.IntervenerAction.ADDED);
+        Organisation organisation = Organisation.builder()
+            .organisationName(INTERVENER_SOLICITOR_FIRM).build();
+        OrganisationPolicy organisationPolicy = OrganisationPolicy.builder()
+            .organisation(organisation).build();
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
-            .intervenerName(INTERVENER_NAME).build();
+            .intervenerName(INTERVENER_NAME)
+            .intervenerOrganisation(organisationPolicy).build();
         intervenerChangeDetails.setIntervenerDetails(intervenerDetails);
         finremCaseData = FinremCaseData.builder()
             .divorceCaseNumber(CASE_NUMBER)
@@ -96,6 +107,27 @@ public class IntervenerDocumentServiceTest {
 
         Map<String, Object> letterData = getPlaceholdersMap(placeholdersMapCaptor);
         assertThat(letterData.get("intervenerFullName"), is(INTERVENER_NAME));
+        assertThat(letterData.get("divorceCaseNumber"), is(CASE_NUMBER));
+
+    }
+
+    @Test
+    public void shouldGenerateIntervenerAddedSolicitorLetter() {
+        when(documentHelper.prepareLetterTemplateData(finremCaseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT))
+            .thenReturn(caseDetails);
+
+        when(documentConfiguration.getIntervenerAddedSolicitorTemplate()).thenReturn(INTERVENER_ADDED_SOLICITOR_TEMPLATE);
+        when(documentConfiguration.getIntervenerAddedSolicitorFilename()).thenReturn(INTERVENER_ADDED_SOLICITOR_FILENAME);
+
+        intervenerDocumentService.generateIntervenerSolicitorAddedLetter(finremCaseDetails,
+            AUTH_TOKEN, DocumentHelper.PaperNotificationRecipient.APPLICANT);
+
+        verify(genericDocumentService).generateDocumentFromPlaceholdersMap(eq(AUTH_TOKEN),
+            placeholdersMapCaptor.capture(), eq(INTERVENER_ADDED_SOLICITOR_TEMPLATE), eq(INTERVENER_ADDED_SOLICITOR_FILENAME));
+
+        Map<String, Object> letterData = getPlaceholdersMap(placeholdersMapCaptor);
+        assertThat(letterData.get("intervenerFullName"), is(INTERVENER_NAME));
+        assertThat(letterData.get("intervenerSolicitorFirm"), is(INTERVENER_SOLICITOR_FIRM));
         assertThat(letterData.get("divorceCaseNumber"), is(CASE_NUMBER));
 
     }

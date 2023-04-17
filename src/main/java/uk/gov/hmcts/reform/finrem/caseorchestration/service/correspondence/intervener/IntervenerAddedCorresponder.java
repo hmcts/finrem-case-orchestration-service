@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerTwoToIntervenerDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
@@ -52,6 +53,30 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
             sendIntervenerThreeCorrespondence(caseDetails, authToken);
         } else if (intervenerChangeDetails.getIntervenerType() == IntervenerChangeDetails.IntervenerType.INTERVENER_FOUR) {
             sendIntervenerFourCorrespondence(caseDetails, authToken);
+        }
+    }
+
+    @Override
+    protected void sendApplicantCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
+        if (shouldSendApplicantSolicitorEmail(caseDetails)) {
+            log.info("Sending email correspondence to applicant for case: {}", caseDetails.getId());
+            this.emailApplicantSolicitor(caseDetails);
+        } else {
+            log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
+            bulkPrintService.sendDocumentForPrint(
+                getAppRepDocumentToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.APPLICANT), caseDetails);
+        }
+    }
+
+    @Override
+    protected void sendRespondentCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
+        if (shouldSendRespondentSolicitorEmail(caseDetails)) {
+            log.info("Sending email correspondence to respondent for case: {}", caseDetails.getId());
+            this.emailRespondentSolicitor(caseDetails);
+        } else {
+            log.info("Sending letter correspondence to respondent for case: {}", caseDetails.getId());
+            bulkPrintService.sendDocumentForPrint(
+                getAppRepDocumentToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT), caseDetails);
         }
     }
 
@@ -115,9 +140,18 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
         }
     }
 
+    public CaseDocument getAppRepDocumentToPrint(FinremCaseDetails caseDetails, String authorisationToken,
+                                           DocumentHelper.PaperNotificationRecipient recipient) {
+        if (caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerRepresented() == YesOrNo.YES) {
+            return intervenerDocumentService.generateIntervenerSolicitorAddedLetter(caseDetails, authorisationToken, recipient);
+        } else {
+            return intervenerDocumentService.generateIntervenerAddedNotificationLetter(caseDetails, authorisationToken, recipient);
+        }
+    }
+
     @Override
     public CaseDocument getDocumentToPrint(FinremCaseDetails caseDetails, String authorisationToken,
-                                           DocumentHelper.PaperNotificationRecipient recipient) {
+                                                 DocumentHelper.PaperNotificationRecipient recipient) {
         return intervenerDocumentService.generateIntervenerAddedNotificationLetter(caseDetails, authorisationToken, recipient);
     }
 
