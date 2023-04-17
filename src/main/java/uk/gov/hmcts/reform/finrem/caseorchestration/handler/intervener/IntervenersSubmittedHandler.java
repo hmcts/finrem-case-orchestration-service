@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.intervener.IntervenerAddedCorresponder;
 
@@ -43,7 +43,7 @@ public class IntervenersSubmittedHandler extends FinremCallbackHandler {
             callbackRequest.getEventType(), CallbackType.SUBMITTED, caseId);
         FinremCaseData caseData = callbackRequest.getCaseDetails().getData();
 
-        if (caseData.getCurrentIntervenerChangeDetails().getIntervenerAction().equals(IntervenerChangeDetails.IntervenerAction.ADDED)) {
+        if (caseData.getCurrentIntervenerChangeDetails().getIntervenerAction().equals(IntervenerAction.ADDED)) {
             log.info("sending Added Intervener Correspondence for case id: {}", caseId);
             intervenerAddedCorresponder.sendCorrespondence(callbackRequest.getCaseDetails(), userAuthorisation);
             return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()

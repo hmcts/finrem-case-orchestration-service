@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.FinremSingleLetterOrEmailAllPartiesCorresponder;
@@ -45,13 +46,13 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
         sendApplicantCorrespondence(caseDetails, authToken);
         sendRespondentCorrespondence(caseDetails, authToken);
         IntervenerChangeDetails intervenerChangeDetails = caseDetails.getData().getCurrentIntervenerChangeDetails();
-        if (intervenerChangeDetails.getIntervenerType() == IntervenerChangeDetails.IntervenerType.INTERVENER_ONE) {
+        if (intervenerChangeDetails.getIntervenerType() == IntervenerType.INTERVENER_ONE) {
             sendIntervenerOneCorrespondence(caseDetails, authToken);
-        } else if (intervenerChangeDetails.getIntervenerType() == IntervenerChangeDetails.IntervenerType.INTERVENER_TWO) {
+        } else if (intervenerChangeDetails.getIntervenerType() == IntervenerType.INTERVENER_TWO) {
             sendIntervenerTwoCorrespondence(caseDetails, authToken);
-        } else if (intervenerChangeDetails.getIntervenerType() == IntervenerChangeDetails.IntervenerType.INTERVENER_THREE) {
+        } else if (intervenerChangeDetails.getIntervenerType() == IntervenerType.INTERVENER_THREE) {
             sendIntervenerThreeCorrespondence(caseDetails, authToken);
-        } else if (intervenerChangeDetails.getIntervenerType() == IntervenerChangeDetails.IntervenerType.INTERVENER_FOUR) {
+        } else if (intervenerChangeDetails.getIntervenerType() == IntervenerType.INTERVENER_FOUR) {
             sendIntervenerFourCorrespondence(caseDetails, authToken);
         }
     }

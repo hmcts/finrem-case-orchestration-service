@@ -11,7 +11,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.intervener.IntervenerAddedCorresponder;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -55,8 +57,10 @@ public class IntervenersSubmittedHandlerTest {
     public void givenContestedCase_whenIntervenerActionIsAdded_thenSendCorrespondance() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
-        IntervenerChangeDetails intervenerOneChangeDetails = new IntervenerChangeDetails(
-            IntervenerChangeDetails.IntervenerType.INTERVENER_ONE, IntervenerChangeDetails.IntervenerAction.ADDED);
+
+        IntervenerChangeDetails intervenerOneChangeDetails = new IntervenerChangeDetails();
+        intervenerOneChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
+        intervenerOneChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
 
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerOneChangeDetails);
 

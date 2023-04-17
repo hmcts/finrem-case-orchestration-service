@@ -16,8 +16,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.util.HashMap;
@@ -68,9 +70,9 @@ public class IntervenerDocumentServiceTest {
     public void setUp() {
         intervenerDocumentService = new IntervenerDocumentService(genericDocumentService,
             documentConfiguration, documentHelper, objectMapper);
-        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails(
-            IntervenerChangeDetails.IntervenerType.INTERVENER_ONE,
-            IntervenerChangeDetails.IntervenerAction.ADDED);
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
         Organisation organisation = Organisation.builder()
             .organisationName(INTERVENER_SOLICITOR_FIRM).build();
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder()

@@ -19,7 +19,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 
 import java.time.LocalDate;
 
@@ -38,8 +40,10 @@ public class IntervenerService {
 
     public IntervenerChangeDetails removeIntervenerOneDetails(FinremCaseData caseData, Long caseId) {
         IntervenerOneWrapper intervenerOneWrapper = caseData.getIntervenerOneWrapper();
-        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails(
-            IntervenerChangeDetails.IntervenerType.INTERVENER_ONE, IntervenerChangeDetails.IntervenerAction.REMOVED);
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
+        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
+
         if (intervenerOneWrapper.getIntervener1Represented().equals(YesOrNo.YES)) {
             log.info("revoke case role for intervener1 for case {}", caseId);
             String orgId = intervenerOneWrapper.getIntervener1Organisation().getOrganisation().getOrganisationID();
@@ -52,8 +56,9 @@ public class IntervenerService {
 
     public IntervenerChangeDetails removeIntervenerTwoDetails(FinremCaseData caseData, Long caseId) {
         IntervenerTwoWrapper wrapper = caseData.getIntervenerTwoWrapper();
-        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails(
-            IntervenerChangeDetails.IntervenerType.INTERVENER_TWO, IntervenerChangeDetails.IntervenerAction.REMOVED);
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
+        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_TWO);
         if (wrapper.getIntervener2Represented().equals(YesOrNo.YES)) {
             log.info("revoke case role for intervener2 for case {}", caseId);
             String orgId = wrapper.getIntervener2Organisation().getOrganisation().getOrganisationID();
@@ -66,8 +71,9 @@ public class IntervenerService {
 
     public IntervenerChangeDetails removeIntervenerThreeDetails(FinremCaseData caseData, Long caseId) {
         IntervenerThreeWrapper wrapper = caseData.getIntervenerThreeWrapper();
-        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails(
-            IntervenerChangeDetails.IntervenerType.INTERVENER_THREE, IntervenerChangeDetails.IntervenerAction.REMOVED);
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
+        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_THREE);
         if (wrapper.getIntervener3Represented().equals(YesOrNo.YES)) {
             log.info("revoke case role for intervener3 for case {}", caseId);
             String orgId = wrapper.getIntervener3Organisation().getOrganisation().getOrganisationID();
@@ -80,8 +86,9 @@ public class IntervenerService {
 
     public IntervenerChangeDetails removeIntervenerFourDetails(FinremCaseData caseData, Long caseId) {
         IntervenerFourWrapper wrapper = caseData.getIntervenerFourWrapper();
-        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails(
-            IntervenerChangeDetails.IntervenerType.INTERVENER_FOUR, IntervenerChangeDetails.IntervenerAction.REMOVED);
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
+        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_FOUR);
         if (wrapper.getIntervener4Represented().equals(YesOrNo.YES)) {
             log.info("revoke case role for intervener4 for case {}", caseId);
             String orgId = wrapper.getIntervener4Organisation().getOrganisation().getOrganisationID();
@@ -97,8 +104,9 @@ public class IntervenerService {
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseData caseData = caseDetails.getData();
         Long caseId = callbackRequest.getCaseDetails().getId();
-        IntervenerChangeDetails intervenerFourChangeDetails = new IntervenerChangeDetails(
-            IntervenerChangeDetails.IntervenerType.INTERVENER_FOUR, IntervenerChangeDetails.IntervenerAction.ADDED);
+        IntervenerChangeDetails intervenerFourChangeDetails = new IntervenerChangeDetails();
+        intervenerFourChangeDetails.setIntervenerType(IntervenerType.INTERVENER_FOUR);
+        intervenerFourChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
 
         IntervenerFourWrapper intervenerFourWrapper = caseData.getIntervenerFourWrapper();
         if (intervenerFourWrapper != null) {
@@ -143,8 +151,10 @@ public class IntervenerService {
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseData caseData = caseDetails.getData();
         Long caseId = callbackRequest.getCaseDetails().getId();
-        IntervenerChangeDetails intervenerThreeChangeDetails = new IntervenerChangeDetails(
-            IntervenerChangeDetails.IntervenerType.INTERVENER_THREE, IntervenerChangeDetails.IntervenerAction.ADDED);
+
+        IntervenerChangeDetails intervenerThreeChangeDetails = new IntervenerChangeDetails();
+        intervenerThreeChangeDetails.setIntervenerType(IntervenerType.INTERVENER_THREE);
+        intervenerThreeChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
 
         IntervenerThreeWrapper intervenerThreeWrapper = caseData.getIntervenerThreeWrapper();
         if (intervenerThreeWrapper != null) {
@@ -189,9 +199,10 @@ public class IntervenerService {
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseData caseData = caseDetails.getData();
         Long caseId = callbackRequest.getCaseDetails().getId();
-        IntervenerChangeDetails intervenerTwoChangeDetails = new IntervenerChangeDetails(
-            IntervenerChangeDetails.IntervenerType.INTERVENER_TWO,
-            IntervenerChangeDetails.IntervenerAction.ADDED);
+
+        IntervenerChangeDetails intervenerTwoChangeDetails = new IntervenerChangeDetails();
+        intervenerTwoChangeDetails.setIntervenerType(IntervenerType.INTERVENER_TWO);
+        intervenerTwoChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
 
         IntervenerTwoWrapper intervenerTwoWrapper = caseData.getIntervenerTwoWrapper();
         if (intervenerTwoWrapper != null) {
@@ -237,9 +248,10 @@ public class IntervenerService {
         FinremCaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         FinremCaseData caseData = caseDetails.getData();
         Long caseId = callbackRequest.getCaseDetails().getId();
-        IntervenerChangeDetails intervenerOneChangeDetails =
-            new IntervenerChangeDetails(IntervenerChangeDetails.IntervenerType.INTERVENER_ONE,
-                IntervenerChangeDetails.IntervenerAction.ADDED);
+
+        IntervenerChangeDetails intervenerOneChangeDetails = new IntervenerChangeDetails();
+        intervenerOneChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
+        intervenerOneChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
 
         IntervenerOneWrapper intervenerOneWrapper = caseData.getIntervenerOneWrapper();
         if (intervenerOneWrapper != null) {

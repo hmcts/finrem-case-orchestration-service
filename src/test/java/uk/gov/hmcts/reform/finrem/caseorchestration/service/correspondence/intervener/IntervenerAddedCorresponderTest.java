@@ -18,8 +18,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
@@ -72,9 +74,9 @@ public class IntervenerAddedCorresponderTest {
 
     @Test
     public void shouldAlwaysSendLetterCorrespondenceToAppAndRespIfNotRepresented() {
-        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails(
-            IntervenerChangeDetails.IntervenerType.INTERVENER_ONE,
-            IntervenerChangeDetails.IntervenerAction.ADDED);
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
             .intervenerRepresented(YesOrNo.NO)
             .build();
@@ -94,9 +96,9 @@ public class IntervenerAddedCorresponderTest {
 
     @Test
     public void shouldSendLetterCorrespondenceIfIntervenerIsRepresentedToAppAndRespIfNotRepresented() {
-        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails(
-            IntervenerChangeDetails.IntervenerType.INTERVENER_ONE,
-            IntervenerChangeDetails.IntervenerAction.ADDED);
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
             .intervenerRepresented(YesOrNo.YES)
             .build();
@@ -116,9 +118,9 @@ public class IntervenerAddedCorresponderTest {
 
     @Test
     public void shouldSendIntervenerOneLetterCorrespondenceIfNotRepresented() {
-        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails(
-            IntervenerChangeDetails.IntervenerType.INTERVENER_ONE,
-            IntervenerChangeDetails.IntervenerAction.ADDED);
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
             .intervenerRepresented(YesOrNo.NO)
             .build();
@@ -135,9 +137,9 @@ public class IntervenerAddedCorresponderTest {
 
     @Test
     public void shouldSendIntervenerTwoLetterCorrespondenceIfNotRepresented() {
-        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails(
-            IntervenerChangeDetails.IntervenerType.INTERVENER_TWO,
-            IntervenerChangeDetails.IntervenerAction.ADDED);
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_TWO);
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
             .intervenerRepresented(YesOrNo.NO)
             .build();
@@ -154,9 +156,9 @@ public class IntervenerAddedCorresponderTest {
 
     @Test
     public void shouldSendIntervenerThreeLetterCorrespondenceIfNotRepresented() {
-        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails(
-            IntervenerChangeDetails.IntervenerType.INTERVENER_THREE,
-            IntervenerChangeDetails.IntervenerAction.ADDED);
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_THREE);
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
             .intervenerRepresented(YesOrNo.NO)
             .build();
@@ -173,9 +175,9 @@ public class IntervenerAddedCorresponderTest {
 
     @Test
     public void shouldSendIntervenerFourLetterCorrespondenceIfNotRepresented() {
-        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails(
-            IntervenerChangeDetails.IntervenerType.INTERVENER_FOUR,
-            IntervenerChangeDetails.IntervenerAction.ADDED);
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_FOUR);
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
             .intervenerRepresented(YesOrNo.NO)
             .build();
@@ -192,9 +194,9 @@ public class IntervenerAddedCorresponderTest {
 
     @Test
     public void shouldSendEmailIfIntervenerOneIsRepresented() {
-        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails(
-            IntervenerChangeDetails.IntervenerType.INTERVENER_ONE,
-            IntervenerChangeDetails.IntervenerAction.ADDED);
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
             .intervenerRepresented(YesOrNo.YES)
             .build();
@@ -209,9 +211,9 @@ public class IntervenerAddedCorresponderTest {
 
     @Test
     public void shouldSendEmailIfIntervenerTwoIsRepresented() {
-        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails(
-            IntervenerChangeDetails.IntervenerType.INTERVENER_TWO,
-            IntervenerChangeDetails.IntervenerAction.ADDED);
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_TWO);
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
             .intervenerRepresented(YesOrNo.YES)
             .build();
@@ -227,9 +229,9 @@ public class IntervenerAddedCorresponderTest {
 
     @Test
     public void shouldSendEmailIfIntervenerThreeIsRepresented() {
-        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails(
-            IntervenerChangeDetails.IntervenerType.INTERVENER_THREE,
-            IntervenerChangeDetails.IntervenerAction.ADDED);
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_THREE);
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
             .intervenerRepresented(YesOrNo.YES)
             .build();
@@ -245,9 +247,9 @@ public class IntervenerAddedCorresponderTest {
 
     @Test
     public void shouldSendEmailIfIntervenerFourIsRepresented() {
-        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails(
-            IntervenerChangeDetails.IntervenerType.INTERVENER_FOUR,
-            IntervenerChangeDetails.IntervenerAction.ADDED);
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_FOUR);
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
         IntervenerDetails intervenerDetails = IntervenerDetails.builder()
             .intervenerRepresented(YesOrNo.YES)
             .build();
