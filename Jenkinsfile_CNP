@@ -32,12 +32,13 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 }
 
 def getProjectName() {
+    String projectPrefix = "HMCTS_d_to_i/finrem-ccd-definitions/"
     def githubApi = new GithubAPI(this)
     for (label in githubApi.getLabelsbyPattern(env.BRANCH_NAME, "use-defs-pr-") ) {
-        String prNumber = label.substring(12, label.length());
-        return "HMCTS_d_to_i/finrem-ccd-definitions/" + "PR-" + prNumber;
+        String prNumber = label.substring(12, label.length())
+        return projectPrefix + "PR-" + prNumber
     }
-    return "HMCTS_d_to_i/finrem-ccd-definitions/master";
+    return projectPrefix + "master"
 }
 
 // Vars for Kubernetes
