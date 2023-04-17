@@ -26,12 +26,6 @@ public class CheckApplicantSolicitorIsDigitalService extends CheckSolicitorIsDig
         Map<String, Object> caseData = caseDetails.getData();
         OrganisationPolicy applicantPolicy = getApplicantOrganisationPolicy(caseData);
         boolean isApplicantRepresented = getApplicantIsRepresented(caseData);
-
-        if (applicantPolicy == null) {
-            throw new IllegalStateException(String.format("Applicant Organisation Policy is null for caseId %s",
-                caseDetails.getId()));
-        }
-
         return !isOrganisationEmpty(applicantPolicy) && isApplicantRepresented;
     }
 
