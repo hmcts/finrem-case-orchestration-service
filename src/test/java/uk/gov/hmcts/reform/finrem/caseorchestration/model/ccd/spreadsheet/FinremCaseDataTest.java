@@ -22,7 +22,7 @@ public class FinremCaseDataTest {
     public static final String DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX = "./definition_files/definitions/contested/xlsx";
     private String consentedFileNameWithPath = null;
     private String contestedFileNameWithPath = null;
-    private boolean localMode = true;
+    private boolean localMode = false;
 
     @Before
     public void setUpDefinitionFiles() {
