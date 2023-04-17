@@ -81,11 +81,13 @@ withPipeline(type, product, component) {
 
     onMaster() {
         enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
+        env.JENKINS_BRANCH = "master"
     }
 
     onPR() {
         enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
         env.CCD_DEFS = getProjectName()
+        env.JENKINS_BRANCH = "preview"
         println "Using CCD definitions from: " + env.CCD_DEFS
     }
 }

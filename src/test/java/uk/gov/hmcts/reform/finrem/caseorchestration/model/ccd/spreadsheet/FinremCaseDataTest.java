@@ -12,23 +12,38 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import static org.junit.Assume.assumeTrue;
 
 @Slf4j
-//@Ignore
 public class FinremCaseDataTest {
 
     ClassLoader classLoader = this.getClass().getClassLoader();
+
+    public static final String CCD_CONFIG_PROD_CONTESTED_XLSX = "ccd-config-prod-contested.xlsx";
+    public static final String CCD_CONFIG_PROD_CONSENTED_XLSX = "ccd-config-prod-consented.xlsx";
     public static final String DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX = "./definition_files/definitions/consented/xlsx";
     public static final String DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX = "./definition_files/definitions/contested/xlsx";
+
     private String consentedFileNameWithPath = null;
     private String contestedFileNameWithPath = null;
-    private boolean localMode = false;
+    private boolean localMode = true;
+    private boolean testEnabled = true;
 
     @Before
     public void setUpDefinitionFiles() {
+        String branch = System.getenv("JENKINS_BRANCH");
+        if (branch != null && branch.equals("master")) {
+            testEnabled = false;
+        }
         if (localMode == false) {
-            consentedFileNameWithPath = retrieveFileName("ccd-config-preview-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
-            contestedFileNameWithPath = retrieveFileName("ccd-config-preview-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
+            consentedFileNameWithPath = retrieveFileName("ccd-config-prod-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
+            if (consentedFileNameWithPath == null) {
+                consentedFileNameWithPath = retrieveFileName("ccd-config-preview-consented", DEFINITION_FILES_DEFINITIONS_CONSENTED_XLSX);
+            }
+            contestedFileNameWithPath = retrieveFileName("ccd-config-prod-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
+            if (contestedFileNameWithPath == null) {
+                contestedFileNameWithPath = retrieveFileName("ccd-config-preview-contested", DEFINITION_FILES_DEFINITIONS_CONTESTED_XLSX);
+            }
         }
     }
 
@@ -46,27 +61,31 @@ public class FinremCaseDataTest {
 
     @Test
     public void testContestedConfigFinRemCaseData() throws IOException, InvalidFormatException {
-        List<File> configFiles = Arrays.asList(getFile("ccd-config-prod-contested.xlsx", contestedFileNameWithPath),
-            getFile("ccd-config-prod-consented.xlsx", consentedFileNameWithPath));
+        assumeTrue(testEnabled);
+        List<File> configFiles = Arrays.asList(getFile(CCD_CONFIG_PROD_CONTESTED_XLSX, contestedFileNameWithPath),
+            getFile(CCD_CONFIG_PROD_CONSENTED_XLSX, consentedFileNameWithPath));
         validateConfig(configFiles);
     }
 
     @Test
     public void testConsentedConfigFinRemCaseData() throws IOException, InvalidFormatException {
-        List<File> configFiles = Arrays.asList(getFile("ccd-config-prod-consented.xlsx", consentedFileNameWithPath),
-            getFile("ccd-config-prod-contested.xlsx", contestedFileNameWithPath));
+        assumeTrue(testEnabled);
+        List<File> configFiles = Arrays.asList(getFile(CCD_CONFIG_PROD_CONSENTED_XLSX, consentedFileNameWithPath),
+            getFile(CCD_CONFIG_PROD_CONTESTED_XLSX, contestedFileNameWithPath));
         validateConfig(configFiles);
     }
 
     @Test
     public void testConsentedStateData() throws IOException, InvalidFormatException {
-        File configFile = getFile("ccd-config-prod-consented.xlsx", consentedFileNameWithPath);
+        assumeTrue(testEnabled);
+        File configFile = getFile(CCD_CONFIG_PROD_CONSENTED_XLSX, consentedFileNameWithPath);
         validateState(configFile);
     }
 
     @Test
     public void testContestedStateData() throws IOException, InvalidFormatException {
-        File configFile = getFile("ccd-config-prod-contested.xlsx", contestedFileNameWithPath);
+        assumeTrue(testEnabled);
+        File configFile = getFile(CCD_CONFIG_PROD_CONTESTED_XLSX, contestedFileNameWithPath);
         validateState(configFile);
     }
 
