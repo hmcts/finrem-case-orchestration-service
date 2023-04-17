@@ -214,7 +214,7 @@ public class CCDConfigValidator {
                     }
                 }
                 if (!found) {
-                    validationErrors.add("No CCD Field Found for FinremCaseData Field Id: " + field.getName() + " Field Type: " + field.getType());
+                    validationErrors.add("No CCD Field Found for FinremCaseData Field Name: " + field.getName() + " Field Type: " + field.getType());
                 }
             }
         }
