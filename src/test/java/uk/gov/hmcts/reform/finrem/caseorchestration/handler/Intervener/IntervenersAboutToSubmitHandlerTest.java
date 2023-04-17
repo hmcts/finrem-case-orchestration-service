@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
+package uk.gov.hmcts.reform.finrem.caseorchestration.handler.Intervener;
 
 
 import org.junit.Test;
@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.intervener.IntervenersAboutToStartHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.intervener.IntervenersAboutToSubmitHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.intervener.IntervenersMidHandler;
@@ -22,7 +23,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.intervener.IntervenerAddedCorresponder;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -61,8 +61,6 @@ public class IntervenersAboutToSubmitHandlerTest {
 
     @Mock
     private IntervenerService service;
-    @Mock
-    private IntervenerAddedCorresponder intervenerAddedCorresponder;
 
     @Test
     public void givenContestedCase_whenICallbackIsSubmitted_thenHandlerCanNotHandle() {

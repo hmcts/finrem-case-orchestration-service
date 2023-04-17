@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapp
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.intervener.IntervenerAddedCorresponder;
 
@@ -27,13 +26,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerC
 @Service
 public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
     private final IntervenerService service;
-    private final IntervenerAddedCorresponder intervenerAddedCorresponder;
 
     public IntervenersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
                                            IntervenerService service, IntervenerAddedCorresponder intervenerAddedCorresponder) {
         super(finremCaseDetailsMapper);
         this.service =  service;
-        this.intervenerAddedCorresponder = intervenerAddedCorresponder;
     }
 
     @Override
@@ -68,17 +65,8 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
             default -> throw new IllegalArgumentException("Invalid option received for case " + caseId);
         }
 
-        if (caseData.getCurrentIntervenerChangeDetails().getIntervenerAction().equals(IntervenerChangeDetails.IntervenerAction.ADDED)) {
-            intervenerAddedCorresponder.sendCorrespondence(callbackRequest.getCaseDetails(), userAuthorisation);
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .data(caseData).build();
-        //} else if (intervenerChangeDetails.getIntervenerAction().equals(IntervenerChangeDetails.IntervenerAction.REMOVED)) {
-            //intervenerRemovedCorresponder
-        } else {
-            return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-                .data(caseData).build();
-        }
-
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+            .data(caseData).build();
     }
 
 
