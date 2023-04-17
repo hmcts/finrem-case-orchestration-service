@@ -26,7 +26,7 @@ public class FinremCaseDataTest {
 
     private String consentedFileNameWithPath = null;
     private String contestedFileNameWithPath = null;
-    private boolean localMode = true;
+    private boolean localMode = false;
     private boolean testEnabled = true;
 
     @Before
