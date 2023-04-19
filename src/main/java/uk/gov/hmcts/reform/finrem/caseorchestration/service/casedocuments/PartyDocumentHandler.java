@@ -31,6 +31,10 @@ public abstract class PartyDocumentHandler extends CaseDocumentHandler<Contested
         List<ContestedUploadedDocumentData> documentsFiltered = uploadedDocuments.stream()
             .filter(d -> {
                 ContestedUploadedDocument uploadedCaseDocument = d.getUploadedCaseDocument();
+                if (uploadedCaseDocument.getCaseDocuments() != null
+                    && uploadedCaseDocument.getCaseDocumentParty() != null) {
+                    log.info("Party involved in uploading document {}", uploadedCaseDocument.getCaseDocumentParty());
+                }
                 return uploadedCaseDocument.getCaseDocuments() != null
                     && uploadedCaseDocument.getCaseDocumentParty() != null
                     && uploadedCaseDocument.getCaseDocumentParty().equals(party);
