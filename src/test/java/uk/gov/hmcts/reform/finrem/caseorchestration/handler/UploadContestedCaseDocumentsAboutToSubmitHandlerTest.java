@@ -92,7 +92,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDo
 
         CaseAssignmentUserRole role = CaseAssignmentUserRole.builder().caseRole("[APPSOLICITOR]").build();
         CaseAssignmentUserRolesResource resource = CaseAssignmentUserRolesResource.builder().caseAssignmentUserRoles(List.of(role)).build();
-        when(accessService.searchUserRoles(caseDetails.getId().toString())).thenReturn(resource);
+        when(accessService.getUserRoles(caseDetails.getId().toString())).thenReturn(resource);
         uploadDocumentList.add(createContestedUploadDocumentItem("Other", "", "yes", "no", "Other Example"));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
         CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
@@ -116,7 +116,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDo
 
             CaseAssignmentUserRole role = CaseAssignmentUserRole.builder().caseRole(activeRole).build();
             CaseAssignmentUserRolesResource resource = CaseAssignmentUserRolesResource.builder().caseAssignmentUserRoles(List.of(role)).build();
-            when(accessService.searchUserRoles(caseDetails.getId().toString())).thenReturn(resource);
+            when(accessService.getUserRoles(caseDetails.getId().toString())).thenReturn(resource);
             uploadDocumentList.add(createContestedUploadDocumentItem("Other", "", "yes", "no", "Other Example"));
             caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
             CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
@@ -136,7 +136,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDo
         CallbackRequest callbackRequest = buildCallbackRequest();
         CaseAssignmentUserRole role = CaseAssignmentUserRole.builder().caseRole("[APPSOLICITOR]").build();
         CaseAssignmentUserRolesResource resource = CaseAssignmentUserRolesResource.builder().caseAssignmentUserRoles(List.of(role)).build();
-        when(accessService.searchUserRoles(caseDetails.getId().toString())).thenReturn(resource);
+        when(accessService.getUserRoles(caseDetails.getId().toString())).thenReturn(resource);
         CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
         ContestedUploadedDocumentData oldDoc = createContestedUploadDocumentItem("Other", "", "yes", "no", "Old Document Example");
         existingDocumentList.add(oldDoc);
@@ -181,7 +181,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDo
         when(featureToggleService.isManageBundleEnabled()).thenReturn(true);
         CaseAssignmentUserRole role = CaseAssignmentUserRole.builder().caseRole("[APPSOLICITOR]").build();
         CaseAssignmentUserRolesResource resource = CaseAssignmentUserRolesResource.builder().caseAssignmentUserRoles(List.of(role)).build();
-        when(accessService.searchUserRoles(caseDetails.getId().toString())).thenReturn(resource);
+        when(accessService.getUserRoles(caseDetails.getId().toString())).thenReturn(resource);
         uploadDocumentList.add(createContestedUploadDocumentItem("Letter from Applicant", "", "yes", "no","Other Example"));
         CallbackRequest callbackRequest = buildCallbackRequest();
         callbackRequest.getCaseDetails().getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
