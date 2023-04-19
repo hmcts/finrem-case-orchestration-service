@@ -101,7 +101,7 @@ public class IntervenersSubmittedHandlerTest {
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(ADD_INTERVENER_TWO_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
-        when(service.setIntervenerOneAddedChangeDetails(finremCaseData)).thenReturn(intervenerTwoChangeDetails);
+        when(service.setIntervenerTwoAddedChangeDetails(finremCaseData)).thenReturn(intervenerTwoChangeDetails);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(intervenerAddedCorresponder).sendCorrespondence(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
@@ -122,7 +122,7 @@ public class IntervenersSubmittedHandlerTest {
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(ADD_INTERVENER_THREE_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
-        when(service.setIntervenerOneAddedChangeDetails(finremCaseData)).thenReturn(intervenerThreeChangeDetails);
+        when(service.setIntervenerThreeAddedChangeDetails(finremCaseData)).thenReturn(intervenerThreeChangeDetails);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(intervenerAddedCorresponder).sendCorrespondence(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
@@ -143,12 +143,12 @@ public class IntervenersSubmittedHandlerTest {
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(ADD_INTERVENER_FOUR_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
-        when(service.setIntervenerOneAddedChangeDetails(finremCaseData)).thenReturn(intervenerFourChangeDetails);
+        when(service.setIntervenerFourAddedChangeDetails(finremCaseData)).thenReturn(intervenerFourChangeDetails);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(intervenerAddedCorresponder).sendCorrespondence(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
-    
+
     private FinremCallbackRequest buildCallbackRequest() {
         return FinremCallbackRequest
             .builder()
