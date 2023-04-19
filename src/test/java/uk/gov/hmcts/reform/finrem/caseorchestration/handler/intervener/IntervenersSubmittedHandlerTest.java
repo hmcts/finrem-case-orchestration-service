@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerAction;
@@ -70,7 +70,8 @@ public class IntervenersSubmittedHandlerTest {
         intervenerOneChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
 
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerOneChangeDetails);
-
+        DynamicRadioList templist = DynamicRadioList.builder().build();
+        finremCaseData.setIntervenerOptionList(templist);
         when(finremCaseData.getIntervenerOptionList().getValueCode()).thenReturn(ADD_INTERVENER_ONE_CODE);
         when(service.setIntervenerOneAddedChangeDetails(finremCaseData)).thenReturn(intervenerOneChangeDetails);
 
