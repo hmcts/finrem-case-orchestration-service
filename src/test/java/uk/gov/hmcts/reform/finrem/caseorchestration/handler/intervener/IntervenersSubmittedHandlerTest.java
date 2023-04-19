@@ -24,7 +24,11 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.ADD_INTERVENER_FOUR_CODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.ADD_INTERVENER_ONE_CODE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.ADD_INTERVENER_THREE_CODE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.ADD_INTERVENER_TWO_CODE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.DEL_INTERVENER_ONE_CODE;
 
 @RunWith(MockitoJUnitRunner.class)
 public class IntervenersSubmittedHandlerTest {
@@ -62,7 +66,7 @@ public class IntervenersSubmittedHandlerTest {
     }
 
     @Test
-    public void givenContestedCase_whenIntervenerActionIsAdded_thenSendCorrespondance() {
+    public void givenContestedCase_whenIntervenerOneActionIsAdded_thenSendCorrespondance() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
@@ -82,6 +86,69 @@ public class IntervenersSubmittedHandlerTest {
         verify(intervenerAddedCorresponder).sendCorrespondence(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
     }
 
+    @Test
+    public void givenContestedCase_whenIntervenerTwoActionIsAdded_thenSendCorrespondance() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+
+        IntervenerChangeDetails intervenerTwoChangeDetails = new IntervenerChangeDetails();
+        intervenerTwoChangeDetails.setIntervenerType(IntervenerType.INTERVENER_TWO);
+        intervenerTwoChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
+
+        finremCaseData.setCurrentIntervenerChangeDetails(intervenerTwoChangeDetails);
+        finremCaseData.setIntervenerOptionList(DynamicRadioList.builder().build());
+
+        DynamicRadioListElement operation = DynamicRadioListElement.builder().code(ADD_INTERVENER_TWO_CODE).build();
+        finremCaseData.getIntervenerOptionList().setValue(operation);
+
+        when(service.setIntervenerOneAddedChangeDetails(finremCaseData)).thenReturn(intervenerTwoChangeDetails);
+
+        handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        verify(intervenerAddedCorresponder).sendCorrespondence(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
+    }
+
+    @Test
+    public void givenContestedCase_whenIntervenerThreeActionIsAdded_thenSendCorrespondance() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+
+        IntervenerChangeDetails intervenerThreeChangeDetails = new IntervenerChangeDetails();
+        intervenerThreeChangeDetails.setIntervenerType(IntervenerType.INTERVENER_THREE);
+        intervenerThreeChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
+
+        finremCaseData.setCurrentIntervenerChangeDetails(intervenerThreeChangeDetails);
+        finremCaseData.setIntervenerOptionList(DynamicRadioList.builder().build());
+
+        DynamicRadioListElement operation = DynamicRadioListElement.builder().code(ADD_INTERVENER_THREE_CODE).build();
+        finremCaseData.getIntervenerOptionList().setValue(operation);
+
+        when(service.setIntervenerOneAddedChangeDetails(finremCaseData)).thenReturn(intervenerThreeChangeDetails);
+
+        handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        verify(intervenerAddedCorresponder).sendCorrespondence(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
+    }
+
+    @Test
+    public void givenContestedCase_whenIntervenerFourActionIsAdded_thenSendCorrespondance() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+
+        IntervenerChangeDetails intervenerFourChangeDetails = new IntervenerChangeDetails();
+        intervenerFourChangeDetails.setIntervenerType(IntervenerType.INTERVENER_FOUR);
+        intervenerFourChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
+
+        finremCaseData.setCurrentIntervenerChangeDetails(intervenerFourChangeDetails);
+        finremCaseData.setIntervenerOptionList(DynamicRadioList.builder().build());
+
+        DynamicRadioListElement operation = DynamicRadioListElement.builder().code(ADD_INTERVENER_FOUR_CODE).build();
+        finremCaseData.getIntervenerOptionList().setValue(operation);
+
+        when(service.setIntervenerOneAddedChangeDetails(finremCaseData)).thenReturn(intervenerFourChangeDetails);
+
+        handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        verify(intervenerAddedCorresponder).sendCorrespondence(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
+    }
+    
     private FinremCallbackRequest buildCallbackRequest() {
         return FinremCallbackRequest
             .builder()

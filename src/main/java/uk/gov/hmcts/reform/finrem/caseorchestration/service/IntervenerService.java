@@ -423,7 +423,7 @@ public class IntervenerService {
         return intervenerFourChangeDetails;
     }
 
-    public IntervenerChangeDetails setIntervenerOneRemovedChangeDetails(FinremCaseData caseData) {
+    public IntervenerChangeDetails setIntervenerOneRemovedChangeDetails() {
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
         intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
         intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
@@ -431,7 +431,7 @@ public class IntervenerService {
         return intervenerChangeDetails;
     }
 
-    public IntervenerChangeDetails setIntervenerTwoRemovedChangeDetails(FinremCaseData caseData) {
+    public IntervenerChangeDetails setIntervenerTwoRemovedChangeDetails() {
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
         intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
         intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_TWO);
@@ -439,7 +439,7 @@ public class IntervenerService {
         return intervenerChangeDetails;
     }
 
-    public IntervenerChangeDetails setIntervenerThreeRemovedChangeDetails(FinremCaseData caseData) {
+    public IntervenerChangeDetails setIntervenerThreeRemovedChangeDetails() {
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
         intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
         intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_THREE);
@@ -447,7 +447,7 @@ public class IntervenerService {
         return intervenerChangeDetails;
     }
 
-    public IntervenerChangeDetails setIntervenerFourRemovedChangeDetails(FinremCaseData caseData) {
+    public IntervenerChangeDetails setIntervenerFourRemovedChangeDetails() {
         IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
         intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
         intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_FOUR);
