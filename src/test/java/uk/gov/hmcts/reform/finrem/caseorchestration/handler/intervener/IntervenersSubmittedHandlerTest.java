@@ -28,6 +28,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerC
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.ADD_INTERVENER_ONE_CODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.ADD_INTERVENER_THREE_CODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.ADD_INTERVENER_TWO_CODE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.DEL_INTERVENER_FOUR_CODE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.DEL_INTERVENER_ONE_CODE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.DEL_INTERVENER_THREE_CODE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.DEL_INTERVENER_TWO_CODE;
 
 @RunWith(MockitoJUnitRunner.class)
 public class IntervenersSubmittedHandlerTest {
@@ -146,6 +150,82 @@ public class IntervenersSubmittedHandlerTest {
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(intervenerAddedCorresponder).sendCorrespondence(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);
+    }
+
+    @Test
+    public void givenContestedCase_whenIntervenerOneActionIsRemoved_thenSendCorrespondance() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+
+        IntervenerChangeDetails intervenerOneChangeDetails = new IntervenerChangeDetails();
+        intervenerOneChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
+        intervenerOneChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
+
+        finremCaseData.setCurrentIntervenerChangeDetails(intervenerOneChangeDetails);
+        finremCaseData.setIntervenerOptionList(DynamicRadioList.builder().build());
+
+        DynamicRadioListElement operation = DynamicRadioListElement.builder().code(DEL_INTERVENER_ONE_CODE).build();
+        finremCaseData.getIntervenerOptionList().setValue(operation);
+
+        handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        verify(service).setIntervenerOneRemovedChangeDetails();
+    }
+
+    @Test
+    public void givenContestedCase_whenIntervenerTwoActionIsRemoved_thenSendCorrespondance() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+
+        IntervenerChangeDetails intervenerTwoChangeDetails = new IntervenerChangeDetails();
+        intervenerTwoChangeDetails.setIntervenerType(IntervenerType.INTERVENER_TWO);
+        intervenerTwoChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
+
+        finremCaseData.setCurrentIntervenerChangeDetails(intervenerTwoChangeDetails);
+        finremCaseData.setIntervenerOptionList(DynamicRadioList.builder().build());
+
+        DynamicRadioListElement operation = DynamicRadioListElement.builder().code(DEL_INTERVENER_TWO_CODE).build();
+        finremCaseData.getIntervenerOptionList().setValue(operation);
+
+        handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        verify(service).setIntervenerTwoRemovedChangeDetails();
+    }
+
+    @Test
+    public void givenContestedCase_whenIntervenerThreeActionIsRemoved_thenSendCorrespondance() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+
+        IntervenerChangeDetails intervenerThreeChangeDetails = new IntervenerChangeDetails();
+        intervenerThreeChangeDetails.setIntervenerType(IntervenerType.INTERVENER_THREE);
+        intervenerThreeChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
+
+        finremCaseData.setCurrentIntervenerChangeDetails(intervenerThreeChangeDetails);
+        finremCaseData.setIntervenerOptionList(DynamicRadioList.builder().build());
+
+        DynamicRadioListElement operation = DynamicRadioListElement.builder().code(DEL_INTERVENER_THREE_CODE).build();
+        finremCaseData.getIntervenerOptionList().setValue(operation);
+
+        handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        verify(service).setIntervenerThreeRemovedChangeDetails();
+    }
+
+    @Test
+    public void givenContestedCase_whenIntervenerFourActionIsRemoved_thenSendCorrespondance() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
+
+        IntervenerChangeDetails intervenerFourChangeDetails = new IntervenerChangeDetails();
+        intervenerFourChangeDetails.setIntervenerType(IntervenerType.INTERVENER_FOUR);
+        intervenerFourChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
+
+        finremCaseData.setCurrentIntervenerChangeDetails(intervenerFourChangeDetails);
+        finremCaseData.setIntervenerOptionList(DynamicRadioList.builder().build());
+
+        DynamicRadioListElement operation = DynamicRadioListElement.builder().code(DEL_INTERVENER_FOUR_CODE).build();
+        finremCaseData.getIntervenerOptionList().setValue(operation);
+
+        handler.handle(finremCallbackRequest, AUTH_TOKEN);
+        verify(service).setIntervenerFourRemovedChangeDetails();
     }
 
     private FinremCallbackRequest buildCallbackRequest() {

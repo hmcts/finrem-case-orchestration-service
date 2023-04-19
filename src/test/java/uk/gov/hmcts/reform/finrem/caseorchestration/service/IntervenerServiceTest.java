@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -65,15 +67,6 @@ public class IntervenerServiceTest extends BaseServiceTest {
     private PrdOrganisationService organisationService;
     @Mock
     private SystemUserService systemUserService;
-    @Mock
-    private IntervenerOneToIntervenerDetailsMapper intervenerOneToIntervenerDetailsMapper;
-    @Mock
-    private IntervenerTwoToIntervenerDetailsMapper intervenerTwoToIntervenerDetailsMapperDetails;
-    @Mock
-    private IntervenerThreeToIntervenerDetailsMapper intervenerThreeToIntervenerDetailsMapperDetails;
-    @Mock
-    private IntervenerFourToIntervenerDetailsMapper intervenerFourToIntervenerDetailsMapperDetails;
-
     @InjectMocks
     private IntervenerService service;
 
@@ -1339,6 +1332,58 @@ public class IntervenerServiceTest extends BaseServiceTest {
             () -> service.updateIntervenerFourDetails(finremCallbackRequest));
         assertEquals("expecting exception to throw when user not found in am",
             "Could not find the user with email " + INTERVENER_TEST_EMAIL, exception.getMessage());
+    }
+
+    @Test
+    public void whenCalled_setIntervenerChangeDetailsForIntervenerOne() {
+        IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
+            .intervener1Name("Intervener One")
+            .build();
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .intervenerOneWrapper(intervenerOneWrapper)
+            .build();
+
+        IntervenerChangeDetails result = service.setIntervenerOneAddedChangeDetails(finremCaseData);
+        Assert.assertEquals(intervenerOneWrapper.getIntervener1Name(), result.getIntervenerDetails().getIntervenerName());
+    }
+
+    @Test
+    public void whenCalled_setIntervenerChangeDetailsForIntervenerTwo() {
+        IntervenerTwoWrapper intervenerTwoWrapper = IntervenerTwoWrapper.builder()
+            .intervener2Name("Intervener Two")
+            .build();
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .intervenerTwoWrapper(intervenerTwoWrapper)
+            .build();
+
+        IntervenerChangeDetails result = service.setIntervenerTwoAddedChangeDetails(finremCaseData);
+        Assert.assertEquals(intervenerTwoWrapper.getIntervener2Name(), result.getIntervenerDetails().getIntervenerName());
+    }
+
+    @Test
+    public void whenCalled_setIntervenerChangeDetailsForIntervenerThree() {
+        IntervenerThreeWrapper intervenerThreeWrapper = IntervenerThreeWrapper.builder()
+            .intervener3Name("Intervener Three")
+            .build();
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .intervenerThreeWrapper(intervenerThreeWrapper)
+            .build();
+
+        IntervenerChangeDetails result = service.setIntervenerThreeAddedChangeDetails(finremCaseData);
+        Assert.assertEquals(intervenerThreeWrapper.getIntervener3Name(), result.getIntervenerDetails().getIntervenerName());
+    }
+
+    @Test
+    public void whenCalled_setIntervenerChangeDetailsForIntervenerFour() {
+        IntervenerFourWrapper intervenerFourWrapper = IntervenerFourWrapper.builder()
+            .intervener4Name("Intervener Four")
+            .build();
+        FinremCaseData finremCaseData = FinremCaseData.builder()
+            .intervenerFourWrapper(intervenerFourWrapper)
+            .build();
+
+        IntervenerChangeDetails result = service.setIntervenerFourAddedChangeDetails(finremCaseData);
+        Assert.assertEquals(intervenerFourWrapper.getIntervener4Name(), result.getIntervenerDetails().getIntervenerName());
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
