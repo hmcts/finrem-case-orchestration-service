@@ -15,6 +15,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseFlagsWrapper;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ConsentOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
@@ -367,6 +368,19 @@ public class FinremCaseData {
     private ScheduleOneWrapper scheduleOneWrapper;
 
     private List<ConsentedHearingDataWrapper> listForHearings;
+
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private CaseFlagsWrapper caseFlagsWrapper;
+
+
+    @JsonIgnore
+    public CaseFlagsWrapper getCaseFlagsWrapper() {
+        if (caseFlagsWrapper == null) {
+            this.caseFlagsWrapper = new CaseFlagsWrapper();
+        }
+        return caseFlagsWrapper;
+    }
 
     @JsonIgnore
     public ScheduleOneWrapper getScheduleOneWrapper() {
@@ -723,7 +737,6 @@ public class FinremCaseData {
             Region.HIGHCOURT, getHighCourt(regionWrapper.getHighCourtFrcList(), courtList)
         ).get(regionWrapper.getRegionList());
     }
-
 
 
     @JsonIgnore
