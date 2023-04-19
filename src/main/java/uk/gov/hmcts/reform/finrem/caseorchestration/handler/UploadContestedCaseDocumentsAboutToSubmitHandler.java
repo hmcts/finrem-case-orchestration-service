@@ -118,7 +118,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler implements Callbac
 
     public List<String> getRolesOnCase(final String caseId) {
         log.info("searching for creator role for caseId {}", caseId);
-        CaseAssignmentUserRolesResource rolesResource = accessService.searchUserRoles(caseId);
+        CaseAssignmentUserRolesResource rolesResource = accessService.getUserRoles(caseId);
         if (rolesResource != null) {
             List<CaseAssignmentUserRole> allRoles = rolesResource.getCaseAssignmentUserRoles();
             log.info("All roles {} for caseId {}", allRoles, caseId);

@@ -473,7 +473,7 @@ public class CCDConfigConstant {
     public static final String APP_CASE_SUMMARIES_COLLECTION = "appCaseSummariesCollection";
     public static final String APP_FORMS_H_COLLECTION = "appFormsHCollection";
     public static final String APP_EXPERT_EVIDENCE_COLLECTION = "appExpertEvidenceCollection";
-    public static final String APP_CORRESPONDENCE_COLLECTION = "appCorrespondenceDocsColl";
+    public static final String APP_CORRESPONDENCE_COLLECTION = "appCorrespondenceDocsCollection";
     public static final String APP_OTHER_COLLECTION = "appOtherCollection";
     public static final String RESP_HEARING_BUNDLES_COLLECTION = "respHearingBundlesCollection";
     public static final String RESP_FORM_E_EXHIBITS_COLLECTION = "respFormEExhibitsCollection";
@@ -489,13 +489,6 @@ public class CCDConfigConstant {
     public static final String CONTESTED_MANAGE_CASE_DOCUMENT_COLLECTION = "manageCaseDocumentCollection";
 
     public static final String AMEND_CONSENT_ORDER = "AmendedConsentOrder";
-
-    private static final String INTERVENER_ONE = "intervener1";
-    private static final String INTERVENER_TWO = "intervener2";
-    private static final String INTERVENER_THREE = "intervener3";
-    private static final String INTERVENER_FOUR = "intervener4";
-    private static final String CASE = "case";
-
     public static final String INTV_ONE_CASE_SUMMARIES_COLLECTION = "intv1Summaries";
     public static final String INTV_ONE_CHRONOLOGIES_STATEMENTS_COLLECTION = "intv1Chronologies";
     public static final String INTV_ONE_CORRESPONDENCE_COLLECTION = "intv1CorrespDocs";
