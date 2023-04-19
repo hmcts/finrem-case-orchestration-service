@@ -14,11 +14,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.intervener.IntervenerAddedCorresponder;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -31,6 +33,9 @@ public class IntervenersSubmittedHandlerTest {
 
     @Mock
     private IntervenerAddedCorresponder intervenerAddedCorresponder;
+
+    @Mock
+    private IntervenerService service;
 
     @Test
     public void givenContestedCase_whenICallbackIsAboutToSubmit_thenHandlerCanNotHandle() {
@@ -63,6 +68,8 @@ public class IntervenersSubmittedHandlerTest {
         intervenerOneChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
 
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerOneChangeDetails);
+
+        when(service.setIntervenerOneAddedChangeDetails(finremCaseData)).thenReturn(intervenerOneChangeDetails);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(intervenerAddedCorresponder).sendCorrespondence(finremCallbackRequest.getCaseDetails(), AUTH_TOKEN);

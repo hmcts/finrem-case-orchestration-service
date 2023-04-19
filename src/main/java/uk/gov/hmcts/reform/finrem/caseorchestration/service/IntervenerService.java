@@ -383,6 +383,78 @@ public class IntervenerService {
         intervenerFourWrapper.getIntervener4Organisation().setOrgPolicyReference(null);
     }
 
+    public IntervenerChangeDetails setIntervenerOneAddedChangeDetails(FinremCaseData caseData) {
+        IntervenerChangeDetails intervenerOneChangeDetails = new IntervenerChangeDetails();
+        intervenerOneChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
+        intervenerOneChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
+        intervenerOneChangeDetails.setIntervenerDetails(
+            intervenerOneDetailsMapper.mapToIntervenerDetails(caseData.getIntervenerOneWrapper()));
+
+        return intervenerOneChangeDetails;
+    }
+
+    public IntervenerChangeDetails setIntervenerTwoAddedChangeDetails(FinremCaseData caseData) {
+        IntervenerChangeDetails intervenerTwoChangeDetails = new IntervenerChangeDetails();
+        intervenerTwoChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
+        intervenerTwoChangeDetails.setIntervenerType(IntervenerType.INTERVENER_TWO);
+        intervenerTwoChangeDetails.setIntervenerDetails(
+            intervenerTwoDetailsMapper.mapToIntervenerDetails(caseData.getIntervenerTwoWrapper()));
+
+        return intervenerTwoChangeDetails;
+    }
+
+    public IntervenerChangeDetails setIntervenerThreeAddedChangeDetails(FinremCaseData caseData) {
+        IntervenerChangeDetails intervenerThreeChangeDetails = new IntervenerChangeDetails();
+        intervenerThreeChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
+        intervenerThreeChangeDetails.setIntervenerType(IntervenerType.INTERVENER_THREE);
+        intervenerThreeChangeDetails.setIntervenerDetails(
+            intervenerThreeDetailsMapper.mapToIntervenerDetails(caseData.getIntervenerThreeWrapper()));
+
+        return intervenerThreeChangeDetails;
+    }
+
+    public IntervenerChangeDetails setIntervenerFourAddedChangeDetails(FinremCaseData caseData) {
+        IntervenerChangeDetails intervenerFourChangeDetails = new IntervenerChangeDetails();
+        intervenerFourChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
+        intervenerFourChangeDetails.setIntervenerType(IntervenerType.INTERVENER_FOUR);
+        intervenerFourChangeDetails.setIntervenerDetails(
+            intervenerFourDetailsMapper.mapToIntervenerDetails(caseData.getIntervenerFourWrapper()));
+
+        return intervenerFourChangeDetails;
+    }
+
+    public IntervenerChangeDetails setIntervenerOneRemovedChangeDetails(FinremCaseData caseData) {
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
+        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
+
+        return intervenerChangeDetails;
+    }
+
+    public IntervenerChangeDetails setIntervenerTwoRemovedChangeDetails(FinremCaseData caseData) {
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
+        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_TWO);
+
+        return intervenerChangeDetails;
+    }
+
+    public IntervenerChangeDetails setIntervenerThreeRemovedChangeDetails(FinremCaseData caseData) {
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
+        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_THREE);
+
+        return intervenerChangeDetails;
+    }
+
+    public IntervenerChangeDetails setIntervenerFourRemovedChangeDetails(FinremCaseData caseData) {
+        IntervenerChangeDetails intervenerChangeDetails = new IntervenerChangeDetails();
+        intervenerChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
+        intervenerChangeDetails.setIntervenerType(IntervenerType.INTERVENER_FOUR);
+
+        return intervenerChangeDetails;
+    }
+
     private void addIntervenerRole(Long caseId, String email, String orgId, String caseRole) {
         organisationService.findUserByEmail(email, systemUserService.getSysUserToken())
             .ifPresentOrElse(

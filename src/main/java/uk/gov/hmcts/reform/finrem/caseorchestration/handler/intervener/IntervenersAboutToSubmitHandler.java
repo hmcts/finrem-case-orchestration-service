@@ -28,7 +28,7 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
     private final IntervenerService service;
 
     public IntervenersAboutToSubmitHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
-                                           IntervenerService service, IntervenerAddedCorresponder intervenerAddedCorresponder) {
+                                           IntervenerService service) {
         super(finremCaseDetailsMapper);
         this.service =  service;
     }
@@ -54,14 +54,14 @@ public class IntervenersAboutToSubmitHandler extends FinremCallbackHandler {
             selectedOperationCode, caseData.getIntervenersList().getValueCode(), caseId);
 
         switch (selectedOperationCode) {
-            case ADD_INTERVENER_ONE_CODE -> caseData.setCurrentIntervenerChangeDetails(service.updateIntervenerOneDetails(callbackRequest));
-            case ADD_INTERVENER_TWO_CODE -> caseData.setCurrentIntervenerChangeDetails(service.updateIntervenerTwoDetails(callbackRequest));
-            case ADD_INTERVENER_THREE_CODE -> caseData.setCurrentIntervenerChangeDetails(service.updateIntervenerThreeDetails(callbackRequest));
-            case ADD_INTERVENER_FOUR_CODE -> caseData.setCurrentIntervenerChangeDetails(service.updateIntervenerFourDetails(callbackRequest));
-            case DEL_INTERVENER_ONE_CODE -> caseData.setCurrentIntervenerChangeDetails(service.removeIntervenerOneDetails(caseData, caseId));
-            case DEL_INTERVENER_TWO_CODE -> caseData.setCurrentIntervenerChangeDetails(service.removeIntervenerTwoDetails(caseData, caseId));
-            case DEL_INTERVENER_THREE_CODE -> caseData.setCurrentIntervenerChangeDetails(service.removeIntervenerThreeDetails(caseData, caseId));
-            case DEL_INTERVENER_FOUR_CODE -> caseData.setCurrentIntervenerChangeDetails(service.removeIntervenerFourDetails(caseData, caseId));
+            case ADD_INTERVENER_ONE_CODE -> service.updateIntervenerOneDetails(callbackRequest);
+            case ADD_INTERVENER_TWO_CODE -> service.updateIntervenerTwoDetails(callbackRequest);
+            case ADD_INTERVENER_THREE_CODE -> service.updateIntervenerThreeDetails(callbackRequest);
+            case ADD_INTERVENER_FOUR_CODE -> service.updateIntervenerFourDetails(callbackRequest);
+            case DEL_INTERVENER_ONE_CODE -> service.removeIntervenerOneDetails(caseData, caseId);
+            case DEL_INTERVENER_TWO_CODE -> service.removeIntervenerTwoDetails(caseData, caseId);
+            case DEL_INTERVENER_THREE_CODE -> service.removeIntervenerThreeDetails(caseData, caseId);
+            case DEL_INTERVENER_FOUR_CODE -> service.removeIntervenerFourDetails(caseData, caseId);
             default -> throw new IllegalArgumentException("Invalid option received for case " + caseId);
         }
 
