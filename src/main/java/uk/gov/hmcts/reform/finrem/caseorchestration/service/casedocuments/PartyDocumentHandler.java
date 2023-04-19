@@ -15,6 +15,11 @@ public abstract class PartyDocumentHandler extends CaseDocumentHandler<Contested
 
     protected static final String APPLICANT = "applicant";
     protected static final String RESPONDENT = "respondent";
+    protected static final String INTERVENER_ONE = "intervener1";
+    protected static final String INTERVENER_TWO = "intervener2";
+    protected static final String INTERVENER_THREE = "intervener3";
+    protected static final String INTERVENER_FOUR = "intervener4";
+    protected static final String CASE = "case";
     private final String collectionName;
     private final String party;
     private final ObjectMapper mapper;

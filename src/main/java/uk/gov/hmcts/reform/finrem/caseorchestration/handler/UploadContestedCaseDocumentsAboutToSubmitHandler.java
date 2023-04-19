@@ -29,7 +29,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.handler.RejectGeneralApplicationSubmittedHandler.CASE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_FOUR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_ONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_THREE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_TWO;
 
 @Slf4j
 @Service
@@ -38,11 +43,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler implements Callbac
 
     private static final String APPLICANT = "applicant";
     private static final String RESPONDENT = "respondent";
-    private static final String INTERVENER_ONE = "intervener1";
-    private static final String INTERVENER_TWO = "intervener2";
-    private static final String INTERVENER_THREE = "intervener3";
-    private static final String INTERVENER_FOUR = "intervener4";
-    private static final String CASE = "case";
+
     public static final String TRIAL_BUNDLE_SELECTED_ERROR =
         "To upload a hearing bundle please use the Manage hearing "
             + "bundles event which can be found on the drop-down list on the home page";
@@ -93,7 +94,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler implements Callbac
     }
 
     private String getActiveRole(Long caseId) {
-        String loggedInUserRole = "";
+        String loggedInUserRole = CASE;
         List<String> rolesOnCase = getRolesOnCase(String.valueOf(caseId));
         if (!rolesOnCase.isEmpty()) {
             if (rolesOnCase.contains(CaseRole.APP_SOLICITOR.getValue())) {
@@ -108,8 +109,6 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler implements Callbac
                 loggedInUserRole = INTERVENER_THREE;
             } else if (rolesOnCase.contains(CaseRole.INTVR_SOLICITOR_4.getValue())) {
                 loggedInUserRole = INTERVENER_FOUR;
-            } else {
-                loggedInUserRole = CASE;
             }
         }
         log.info("Logged in user role {} caseId {}", loggedInUserRole, caseId);

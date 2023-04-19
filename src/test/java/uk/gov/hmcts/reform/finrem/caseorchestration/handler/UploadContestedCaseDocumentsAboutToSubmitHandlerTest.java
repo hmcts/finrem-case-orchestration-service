@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Before;
@@ -99,10 +100,35 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDo
         uploadContestedCaseDocumentsHandler.handle(callbackRequest, AUTH_TOKEN);
 
         List<ContestedUploadedDocumentData> uploadedDocumentPost
-            = (List<ContestedUploadedDocumentData>) caseDetails.getData().get(CONTESTED_UPLOADED_DOCUMENTS);
+            = convertToUploadDocList(caseDetails.getData().get(CONTESTED_UPLOADED_DOCUMENTS));
 
         verify(applicantCaseSummariesHandler).handle(uploadedDocumentPost, caseDetails.getData());
         verify(applicantChronologiesStatementHandler).handle(uploadedDocumentPost, caseDetails.getData());
+    }
+
+    @Test
+    public void givenUploadCaseDocument_whenDocIsValidAndUploadedByInterveners_thenExecuteHandlers() {
+        List<String> roles = List.of("[INTVRSOLICITOR1]", "[INTVRSOLICITOR2]", "[INTVRSOLICITOR3]", "[INTVRSOLICITOR4]", "[RESPSOLICITOR]");
+
+        for (String activeRole : roles) {
+            CallbackRequest callbackRequest = buildCallbackRequest();
+            CaseDetails caseDetails = callbackRequest.getCaseDetails();
+
+            CaseAssignmentUserRole role = CaseAssignmentUserRole.builder().caseRole(activeRole).build();
+            CaseAssignmentUserRolesResource resource = CaseAssignmentUserRolesResource.builder().caseAssignmentUserRoles(List.of(role)).build();
+            when(accessService.searchUserRoles(caseDetails.getId().toString())).thenReturn(resource);
+            uploadDocumentList.add(createContestedUploadDocumentItem("Other", "", "yes", "no", "Other Example"));
+            caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+            CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+            caseDetailsBefore.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+            uploadContestedCaseDocumentsHandler.handle(callbackRequest, AUTH_TOKEN);
+
+            List<ContestedUploadedDocumentData> uploadedDocumentPost
+                = convertToUploadDocList(caseDetails.getData().get(CONTESTED_UPLOADED_DOCUMENTS));
+
+            verify(applicantCaseSummariesHandler).handle(uploadedDocumentPost, caseDetails.getData());
+            verify(applicantChronologiesStatementHandler).handle(uploadedDocumentPost, caseDetails.getData());
+        }
     }
 
     @Test
@@ -175,5 +201,10 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDo
         caseDetailsBefore.setData(caseDataBefore);
         return CallbackRequest.builder().eventId(EventType.UPLOAD_CASE_FILES.getCcdType())
             .caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
+    }
+
+    public List<ContestedUploadedDocumentData> convertToUploadDocList(Object object) {
+        return objectMapper.convertValue(object, new TypeReference<>() {
+        });
     }
 }
