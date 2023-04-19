@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicRadioListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerAction;
@@ -70,9 +71,11 @@ public class IntervenersSubmittedHandlerTest {
         intervenerOneChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
 
         finremCaseData.setCurrentIntervenerChangeDetails(intervenerOneChangeDetails);
-        DynamicRadioList templist = DynamicRadioList.builder().build();
-        finremCaseData.setIntervenerOptionList(templist);
-        when(finremCaseData.getIntervenerOptionList().getValueCode()).thenReturn(ADD_INTERVENER_ONE_CODE);
+        finremCaseData.setIntervenerOptionList(DynamicRadioList.builder().build());
+
+        DynamicRadioListElement operation = DynamicRadioListElement.builder().code(ADD_INTERVENER_ONE_CODE).build();
+        finremCaseData.getIntervenerOptionList().setValue(operation);
+
         when(service.setIntervenerOneAddedChangeDetails(finremCaseData)).thenReturn(intervenerOneChangeDetails);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
