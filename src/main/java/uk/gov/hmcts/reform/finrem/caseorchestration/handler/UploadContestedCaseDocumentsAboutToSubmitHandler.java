@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandler;
 
 import java.util.ArrayList;
@@ -54,6 +55,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler implements Callbac
     private final ObjectMapper objectMapper;
     private final UploadedDocumentHelper uploadedDocumentHelper;
     private final AssignCaseAccessService accessService;
+    private final IdamService idamService;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -79,7 +81,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler implements Callbac
             callbackRequest.getCaseDetails().getData(),
             callbackRequest.getCaseDetailsBefore().getData(), CONTESTED_UPLOADED_DOCUMENTS);
 
-        String loggedInUserRole = getActiveRole(caseId);
+        String loggedInUserRole = getActiveUser(caseId, userAuthorisation);
         log.info("Loggedin User role {}", loggedInUserRole);
 
         List<ContestedUploadedDocumentData> uploadedDocuments = (List<ContestedUploadedDocumentData>) caseData.get(CONTESTED_UPLOADED_DOCUMENTS);
@@ -93,39 +95,48 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler implements Callbac
         return response;
     }
 
-    private String getActiveRole(Long caseId) {
-        String loggedInUserRole = CASE;
-        List<String> rolesOnCase = getRolesOnCase(String.valueOf(caseId));
-        if (!rolesOnCase.isEmpty()) {
-            if (rolesOnCase.contains(CaseRole.APP_SOLICITOR.getValue())) {
-                loggedInUserRole = APPLICANT;
-            } else if (rolesOnCase.contains(CaseRole.RESP_SOLICITOR.getValue())) {
-                loggedInUserRole = RESPONDENT;
-            } else if (rolesOnCase.contains(CaseRole.INTVR_SOLICITOR_1.getValue())) {
-                loggedInUserRole = INTERVENER_ONE;
-            } else if (rolesOnCase.contains(CaseRole.INTVR_SOLICITOR_2.getValue())) {
-                loggedInUserRole = INTERVENER_TWO;
-            } else if (rolesOnCase.contains(CaseRole.INTVR_SOLICITOR_3.getValue())) {
-                loggedInUserRole = INTERVENER_THREE;
-            } else if (rolesOnCase.contains(CaseRole.INTVR_SOLICITOR_4.getValue())) {
-                loggedInUserRole = INTERVENER_FOUR;
-            }
+    private String getActiveUser(Long caseId, String userAuthorisation) {
+        String logMessage = "Logged in user role {} caseId {}";
+        String activeUserCaseRole = getActiveUserCaseRole(String.valueOf(caseId), userAuthorisation);
+        if (activeUserCaseRole.contains(CaseRole.APP_SOLICITOR.getValue())) {
+            log.info(logMessage, APPLICANT, caseId);
+            return APPLICANT;
+        } else if (activeUserCaseRole.contains(CaseRole.RESP_SOLICITOR.getValue())) {
+            log.info(logMessage, RESPONDENT, caseId);
+            return RESPONDENT;
+        } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_1.getValue())) {
+            log.info(logMessage, INTERVENER_ONE, caseId);
+            return INTERVENER_ONE;
+        } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_2.getValue())) {
+            log.info(logMessage, INTERVENER_TWO, caseId);
+            return INTERVENER_TWO;
+        } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_3.getValue())) {
+            log.info(logMessage, INTERVENER_THREE, caseId);
+            return INTERVENER_THREE;
+        } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_4.getValue())) {
+            log.info(logMessage, INTERVENER_FOUR, caseId);
+            return INTERVENER_FOUR;
         }
-        log.info("Logged in user role {} caseId {}", loggedInUserRole, caseId);
-        return loggedInUserRole;
+        return activeUserCaseRole;
     }
 
 
-    public List<String> getRolesOnCase(final String caseId) {
-        log.info("searching for creator role for caseId {}", caseId);
-        CaseAssignmentUserRolesResource rolesResource = accessService.getUserRoles(caseId);
+    public String getActiveUserCaseRole(final String caseId, final String userAuthorisation) {
+        log.info("retrieve active user  case role for caseId {}", caseId);
+        String idamUserId = idamService.getIdamUserId(userAuthorisation);
+        CaseAssignmentUserRolesResource rolesResource = accessService.searchUserRoles(caseId);
         if (rolesResource != null) {
             List<CaseAssignmentUserRole> allRoles = rolesResource.getCaseAssignmentUserRoles();
             log.info("All roles {} for caseId {}", allRoles, caseId);
-            List<String> activeCaseRoles = allRoles.stream().map(CaseAssignmentUserRole::getCaseRole).toList();
-            return Optional.of(activeCaseRoles).orElse(new ArrayList<>());
+            List<CaseAssignmentUserRole> activeRole = allRoles.stream().filter(role -> role.getUserId().equals(idamUserId)).toList();
+            if (!activeRole.isEmpty()) {
+                log.info("Active Role {} for caseId {}", activeRole, caseId);
+                String caseRole = activeRole.get(0).getCaseRole();
+                log.info("case role found {} for caseId {}", caseRole, caseId);
+                return caseRole;
+            }
         }
-        return new ArrayList<>();
+        return CASE;
     }
 
 
