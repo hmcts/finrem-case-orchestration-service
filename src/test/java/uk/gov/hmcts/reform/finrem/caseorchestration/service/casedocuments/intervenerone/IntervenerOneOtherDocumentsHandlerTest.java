@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.inter
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandlerTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.intervenerfour.IntervenerFourOtherDocumentsHandler;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -13,7 +12,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerC
 
 public class IntervenerOneOtherDocumentsHandlerTest extends CaseDocumentHandlerTest {
 
-    IntervenerFourOtherDocumentsHandler handler = new IntervenerFourOtherDocumentsHandler(new ObjectMapper());
+    IntervenerOneOtherDocumentsHandler handler = new IntervenerOneOtherDocumentsHandler(new ObjectMapper());
 
 
     @Test
