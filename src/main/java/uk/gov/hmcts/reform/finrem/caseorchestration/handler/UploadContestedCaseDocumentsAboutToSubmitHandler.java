@@ -12,9 +12,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedDocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResource;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandler;
 
@@ -30,9 +34,15 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UploadContestedCaseDocumentsAboutToSubmitHandler
-    implements CallbackHandler<Map<String, Object>> {
+public class UploadContestedCaseDocumentsAboutToSubmitHandler implements CallbackHandler<Map<String, Object>> {
 
+    private static final String APPLICANT = "applicant";
+    private static final String RESPONDENT = "respondent";
+    private static final String INTERVENER_ONE = "intervener1";
+    private static final String INTERVENER_TWO = "intervener2";
+    private static final String INTERVENER_THREE = "intervener3";
+    private static final String INTERVENER_FOUR = "intervener4";
+    private static final String CASE = "case";
     public static final String TRIAL_BUNDLE_SELECTED_ERROR =
         "To upload a hearing bundle please use the Manage hearing "
             + "bundles event which can be found on the drop-down list on the home page";
@@ -42,6 +52,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler
     private final List<CaseDocumentHandler> caseDocumentHandlers;
     private final ObjectMapper objectMapper;
     private final UploadedDocumentHelper uploadedDocumentHelper;
+    private final AssignCaseAccessService accessService;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -54,6 +65,9 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler
     public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(CallbackRequest callbackRequest,
                                                                                    String userAuthorisation) {
 
+        Long caseId = callbackRequest.getCaseDetails().getId();
+        log.info("Invoking Upload case document file event for case Id {}", caseId);
+
         GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>>
             response = validateUploadedDocuments(callbackRequest.getCaseDetails().getData());
         if (!CollectionUtils.isEmpty(response.getErrors())) {
@@ -64,7 +78,11 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler
             callbackRequest.getCaseDetails().getData(),
             callbackRequest.getCaseDetailsBefore().getData(), CONTESTED_UPLOADED_DOCUMENTS);
 
+        String loggedInUserRole = getActiveRole(caseId);
+        log.info("Loggedin User role {}", loggedInUserRole);
+
         List<ContestedUploadedDocumentData> uploadedDocuments = (List<ContestedUploadedDocumentData>) caseData.get(CONTESTED_UPLOADED_DOCUMENTS);
+        uploadedDocuments.forEach(doc -> doc.getUploadedCaseDocument().setCaseDocumentParty(loggedInUserRole));
         caseDocumentHandlers.stream().forEach(h -> h.handle(uploadedDocuments, caseData));
         uploadedDocuments.sort(Comparator.comparing(
             ContestedUploadedDocumentData::getUploadedCaseDocument, Comparator.comparing(
@@ -73,6 +91,44 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler
         caseData.put(CONTESTED_UPLOADED_DOCUMENTS, uploadedDocuments);
         return response;
     }
+
+    private String getActiveRole(Long caseId) {
+        String loggedInUserRole = "";
+        List<String> rolesOnCase = getRolesOnCase(String.valueOf(caseId));
+        if (!rolesOnCase.isEmpty()) {
+            if (rolesOnCase.contains(CaseRole.APP_SOLICITOR.getValue())) {
+                loggedInUserRole = APPLICANT;
+            } else if (rolesOnCase.contains(CaseRole.RESP_SOLICITOR.getValue())) {
+                loggedInUserRole = RESPONDENT;
+            } else if (rolesOnCase.contains(CaseRole.INTVR_SOLICITOR_1.getValue())) {
+                loggedInUserRole = INTERVENER_ONE;
+            } else if (rolesOnCase.contains(CaseRole.INTVR_SOLICITOR_2.getValue())) {
+                loggedInUserRole = INTERVENER_TWO;
+            } else if (rolesOnCase.contains(CaseRole.INTVR_SOLICITOR_3.getValue())) {
+                loggedInUserRole = INTERVENER_THREE;
+            } else if (rolesOnCase.contains(CaseRole.INTVR_SOLICITOR_4.getValue())) {
+                loggedInUserRole = INTERVENER_FOUR;
+            } else {
+                loggedInUserRole = CASE;
+            }
+        }
+        log.info("Logged in user role {} caseId {}", loggedInUserRole, caseId);
+        return loggedInUserRole;
+    }
+
+
+    public List<String> getRolesOnCase(final String caseId) {
+        log.info("searching for creator role for caseId {}", caseId);
+        CaseAssignmentUserRolesResource rolesResource = accessService.searchUserRoles(caseId);
+        if (rolesResource != null) {
+            List<CaseAssignmentUserRole> allRoles = rolesResource.getCaseAssignmentUserRoles();
+            log.info("All roles {} for caseId {}", allRoles, caseId);
+            List<String> activeCaseRoles = allRoles.stream().map(CaseAssignmentUserRole::getCaseRole).toList();
+            return Optional.of(activeCaseRoles).orElse(new ArrayList<>());
+        }
+        return new ArrayList<>();
+    }
+
 
     private GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> validateUploadedDocuments(
         Map<String, Object> caseData) {
