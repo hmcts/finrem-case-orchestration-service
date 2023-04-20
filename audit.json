@@ -10,5 +10,8 @@
   "90033_Loosely Scoped Cookie_http://finrem-cos-aat.service.core-compute-aat.internal/robots.txt_GET": "ignore",
   "10096_Timestamp Disclosure - Unix_http://finrem-cos-aat.service.core-compute-aat.internal/_GET": "ignore",
   "10096_Timestamp Disclosure - Unix_http://finrem-cos-aat.service.core-compute-aat.internal_GET": "ignore",
-  "10096_Timestamp Disclosure - Unix_http://finrem-cos-aat.service.core-compute-aat.internal/robots.txt_GET": "ignore"
+  "10096_Timestamp Disclosure - Unix_http://finrem-cos-aat.service.core-compute-aat.internal/robots.txt_GET": "ignore",
+  "10096_Timestamp Disclosure - Unix_http://finrem-cos-aat.service.core-compute-aat.internal/sitemap.xml_GET": "ignore",
+  "10096_Timestamp Disclosure - Unix_http://finrem-cos-aat.service.core-compute-aat.internal/v2/api-docs_GET": "ignore",
+  "100000_A Client Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/v2/api-docs_GET": "ignore"
 }
