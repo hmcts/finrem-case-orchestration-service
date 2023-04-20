@@ -338,26 +338,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void sendGeneralEmailConsented() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-
-        notificationsController.sendGeneralEmail(createCallbackRequestWithFinalOrder());
-
-        verify(notificationService).sendConsentGeneralEmail(any(CaseDetails.class));
-        verify(generalEmailService).storeGeneralEmail(any(CaseDetails.class));
-    }
-
-    @Test
-    public void sendGeneralEmailContested() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
-
-        notificationsController.sendGeneralEmail(createCallbackRequestWithFinalOrder());
-
-        verify(notificationService).sendContestedGeneralEmail(any(CaseDetails.class));
-        verify(generalEmailService).storeGeneralEmail(any(CaseDetails.class));
-    }
-
-    @Test
     public void sendContestOrderNotApprovedEmail() {
         when(caseDataService.isConsentedApplication(any())).thenReturn(false);
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);

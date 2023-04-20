@@ -312,7 +312,7 @@ public class NotificationService {
     public void sendConsentGeneralEmail(FinremCaseDetails caseDetails) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentGeneralEmail());
         NotificationRequest notificationRequest = finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
-        notificationRequest.setNotificationEmail(caseDetails.getData().getGeneralEmailRecipient());
+        notificationRequest.setNotificationEmail(caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailRecipient());
         sendNotificationEmail(notificationRequest, uri);
     }
 
@@ -328,7 +328,7 @@ public class NotificationService {
     public void sendContestedGeneralEmail(FinremCaseDetails caseDetails) {
         URI uri = buildUri(notificationServiceConfiguration.getContestedGeneralEmail());
         NotificationRequest notificationRequest = finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
-        notificationRequest.setNotificationEmail(Objects.toString(caseDetails.getData().getGeneralEmailRecipient()));
+        notificationRequest.setNotificationEmail(Objects.toString(caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailRecipient()));
         sendNotificationEmail(notificationRequest, uri);
     }
 
