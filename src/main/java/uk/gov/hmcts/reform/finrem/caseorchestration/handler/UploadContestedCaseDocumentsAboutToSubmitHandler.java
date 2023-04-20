@@ -12,15 +12,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.UploadedDocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRole;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResource;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.casedocuments.CaseDocumentHandler;
 
 import java.util.ArrayList;
@@ -30,7 +27,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.handler.RejectGeneralApplicationSubmittedHandler.CASE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_FOUR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_ONE;
@@ -55,7 +51,6 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler implements Callbac
     private final ObjectMapper objectMapper;
     private final UploadedDocumentHelper uploadedDocumentHelper;
     private final AssignCaseAccessService accessService;
-    private final IdamService idamService;
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -97,7 +92,7 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler implements Callbac
 
     private String getActiveUser(Long caseId, String userAuthorisation) {
         String logMessage = "Logged in user role {} caseId {}";
-        String activeUserCaseRole = getActiveUserCaseRole(String.valueOf(caseId), userAuthorisation);
+        String activeUserCaseRole = accessService.getActiveUserCaseRole(String.valueOf(caseId), userAuthorisation);
         if (activeUserCaseRole.contains(CaseRole.APP_SOLICITOR.getValue())) {
             log.info(logMessage, APPLICANT, caseId);
             return APPLICANT;
@@ -119,26 +114,6 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler implements Callbac
         }
         return activeUserCaseRole;
     }
-
-
-    public String getActiveUserCaseRole(final String caseId, final String userAuthorisation) {
-        log.info("retrieve active user  case role for caseId {}", caseId);
-        String idamUserId = idamService.getIdamUserId(userAuthorisation);
-        CaseAssignmentUserRolesResource rolesResource = accessService.searchUserRoles(caseId);
-        if (rolesResource != null) {
-            List<CaseAssignmentUserRole> allRoles = rolesResource.getCaseAssignmentUserRoles();
-            log.info("All roles {} for caseId {}", allRoles, caseId);
-            List<CaseAssignmentUserRole> activeRole = allRoles.stream().filter(role -> role.getUserId().equals(idamUserId)).toList();
-            if (!activeRole.isEmpty()) {
-                log.info("Active Role {} for caseId {}", activeRole, caseId);
-                String caseRole = activeRole.get(0).getCaseRole();
-                log.info("case role found {} for caseId {}", caseRole, caseId);
-                return caseRole;
-            }
-        }
-        return CASE;
-    }
-
 
     private GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> validateUploadedDocuments(
         Map<String, Object> caseData) {

@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.config.CacheConfiguration.REQUEST_SCOPED_CACHE_MANAGER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.config.CacheConfiguration.USER_ROLES_CACHE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.handler.RejectGeneralApplicationSubmittedHandler.CASE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 
 @Service
@@ -263,4 +264,23 @@ public class AssignCaseAccessService {
             .userId(userId)
             .build());
     }
+
+    public String getActiveUserCaseRole(final String caseId, final String userAuthorisation) {
+        log.info("retrieve active user case role for caseId {}", caseId);
+        String idamUserId = idamService.getIdamUserId(userAuthorisation);
+        CaseAssignmentUserRolesResource rolesResource = searchUserRoles(caseId);
+        if (rolesResource != null) {
+            List<CaseAssignmentUserRole> allRoles = rolesResource.getCaseAssignmentUserRoles();
+            log.info("All roles {} for caseId {}", allRoles, caseId);
+            List<CaseAssignmentUserRole> activeRole = allRoles.stream().filter(role -> role.getUserId().equals(idamUserId)).toList();
+            if (!activeRole.isEmpty()) {
+                log.info("Active Role {} for caseId {}", activeRole, caseId);
+                String caseRole = activeRole.get(0).getCaseRole();
+                log.info("case role found {} for caseId {}", caseRole, caseId);
+                return caseRole;
+            }
+        }
+        return CASE;
+    }
+
 }
