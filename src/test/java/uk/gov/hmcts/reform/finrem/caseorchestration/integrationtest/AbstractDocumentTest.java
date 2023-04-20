@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.PdfDocumentRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OptionIdToValueTranslator;
+import uk.gov.hmcts.reform.sendletter.api.LetterStatus;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
 
 import java.io.IOException;
@@ -32,6 +33,8 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
+import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -50,6 +53,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.HearingNonFastTrackDocumentTest.SEND_LETTER_CONTEXT_PATH;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
@@ -173,11 +177,25 @@ public abstract class AbstractDocumentTest extends BaseTest {
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)));
     }
 
-    public void generateSendLetterServiceStub() throws JsonProcessingException {
+    public void generateSendLetterServiceStub(UUID uuid) throws JsonProcessingException {
         sendLetterService.stubFor(post(urlPathEqualTo(SEND_LETTERS_CONTEXT_PATH))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
-                .withBody(objectMapper.writeValueAsString(new SendLetterResponse(UUID.randomUUID())))));
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withBody(objectMapper.writeValueAsString(new SendLetterResponse(uuid)))));
+    }
+
+    // Paul Hudson
+    void generateConfirmLetterCreatedStub(UUID uuid) throws IOException {
+        LetterStatus letterStatus = new LetterStatus(uuid, "Created", "checksum",
+            ZonedDateTime.now(), ZonedDateTime.now().plusHours(1),
+            ZonedDateTime.now().plusHours(2), Collections.emptyMap(), 1);
+
+        sendLetterService.stubFor(get(urlPathEqualTo(SEND_LETTER_CONTEXT_PATH + "/" + uuid))
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withBody(objectMapper.writeValueAsString(letterStatus))));
     }
 
     void idamServiceStub() {

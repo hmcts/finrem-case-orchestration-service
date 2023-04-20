@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.PdfDocumentRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 
@@ -46,7 +47,7 @@ public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
         return PdfDocumentRequest.builder()
             .accessKey("TESTPDFACCESS")
             .outputName("result.pdf")
-            .templateName(documentConfiguration.getFormCFastTrackTemplate(CaseDetails.builder().build()))
+            .templateName(documentConfiguration.getFormCFastTrackTemplate(FinremCaseDetails.builder().build()))
             .data(request.getCaseDetails().getData())
             .build();
     }
@@ -131,10 +132,11 @@ public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
     @Test
     public void generateFormC() throws Exception {
         idamServiceStub();
+        UUID uuid = UUID.randomUUID();
         generateEvidenceUploadServiceSuccessStub();
         generateDocumentServiceSuccessStubWithCoverSheet();
         downloadDocumentServiceStubWith(HttpStatus.OK);
-        generateSendLetterServiceStub();
+        generateSendLetterServiceStub(uuid);
 
         webClient.perform(MockMvcRequestBuilders.post(API_URL)
             .content(objectMapper.writeValueAsString(request))
