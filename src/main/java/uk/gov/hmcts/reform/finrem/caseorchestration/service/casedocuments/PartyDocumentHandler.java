@@ -38,7 +38,8 @@ public abstract class PartyDocumentHandler extends CaseDocumentHandler<Contested
                 ContestedUploadedDocument uploadedCaseDocument = d.getUploadedCaseDocument();
                 if (uploadedCaseDocument.getCaseDocuments() != null
                     && uploadedCaseDocument.getCaseDocumentParty() != null) {
-                    log.info("Party involved in uploading document {}", uploadedCaseDocument.getCaseDocumentParty());
+                    log.info("Party involved in uploading document {}, party arg {}",
+                        uploadedCaseDocument.getCaseDocumentParty(), party);
                 }
                 return uploadedCaseDocument.getCaseDocuments() != null
                     && uploadedCaseDocument.getCaseDocumentParty() != null
