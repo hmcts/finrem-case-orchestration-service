@@ -368,7 +368,7 @@ public class NotificationService {
 
     public void sendConsentGeneralEmail(FinremCaseDetails caseDetails) {
         NotificationRequest notificationRequest = finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
-        notificationRequest.setNotificationEmail(caseDetails.getData().getGeneralEmailRecipient());
+        notificationRequest.setNotificationEmail(caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailRecipient());
         log.info("Received request for notification email for consented general email Notification request : {}",
             notificationRequest);
         emailService.sendConfirmationEmail(notificationRequest, FR_CONSENT_GENERAL_EMAIL);
@@ -386,7 +386,7 @@ public class NotificationService {
 
     public void sendContestedGeneralEmail(FinremCaseDetails caseDetails) {
         NotificationRequest notificationRequest = finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
-        notificationRequest.setNotificationEmail(Objects.toString(caseDetails.getData().getGeneralEmailRecipient()));
+        notificationRequest.setNotificationEmail(Objects.toString(caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailRecipient()));
         log.info("Received request for notification email for contested general email Notification request : {}",
             notificationRequest);
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_EMAIL);
