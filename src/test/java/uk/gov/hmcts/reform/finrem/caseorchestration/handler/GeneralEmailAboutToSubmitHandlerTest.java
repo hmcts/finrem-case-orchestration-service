@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralEmailWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -32,12 +33,18 @@ public class GeneralEmailAboutToSubmitHandlerTest {
 
     @Mock
     private NotificationService notificationService;
+
+    @Mock
+    private GenericDocumentService genericDocumentService;
     @Mock
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
 
     @Before
     public void setup() {
-        handler =  new GeneralEmailAboutToSubmitHandler(finremCaseDetailsMapper, notificationService, generalEmailService);
+        handler =  new GeneralEmailAboutToSubmitHandler(finremCaseDetailsMapper,
+            notificationService,
+            generalEmailService,
+            genericDocumentService);
     }
 
     @Test
@@ -61,16 +68,6 @@ public class GeneralEmailAboutToSubmitHandlerTest {
         verify(notificationService).sendConsentGeneralEmail(any(FinremCaseDetails.class));
         verify(generalEmailService).storeGeneralEmail(any(FinremCaseDetails.class));
     }
-
-    /*@Test
-    public void givenACcdCallbackCallbackGeneralEmailAboutToSubmitHandler_WhenHandle_thenCreateError() {
-        FinremCallbackRequest callbackRequest = buildFinremCallbackRequest();
-        callbackRequest.getCaseDetails().getData().getContactDetailsWrapper().setSolicitorAddress(null);
-        when(notificationService.sendConsentGeneralEmail(callbackRequest.getCaseDetails()))
-            .thenReturn(asList("Address is missing for recipient type"));
-        handler.handle(callbackRequest, AUTH_TOKEN);
-        verify(generalLetterService, times(2)).getCaseDataErrorsForCreatingPreviewOrFinalLetter(any(FinremCaseDetails.class));
-    }*/
 
     private FinremCallbackRequest buildFinremCallbackRequest() {
         FinremCaseData caseData = FinremCaseData.builder()
