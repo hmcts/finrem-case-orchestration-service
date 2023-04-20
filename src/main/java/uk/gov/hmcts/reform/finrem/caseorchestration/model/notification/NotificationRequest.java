@@ -45,4 +45,8 @@ public class NotificationRequest {
     private String barristerReferenceNumber;
     @JsonProperty("hearingType")
     private String hearingType;
+    @JsonProperty("intervenerSolicitorReferenceNumber")
+    private String intervenerSolicitorReferenceNumber;
+    @JsonProperty("intervenerFullName")
+    private String intervenerFullName;
 }

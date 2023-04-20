@@ -47,4 +47,8 @@ public class NotificationServiceConfiguration {
     private String addedBarrister;
     private String removedBarrister;
     private String consentedHearing;
+    private String addedIntervenerSolicitor;
+    private String removedIntervenerSolicitor;
+    private String addedIntervenerCitizen;
+    private String removedIntervenerCitizen;
 }

@@ -7,7 +7,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.FinremSingleLetterOrEmailAllPartiesCorresponder;
@@ -15,26 +14,23 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.interveners.Interven
 
 @Component
 @Slf4j
-public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPartiesCorresponder {
+public class IntervenerRemovedCorresponder extends FinremSingleLetterOrEmailAllPartiesCorresponder {
 
     private final IntervenerDocumentService intervenerDocumentService;
-    private final IntervenerOneToIntervenerDetailsMapper intervenerOneDetailsMapper;
 
-    public IntervenerAddedCorresponder(NotificationService notificationService, BulkPrintService bulkPrintService,
-                                       IntervenerDocumentService intervenerDocumentService,
-                                       IntervenerOneToIntervenerDetailsMapper intervenerOneDetailsMapper) {
+    public IntervenerRemovedCorresponder(NotificationService notificationService, BulkPrintService bulkPrintService,
+                                         IntervenerDocumentService intervenerDocumentService) {
         super(notificationService, bulkPrintService);
         this.intervenerDocumentService = intervenerDocumentService;
-        this.intervenerOneDetailsMapper = intervenerOneDetailsMapper;
     }
 
-    public void sendCorrespondence(FinremCaseDetails caseDetails, String authToken) {
+    public void sendCorrespondence(FinremCaseDetails caseDetails, String authToken, IntervenerChangeDetails intervenerChangeDetails) {
         sendApplicantCorrespondence(caseDetails, authToken);
         sendRespondentCorrespondence(caseDetails, authToken);
-        if (caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerType()
-            .equals(IntervenerChangeDetails.IntervenerType.INTERVENER_ONE)
-            && caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerAction()
-            .equals(IntervenerChangeDetails.IntervenerAction.ADDED)) {
+        if (intervenerChangeDetails.getIntervenerType().equals(IntervenerChangeDetails.IntervenerType.INTERVENER_ONE)
+            && intervenerChangeDetails.getIntervenerAction().equals(IntervenerChangeDetails.IntervenerAction.ADDED)) {
+
+            caseDetails.getData().setCurrentIntervenerChangeDetails(intervenerChangeDetails);
             sendIntervenerOneCorrespondence(caseDetails, authToken);
         }
     }
@@ -67,7 +63,7 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
     @Override
     public CaseDocument getDocumentToPrint(FinremCaseDetails caseDetails, String authorisationToken,
                                            DocumentHelper.PaperNotificationRecipient recipient) {
-        return intervenerDocumentService.generateIntervenerAddedNotificationLetter(caseDetails, authorisationToken, recipient);
+        return intervenerDocumentService.generateIntervenerAddedNotificationLetter(caseDetails, authorisationToken,recipient);
     }
 
     protected boolean shouldSendIntervenerOneSolicitorEmail(FinremCaseDetails caseDetails) {
@@ -92,15 +88,16 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
     }
 
     protected void emailApplicantSolicitorIntervenerCitizen(FinremCaseDetails caseDetails) {
-        notificationService.sendIntervenerCitizenAddedEmail(caseDetails,
+        notificationService.sendIntervenerCitizenRemovedEmail(caseDetails,
             new IntervenerOneToIntervenerDetailsMapper().getIntervenerDetails(caseDetails));
 
     }
 
     protected void emailRespondentSolicitorIntervenerCitizen(FinremCaseDetails caseDetails) {
-        notificationService.sendIntervenerCitizenAddedEmail(caseDetails,
+        notificationService.sendIntervenerCitizenRemovedEmail(caseDetails,
             new IntervenerOneToIntervenerDetailsMapper().getIntervenerDetails(caseDetails));
 
     }
+
 
 }

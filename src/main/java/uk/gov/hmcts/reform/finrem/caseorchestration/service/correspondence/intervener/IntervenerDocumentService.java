@@ -1,8 +1,10 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.intervener;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.interveners;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -61,9 +63,9 @@ public class IntervenerDocumentService {
     }
 
     private CaseDocument generateDocument(String authToken,
-                                                    IntervenerAddedLetterDetails intervenerAddedLetterDetails,
-                                                    String template,
-                                                    String filename) {
+                                          IntervenerAddedLetterDetails intervenerAddedLetterDetails,
+                                          String template,
+                                          String filename) {
         return genericDocumentService.generateDocumentFromPlaceholdersMap(
             authToken,
             convertLetterDetailsToMap(intervenerAddedLetterDetails),

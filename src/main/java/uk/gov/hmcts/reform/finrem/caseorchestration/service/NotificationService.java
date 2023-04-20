@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMa
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
@@ -728,6 +729,43 @@ public class NotificationService {
         NotificationRequest notificationRequest = finremNotificationRequestMapper.buildNotificationRequest(caseDetails, barrister);
         sendNotificationEmail(notificationRequest, uri);
     }
+
+    // TODO: AC1 Notify Intervener Solicitor they have been added- Email
+
+    public void sendIntervenerSolicitorAddedEmail(FinremCaseDetails caseDetails, IntervenerDetails intervenerDetails) {
+        URI uri = buildUri(notificationServiceConfiguration.getAddedIntervenerSolicitor());
+        NotificationRequest notificationRequest = finremNotificationRequestMapper.buildNotificationRequest(caseDetails, intervenerDetails);
+        sendNotificationEmail(notificationRequest, uri);
+    }
+
+
+    public void sendIntervenerSolicitorRemovedEmail(FinremCaseDetails caseDetails, IntervenerDetails intervenerDetails) {
+        URI uri = buildUri(notificationServiceConfiguration.getRemovedIntervenerSolicitor());
+        NotificationRequest notificationRequest = finremNotificationRequestMapper.buildNotificationRequest(caseDetails, intervenerDetails);
+        sendNotificationEmail(notificationRequest, uri);
+    }
+
+
+    // TODO: AC2 Inform Applicant/Respondent solicitor that an (Intervener solicitor) has been added- Email
+
+
+
+    // TODO: AC3 Inform applicant solicitor/respondent solicitor that an (Intervener citizen) has been added- Email
+
+    public void sendIntervenerCitizenAddedEmail(FinremCaseDetails caseDetails, IntervenerDetails intervenerDetails) {
+        URI uri = buildUri(notificationServiceConfiguration.getAddedIntervenerCitizen());
+        NotificationRequest notificationRequest = finremNotificationRequestMapper.buildNotificationRequest(caseDetails, intervenerDetails);
+        sendNotificationEmail(notificationRequest, uri);
+    }
+
+
+    public void sendIntervenerCitizenRemovedEmail(FinremCaseDetails caseDetails, IntervenerDetails intervenerDetails) {
+        URI uri = buildUri(notificationServiceConfiguration.getRemovedIntervenerCitizen());
+        NotificationRequest notificationRequest = finremNotificationRequestMapper.buildNotificationRequest(caseDetails, intervenerDetails);
+        sendNotificationEmail(notificationRequest, uri);
+    }
+
+
 
     private void sendNotificationEmail(NotificationRequest notificationRequest, URI uri) {
         HttpEntity<NotificationRequest> request = new HttpEntity<>(notificationRequest, buildHeaders());
