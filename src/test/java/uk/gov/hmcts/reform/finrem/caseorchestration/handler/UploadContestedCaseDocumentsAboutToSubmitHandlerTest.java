@@ -106,7 +106,8 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandlerTest extends CaseDo
 
     @Test
     public void givenUploadCaseDocument_whenDocIsValidAndUploadedByInterveners_thenExecuteHandlers() {
-        List<String> roles = List.of("[INTVRSOLICITOR1]", "[INTVRSOLICITOR2]", "[INTVRSOLICITOR3]", "[INTVRSOLICITOR4]", "[RESPSOLICITOR]", "");
+        List<String> roles = List.of("[INTVRSOLICITOR1]", "[INTVRSOLICITOR2]", "[INTVRSOLICITOR3]", "[INTVRSOLICITOR4]",
+            "[[INTVRBARRISTER1]]", "[[INTVRBARRISTER2]]", "[[INTVRBARRISTER3]]", "[[INTVRBARRISTER4]]", "[RESPSOLICITOR]", "");
 
         for (String activeRole : roles) {
             CallbackRequest callbackRequest = buildCallbackRequest();

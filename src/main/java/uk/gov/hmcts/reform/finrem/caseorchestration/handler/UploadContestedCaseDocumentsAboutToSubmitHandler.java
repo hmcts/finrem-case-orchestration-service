@@ -99,16 +99,20 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler implements Callbac
         } else if (activeUserCaseRole.contains(CaseRole.RESP_SOLICITOR.getValue())) {
             log.info(logMessage, RESPONDENT, caseId);
             return RESPONDENT;
-        } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_1.getValue())) {
+        } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_1.getValue())
+            || activeUserCaseRole.contains(CaseRole.INTVR_BARRISTER_1.getValue())) {
             log.info(logMessage, INTERVENER_ONE, caseId);
             return INTERVENER_ONE;
-        } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_2.getValue())) {
+        } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_2.getValue())
+            || activeUserCaseRole.contains(CaseRole.INTVR_BARRISTER_2.getValue())) {
             log.info(logMessage, INTERVENER_TWO, caseId);
             return INTERVENER_TWO;
-        } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_3.getValue())) {
+        } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_3.getValue())
+            || activeUserCaseRole.contains(CaseRole.INTVR_BARRISTER_3.getValue())) {
             log.info(logMessage, INTERVENER_THREE, caseId);
             return INTERVENER_THREE;
-        } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_4.getValue())) {
+        } else if (activeUserCaseRole.contains(CaseRole.INTVR_SOLICITOR_4.getValue())
+            || activeUserCaseRole.contains(CaseRole.INTVR_BARRISTER_4.getValue())) {
             log.info(logMessage, INTERVENER_FOUR, caseId);
             return INTERVENER_FOUR;
         }
