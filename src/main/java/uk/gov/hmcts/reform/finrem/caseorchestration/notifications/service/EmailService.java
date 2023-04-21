@@ -138,7 +138,7 @@ public class EmailService {
     }
 
     private JSONObject preparedForEmailAttachment(final byte[] documentContents) {
-        try{
+        try {
             if (documentContents != null) {
                 return emailClient.prepareUpload(documentContents);
             }
