@@ -156,7 +156,7 @@ public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
         return objectMapper.writeValueAsString(
             AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDetails.getData())
-                .warnings(ImmutableList.of(DATE_BETWEEN_6_AND_10_WEEKS))
+                .warnings(new ArrayList<>())
                 .build());
     }
 }
