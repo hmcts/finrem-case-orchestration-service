@@ -185,7 +185,6 @@ public abstract class AbstractDocumentTest extends BaseTest {
                 .withBody(objectMapper.writeValueAsString(new SendLetterResponse(uuid)))));
     }
 
-    // Paul Hudson
     void generateConfirmLetterCreatedStub(UUID uuid) throws IOException {
         LetterStatus letterStatus = new LetterStatus(uuid, "Created", "checksum",
             ZonedDateTime.now(), ZonedDateTime.now().plusHours(1),
