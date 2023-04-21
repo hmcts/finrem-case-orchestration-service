@@ -76,11 +76,11 @@ public class UploadContestedCaseDocumentsAboutToSubmitHandler implements Callbac
             callbackRequest.getCaseDetails().getData(),
             callbackRequest.getCaseDetailsBefore().getData(), CONTESTED_UPLOADED_DOCUMENTS);
 
-        String loggedInUserRole = getActiveUser(caseId, userAuthorisation);
-        log.info("Loggedin User role {}", loggedInUserRole);
+        String loggedInUserCaseRole = getActiveUser(caseId, userAuthorisation);
+        log.info("Loggedin User case role {}", loggedInUserCaseRole);
 
         List<ContestedUploadedDocumentData> uploadedDocuments = (List<ContestedUploadedDocumentData>) caseData.get(CONTESTED_UPLOADED_DOCUMENTS);
-        uploadedDocuments.forEach(doc -> doc.getUploadedCaseDocument().setCaseDocumentParty(loggedInUserRole));
+        uploadedDocuments.forEach(doc -> doc.getUploadedCaseDocument().setCaseDocumentParty(loggedInUserCaseRole));
         caseDocumentHandlers.stream().forEach(h -> h.handle(uploadedDocuments, caseData));
         uploadedDocuments.sort(Comparator.comparing(
             ContestedUploadedDocumentData::getUploadedCaseDocument, Comparator.comparing(

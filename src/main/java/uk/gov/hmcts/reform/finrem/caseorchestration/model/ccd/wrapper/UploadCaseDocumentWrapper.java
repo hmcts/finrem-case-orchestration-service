@@ -119,4 +119,9 @@ public class UploadCaseDocumentWrapper {
     private List<UploadCaseDocumentCollection> intv4Other;
     private List<UploadCaseDocumentCollection> intv4Qa;
     private List<UploadCaseDocumentCollection> intv4StmtsExhibits;
+
+    private List<UploadCaseDocumentCollection> intv1FdrCaseDocuments;
+    private List<UploadCaseDocumentCollection> intv2FdrCaseDocuments;
+    private List<UploadCaseDocumentCollection> intv3FdrCaseDocuments;
+    private List<UploadCaseDocumentCollection> intv4FdrCaseDocuments;
 }

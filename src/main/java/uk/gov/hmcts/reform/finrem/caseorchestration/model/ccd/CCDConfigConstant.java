@@ -533,6 +533,11 @@ public class CCDConfigConstant {
     public static final String INTV_FOUR_QUESTIONNAIRES_ANSWERS_COLLECTION = "intv4Qa";
     public static final String INTV_FOUR_STATEMENTS_EXHIBITS_COLLECTION = "intv4StmtsExhibits";
 
+    public static final String INTV_ONE_FDR_DOCS_COLLECTION = "intv1FdrCaseDocuments";
+    public static final String INTV_TWO_FDR_DOCS_COLLECTION = "intv2FdrCaseDocuments";
+    public static final String INTV_THREE_FDR_DOCS_COLLECTION = "intv3FdrCaseDocuments";
+    public static final String INTV_FOUR_FDR_DOCS_COLLECTION = "intv4FdrCaseDocuments";
+
     //organisation policy
     public static final String ORGANISATION_POLICY_APPLICANT = "ApplicantOrganisationPolicy";
     public static final String ORGANISATION_POLICY_RESPONDENT = "RespondentOrganisationPolicy";
