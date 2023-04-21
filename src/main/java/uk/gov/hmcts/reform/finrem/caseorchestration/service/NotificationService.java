@@ -4,16 +4,20 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
 import java.io.IOException;
@@ -88,6 +92,7 @@ public class NotificationService {
     private final FinremNotificationRequestMapper finremNotificationRequestMapper;
     private final CaseDataService caseDataService;
     private final CheckSolicitorIsDigitalService checkSolicitorIsDigitalService;
+    private final EvidenceManagementDownloadService evidenceManagementDownloadService;
 
     @Deprecated
     public void sendConsentedHWFSuccessfulConfirmationEmail(CaseDetails caseDetails) {
@@ -369,9 +374,23 @@ public class NotificationService {
     public void sendConsentGeneralEmail(FinremCaseDetails caseDetails) {
         NotificationRequest notificationRequest = finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
         notificationRequest.setNotificationEmail(caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailRecipient());
+        downloadGeneralEmailUploadedDocument(caseDetails, notificationRequest);
         log.info("Received request for notification email for consented general email Notification request : {}",
             notificationRequest);
         emailService.sendConfirmationEmail(notificationRequest, FR_CONSENT_GENERAL_EMAIL);
+    }
+
+    private void downloadGeneralEmailUploadedDocument(FinremCaseDetails caseDetails, NotificationRequest notificationRequest) {
+        CaseDocument caseDocument = caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailUploadedDocument();
+        if (caseDocument != null) {
+            ResponseEntity<byte[]> response = evidenceManagementDownloadService.download(caseDocument.getDocumentBinaryUrl());
+            if (response.getStatusCode() != HttpStatus.OK) {
+                log.error("Download failed for url {}, filename {} ", caseDocument.getDocumentBinaryUrl(),
+                    caseDocument.getDocumentFilename());
+                throw new RuntimeException(String.format("Unexpected error DM store: %s ", response.getStatusCode()));
+            }
+            notificationRequest.setDocumentContents(response.getBody());
+        }
     }
 
     @Deprecated
@@ -387,6 +406,7 @@ public class NotificationService {
     public void sendContestedGeneralEmail(FinremCaseDetails caseDetails) {
         NotificationRequest notificationRequest = finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
         notificationRequest.setNotificationEmail(Objects.toString(caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailRecipient()));
+        downloadGeneralEmailUploadedDocument(caseDetails, notificationRequest);
         log.info("Received request for notification email for contested general email Notification request : {}",
             notificationRequest);
         emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_EMAIL);
