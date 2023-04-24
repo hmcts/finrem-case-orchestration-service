@@ -185,18 +185,6 @@ public abstract class AbstractDocumentTest extends BaseTest {
                 .withBody(objectMapper.writeValueAsString(new SendLetterResponse(uuid)))));
     }
 
-    void generateConfirmLetterCreatedStub(UUID uuid) throws IOException {
-        LetterStatus letterStatus = new LetterStatus(uuid, "Created", "checksum",
-            ZonedDateTime.now(), ZonedDateTime.now().plusHours(1),
-            ZonedDateTime.now().plusHours(2), Collections.emptyMap(), 1);
-
-        sendLetterService.stubFor(get(urlPathEqualTo(SEND_LETTER_CONTEXT_PATH + "/" + uuid))
-            .willReturn(aResponse()
-                .withStatus(HttpStatus.OK.value())
-                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                .withBody(objectMapper.writeValueAsString(letterStatus))));
-    }
-
     void idamServiceStub() {
         idamService.stubFor(get(urlPathEqualTo(IDAM_SERVICE_CONTEXT_PATH))
             .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
