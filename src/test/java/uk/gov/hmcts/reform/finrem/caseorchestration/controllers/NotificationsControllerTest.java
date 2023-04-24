@@ -114,7 +114,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @MockBean
     private GeneralOrderRaisedCorresponder generalOrderRaisedCorresponder;
 
-
     @Test
     public void sendHwfSuccessfulConfirmationEmailIfDigitalCase() {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
