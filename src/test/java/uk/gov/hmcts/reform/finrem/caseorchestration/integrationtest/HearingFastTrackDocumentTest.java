@@ -45,15 +45,6 @@ public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
 
     private static final String API_URL = "/case-orchestration/documents/hearing";
     private static final String GENERATE_BULK_PRINT_CONTEXT_PATH = "/version/1/bulk-print";
-    protected static final String SEND_LETTER_CONTEXT_PATH = "/letters";
-
-    private static String requestJson;
-    private static final String JSON_CONTENT_PATH = "/fixtures/contested/validate-hearing-with-fastTrackDecision.json";
-
-    @BeforeClass
-    public static void loadJsonString() throws IOException {
-        requestJson = Resources.toString(HearingFastTrackDocumentTest.class.getResource(JSON_CONTENT_PATH), StandardCharsets.UTF_8);
-    }
 
     @Override
     protected PdfDocumentRequest pdfRequest() {
@@ -150,8 +141,7 @@ public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
         generateDocumentServiceSuccessStubWithCoverSheet();
         downloadDocumentServiceStubWith(HttpStatus.OK);
         generateSendLetterServiceStub(uuid);
-
-
+        
         webClient.perform(MockMvcRequestBuilders.post(API_URL)
             .content(objectMapper.writeValueAsString(request))
             .header(AUTHORIZATION, AUTH_TOKEN)
