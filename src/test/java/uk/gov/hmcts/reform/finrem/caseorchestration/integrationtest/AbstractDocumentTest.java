@@ -65,7 +65,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.Heari
 public abstract class AbstractDocumentTest extends BaseTest {
 
     protected static final String GENERATE_DOCUMENT_CONTEXT_PATH = "/rs/render";
-    protected static final String SEND_LETTER_CONTEXT_PATH = "/letters";
+    protected static final String SEND_LETTERS_CONTEXT_PATH = "/letters";
 
     protected static final String UPLOAD_DOCUMENT_CONTEXT_PATH = "/documents";
     private static final String TEMP_URL = "http://doc1";
@@ -177,12 +177,12 @@ public abstract class AbstractDocumentTest extends BaseTest {
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)));
     }
 
-    public void generateSendLetterServiceStub(UUID uuid) throws JsonProcessingException {
-        sendLetterService.stubFor(post(urlPathEqualTo(SEND_LETTER_CONTEXT_PATH))
+    public void generateSendLetterServiceStub() throws JsonProcessingException {
+        sendLetterService.stubFor(post(urlPathEqualTo(SEND_LETTERS_CONTEXT_PATH))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                .withBody(objectMapper.writeValueAsString(new SendLetterResponse(uuid)))));
+                .withBody(objectMapper.writeValueAsString(new SendLetterResponse(UUID.randomUUID())))));
     }
 
     void idamServiceStub() {
