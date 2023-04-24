@@ -65,7 +65,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.Heari
 public abstract class AbstractDocumentTest extends BaseTest {
 
     protected static final String GENERATE_DOCUMENT_CONTEXT_PATH = "/rs/render";
-    protected static final String SEND_LETTERS_CONTEXT_PATH = "/letters";
+    protected static final String SEND_LETTER_CONTEXT_PATH = "/letters";
 
     protected static final String UPLOAD_DOCUMENT_CONTEXT_PATH = "/documents";
     private static final String TEMP_URL = "http://doc1";
@@ -178,13 +178,25 @@ public abstract class AbstractDocumentTest extends BaseTest {
     }
 
     public void generateSendLetterServiceStub(UUID uuid) throws JsonProcessingException {
-        sendLetterService.stubFor(post(urlPathEqualTo(SEND_LETTERS_CONTEXT_PATH))
+        sendLetterService.stubFor(post(urlPathEqualTo(SEND_LETTER_CONTEXT_PATH))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .withBody(objectMapper.writeValueAsString(new SendLetterResponse(uuid)))));
     }
-    
+
+    void generateConfirmLetterCreatedStub(UUID uuid) throws IOException {
+        LetterStatus letterStatus = new LetterStatus(uuid, "Created", "checksum",
+            ZonedDateTime.now(), ZonedDateTime.now().plusHours(1),
+            ZonedDateTime.now().plusHours(2), Collections.emptyMap(), 1);
+
+        sendLetterService.stubFor(get(urlPathEqualTo(SEND_LETTER_CONTEXT_PATH + "/" + uuid))
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withBody(objectMapper.writeValueAsString(letterStatus))));
+    }
+
     void idamServiceStub() {
         idamService.stubFor(get(urlPathEqualTo(IDAM_SERVICE_CONTEXT_PATH))
             .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))

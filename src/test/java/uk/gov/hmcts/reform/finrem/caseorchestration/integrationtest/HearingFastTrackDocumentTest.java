@@ -137,6 +137,7 @@ public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
         generateDocumentServiceSuccessStubWithCoverSheet();
         downloadDocumentServiceStubWith(HttpStatus.OK);
         generateSendLetterServiceStub(uuid);
+        generateConfirmLetterCreatedStub(uuid);
 
         webClient.perform(MockMvcRequestBuilders.post(API_URL)
             .content(objectMapper.writeValueAsString(request))
