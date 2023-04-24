@@ -220,14 +220,6 @@ public class AdditionalHearingDocumentService {
         }
     }
 
-    private CaseDocument generateAdditionalHearingDocument(CaseDetails caseDetailsCopy, String authorisationToken) {
-        log.info("Generating Additional Hearing Document for Case ID: {}", caseDetailsCopy.getId());
-
-        return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
-            documentConfiguration.getAdditionalHearingTemplate(),
-            documentConfiguration.getAdditionalHearingFileName());
-    }
-
     private void prepareHearingCaseDetails(CaseDetails caseDetails, Map<String, Object> courtDetails,
                                            Object hearingType, Object hearingDate, Object hearingTime, Object hearingLength) {
         Map<String, Object> caseData = caseDetails.getData();
@@ -301,6 +293,14 @@ public class AdditionalHearingDocumentService {
         log.info("Generating Additional Hearing Document for Case ID: {}", placeholdersMap.get("ccdCaseNumber"));
 
         return genericDocumentService.generateDocumentFromPlaceholdersMap(authorisationToken, placeholdersMap,
+            documentConfiguration.getAdditionalHearingTemplate(),
+            documentConfiguration.getAdditionalHearingFileName());
+    }
+
+    private CaseDocument generateAdditionalHearingDocument(CaseDetails caseDetailsCopy, String authorisationToken) {
+        log.info("Generating Additional Hearing Document for Case ID: {}", caseDetailsCopy.getId());
+
+        return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
             documentConfiguration.getAdditionalHearingTemplate(),
             documentConfiguration.getAdditionalHearingFileName());
     }
