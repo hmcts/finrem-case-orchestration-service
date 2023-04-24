@@ -926,7 +926,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         List<Map<String, Object>> interimDataMap = interimHearingItems.stream()
             .map(obj -> new ObjectMapper().convertValue(obj, new TypeReference<Map<String, Object>>() {
-            })).collect(Collectors.toList());
+            })).toList();
 
         when(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(CaseDetails.class), any())).thenReturn(notificationRequest);
 

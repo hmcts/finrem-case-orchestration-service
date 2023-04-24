@@ -391,6 +391,7 @@ public class NotificationService {
             }
             notificationRequest.setDocumentContents(response.getBody());
         }
+
     }
 
     @Deprecated

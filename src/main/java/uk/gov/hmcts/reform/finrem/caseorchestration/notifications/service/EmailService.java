@@ -46,14 +46,13 @@ public class EmailService {
     public static final String CONSENTED_LIST_FOR_HEARING = "FR_CONSENTED_LIST_FOR_HEARING";
 
     public void sendConfirmationEmail(NotificationRequest notificationRequest, EmailTemplateNames template) {
-        Map<String, Object> templateVars = buildTemplateVars(notificationRequest, template.name());
+        Map<String, String> templateVars = buildTemplateVars(notificationRequest, template.name());
         EmailToSend emailToSend = generateEmail(notificationRequest.getNotificationEmail(), template.name(),
             templateVars);
         sendEmail(emailToSend, "send Confirmation email for " + template.name());
     }
-
-    protected Map<String, Object> buildTemplateVars(NotificationRequest notificationRequest, String templateName) {
-        Map<String, Object> templateVars = new HashMap<>();
+    protected Map<String, String> buildTemplateVars(NotificationRequest notificationRequest, String templateName) {
+        Map<String, String> templateVars = new HashMap<>();
 
         templateVars.put("caseReferenceNumber", notificationRequest.getCaseReferenceNumber());
         templateVars.put("solicitorReferenceNumber", notificationRequest.getSolicitorReferenceNumber());
@@ -88,6 +87,7 @@ public class EmailService {
             || CONTESTED_GENERAL_EMAIL.equals(templateName)) {
             templateVars.put("generalEmailBody", notificationRequest.getGeneralEmailBody());
             templateVars.put("jsonObject", preparedForEmailAttachment(notificationRequest.getDocumentContents()));
+
         }
 
         if (CONSENTED.equals(notificationRequest.getCaseType()) && !FR_CONSENT_ORDER_AVAILABLE_CTSC.equals(templateName)) {
@@ -147,4 +147,5 @@ public class EmailService {
         }
         return null;
     }
+
 }
