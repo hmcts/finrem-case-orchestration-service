@@ -39,6 +39,7 @@ public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
 
     private static final String API_URL = "/case-orchestration/documents/hearing";
     private static final String GENERATE_BULK_PRINT_CONTEXT_PATH = "/version/1/bulk-print";
+    private static final UUID uuid = UUID.randomUUID();
 
     @Override
     protected PdfDocumentRequest pdfRequest() {
@@ -130,7 +131,6 @@ public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
     @Test
     public void generateFormC() throws Exception {
         idamServiceStub();
-        UUID uuid = UUID.randomUUID();
         generateEvidenceUploadServiceSuccessStub();
         generateDocumentServiceSuccessStubWithCoverSheet();
         downloadDocumentServiceStubWith(HttpStatus.OK);

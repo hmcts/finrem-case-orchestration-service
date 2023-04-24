@@ -115,6 +115,24 @@ public class AdditionalHearingDocumentService {
         data.setAdditionalHearingDocuments(additionalHearingDocumentDataList);
     }
 
+    protected void addAdditionalHearingDocumentToCaseData(CaseDetails caseDetails, CaseDocument document) {
+        AdditionalHearingDocumentData generatedDocumentData = AdditionalHearingDocumentData.builder()
+            .additionalHearingDocument(AdditionalHearingDocument.builder()
+                .document(document)
+                .build())
+            .build();
+
+        Map<String, Object> caseData = caseDetails.getData();
+        List<AdditionalHearingDocumentData> additionalHearingDocumentDataList =
+            Optional.ofNullable(caseData.get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION))
+                .map(documentHelper::convertToAdditionalHearingDocumentData)
+                .orElse(new ArrayList<>(1));
+
+        additionalHearingDocumentDataList.add(generatedDocumentData);
+
+        caseData.put(ADDITIONAL_HEARING_DOCUMENT_COLLECTION, additionalHearingDocumentDataList);
+    }
+
     public void sendAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
         additionalHearingCorresponder.sendCorrespondence(caseDetails, authorisationToken);
     }
@@ -237,24 +255,6 @@ public class AdditionalHearingDocumentService {
         caseData.put("DivorceCaseNumber", caseData.get(DIVORCE_CASE_NUMBER));
         caseData.put("ApplicantName", caseDataService.buildFullApplicantName(caseDetails));
         caseData.put("RespondentName", caseDataService.buildFullRespondentName(caseDetails));
-    }
-
-    protected void addAdditionalHearingDocumentToCaseData(CaseDetails caseDetails, CaseDocument document) {
-        AdditionalHearingDocumentData generatedDocumentData = AdditionalHearingDocumentData.builder()
-            .additionalHearingDocument(AdditionalHearingDocument.builder()
-                .document(document)
-                .build())
-            .build();
-
-        Map<String, Object> caseData = caseDetails.getData();
-        List<AdditionalHearingDocumentData> additionalHearingDocumentDataList =
-            Optional.ofNullable(caseData.get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION))
-                .map(documentHelper::convertToAdditionalHearingDocumentData)
-                .orElse(new ArrayList<>(1));
-
-        additionalHearingDocumentDataList.add(generatedDocumentData);
-
-        caseData.put(ADDITIONAL_HEARING_DOCUMENT_COLLECTION, additionalHearingDocumentDataList);
     }
 
     public void bulkPrintAdditionalHearingDocuments(CaseDetails caseDetails, String authorisationToken) {
