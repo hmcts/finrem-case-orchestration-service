@@ -173,12 +173,12 @@ public abstract class AbstractDocumentTest extends BaseTest {
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)));
     }
 
-    public void generateSendLetterServiceStub() throws JsonProcessingException {
+    public void generateSendLetterServiceStub(UUID uuid) throws JsonProcessingException {
         sendLetterService.stubFor(post(urlPathEqualTo(SEND_LETTERS_CONTEXT_PATH))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                .withBody(objectMapper.writeValueAsString(new SendLetterResponse(UUID.randomUUID())))));
+                .withBody(objectMapper.writeValueAsString(new SendLetterResponse(uuid)))));
     }
 
     void idamServiceStub() {

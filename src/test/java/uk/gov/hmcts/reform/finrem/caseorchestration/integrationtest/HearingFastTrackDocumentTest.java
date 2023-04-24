@@ -130,10 +130,11 @@ public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
     @Test
     public void generateFormC() throws Exception {
         idamServiceStub();
+        UUID uuid = UUID.randomUUID();
         generateEvidenceUploadServiceSuccessStub();
         generateDocumentServiceSuccessStubWithCoverSheet();
         downloadDocumentServiceStubWith(HttpStatus.OK);
-        generateSendLetterServiceStub();
+        generateSendLetterServiceStub(uuid);
 
         webClient.perform(MockMvcRequestBuilders.post(API_URL)
             .content(objectMapper.writeValueAsString(request))
