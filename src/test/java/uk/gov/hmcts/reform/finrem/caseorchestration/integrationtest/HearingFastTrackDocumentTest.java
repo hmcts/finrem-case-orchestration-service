@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
+import com.google.common.collect.ImmutableList;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
@@ -34,6 +35,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_N
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OUT_OF_FAMILY_COURT_RESOLUTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.DATE_BETWEEN_6_AND_10_WEEKS;
 
 public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
 
@@ -45,7 +47,7 @@ public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
         return PdfDocumentRequest.builder()
             .accessKey("TESTPDFACCESS")
             .outputName("result.pdf")
-            .templateName(documentConfiguration.getFormCFastTrackTemplate(CaseDetails.builder().build()))
+            .templateName(documentConfiguration.getFormCFastTrackTemplate(FinremCaseDetails.builder().build()))
             .data(request.getCaseDetails().getData())
             .build();
     }
