@@ -46,13 +46,14 @@ public class EmailService {
     public static final String CONSENTED_LIST_FOR_HEARING = "FR_CONSENTED_LIST_FOR_HEARING";
 
     public void sendConfirmationEmail(NotificationRequest notificationRequest, EmailTemplateNames template) {
-        Map<String, String> templateVars = buildTemplateVars(notificationRequest, template.name());
+        Map<String, Object> templateVars = buildTemplateVars(notificationRequest, template.name());
         EmailToSend emailToSend = generateEmail(notificationRequest.getNotificationEmail(), template.name(),
             templateVars);
         sendEmail(emailToSend, "send Confirmation email for " + template.name());
     }
-    protected Map<String, String> buildTemplateVars(NotificationRequest notificationRequest, String templateName) {
-        Map<String, String> templateVars = new HashMap<>();
+
+    protected Map<String, Object> buildTemplateVars(NotificationRequest notificationRequest, String templateName) {
+        Map<String, Object> templateVars = new HashMap<>();
 
         templateVars.put("caseReferenceNumber", notificationRequest.getCaseReferenceNumber());
         templateVars.put("solicitorReferenceNumber", notificationRequest.getSolicitorReferenceNumber());
