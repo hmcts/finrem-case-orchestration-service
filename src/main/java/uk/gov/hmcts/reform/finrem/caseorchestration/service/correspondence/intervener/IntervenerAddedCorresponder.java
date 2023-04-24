@@ -7,7 +7,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerChangeDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.FinremSingleLetterOrEmailAllPartiesCorresponder;
@@ -18,16 +17,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.interveners.Interven
 public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPartiesCorresponder {
 
     private final IntervenerDocumentService intervenerDocumentService;
-    private final IntervenerOneToIntervenerDetailsMapper intervenerOneDetailsMapper;
 
     public IntervenerAddedCorresponder(NotificationService notificationService, BulkPrintService bulkPrintService,
-                                       IntervenerDocumentService intervenerDocumentService,
-                                       IntervenerOneToIntervenerDetailsMapper intervenerOneDetailsMapper) {
+                                       IntervenerDocumentService intervenerDocumentService) {
         super(notificationService, bulkPrintService);
         this.intervenerDocumentService = intervenerDocumentService;
-        this.intervenerOneDetailsMapper = intervenerOneDetailsMapper;
     }
 
+    @Override
     public void sendCorrespondence(FinremCaseDetails caseDetails, String authToken) {
         sendApplicantCorrespondence(caseDetails, authToken);
         sendRespondentCorrespondence(caseDetails, authToken);
@@ -57,10 +54,6 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
             if (notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)) {
                 emailRespondentSolicitor(caseDetails);
             }
-
-            // TODO: emailApplicantSolicitorIntervenerCitizen
-
-            // TODO: emailRespondentSolicitorIntervenerCitizen
         }
     }
 
