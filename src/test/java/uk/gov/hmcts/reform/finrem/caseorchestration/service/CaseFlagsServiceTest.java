@@ -8,9 +8,14 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.caseflag.caseflag.CaseFlag;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.caseflag.caseflag.FlagDetail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.caseflag.caseflag.FlagDetailData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.CaseFlagsWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 
 import java.util.HashMap;
 import java.util.List;
@@ -30,9 +35,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RunWith(MockitoJUnitRunner.class)
 public class CaseFlagsServiceTest {
 
-    public static final String APPLICANT_NAME = "App Name";
-    public static final String RESPONDENT_NAME = "Resp Name";
-
+    private static final String APPLICANT_NAME = "App Name";
+    private static final String RESPONDENT_NAME = "Resp Name";
+    private static final String CASE = "Case";
     @Mock
     private CaseDataService caseDataService;
     @Spy
@@ -41,75 +46,34 @@ public class CaseFlagsServiceTest {
     private CaseFlagsService caseFlagsService;
 
     @Test
-    public void givenCaseFlags_whenHandleAboutToSubmit_thenSetApplicantFlagDetails() {
-        when(caseDataService.buildFullApplicantName(any())).thenReturn(APPLICANT_NAME);
+    public void shouldSetApplicantRespondentAndCaseFlagDetails() {
 
-        CaseDetails caseDetails = caseData();
-        caseDetails.getData().put(CASE_APPLICANT_FLAGS, flagDetailsData());
+        FinremCaseDetails caseDetails = finremCaseDetails();
 
         caseFlagsService.setCaseFlagInformation(caseDetails);
 
-        Map<String, Object> caseData = caseDetails.getData();
-
-        CaseFlag applicantFlags = objectMapper.convertValue(caseData.get(CASE_APPLICANT_FLAGS), CaseFlag.class);
-
-        assertThat(applicantFlags.getPartyName(), is(APPLICANT_NAME));
-        assertThat(applicantFlags.getRoleOnCase(), is(APPLICANT));
+        CaseFlagsWrapper caseFlagsWrapper = caseDetails.getData().getCaseFlagsWrapper();
+        assertThat(caseFlagsWrapper.getApplicantFlags().getPartyName(), is(APPLICANT_NAME));
+        assertThat(caseFlagsWrapper.getApplicantFlags().getRoleOnCase(), is(APPLICANT));
+        assertThat(caseFlagsWrapper.getRespondentFlags().getPartyName(), is(RESPONDENT_NAME));
+        assertThat(caseFlagsWrapper.getRespondentFlags().getRoleOnCase(), is(RESPONDENT));
+        assertThat(caseFlagsWrapper.getCaseFlags().getPartyName(), is(CASE));
+        assertThat(caseFlagsWrapper.getCaseFlags().getRoleOnCase(), is(CASE));
     }
 
-    @Test
-    public void givenCaseFlags_whenHandleAboutToSubmit_thenSetRespondentFlagDetails() {
-        when(caseDataService.buildFullRespondentName(any())).thenReturn(RESPONDENT_NAME);
-
-        CaseDetails caseDetails = caseData();
-        caseDetails.getData().put(CASE_RESPONDENT_FLAGS, flagDetailsData());
-
-        caseFlagsService.setCaseFlagInformation(caseDetails);
-
-        Map<String, Object> caseData = caseDetails.getData();
-
-        CaseFlag respondentFlags = objectMapper.convertValue(caseData.get(CASE_RESPONDENT_FLAGS), CaseFlag.class);
-
-        assertThat(respondentFlags.getPartyName(), is(RESPONDENT_NAME));
-        assertThat(respondentFlags.getRoleOnCase(), is(RESPONDENT));
-    }
-
-    @Test
-    public void givenNoCaseFlags_whenHandleAboutToSubmit_thenSetDefaultCaseFlagField() {
-        when(caseDataService.buildFullApplicantName(any())).thenReturn(APPLICANT_NAME);
-        when(caseDataService.buildFullRespondentName(any())).thenReturn(RESPONDENT_NAME);
-
-        CaseDetails caseDetails = caseData();
-
-        caseFlagsService.setCaseFlagInformation(caseDetails);
-
-        Map<String, Object> caseData = caseDetails.getData();
-
-        CaseFlag respondentFlags = objectMapper.convertValue(caseData.get(CASE_RESPONDENT_FLAGS), CaseFlag.class);
-        assertThat(respondentFlags.getPartyName(), is(RESPONDENT_NAME));
-        assertThat(respondentFlags.getRoleOnCase(), is(RESPONDENT));
-
-        CaseFlag applicantFlags = objectMapper.convertValue(caseData.get(CASE_APPLICANT_FLAGS), CaseFlag.class);
-        assertThat(applicantFlags.getPartyName(), is(APPLICANT_NAME));
-        assertThat(applicantFlags.getRoleOnCase(), is(APPLICANT));
-    }
-
-    @Test
-    public void givenNoCaseFlags_whenHandleAboutToSubmit_thenSetCaseLevelFlags() {
-        CaseDetails caseDetails = caseData();
-
-        caseFlagsService.setCaseFlagInformation(caseDetails);
-
-        Map<String, Object> caseData = caseDetails.getData();
-
-        CaseFlag caseFlag = objectMapper.convertValue(caseData.get(CASE_LEVEL_FLAGS), CaseFlag.class);
-        assertThat(caseFlag.getPartyName(), is("Case"));
-        assertThat(caseFlag.getRoleOnCase(), is("Case"));
-    }
-
-    private CaseDetails caseData() {
-        Map<String, Object> caseData = new HashMap<>();
-        return CaseDetails.builder().data(caseData).build();
+    private FinremCaseDetails finremCaseDetails() {
+        FinremCaseDetails caseDetails = FinremCaseDetails.builder()
+            .data(FinremCaseData.builder()
+                .ccdCaseType(CaseType.CONTESTED)
+                .contactDetailsWrapper(ContactDetailsWrapper.builder()
+                    .applicantFmName("App")
+                    .applicantLname("Name")
+                    .respondentFmName("Resp")
+                    .respondentLname("Name")
+                    .build())
+                .build())
+            .build();
+        return caseDetails;
     }
 
     private CaseFlag flagDetailsData() {

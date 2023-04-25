@@ -58,6 +58,7 @@ public enum EventType {
     MANUAL_PAYMENT("FR_manualPayment"),
     ASSIGN_TO_JUDGE_CONSENT("FR_assignToJudgeConsent"),
     MANAGE_INTERVENERS("manageInterveners"),
+    CREATE_CASE_FLAG("createFlags"),
     @JsonEnumDefaultValue
     NONE("");
 

@@ -58,7 +58,6 @@ public class DraftOnlineDocumentController {
             callback.getCaseDetails().getId());
 
         CaseDetails caseDetails = callback.getCaseDetails();
-        caseFlagsService.setCaseFlagInformation(caseDetails);
 
         Map<String, Object> caseData = callback.getCaseDetails().getData();
         if (!idamService.isUserRoleAdmin(authorisationToken)) {

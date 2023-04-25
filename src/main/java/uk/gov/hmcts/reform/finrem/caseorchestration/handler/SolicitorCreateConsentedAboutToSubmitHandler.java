@@ -45,7 +45,6 @@ public class SolicitorCreateConsentedAboutToSubmitHandler
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         CaseDocument caseDocument = consentOrderService.getLatestConsentOrderData(callbackRequest);
         caseData.put(LATEST_CONSENT_ORDER, caseDocument);
-        caseFlagsService.setCaseFlagInformation(callbackRequest.getCaseDetails());
 
         if (!idamService.isUserRoleAdmin(userAuthorisation)) {
             caseData.put(APPLICANT_REPRESENTED, YES_VALUE);
