@@ -6,8 +6,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 
 import java.util.ArrayList;
@@ -47,6 +48,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RestController
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
+@RequiredArgsConstructor
 public class UpdateContestedCaseController extends BaseController {
 
     private static final String DIVORCE_STAGE_REACHED = "divorceStageReached";
@@ -56,8 +58,8 @@ public class UpdateContestedCaseController extends BaseController {
     private static final String DIVORCE_UPLOAD_EVIDENCE_1 = "divorceUploadEvidence1";
     private static final String DIVORCE_DECREE_NISI_DATE = "divorceDecreeNisiDate";
 
-    @Autowired
-    private OnlineFormDocumentService onlineFormDocumentService;
+    private final OnlineFormDocumentService onlineFormDocumentService;
+    private final CaseFlagsService caseFlagsService;
 
     @PostMapping(path = "/update-contested-case", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Handles update Contested Case details and cleans up the data fields based on the options chosen for Contested Cases")
@@ -80,6 +82,9 @@ public class UpdateContestedCaseController extends BaseController {
         if (typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)) {
             updateDivorceDetailsForContestedCase(caseData);
         }
+        caseFlagsService.setCaseFlagInformation(caseDetails);
+
+        updateDivorceDetailsForContestedCase(caseData);
         updateContestedRespondentDetails(caseData);
         updateContestedPeriodicPaymentOrder(caseData, typeOfApplication);
         if (typeOfApplication.equals(TYPE_OF_APPLICATION_DEFAULT_TO)) {
