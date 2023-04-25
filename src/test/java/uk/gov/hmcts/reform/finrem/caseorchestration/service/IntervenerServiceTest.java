@@ -67,6 +67,14 @@ public class IntervenerServiceTest extends BaseServiceTest {
     private PrdOrganisationService organisationService;
     @Mock
     private SystemUserService systemUserService;
+    @Mock
+    private IntervenerOneToIntervenerDetailsMapper intervenerOneToIntervenerDetailsMapper;
+    @Mock
+    private IntervenerTwoToIntervenerDetailsMapper intervenerTwoToIntervenerDetailsMapper;
+    @Mock
+    private IntervenerThreeToIntervenerDetailsMapper intervenerThreeToIntervenerDetailsMapper;
+    @Mock
+    private IntervenerFourToIntervenerDetailsMapper intervenerFourToIntervenerDetailsMapper;
     @InjectMocks
     private IntervenerService service;
 
