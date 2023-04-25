@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HwfConsentedApplicantCorresponderTest {
@@ -57,7 +58,7 @@ public class HwfConsentedApplicantCorresponderTest {
 
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)).thenReturn(false);
         hwfConsentedApplicantCorresponder.sendCorrespondence(caseDetails, AUTHORISATION_TOKEN);
-        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails);
+        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, APPLICANT);
     }
 
     @Test
