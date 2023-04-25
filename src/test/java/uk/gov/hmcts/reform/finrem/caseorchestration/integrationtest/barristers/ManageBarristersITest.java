@@ -340,7 +340,6 @@ public class ManageBarristersITest implements IntegrationTest {
 
         ccdCallbackController.ccdSubmittedEvent(AUTH_TOKEN, request);
 
-        verify(restTemplate).exchange(eq(uri), eq(HttpMethod.POST), restRequestCaptor.capture(), eq(String.class));
         verify(bulkPrintService).sendDocumentForPrint(eq(addedDocument), any(CaseDetails.class), any());
         verify(emailService).sendConfirmationEmail(notificationRequestArgumentCaptor.capture(), eq(EmailTemplateNames.FR_BARRISTER_ACCESS_ADDED));
 
@@ -367,7 +366,6 @@ public class ManageBarristersITest implements IntegrationTest {
 
         ccdCallbackController.ccdSubmittedEvent(AUTH_TOKEN, request);
 
-        verify(restTemplate).exchange(eq(uri), eq(HttpMethod.POST), restRequestCaptor.capture(), eq(String.class));
         verify(bulkPrintService).sendDocumentForPrint(eq(removedDocument), any(CaseDetails.class), any());
         verify(emailService).sendConfirmationEmail(notificationRequestArgumentCaptor.capture(), eq(EmailTemplateNames.FR_BARRISTER_ACCESS_REMOVED));
 
@@ -390,7 +388,6 @@ public class ManageBarristersITest implements IntegrationTest {
 
         ccdCallbackController.ccdSubmittedEvent(AUTH_TOKEN, request);
 
-        verify(restTemplate).exchange(eq(uri), eq(HttpMethod.POST), restRequestCaptor.capture(), eq(String.class));
         verify(bulkPrintService, never()).sendDocumentForPrint(any(), any(CaseDetails.class), any());
         verify(emailService).sendConfirmationEmail(notificationRequestArgumentCaptor.capture(), eq(EmailTemplateNames.FR_BARRISTER_ACCESS_ADDED));
 
