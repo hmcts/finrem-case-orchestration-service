@@ -17,7 +17,8 @@ def secrets = [
                 secret("finrem-system-update-password", "FINREM_SYSTEMUPDATE_PASSWORD"),
                 secret("finrem-idam-client-secret", "FINREM_IDAM_CLIENT_SECRET"),
                 secret("docmosis-api-key", "PDF_SERVICE_ACCESS_KEY"),
-                secret("docmosis-endpoint", "PDF_SERVICE_BASEURL")
+                secret("docmosis-endpoint", "PDF_SERVICE_BASEURL"),
+                secret("gov-uk-notification-key", "UK_GOV_NOTIFY_API_KEY")
         ]
 ]
 
