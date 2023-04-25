@@ -12,12 +12,9 @@ import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -49,6 +46,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RepresentationUpda
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationUser;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CallbackDispatchService;
@@ -59,7 +58,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
@@ -139,13 +137,13 @@ public class ManageBarristersITest implements IntegrationTest {
     @MockBean
     private SystemUserService systemUserService;
     @MockBean
-    private RestTemplate restTemplate;
-    @MockBean
     BulkPrintService bulkPrintService;
     @MockBean
     private GenericDocumentService genericDocumentService;
+    @MockBean
+    private EmailService emailService;
     @Captor
-    private ArgumentCaptor<HttpEntity> restRequestCaptor;
+    private ArgumentCaptor<NotificationRequest> notificationRequestArgumentCaptor;
 
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
@@ -340,15 +338,15 @@ public class ManageBarristersITest implements IntegrationTest {
         CallbackRequest request = buildCallbackRequest();
         request.getCaseDetails().getData().put(APPLICANT_BARRISTER_COLLECTION, applicantBarristerCollection());
 
-
         ccdCallbackController.ccdSubmittedEvent(AUTH_TOKEN, request);
-        URI uri = new URI(END_POINT_BARRISTER_ADDED);
 
         verify(restTemplate).exchange(eq(uri), eq(HttpMethod.POST), restRequestCaptor.capture(), eq(String.class));
         verify(bulkPrintService).sendDocumentForPrint(eq(addedDocument), any(CaseDetails.class), any());
+        verify(emailService).sendConfirmationEmail(notificationRequestArgumentCaptor.capture(), eq(EmailTemplateNames.FR_BARRISTER_ACCESS_ADDED));
 
-        HttpEntity<NotificationRequest> notificationRequestHttpEntity = restRequestCaptor.getValue();
-        assertEquals(notificationRequestHttpEntity.getBody().getBarristerReferenceNumber(), APP_BARR_ORG_ID);
+
+        NotificationRequest notificationRequest = notificationRequestArgumentCaptor.getValue();
+        assertEquals(notificationRequest.getBarristerReferenceNumber(), APP_BARR_ORG_ID);
     }
 
     @Test
@@ -368,13 +366,13 @@ public class ManageBarristersITest implements IntegrationTest {
         request.getCaseDetailsBefore().getData().put(APPLICANT_BARRISTER_COLLECTION, applicantBarristerCollection());
 
         ccdCallbackController.ccdSubmittedEvent(AUTH_TOKEN, request);
-        URI uri = new URI(END_POINT_BARRISTER_REMOVED);
 
         verify(restTemplate).exchange(eq(uri), eq(HttpMethod.POST), restRequestCaptor.capture(), eq(String.class));
         verify(bulkPrintService).sendDocumentForPrint(eq(removedDocument), any(CaseDetails.class), any());
+        verify(emailService).sendConfirmationEmail(notificationRequestArgumentCaptor.capture(), eq(EmailTemplateNames.FR_BARRISTER_ACCESS_REMOVED));
 
-        HttpEntity<NotificationRequest> notificationRequestHttpEntity = restRequestCaptor.getValue();
-        assertEquals(notificationRequestHttpEntity.getBody().getBarristerReferenceNumber(), APP_BARR_ORG_ID);
+        NotificationRequest notificationRequest = notificationRequestArgumentCaptor.getValue();
+        assertEquals(notificationRequest.getBarristerReferenceNumber(), APP_BARR_ORG_ID);
     }
 
     @Test
@@ -391,13 +389,14 @@ public class ManageBarristersITest implements IntegrationTest {
         request.getCaseDetails().getData().put(APPLICANT_REPRESENTED, YES_VALUE);
 
         ccdCallbackController.ccdSubmittedEvent(AUTH_TOKEN, request);
-        URI uri = new URI(END_POINT_BARRISTER_ADDED);
 
         verify(restTemplate).exchange(eq(uri), eq(HttpMethod.POST), restRequestCaptor.capture(), eq(String.class));
         verify(bulkPrintService, never()).sendDocumentForPrint(any(), any(CaseDetails.class), any());
+        verify(emailService).sendConfirmationEmail(notificationRequestArgumentCaptor.capture(), eq(EmailTemplateNames.FR_BARRISTER_ACCESS_ADDED));
 
-        HttpEntity<NotificationRequest> notificationRequestHttpEntity = restRequestCaptor.getValue();
-        assertEquals(notificationRequestHttpEntity.getBody().getBarristerReferenceNumber(), APP_BARR_ORG_ID);
+
+        NotificationRequest notificationRequest = notificationRequestArgumentCaptor.getValue();
+        assertEquals(notificationRequest.getBarristerReferenceNumber(), APP_BARR_ORG_ID);
     }
 
     private CallbackRequest buildCallbackRequest() {
@@ -416,11 +415,11 @@ public class ManageBarristersITest implements IntegrationTest {
 
     private List<BarristerData> applicantBarristerCollection() {
         return List.of(BarristerData.builder()
-                .barrister(Barrister.builder()
-                    .name(APP_BARRISTER_NAME)
-                    .email(APP_BARRISTER_EMAIL_ONE)
-                    .organisation(Organisation.builder().organisationID(APP_BARR_ORG_ID).build())
-                    .build())
+            .barrister(Barrister.builder()
+                .name(APP_BARRISTER_NAME)
+                .email(APP_BARRISTER_EMAIL_ONE)
+                .organisation(Organisation.builder().organisationID(APP_BARR_ORG_ID).build())
+                .build())
             .build());
     }
 

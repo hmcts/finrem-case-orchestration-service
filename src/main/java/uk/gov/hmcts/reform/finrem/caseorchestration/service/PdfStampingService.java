@@ -72,19 +72,19 @@ public class PdfStampingService {
         PdfAnnexStampingInfo info = PdfAnnexStampingInfo.builder(page).build();
         log.info("PdfAnnexStampingInfo data  = {}", info);
 
-        PDImageXObject annexImage = createFromByteArray(doc, imageAsBytes(info.getAnnexFile()), null);
-        PDImageXObject familySealImage = createFromByteArray(doc, imageAsBytes(info.getCourtSealFile()), null);
-        PDImageXObject highCourtSealImage = createFromByteArray(doc, imageAsBytes(info.getHighCourtSealFile()), null);
         PDPageContentStream psdStream = new PDPageContentStream(doc, page, APPEND, true, true);
 
         if (StampType.FAMILY_COURT_STAMP.equals(stampType)) {
+            PDImageXObject familySealImage = createFromByteArray(doc, imageAsBytes(info.getCourtSealFile()), null);
             psdStream.drawImage(familySealImage, info.getCourtSealPositionX(), info.getCourtSealPositionY(),
                 WIDTH_AND_HEIGHT, WIDTH_AND_HEIGHT);
         } else if (StampType.HIGH_COURT_STAMP.equals(stampType)) {
+            PDImageXObject highCourtSealImage = createFromByteArray(doc, imageAsBytes(info.getHighCourtSealFile()), null);
             psdStream.drawImage(highCourtSealImage, info.getHighCourtSealPositionX(), info.getHighCourtSealPositionY(),
                 WIDTH_AND_HEIGHT, WIDTH_AND_HEIGHT);
         }
         if (isAnnexNeeded) {
+            PDImageXObject annexImage = createFromByteArray(doc, imageAsBytes(info.getAnnexFile()), null);
             psdStream.drawImage(annexImage, info.getAnnexPositionX(), info.getAnnexPositionY(),
                 WIDTH_AND_HEIGHT, WIDTH_AND_HEIGHT);
         }

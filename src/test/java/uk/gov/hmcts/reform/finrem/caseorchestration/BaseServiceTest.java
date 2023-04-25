@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.ResourceUtils;
@@ -25,6 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RegionMidlandsFrc;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.ContactDetailsWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.NatureApplicationWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 
 import java.io.File;
 import java.io.IOException;
@@ -79,6 +81,9 @@ public abstract class BaseServiceTest extends BaseTest {
     protected ObjectMapper mapper;
     @Autowired
     protected FinremCaseDetailsMapper finremCaseDetailsMapper;
+
+    @MockBean
+    protected EmailService emailService;
 
     public static final String CASE_DETAILS = "caseDetails";
     public static final String CASE_DATA = "case_data";
