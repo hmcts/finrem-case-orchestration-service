@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -897,11 +896,11 @@ public class NotificationServiceTest extends BaseServiceTest {
             .map(this::convertToInterimHearingDataList).orElse(Collections.emptyList());
 
         List<InterimHearingItem> interimHearingItems
-            = interimHearingList.stream().map(InterimHearingData::getValue).collect(Collectors.toList());
+            = interimHearingList.stream().map(InterimHearingData::getValue).toList();
 
         List<Map<String, Object>> interimDataMap = interimHearingItems.stream()
             .map(obj -> new ObjectMapper().convertValue(obj, new TypeReference<Map<String, Object>>() {
-            })).collect(Collectors.toList());
+            })).toList();
 
         when(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(CaseDetails.class), any())).thenReturn(notificationRequest);
 
@@ -922,7 +921,7 @@ public class NotificationServiceTest extends BaseServiceTest {
             .map(this::convertToInterimHearingDataList).orElse(Collections.emptyList());
 
         List<InterimHearingItem> interimHearingItems
-            = interimHearingList.stream().map(InterimHearingData::getValue).collect(Collectors.toList());
+            = interimHearingList.stream().map(InterimHearingData::getValue).toList();
 
         List<Map<String, Object>> interimDataMap = interimHearingItems.stream()
             .map(obj -> new ObjectMapper().convertValue(obj, new TypeReference<Map<String, Object>>() {

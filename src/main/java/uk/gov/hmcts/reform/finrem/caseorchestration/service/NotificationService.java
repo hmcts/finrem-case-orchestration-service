@@ -385,8 +385,8 @@ public class NotificationService {
         if (caseDocument != null) {
             ResponseEntity<byte[]> response = evidenceManagementDownloadService.download(caseDocument.getDocumentBinaryUrl());
             if (response.getStatusCode() != HttpStatus.OK) {
-                log.error("Download failed for url {}, filename {} ", caseDocument.getDocumentBinaryUrl(),
-                    caseDocument.getDocumentFilename());
+                log.error("Download failed for url {}, filename {} and Case ID: {}", caseDocument.getDocumentBinaryUrl(),
+                    caseDocument.getDocumentFilename(), caseDetails.getId());
                 throw new RuntimeException(String.format("Unexpected error DM store: %s ", response.getStatusCode()));
             }
             notificationRequest.setDocumentContents(response.getBody());
@@ -406,7 +406,7 @@ public class NotificationService {
 
     public void sendContestedGeneralEmail(FinremCaseDetails caseDetails) {
         NotificationRequest notificationRequest = finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
-        notificationRequest.setNotificationEmail(Objects.toString(caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailRecipient()));
+        notificationRequest.setNotificationEmail(caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailRecipient());
         downloadGeneralEmailUploadedDocument(caseDetails, notificationRequest);
         log.info("Received request for notification email for contested general email Notification request : {}",
             notificationRequest);

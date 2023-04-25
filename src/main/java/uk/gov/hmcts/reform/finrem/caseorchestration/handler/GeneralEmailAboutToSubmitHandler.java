@@ -47,7 +47,7 @@ public class GeneralEmailAboutToSubmitHandler extends FinremCallbackHandler {
         log.info("Received request to send general email for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
 
-        log.info("Sending general email notification");
+        log.info("Sending general email notification for Case ID: {}", callbackRequest.getCaseDetails().getId());
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseDocument generalEmailUploadedDocument = caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailUploadedDocument();
         if (generalEmailUploadedDocument != null) {
