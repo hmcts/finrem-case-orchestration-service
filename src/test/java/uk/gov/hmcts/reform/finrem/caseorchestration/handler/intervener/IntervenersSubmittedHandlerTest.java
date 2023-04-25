@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler.intervener;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -33,8 +33,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerC
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.DEL_INTERVENER_THREE_CODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.DEL_INTERVENER_TWO_CODE;
 
-@RunWith(MockitoJUnitRunner.class)
-public class IntervenersSubmittedHandlerTest {
+@ExtendWith(MockitoExtension.class)
+class IntervenersSubmittedHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
 
@@ -48,28 +48,28 @@ public class IntervenersSubmittedHandlerTest {
     private IntervenerService service;
 
     @Test
-    public void givenContestedCase_whenICallbackIsAboutToSubmit_thenHandlerCanNotHandle() {
+    void givenContestedCase_whenICallbackIsAboutToSubmit_thenHandlerCanNotHandle() {
         assertThat(handler
                 .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.MANAGE_INTERVENERS),
             is(false));
     }
 
     @Test
-    public void givenConsentedCase_whenEventIsClose_thenHandlerCanNotHandle() {
+    void givenConsentedCase_whenEventIsClose_thenHandlerCanNotHandle() {
         assertThat(handler
                 .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONTESTED, EventType.CLOSE),
             is(false));
     }
 
     @Test
-    public void givenContestedCase_whenEventIsManageInteveners_thenHandlerCanHandleEvent() {
+    void givenContestedCase_whenEventIsManageInteveners_thenHandlerCanHandleEvent() {
         assertThat(handler
                 .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.MANAGE_INTERVENERS),
             is(true));
     }
 
     @Test
-    public void givenContestedCase_whenIntervenerOneActionIsAdded_thenSendCorrespondance() {
+    void givenContestedCase_whenIntervenerOneActionIsAdded_thenSendCorrespondance() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
@@ -90,7 +90,7 @@ public class IntervenersSubmittedHandlerTest {
     }
 
     @Test
-    public void givenContestedCase_whenIntervenerTwoActionIsAdded_thenSendCorrespondance() {
+    void givenContestedCase_whenIntervenerTwoActionIsAdded_thenSendCorrespondance() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
@@ -111,7 +111,7 @@ public class IntervenersSubmittedHandlerTest {
     }
 
     @Test
-    public void givenContestedCase_whenIntervenerThreeActionIsAdded_thenSendCorrespondance() {
+    void givenContestedCase_whenIntervenerThreeActionIsAdded_thenSendCorrespondance() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
@@ -132,7 +132,7 @@ public class IntervenersSubmittedHandlerTest {
     }
 
     @Test
-    public void givenContestedCase_whenIntervenerFourActionIsAdded_thenSendCorrespondance() {
+    void givenContestedCase_whenIntervenerFourActionIsAdded_thenSendCorrespondance() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
@@ -153,7 +153,7 @@ public class IntervenersSubmittedHandlerTest {
     }
 
     @Test
-    public void givenContestedCase_whenIntervenerOneActionIsRemoved_thenSendCorrespondance() {
+    void givenContestedCase_whenIntervenerOneActionIsRemoved_thenSendCorrespondance() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
@@ -167,12 +167,14 @@ public class IntervenersSubmittedHandlerTest {
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(DEL_INTERVENER_ONE_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
+        when(service.setIntervenerOneRemovedChangeDetails()).thenReturn(intervenerOneChangeDetails);
+
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(service).setIntervenerOneRemovedChangeDetails();
     }
 
     @Test
-    public void givenContestedCase_whenIntervenerTwoActionIsRemoved_thenSendCorrespondance() {
+    void givenContestedCase_whenIntervenerTwoActionIsRemoved_thenSendCorrespondance() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
@@ -186,12 +188,14 @@ public class IntervenersSubmittedHandlerTest {
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(DEL_INTERVENER_TWO_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
+        when(service.setIntervenerTwoRemovedChangeDetails()).thenReturn(intervenerTwoChangeDetails);
+
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(service).setIntervenerTwoRemovedChangeDetails();
     }
 
     @Test
-    public void givenContestedCase_whenIntervenerThreeActionIsRemoved_thenSendCorrespondance() {
+    void givenContestedCase_whenIntervenerThreeActionIsRemoved_thenSendCorrespondance() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
@@ -205,12 +209,14 @@ public class IntervenersSubmittedHandlerTest {
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(DEL_INTERVENER_THREE_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
 
+        when(service.setIntervenerThreeRemovedChangeDetails()).thenReturn(intervenerThreeChangeDetails);
+
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(service).setIntervenerThreeRemovedChangeDetails();
     }
 
     @Test
-    public void givenContestedCase_whenIntervenerFourActionIsRemoved_thenSendCorrespondance() {
+    void givenContestedCase_whenIntervenerFourActionIsRemoved_thenSendCorrespondance() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseData finremCaseData = finremCallbackRequest.getCaseDetails().getData();
 
@@ -223,6 +229,8 @@ public class IntervenersSubmittedHandlerTest {
 
         DynamicRadioListElement operation = DynamicRadioListElement.builder().code(DEL_INTERVENER_FOUR_CODE).build();
         finremCaseData.getIntervenerOptionList().setValue(operation);
+
+        when(service.setIntervenerFourRemovedChangeDetails()).thenReturn(intervenerFourChangeDetails);
 
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(service).setIntervenerFourRemovedChangeDetails();
