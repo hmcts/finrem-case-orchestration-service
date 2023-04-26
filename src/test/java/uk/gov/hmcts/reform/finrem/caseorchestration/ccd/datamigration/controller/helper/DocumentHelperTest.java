@@ -450,8 +450,8 @@ public class DocumentHelperTest {
             .intervener1Name("Name")
             .intervener1Address(address).build();
         caseDetails.getData().setIntervenerOneWrapper(intervenerOneWrapper);
-        Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1" +
-            "\nSW1 1TE").build();
+        Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
+            + "\nSW1 1TE").build();
 
         CaseDetails result = documentHelper.prepareLetterTemplateData(caseDetails, INTERVENER_ONE);
 
@@ -466,8 +466,8 @@ public class DocumentHelperTest {
             .intervener2Name("Name")
             .intervener2Address(address).build();
         caseDetails.getData().setIntervenerTwoWrapper(intervenerTwoWrapper);
-        Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1" +
-            "\nSW1 1TE").build();
+        Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
+            + "\nSW1 1TE").build();
 
         CaseDetails result = documentHelper.prepareLetterTemplateData(caseDetails, INTERVENER_TWO);
 
@@ -482,8 +482,8 @@ public class DocumentHelperTest {
             .intervener3Name("Name")
             .intervener3Address(address).build();
         caseDetails.getData().setIntervenerThreeWrapper(intervenerThreeWrapper);
-        Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1" +
-            "\nSW1 1TE").build();
+        Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
+            + "\nSW1 1TE").build();
 
         CaseDetails result = documentHelper.prepareLetterTemplateData(caseDetails, INTERVENER_THREE);
 
@@ -498,8 +498,8 @@ public class DocumentHelperTest {
             .intervener4Name("Name")
             .intervener4Address(address).build();
         caseDetails.getData().setIntervenerFourWrapper(intervenerFourWrapper);
-        Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1" +
-            "\nSW1 1TE").build();
+        Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
+            + "\nSW1 1TE").build();
 
         CaseDetails result = documentHelper.prepareLetterTemplateData(caseDetails, INTERVENER_FOUR);
 
