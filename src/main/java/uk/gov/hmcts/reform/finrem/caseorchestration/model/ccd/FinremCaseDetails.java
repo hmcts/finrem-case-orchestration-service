@@ -249,6 +249,4 @@ public class FinremCaseDetails implements CcdCaseDetails<FinremCaseData> {
             : data.getFullRespondentNameConsented();
     }
 
-
-
 }
