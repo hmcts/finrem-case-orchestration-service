@@ -25,7 +25,7 @@ public class CreateCaseFlagAboutToStartHandler extends FinremCallbackHandler {
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
-        return (CallbackType.ABOUT_TO_START.equals(callbackType) || CallbackType.ABOUT_TO_SUBMIT.equals(callbackType))
+        return CallbackType.ABOUT_TO_START.equals(callbackType)
             && (CaseType.CONSENTED.equals(caseType) || CaseType.CONTESTED.equals(caseType))
             && (EventType.CREATE_CASE_FLAG.equals(eventType));
     }
