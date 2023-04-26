@@ -259,7 +259,37 @@ public class NotificationService {
     }
 
     public void sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(FinremCaseDetails caseDetails) {
-        sendConsentOrderMadeConfirmationEmail(finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
+        NotificationRequest notificationRequestForRespondentSolicitor = finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails);
+        sendConsentOrderMadeConfirmationEmail(notificationRequestForRespondentSolicitor);
+        sendConsentOrderMadeConfirmationEmailToInterveners(caseDetails, notificationRequestForRespondentSolicitor);
+    }
+
+    private void sendConsentOrderMadeConfirmationEmailToInterveners(FinremCaseDetails finremCaseDetails,
+                                                                    NotificationRequest notificationRequestForRespondentSolicitor) {
+        FinremCaseData data = finremCaseDetails.getData();
+        if(isIntervenerOneEmailPresent(data.getIntervenerOneWrapper())) {
+            NotificationRequest notificationRequestForRespondentIntervenerOne =
+                getIntervenerOneNotification(finremCaseDetails, notificationRequestForRespondentSolicitor);
+            sendConsentOrderMadeConfirmationEmail(notificationRequestForRespondentIntervenerOne);
+        }
+
+        if(isIntervenerTwoEmailPresent(data.getIntervenerTwoWrapper())) {
+            NotificationRequest notificationRequestForRespondentIntervenerTwo =
+                getIntervenerTwoNotification(finremCaseDetails, notificationRequestForRespondentSolicitor);
+            sendConsentOrderMadeConfirmationEmail(notificationRequestForRespondentIntervenerTwo);
+        }
+
+        if(isIntervenerThreeEmailPresent(data.getIntervenerThreeWrapper())) {
+            NotificationRequest notificationRequestForRespondentIntervenerThree =
+                getIntervenerThreeNotification(finremCaseDetails, notificationRequestForRespondentSolicitor);
+            sendConsentOrderMadeConfirmationEmail(notificationRequestForRespondentIntervenerThree);
+        }
+
+        if(isIntervenerFourEmailPresent(data.getIntervenerFourWrapper())) {
+            NotificationRequest notificationRequestForRespondentIntervenerFour =
+                getIntervenerFourNotification(finremCaseDetails, notificationRequestForRespondentSolicitor);
+            sendConsentOrderMadeConfirmationEmail(notificationRequestForRespondentIntervenerFour);
+        }
     }
 
     public void sendConsentOrderMadeConfirmationEmail(NotificationRequest notificationRequest) {
@@ -283,7 +313,37 @@ public class NotificationService {
     }
 
     public void sendConsentOrderNotApprovedEmailToRespondentSolicitor(FinremCaseDetails caseDetails) {
-        sendConsentOrderNotApprovedEmail(finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
+        NotificationRequest notificationRequestForRespondentSolicitor = finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails);
+        sendConsentOrderNotApprovedEmail(notificationRequestForRespondentSolicitor);
+        sendConsentOrderNotApprovedEmailToInterveners(caseDetails, notificationRequestForRespondentSolicitor);
+    }
+
+    private void sendConsentOrderNotApprovedEmailToInterveners(FinremCaseDetails finremCaseDetails,
+                                                                    NotificationRequest notificationRequestForRespondentSolicitor) {
+        FinremCaseData data = finremCaseDetails.getData();
+        if(isIntervenerOneEmailPresent(data.getIntervenerOneWrapper())) {
+            NotificationRequest notificationRequestForRespondentIntervenerOne =
+                getIntervenerOneNotification(finremCaseDetails, notificationRequestForRespondentSolicitor);
+            sendConsentOrderNotApprovedEmail(notificationRequestForRespondentIntervenerOne);
+        }
+
+        if(isIntervenerTwoEmailPresent(data.getIntervenerTwoWrapper())) {
+            NotificationRequest notificationRequestForRespondentIntervenerTwo =
+                getIntervenerTwoNotification(finremCaseDetails, notificationRequestForRespondentSolicitor);
+            sendConsentOrderNotApprovedEmail(notificationRequestForRespondentIntervenerTwo);
+        }
+
+        if(isIntervenerThreeEmailPresent(data.getIntervenerThreeWrapper())) {
+            NotificationRequest notificationRequestForRespondentIntervenerThree =
+                getIntervenerThreeNotification(finremCaseDetails, notificationRequestForRespondentSolicitor);
+            sendConsentOrderNotApprovedEmail(notificationRequestForRespondentIntervenerThree);
+        }
+
+        if(isIntervenerFourEmailPresent(data.getIntervenerFourWrapper())) {
+            NotificationRequest notificationRequestForRespondentIntervenerFour =
+                getIntervenerFourNotification(finremCaseDetails, notificationRequestForRespondentSolicitor);
+            sendConsentOrderNotApprovedEmail(notificationRequestForRespondentIntervenerFour);
+        }
     }
 
     private void sendConsentOrderNotApprovedEmail(NotificationRequest notificationRequest) {
@@ -308,7 +368,37 @@ public class NotificationService {
     }
 
     public void sendConsentOrderAvailableEmailToRespondentSolicitor(FinremCaseDetails caseDetails) {
-        sendConsentOrderAvailableEmail(finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
+        NotificationRequest notificationRequestForRespondentSolicitor = finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails);
+        sendConsentOrderAvailableEmail(notificationRequestForRespondentSolicitor);
+        sendConsentOrderAvailableEmailToInterveners(caseDetails, notificationRequestForRespondentSolicitor);
+    }
+
+    private void sendConsentOrderAvailableEmailToInterveners(FinremCaseDetails finremCaseDetails,
+                                                               NotificationRequest notificationRequestForRespondentSolicitor) {
+        FinremCaseData data = finremCaseDetails.getData();
+        if(isIntervenerOneEmailPresent(data.getIntervenerOneWrapper())) {
+            NotificationRequest notificationRequestForRespondentIntervenerOne =
+                getIntervenerOneNotification(finremCaseDetails, notificationRequestForRespondentSolicitor);
+            sendConsentOrderAvailableEmail(notificationRequestForRespondentIntervenerOne);
+        }
+
+        if(isIntervenerTwoEmailPresent(data.getIntervenerTwoWrapper())) {
+            NotificationRequest notificationRequestForRespondentIntervenerTwo =
+                getIntervenerTwoNotification(finremCaseDetails, notificationRequestForRespondentSolicitor);
+            sendConsentOrderAvailableEmail(notificationRequestForRespondentIntervenerTwo);
+        }
+
+        if(isIntervenerThreeEmailPresent(data.getIntervenerThreeWrapper())) {
+            NotificationRequest notificationRequestForRespondentIntervenerThree =
+                getIntervenerThreeNotification(finremCaseDetails, notificationRequestForRespondentSolicitor);
+            sendConsentOrderAvailableEmail(notificationRequestForRespondentIntervenerThree);
+        }
+
+        if(isIntervenerFourEmailPresent(data.getIntervenerFourWrapper())) {
+            NotificationRequest notificationRequestForRespondentIntervenerFour =
+                getIntervenerFourNotification(finremCaseDetails, notificationRequestForRespondentSolicitor);
+            sendConsentOrderAvailableEmail(notificationRequestForRespondentIntervenerFour);
+        }
     }
 
     private void sendConsentOrderAvailableEmail(NotificationRequest notificationRequest) {
