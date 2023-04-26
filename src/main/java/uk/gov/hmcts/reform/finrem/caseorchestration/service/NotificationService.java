@@ -48,6 +48,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_NOC_CASEWORKER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_NOTICE_OF_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_GENERAL_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_GENERAL_EMAIL_ATTACHMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE_CTSC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_MADE;
@@ -60,6 +61,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_OUTCOME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_ORDER_CONSENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HWF_SUCCESSFUL;
@@ -374,13 +376,16 @@ public class NotificationService {
     public void sendConsentGeneralEmail(FinremCaseDetails caseDetails) {
         NotificationRequest notificationRequest = finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
         notificationRequest.setNotificationEmail(caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailRecipient());
-        downloadGeneralEmailUploadedDocument(caseDetails, notificationRequest);
+        final boolean hasAttachment = downloadGeneralEmailUploadedDocument(caseDetails, notificationRequest);
         log.info("Received request for notification email for consented general email Notification request : {}",
             notificationRequest);
-        emailService.sendConfirmationEmail(notificationRequest, FR_CONSENT_GENERAL_EMAIL);
+        final EmailTemplateNames templateName = (hasAttachment) ? FR_CONSENT_GENERAL_EMAIL_ATTACHMENT : FR_CONSENT_GENERAL_EMAIL;
+        emailService.sendConfirmationEmail(notificationRequest, templateName);
+
     }
 
-    private void downloadGeneralEmailUploadedDocument(FinremCaseDetails caseDetails, NotificationRequest notificationRequest) {
+    private boolean downloadGeneralEmailUploadedDocument(FinremCaseDetails caseDetails,
+                                                         NotificationRequest notificationRequest) {
         CaseDocument caseDocument = caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailUploadedDocument();
         if (caseDocument != null) {
             ResponseEntity<byte[]> response = evidenceManagementDownloadService.download(caseDocument.getDocumentBinaryUrl());
@@ -390,8 +395,9 @@ public class NotificationService {
                 throw new RuntimeException(String.format("Unexpected error DM store: %s ", response.getStatusCode()));
             }
             notificationRequest.setDocumentContents(response.getBody());
+            return true;
         }
-
+        return false;
     }
 
     @Deprecated
@@ -407,10 +413,11 @@ public class NotificationService {
     public void sendContestedGeneralEmail(FinremCaseDetails caseDetails) {
         NotificationRequest notificationRequest = finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
         notificationRequest.setNotificationEmail(caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailRecipient());
-        downloadGeneralEmailUploadedDocument(caseDetails, notificationRequest);
+        final boolean hasAttachment = downloadGeneralEmailUploadedDocument(caseDetails, notificationRequest);
         log.info("Received request for notification email for contested general email Notification request : {}",
             notificationRequest);
-        emailService.sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_EMAIL);
+        final EmailTemplateNames templateName = (hasAttachment) ? FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT : FR_CONTESTED_GENERAL_EMAIL;
+        emailService.sendConfirmationEmail(notificationRequest, templateName);
     }
 
     @Deprecated
