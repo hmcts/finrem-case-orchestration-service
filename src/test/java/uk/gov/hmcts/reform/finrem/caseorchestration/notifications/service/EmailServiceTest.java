@@ -23,6 +23,7 @@ import uk.gov.service.notify.NotificationClientException;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -45,6 +46,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_BARRISTER_ACCESS_REMOVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_LIST_FOR_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_GENERAL_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_GENERAL_EMAIL_ATTACHMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_NOT_APPROVED;
@@ -446,6 +448,22 @@ public class EmailServiceTest {
         assertNull(returnedTemplateVars.get("courtName"));
         assertNull(returnedTemplateVars.get("courtEmail"));
         assertEquals("test email body", returnedTemplateVars.get("generalEmailBody"));
+    }
+
+    @Test
+    public void shouldBuildTemplateVarsForGeneralEmailAttachmentConsented() {
+        setConsentedData();
+        notificationRequest.setGeneralEmailBody("test email body");
+        notificationRequest.setDocumentContents(new byte[5]);
+
+        Map<String, Object> returnedTemplateVars =
+
+            emailService.buildTemplateVars(notificationRequest, FR_CONSENT_GENERAL_EMAIL_ATTACHMENT.name());
+
+        assertNull(returnedTemplateVars.get("courtName"));
+        assertNull(returnedTemplateVars.get("courtEmail"));
+        assertEquals("test email body", returnedTemplateVars.get("generalEmailBody"));
+        assertNotNull(returnedTemplateVars.get("link_to_file"));
     }
 
     @Test
