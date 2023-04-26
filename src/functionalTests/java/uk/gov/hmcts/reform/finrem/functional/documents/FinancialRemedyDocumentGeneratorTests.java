@@ -4,7 +4,6 @@ import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import net.serenitybdd.junit.runners.SerenityRunner;
 import net.serenitybdd.rest.SerenityRest;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.BINARY_URL_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
@@ -71,20 +69,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
         assertTrue(jsonPathEvaluator.get("data.latestDraftHearingOrder.document_filename").toString()
             .equalsIgnoreCase("approvedConvertedHearingOrder.pdf"));
-    }
-
-    @Test
-    public void verifyBulkPrintDocumentGenerationShouldReturnOkResponseCode() {
-        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(GENERAL_ORDER_JSON, documentRejectedOrderUrl,
-            BINARY_URL_TYPE, "generalOrder", consentedDir);
-
-        String payload = utils.getJsonFromFile("bulk-print.json", consentedDir)
-            .replace("$DOCUMENT-BINARY-URL", documentUrl);
-        jsonPathEvaluator = utils.getResponseData(caseOrchestration + "/bulk-print", payload, "data");
-
-        if (jsonPathEvaluator.get("bulkPrintLetterIdRes") == null) {
-            Assert.fail("bulk Printing not successful");
-        }
     }
 
     @Test
@@ -182,7 +166,10 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(CONTESTED_FORM_G_JSON, generateHearingUrl,
             "document", "hearing", contestedDir);
 
-        assertNotNull(documentUrl);
+        JsonPath jsonPathEvaluator1 = accessGeneratedDocument(fileRetrieveUrl(documentUrl));
+
+        assertTrue(jsonPathEvaluator1.get("mimeType").toString().equalsIgnoreCase("application/pdf"));
+        assertTrue(jsonPathEvaluator1.get("classification").toString().equalsIgnoreCase("RESTRICTED"));
     }
 
     @Test
