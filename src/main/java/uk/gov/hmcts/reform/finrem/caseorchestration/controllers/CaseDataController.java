@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateSolicitorDetailsService;
@@ -59,7 +58,6 @@ public class CaseDataController extends BaseController {
     private final IdamService idamService;
     private final CaseDataService caseDataService;
     private final FeatureToggleService featureToggleService;
-    private final CaseFlagsService caseFlagsService;
 
     @PostMapping(path = "/consented/set-defaults", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(description = "Set default values for consented journey")
