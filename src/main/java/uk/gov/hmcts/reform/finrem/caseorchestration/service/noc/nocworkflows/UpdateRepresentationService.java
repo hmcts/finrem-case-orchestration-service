@@ -36,10 +36,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_FIRM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTVR_SOLICITOR_1_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTVR_SOLICITOR_2_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTVR_SOLICITOR_3_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IS_NOC_REJECTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_FIRM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationApprovalStatus.REJECTED;
 
 @Slf4j
@@ -195,12 +199,25 @@ public class UpdateRepresentationService {
         return ChangeOfRepresentationRequest.builder()
             .by(addedSolicitor.getName())
             .party(changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY) ? APPLICANT : RESPONDENT)
-            .clientName(changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY)
-                ? caseDataService.buildFullApplicantName(caseDetails)
-                : caseDataService.buildFullRespondentName(caseDetails))
+            .clientName(buildFullName(changeRequest, caseDetails))
             .current(current)
             .addedRepresentative(addedSolicitor)
             .removedRepresentative(removedSolicitor)
             .build();
+    }
+
+    private String buildFullName(ChangeOrganisationRequest changeRequest, CaseDetails caseDetails) {
+        if (changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY)) {
+            return caseDataService.buildFullApplicantName(caseDetails);
+        } else if (changeRequest.getCaseRoleId().getValueCode().equals(RESP_SOLICITOR_POLICY)) {
+            return caseDataService.buildFullRespondentName(caseDetails);
+        } else if (changeRequest.getCaseRoleId().getValueCode().equals(INTVR_SOLICITOR_1_POLICY)) {
+            return caseDataService.buildFullIntervener1Name(caseDetails);
+        } else if (changeRequest.getCaseRoleId().getValueCode().equals(INTVR_SOLICITOR_2_POLICY)) {
+            return caseDataService.buildFullIntervener2Name(caseDetails);
+        } else if (changeRequest.getCaseRoleId().getValueCode().equals(INTVR_SOLICITOR_3_POLICY)) {
+            return caseDataService.buildFullIntervener3Name(caseDetails);
+        }
+        return caseDataService.buildFullIntervener4Name(caseDetails);
     }
 }
