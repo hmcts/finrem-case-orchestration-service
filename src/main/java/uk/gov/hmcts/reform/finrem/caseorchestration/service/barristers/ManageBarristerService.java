@@ -140,7 +140,8 @@ public class ManageBarristerService {
             ? CASEWORKER_ROLE
             : caseRoleResource.getCaseAssignedUserRoles().get(0).getCaseRole();
 
-        if (!List.of(APP_SOLICITOR_POLICY, RESP_SOLICITOR_POLICY, INTVR_SOLICITOR_1_POLICY, INTVR_SOLICITOR_2_POLICY, INTVR_SOLICITOR_3_POLICY, INTVR_SOLICITOR_4_POLICY).contains(caseRole)) {
+        if (!List.of(APP_SOLICITOR_POLICY, RESP_SOLICITOR_POLICY, INTVR_SOLICITOR_1_POLICY, INTVR_SOLICITOR_2_POLICY,
+            INTVR_SOLICITOR_3_POLICY, INTVR_SOLICITOR_4_POLICY).contains(caseRole)) {
             String caseworkerParty = Objects.toString(caseDetails.getData().get(MANAGE_BARRISTER_PARTY), StringUtils.EMPTY);
             log.info("caseWorker party is {}", caseworkerParty);
             if (APPLICANT.equalsIgnoreCase(caseworkerParty)) {
