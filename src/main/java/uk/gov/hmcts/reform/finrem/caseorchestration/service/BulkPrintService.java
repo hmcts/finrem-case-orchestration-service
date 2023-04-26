@@ -125,8 +125,8 @@ public class BulkPrintService {
                 .bulkPrintDocuments(documents)
                 .build(), recipient);
 
-        log.info("Case {} Letter ID {} for {} document(s) of type {} sent to bulk print: {}", caseId, letterId, documents.size(), letterType,
-            documents);
+        log.info("Case {} Letter ID {} for {} document(s) of type {} sent to bulk print: {} and recipient is {}",
+            caseId, letterId, documents.size(), letterType, documents, recipient);
 
         return letterId;
     }
