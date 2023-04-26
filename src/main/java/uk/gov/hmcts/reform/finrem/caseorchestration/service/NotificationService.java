@@ -10,7 +10,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceCo
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
@@ -20,6 +25,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
@@ -121,8 +127,115 @@ public class NotificationService {
         sendAssignToJudgeConfirmationEmail(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
     }
 
-    public void sendAssignToJudgeConfirmationEmailToRespondentSolicitor(FinremCaseDetails caseDetails) {
-        sendAssignToJudgeConfirmationEmail(finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
+    public void sendAssignToJudgeConfirmationEmailToRespondentSolicitor(FinremCaseDetails finremCaseDetails) {
+        NotificationRequest notificationRequestForRespondentSolicitor =
+            finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(finremCaseDetails);
+        sendAssignToJudgeConfirmationEmail(notificationRequestForRespondentSolicitor);
+
+        sendAssignToJudgeConfirmationEmailToInterveners(finremCaseDetails, notificationRequestForRespondentSolicitor);
+    }
+
+    private void sendAssignToJudgeConfirmationEmailToInterveners(FinremCaseDetails finremCaseDetails, NotificationRequest notificationRequestForRespondentSolicitor) {
+        FinremCaseData data = finremCaseDetails.getData();
+        if(isIntervenerOneEmailPresent(data.getIntervenerOneWrapper())) {
+            NotificationRequest notificationRequestForRespondentIntervenerOne =
+                getIntervenerOneNotification(finremCaseDetails, notificationRequestForRespondentSolicitor);
+            sendAssignToJudgeConfirmationEmail(notificationRequestForRespondentIntervenerOne);
+        }
+
+        if(isIntervenerTwoEmailPresent(data.getIntervenerTwoWrapper())) {
+            NotificationRequest notificationRequestForRespondentIntervenerTwo =
+                getIntervenerTwoNotification(finremCaseDetails, notificationRequestForRespondentSolicitor);
+            sendAssignToJudgeConfirmationEmail(notificationRequestForRespondentIntervenerTwo);
+        }
+
+        if(isIntervenerThreeEmailPresent(data.getIntervenerThreeWrapper())) {
+            NotificationRequest notificationRequestForRespondentIntervenerThree =
+                getIntervenerThreeNotification(finremCaseDetails, notificationRequestForRespondentSolicitor);
+            sendAssignToJudgeConfirmationEmail(notificationRequestForRespondentIntervenerThree);
+        }
+
+        if(isIntervenerFourEmailPresent(data.getIntervenerFourWrapper())) {
+            NotificationRequest notificationRequestForRespondentIntervenerFour =
+                getIntervenerFourNotification(finremCaseDetails, notificationRequestForRespondentSolicitor);
+            sendAssignToJudgeConfirmationEmail(notificationRequestForRespondentIntervenerFour);
+        }
+    }
+
+    private NotificationRequest getIntervenerOneNotification(FinremCaseDetails finremCaseDetails,
+                                                             NotificationRequest notificationRequestForRespondentSolicitor) {
+        FinremCaseData caseData = finremCaseDetails.getData();
+        IntervenerOneWrapper intervenerOneWrapper = caseData.getIntervenerOneWrapper();
+        if(isIntervenerOneEmailPresent(intervenerOneWrapper)){
+            notificationRequestForRespondentSolicitor
+                .setNotificationEmail(intervenerOneWrapper.getIntervener1SolEmail());
+            notificationRequestForRespondentSolicitor
+                .setName(intervenerOneWrapper.getIntervener1SolName());
+        }
+
+        return notificationRequestForRespondentSolicitor;
+    }
+
+    private boolean isIntervenerOneEmailPresent(IntervenerOneWrapper intervenerOneWrapper) {
+        return intervenerOneWrapper != null
+            && intervenerOneWrapper.getIntervener1Email() != null;
+    }
+
+    private boolean isIntervenerTwoEmailPresent(IntervenerTwoWrapper intervenerTwoWrapper) {
+        return intervenerTwoWrapper != null
+            && intervenerTwoWrapper.getIntervener2Email() != null;
+    }
+
+    private boolean isIntervenerThreeEmailPresent(IntervenerThreeWrapper intervenerThreeWrapper) {
+        return intervenerThreeWrapper != null
+            && intervenerThreeWrapper.getIntervener3Email() != null;
+    }
+
+    private boolean isIntervenerFourEmailPresent(IntervenerFourWrapper intervenerFourWrapper) {
+        return intervenerFourWrapper != null
+            && intervenerFourWrapper.getIntervener4Email() != null;
+    }
+
+    private NotificationRequest getIntervenerTwoNotification(FinremCaseDetails finremCaseDetails,
+                                                             NotificationRequest notificationRequestForRespondentSolicitor) {
+        FinremCaseData caseData = finremCaseDetails.getData();
+        IntervenerTwoWrapper intervenerTwoWrapper = caseData.getIntervenerTwoWrapper();
+        if(isIntervenerTwoEmailPresent(intervenerTwoWrapper)){
+            notificationRequestForRespondentSolicitor
+                .setNotificationEmail(intervenerTwoWrapper.getIntervener2SolEmail());
+            notificationRequestForRespondentSolicitor
+                .setName(intervenerTwoWrapper.getIntervener2SolName());
+        }
+
+        return notificationRequestForRespondentSolicitor;
+    }
+
+    private NotificationRequest getIntervenerThreeNotification(FinremCaseDetails finremCaseDetails,
+                                                               NotificationRequest notificationRequestForRespondentSolicitor) {
+        FinremCaseData caseData = finremCaseDetails.getData();
+        IntervenerThreeWrapper intervenerThreeWrapper = caseData.getIntervenerThreeWrapper();
+        if(isIntervenerThreeEmailPresent(intervenerThreeWrapper)){
+            notificationRequestForRespondentSolicitor
+                .setNotificationEmail(intervenerThreeWrapper.getIntervener3SolEmail());
+            notificationRequestForRespondentSolicitor
+                .setName(intervenerThreeWrapper.getIntervener3SolName());
+        }
+
+        return notificationRequestForRespondentSolicitor;
+    }
+
+    private NotificationRequest getIntervenerFourNotification(FinremCaseDetails finremCaseDetails,
+                                                              NotificationRequest notificationRequestForRespondentSolicitor) {
+        FinremCaseData caseData = finremCaseDetails.getData();
+        IntervenerFourWrapper intervenerFourWrapper = caseData.getIntervenerFourWrapper();
+        if(isIntervenerFourEmailPresent(intervenerFourWrapper)){
+            notificationRequestForRespondentSolicitor
+                .setNotificationEmail(intervenerFourWrapper.getIntervener4SolEmail());
+            notificationRequestForRespondentSolicitor
+                .setName(intervenerFourWrapper.getIntervener4SolName());
+        }
+
+        return notificationRequestForRespondentSolicitor;
     }
 
     private void sendAssignToJudgeConfirmationEmail(NotificationRequest notificationRequest) {
