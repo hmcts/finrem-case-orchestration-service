@@ -42,8 +42,7 @@ public class IntervenerDocumentService {
             documentConfiguration.getIntervenerAddedFilename(),
             recipient);
 
-
-        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterTemplateData(finremCaseDetails, recipient);
+        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareIntervenerLetterTemplateData(finremCaseDetails, recipient);
         finremCaseDetails.getData().setCurrentAddressee((Addressee) caseDetailsForBulkPrint.getData().get(ADDRESSEE));
         IntervenerAddedLetterDetails intervenerAddedLetterDetails = generateAddedLetterDetails(finremCaseDetails);
 
@@ -58,8 +57,7 @@ public class IntervenerDocumentService {
             documentConfiguration.getIntervenerAddedSolicitorFilename(),
             recipient);
 
-
-        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterTemplateData(finremCaseDetails, recipient);
+        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareIntervenerLetterTemplateData(finremCaseDetails, recipient);
         finremCaseDetails.getData().setCurrentAddressee((Addressee) caseDetailsForBulkPrint.getData().get(ADDRESSEE));
         IntervenerAddedSolicitorLetterDetails intervenerAddedSolicitorLetterDetails = generateSolAddedLetterDetails(finremCaseDetails);
 

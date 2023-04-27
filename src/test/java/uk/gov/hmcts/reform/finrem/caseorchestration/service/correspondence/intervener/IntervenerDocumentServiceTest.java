@@ -95,7 +95,7 @@ public class IntervenerDocumentServiceTest {
 
     @Test
     public void shouldGenerateIntervenerAddedLetter() {
-        when(documentHelper.prepareLetterTemplateData(finremCaseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT))
+        when(documentHelper.prepareIntervenerLetterTemplateData(finremCaseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT))
             .thenReturn(caseDetails);
 
         when(documentConfiguration.getIntervenerAddedTemplate()).thenReturn(INTERVENER_ADDED_TEMPLATE);
@@ -115,7 +115,7 @@ public class IntervenerDocumentServiceTest {
 
     @Test
     public void shouldGenerateIntervenerAddedSolicitorLetter() {
-        when(documentHelper.prepareLetterTemplateData(finremCaseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT))
+        when(documentHelper.prepareIntervenerLetterTemplateData(finremCaseDetails, DocumentHelper.PaperNotificationRecipient.APPLICANT))
             .thenReturn(caseDetails);
 
         when(documentConfiguration.getIntervenerAddedSolicitorTemplate()).thenReturn(INTERVENER_ADDED_SOLICITOR_TEMPLATE);

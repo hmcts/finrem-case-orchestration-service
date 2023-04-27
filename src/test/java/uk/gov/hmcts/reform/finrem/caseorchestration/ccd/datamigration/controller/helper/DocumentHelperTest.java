@@ -453,7 +453,7 @@ public class DocumentHelperTest {
         Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
             + "\nSW1 1TE").build();
 
-        CaseDetails result = documentHelper.prepareLetterTemplateData(caseDetails, INTERVENER_ONE);
+        CaseDetails result = documentHelper.prepareIntervenerLetterTemplateData(caseDetails, INTERVENER_ONE);
 
         assertEquals(result.getData().get(ADDRESSEE), expected);
     }
@@ -469,7 +469,7 @@ public class DocumentHelperTest {
         Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
             + "\nSW1 1TE").build();
 
-        CaseDetails result = documentHelper.prepareLetterTemplateData(caseDetails, INTERVENER_TWO);
+        CaseDetails result = documentHelper.prepareIntervenerLetterTemplateData(caseDetails, INTERVENER_TWO);
 
         assertEquals(result.getData().get(ADDRESSEE), expected);
     }
@@ -485,7 +485,7 @@ public class DocumentHelperTest {
         Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
             + "\nSW1 1TE").build();
 
-        CaseDetails result = documentHelper.prepareLetterTemplateData(caseDetails, INTERVENER_THREE);
+        CaseDetails result = documentHelper.prepareIntervenerLetterTemplateData(caseDetails, INTERVENER_THREE);
 
         assertEquals(result.getData().get(ADDRESSEE), expected);
     }
@@ -501,7 +501,7 @@ public class DocumentHelperTest {
         Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
             + "\nSW1 1TE").build();
 
-        CaseDetails result = documentHelper.prepareLetterTemplateData(caseDetails, INTERVENER_FOUR);
+        CaseDetails result = documentHelper.prepareIntervenerLetterTemplateData(caseDetails, INTERVENER_FOUR);
 
         assertEquals(result.getData().get(ADDRESSEE), expected);
     }
