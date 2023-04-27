@@ -85,6 +85,7 @@ public class ManageBarristerServiceTest {
     private static final String SYS_USER_TOKEN = "sysUserToken";
     private static final String CLIENT_NAME = "Client Name";
     private static final String SOME_ORG_ID = "someOrgId";
+    public static final String CASEWORKER_POLICY = "[CASEWORKER]";
     private static final Barrister DEFAULT_BARRISTER = Barrister.builder()
         .email("someEmail")
         .build();
@@ -122,30 +123,30 @@ public class ManageBarristerServiceTest {
     }
 
     @Test
-    public void givenValidData_whenGetCaseRolesForPartyIntervener1_thenReturnIntervener1Role() {
+    public void givenValidData_whenCaseWorkerManagesIntervener1Party_thenReturnIntervener1Policy() {
         caseDetails.getData().put(MANAGE_BARRISTER_PARTY, INTERVENER1);
-        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN)).thenReturn(buildCaseAssignedUserRolesResource(INTVR_SOLICITOR_1_POLICY));
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN)).thenReturn(buildCaseAssignedUserRolesResource(CASEWORKER_POLICY));
         assertEquals(manageBarristerService.getCaseRole(caseDetails, AUTH_TOKEN), INTVR_SOLICITOR_1_POLICY);
     }
 
     @Test
-    public void givenValidData_whenGetCaseRolesForPartyIntervener2_thenReturnIntervener2Role() {
+    public void givenValidData_whenCaseWorkerManagesIntervener2Party_thenReturnIntervener2Policy() {
         caseDetails.getData().put(MANAGE_BARRISTER_PARTY, INTERVENER2);
-        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN)).thenReturn(buildCaseAssignedUserRolesResource(INTVR_SOLICITOR_2_POLICY));
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN)).thenReturn(buildCaseAssignedUserRolesResource(CASEWORKER_POLICY));
         assertEquals(manageBarristerService.getCaseRole(caseDetails, AUTH_TOKEN), INTVR_SOLICITOR_2_POLICY);
     }
 
     @Test
-    public void givenValidData_whenGetCaseRolesForPartyIntervener3_thenReturnIntervener3Role() {
+    public void givenValidData_whenCaseWorkerManagesIntervener3Party_thenReturnIntervener3Policy() {
         caseDetails.getData().put(MANAGE_BARRISTER_PARTY, INTERVENER3);
-        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN)).thenReturn(buildCaseAssignedUserRolesResource(INTVR_SOLICITOR_3_POLICY));
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN)).thenReturn(buildCaseAssignedUserRolesResource(CASEWORKER_POLICY));
         assertEquals(manageBarristerService.getCaseRole(caseDetails, AUTH_TOKEN), INTVR_SOLICITOR_3_POLICY);
     }
 
     @Test
-    public void givenValidData_whenGetCaseRolesForPartyIntervener4_thenReturnIntervener4Role() {
+    public void givenValidData_whenCaseWorkerManagesIntervener4Party_thenReturnIntervener4Policy() {
         caseDetails.getData().put(MANAGE_BARRISTER_PARTY, INTERVENER4);
-        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN)).thenReturn(buildCaseAssignedUserRolesResource(INTVR_SOLICITOR_4_POLICY));
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN)).thenReturn(buildCaseAssignedUserRolesResource(CASEWORKER_POLICY));
         assertEquals(manageBarristerService.getCaseRole(caseDetails, AUTH_TOKEN), INTVR_SOLICITOR_4_POLICY);
     }
 
