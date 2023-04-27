@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToSt
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
@@ -42,6 +43,8 @@ public class SolicitorCreateConsentedAboutToSubmitHandlerTest {
     private ConsentOrderService consentOrderService;
     @Mock
     private IdamService idamService;
+    @Mock
+    private CaseFlagsService caseFlagsService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 

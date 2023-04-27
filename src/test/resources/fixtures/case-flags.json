@@ -1,0 +1,268 @@
+{
+  "id": 1677711984836611,
+  "jurisdiction": "DIVORCE",
+  "state": "applicationSubmitted",
+  "case_type_id": "FinancialRemedyContested",
+  "created_date": "2023-03-01T23:06:24.896344",
+  "last_modified": "2023-03-02T11:03:59.248991",
+  "locked_by_user_id": null,
+  "security_level": null,
+  "case_data": {
+    "highCourtList": "FR_highCourtList_1",
+    "rSolicitorAddress": {
+      "County": "",
+      "Country": "United Kingdom",
+      "PostCode": "HA1 2FW",
+      "PostTown": "Harrow",
+      "AddressLine1": "Flat 10",
+      "AddressLine2": "Bruce House",
+      "AddressLine3": "Sovereign Place"
+    },
+    "rSolicitorName": "DFRRes",
+    "newportCourtList": null,
+    "benefitForChildrenDecisionSchedule": "Yes",
+    "southEastFRCList": null,
+    "otherReasonForComplexity": null,
+    "applicantFMName": "Price Daniel",
+    "fastTrackDecision": "Yes",
+    "otherReasonForComplexityText": null,
+    "uploadAdditionalDocument": [],
+    "dorsetCourtList": null,
+    "potentialAllegationChecklist": [
+      "notApplicable"
+    ],
+    "lancashireCourtList": null,
+    "applicantSolicitorAddress": {
+      "County": "",
+      "Country": "United Kingdom",
+      "PostCode": "wa1",
+      "PostTown": "Harrow",
+      "AddressLine1": "Flat 10",
+      "AddressLine2": "Bruce House",
+      "AddressLine3": "Sovereign Place"
+    },
+    "applicantSolicitorFirm": "DFRAppSol",
+    "RespondentOrganisationPolicy": {
+      "Organisation": {
+        "OrganisationID": "Y707HZM",
+        "OrganisationName": "FinRem-1-Org"
+      },
+      "LastNoCRequestedBy": null,
+      "OrgPolicyReference": null,
+      "PreviousOrganisations": [],
+      "OrgPolicyCaseAssignedRole": "[RESPSOLICITOR]",
+      "PrepopulateToUsersOrganisation": null
+    },
+    "rSolicitorDXnumber": null,
+    "netValueOfHome": "22",
+    "bedfordshireCourtList": null,
+    "promptForAnyDocument": "No",
+    "claimingExemptionMIAM": null,
+    "applicantLName": "Hoover",
+    "rSolicitorEmail": null,
+    "respondentAddress": {},
+    "nottinghamCourtList": null,
+    "natureOfApplicationChecklist": [],
+    "northWalesCourtList": null,
+    "urgentCaseQuestionDetailsTextArea": "I want justice",
+    "bristolCourtList": null,
+    "southWestFRCList": null,
+    "applicantSolicitorDXnumber": null,
+    "isAdmin": "Yes",
+    "caseFlags": {
+      "details": [
+        {
+          "id": "32dd3d40-a98a-46a4-9535-34d5031d5cba",
+          "value": {
+            "name": "Potential fraud",
+            "path": [
+              {
+                "id": "492ba780-2024-4d8c-861b-2929f58134c5",
+                "value": "Case"
+              }
+            ],
+            "status": "Active",
+            "flagCode": "CF0006",
+            "subTypeKey": null,
+            "flagComment": "Someone Cheated on me",
+            "subTypeValue": null,
+            "dateTimeCreated": "2023-03-01T23:10:28.730Z",
+            "hearingRelevant": "No",
+            "otherDescription": null
+          }
+        }
+      ],
+      "partyName": "Case",
+      "roleOnCase": "Case"
+    },
+    "highCourtFRCList": "highcourt",
+    "manchesterCourtList": null,
+    "variationOrderDocument": {
+      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/2364dbd7-35dc-4fac-aafc-184de35b179e",
+      "document_filename": "Dummy document.pdf",
+      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/2364dbd7-35dc-4fac-aafc-184de35b179e/binary"
+    },
+    "natureOfApplicationChecklistSchedule": [
+      "Interim child periodical payments",
+      "Lump Sum Order",
+      "A settlement or a transfer of property",
+      "periodicalPaymentOrder",
+      "variationOrder"
+    ],
+    "northWestFRCList": null,
+    "applicantSolicitorName": "JNK",
+    "walesFRCList": null,
+    "applicantSolicitorEmail": "dfr@mailinator.com",
+    "paymentForChildrenDecision": "Yes",
+    "devonCourtList": null,
+    "promptForUrgentCaseQuestion": "Yes",
+    "familyMediatorServiceName": "Omar Nunez",
+    "specificArrangementsRequired": null,
+    "respondentRepresented": "Yes",
+    "applicantFlags": {
+      "details": [
+        {
+          "id": "cc973247-d42f-4201-8bc7-3a8eb625652f",
+          "value": {
+            "name": "Other",
+            "path": [
+              {
+                "id": "02751c32-fec1-4e10-ae5b-80c062c4b0ec",
+                "value": "Party"
+              }
+            ],
+            "status": "Active",
+            "flagCode": "OT0001",
+            "subTypeKey": null,
+            "flagComment": "Bcoz i am poor",
+            "subTypeValue": null,
+            "dateTimeCreated": "2023-03-01T23:09:22.075Z",
+            "hearingRelevant": "Yes",
+            "otherDescription": "Extra financial help from Goverment"
+          }
+        }
+      ],
+      "partyName": "Price Daniel Hoover",
+      "roleOnCase": "Applicant"
+    },
+    "northEastFRCList": null,
+    "swanseaCourtList": null,
+    "ApplicantOrganisationPolicy": {
+      "Organisation": {
+        "OrganisationID": "Y707HZM",
+        "OrganisationName": "FinRem-1-Org"
+      },
+      "LastNoCRequestedBy": null,
+      "OrgPolicyReference": null,
+      "PreviousOrganisations": [],
+      "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]",
+      "PrepopulateToUsersOrganisation": null
+    },
+    "cfcCourtList": null,
+    "familyMediatorMIAM": null,
+    "respondentLName": "Wilkinson",
+    "applicantRepresented": "Yes",
+    "midlandsFRCList": null,
+    "kentSurreyCourtList": null,
+    "reasonForLocalCourt": null,
+    "rSolicitorPhone": null,
+    "birminghamCourtList": null,
+    "rSolicitorReference": "1234",
+    "applicantAttendedMIAM": "Yes",
+    "specialAssistanceRequired": null,
+    "cleavelandCourtList": null,
+    "childrenCollection": [
+      {
+        "id": "f83144ee-a73e-4bb8-84c4-00d85b72943c",
+        "value": {
+          "childGender": "Male",
+          "childFullname": "Kuame Mclaughlin",
+          "childDateOfBirth": "1994-04-15",
+          "childApplicantRelation": "Mother",
+          "childRespondentRelation": "Step father",
+          "childApplicantRelationOther": null,
+          "childRespondentRelationOther": null,
+          "childrenLivesInEnglandOrWales": "Yes"
+        }
+      }
+    ],
+    "rSolicitorFirm": "FRRes",
+    "respondentPhone": null,
+    "isApplicantsHomeCourt": "No",
+    "applicantSolicitorPhone": "444444",
+    "fastTrackDecisionReason": [
+      "reason_2"
+    ],
+    "solicitorReference": "12345",
+    "soleTraderName": "Stacy Butler",
+    "copyOfPaperFormA": [
+      {
+        "value": {
+          "typeOfDocument": "Copy of paper form A",
+          "uploadedDocument": {
+            "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4aedaefa-8354-41de-8bb0-7c3602580342",
+            "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4aedaefa-8354-41de-8bb0-7c3602580342/binary",
+            "document_filename": "PDF.pdf"
+          }
+        },
+        "id": "9a50d47b-ff66-4d56-95b9-6f84362c062a"
+      }
+    ],
+    "nwyorkshireCourtList": null,
+    "liverpoolCourtList": null,
+    "mediatorRegistrationNumber": "119",
+    "benefitPaymentChecklistSchedule": [],
+    "detailPotentialAllegation": null,
+    "regionList": "highcourt",
+    "applicantAddress": {
+      "County": "",
+      "Country": "United Kingdom",
+      "PostCode": "WA16 6HT",
+      "PostTown": "Knutsford",
+      "AddressLine1": "51 Garden Road",
+      "AddressLine2": "",
+      "AddressLine3": ""
+    },
+    "applicantEmail": "wiwusakyne@mailinator.com",
+    "respondentFlags": {
+      "details": [
+        {
+          "id": "40872daa-06a8-43e3-aff5-e5c98f2746f3",
+          "value": {
+            "name": "Language Interpreter",
+            "path": [
+              {
+                "id": "de8c5537-48da-471c-8143-ad13c877f4ab",
+                "value": "Party"
+              }
+            ],
+            "status": "Active",
+            "flagCode": "PF0015",
+            "subTypeKey": "hin",
+            "flagComment": "My English is very poor",
+            "subTypeValue": "Hindi",
+            "dateTimeCreated": "2023-03-01T23:12:22.854Z",
+            "hearingRelevant": "Yes",
+            "otherDescription": null
+          }
+        }
+      ],
+      "partyName": "Cain Gibson Wilkinson",
+      "roleOnCase": "Respondent"
+    },
+    "typeOfApplication": "Under paragraph 1 or 2 of schedule 1 children act 1989",
+    "paperApplication": "Yes",
+    "thamesvalleyCourtList": null,
+    "humberCourtList": null,
+    "respondentEmail": null,
+    "estimatedAssetsChecklist": [
+      "estimatedAssetsChecklist_3"
+    ],
+    "respondentFMName": "Cain Gibson",
+    "londonFRCList": null,
+    "applicantPhone": "+1 (906) 224-1141",
+    "addToComplexityListOfCourts": "trueYes"
+  },
+  "security_classification": "PUBLIC",
+  "callback_response_status": null
+}
