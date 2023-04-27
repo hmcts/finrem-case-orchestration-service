@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseFlagsService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 
 import java.io.File;
@@ -50,6 +51,8 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
 
     @MockBean
     private OnlineFormDocumentService onlineFormDocumentService;
+    @MockBean
+    private CaseFlagsService caseFlagsService;
 
     @Before
     public void setUp() {

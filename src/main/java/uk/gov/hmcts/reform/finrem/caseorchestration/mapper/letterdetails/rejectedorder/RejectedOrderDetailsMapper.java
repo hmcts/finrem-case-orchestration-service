@@ -79,7 +79,7 @@ public class RejectedOrderDetailsMapper extends AbstractLetterDetailsMapper {
                     .orderRefusal(getReasonsAsStringAndTranslate(refusalOrder))
                     .orderRefusalAddComments(refusalOrder.getValue().getOrderRefusalAddComments())
                     .orderRefusalAfterText(refusalOrder.getValue().getOrderRefusalAfterText())
-                    .orderRefusalDate(String.valueOf(refusalOrder.getValue().getOrderRefusalDate()))
+                    .orderRefusalDate(refusalOrder.getValue().getOrderRefusalDate())
                     .orderRefusalJudge(getOrderRefusalJudge(refusalOrder))
                     .orderRefusalJudgeName(refusalOrder.getValue().getOrderRefusalJudgeName())
                     .orderRefusalDocs(refusalOrder.getValue().getOrderRefusalDocs())

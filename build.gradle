@@ -19,6 +19,7 @@ def versions = [
         ccdClient            : '4.8.6',
         commonsIo            : '2.7',
         commonsLang3         : '3.11',
+        hmctsNotify          : '3.17.0-RELEASE',
         junit                : '4.13.1',
         lombok               : '1.18.22',
         mockito              : '3.4.4',
@@ -320,7 +321,7 @@ dependencyManagement {
             entry 'spring-security-crypto'
         }
         //CVE-2023-20861
-        dependencySet(group: 'org.springframework', version: '5.3.26') {
+        dependencySet(group: 'org.springframework', version: '5.3.27') {
             entry 'spring-aop'
             entry 'spring-beans'
             entry 'spring-context'
@@ -372,6 +373,8 @@ dependencies {
     }
 
     implementation group: 'org.yaml', name: 'snakeyaml', version: '1.33'
+
+    implementation group: 'uk.gov.service.notify', name: 'notifications-java-client', version: versions.hmctsNotify
 
     developmentOnly group: 'org.springframework.boot', name: 'spring-boot-devtools'
 

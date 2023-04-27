@@ -67,6 +67,9 @@
         "walesList": "swansea",
         "swanseaCourtList": "FR_swansea_hc_list_6"
       },
+      "regionList": "wales",
+      "walesFRCList": "swansea",
+      "cfcCourtList": "FR_swansea_hc_list_6",
       "applicationNotApproved": [
         {
           "id": "acdfd900-5976-4c8a-a518-9e972c5acc81",

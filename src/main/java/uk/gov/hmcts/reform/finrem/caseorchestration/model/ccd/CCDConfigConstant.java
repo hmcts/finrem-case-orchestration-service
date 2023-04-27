@@ -632,6 +632,10 @@ public class CCDConfigConstant {
 
     //Hearing State
     public static final String PREPARE_FOR_HEARING_STATE = "prepareForHearing";
-
+    public static final String CASE_LEVEL_FLAGS = "caseFlags";
+    public static final String CASE_APPLICANT_FLAGS = "applicantFlags";
+    public static final String CASE_RESPONDENT_FLAGS = "respondentFlags";
+    public static final String CASE_LEVEL_ROLE = "Case";
+    
     public static final String LETTER_DATE_FORMAT = "yyyy-MM-dd";
 }
