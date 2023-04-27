@@ -53,6 +53,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_NOT_APPROVED_SENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HWF_SUCCESSFUL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_PREPARE_FOR_HEARING;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_HWF_SUCCESSFUL;
@@ -459,6 +460,22 @@ public class EmailServiceTest {
         Map<String, Object> returnedTemplateVars =
 
             emailService.buildTemplateVars(notificationRequest, FR_CONSENT_GENERAL_EMAIL_ATTACHMENT.name());
+
+        assertNull(returnedTemplateVars.get("courtName"));
+        assertNull(returnedTemplateVars.get("courtEmail"));
+        assertEquals("test email body", returnedTemplateVars.get("generalEmailBody"));
+        assertNotNull(returnedTemplateVars.get("link_to_file"));
+    }
+
+    @Test
+    public void shouldBuildTemplateVarsForGeneralEmailAttachmentContested() {
+        setConsentedData();
+        notificationRequest.setGeneralEmailBody("test email body");
+        notificationRequest.setDocumentContents(new byte[5]);
+
+        Map<String, Object> returnedTemplateVars =
+
+            emailService.buildTemplateVars(notificationRequest, FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT.name());
 
         assertNull(returnedTemplateVars.get("courtName"));
         assertNull(returnedTemplateVars.get("courtEmail"));
