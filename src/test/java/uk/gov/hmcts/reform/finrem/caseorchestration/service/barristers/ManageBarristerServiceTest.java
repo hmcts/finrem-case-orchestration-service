@@ -54,6 +54,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASEWORKER_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ROLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER3;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER4;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER_BARRISTER_1_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER_BARRISTER_2_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER_BARRISTER_3_COLLECTION;
@@ -115,6 +119,34 @@ public class ManageBarristerServiceTest {
     public void setUp() throws Exception {
         Map<String, Object> caseData = new HashMap<>();
         caseDetails = CaseDetails.builder().id(CASE_ID).data(caseData).build();
+    }
+
+    @Test
+    public void givenValidData_whenGetCaseRolesForPartyIntervener1_thenReturnIntervener1Role() {
+        caseDetails.getData().put(MANAGE_BARRISTER_PARTY, INTERVENER1);
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN)).thenReturn(buildCaseAssignedUserRolesResource(INTVR_SOLICITOR_1_POLICY));
+        assertEquals(manageBarristerService.getCaseRole(caseDetails, AUTH_TOKEN), INTVR_SOLICITOR_1_POLICY);
+    }
+
+    @Test
+    public void givenValidData_whenGetCaseRolesForPartyIntervener2_thenReturnIntervener2Role() {
+        caseDetails.getData().put(MANAGE_BARRISTER_PARTY, INTERVENER2);
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN)).thenReturn(buildCaseAssignedUserRolesResource(INTVR_SOLICITOR_2_POLICY));
+        assertEquals(manageBarristerService.getCaseRole(caseDetails, AUTH_TOKEN), INTVR_SOLICITOR_2_POLICY);
+    }
+
+    @Test
+    public void givenValidData_whenGetCaseRolesForPartyIntervener3_thenReturnIntervener3Role() {
+        caseDetails.getData().put(MANAGE_BARRISTER_PARTY, INTERVENER3);
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN)).thenReturn(buildCaseAssignedUserRolesResource(INTVR_SOLICITOR_3_POLICY));
+        assertEquals(manageBarristerService.getCaseRole(caseDetails, AUTH_TOKEN), INTVR_SOLICITOR_3_POLICY);
+    }
+
+    @Test
+    public void givenValidData_whenGetCaseRolesForPartyIntervener4_thenReturnIntervener4Role() {
+        caseDetails.getData().put(MANAGE_BARRISTER_PARTY, INTERVENER4);
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN)).thenReturn(buildCaseAssignedUserRolesResource(INTVR_SOLICITOR_4_POLICY));
+        assertEquals(manageBarristerService.getCaseRole(caseDetails, AUTH_TOKEN), INTVR_SOLICITOR_4_POLICY);
     }
 
     @Test
