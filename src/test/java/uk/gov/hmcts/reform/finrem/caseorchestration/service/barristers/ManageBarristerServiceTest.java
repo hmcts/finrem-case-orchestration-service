@@ -54,6 +54,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASEWORKER_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ROLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER_BARRISTER_1_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER_BARRISTER_2_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER_BARRISTER_3_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERVENER_BARRISTER_4_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTVR_SOLICITOR_1_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTVR_SOLICITOR_2_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTVR_SOLICITOR_3_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTVR_SOLICITOR_4_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MANAGE_BARRISTERS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MANAGE_BARRISTER_PARTY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REPRESENTATION_UPDATE_HISTORY;
@@ -121,6 +129,59 @@ public class ManageBarristerServiceTest {
 
         assertThat(barristerData, is(applicantBarristers));
     }
+
+    @Test
+    public void givenValidData_whenGetBarristersForPartyIntervener1_thenReturnIntervener1BarristerData() {
+        List<BarristerData> intervener1Barristers = intervener1BarristerCollection();
+        caseDetails.getData().put(CASE_ROLE, INTVR_SOLICITOR_1_POLICY);
+        caseDetails.getData().put(INTERVENER_BARRISTER_1_COLLECTION, intervener1Barristers);
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
+            .thenReturn(buildCaseAssignedUserRolesResource(INTVR_SOLICITOR_1_POLICY));
+
+        List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
+
+        assertThat(barristerData, is(intervener1Barristers));
+    }
+
+    @Test
+    public void givenValidData_whenGetBarristersForPartyIntervener2_thenReturnIntervener2BarristerData() {
+        List<BarristerData> intervener2Barristers = intervener2BarristerCollection();
+        caseDetails.getData().put(CASE_ROLE, INTVR_SOLICITOR_2_POLICY);
+        caseDetails.getData().put(INTERVENER_BARRISTER_2_COLLECTION, intervener2Barristers);
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
+            .thenReturn(buildCaseAssignedUserRolesResource(INTVR_SOLICITOR_2_POLICY));
+
+        List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
+
+        assertThat(barristerData, is(intervener2Barristers));
+    }
+
+    @Test
+    public void givenValidData_whenGetBarristersForPartyIntervener3_thenReturnIntervener3BarristerData() {
+        List<BarristerData> intervener3Barristers = intervener3BarristerCollection();
+        caseDetails.getData().put(CASE_ROLE, INTVR_SOLICITOR_3_POLICY);
+        caseDetails.getData().put(INTERVENER_BARRISTER_3_COLLECTION, intervener3Barristers);
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
+            .thenReturn(buildCaseAssignedUserRolesResource(INTVR_SOLICITOR_3_POLICY));
+
+        List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
+
+        assertThat(barristerData, is(intervener3Barristers));
+    }
+
+    @Test
+    public void givenValidData_whenGetBarristersForPartyIntervener4_thenReturnIntervener4BarristerData() {
+        List<BarristerData> intervener4Barristers = intervener4BarristerCollection();
+        caseDetails.getData().put(CASE_ROLE, INTVR_SOLICITOR_4_POLICY);
+        caseDetails.getData().put(INTERVENER_BARRISTER_4_COLLECTION, intervener4Barristers);
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
+            .thenReturn(buildCaseAssignedUserRolesResource(INTVR_SOLICITOR_4_POLICY));
+
+        List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
+
+        assertThat(barristerData, is(intervener4Barristers));
+    }
+
 
     @Test
     public void givenNoCurrentBarristers_whenGetBarristersForPartyApplicant_thenReturnEmptyList() {
@@ -322,6 +383,74 @@ public class ManageBarristerServiceTest {
                 .id(UUID.randomUUID().toString())
                 .barrister(Barrister.builder()
                     .email("respbarristertwo@gmail.com")
+                    .build())
+                .build()
+        );
+    }
+
+    private List<BarristerData> intervener1BarristerCollection() {
+        return List.of(
+            BarristerData.builder()
+                .id(UUID.randomUUID().toString())
+                .barrister(Barrister.builder()
+                    .email("intvr1barristerone@gmail.com")
+                    .build())
+                .build(),
+            BarristerData.builder()
+                .id(UUID.randomUUID().toString())
+                .barrister(Barrister.builder()
+                    .email("intvr1barristertwo@gmail.com")
+                    .build())
+                .build()
+        );
+    }
+
+    private List<BarristerData> intervener2BarristerCollection() {
+        return List.of(
+            BarristerData.builder()
+                .id(UUID.randomUUID().toString())
+                .barrister(Barrister.builder()
+                    .email("intvr2barristerone@gmail.com")
+                    .build())
+                .build(),
+            BarristerData.builder()
+                .id(UUID.randomUUID().toString())
+                .barrister(Barrister.builder()
+                    .email("intvr2barristertwo@gmail.com")
+                    .build())
+                .build()
+        );
+    }
+
+    private List<BarristerData> intervener3BarristerCollection() {
+        return List.of(
+            BarristerData.builder()
+                .id(UUID.randomUUID().toString())
+                .barrister(Barrister.builder()
+                    .email("intvr3barristerone@gmail.com")
+                    .build())
+                .build(),
+            BarristerData.builder()
+                .id(UUID.randomUUID().toString())
+                .barrister(Barrister.builder()
+                    .email("intvr3barristertwo@gmail.com")
+                    .build())
+                .build()
+        );
+    }
+
+    private List<BarristerData> intervener4BarristerCollection() {
+        return List.of(
+            BarristerData.builder()
+                .id(UUID.randomUUID().toString())
+                .barrister(Barrister.builder()
+                    .email("intvr4barristerone@gmail.com")
+                    .build())
+                .build(),
+            BarristerData.builder()
+                .id(UUID.randomUUID().toString())
+                .barrister(Barrister.builder()
+                    .email("intvr4barristertwo@gmail.com")
                     .build())
                 .build()
         );
