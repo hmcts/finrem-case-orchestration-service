@@ -39,6 +39,8 @@ public enum EventType {
     GENERAL_APPLICATION_DIRECTIONS("FR_GeneralApplicationDirections"),
     LIST_FOR_HEARING_CONSENTED("FR_listForHearing"),
     MANAGE_BARRISTER("FR_manageBarrister"),
+    CASE_FLAG_CREATE("createFlags"),
+    CASE_FLAG_MANAGE("manageFlags"),
     ISSUE_APPLICATION("FR_issueApplication"),
     REGENERATE_FORM_C("FR_regenerateFormC"),
     CONSENT_APPLICATION_APPROVED_IN_CONTESTED("FR_consentOrderApproved"),
