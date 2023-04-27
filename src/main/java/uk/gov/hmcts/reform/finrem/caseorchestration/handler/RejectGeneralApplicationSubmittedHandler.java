@@ -75,7 +75,7 @@ public class RejectGeneralApplicationSubmittedHandler
     }
 
     private void sendRespondentNotifications(String userAuthorisation, CaseDetails caseDetails) {
-        if (notificationService.isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(caseDetails)) {
+        if (notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)) {
             notificationService.sendGeneralApplicationRejectionEmailToResSolicitor(caseDetails);
         } else {
             paperNotificationService.printRespondentRejectionGeneralApplication(caseDetails, userAuthorisation);
