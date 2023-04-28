@@ -195,7 +195,6 @@ sonarqube {
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/controllers/GenericAboutToStartOrSubmitCallbackResponse.java',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/handler/ShareSelectedDocumentsAboutToStartHandler.java',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/handler/ShareSelectedDocumentsAboutToSubmitHandler.java',
-                           '**/uk/gov/hmcts/reform/finrem/caseorchestration/service/ApplicantShareDocumentsService.java',
                            '**/uk/gov/hmcts/reform/finrem/caseorchestration/service/RespondentShareDocumentsService.java'
     ]
 

@@ -473,7 +473,7 @@ public class CCDConfigConstant {
     public static final String APP_CASE_SUMMARIES_COLLECTION = "appCaseSummariesCollection";
     public static final String APP_FORMS_H_COLLECTION = "appFormsHCollection";
     public static final String APP_EXPERT_EVIDENCE_COLLECTION = "appExpertEvidenceCollection";
-    public static final String APP_CORRESPONDENCE_COLLECTION = "appCorrespondenceDocsColl";
+    public static final String APP_CORRESPONDENCE_COLLECTION = "appCorrespondenceDocsCollection";
     public static final String APP_OTHER_COLLECTION = "appOtherCollection";
     public static final String RESP_HEARING_BUNDLES_COLLECTION = "respHearingBundlesCollection";
     public static final String RESP_FORM_E_EXHIBITS_COLLECTION = "respFormEExhibitsCollection";
