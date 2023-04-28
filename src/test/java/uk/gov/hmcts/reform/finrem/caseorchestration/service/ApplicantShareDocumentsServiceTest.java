@@ -100,8 +100,17 @@ class ApplicantShareDocumentsServiceTest {
     void getApplicantToOtherSolicitorRoleList() {
 
         FinremCallbackRequest request = buildCallbackRequest();
+        setCaseRole(request.getCaseDetails().getData());
         DynamicMultiSelectList list = service.getApplicantToOtherSolicitorRoleList(request.getCaseDetails());
         assertEquals("role size for sharing", 5, list.getListItems().size());
+        assertNull("no document selected from list", list.getValue());
+    }
+
+    @Test
+    void getApplicantToOtherSolicitorRoleListButNoCaseRoleAvailable() {
+        FinremCallbackRequest request = buildCallbackRequest();
+        DynamicMultiSelectList list = service.getApplicantToOtherSolicitorRoleList(request.getCaseDetails());
+        assertEquals("role size for sharing", 0, list.getListItems().size());
         assertNull("no document selected from list", list.getValue());
     }
 
@@ -111,6 +120,7 @@ class ApplicantShareDocumentsServiceTest {
         FinremCallbackRequest request = buildCallbackRequest();
         FinremCaseDetails details = request.getCaseDetails();
         FinremCaseData data = details.getData();
+        setCaseRole(data);
 
         data.getUploadCaseDocumentWrapper().setAppOtherCollection(getTestDocument(OTHER));
         data.getUploadCaseDocumentWrapper().setAppChronologiesCollection(getTestDocument(CHRONOLOGY));
@@ -180,6 +190,17 @@ class ApplicantShareDocumentsServiceTest {
 
     private FinremCallbackRequest buildCallbackRequest() {
         FinremCaseData caseData = new FinremCaseData();
+        return FinremCallbackRequest
+            .builder()
+            .eventType(EventType.SHARE_SELECTED_DOCUMENTS)
+            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+                .data(caseData).build())
+            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+                .data(caseData).build())
+            .build();
+    }
+
+    private static void setCaseRole(FinremCaseData caseData) {
         Organisation testOrg = Organisation.builder().organisationID(TEST_ORG).build();
         caseData.setRespondentOrganisationPolicy(OrganisationPolicy.builder()
             .organisation(testOrg).orgPolicyCaseAssignedRole(CaseRole.RESP_SOLICITOR.getValue()).build());
@@ -191,14 +212,5 @@ class ApplicantShareDocumentsServiceTest {
             .organisation(testOrg).orgPolicyCaseAssignedRole(INTVR_SOLICITOR_3.getValue()).build()).build());
         caseData.setIntervenerFourWrapper(IntervenerFourWrapper.builder().intervener4Organisation(OrganisationPolicy.builder()
             .organisation(testOrg).orgPolicyCaseAssignedRole(INTVR_SOLICITOR_4.getValue()).build()).build());
-
-        return FinremCallbackRequest
-            .builder()
-            .eventType(EventType.SHARE_SELECTED_DOCUMENTS)
-            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(caseData).build())
-            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
-                .data(caseData).build())
-            .build();
     }
 }
