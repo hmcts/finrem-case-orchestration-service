@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -51,11 +52,17 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Contes
 @ExtendWith(MockitoExtension.class)
 class ApplicantShareDocumentsServiceTest {
 
+    private ApplicantShareDocumentsService service;
     private static final String TEST_ORG = "HSKEOS";
+
+    @BeforeEach
+    void beforeEach() {
+        service = new ApplicantShareDocumentsService();
+    }
+
 
     @Test
     void applicantSourceDocumentListWhenDocNotPresent() {
-        ApplicantShareDocumentsService service = new ApplicantShareDocumentsService();
 
         FinremCallbackRequest request = buildCallbackRequest();
         FinremCaseDetails details = request.getCaseDetails();
@@ -67,7 +74,6 @@ class ApplicantShareDocumentsServiceTest {
 
     @Test
     void applicantSourceDocumentListWhenDocPresent() {
-        ApplicantShareDocumentsService service = new ApplicantShareDocumentsService();
 
         FinremCallbackRequest request = buildCallbackRequest();
         FinremCaseDetails details = request.getCaseDetails();
@@ -92,7 +98,6 @@ class ApplicantShareDocumentsServiceTest {
 
     @Test
     void getApplicantToOtherSolicitorRoleList() {
-        ApplicantShareDocumentsService service = new ApplicantShareDocumentsService();
 
         FinremCallbackRequest request = buildCallbackRequest();
         DynamicMultiSelectList list = service.getApplicantToOtherSolicitorRoleList(request.getCaseDetails());
@@ -102,7 +107,6 @@ class ApplicantShareDocumentsServiceTest {
 
     @Test
     void copyDocumentOnTheirRespectiveCollectionForSelectedSolicitors() {
-        ApplicantShareDocumentsService service = new ApplicantShareDocumentsService();
 
         FinremCallbackRequest request = buildCallbackRequest();
         FinremCaseDetails details = request.getCaseDetails();
