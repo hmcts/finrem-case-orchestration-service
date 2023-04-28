@@ -23,6 +23,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -48,16 +50,27 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.IN
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole.RESP_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APPLICANT_CORRESPONDENCE_DOC_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_CASE_SUMMARIES_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_CHRONOLOGIES_STATEMENTS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_EXPERT_EVIDENCE_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_FORMS_H_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_FORM_E_EXHIBITS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_HEARING_BUNDLES_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_OTHER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_QUESTIONNAIRES_ANSWERS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_STATEMENTS_EXHIBITS_COLLECTION;
 
 @ExtendWith(MockitoExtension.class)
 class ApplicantShareDocumentsServiceTest {
 
     private ApplicantShareDocumentsService service;
     private static final String TEST_ORG = "HSKEOS";
+    private final ThreadLocal<UUID> uuid = new ThreadLocal<>();
 
     @BeforeEach
     void beforeEach() {
         service = new ApplicantShareDocumentsService();
+        uuid.set(UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d"));
     }
 
 
@@ -104,6 +117,16 @@ class ApplicantShareDocumentsServiceTest {
         DynamicMultiSelectList list = service.getApplicantToOtherSolicitorRoleList(request.getCaseDetails());
         assertEquals("role size for sharing", 5, list.getListItems().size());
         assertNull("no document selected from list", list.getValue());
+
+        FinremCaseData data = request.getCaseDetails().getData();
+        data.setIntervenerOneWrapper(null);
+        data.setIntervenerTwoWrapper(null);
+        data.setIntervenerThreeWrapper(null);
+        data.setIntervenerFourWrapper(null);
+        data.setRespondentOrganisationPolicy(null);
+        list = service.getApplicantToOtherSolicitorRoleList(request.getCaseDetails());
+        assertEquals("role size for sharing", 0, list.getListItems().size());
+        assertNull("no document selected from list", list.getValue());
     }
 
     @Test
@@ -137,11 +160,16 @@ class ApplicantShareDocumentsServiceTest {
 
         List<UploadCaseDocumentCollection> coll = data.getUploadCaseDocumentWrapper().getAppCorrespondenceDocsCollection();
         CaseDocument doc = coll.get(0).getValue().getCaseDocuments();
-
-        sourceDocumentList.setValue(List.of(DynamicMultiSelectListElement.builder()
-            .label(APPLICANT_CORRESPONDENCE_DOC_COLLECTION.getCcdKey() + " -> " + doc.getDocumentFilename())
-            .code(coll.get(0).getId() + "#" + APPLICANT_CORRESPONDENCE_DOC_COLLECTION.getCcdKey())
-            .build()));
+        sourceDocumentList.setValue(List.of(getSelectedDoc(coll, doc, APPLICANT_CORRESPONDENCE_DOC_COLLECTION),
+            getSelectedDoc(coll, doc, APP_OTHER_COLLECTION),
+            getSelectedDoc(coll, doc, APP_CHRONOLOGIES_STATEMENTS_COLLECTION),
+            getSelectedDoc(coll, doc, APP_STATEMENTS_EXHIBITS_COLLECTION),
+            getSelectedDoc(coll, doc, APP_HEARING_BUNDLES_COLLECTION),
+            getSelectedDoc(coll, doc, APP_FORM_E_EXHIBITS_COLLECTION),
+            getSelectedDoc(coll, doc, APP_QUESTIONNAIRES_ANSWERS_COLLECTION),
+            getSelectedDoc(coll, doc, APP_CASE_SUMMARIES_COLLECTION),
+            getSelectedDoc(coll, doc, APP_FORMS_H_COLLECTION),
+            getSelectedDoc(coll, doc, APP_EXPERT_EVIDENCE_COLLECTION)));
         data.setSourceDocumentList(sourceDocumentList);
 
         DynamicMultiSelectList roleList = service.getApplicantToOtherSolicitorRoleList(details);
@@ -154,20 +182,50 @@ class ApplicantShareDocumentsServiceTest {
         data.setSolicitorRoleList(roleList);
 
         service.copyDocumentOnTheirRespectiveCollectionForSelectedSolicitors(data);
+        UploadCaseDocumentWrapper wrapper = data.getUploadCaseDocumentWrapper();
 
         assertEquals("one document shared with respondent solicitor", 1,
-            data.getUploadCaseDocumentWrapper().getRespCorrespondenceDocsCollShared().size());
+            wrapper.getRespCorrespondenceDocsCollShared().size());
+        assertEquals("one document shared with respondent solicitor", 1,
+            wrapper.getRespOtherCollectionShared().size());
+        assertEquals("one document shared with respondent solicitor", 1,
+            wrapper.getRespExpertEvidenceCollShared().size());
+        assertEquals("one document shared with respondent solicitor", 1,
+            wrapper.getRespFormsHCollectionShared().size());
+        assertEquals("one document shared with respondent solicitor", 1,
+            wrapper.getRespHearingBundlesCollShared().size());
+        assertEquals("one document shared with respondent solicitor", 1,
+            wrapper.getRespCaseSummariesCollectionShared().size());
+        assertEquals("one document shared with respondent solicitor", 1,
+            wrapper.getRespStatementsExhibitsCollShared().size());
+        assertEquals("one document shared with respondent solicitor", 1,
+            wrapper.getRespQaCollectionShared().size());
+        assertEquals("one document shared with respondent solicitor", 1,
+            wrapper.getRespChronologiesCollectionShared().size());
+        assertEquals("one document shared with respondent solicitor", 1,
+            wrapper.getRespFormEExhibitsCollectionShared().size());
+
+
         assertEquals("one document shared with intervener 1 solicitor", 1,
-            data.getUploadCaseDocumentWrapper().getIntv1CorrespDocsShared().size());
+            wrapper.getIntv1CorrespDocsShared().size());
 
         assertEquals("one document shared with intervener 2 solicitor", 1,
-            data.getUploadCaseDocumentWrapper().getIntv2CorrespDocsShared().size());
+            wrapper.getIntv2CorrespDocsShared().size());
 
         assertEquals("one document shared with intervener 3 solicitor", 1,
-            data.getUploadCaseDocumentWrapper().getIntv3CorrespDocsShared().size());
+            wrapper.getIntv3CorrespDocsShared().size());
 
         assertEquals("one document shared with intervener 4 solicitor", 1,
-            data.getUploadCaseDocumentWrapper().getIntv4CorrespDocsShared().size());
+            wrapper.getIntv4CorrespDocsShared().size());
+    }
+
+    private static DynamicMultiSelectListElement getSelectedDoc(List<UploadCaseDocumentCollection> coll,
+                                                                CaseDocument doc,
+                                                                ContestedUploadCaseFilesCollectionType type) {
+        return DynamicMultiSelectListElement.builder()
+            .label(type.getCcdKey() + " -> " + doc.getDocumentFilename())
+            .code(coll.get(0).getId() + "#" + type.getCcdKey())
+            .build();
     }
 
     private DynamicMultiSelectListElement getSelectedParty(CaseRole role) {
@@ -185,7 +243,7 @@ class ApplicantShareDocumentsServiceTest {
             .hearingDetails("UK 1400 hours")
             .caseDocumentFdr(YesOrNo.NO)
             .caseDocumentUploadDateTime(LocalDateTime.now()).build();
-        return List.of(UploadCaseDocumentCollection.builder().id(UUID.randomUUID()).value(document).build());
+        return List.of(UploadCaseDocumentCollection.builder().id(uuid.get()).value(document).build());
     }
 
     private FinremCallbackRequest buildCallbackRequest() {
