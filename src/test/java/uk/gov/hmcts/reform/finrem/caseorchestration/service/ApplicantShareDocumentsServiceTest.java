@@ -54,7 +54,19 @@ class ApplicantShareDocumentsServiceTest {
     private static final String TEST_ORG = "HSKEOS";
 
     @Test
-    void applicantSourceDocumentList() {
+    void applicantSourceDocumentListWhenDocNotPresent() {
+        ApplicantShareDocumentsService service = new ApplicantShareDocumentsService();
+
+        FinremCallbackRequest request = buildCallbackRequest();
+        FinremCaseDetails details = request.getCaseDetails();
+
+        DynamicMultiSelectList list = service.applicantSourceDocumentList(details);
+        assertEquals("document size for sharing", 0, list.getListItems().size());
+        assertNull("no document selected from list", list.getValue());
+    }
+
+    @Test
+    void applicantSourceDocumentListWhenDocPresent() {
         ApplicantShareDocumentsService service = new ApplicantShareDocumentsService();
 
         FinremCallbackRequest request = buildCallbackRequest();
