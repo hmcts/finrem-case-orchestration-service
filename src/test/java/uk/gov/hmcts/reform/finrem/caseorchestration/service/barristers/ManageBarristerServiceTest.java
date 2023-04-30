@@ -123,34 +123,6 @@ public class ManageBarristerServiceTest {
     }
 
     @Test
-    public void givenValidData_whenCaseWorkerManagesIntervener1Party_thenReturnIntervener1Policy() {
-        caseDetails.getData().put(MANAGE_BARRISTER_PARTY, INTERVENER1);
-        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN)).thenReturn(buildCaseAssignedUserRolesResource(CASEWORKER_POLICY));
-        assertEquals(manageBarristerService.getCaseRole(caseDetails, AUTH_TOKEN), INTVR_SOLICITOR_1_POLICY);
-    }
-
-    @Test
-    public void givenValidData_whenCaseWorkerManagesIntervener2Party_thenReturnIntervener2Policy() {
-        caseDetails.getData().put(MANAGE_BARRISTER_PARTY, INTERVENER2);
-        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN)).thenReturn(buildCaseAssignedUserRolesResource(CASEWORKER_POLICY));
-        assertEquals(manageBarristerService.getCaseRole(caseDetails, AUTH_TOKEN), INTVR_SOLICITOR_2_POLICY);
-    }
-
-    @Test
-    public void givenValidData_whenCaseWorkerManagesIntervener3Party_thenReturnIntervener3Policy() {
-        caseDetails.getData().put(MANAGE_BARRISTER_PARTY, INTERVENER3);
-        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN)).thenReturn(buildCaseAssignedUserRolesResource(CASEWORKER_POLICY));
-        assertEquals(manageBarristerService.getCaseRole(caseDetails, AUTH_TOKEN), INTVR_SOLICITOR_3_POLICY);
-    }
-
-    @Test
-    public void givenValidData_whenCaseWorkerManagesIntervener4Party_thenReturnIntervener4Policy() {
-        caseDetails.getData().put(MANAGE_BARRISTER_PARTY, INTERVENER4);
-        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN)).thenReturn(buildCaseAssignedUserRolesResource(CASEWORKER_POLICY));
-        assertEquals(manageBarristerService.getCaseRole(caseDetails, AUTH_TOKEN), INTVR_SOLICITOR_4_POLICY);
-    }
-
-    @Test
     public void givenValidData_whenGetBarristersForPartyApplicant_thenReturnApplicantBarristerData() {
         List<BarristerData> applicantBarristers = applicantBarristerCollection();
         caseDetails.getData().put(CASE_ROLE, APP_SOLICITOR_POLICY);
@@ -229,6 +201,54 @@ public class ManageBarristerServiceTest {
     }
 
     @Test
+    public void givenNoCurrentBarristers_whenGetBarristersForPartyIntervener1_thenReturnEmptyList() {
+        caseDetails.getData().put(CASE_ROLE, INTVR_SOLICITOR_1_POLICY);
+        caseDetails.getData().put(RESPONDENT_BARRISTER_COLLECTION, respondentBarristerCollection());
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
+            .thenReturn(buildCaseAssignedUserRolesResource(INTVR_SOLICITOR_1_POLICY));
+
+        List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
+
+        assertThat(barristerData, is(empty()));
+    }
+
+    @Test
+    public void givenNoCurrentBarristers_whenGetBarristersForPartyIntervener2_thenReturnEmptyList() {
+        caseDetails.getData().put(CASE_ROLE, INTVR_SOLICITOR_2_POLICY);
+        caseDetails.getData().put(RESPONDENT_BARRISTER_COLLECTION, respondentBarristerCollection());
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
+            .thenReturn(buildCaseAssignedUserRolesResource(INTVR_SOLICITOR_2_POLICY));
+
+        List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
+
+        assertThat(barristerData, is(empty()));
+    }
+
+    @Test
+    public void givenNoCurrentBarristers_whenGetBarristersForPartyIntervener3_thenReturnEmptyList() {
+        caseDetails.getData().put(CASE_ROLE, INTVR_SOLICITOR_3_POLICY);
+        caseDetails.getData().put(RESPONDENT_BARRISTER_COLLECTION, respondentBarristerCollection());
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
+            .thenReturn(buildCaseAssignedUserRolesResource(INTVR_SOLICITOR_3_POLICY));
+
+        List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
+
+        assertThat(barristerData, is(empty()));
+    }
+
+    @Test
+    public void givenNoCurrentBarristers_whenGetBarristersForPartyIntervener4_thenReturnEmptyList() {
+        caseDetails.getData().put(CASE_ROLE, INTVR_SOLICITOR_4_POLICY);
+        caseDetails.getData().put(RESPONDENT_BARRISTER_COLLECTION, respondentBarristerCollection());
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
+            .thenReturn(buildCaseAssignedUserRolesResource(INTVR_SOLICITOR_4_POLICY));
+
+        List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
+
+        assertThat(barristerData, is(empty()));
+    }
+
+    @Test
     public void givenValidData_whenGetBarristersForPartyRespondent_thenReturnRespondentBarristerData() {
         List<BarristerData> respondentBarristers = respondentBarristerCollection();
         caseDetails.getData().put(CASE_ROLE, RESP_SOLICITOR_POLICY);
@@ -253,6 +273,62 @@ public class ManageBarristerServiceTest {
         List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
 
         assertThat(barristerData, is(applicantBarristers));
+    }
+
+    @Test
+    public void givenCaseworkerUsers_whenGetBarristersForPartyIntervener1_thenReturnIntervener1BarristerData() {
+        List<BarristerData> intervener1Barristers = intervener1BarristerCollection();
+        caseDetails.getData().put(CASE_ROLE, CASEWORKER_ROLE);
+        caseDetails.getData().put(MANAGE_BARRISTER_PARTY, INTERVENER1);
+        caseDetails.getData().put(INTERVENER_BARRISTER_1_COLLECTION, intervener1Barristers);
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
+            .thenReturn(CaseAssignedUserRolesResource.builder().build());
+
+        List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
+
+        assertThat(barristerData, is(intervener1Barristers));
+    }
+
+    @Test
+    public void givenCaseworkerUsers_whenGetBarristersForPartyIntervener2_thenReturnIntervener2BarristerData() {
+        List<BarristerData> intervener2Barristers = intervener2BarristerCollection();
+        caseDetails.getData().put(CASE_ROLE, CASEWORKER_ROLE);
+        caseDetails.getData().put(MANAGE_BARRISTER_PARTY, INTERVENER2);
+        caseDetails.getData().put(INTERVENER_BARRISTER_2_COLLECTION, intervener2Barristers);
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
+            .thenReturn(CaseAssignedUserRolesResource.builder().build());
+
+        List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
+
+        assertThat(barristerData, is(intervener2Barristers));
+    }
+
+    @Test
+    public void givenCaseworkerUsers_whenGetBarristersForPartyIntervener3_thenReturnIntervener3BarristerData() {
+        List<BarristerData> intervener3Barristers = intervener3BarristerCollection();
+        caseDetails.getData().put(CASE_ROLE, CASEWORKER_ROLE);
+        caseDetails.getData().put(MANAGE_BARRISTER_PARTY, INTERVENER3);
+        caseDetails.getData().put(INTERVENER_BARRISTER_3_COLLECTION, intervener3Barristers);
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
+            .thenReturn(CaseAssignedUserRolesResource.builder().build());
+
+        List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
+
+        assertThat(barristerData, is(intervener3Barristers));
+    }
+
+    @Test
+    public void givenCaseworkerUsers_whenGetBarristersForPartyIntervener4_thenReturnIntervener4BarristerData() {
+        List<BarristerData> intervener4Barristers = intervener4BarristerCollection();
+        caseDetails.getData().put(CASE_ROLE, CASEWORKER_ROLE);
+        caseDetails.getData().put(MANAGE_BARRISTER_PARTY, INTERVENER4);
+        caseDetails.getData().put(INTERVENER_BARRISTER_4_COLLECTION, intervener4Barristers);
+        when(caseAssignedRoleService.getCaseAssignedUserRole(caseDetails, AUTH_TOKEN))
+            .thenReturn(CaseAssignedUserRolesResource.builder().build());
+
+        List<BarristerData> barristerData = manageBarristerService.getBarristersForParty(caseDetails, AUTH_TOKEN);
+
+        assertThat(barristerData, is(intervener4Barristers));
     }
 
     @Test
