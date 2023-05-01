@@ -30,6 +30,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import static java.util.Collections.singletonList;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocumentParty.APPLICANT;
@@ -137,8 +138,33 @@ class ApplicantShareDocumentsServiceTest {
         assertNull("no document selected from list", list.getValue());
     }
 
+
     @Test
-    void copyDocumentOnTheirRespectiveCollectionForSelectedSolicitors() {
+    void ShareOneDocumentOnTheirRespectiveCollectionForSelectedSolicitors() {
+        FinremCallbackRequest request = buildCallbackRequest();
+        FinremCaseDetails details = request.getCaseDetails();
+        FinremCaseData data = details.getData();
+        setCaseRole(data);
+
+        data.getUploadCaseDocumentWrapper().setAppOtherCollection(getTestDocument(OTHER));
+        DynamicMultiSelectList sourceDocumentList = new DynamicMultiSelectList();
+        List<UploadCaseDocumentCollection> coll = data.getUploadCaseDocumentWrapper().getAppOtherCollection();
+        CaseDocument doc = coll.get(0).getValue().getCaseDocuments();
+        sourceDocumentList.setValue(singletonList(getSelectedDoc(coll, doc, APP_OTHER_COLLECTION)));
+        data.setSourceDocumentList(sourceDocumentList);
+
+        DynamicMultiSelectList roleList = new DynamicMultiSelectList();
+        roleList.setValue(singletonList(getSelectedParty(RESP_SOLICITOR)));
+        data.setSolicitorRoleList(roleList);
+
+        service.copyDocumentOnTheirRespectiveCollectionForSelectedSolicitors(data);
+
+        UploadCaseDocumentWrapper wrapper = data.getUploadCaseDocumentWrapper();
+        assertEquals("one document shared with respondent solicitor", 1,
+            wrapper.getRespOtherCollectionShared().size());
+    }
+    @Test
+    void shareDocumentOnTheirRespectiveCollectionForSelectedSolicitors() {
 
         FinremCallbackRequest request = buildCallbackRequest();
         FinremCaseDetails details = request.getCaseDetails();
@@ -156,7 +182,7 @@ class ApplicantShareDocumentsServiceTest {
         data.getUploadCaseDocumentWrapper().setAppExpertEvidenceCollection(getTestDocument(EXPERT_EVIDENCE));
         data.getUploadCaseDocumentWrapper().setAppCorrespondenceDocsCollection(getTestDocument(CARE_PLAN));
 
-        DynamicMultiSelectList sourceDocumentList = service.applicantSourceDocumentList(details);
+        DynamicMultiSelectList sourceDocumentList = new DynamicMultiSelectList();
 
         List<UploadCaseDocumentCollection> coll = data.getUploadCaseDocumentWrapper().getAppCorrespondenceDocsCollection();
         CaseDocument doc = coll.get(0).getValue().getCaseDocuments();
