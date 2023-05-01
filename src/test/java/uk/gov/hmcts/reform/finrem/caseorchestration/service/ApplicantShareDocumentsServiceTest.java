@@ -140,7 +140,7 @@ class ApplicantShareDocumentsServiceTest {
 
 
     @Test
-    void ShareOneDocumentOnTheirRespectiveCollectionForSelectedSolicitors() {
+    void shareOneDocumentOnTheirRespectiveCollectionForSelectedSolicitors() {
         FinremCallbackRequest request = buildCallbackRequest();
         FinremCaseDetails details = request.getCaseDetails();
         FinremCaseData data = details.getData();
@@ -163,6 +163,7 @@ class ApplicantShareDocumentsServiceTest {
         assertEquals("one document shared with respondent solicitor", 1,
             wrapper.getRespOtherCollectionShared().size());
     }
+
     @Test
     void shareDocumentOnTheirRespectiveCollectionForSelectedSolicitors() {
 
