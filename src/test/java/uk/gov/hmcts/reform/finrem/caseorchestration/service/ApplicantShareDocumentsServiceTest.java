@@ -104,20 +104,31 @@ class ApplicantShareDocumentsServiceTest {
         data.getUploadCaseDocumentWrapper().setAppExpertEvidenceCollection(getTestDocument(EXPERT_EVIDENCE));
         data.getUploadCaseDocumentWrapper().setAppCorrespondenceDocsCollection(getTestDocument(CARE_PLAN));
 
+        DynamicMultiSelectList sourceDocumentList = new DynamicMultiSelectList();
+        List<UploadCaseDocumentCollection> coll = data.getUploadCaseDocumentWrapper().getAppOtherCollection();
+        CaseDocument doc = coll.get(0).getValue().getCaseDocuments();
+        sourceDocumentList.setValue(singletonList(getSelectedDoc(coll, doc, APP_OTHER_COLLECTION)));
+        data.setSourceDocumentList(sourceDocumentList);
 
         DynamicMultiSelectList list = service.applicantSourceDocumentList(details);
         assertEquals("document size for sharing", 10, list.getListItems().size());
-        assertNull("no document selected from list", list.getValue());
+        assertEquals("no document selected from list", 1, list.getValue().size());
     }
 
     @Test
     void getApplicantToOtherSolicitorRoleList() {
 
         FinremCallbackRequest request = buildCallbackRequest();
+        FinremCaseData caseData = request.getCaseDetails().getData();
         setCaseRole(request.getCaseDetails().getData());
+
+        DynamicMultiSelectList roleList = new DynamicMultiSelectList();
+        roleList.setValue(singletonList(getSelectedParty(RESP_SOLICITOR)));
+        caseData.setSolicitorRoleList(roleList);
+
         DynamicMultiSelectList list = service.getApplicantToOtherSolicitorRoleList(request.getCaseDetails());
         assertEquals("role size for sharing", 5, list.getListItems().size());
-        assertNull("no document selected from list", list.getValue());
+        assertEquals("no document selected from list", 1, list.getValue().size());
 
         FinremCaseData data = request.getCaseDetails().getData();
         data.setIntervenerOneWrapper(null);
@@ -125,6 +136,7 @@ class ApplicantShareDocumentsServiceTest {
         data.setIntervenerThreeWrapper(null);
         data.setIntervenerFourWrapper(null);
         data.setRespondentOrganisationPolicy(null);
+        data.setSolicitorRoleList(new DynamicMultiSelectList());
         list = service.getApplicantToOtherSolicitorRoleList(request.getCaseDetails());
         assertEquals("role size for sharing", 0, list.getListItems().size());
         assertNull("no document selected from list", list.getValue());
