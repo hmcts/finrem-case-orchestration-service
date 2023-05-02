@@ -167,16 +167,8 @@ public class RespondentShareDocumentsService implements SharedService {
             roleList.add(caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole());
         }
 
-        intervenerCaseRoleList(caseData, roleList);
-
-        List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();
-        if (ObjectUtils.isNotEmpty(roleList)) {
-            log.info("setting role list for case {}", caseDetails.getId());
-            roleList.forEach(role -> dynamicListElements.add(getDynamicMultiSelectListElement(role, role)));
-            log.info("dynamic role list {} for case {}", roleList, caseDetails.getId());
-        }
-
-        return getRoleList(dynamicListElements, caseDetails.getData().getSolicitorRoleList());
+        return getRoleList(intervenerCaseRoleList(caseData, roleList),
+            caseDetails.getData().getSolicitorRoleList());
     }
 
 

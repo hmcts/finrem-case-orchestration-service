@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public interface SharedService {
@@ -48,7 +49,7 @@ public interface SharedService {
         }
     }
 
-    default void intervenerCaseRoleList(FinremCaseData caseData, List<String> roleList) {
+    default List<DynamicMultiSelectListElement> intervenerCaseRoleList(FinremCaseData caseData, List<String> roleList) {
         //intervener1
         IntervenerOneWrapper oneWrapper = caseData.getIntervenerOneWrapper();
         if (ObjectUtils.isNotEmpty(oneWrapper)
@@ -81,6 +82,12 @@ public interface SharedService {
             && ObjectUtils.isNotEmpty(fourWrapper.getIntervener4Organisation().getOrganisation().getOrganisationID())) {
             roleList.add(fourWrapper.getIntervener4Organisation().getOrgPolicyCaseAssignedRole());
         }
+
+        List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();
+        if (ObjectUtils.isNotEmpty(roleList)) {
+            roleList.forEach(role -> dynamicListElements.add(getDynamicMultiSelectListElement(role, role)));
+        }
+        return dynamicListElements;
     }
 
     default UploadCaseDocumentCollection setSharedDocument(UploadCaseDocumentCollection sd) {
