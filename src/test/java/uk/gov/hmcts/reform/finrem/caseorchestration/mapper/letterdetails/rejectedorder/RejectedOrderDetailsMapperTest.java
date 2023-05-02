@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.Rejected
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.TranslatedOrderRefusalDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.letterdetails.TranslatedOrderRefusalDocumentCollection;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -149,7 +150,7 @@ public class RejectedOrderDetailsMapperTest extends AbstractLetterDetailsMapperT
                             .build())
                         .orderRefusalJudgeName("Contested")
                         .orderRefusalJudge(JudgeType.HIS_HONOUR_JUDGE.getValue())
-                        .orderRefusalDate("2022-01-01")
+                        .orderRefusalDate(LocalDate.of(2022,1, 1))
                         .orderRefusalAddComments("testComment")
                         .build())
                 .build());

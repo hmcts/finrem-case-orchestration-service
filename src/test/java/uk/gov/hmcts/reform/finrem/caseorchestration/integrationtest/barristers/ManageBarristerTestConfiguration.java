@@ -57,4 +57,6 @@ public class ManageBarristerTestConfiguration {
 
     @MockBean
     private FinremNotificationRequestMapper finremNotificationRequestMapper;
+
+
 }
