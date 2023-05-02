@@ -947,11 +947,7 @@ public class ApplicantShareDocumentsService implements SharedService {
         }
     }
 
-    private UploadCaseDocumentCollection setSharedDocument(UploadCaseDocumentCollection sd) {
-        return UploadCaseDocumentCollection.builder()
-            .id(sd.getId())
-            .value(sd.getValue()).build();
-    }
+
 
     private void copySelectedExpertFilesToIntv4(FinremCaseData caseData, String collId, String collName) {
         if (collName.equalsIgnoreCase(APP_EXPERT_EVIDENCE_COLLECTION.getCcdKey())) {
@@ -962,8 +958,7 @@ public class ApplicantShareDocumentsService implements SharedService {
                         Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv4ExpertEvidenceShared())
                             .orElse(new ArrayList<>());
 
-                    list.add(UploadCaseDocumentCollection.builder()
-                        .value(sd.getValue()).build());
+                    list.add(setSharedDocument(sd));
 
                     caseData.getUploadCaseDocumentWrapper().setIntv4ExpertEvidenceShared(list);
                 }
@@ -980,8 +975,7 @@ public class ApplicantShareDocumentsService implements SharedService {
                         Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv4FormHsShared())
                             .orElse(new ArrayList<>());
 
-                    list.add(UploadCaseDocumentCollection.builder()
-                        .value(sd.getValue()).build());
+                    list.add(setSharedDocument(sd));
 
                     caseData.getUploadCaseDocumentWrapper().setIntv4FormHsShared(list);
                 }
@@ -998,8 +992,7 @@ public class ApplicantShareDocumentsService implements SharedService {
                         Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv4HearingBundlesShared())
                             .orElse(new ArrayList<>());
 
-                    list.add(UploadCaseDocumentCollection.builder()
-                        .value(sd.getValue()).build());
+                    list.add(setSharedDocument(sd));
 
                     caseData.getUploadCaseDocumentWrapper().setIntv4HearingBundlesShared(list);
                 }
@@ -1016,8 +1009,7 @@ public class ApplicantShareDocumentsService implements SharedService {
                         Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv4SummariesShared())
                             .orElse(new ArrayList<>());
 
-                    list.add(UploadCaseDocumentCollection.builder()
-                        .value(sd.getValue()).build());
+                    list.add(setSharedDocument(sd));
 
                     caseData.getUploadCaseDocumentWrapper().setIntv4SummariesShared(list);
                 }
@@ -1034,8 +1026,7 @@ public class ApplicantShareDocumentsService implements SharedService {
                         Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv4StmtsExhibitsShared())
                             .orElse(new ArrayList<>());
 
-                    list.add(UploadCaseDocumentCollection.builder()
-                        .value(sd.getValue()).build());
+                    list.add(setSharedDocument(sd));
 
                     caseData.getUploadCaseDocumentWrapper().setIntv4StmtsExhibitsShared(list);
                 }
@@ -1052,8 +1043,7 @@ public class ApplicantShareDocumentsService implements SharedService {
                         Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv4QaShared())
                             .orElse(new ArrayList<>());
 
-                    list.add(UploadCaseDocumentCollection.builder()
-                        .value(sd.getValue()).build());
+                    list.add(setSharedDocument(sd));
 
                     caseData.getUploadCaseDocumentWrapper().setIntv4QaShared(list);
                 }
@@ -1070,8 +1060,7 @@ public class ApplicantShareDocumentsService implements SharedService {
                         Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv4ChronologiesShared())
                             .orElse(new ArrayList<>());
 
-                    list.add(UploadCaseDocumentCollection.builder()
-                        .value(sd.getValue()).build());
+                    list.add(setSharedDocument(sd));
 
                     caseData.getUploadCaseDocumentWrapper().setIntv4ChronologiesShared(list);
                 }
@@ -1088,8 +1077,7 @@ public class ApplicantShareDocumentsService implements SharedService {
                         Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv4FormEsExhibitsShared())
                             .orElse(new ArrayList<>());
 
-                    list.add(UploadCaseDocumentCollection.builder()
-                        .value(sd.getValue()).build());
+                    list.add(setSharedDocument(sd));
 
                     caseData.getUploadCaseDocumentWrapper().setIntv4FormEsExhibitsShared(list);
                 }
@@ -1100,14 +1088,13 @@ public class ApplicantShareDocumentsService implements SharedService {
     private void copySelectedOtherFilesToIntv4(FinremCaseData caseData, String collId, String collName) {
         if (collName.equalsIgnoreCase(APP_OTHER_COLLECTION.getCcdKey())) {
             List<UploadCaseDocumentCollection> appOtherCollection = caseData.getUploadCaseDocumentWrapper().getAppOtherCollection();
-            appOtherCollection.forEach(d -> {
-                if (String.valueOf(d.getId()).equalsIgnoreCase(collId)) {
+            appOtherCollection.forEach(sd -> {
+                if (String.valueOf(sd.getId()).equalsIgnoreCase(collId)) {
                     List<UploadCaseDocumentCollection> list =
                         Optional.ofNullable(caseData.getUploadCaseDocumentWrapper().getIntv4OtherShared())
                             .orElse(new ArrayList<>());
 
-                    list.add(UploadCaseDocumentCollection.builder()
-                        .value(d.getValue()).build());
+                    list.add(setSharedDocument(sd));
 
                     caseData.getUploadCaseDocumentWrapper().setIntv4OtherShared(list);
                 }

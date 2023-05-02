@@ -4,6 +4,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.UploadCaseDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
@@ -80,5 +81,11 @@ public interface SharedService {
             && ObjectUtils.isNotEmpty(fourWrapper.getIntervener4Organisation().getOrganisation().getOrganisationID())) {
             roleList.add(fourWrapper.getIntervener4Organisation().getOrgPolicyCaseAssignedRole());
         }
+    }
+
+    default UploadCaseDocumentCollection setSharedDocument(UploadCaseDocumentCollection sd) {
+        return UploadCaseDocumentCollection.builder()
+            .id(sd.getId())
+            .value(sd.getValue()).build();
     }
 }
