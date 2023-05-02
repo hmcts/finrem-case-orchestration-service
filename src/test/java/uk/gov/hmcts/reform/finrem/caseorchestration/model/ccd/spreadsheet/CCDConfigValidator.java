@@ -68,7 +68,7 @@ public class CCDConfigValidator {
         Map.entry(DYNAMIC_LIST, "DynamicList"),
         Map.entry(DYNAMIC_RADIO_LIST, "DynamicRadioList"),
         Map.entry("FR_ct_draftDirectionOrder", "DraftDirectionOrder"),
-        Map.entry("Flags", "CaseFlag"),
+        Map.entry("Flags", "CaseFlag")
     );
 
     private Map<String, String> specialFieldTypes = Map.ofEntries(
