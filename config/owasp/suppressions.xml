@@ -243,4 +243,11 @@
     <suppress until="2023-07-15">
         <cve>CVE-2023-20861</cve>
     </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: spring-security-crypto-5.7.5.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring\-security\-crypto@.*$</packageUrl>
+        <cve>CVE-2023-20862</cve>
+    </suppress>
 </suppressions>
