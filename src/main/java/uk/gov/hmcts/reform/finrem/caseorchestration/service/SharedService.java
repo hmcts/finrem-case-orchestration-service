@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import org.apache.commons.lang3.ObjectUtils;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -9,10 +10,32 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.UploadCaseDocumentWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_CASE_SUMMARIES_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_CHRONOLOGIES_STATEMENTS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_CORRESPONDENCE_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_EXPERT_EVIDENCE_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_FORMS_H_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_FORM_E_EXHIBITS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_HEARING_BUNDLES_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_OTHER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_QUESTIONNAIRES_ANSWERS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.APP_STATEMENTS_EXHIBITS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESP_CASE_SUMMARIES_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESP_CHRONOLOGIES_STATEMENTS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESP_CORRESPONDENCE_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESP_EXPERT_EVIDENCE_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESP_FORM_E_EXHIBITS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESP_FORM_H_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESP_HEARING_BUNDLES_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESP_OTHER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESP_QUESTIONNAIRES_ANSWERS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ContestedUploadCaseFilesCollectionType.RESP_STATEMENTS_EXHIBITS_COLLECTION;
 
 public interface SharedService {
     default DynamicMultiSelectListElement getDynamicMultiSelectListElement(String code, String label) {
@@ -95,6 +118,253 @@ public interface SharedService {
         return UploadCaseDocumentCollection.builder()
             .id(sd.getId())
             .value(sd.getValue()).build();
+    }
+
+
+    default void copyIntervenersDocuments(FinremCaseData caseData, String role, List<DynamicMultiSelectListElement> documentList) {
+        if (role.equals(CaseRole.INTVR_SOLICITOR_1.getValue())) {
+            copyShareDocumentsInSharedCollection(caseData, role, documentList);
+        }
+
+        if (role.equals(CaseRole.INTVR_SOLICITOR_2.getValue())) {
+            copyShareDocumentsInSharedCollection(caseData, role, documentList);
+        }
+
+        if (role.equals(CaseRole.INTVR_SOLICITOR_3.getValue())) {
+            copyShareDocumentsInSharedCollection(caseData, role, documentList);
+        }
+
+        if (role.equals(CaseRole.INTVR_SOLICITOR_4.getValue())) {
+            copyShareDocumentsInSharedCollection(caseData, role, documentList);
+        }
+    }
+
+    private void copyShareDocumentsInSharedCollection(FinremCaseData caseData, String role, List<DynamicMultiSelectListElement> documentList) {
+        documentList.forEach(doc -> {
+            String[] collectionIdAndFilename = doc.getCode().split("#");
+            String collId = collectionIdAndFilename[0];
+            String collName = collectionIdAndFilename[1];
+
+            copySelectedOtherFiles(caseData, collId, collName, role);
+            copySelectedFormEFiles(caseData, collId, collName, role);
+            copySelectedChronologiesFiles(caseData, collId, collName, role);
+            copySelectedQaFiles(caseData, collId, collName, role);
+            copySelectedStmtExhibitsFiles(caseData, collId, collName, role);
+            copySelectedSummariesFiles(caseData, collId, collName, role);
+            copySelectedHearingFiles(caseData, collId, collName, role);
+            copySelectedFormHFiles(caseData, collId, collName, role);
+            copySelectedExpertFiles(caseData, collId, collName, role);
+            copySelectedCorresFiles(caseData, collId, collName, role);
+        });
+    }
+
+    private void copySelectedOtherFiles(FinremCaseData caseData,
+                                        String collId, String collName, String caseRole) {
+        List<UploadCaseDocumentCollection> docs = new ArrayList<>();
+        UploadCaseDocumentWrapper documentWrapper = caseData.getUploadCaseDocumentWrapper();
+        if (collName.equalsIgnoreCase(APP_OTHER_COLLECTION.getCcdKey())) {
+            docs = documentWrapper.getAppOtherCollection();
+        } else if (collName.equalsIgnoreCase(RESP_OTHER_COLLECTION.getCcdKey())) {
+            docs = documentWrapper.getRespOtherCollection();
+        }
+
+        if (caseRole.equals(CaseRole.INTVR_SOLICITOR_1.getValue())) {
+            setIntv1OtherShared(caseData, collId, docs);
+        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_2.getValue())) {
+            setIntv2OtherShared(caseData, collId, docs);
+        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_3.getValue())) {
+            setIntv3OtherShared(caseData, collId, docs);
+        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_4.getValue())) {
+            setIntv4OtherShared(caseData, collId, docs);
+        }
+    }
+
+    private void copySelectedFormEFiles(FinremCaseData caseData, String collId, String collName, String caseRole) {
+        List<UploadCaseDocumentCollection> docs = new ArrayList<>();
+        UploadCaseDocumentWrapper documentWrapper = caseData.getUploadCaseDocumentWrapper();
+        if (collName.equalsIgnoreCase(APP_FORM_E_EXHIBITS_COLLECTION.getCcdKey())) {
+            docs = documentWrapper.getAppFormEExhibitsCollection();
+        } else if (collName.equalsIgnoreCase(RESP_FORM_E_EXHIBITS_COLLECTION.getCcdKey())) {
+            docs = documentWrapper.getRespFormEExhibitsCollection();
+        }
+
+        if (caseRole.equals(CaseRole.INTVR_SOLICITOR_1.getValue())) {
+            setIntv1FormEsExhibitsShared(caseData, collId, docs);
+        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_2.getValue())) {
+            setIntv2FormEsExhibitsShared(caseData, collId, docs);
+        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_3.getValue())) {
+            setIntv3FormEsExhibitsShared(caseData, collId, docs);
+        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_4.getValue())) {
+            setIntv4FormEsExhibitsShared(caseData, collId, docs);
+        }
+    }
+
+
+    private void copySelectedCorresFiles(FinremCaseData caseData, String collId, String collName, String caseRole) {
+        List<UploadCaseDocumentCollection> docs = new ArrayList<>();
+        UploadCaseDocumentWrapper documentWrapper = caseData.getUploadCaseDocumentWrapper();
+        if (collName.equalsIgnoreCase(APP_CORRESPONDENCE_COLLECTION.getCcdKey())) {
+            docs = documentWrapper.getAppFormEExhibitsCollection();
+        } else if (collName.equalsIgnoreCase(RESP_CORRESPONDENCE_COLLECTION.getCcdKey())) {
+            docs = documentWrapper.getRespFormEExhibitsCollection();
+        }
+
+        if (caseRole.equals(CaseRole.INTVR_SOLICITOR_1.getValue())) {
+            setIntv1CorrespDocsShared(caseData, collId, docs);
+        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_2.getValue())) {
+            setIntv2CorrespDocsShared(caseData, collId, docs);
+        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_3.getValue())) {
+            setIntv3CorrespDocsShared(caseData, collId, docs);
+        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_4.getValue())) {
+            setIntv4CorrespDocsShared(caseData, collId, docs);
+        }
+    }
+
+    private void copySelectedExpertFiles(FinremCaseData caseData, String collId, String collName, String caseRole) {
+        List<UploadCaseDocumentCollection> docs = new ArrayList<>();
+        UploadCaseDocumentWrapper documentWrapper = caseData.getUploadCaseDocumentWrapper();
+        if (collName.equalsIgnoreCase(APP_EXPERT_EVIDENCE_COLLECTION.getCcdKey())) {
+            docs = documentWrapper.getAppExpertEvidenceCollection();
+        } else if (collName.equalsIgnoreCase(RESP_EXPERT_EVIDENCE_COLLECTION.getCcdKey())) {
+            docs = documentWrapper.getRespExpertEvidenceCollection();
+        }
+
+
+        if (caseRole.equals(CaseRole.INTVR_SOLICITOR_1.getValue())) {
+            setIntv1ExpertEvidenceShared(caseData, collId, docs);
+        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_2.getValue())) {
+            setIntv2ExpertEvidenceShared(caseData, collId, docs);
+        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_3.getValue())) {
+            setIntv3ExpertEvidenceShared(caseData, collId, docs);
+        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_4.getValue())) {
+            setIntv4ExpertEvidenceShared(caseData, collId, docs);
+        }
+    }
+
+    private void copySelectedFormHFiles(FinremCaseData caseData, String collId, String collName, String caseRole) {
+        List<UploadCaseDocumentCollection> docs = new ArrayList<>();
+        UploadCaseDocumentWrapper documentWrapper = caseData.getUploadCaseDocumentWrapper();
+        if (collName.equalsIgnoreCase(APP_FORMS_H_COLLECTION.getCcdKey())) {
+            docs = documentWrapper.getAppFormsHCollection();
+        } else if (collName.equalsIgnoreCase(RESP_FORM_H_COLLECTION.getCcdKey())) {
+            docs = documentWrapper.getRespFormsHCollection();
+        }
+
+
+        if (caseRole.equals(CaseRole.INTVR_SOLICITOR_1.getValue())) {
+            setIntv1FormHsShared(caseData, collId, docs);
+        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_2.getValue())) {
+            setIntv2FormHsShared(caseData, collId, docs);
+        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_3.getValue())) {
+            setIntv3FormHsShared(caseData, collId, docs);
+        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_4.getValue())) {
+            setIntv4FormHsShared(caseData, collId, docs);
+        }
+    }
+
+    private void copySelectedHearingFiles(FinremCaseData caseData, String collId, String collName, String caseRole) {
+        List<UploadCaseDocumentCollection> docs = new ArrayList<>();
+        UploadCaseDocumentWrapper documentWrapper = caseData.getUploadCaseDocumentWrapper();
+        if (collName.equalsIgnoreCase(APP_HEARING_BUNDLES_COLLECTION.getCcdKey())) {
+            docs = documentWrapper.getAppHearingBundlesCollection();
+        } else if (collName.equalsIgnoreCase(RESP_HEARING_BUNDLES_COLLECTION.getCcdKey())) {
+            docs = documentWrapper.getRespHearingBundlesCollection();
+        }
+
+
+        if (caseRole.equals(CaseRole.INTVR_SOLICITOR_1.getValue())) {
+            setIntv1HearingBundlesShared(caseData, collId, docs);
+        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_2.getValue())) {
+            setIntv2HearingBundlesShared(caseData, collId, docs);
+        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_3.getValue())) {
+            setIntv3HearingBundlesShared(caseData, collId, docs);
+        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_4.getValue())) {
+            setIntv4HearingBundlesShared(caseData, collId, docs);
+        }
+    }
+
+    private void copySelectedSummariesFiles(FinremCaseData caseData, String collId, String collName, String caseRole) {
+        List<UploadCaseDocumentCollection> docs = new ArrayList<>();
+        UploadCaseDocumentWrapper documentWrapper = caseData.getUploadCaseDocumentWrapper();
+        if (collName.equalsIgnoreCase(APP_CASE_SUMMARIES_COLLECTION.getCcdKey())) {
+            docs = documentWrapper.getAppCaseSummariesCollection();
+        } else if (collName.equalsIgnoreCase(RESP_CASE_SUMMARIES_COLLECTION.getCcdKey())) {
+            docs = documentWrapper.getRespCaseSummariesCollection();
+        }
+
+
+        if (caseRole.equals(CaseRole.INTVR_SOLICITOR_1.getValue())) {
+            setIntv1SummariesShared(caseData, collId, docs);
+        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_2.getValue())) {
+            setIntv2SummariesShared(caseData, collId, docs);
+        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_3.getValue())) {
+            setIntv3SummariesShared(caseData, collId, docs);
+        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_4.getValue())) {
+            setIntv4SummariesShared(caseData, collId, docs);
+        }
+    }
+
+    private void copySelectedStmtExhibitsFiles(FinremCaseData caseData, String collId, String collName, String caseRole) {
+        List<UploadCaseDocumentCollection> docs = new ArrayList<>();
+        UploadCaseDocumentWrapper documentWrapper = caseData.getUploadCaseDocumentWrapper();
+        if (collName.equalsIgnoreCase(APP_STATEMENTS_EXHIBITS_COLLECTION.getCcdKey())) {
+            docs = documentWrapper.getAppStatementsExhibitsCollection();
+        } else if (collName.equalsIgnoreCase(RESP_STATEMENTS_EXHIBITS_COLLECTION.getCcdKey())) {
+            docs = documentWrapper.getRespStatementsExhibitsCollection();
+        }
+
+
+        if (caseRole.equals(CaseRole.INTVR_SOLICITOR_1.getValue())) {
+            setIntv1StmtsExhibitsShared(caseData, collId, docs);
+        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_2.getValue())) {
+            setIntv2StmtsExhibitsShared(caseData, collId, docs);
+        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_3.getValue())) {
+            setIntv3StmtsExhibitsShared(caseData, collId, docs);
+        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_4.getValue())) {
+            setIntv4StmtsExhibitsShared(caseData, collId, docs);
+        }
+    }
+
+    private void copySelectedQaFiles(FinremCaseData caseData, String collId, String collName, String caseRole) {
+        List<UploadCaseDocumentCollection> docs = new ArrayList<>();
+        UploadCaseDocumentWrapper documentWrapper = caseData.getUploadCaseDocumentWrapper();
+        if (collName.equalsIgnoreCase(APP_QUESTIONNAIRES_ANSWERS_COLLECTION.getCcdKey())) {
+            docs = documentWrapper.getAppQaCollection();
+        } else if (collName.equalsIgnoreCase(RESP_QUESTIONNAIRES_ANSWERS_COLLECTION.getCcdKey())) {
+            docs = documentWrapper.getRespQaCollection();
+        }
+
+
+        if (caseRole.equals(CaseRole.INTVR_SOLICITOR_1.getValue())) {
+            setIntv1QaShared(caseData, collId, docs);
+        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_2.getValue())) {
+            setIntv2QaShared(caseData, collId, docs);
+        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_3.getValue())) {
+            setIntv3QaShared(caseData, collId, docs);
+        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_4.getValue())) {
+            setIntv4QaShared(caseData, collId, docs);
+        }
+    }
+
+    private void copySelectedChronologiesFiles(FinremCaseData caseData, String collId, String collName, String caseRole) {
+        List<UploadCaseDocumentCollection> docs = new ArrayList<>();
+        UploadCaseDocumentWrapper documentWrapper = caseData.getUploadCaseDocumentWrapper();
+        if (collName.equalsIgnoreCase(APP_CHRONOLOGIES_STATEMENTS_COLLECTION.getCcdKey())) {
+            docs = documentWrapper.getAppChronologiesCollection();
+        } else if (collName.equalsIgnoreCase(RESP_CHRONOLOGIES_STATEMENTS_COLLECTION.getCcdKey())) {
+            docs = documentWrapper.getRespChronologiesCollection();
+        }
+
+
+        if (caseRole.equals(CaseRole.INTVR_SOLICITOR_1.getValue())) {
+            setIntv1ChronologiesShared(caseData, collId, docs);
+        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_2.getValue())) {
+            setIntv2ChronologiesShared(caseData, collId, docs);
+        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_3.getValue())) {
+            setIntv3ChronologiesShared(caseData, collId, docs);
+        } else if (caseRole.equals(CaseRole.INTVR_SOLICITOR_4.getValue())) {
+            setIntv4ChronologiesShared(caseData, collId, docs);
+        }
     }
 
     default void setIntv1CorrespDocsShared(FinremCaseData caseData, String collId, List<UploadCaseDocumentCollection> coll) {
