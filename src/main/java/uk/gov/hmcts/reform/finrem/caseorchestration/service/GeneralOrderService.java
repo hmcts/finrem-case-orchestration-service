@@ -11,6 +11,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsentedData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContested;
@@ -200,6 +205,43 @@ public class GeneralOrderService {
             return "Respondent Solicitor";
         } else {
             return "";
+        }
+    }
+
+    public void setOrderList(FinremCaseDetails caseDetails) {
+        FinremCaseData data = caseDetails.getData();
+        List<DynamicMultiSelectListElement> dynamicListElements = new ArrayList<>();
+        List<DirectionOrderCollection> hearingOrderDocuments = data.getUploadHearingOrder();
+
+        if (hearingOrderDocuments != null) {
+            hearingOrderDocuments.forEach(obj -> dynamicListElements.add(getDynamicMultiSelectListElement(obj.getId(),
+                obj.getValue().getUploadDraftDocument().getDocumentFilename())));
+        }
+
+        DynamicMultiSelectList selectedOrders = data.getOrderList();
+
+        DynamicMultiSelectList dynamicOrderList = getDynamicOrderList(dynamicListElements, selectedOrders);
+        data.setOrderList(dynamicOrderList);
+    }
+
+    public DynamicMultiSelectListElement getDynamicMultiSelectListElement(String code, String label) {
+        return DynamicMultiSelectListElement.builder()
+            .code(code)
+            .label(label)
+            .build();
+    }
+
+    private DynamicMultiSelectList getDynamicOrderList(List<DynamicMultiSelectListElement> dynamicMultiSelectListElement,
+                                                           DynamicMultiSelectList selectedOrders) {
+        if (selectedOrders != null) {
+            return DynamicMultiSelectList.builder()
+                .value(selectedOrders.getValue())
+                .listItems(dynamicMultiSelectListElement)
+                .build();
+        } else {
+            return DynamicMultiSelectList.builder()
+                .listItems(dynamicMultiSelectListElement)
+                .build();
         }
     }
 }

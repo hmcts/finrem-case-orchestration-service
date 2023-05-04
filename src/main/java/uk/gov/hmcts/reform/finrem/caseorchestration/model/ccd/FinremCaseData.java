@@ -110,6 +110,7 @@ public class FinremCaseData {
     private String pbaPaymentReference;
     private OrderDirection orderDirection;
     private CaseDocument orderDirectionOpt1;
+    private CaseDocument additionalDocument;
     private String orderDirectionOpt2;
     private YesOrNo orderDirectionAbsolute;
     private YesOrNo servePensionProvider;
@@ -275,6 +276,8 @@ public class FinremCaseData {
     private String reasonForFrcLocation;
     private List<HearingUploadBundleCollection> hearingUploadBundle;
     private SendOrderEventPostStateOption sendOrderPostStateOption;
+    private DynamicMultiSelectList orderList;
+    private DynamicMultiSelectList roleList;
     private List<UploadConfidentialDocumentCollection> confidentialDocumentsUploaded;
     private ChangeOrganisationRequest changeOrganisationRequestField;
     @JsonProperty("ApplicantOrganisationPolicy")
