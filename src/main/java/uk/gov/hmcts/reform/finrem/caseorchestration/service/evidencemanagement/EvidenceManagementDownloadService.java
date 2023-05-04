@@ -29,4 +29,12 @@ public class EvidenceManagementDownloadService {
 
         return (resource != null) ? resource.getByteArray() : new byte[0];
     }
+
+    public ResponseEntity<Resource> downloadInResponseEntity(String binaryFileUrl, String auth) throws HttpClientErrorException {
+
+        return caseDocumentClient.getDocumentBinary(
+            idamAuthService.getIdamToken(auth).getIdamOauth2Token(),
+            idamAuthService.getIdamToken(auth).getServiceAuthorization(),
+            binaryFileUrl);
+    }
 }

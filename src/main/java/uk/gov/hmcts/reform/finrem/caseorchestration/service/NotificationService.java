@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -373,10 +375,10 @@ public class NotificationService {
         emailService.sendConfirmationEmail(notificationRequest, FR_CONSENT_GENERAL_EMAIL);
     }
 
-    public void sendConsentGeneralEmail(FinremCaseDetails caseDetails) {
+    public void sendConsentGeneralEmail(FinremCaseDetails caseDetails, String auth) {
         NotificationRequest notificationRequest = finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
         notificationRequest.setNotificationEmail(caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailRecipient());
-        final boolean hasAttachment = downloadGeneralEmailUploadedDocument(caseDetails, notificationRequest);
+        final boolean hasAttachment = downloadGeneralEmailUploadedDocument(caseDetails, notificationRequest, auth);
         log.info("Received request for notification email for consented general email Notification request : {}",
             notificationRequest);
         final EmailTemplateNames templateName = (hasAttachment) ? FR_CONSENT_GENERAL_EMAIL_ATTACHMENT : FR_CONSENT_GENERAL_EMAIL;
@@ -385,16 +387,19 @@ public class NotificationService {
     }
 
     private boolean downloadGeneralEmailUploadedDocument(FinremCaseDetails caseDetails,
-                                                         NotificationRequest notificationRequest) {
+                                                         NotificationRequest notificationRequest,
+                                                         String auth) {
         CaseDocument caseDocument = caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailUploadedDocument();
         if (caseDocument != null) {
-            ResponseEntity<byte[]> response = evidenceManagementDownloadService.download(caseDocument.getDocumentBinaryUrl());
+            ResponseEntity<Resource> response = evidenceManagementDownloadService.downloadInResponseEntity(caseDocument.getDocumentBinaryUrl(),
+                auth);
             if (response.getStatusCode() != HttpStatus.OK) {
                 log.error("Download failed for url {}, filename {} and Case ID: {}", caseDocument.getDocumentBinaryUrl(),
                     caseDocument.getDocumentFilename(), caseDetails.getId());
                 throw new RuntimeException(String.format("Unexpected error DM store: %s ", response.getStatusCode()));
             }
-            notificationRequest.setDocumentContents(response.getBody());
+            ByteArrayResource resource = (ByteArrayResource) response.getBody();
+            notificationRequest.setDocumentContents((resource != null) ? resource.getByteArray() : new byte[0]);
             return true;
         }
         return false;
@@ -410,10 +415,10 @@ public class NotificationService {
     }
 
 
-    public void sendContestedGeneralEmail(FinremCaseDetails caseDetails) {
+    public void sendContestedGeneralEmail(FinremCaseDetails caseDetails, String auth) {
         NotificationRequest notificationRequest = finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(caseDetails);
         notificationRequest.setNotificationEmail(caseDetails.getData().getGeneralEmailWrapper().getGeneralEmailRecipient());
-        final boolean hasAttachment = downloadGeneralEmailUploadedDocument(caseDetails, notificationRequest);
+        final boolean hasAttachment = downloadGeneralEmailUploadedDocument(caseDetails, notificationRequest, auth);
         log.info("Received request for notification email for contested general email Notification request : {}",
             notificationRequest);
         final EmailTemplateNames templateName = (hasAttachment) ? FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT : FR_CONTESTED_GENERAL_EMAIL;
