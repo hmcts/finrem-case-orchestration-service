@@ -476,8 +476,8 @@ public class FinremCaseDetailMapperTest {
     }
 
     private void assertGeneralEmail(FinremCaseData caseData) {
-        assertEquals(caseData.getGeneralEmailRecipient(), "recipient");
-        assertEquals(caseData.getGeneralEmailCreatedBy(), "sender");
+        assertEquals(caseData.getGeneralEmailWrapper().getGeneralEmailRecipient(), "recipient");
+        assertEquals(caseData.getGeneralEmailWrapper().getGeneralEmailCreatedBy(), "sender");
         List<GeneralEmailCollection> expected = List.of(
             GeneralEmailCollection.builder()
                 .value(GeneralEmailHolder.builder()
@@ -487,7 +487,7 @@ public class FinremCaseDetailMapperTest {
                     .build())
                 .build()
         );
-        assertTrue(caseData.getGeneralEmailCollection().containsAll(expected));
+        assertTrue(caseData.getGeneralEmailWrapper().getGeneralEmailCollection().containsAll(expected));
     }
 
     private void assertRepresentationUpdateHistory(FinremCaseData caseData) {

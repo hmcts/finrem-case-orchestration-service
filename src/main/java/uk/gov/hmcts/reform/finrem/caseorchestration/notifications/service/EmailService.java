@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -35,7 +36,9 @@ public class EmailService {
     private static final String CONTESTED = "contested";
     private static final String CONSENTED = "consented";
     private static final String CONTESTED_GENERAL_EMAIL = "FR_CONTESTED_GENERAL_EMAIL";
+    private static final String CONTESTED_GENERAL_EMAIL_ATTACHMENT = "FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT";
     private static final String CONSENT_GENERAL_EMAIL = "FR_CONSENT_GENERAL_EMAIL";
+    private static final String CONSENT_GENERAL_EMAIL_ATTACHMENT = "FR_CONSENT_GENERAL_EMAIL_ATTACHMENT";
     private static final String TRANSFER_TO_LOCAL_COURT = "FR_TRANSFER_TO_LOCAL_COURT";
     private static final String GENERAL_APPLICATION_REFER_TO_JUDGE = "FR_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE";
     public static final String FR_CONSENT_ORDER_AVAILABLE_CTSC = "FR_CONSENT_ORDER_AVAILABLE_CTSC";
@@ -45,14 +48,14 @@ public class EmailService {
     public static final String CONSENTED_LIST_FOR_HEARING = "FR_CONSENTED_LIST_FOR_HEARING";
 
     public void sendConfirmationEmail(NotificationRequest notificationRequest, EmailTemplateNames template) {
-        Map<String, String> templateVars = buildTemplateVars(notificationRequest, template.name());
+        Map<String, Object> templateVars = buildTemplateVars(notificationRequest, template.name());
         EmailToSend emailToSend = generateEmail(notificationRequest.getNotificationEmail(), template.name(),
             templateVars);
         sendEmail(emailToSend, "send Confirmation email for " + template.name());
     }
 
-    protected Map<String, String> buildTemplateVars(NotificationRequest notificationRequest, String templateName) {
-        Map<String, String> templateVars = new HashMap<>();
+    protected Map<String, Object> buildTemplateVars(NotificationRequest notificationRequest, String templateName) {
+        Map<String, Object> templateVars = new HashMap<>();
 
         templateVars.put("caseReferenceNumber", notificationRequest.getCaseReferenceNumber());
         templateVars.put("solicitorReferenceNumber", notificationRequest.getSolicitorReferenceNumber());
@@ -81,9 +84,15 @@ public class EmailService {
         //general emails and transfer to local court emails are the only templates that require the generalEmailBody
         if (CONSENT_GENERAL_EMAIL.equals(templateName)
                 || CONTESTED_GENERAL_EMAIL.equals(templateName)
+                || CONSENT_GENERAL_EMAIL_ATTACHMENT.equals(templateName)
+                || CONTESTED_GENERAL_EMAIL_ATTACHMENT.equals(templateName)
                 || TRANSFER_TO_LOCAL_COURT.equals(templateName)
                 || GENERAL_APPLICATION_REFER_TO_JUDGE.equals(templateName)) {
             templateVars.put("generalEmailBody", notificationRequest.getGeneralEmailBody());
+        }
+        if (CONSENT_GENERAL_EMAIL_ATTACHMENT.equals(templateName)
+            || CONTESTED_GENERAL_EMAIL_ATTACHMENT.equals(templateName)) {
+            templateVars.put("link_to_file", preparedForEmailAttachment(notificationRequest.getDocumentContents()));
         }
 
         if (CONSENTED.equals(notificationRequest.getCaseType()) && !FR_CONSENT_ORDER_AVAILABLE_CTSC.equals(templateName)) {
@@ -110,7 +119,7 @@ public class EmailService {
 
     private EmailToSend generateEmail(String destinationAddress,
                                       String templateName,
-                                      Map<String, String> templateVars) {
+                                      Map<String, Object> templateVars) {
         String referenceId = UUID.randomUUID().toString();
         String templateId = emailTemplates.get(templateName);
         return new EmailToSend(destinationAddress, templateId, templateVars, referenceId);
@@ -132,4 +141,16 @@ public class EmailService {
             log.warn("Failed to send email. Reference ID: {}. Reason:", referenceId, e);
         }
     }
+
+    private JSONObject preparedForEmailAttachment(final byte[] documentContents) {
+        try {
+            if (documentContents != null) {
+                return emailClient.prepareUpload(documentContents);
+            }
+        } catch (NotificationClientException e) {
+            log.warn("Failed to attach document to email", e);
+        }
+        return null;
+    }
+
 }
