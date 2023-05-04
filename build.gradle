@@ -212,6 +212,7 @@ pitest {
                          'uk.gov.hmcts.reform.finrem.caseorchestration.config.*',
                          'uk.gov.hmcts.reform.finrem.caseorchestration.controllers.PaymentByAccountStub',
                          'uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamAuthService'])
+    excludedTestClasses.set(['uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.spreadsheet.FinremCaseDataTest'])
     threads.set(4)
     outputFormats.set(['XML', 'HTML'])
     timestampedReports.set(false)
