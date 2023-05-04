@@ -720,7 +720,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         notificationService.sendContestedGeneralEmail(finremCaseDetails, anyString());
 
         verify(finremNotificationRequestMapper).getNotificationRequestForApplicantSolicitor(finremCaseDetails);
-        verify(evidenceManagementDownloadService).download(anyString(), anyString());
+        verify(evidenceManagementDownloadService).downloadInResponseEntity(anyString(), anyString());
         verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT);
     }
 
