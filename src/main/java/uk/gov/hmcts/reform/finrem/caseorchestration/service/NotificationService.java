@@ -858,7 +858,6 @@ public class NotificationService {
             && YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED)));
     }
 
-    @Deprecated
     public boolean isApplicantSolicitorDigitalAndEmailPopulated(CaseDetails caseDetails) {
         return caseDataService.isApplicantSolicitorEmailPopulated(caseDetails)
             && checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString());
@@ -869,7 +868,6 @@ public class NotificationService {
             && checkSolicitorIsDigitalService.isApplicantSolicitorDigital(caseDetails.getId().toString());
     }
 
-    @Deprecated
     public boolean isRespondentSolicitorDigitalAndEmailPopulated(CaseDetails caseDetails) {
         return caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseDetails.getData())
             && checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
