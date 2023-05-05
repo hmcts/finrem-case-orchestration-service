@@ -21,8 +21,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.lang.String.format;
-
 @Slf4j
 @Service
 public class SendOrderContestedAboutToStartHandler extends FinremCallbackHandler {
@@ -49,21 +47,17 @@ public class SendOrderContestedAboutToStartHandler extends FinremCallbackHandler
         log.info("Invoking contested {} about to start callback for case id: {}",
             callbackRequest.getEventType(), caseDetails.getId());
         FinremCaseData finremCaseData = caseDetails.getData();
-        List<String> errors =  new ArrayList<>();
         generalOrderService.setOrderList(caseDetails);
 
         DynamicMultiSelectList roleList = getAllActivePartyList(caseDetails);
-        if (roleList != null) {
-            finremCaseData.setPartiesInCase(roleList);
-        } else {
-            errors.add(format("No active case role found on case %s", caseDetails.getId()));
-        }
+        finremCaseData.setPartiesInCase(roleList);
+
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
-            .data(finremCaseData).errors(errors).build();
+            .data(finremCaseData).build();
     }
 
 
-    public DynamicMultiSelectList getAllActivePartyList(FinremCaseDetails caseDetails) {
+    private DynamicMultiSelectList getAllActivePartyList(FinremCaseDetails caseDetails) {
         log.info("Event {} fetching all partys solicitor case role for caseId {}", EventType.SEND_ORDER, caseDetails.getId());
 
         FinremCaseData caseData = caseDetails.getData();
@@ -71,15 +65,15 @@ public class SendOrderContestedAboutToStartHandler extends FinremCallbackHandler
         //respondent
         if ((ObjectUtils.isNotEmpty(caseData.getApplicantOrganisationPolicy())
             && ObjectUtils.isNotEmpty(caseData.getApplicantOrganisationPolicy().getOrganisation())
-            && ObjectUtils.isNotEmpty(caseData.getApplicantOrganisationPolicy().getOrganisation().getOrganisationID())) ||
-            ObjectUtils.isNotEmpty(caseData.getFullApplicantName())) {
+            && ObjectUtils.isNotEmpty(caseData.getApplicantOrganisationPolicy().getOrganisation().getOrganisationID()))
+            || ObjectUtils.isNotEmpty(caseData.getFullApplicantName())) {
             roleList.add(caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole());
         }
 
         if ((ObjectUtils.isNotEmpty(caseData.getRespondentOrganisationPolicy())
             && ObjectUtils.isNotEmpty(caseData.getRespondentOrganisationPolicy().getOrganisation())
-            && ObjectUtils.isNotEmpty(caseData.getRespondentOrganisationPolicy().getOrganisation().getOrganisationID())) ||
-            ObjectUtils.isNotEmpty(caseData.getRespondentFullName())) {
+            && ObjectUtils.isNotEmpty(caseData.getRespondentOrganisationPolicy().getOrganisation().getOrganisationID()))
+            || ObjectUtils.isNotEmpty(caseData.getRespondentFullName())) {
             roleList.add(caseData.getRespondentOrganisationPolicy().getOrgPolicyCaseAssignedRole());
         }
         return getRoleList(intervenerCaseRoleList(caseData, roleList),
@@ -106,8 +100,8 @@ public class SendOrderContestedAboutToStartHandler extends FinremCallbackHandler
         if ((ObjectUtils.isNotEmpty(oneWrapper)
             && ObjectUtils.isNotEmpty(oneWrapper.getIntervener1Organisation())
             && ObjectUtils.isNotEmpty(oneWrapper.getIntervener1Organisation().getOrganisation())
-            && ObjectUtils.isNotEmpty(oneWrapper.getIntervener1Organisation().getOrganisation().getOrganisationID())) ||
-            ObjectUtils.isNotEmpty(oneWrapper.getIntervener1Name())) {
+            && ObjectUtils.isNotEmpty(oneWrapper.getIntervener1Organisation().getOrganisation().getOrganisationID()))
+            || ObjectUtils.isNotEmpty(oneWrapper.getIntervener1Name())) {
             roleList.add(oneWrapper.getIntervener1Organisation().getOrgPolicyCaseAssignedRole());
         }
         //intervener2
@@ -115,8 +109,8 @@ public class SendOrderContestedAboutToStartHandler extends FinremCallbackHandler
         if ((ObjectUtils.isNotEmpty(twoWrapper)
             && ObjectUtils.isNotEmpty(twoWrapper.getIntervener2Organisation())
             && ObjectUtils.isNotEmpty(twoWrapper.getIntervener2Organisation().getOrganisation())
-            && ObjectUtils.isNotEmpty(twoWrapper.getIntervener2Organisation().getOrganisation().getOrganisationID())) ||
-            ObjectUtils.isNotEmpty(twoWrapper.getIntervener2Name())) {
+            && ObjectUtils.isNotEmpty(twoWrapper.getIntervener2Organisation().getOrganisation().getOrganisationID()))
+            || ObjectUtils.isNotEmpty(twoWrapper.getIntervener2Name())) {
             roleList.add(twoWrapper.getIntervener2Organisation().getOrgPolicyCaseAssignedRole());
         }
         //intervener3
@@ -124,8 +118,8 @@ public class SendOrderContestedAboutToStartHandler extends FinremCallbackHandler
         if ((ObjectUtils.isNotEmpty(threeWrapper)
             && ObjectUtils.isNotEmpty(threeWrapper.getIntervener3Organisation())
             && ObjectUtils.isNotEmpty(threeWrapper.getIntervener3Organisation().getOrganisation())
-            && ObjectUtils.isNotEmpty(threeWrapper.getIntervener3Organisation().getOrganisation().getOrganisationID())) ||
-            ObjectUtils.isNotEmpty(threeWrapper.getIntervener3Name())) {
+            && ObjectUtils.isNotEmpty(threeWrapper.getIntervener3Organisation().getOrganisation().getOrganisationID()))
+            || ObjectUtils.isNotEmpty(threeWrapper.getIntervener3Name())) {
             roleList.add(threeWrapper.getIntervener3Organisation().getOrgPolicyCaseAssignedRole());
         }
         //intervener4
@@ -133,8 +127,8 @@ public class SendOrderContestedAboutToStartHandler extends FinremCallbackHandler
         if ((ObjectUtils.isNotEmpty(fourWrapper)
             && ObjectUtils.isNotEmpty(fourWrapper.getIntervener4Organisation())
             && ObjectUtils.isNotEmpty(fourWrapper.getIntervener4Organisation().getOrganisation())
-            && ObjectUtils.isNotEmpty(fourWrapper.getIntervener4Organisation().getOrganisation().getOrganisationID())) ||
-            ObjectUtils.isNotEmpty(fourWrapper.getIntervener4Name())) {
+            && ObjectUtils.isNotEmpty(fourWrapper.getIntervener4Organisation().getOrganisation().getOrganisationID()))
+            || ObjectUtils.isNotEmpty(fourWrapper.getIntervener4Name())) {
             roleList.add(fourWrapper.getIntervener4Organisation().getOrgPolicyCaseAssignedRole());
         }
 

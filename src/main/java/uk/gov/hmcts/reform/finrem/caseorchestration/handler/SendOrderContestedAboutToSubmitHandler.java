@@ -142,7 +142,8 @@ public class SendOrderContestedAboutToSubmitHandler
 
         CaseDocument obj = documentHelper.convertToCaseDocumentIfObjNotNull(caseData.get(ADDITIONAL_ORDER_DOC));
         if (obj != null) {
-            List<HearingOrderCollectionData> additionalOrderCollection = Optional.ofNullable(documentHelper.getFinalAdditionalDocOrderDocuments(caseData))
+            List<HearingOrderCollectionData> additionalOrderCollection
+                = Optional.ofNullable(documentHelper.getFinalAdditionalDocOrderDocuments(caseData))
                 .orElse(new ArrayList<>());
             additionalOrderCollection.add(prepareFinalOrderList(obj));
             caseData.put(FINAL_ADDITIONAL_ORDER_COLLECTION, additionalOrderCollection);

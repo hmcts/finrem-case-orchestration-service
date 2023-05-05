@@ -11,16 +11,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.PostStateOption;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -37,12 +38,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class SendOrderContestedSubmittedHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
-    public static final String PREPARE_FOR_HEARING_STATE = "prepareForHearing";
-    public static final String CLOSE_STATE = "close";
     @Mock
-    private CaseDataService caseDataService;
-    @Mock
-    private FeatureToggleService featureToggleService;
+    private GeneralOrderService generalOrderService;
     @Mock
     private NotificationService notificationService;
 
@@ -113,36 +110,30 @@ public class SendOrderContestedSubmittedHandlerTest {
 
     @Test
     public void givenAgreedToReceiveEmails_WhenHandle_ThenSendContestOrderApprovedEmail() {
-        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
-
+        when(generalOrderService.getPartyList(any(CaseDetails.class))).thenReturn(List.of(CaseRole.APP_SOLICITOR.getValue()));
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
         sendOrderContestedSubmittedHandler.handle(createCallbackRequestWithFinalOrder(), AUTH_TOKEN);
-
         verify(notificationService).sendContestOrderApprovedEmailApplicant(any(CaseDetails.class));
     }
 
     @Test
     public void givenNotAgreedToReceiveEmails_WhenHandle_ThenDoNotSendContestOrderApprovedEmail() {
-
         sendOrderContestedSubmittedHandler.handle(buildCallbackRequest(), AUTH_TOKEN);
-
         verifyNoInteractions(notificationService);
     }
 
     @Test
     public void givenRespAgreedToReceiveEmails_WhenHandle_ThenSendContestOrderApprovedEmailToRespondent() {
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(true);
-
+        when(generalOrderService.getPartyList(any(CaseDetails.class))).thenReturn(List.of(CaseRole.RESP_SOLICITOR.getValue()));
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
         sendOrderContestedSubmittedHandler.handle(createCallbackRequestWithFinalOrder(), AUTH_TOKEN);
-
         verify(notificationService).sendContestOrderApprovedEmailRespondent(any(CaseDetails.class));
     }
 
     @Test
     public void givenRespNotAgreedToReceiveEmails_WhenHandle_ThenDoNotSendContestOrderApprovedEmailToRespondent() {
-        when(notificationService.isRespondentSolicitorEmailCommunicationEnabled(any())).thenReturn(false);
-
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
         sendOrderContestedSubmittedHandler.handle(createCallbackRequestWithFinalOrder(), AUTH_TOKEN);
-
         verify(notificationService, never()).sendContestOrderApprovedEmailRespondent(any(CaseDetails.class));
     }
 
