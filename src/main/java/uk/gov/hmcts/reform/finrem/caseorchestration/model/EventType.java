@@ -59,6 +59,7 @@ public enum EventType {
     ASSIGN_TO_JUDGE_CONSENT("FR_assignToJudgeConsent"),
     MANAGE_INTERVENERS("manageInterveners"),
     CREATE_CASE_FLAG("createFlags"),
+    CREATE_GENERAL_EMAIL("FR_generalEmail"),
     @JsonEnumDefaultValue
     NONE("");
 

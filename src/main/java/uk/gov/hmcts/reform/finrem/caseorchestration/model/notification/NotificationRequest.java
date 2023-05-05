@@ -45,4 +45,5 @@ public class NotificationRequest {
     private String barristerReferenceNumber;
     @JsonProperty("hearingType")
     private String hearingType;
+    private byte[] documentContents;
 }
