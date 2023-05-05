@@ -44,6 +44,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_RECITALS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PARIY_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
 
 @Service
@@ -218,10 +219,10 @@ public class GeneralOrderService {
                 obj.getValue().getUploadDraftDocument().getDocumentFilename())));
         }
 
-        DynamicMultiSelectList selectedOrders = data.getOrderList();
+        DynamicMultiSelectList selectedOrders = data.getOrdersToShare();
 
         DynamicMultiSelectList dynamicOrderList = getDynamicOrderList(dynamicListElements, selectedOrders);
-        data.setOrderList(dynamicOrderList);
+        data.setOrdersToShare(dynamicOrderList);
     }
 
     public DynamicMultiSelectListElement getDynamicMultiSelectListElement(String code, String label) {
@@ -243,5 +244,17 @@ public class GeneralOrderService {
                 .listItems(dynamicMultiSelectListElement)
                 .build();
         }
+    }
+
+    public DynamicMultiSelectList getList(Object object) {
+        return new ObjectMapper().convertValue(object, new TypeReference<>() {
+        });
+    }
+
+    public List<String> getPartyList(CaseDetails caseDetails) {
+        Map<String, Object> caseData =  caseDetails.getData();
+        DynamicMultiSelectList parties = getList(caseData.get(PARIY_LIST));
+        log.info("all parties {} on case {}", parties, caseDetails.getId());
+        return parties.getValue().stream().map(DynamicMultiSelectListElement::getCode).toList();
     }
 }

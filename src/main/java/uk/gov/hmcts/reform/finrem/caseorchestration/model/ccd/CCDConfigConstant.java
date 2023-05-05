@@ -264,6 +264,9 @@ public class CCDConfigConstant {
     public static final String CONTESTED_ORDER_APPROVED_JUDGE_NAME = "orderApprovedJudgeName";
     public static final String CONTESTED_ORDER_APPROVED_DATE = "orderApprovedDate";
     public static final String CONTESTED_ORDER_APPROVED_COVER_LETTER = "orderApprovedCoverLetter";
+    public static final String ORDER_LIST = "ordersToShare";
+    public static final String PARIY_LIST = "partiesInCase";
+    public static final String ADDITIONAL_ORDER_DOC = "additionalDocument";
 
     //Application Type related
     public static final String CONSENT_D81_QUESTION = "consentD81Question";
@@ -311,7 +314,19 @@ public class CCDConfigConstant {
     public static final String GENERAL_ORDER_COLLECTION_CONSENTED_IN_CONTESTED = "generalOrdersConsent";
     public static final String GENERAL_ORDER_COLLECTION_CONSENTED = "generalOrderCollection";
     public static final String APPROVED_ORDER_COLLECTION = "approvedOrderCollection";
+    public static final String INTV1_FINAL_ORDER_COLLECTION = "intv1OrderCollection";
+    public static final String INTV2_FINAL_ORDER_COLLECTION = "intv2OrderCollection";
+    public static final String INTV3_FINAL_ORDER_COLLECTION = "intv3OrderCollection";
+    public static final String INTV4_FINAL_ORDER_COLLECTION = "intv4OrderCollection";
+
+    public static final String INTV1_ADDITIONAL_DOC_ORDER_COLLECTION = "intv1AdditionalOrderDocsColl";
+    public static final String INTV2_ADDITIONAL_DOC_ORDER_COLLECTION = "intv2AdditionalOrderDocsColl";
+    public static final String INTV3_ADDITIONAL_DOC_ORDER_COLLECTION = "intv3AdditionalOrderDocsColl";
+    public static final String INTV4_ADDITIONAL_DOC_ORDER_COLLECTION = "intv4AdditionalOrderDocsColl";
+
     public static final String FINAL_ORDER_COLLECTION = "finalOrderCollection";
+    public static final String FINAL_ADDITIONAL_ORDER_COLLECTION = "additionalOrderDocsCollection";
+
     public static final String HEARING_ORDER_COLLECTION = "uploadHearingOrder";
     public static final String HEARING_NOTICES_COLLECTION = "hearingNoticesDocumentCollection";
     public static final String RESPOND_TO_ORDER_DOCUMENTS = "respondToOrderDocuments";

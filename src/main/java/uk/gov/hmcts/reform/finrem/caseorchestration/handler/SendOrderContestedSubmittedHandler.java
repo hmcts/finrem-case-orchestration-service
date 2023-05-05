@@ -9,12 +9,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.PostStateOption;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -27,10 +28,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequiredArgsConstructor
 public class SendOrderContestedSubmittedHandler
     implements CallbackHandler<Map<String, Object>> {
-
-    private final CaseDataService caseDataService;
-    private final FeatureToggleService featureToggleService;
     private final NotificationService notificationService;
+    private final GeneralOrderService generalOrderService;
     private final CcdService ccdService;
 
     @Override
@@ -79,14 +78,19 @@ public class SendOrderContestedSubmittedHandler
     private void sendNotifications(CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
-        if (!caseDataService.isPaperApplication(caseData) && Objects.nonNull(caseData.get(FINAL_ORDER_COLLECTION))) {
+
+        List<String> partyList = generalOrderService.getPartyList(caseDetails);
+
+        if (Objects.nonNull(caseData.get(FINAL_ORDER_COLLECTION))) {
             log.info("Received request to send email for 'Contest Order Approved' for Case ID: {}", callbackRequest.getCaseDetails().getId());
-            if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
+            if (notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)
+                && partyList.contains(CaseRole.APP_SOLICITOR.getValue())) {
                 log.info("Sending 'Contest Order Approved' email notification to Applicant Solicitor");
                 notificationService.sendContestOrderApprovedEmailApplicant(caseDetails);
             }
 
-            if (notificationService.isRespondentSolicitorEmailCommunicationEnabled(caseData)) {
+            if (notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)
+                && partyList.contains(CaseRole.RESP_SOLICITOR.getValue())) {
                 log.info("Sending 'Contest Order Approved' email notification to Respondent Solicitor");
                 notificationService.sendContestOrderApprovedEmailRespondent(caseDetails);
             }

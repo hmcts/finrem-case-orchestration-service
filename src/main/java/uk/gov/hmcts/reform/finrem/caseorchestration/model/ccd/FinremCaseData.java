@@ -250,6 +250,17 @@ public class FinremCaseData {
     private List<DocumentCollection> hearingOrderOtherDocuments;
     private List<DirectionDetailCollection> directionDetailsCollection;
     private List<DirectionOrderCollection> finalOrderCollection;
+    private List<DirectionOrderCollection> additionalOrderDocsCollection;
+    private List<IntervenerOrderCollection> intv1OrderCollection;
+    private List<IntervenerOrderCollection> intv2OrderCollection;
+    private List<IntervenerOrderCollection> intv3OrderCollection;
+    private List<IntervenerOrderCollection> intv4OrderCollection;
+    private List<IntervenerOrderCollection> intv1AdditionalOrderDocsColl;
+    private List<IntervenerOrderCollection> intv2AdditionalOrderDocsColl;
+    private List<IntervenerOrderCollection> intv3AdditionalOrderDocsColl;
+    private List<IntervenerOrderCollection> intv4AdditionalOrderDocsColl;
+
+
     private List<JudgeNotApprovedReasonsCollection> judgeNotApprovedReasons;
     private JudgeType refusalOrderJudgeType;
     private String refusalOrderJudgeName;
@@ -276,8 +287,8 @@ public class FinremCaseData {
     private String reasonForFrcLocation;
     private List<HearingUploadBundleCollection> hearingUploadBundle;
     private SendOrderEventPostStateOption sendOrderPostStateOption;
-    private DynamicMultiSelectList orderList;
-    private DynamicMultiSelectList roleList;
+    private DynamicMultiSelectList ordersToShare;
+    private DynamicMultiSelectList partiesInCase;
     private List<UploadConfidentialDocumentCollection> confidentialDocumentsUploaded;
     private ChangeOrganisationRequest changeOrganisationRequestField;
     @JsonProperty("ApplicantOrganisationPolicy")
