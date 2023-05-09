@@ -53,7 +53,7 @@ class SendOrderContestedAboutToStartHandlerTest {
     private FinremCallbackRequest buildCallbackRequest() {
         return FinremCallbackRequest
             .builder()
-            .eventType(EventType.MANAGE_INTERVENERS)
+            .eventType(EventType.SEND_ORDER)
             .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
                 .data(new FinremCaseData()).build())
             .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)

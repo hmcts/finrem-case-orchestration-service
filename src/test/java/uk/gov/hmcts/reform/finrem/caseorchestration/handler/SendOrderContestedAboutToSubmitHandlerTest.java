@@ -10,13 +10,21 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
@@ -24,7 +32,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 
 import java.io.InputStream;
@@ -33,6 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
@@ -51,6 +60,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -59,11 +69,15 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SendOrderContestedAboutToSubmitHandlerTest {
 
+    private static final String uuid = UUID.fromString("a23ce12a-81b3-416f-81a7-a5159606f5ae").toString();
     @InjectMocks
     private SendOrderContestedAboutToSubmitHandler sendOrderContestedAboutToSubmitHandler;
     @Mock
@@ -71,7 +85,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
     @Mock
     private BulkPrintService bulkPrintService;
     @Mock
-    private PaperNotificationService paperNotificationService;
+    private NotificationService notificationService;
     @Mock
     private DocumentHelper documentHelper;
     @Mock
@@ -112,13 +126,17 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
 
     @Test
     public void givenShouldPrintAppAndResp_whenPrintAndMailGeneralOrderTriggered_thenBothAppAndRespPacksPrinted() {
-        when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
-        when(paperNotificationService.shouldPrintForRespondent(any())).thenReturn(true);
+        when(generalOrderService.getPartyList(any(CaseDetails.class))).thenReturn(List.of(CaseRole.APP_SOLICITOR.getValue(),
+            CaseRole.RESP_SOLICITOR.getValue()));
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
+
         when(generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(any(), any()))
-            .thenReturn(BulkPrintDocument.builder().build());
+            .thenReturn(BulkPrintDocument.builder().binaryFileUrl(TestSetUpUtils.BINARY_URL).build());
 
         CallbackRequest callbackRequest =
             CallbackRequest.builder().caseDetails(generalOrderContestedCaseDetails()).build();
+
         sendOrderContestedAboutToSubmitHandler.handle(callbackRequest, AUTH_TOKEN);
 
         verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), any(), any());
@@ -127,8 +145,9 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
 
     @Test
     public void givenShouldNotPrintPackForApplicant_whenPrintAndMailGeneralOrderTriggered_thenOnlyRespondentPacksIsPrinted() {
-        when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(false);
-        when(paperNotificationService.shouldPrintForRespondent(any())).thenReturn(true);
+        when(generalOrderService.getPartyList(any(CaseDetails.class))).thenReturn(List.of(CaseRole.RESP_SOLICITOR.getValue()));
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
 
         CallbackRequest callbackRequest =
             CallbackRequest.builder().caseDetails(generalOrderContestedCaseDetails()).build();
@@ -140,7 +159,9 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
 
     @Test
     public void givenShouldThrowErrorAndNotPrintPackForResondent_whenPrintAndMailGeneralOrderTriggeredAndAddressIsNotPresent() {
-        when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
+        when(generalOrderService.getPartyList(any(CaseDetails.class))).thenReturn(List.of(CaseRole.APP_SOLICITOR.getValue(),
+            CaseRole.RESP_SOLICITOR.getValue()));
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
 
         doThrow(new InvalidCaseDataException(BAD_REQUEST.value(), "CCD address field applicantAddress"
             + " needs to contain both first line of address and postcode")).when(bulkPrintService)
@@ -159,19 +180,72 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
     }
 
     @Test
+    public void sendOrderForAppResp() {
+        CallbackRequest request = getEmptyCallbackRequest();
+        Map<String, Object> data = request.getCaseDetails().getData();
+        when(generalOrderService.getPartyList(any(CaseDetails.class))).thenReturn(List.of(CaseRole.APP_SOLICITOR.getValue(),
+            CaseRole.RESP_SOLICITOR.getValue()));
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
+        when(generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(data, AUTH_TOKEN))
+            .thenReturn(BulkPrintDocument.builder().binaryFileUrl("GeneralOrderBinaryURL").build());
+        DynamicMultiSelectList selectedDocs = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiSelectListElement.builder()
+                .code(uuid)
+                .label("app_docs.pdf")
+                .build()))
+            .listItems(List.of(DynamicMultiSelectListElement.builder()
+                .code(uuid)
+                .label("app_docs.pdf")
+                .build()))
+            .build();
+
+        data.put(ORDER_LIST, selectedDocs);
+        when(generalOrderService.getList(any())).thenReturn(selectedDocs);
+        data.put(GENERAL_ORDER_LATEST_DOCUMENT, TestSetUpUtils.caseDocument());
+        when(documentHelper.getHearingOrderDocuments(data))
+            .thenReturn(List.of(HearingOrderCollectionData.builder()
+                .id(uuid)
+                .hearingOrderDocuments(HearingOrderDocument.builder()
+                    .uploadDraftDocument(caseDocument())
+                    .build())
+                .build()));
+
+        sendOrderContestedAboutToSubmitHandler.handle(request, AUTH_TOKEN);
+    }
+    @Test
     public void givenAllHearingDocumentsArePresent_WhenPrintAndMailHearingDocuments_ThenSendToBulkPrintWhenPaperCase() {
-        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
-        when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
-        when(paperNotificationService.shouldPrintForRespondent(any())).thenReturn(true);
+        when(generalOrderService.getPartyList(any(CaseDetails.class))).thenReturn(List.of(CaseRole.APP_SOLICITOR.getValue(),
+            CaseRole.RESP_SOLICITOR.getValue()));
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
         when(documentHelper.hasAnotherHearing(any())).thenReturn(true);
+
         mockDocumentHelperToReturnDefaultExpectedDocuments();
+        DynamicMultiSelectList selectedDocs = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiSelectListElement.builder()
+                .code("a23ce12a-81b3-416f-81a7-a5159606f5ae")
+                .label("app_docs.pdf")
+                .build()))
+            .listItems(List.of(DynamicMultiSelectListElement.builder()
+                .code("a23ce12a-81b3-416f-81a7-a5159606f5ae")
+                .label("app_docs.pdf")
+                .build()))
+            .build();
+        CallbackRequest request = getEmptyCallbackRequest();
+        Map<String, Object> data = request.getCaseDetails().getData();
+        data.put(ORDER_LIST, selectedDocs);
+        when(generalOrderService.getList(any())).thenReturn(selectedDocs);
+        data.put(GENERAL_ORDER_LATEST_DOCUMENT, TestSetUpUtils.caseDocument());
 
-        sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
+        sendOrderContestedAboutToSubmitHandler.handle(request, AUTH_TOKEN);
 
-        verify(bulkPrintService).printApplicantDocuments(any(CaseDetails.class), any(), bulkPrintArgumentCaptor.capture());
-        verify(bulkPrintService).printRespondentDocuments(any(CaseDetails.class), any(), any());
+        verify(bulkPrintService, times(2)).printApplicantDocuments(any(CaseDetails.class), any(), bulkPrintArgumentCaptor.capture());
+        verify(bulkPrintService, times(2)).printRespondentDocuments(any(CaseDetails.class), any(), any());
 
-        List<String> expectedBulkPrintDocuments = asList("HearingOrderBinaryURL", "AdditionalHearingDocumentURL", "OtherHearingOrderDocumentsURL");
+        List<String> expectedBulkPrintDocuments = asList("HearingOrderBinaryURL", "AdditionalHearingDocumentURL");
 
         assertThat(bulkPrintArgumentCaptor.getAllValues().get(0).stream().map(BulkPrintDocument::getBinaryFileUrl).collect(Collectors.toList()),
             containsInAnyOrder(expectedBulkPrintDocuments.toArray()));
@@ -181,8 +255,8 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
     @Test
     public void givenAllHearingDocumentsArePresent_WhenHandle_ThenSendToBulkPrintWhenPaperCase_noNextHearing() {
         when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
-        when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
-        when(paperNotificationService.shouldPrintForRespondent(any())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
         when(documentHelper.hasAnotherHearing(any())).thenReturn(false);
 
         sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
@@ -210,7 +284,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         when(documentHelper.hasAnotherHearing(any())).thenReturn(true);
         mockDocumentHelperToReturnDefaultExpectedDocuments();
         when(documentHelper.getDocumentLinkAsBulkPrintDocument(any(), eq(LATEST_DRAFT_HEARING_ORDER))).thenReturn(Optional.empty());
-        when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
 
         sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 
@@ -226,7 +300,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
     public void givenLatestDraftedHearingOrderDocumentIsNotAddedToPack_WhenHandle_ThenNoNextHearing() {
         when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
         when(documentHelper.hasAnotherHearing(any())).thenReturn(false);
-        when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
 
         sendOrderContestedAboutToSubmitHandler.handle(getEmptyCallbackRequest(), AUTH_TOKEN);
 
@@ -242,7 +316,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
     @Test
     public void givenLatestAdditionalHearingDocumentIsNotAddedToPack_WhenHandle_ThenPrintApplicantDocuments() {
         when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
-        when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
         when(documentHelper.hasAnotherHearing(any())).thenReturn(true);
         mockDocumentHelperToReturnDefaultExpectedDocuments();
         when(documentHelper.getLatestAdditionalHearingDocument(any())).thenReturn(Optional.empty());
@@ -307,10 +381,12 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
 
     private void mockDocumentHelperToReturnDefaultExpectedDocuments() {
         when(documentHelper.getStampType(anyMap())).thenReturn(StampType.FAMILY_COURT_STAMP);
-        when(documentHelper.getDocumentLinkAsBulkPrintDocument(any(), eq(LATEST_DRAFT_HEARING_ORDER))).thenReturn(
+        when(documentHelper.getDocumentLinkAsBulkPrintDocument(any(), eq(GENERAL_ORDER_LATEST_DOCUMENT))).thenReturn(
+            Optional.of(BulkPrintDocument.builder().binaryFileUrl("GeneralOrderBinaryURL").build()));
+        when(documentHelper.getDocumentLinkAsBulkPrintDocument(any(), eq(HEARING_ORDER_COLLECTION))).thenReturn(
             Optional.of(BulkPrintDocument.builder().binaryFileUrl("HearingOrderBinaryURL").build()));
-        when(documentHelper.getHearingDocumentsAsBulkPrintDocuments(any(), any())).thenReturn(
-            singletonList(BulkPrintDocument.builder().binaryFileUrl("OtherHearingOrderDocumentsURL").build()));
+//        when(documentHelper.getHearingDocumentsAsBulkPrintDocuments(any(), any())).thenReturn(
+//            singletonList(BulkPrintDocument.builder().binaryFileUrl("OtherHearingOrderDocumentsURL").build()));
 
         CaseDocument additionalHearingDocument = CaseDocument.builder().documentBinaryUrl("AdditionalHearingDocumentURL").build();
         when(documentHelper.getLatestAdditionalHearingDocument(any())).thenReturn(Optional.of(additionalHearingDocument));
@@ -318,6 +394,7 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
             BulkPrintDocument.builder().binaryFileUrl(additionalHearingDocument.getDocumentBinaryUrl()).build());
 
         when(documentHelper.getHearingOrderDocuments(any())).thenReturn(singletonList(HearingOrderCollectionData.builder()
+            .id(UUID.fromString("a23ce12a-81b3-416f-81a7-a5159606f5ae").toString())
             .hearingOrderDocuments(HearingOrderDocument.builder()
                 .uploadDraftDocument(caseDocument())
                 .build())
@@ -350,5 +427,16 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private FinremCallbackRequest buildCallbackRequest() {
+        return FinremCallbackRequest
+            .builder()
+            .eventType(EventType.SEND_ORDER)
+            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+                .data(new FinremCaseData()).build())
+            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+                .data(new FinremCaseData()).build())
+            .build();
     }
 }
