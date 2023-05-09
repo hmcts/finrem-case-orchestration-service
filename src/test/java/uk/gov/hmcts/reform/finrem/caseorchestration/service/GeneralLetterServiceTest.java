@@ -81,6 +81,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         assertThat(data.get("ccdCaseNumber"), is(1234567890L));
         assertThat(((Addressee) data.get(ADDRESSEE)).getFormattedAddress(), is("50 Applicant Solicitor Street\n"
             + "Second Address Line\n"
+            + "Third Address Line\n"
             + "Greater London\n"
             + "London\n"
             + "SE12 9SE"));
@@ -108,6 +109,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         assertThat(data.get("ccdCaseNumber"), is(1234567890L));
         assertThat(((Addressee) data.get(ADDRESSEE)).getFormattedAddress(), is("50 Applicant Solicitor Street\n"
             + "Second Address Line\n"
+            + "Third Address Line\n"
             + "Greater London\n"
             + "London\n"
             + "SW1V 4FG"));

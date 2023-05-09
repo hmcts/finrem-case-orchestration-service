@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DefaultReg
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.DraftDirectionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationRegionWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralApplicationWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralEmailWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralLetterWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralOrderWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.InterimWrapper;
@@ -157,10 +158,6 @@ public class FinremCaseData {
     private List<ChildrenInfoCollection> childrenInfo;
     private CaseDocument formA;
     private List<DocumentCollection> scannedD81s;
-    private String generalEmailRecipient;
-    private String generalEmailCreatedBy;
-    private String generalEmailBody;
-    private List<GeneralEmailCollection> generalEmailCollection;
     private String transferLocalCourtName;
     private String transferLocalCourtEmail;
     private String transferLocalCourtInstructions;
@@ -328,6 +325,9 @@ public class FinremCaseData {
     private GeneralLetterWrapper generalLetterWrapper;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
+    private GeneralEmailWrapper generalEmailWrapper;
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
     private MiamWrapper miamWrapper;
     @JsonUnwrapped
     @Getter(AccessLevel.NONE)
@@ -397,6 +397,14 @@ public class FinremCaseData {
             this.generalLetterWrapper = new GeneralLetterWrapper();
         }
         return generalLetterWrapper;
+    }
+
+    @JsonIgnore
+    public GeneralEmailWrapper getGeneralEmailWrapper() {
+        if (generalEmailWrapper == null) {
+            this.generalEmailWrapper = new GeneralEmailWrapper();
+        }
+        return generalEmailWrapper;
     }
 
     @JsonIgnore
