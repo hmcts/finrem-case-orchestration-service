@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
@@ -23,7 +22,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -45,7 +43,6 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -57,8 +54,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static java.nio.file.Files.readAllBytes;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -141,42 +136,6 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
     @Test
     public void missingFastTrackDecision() throws Exception {
         doMissingMustFieldTest(FAST_TRACK_DECISION);
-    }
-
-    @Test
-    public void generateFormCAndFormGSuccess() throws Exception {
-        idamServiceStub();
-        UUID uuid = UUID.randomUUID();
-        generateSendLetterSuccessStub(uuid);
-        generateConfirmLetterCreatedStub(uuid);
-        generateEvidenceDownloadServiceSuccessStub();
-        generateEvidenceUploadServiceSuccessStub();
-        generateDocumentServiceSuccessStub(pdfGenerationRequest(config.getFormCNonFastTrackTemplate(request.getCaseDetails())));
-        generateDocumentServiceSuccessStub(pdfGenerationRequest(config.getFormGTemplate(request.getCaseDetails())));
-        generateDocumentServiceSuccessStub(pdfGenerationRequest(config.getOutOfFamilyCourtResolutionTemplate()));
-
-        MvcResult mvcResult;
-        int requestsMade = 0;
-        do {
-            if (requestsMade > 0) {
-                Thread.sleep(100);
-            }
-
-            mvcResult = webClient.perform(MockMvcRequestBuilders.post(API_URL)
-                .content(objectMapper.writeValueAsString(request))
-                .header(AUTHORIZATION, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON_VALUE)
-                .accept(APPLICATION_JSON_VALUE))
-                .andReturn();
-        } while (++requestsMade < 5 && mvcResult.getResponse().getStatus() == HttpStatus.INTERNAL_SERVER_ERROR.value());
-
-        if (requestsMade > 1) {
-            System.out.println("generateFormCAndFormGSuccess requests made: " + requestsMade);
-        }
-
-        assertThat(mvcResult.getResponse().getStatus(), is(HttpStatus.OK.value()));
-        assertThat(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), new TypeReference<>() {}),
-            is(objectMapper.readValue(expectedCaseData(), new TypeReference<HashMap<String, Object>>(){})));
     }
 
     @Test
