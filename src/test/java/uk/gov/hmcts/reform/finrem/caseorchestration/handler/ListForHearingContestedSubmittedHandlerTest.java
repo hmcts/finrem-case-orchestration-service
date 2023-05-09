@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
@@ -24,8 +24,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ListForHearingContestedSubmittedHandlerTest {
+@ExtendWith(MockitoExtension.class)
+class ListForHearingContestedSubmittedHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
     @Mock
@@ -39,23 +39,40 @@ public class ListForHearingContestedSubmittedHandlerTest {
     private ListForHearingContestedSubmittedHandler handler;
 
     @Test
-    public void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanHandle() {
+    void givenACcdCallbackContestedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanHandle() {
         assertThat(handler
                 .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.LIST_FOR_HEARING),
             is(true));
     }
 
     @Test
-    public void givenACcdCallbackConsentedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanNotHandle() {
+    void givenACcdCallbackConsentedCase_WhenCaseTypeIsConsented_thenHandlerCanNotHandle() {
         assertThat(handler
                 .canHandle(CallbackType.SUBMITTED, CaseType.CONSENTED, EventType.LIST_FOR_HEARING),
             is(false));
     }
 
     @Test
-    public void givenCase_whenSchedulingFirstTime_thenSendInitialCorrespondence() {
+    void givenACcdCallbackConsentedCase_WhenAnAboutToSubmitEventSendOrder_thenHandlerCanNotHandle() {
+        assertThat(handler
+                .canHandle(CallbackType.ABOUT_TO_SUBMIT, CaseType.CONSENTED, EventType.LIST_FOR_HEARING),
+            is(false));
+    }
+
+    @Test
+    void givenACcdCallbackConsentedCase_WhenEventIsClose_thenHandlerCanNotHandle() {
+        assertThat(handler
+                .canHandle(CallbackType.SUBMITTED, CaseType.CONTESTED, EventType.CLOSE),
+            is(false));
+    }
+
+    @Test
+    void givenCase_whenSchedulingFirstTime_thenSendInitialCorrespondence() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseDetails caseDetailsBefore = CaseDetails.builder().id(123L).build();
+        caseDetailsBefore.setData(new HashMap<>());
+        callbackRequest.setCaseDetailsBefore(caseDetailsBefore);
         when(caseDataService.isContestedApplication(caseDetails)).thenReturn(true);
         when(hearingDocumentService.alreadyHadFirstHearing(caseDetails)).thenReturn(false);
 
@@ -66,9 +83,12 @@ public class ListForHearingContestedSubmittedHandlerTest {
     }
 
     @Test
-    public void givenCase_whenSchedulingSecondTime_thenSendAdditionalHearingDocuments() {
+    void givenCase_whenSchedulingSecondTime_thenSendAdditionalHearingDocuments() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseDetails caseDetailsBefore = CaseDetails.builder().id(123L).build();
+        caseDetailsBefore.setData(new HashMap<>());
+        callbackRequest.setCaseDetailsBefore(caseDetailsBefore);
         when(caseDataService.isContestedApplication(caseDetails)).thenReturn(true);
         when(hearingDocumentService.alreadyHadFirstHearing(caseDetails)).thenReturn(true);
 
@@ -78,14 +98,24 @@ public class ListForHearingContestedSubmittedHandlerTest {
         verify(hearingDocumentService, never()).sendInitialHearingCorrespondence(any(), any());
     }
 
+    @Test
+    void givenCase_whenCaseDetailsBeforeDoNotExist_thenSendInitialCorrespondence() {
+        CallbackRequest callbackRequest = buildCallbackRequest();
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        when(caseDataService.isContestedApplication(caseDetails)).thenReturn(true);
+
+        handler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(hearingDocumentService).sendInitialHearingCorrespondence(any(), any());
+        verify(additionalHearingDocumentService, never()).sendAdditionalHearingDocuments(any(), any());
+    }
+
     private CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
-        CaseDetails caseDetailsBefore = CaseDetails.builder().id(123L).build();
-        caseDetailsBefore.setData(caseData);
         CaseDetails caseDetails = CaseDetails.builder().id(123L).build();
         caseDetails.setData(caseData);
         return CallbackRequest.builder().eventId(EventType.SEND_ORDER.getCcdType())
-            .caseDetails(caseDetails).caseDetailsBefore(caseDetailsBefore).build();
+            .caseDetails(caseDetails).build();
     }
 
 }
