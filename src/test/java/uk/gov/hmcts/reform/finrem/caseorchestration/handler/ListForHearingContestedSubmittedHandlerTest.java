@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 
 import java.util.HashMap;
@@ -28,8 +27,6 @@ import static org.mockito.Mockito.when;
 class ListForHearingContestedSubmittedHandlerTest {
 
     public static final String AUTH_TOKEN = "tokien:)";
-    @Mock
-    private CaseDataService caseDataService;
     @Mock
     private HearingDocumentService hearingDocumentService;
     @Mock
@@ -73,7 +70,6 @@ class ListForHearingContestedSubmittedHandlerTest {
         CaseDetails caseDetailsBefore = CaseDetails.builder().id(123L).build();
         caseDetailsBefore.setData(new HashMap<>());
         callbackRequest.setCaseDetailsBefore(caseDetailsBefore);
-        when(caseDataService.isContestedApplication(caseDetails)).thenReturn(true);
         when(hearingDocumentService.alreadyHadFirstHearing(caseDetails)).thenReturn(false);
 
         handler.handle(callbackRequest, AUTH_TOKEN);
@@ -89,7 +85,6 @@ class ListForHearingContestedSubmittedHandlerTest {
         CaseDetails caseDetailsBefore = CaseDetails.builder().id(123L).build();
         caseDetailsBefore.setData(new HashMap<>());
         callbackRequest.setCaseDetailsBefore(caseDetailsBefore);
-        when(caseDataService.isContestedApplication(caseDetails)).thenReturn(true);
         when(hearingDocumentService.alreadyHadFirstHearing(caseDetails)).thenReturn(true);
 
         handler.handle(callbackRequest, AUTH_TOKEN);
@@ -102,7 +97,6 @@ class ListForHearingContestedSubmittedHandlerTest {
     void givenCase_whenCaseDetailsBeforeDoNotExist_thenSendInitialCorrespondence() {
         CallbackRequest callbackRequest = buildCallbackRequest();
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        when(caseDataService.isContestedApplication(caseDetails)).thenReturn(true);
 
         handler.handle(callbackRequest, AUTH_TOKEN);
 
