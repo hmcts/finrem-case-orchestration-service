@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
@@ -22,6 +23,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -43,7 +45,9 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -53,7 +57,10 @@ import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static java.lang.Thread.sleep;
 import static java.nio.file.Files.readAllBytes;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -65,8 +72,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_N
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ADDITIONAL_DOC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ISSUE_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OUT_OF_FAMILY_COURT_RESOLUTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.REQUIRED_FIELD_EMPTY_ERROR;
 
@@ -85,6 +96,7 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
     protected static final String SEND_LETTER_CONTEXT_PATH = "/letters";
 
     private static final String API_URL = "/case-orchestration/documents/hearing";
+    private static final String HANDLER_URL = "/case-orchestration/ccdSubmittedEvent";
     private static final String JSON_CONTENT_PATH = "/fixtures/contested/validate-hearing-withoutfastTrackDecision.json";
 
     @Autowired protected ObjectMapper objectMapper;
@@ -139,6 +151,48 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
     }
 
     @Test
+    public void generateFormCAndFormGSuccess() throws Exception {
+        idamServiceStub();
+        UUID uuid = UUID.randomUUID();
+        generateSendLetterSuccessStub(uuid);
+        generateConfirmLetterCreatedStub(uuid);
+        generateEvidenceDownloadServiceSuccessStub();
+        generateEvidenceUploadServiceSuccessStub();
+        generateDocumentServiceSuccessStub(pdfGenerationRequest(config.getFormCNonFastTrackTemplate(request.getCaseDetails())));
+        generateDocumentServiceSuccessStub(pdfGenerationRequest(config.getFormGTemplate(request.getCaseDetails())));
+        generateDocumentServiceSuccessStub(pdfGenerationRequest(config.getOutOfFamilyCourtResolutionTemplate()));
+        Map<String, Object> data = request.getCaseDetails().getData();
+        data.put(FORM_C, caseDocument());
+        data.put(FORM_G, caseDocument());
+        data.put(MINI_FORM_A, caseDocument());
+        data.put(OUT_OF_FAMILY_COURT_RESOLUTION, caseDocument());
+        data.put(HEARING_ADDITIONAL_DOC,caseDocument());
+
+        MvcResult mvcResult;
+        int requestsMade = 0;
+        do {
+            if (requestsMade > 0) {
+                sleep(100);
+            }
+
+            mvcResult = webClient.perform(MockMvcRequestBuilders.post(HANDLER_URL)
+                .content(objectMapper.writeValueAsString(request))
+                .header(AUTHORIZATION, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
+                .andReturn();
+        } while (++requestsMade < 5 && mvcResult.getResponse().getStatus() == HttpStatus.INTERNAL_SERVER_ERROR.value());
+
+        if (requestsMade > 1) {
+            System.out.println("generateFormCAndFormGSuccess requests made: " + requestsMade);
+        }
+
+        assertThat(mvcResult.getResponse().getStatus(), is(HttpStatus.OK.value()));
+        assertThat(objectMapper.readValue(mvcResult.getResponse().getContentAsString(), new TypeReference<>() {}),
+            is(objectMapper.readValue(expectedCaseData(), new TypeReference<HashMap<String, Object>>(){})));
+    }
+
+    @Test
     public void generateFormCAndFormGServiceError() throws Exception {
         idamServiceStub();
         generateEvidenceUploadServiceSuccessStub();
@@ -184,10 +238,10 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
 
     private String expectedCaseData() throws JsonProcessingException {
         CaseDetails caseDetails = request.getCaseDetails();
-        caseDetails.getData().put("hearingDate", LocalDate.now().plusDays(100));
-        caseDetails.getData().put("issueDate", LocalDate.now());
-        caseDetails.getData().put("formC", caseDocument());
-        caseDetails.getData().put("formG", caseDocument());
+        caseDetails.getData().put(HEARING_DATE, LocalDate.now().plusDays(100));
+        caseDetails.getData().put(ISSUE_DATE, LocalDate.now());
+        caseDetails.getData().put(FORM_C, caseDocument());
+        caseDetails.getData().put(FORM_G, caseDocument());
         caseDetails.getData().put(OUT_OF_FAMILY_COURT_RESOLUTION, caseDocument());
         caseDetails.getData().put("bulkPrintCoverSheetApp", caseDocument());
         caseDetails.getData().put("bulkPrintCoverSheetRes", caseDocument());
@@ -195,7 +249,8 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
         return objectMapper.writeValueAsString(
             AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDetails.getData())
-                .warnings(ImmutableList.of())
+                .warnings(List.of())
+                .errors(List.of())
                 .build());
     }
 
