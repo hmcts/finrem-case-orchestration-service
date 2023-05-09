@@ -86,7 +86,7 @@ public class FinremNotificationRequestMapper {
         notificationRequest.setPhoneOpeningHours(CTSC_OPENING_HOURS);
         notificationRequest.setGeneralApplicationRejectionReason(
             Objects.toString(caseData.getGeneralApplicationWrapper().getGeneralApplicationRejectReason(), EMPTY_STRING));
-        notificationRequest.setGeneralEmailBody(Objects.toString(caseData.getGeneralEmailBody(), EMPTY_STRING));
+        notificationRequest.setGeneralEmailBody(Objects.toString(caseData.getGeneralEmailWrapper().getGeneralEmailBody(), EMPTY_STRING));
         notificationRequest.setApplicantName(Objects.toString(caseData.getFullApplicantName()));
         if (caseData.isConsentedApplication()) {
             notificationRequest.setRespondentName(Objects.toString(caseData.getFullRespondentNameConsented()));

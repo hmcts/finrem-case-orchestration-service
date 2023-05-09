@@ -281,6 +281,7 @@ public class DocumentHelperTest {
 
         String expectedAddress = "50 Applicant Street" + "\n"
             + "Second Address Line" + "\n"
+            + "Third Address Line" + "\n"
             + "Greater London" + "\n"
             + "London" + "\n"
             + "SW1";
@@ -320,6 +321,7 @@ public class DocumentHelperTest {
         String formattedAddress = documentHelper.formatAddressForLetterPrinting(testAddressMap);
         String expectedAddress = "50 Applicant Street" + "\n"
             + "Second Address Line" + "\n"
+            + "Third Address Line" + "\n"
             + "Greater London" + "\n"
             + "London" + "\n"
             + "SW1";

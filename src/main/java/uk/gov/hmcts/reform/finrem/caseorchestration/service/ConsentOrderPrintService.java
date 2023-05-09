@@ -30,7 +30,7 @@ public class ConsentOrderPrintService {
     private final GenerateCoverSheetService coverSheetService;
     private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     private final ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
-    private final PaperNotificationService paperNotificationService;
+    private final NotificationService notificationService;
     private final DocumentOrderingService documentOrderingService;
     private final CaseDataService caseDataService;
     private final DocumentHelper documentHelper;
@@ -38,18 +38,18 @@ public class ConsentOrderPrintService {
     public void sendConsentOrderToBulkPrint(CaseDetails caseDetails, String authorisationToken) {
         Map<String, Object> caseData = caseDetails.getData();
 
-        if (paperNotificationService.shouldPrintForApplicant(caseDetails)) {
+        if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)) {
+            log.info("Sending approved order for applicant to bulk print for case {}", caseDetails.getId());
             UUID applicantLetterId = shouldPrintOrderApprovedDocuments(caseDetails, authorisationToken)
                 ? printApplicantConsentOrderApprovedDocuments(caseDetails, authorisationToken)
                 : printApplicantConsentOrderNotApprovedDocuments(caseDetails, authorisationToken);
             caseData.put(BULK_PRINT_LETTER_ID_APP, applicantLetterId);
         }
 
-        if (paperNotificationService.shouldPrintForRespondent(caseDetails)) {
+        if (!notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)) {
+            log.info("Sending approved order for respondent to bulk print for case {}", caseDetails.getId());
             generateCoversheetForRespondentAndSendOrders(caseDetails, authorisationToken);
         }
-
-        log.info("Bulk print is successful, case {}", caseDetails.getId());
     }
 
     private void generateCoversheetForRespondentAndSendOrders(CaseDetails caseDetails, String authorisationToken) {
