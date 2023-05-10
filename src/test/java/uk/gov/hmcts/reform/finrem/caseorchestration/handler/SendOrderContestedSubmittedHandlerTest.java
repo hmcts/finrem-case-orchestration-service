@@ -112,8 +112,10 @@ public class SendOrderContestedSubmittedHandlerTest {
     public void givenAgreedToReceiveEmails_WhenHandle_ThenSendContestOrderApprovedEmail() {
         when(generalOrderService.getPartyList(any(CaseDetails.class))).thenReturn(List.of(CaseRole.APP_SOLICITOR.getValue()));
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
         sendOrderContestedSubmittedHandler.handle(createCallbackRequestWithFinalOrder(), AUTH_TOKEN);
         verify(notificationService).sendContestOrderApprovedEmailApplicant(any(CaseDetails.class));
+        verify(notificationService, never()).sendContestOrderApprovedEmailRespondent(any(CaseDetails.class));
     }
 
     @Test
@@ -126,8 +128,11 @@ public class SendOrderContestedSubmittedHandlerTest {
     public void givenRespAgreedToReceiveEmails_WhenHandle_ThenSendContestOrderApprovedEmailToRespondent() {
         when(generalOrderService.getPartyList(any(CaseDetails.class))).thenReturn(List.of(CaseRole.RESP_SOLICITOR.getValue()));
         when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
         sendOrderContestedSubmittedHandler.handle(createCallbackRequestWithFinalOrder(), AUTH_TOKEN);
         verify(notificationService).sendContestOrderApprovedEmailRespondent(any(CaseDetails.class));
+        verify(notificationService, never()).sendContestOrderApprovedEmailApplicant(any(CaseDetails.class));
+        verify(notificationService, never()).sendContestOrderApprovedEmailApplicant(any(CaseDetails.class));
     }
 
     @Test
