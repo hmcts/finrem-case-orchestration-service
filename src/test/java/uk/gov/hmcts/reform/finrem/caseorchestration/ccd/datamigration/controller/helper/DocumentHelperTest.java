@@ -496,4 +496,28 @@ public class DocumentHelperTest {
                 .build();
         }
     }
+
+    @Test
+    public void convertToCaseDocumentIfObjNotNull() throws Exception {
+        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("draft-consent-order.json");
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        Map<String, Object> data = caseDetails.getData();
+        CaseDocument caseDocument = documentHelper.convertToCaseDocumentIfObjNotNull(data.get(CONSENT_ORDER));
+
+        assertThat(caseDocument.getDocumentBinaryUrl(), is("http://file1.binary"));
+        assertThat(caseDocument.getDocumentUrl(), is("http://file1"));
+        assertThat(caseDocument.getDocumentFilename(), is("file1"));
+    }
+
+    @Test
+    public void convertToCaseDocument() throws Exception {
+        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("draft-consent-order.json");
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        Map<String, Object> data = caseDetails.getData();
+        CaseDocument caseDocument = documentHelper.convertToCaseDocument(data.get(CONSENT_ORDER), CaseDocument.class);
+
+        assertThat(caseDocument.getDocumentBinaryUrl(), is("http://file1.binary"));
+        assertThat(caseDocument.getDocumentUrl(), is("http://file1"));
+        assertThat(caseDocument.getDocumentFilename(), is("file1"));
+    }
 }
