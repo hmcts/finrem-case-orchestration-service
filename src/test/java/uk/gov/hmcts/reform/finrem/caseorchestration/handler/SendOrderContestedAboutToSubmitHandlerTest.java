@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelect
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
@@ -69,6 +70,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ADDITIONAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTV1_ADDITIONAL_DOC_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTV1_FINAL_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTV2_ADDITIONAL_DOC_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTV2_FINAL_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTV3_ADDITIONAL_DOC_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTV3_FINAL_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTV4_ADDITIONAL_DOC_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTV4_FINAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_LIST;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -209,7 +218,8 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
                     .build())
                 .build()));
 
-        sendOrderContestedAboutToSubmitHandler.handle(request, AUTH_TOKEN);
+        GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> response
+            = sendOrderContestedAboutToSubmitHandler.handle(request, AUTH_TOKEN);
 
         verify(bulkPrintService, times(2)).printApplicantDocuments(any(CaseDetails.class), any(), any());
         verify(bulkPrintService, times(2)).printRespondentDocuments(any(CaseDetails.class), any(), any());
@@ -245,9 +255,11 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
     }
 
     @Test
-    public void givenLatestDraftedHearingOrderDocumentIsNotAddedToPack_WhenHandle_ThenPrintApplicantDocuments() {
+    public void givenLatestDraftedHearingOrderDocumentIsNotAddedToPack_WhenHandle_ThenPrintDocuments() {
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
-        when(generalOrderService.getPartyList(any(CaseDetails.class))).thenReturn(List.of(CaseRole.APP_SOLICITOR.getValue()));
+        when(generalOrderService.getPartyList(any(CaseDetails.class))).thenReturn(List.of(CaseRole.APP_SOLICITOR.getValue(),
+            CaseRole.RESP_SOLICITOR.getValue(), CaseRole.INTVR_SOLICITOR_1.getValue(), CaseRole.INTVR_SOLICITOR_2.getValue(),
+            CaseRole.INTVR_SOLICITOR_3.getValue(), CaseRole.INTVR_SOLICITOR_4.getValue()));
         when(documentHelper.hasAnotherHearing(any())).thenReturn(true);
         mockDocumentHelperToReturnDefaultExpectedDocuments();
         when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
@@ -296,6 +308,16 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
 
         assertThat(bulkPrintArgumentCaptor.getAllValues().get(1).stream().map(BulkPrintDocument::getBinaryFileUrl).toList(),
             containsInAnyOrder(expectedBulkPrintDocuments.toArray()));
+
+        Map<String, Object> data1 = response.getData();
+        assertEquals(caseDocument(), getIntvCollection(data1.get(INTV1_FINAL_ORDER_COLLECTION)).get(0).getValue().getApproveOrder());
+        assertEquals(caseDocument(), getIntvCollection(data1.get(INTV1_ADDITIONAL_DOC_ORDER_COLLECTION)).get(0).getValue().getApproveOrder());
+        assertEquals(caseDocument(), getIntvCollection(data1.get(INTV2_FINAL_ORDER_COLLECTION)).get(0).getValue().getApproveOrder());
+        assertEquals(caseDocument(), getIntvCollection(data1.get(INTV2_ADDITIONAL_DOC_ORDER_COLLECTION)).get(0).getValue().getApproveOrder());
+        assertEquals(caseDocument(), getIntvCollection(data1.get(INTV3_FINAL_ORDER_COLLECTION)).get(0).getValue().getApproveOrder());
+        assertEquals(caseDocument(), getIntvCollection(data1.get(INTV3_ADDITIONAL_DOC_ORDER_COLLECTION)).get(0).getValue().getApproveOrder());
+        assertEquals(caseDocument(), getIntvCollection(data1.get(INTV4_FINAL_ORDER_COLLECTION)).get(0).getValue().getApproveOrder());
+        assertEquals(caseDocument(), getIntvCollection(data1.get(INTV4_ADDITIONAL_DOC_ORDER_COLLECTION)).get(0).getValue().getApproveOrder());
     }
 
     @Test
@@ -356,9 +378,10 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
 
         sendOrderContestedAboutToSubmitHandler.handle(emptyCallbackRequest, AUTH_TOKEN);
 
-        verify(bulkPrintService, times(2)).printApplicantDocuments(any(CaseDetails.class), any(), bulkPrintArgumentCaptor.capture());
+        verify(bulkPrintService, times(2)).printApplicantDocuments(any(CaseDetails.class), any(),
+            bulkPrintArgumentCaptor.capture());
 
-        List<String> expectedBulkPrintDocuments = asList("GeneralOrderBinaryURL");
+        List<String> expectedBulkPrintDocuments = List.of("GeneralOrderBinaryURL");
 
         assertThat(bulkPrintArgumentCaptor.getAllValues().get(0).stream().map(BulkPrintDocument::getBinaryFileUrl).collect(Collectors.toList()),
             containsInAnyOrder(expectedBulkPrintDocuments.toArray()));
@@ -516,6 +539,11 @@ public class SendOrderContestedAboutToSubmitHandlerTest {
     }
 
     public List<HearingOrderCollectionData> getCollection(Object obj) {
+        return objectMapper.convertValue(obj, new TypeReference<>() {
+        });
+    }
+
+    public List<IntervenerOrderCollection> getIntvCollection(Object obj) {
         return objectMapper.convertValue(obj, new TypeReference<>() {
         });
     }
