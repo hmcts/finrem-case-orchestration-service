@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackReques
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
@@ -26,6 +27,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContes
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -52,6 +54,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_COLLECTION_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PARIY_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 public class GeneralOrderServiceTest extends BaseServiceTest {
@@ -292,7 +295,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
 
         data.setUploadHearingOrder(hearingOrderDocuments);
 
-        List<DynamicMultiSelectListElement> dynamicElementList = List.of(getDynamicElementList(false,
+        List<DynamicMultiSelectListElement> dynamicElementList = List.of(getDynamicElementList(
             caseDocument("url", "moj.pdf", "binaryurl")));
 
         DynamicMultiSelectList selectList = DynamicMultiSelectList.builder()
@@ -308,10 +311,41 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         assertEquals("One document selected", 1, data.getOrdersToShare().getValue().size());
     }
 
-    private DynamicMultiSelectListElement getDynamicElementList(boolean generateId, CaseDocument caseDocument) {
+    @Test
+    public void givenContestedCase_whenRequestedParies_thenReturnParties() {
+        CallbackRequest callbackRequest = callbackRequest();
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        Map<String, Object> data = caseDetails.getData();
+
+        List<DynamicMultiSelectListElement> dynamicElementList = List.of(getDynamicElementList(CaseRole.APP_SOLICITOR.getValue()),
+            getDynamicElementList(CaseRole.RESP_SOLICITOR.getValue()),
+            getDynamicElementList(CaseRole.INTVR_SOLICITOR_1.getValue()),
+            getDynamicElementList(CaseRole.INTVR_SOLICITOR_2.getValue()),
+            getDynamicElementList(CaseRole.INTVR_SOLICITOR_3.getValue()),
+            getDynamicElementList(CaseRole.INTVR_SOLICITOR_4.getValue()));
+
+        DynamicMultiSelectList parties = DynamicMultiSelectList.builder()
+            .value(dynamicElementList)
+            .listItems(dynamicElementList)
+            .build();
+
+        data.put(PARIY_LIST, parties);
+
+        List<String> partyList = generalOrderService.getPartyList(caseDetails);
+        assertEquals("6 parties availablle ", 6, partyList.size());
+    }
+
+    private DynamicMultiSelectListElement getDynamicElementList(CaseDocument caseDocument) {
         return DynamicMultiSelectListElement.builder()
-            .code(generateId ? uuid.toString() : UUID.randomUUID().toString())
+            .code(UUID.randomUUID().toString())
             .label(caseDocument.getDocumentFilename())
+            .build();
+    }
+
+    private DynamicMultiSelectListElement getDynamicElementList(String role) {
+        return DynamicMultiSelectListElement.builder()
+            .code(role)
+            .label(role)
             .build();
     }
 
@@ -324,6 +358,16 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
             .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
                 .data(new FinremCaseData()).build())
             .build();
+    }
+
+    private CallbackRequest callbackRequest() {
+        return CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                .caseTypeId(CONTESTED.getCcdType()).id(123L).data(new HashMap<>()).build())
+            .caseDetailsBefore(CaseDetails.builder()
+                .caseTypeId(CONTESTED.getCcdType()).id(123L).data(new HashMap<>()).build())
+            .build();
+
     }
 
 
