@@ -8,14 +8,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
@@ -43,11 +47,81 @@ class SendOrderContestedAboutToStartHandlerTest {
     }
 
     @Test
-    void givenACcdCallbackConsentedCase_whenStartEventCalled_thenPrepareOrderList() {
+    void givenACcdCallbackContestedCase_whenStartEventCalledAndAllPartiesAredigital_thenPrepareOrderList() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+
+        data.setApplicantOrganisationPolicy(getOrganisation("ORGAPP","applicant",
+            CaseRole.APP_SOLICITOR.getValue()));
+        data.setRespondentOrganisationPolicy(getOrganisation("ORGRESP","respondent",
+            CaseRole.RESP_SOLICITOR.getValue()));
+        data.getIntervenerOneWrapper().setIntervener1Organisation(getOrganisation("ORGINTV1","intervener1",
+            CaseRole.INTVR_SOLICITOR_1.getValue()));
+        data.getIntervenerTwoWrapper().setIntervener2Organisation(getOrganisation("ORGINTV2","intervener2",
+            CaseRole.INTVR_SOLICITOR_2.getValue()));
+        data.getIntervenerThreeWrapper().setIntervener3Organisation(getOrganisation("ORGINTV3","intervener3",
+            CaseRole.INTVR_SOLICITOR_3.getValue()));
+        data.getIntervenerFourWrapper().setIntervener4Organisation(getOrganisation("ORGINTV4","intervener4",
+            CaseRole.INTVR_SOLICITOR_4.getValue()));
+
+
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> resp = handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        assertNull(resp.getData().getOrdersToShare());
-        verify(generalOrderService).setOrderList(finremCallbackRequest.getCaseDetails());
+
+        DynamicMultiSelectList partiesInCase = resp.getData().getPartiesInCase();
+        assertEquals(6, partiesInCase.getListItems().size(), "available parties");
+        verify(generalOrderService).setOrderList(caseDetails);
+    }
+
+    @Test
+    void givenACcdCallbackContestedCase_whenStartEventCalledAndAllPartiesAreNotdigital_thenPrepareOrderList() {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+        data.setCcdCaseType(CONTESTED);
+        data.getContactDetailsWrapper().setApplicantFmName("Tony");
+        data.getContactDetailsWrapper().setApplicantLname("B");
+        data.setApplicantOrganisationPolicy(getOrganisation(null,null,
+            CaseRole.APP_SOLICITOR.getValue()));
+
+        data.getContactDetailsWrapper().setRespondentFmName("Tony");
+        data.getContactDetailsWrapper().setRespondentLname("C");
+        data.setRespondentOrganisationPolicy(getOrganisation(null,null,
+            CaseRole.RESP_SOLICITOR.getValue()));
+
+        data.getIntervenerOneWrapper().setIntervener1Name("Intv1");
+        data.getIntervenerOneWrapper().setIntervener1Organisation(getOrganisation(null,null,
+            CaseRole.INTVR_SOLICITOR_1.getValue()));
+
+        data.getIntervenerTwoWrapper().setIntervener2Organisation(getOrganisation(null,null,
+            CaseRole.INTVR_SOLICITOR_2.getValue()));
+        data.getIntervenerTwoWrapper().setIntervener2Name("Intv2");
+
+        data.getIntervenerThreeWrapper().setIntervener3Organisation(getOrganisation(null,null,
+            CaseRole.INTVR_SOLICITOR_3.getValue()));
+        data.getIntervenerThreeWrapper().setIntervener3Name("Intv3");
+
+        data.getIntervenerFourWrapper().setIntervener4Organisation(getOrganisation(null,null,
+            CaseRole.INTVR_SOLICITOR_4.getValue()));
+        data.getIntervenerFourWrapper().setIntervener4Name("Intv4");
+
+        GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> resp = handler.handle(finremCallbackRequest, AUTH_TOKEN);
+
+        DynamicMultiSelectList partiesInCase = resp.getData().getPartiesInCase();
+        assertEquals(6, partiesInCase.getListItems().size(), "available parties");
+        verify(generalOrderService).setOrderList(caseDetails);
+    }
+
+    private OrganisationPolicy getOrganisation(String orgId, String orgName, String role) {
+        Organisation organisation = Organisation.builder()
+            .organisationID(orgId)
+            .organisationName(orgName)
+            .build();
+        return OrganisationPolicy.builder()
+            .organisation(organisation)
+            .orgPolicyCaseAssignedRole(role)
+            .build();
+
     }
 
     private FinremCallbackRequest buildCallbackRequest() {

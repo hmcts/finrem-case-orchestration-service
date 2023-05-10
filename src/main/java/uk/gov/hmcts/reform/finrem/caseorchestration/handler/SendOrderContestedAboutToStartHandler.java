@@ -62,7 +62,7 @@ public class SendOrderContestedAboutToStartHandler extends FinremCallbackHandler
 
         FinremCaseData caseData = caseDetails.getData();
         List<String> roleList = new ArrayList<>();
-        //respondent
+
         if ((ObjectUtils.isNotEmpty(caseData.getApplicantOrganisationPolicy())
             && ObjectUtils.isNotEmpty(caseData.getApplicantOrganisationPolicy().getOrganisation())
             && ObjectUtils.isNotEmpty(caseData.getApplicantOrganisationPolicy().getOrganisation().getOrganisationID()))
