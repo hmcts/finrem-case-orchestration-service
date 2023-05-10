@@ -18,7 +18,7 @@ public class NotificationRequestTest {
                 "45623", "D123", "Padmaja", "test@test.com",
                 "nottingham", CONTESTED, "body", PHONE_OPENING_HOURS, "consent",
                 "Consent",
-                "rejectedReason","app", "res", "1234567890", "");
+                "rejectedReason","app", "res", "1234567890", "",null);
         assertEquals("123456", underTest.getCaseReferenceNumber());
         assertEquals("45623", underTest.getSolicitorReferenceNumber());
         assertEquals("D123", underTest.getDivorceCaseNumber());

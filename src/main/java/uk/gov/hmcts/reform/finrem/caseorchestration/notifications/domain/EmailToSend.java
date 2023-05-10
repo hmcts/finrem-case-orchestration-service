@@ -8,6 +8,6 @@ import java.util.Map;
 public final class EmailToSend {
     String emailAddress;
     String templateId;
-    Map<String, String> templateFields;
+    Map<String, Object> templateFields;
     String referenceId;
 }
