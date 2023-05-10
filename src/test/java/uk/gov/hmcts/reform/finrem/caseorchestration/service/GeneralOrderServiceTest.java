@@ -11,8 +11,16 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionOrderCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsentedData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContestedData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
@@ -20,11 +28,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocu
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
@@ -42,6 +52,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_COLLECTION_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 public class GeneralOrderServiceTest extends BaseServiceTest {
 
@@ -60,8 +71,11 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     @Captor
     private ArgumentCaptor<CaseDetails> caseDetailsArgumentCaptor;
 
+    private UUID uuid;
+
     @Before
     public void setUp() {
+        uuid = UUID.fromString("2ec43a65-3614-4b53-ab89-18252855f399");
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
     }
 
@@ -245,6 +259,73 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(details.getData(), AUTH_TOKEN);
         assertNull(latestGeneralOrder);
     }
+
+    @Test
+    public void whenRequestedOrderList_and_notshared_before_returnList() throws Exception {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+
+        List<DirectionOrderCollection> hearingOrderDocuments =  List.of(
+            DirectionOrderCollection.builder()
+                .id(uuid.toString())
+                .value(DirectionOrder.builder().uploadDraftDocument(caseDocument()).build())
+                .build());
+
+        data.setUploadHearingOrder(hearingOrderDocuments);
+        generalOrderService.setOrderList(caseDetails);
+
+        assertEquals("One document available to share with other parties", 1, data.getOrdersToShare().getListItems().size());
+    }
+
+    @Test
+    public void whenRequestedOrderList_and_shared_before_returnList() throws Exception {
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
+
+        List<DirectionOrderCollection> hearingOrderDocuments =  List.of(
+            DirectionOrderCollection.builder()
+                .id(uuid.toString())
+                .value(DirectionOrder.builder().uploadDraftDocument(caseDocument()).build())
+                .build());
+
+        data.setUploadHearingOrder(hearingOrderDocuments);
+
+        List<DynamicMultiSelectListElement> dynamicElementList = List.of(getDynamicElementList(false,
+            caseDocument("url", "moj.pdf", "binaryurl")));
+
+        DynamicMultiSelectList selectList = DynamicMultiSelectList.builder()
+            .value(dynamicElementList)
+            .listItems(dynamicElementList)
+            .build();
+
+        data.setOrdersToShare(selectList);
+
+        generalOrderService.setOrderList(caseDetails);
+
+        assertEquals("One document available to share with other parties", 1, data.getOrdersToShare().getListItems().size());
+        assertEquals("One document selected", 1, data.getOrdersToShare().getValue().size());
+    }
+
+    private DynamicMultiSelectListElement getDynamicElementList(boolean generateId, CaseDocument caseDocument) {
+        return DynamicMultiSelectListElement.builder()
+            .code(generateId ? uuid.toString() : UUID.randomUUID().toString())
+            .label(caseDocument.getDocumentFilename())
+            .build();
+    }
+
+    private FinremCallbackRequest buildCallbackRequest() {
+        return FinremCallbackRequest
+            .builder()
+            .eventType(EventType.SEND_ORDER)
+            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+                .data(new FinremCaseData()).build())
+            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+                .data(new FinremCaseData()).build())
+            .build();
+    }
+
 
     private CaseDetails consentedCaseDetails() throws Exception {
         try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/general-order-consented.json")) {
