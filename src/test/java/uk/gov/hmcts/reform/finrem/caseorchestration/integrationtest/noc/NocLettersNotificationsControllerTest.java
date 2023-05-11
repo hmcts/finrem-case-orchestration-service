@@ -83,7 +83,7 @@ public class NocLettersNotificationsControllerTest extends BaseControllerTest {
         CaseDocument litigantSolicitorRemovedCaseDocument = CaseDocument.builder().documentFilename("docFileNameRemoved").build();
         when(genericDocumentServiceMock.generateDocumentFromPlaceholdersMap(anyString(), anyMap(),
             eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorRevokedTemplate()),
-            eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorRevokedFileName()))).thenReturn(
+            eq(documentConfiguration.getNocLetterNotificationLitigantSolicitorRevokedFileName()), eq(CASE_ID))).thenReturn(
             litigantSolicitorRemovedCaseDocument);
 
         notificationsController.sendNoticeOfChangeNotifications("authToken", buildCallbackRequest());

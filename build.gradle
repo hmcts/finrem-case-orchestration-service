@@ -359,9 +359,9 @@ dependencies {
     implementation group: 'com.github.hmcts', name: 'send-letter-client', version: versions.sendLetterClient
     implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
-
+    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.10.0'
     implementation group: 'com.github.hmcts', name: 'ccd-case-document-am-client', version: versions.amClient
-    
+
     implementation("org.apache.poi:poi:5.2.3") {
         exclude group: "org.apache.commons", module: "commons-math3"
     }

@@ -20,6 +20,7 @@ import java.util.Collections;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -107,7 +108,7 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldBulkPrintDocument() {
-        genericDocumentService.bulkPrint(BulkPrintRequest.builder().build(), any(), AUTH_TOKEN);
+        genericDocumentService.bulkPrint(BulkPrintRequest.builder().build(), "recipient", AUTH_TOKEN);
 
         verify(bulkPrintDocumentGeneratorService, times(1)).send(any(), any(), any());
     }
