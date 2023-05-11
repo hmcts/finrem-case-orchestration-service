@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremNotificationReq
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerFourWrapper;
@@ -1087,6 +1088,31 @@ public class NotificationService {
         return caseDetails.getData().isRespondentSolicitorPopulated()
             && checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
     }
+
+    public boolean isIntervenerOneDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
+        return caseDetails.getData().isIntervenerOneEmailPopulated()
+            && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
+            CaseRole.INTVR_SOLICITOR_1);
+    }
+
+    public boolean isIntervenerTwoDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
+        return caseDetails.getData().isIntervenerTwoEmailPopulated()
+            && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
+            CaseRole.INTVR_SOLICITOR_2);
+    }
+
+    public boolean isIntervenerThreeDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
+        return caseDetails.getData().isIntervenerThreeEmailPopulated()
+            && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
+            CaseRole.INTVR_SOLICITOR_3);
+    }
+
+    public boolean isIntervenerFourDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {
+        return caseDetails.getData().isIntervenerFourEmailPopulated()
+            && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
+            CaseRole.INTVR_SOLICITOR_4);
+    }
+
 
     @Deprecated
     public boolean isRespondentSolicitorRegisteredAndEmailCommunicationEnabled(CaseDetails caseDetails) {

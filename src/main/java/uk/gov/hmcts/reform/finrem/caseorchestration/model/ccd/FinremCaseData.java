@@ -650,6 +650,26 @@ public class FinremCaseData {
     }
 
     @JsonIgnore
+    public boolean isIntervenerOneEmailPopulated() {
+        return StringUtils.isNotEmpty(nullToEmpty(getIntervenerOneWrapper().getIntervener1Email()));
+    }
+
+    @JsonIgnore
+    public boolean isIntervenerTwoEmailPopulated() {
+        return StringUtils.isNotEmpty(nullToEmpty(getIntervenerTwoWrapper().getIntervener2Email()));
+    }
+
+    @JsonIgnore
+    public boolean isIntervenerThreeEmailPopulated() {
+        return StringUtils.isNotEmpty(nullToEmpty(getIntervenerThreeWrapper().getIntervener3Email()));
+    }
+
+    @JsonIgnore
+    public boolean isIntervenerFourEmailPopulated() {
+        return StringUtils.isNotEmpty(nullToEmpty(getIntervenerFourWrapper().getIntervener4Email()));
+    }
+
+    @JsonIgnore
     public String getAppSolicitorFirm() {
         return isConsentedApplication()
             ? getContactDetailsWrapper().getSolicitorFirm()
