@@ -58,7 +58,8 @@ public class GeneralLetterService {
 
     public void previewGeneralLetter(String authorisationToken, CaseDetails caseDetails) {
         log.info("Generating General letter preview for Case ID: {}", caseDetails.getId());
-        CaseDocument generalLetterDocument = generateGeneralLetterDocument(caseDetails, authorisationToken);
+        CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
+        CaseDocument generalLetterDocument = generateGeneralLetterDocument(caseDetailsCopy, authorisationToken);
         caseDetails.getData().put(GENERAL_LETTER_PREVIEW, generalLetterDocument);
     }
 
