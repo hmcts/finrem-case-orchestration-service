@@ -345,7 +345,7 @@ public class ManageBarristersITest implements IntegrationTest {
         ccdCallbackController.ccdSubmittedEvent(AUTH_TOKEN, request);
 
         verify(emailService).sendConfirmationEmail(notificationRequestArgumentCaptor.capture(), eq(EmailTemplateNames.FR_BARRISTER_ACCESS_ADDED));
-        verify(bulkPrintService).sendDocumentForPrint(eq(addedDocument), any(CaseDetails.class));
+        verify(bulkPrintService).sendDocumentForPrint(eq(addedDocument), any(CaseDetails.class), any());
 
         NotificationRequest notificationRequest = notificationRequestArgumentCaptor.getValue();
         assertEquals(notificationRequest.getBarristerReferenceNumber(), APP_BARR_ORG_ID);
@@ -370,7 +370,7 @@ public class ManageBarristersITest implements IntegrationTest {
         ccdCallbackController.ccdSubmittedEvent(AUTH_TOKEN, request);
 
         verify(emailService).sendConfirmationEmail(notificationRequestArgumentCaptor.capture(), eq(EmailTemplateNames.FR_BARRISTER_ACCESS_REMOVED));
-        verify(bulkPrintService).sendDocumentForPrint(eq(removedDocument), any(CaseDetails.class));
+        verify(bulkPrintService).sendDocumentForPrint(eq(removedDocument), any(CaseDetails.class), any());
 
         NotificationRequest notificationRequest = notificationRequestArgumentCaptor.getValue();
         assertEquals(notificationRequest.getBarristerReferenceNumber(), APP_BARR_ORG_ID);
@@ -392,7 +392,7 @@ public class ManageBarristersITest implements IntegrationTest {
         ccdCallbackController.ccdSubmittedEvent(AUTH_TOKEN, request);
 
         verify(emailService).sendConfirmationEmail(notificationRequestArgumentCaptor.capture(), eq(EmailTemplateNames.FR_BARRISTER_ACCESS_ADDED));
-        verify(bulkPrintService, never()).sendDocumentForPrint(any(), any(CaseDetails.class));
+        verify(bulkPrintService, never()).sendDocumentForPrint(any(), any(CaseDetails.class), any());
 
         NotificationRequest notificationRequest = notificationRequestArgumentCaptor.getValue();
         assertEquals(notificationRequest.getBarristerReferenceNumber(), APP_BARR_ORG_ID);
