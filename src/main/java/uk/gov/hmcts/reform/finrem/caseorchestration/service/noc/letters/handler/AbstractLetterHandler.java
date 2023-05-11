@@ -60,7 +60,8 @@ public abstract class AbstractLetterHandler implements LetterHandler {
             log.info("Got the letter details now call the document service to generate the Case Document ");
             CaseDocument caseDocument = nocDocumentService.generateNoticeOfChangeLetter(authToken, letter);
             log.info("Generated the case document now send to bulk print");
-            UUID uuid = bulkPrintService.sendDocumentForPrint(caseDocument, caseDetails);
+            UUID uuid = bulkPrintService.sendDocumentForPrint(caseDocument, caseDetails,
+                bulkPrintService.getRecipient(recipient.toString()));
             log.info("Document sent to bulkprint with UUID {}", uuid);
         });
     }

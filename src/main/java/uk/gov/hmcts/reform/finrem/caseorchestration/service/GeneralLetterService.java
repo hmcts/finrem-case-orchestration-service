@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.google.common.collect.ImmutableMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -16,12 +15,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ADDRESSEE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CTSC_CONTACT_DETAILS;
@@ -64,13 +64,14 @@ public class GeneralLetterService {
 
     public void createGeneralLetter(String authorisationToken, CaseDetails caseDetails) {
         log.info("Generating General letter for Case ID: {}", caseDetails.getId());
-        CaseDocument document = generateGeneralLetterDocument(caseDetails, authorisationToken);
+        CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
+        CaseDocument document = generateGeneralLetterDocument(caseDetailsCopy, authorisationToken);
+        String recipient = Objects.toString(caseDetailsCopy.getData().get("recipient"));
         addGeneralLetterToCaseData(caseDetails, document);
-        printLatestGeneralLetter(caseDetails);
+        printLatestGeneralLetter(caseDetails, recipient);
     }
 
-    private CaseDocument generateGeneralLetterDocument(CaseDetails caseDetails, String authorisationToken) {
-        CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
+    private CaseDocument generateGeneralLetterDocument(CaseDetails caseDetailsCopy, String authorisationToken) {
         prepareCaseDetailsForDocumentGeneration(caseDetailsCopy);
 
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
@@ -117,6 +118,7 @@ public class GeneralLetterService {
                 .name((String) data.get(GENERAL_LETTER_RECIPIENT))
                 .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) data.get(GENERAL_LETTER_RECIPIENT_ADDRESS)));
         }
+        data.put("recipient", generalLetterAddressTo);
         data.put(ADDRESSEE, addresseeBuilder.build());
     }
 
@@ -139,7 +141,7 @@ public class GeneralLetterService {
 
     public List<String> getCaseDataErrorsForCreatingPreviewOrFinalLetter(CaseDetails caseDetails) {
         boolean isConsentedApplication = caseDataService.isConsentedApplication(caseDetails);
-        Map<String, String> generalLetterAddressToValueToAddressCcdFieldName = ImmutableMap.of(
+        Map<String, String> generalLetterAddressToValueToAddressCcdFieldName = Map.of(
             "applicantSolicitor", isConsentedApplication ? CONSENTED_SOLICITOR_ADDRESS : CONTESTED_SOLICITOR_ADDRESS,
             "respondentSolicitor", RESP_SOLICITOR_ADDRESS,
             "respondent", RESPONDENT_ADDRESS,
@@ -149,15 +151,16 @@ public class GeneralLetterService {
         String generalLetterAddressTo = (String) data.get(GENERAL_LETTER_ADDRESS_TO);
         Map<String, Object> recipientAddress = (Map) data.get(generalLetterAddressToValueToAddressCcdFieldName.get(generalLetterAddressTo));
         if (recipientAddress == null || recipientAddress.isEmpty()) {
-            return asList(String.format("Address is missing for recipient type %s", generalLetterAddressTo));
+            return Collections.singletonList(String.format("Address is missing for recipient type %s", generalLetterAddressTo));
         } else {
             return emptyList();
         }
     }
 
-    private UUID printLatestGeneralLetter(CaseDetails caseDetails) {
+    private UUID printLatestGeneralLetter(CaseDetails caseDetails, String recipient) {
         List<GeneralLetterData> generalLettersData = documentHelper.convertToGeneralLetterData(caseDetails.getData().get(GENERAL_LETTER));
         GeneralLetterData latestGeneralLetterData = generalLettersData.get(generalLettersData.size() - 1);
-        return bulkPrintService.sendDocumentForPrint(latestGeneralLetterData.getGeneralLetter().getGeneratedLetter(), caseDetails);
+        return bulkPrintService.sendDocumentForPrint(latestGeneralLetterData.getGeneralLetter().getGeneratedLetter(),
+            caseDetails, recipient);
     }
 }
