@@ -14,9 +14,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.assigntojudgeconsentincontested.FinremAssignToJudgeConsentInContestedCorresponder;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FinremAssignToJudgeConsentInContestedCorresponderTest {
@@ -81,7 +82,7 @@ public class FinremAssignToJudgeConsentInContestedCorresponderTest {
             .generateConsentInContestedAssignedToJudgeNotificationLetter(
                 caseDetails, AUTHORISATION_TOKEN, DocumentHelper.PaperNotificationRecipient.APPLICANT);
 
-        verify(bulkPrintService, times(2))
-            .sendDocumentForPrint(caseDocument, caseDetails, AUTHORISATION_TOKEN);
+        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, APPLICANT, AUTHORISATION_TOKEN);
+        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, RESPONDENT, AUTHORISATION_TOKEN);
     }
 }

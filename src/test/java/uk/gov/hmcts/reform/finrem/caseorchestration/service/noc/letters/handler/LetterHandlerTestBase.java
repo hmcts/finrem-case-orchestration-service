@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Assert;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -13,7 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.NocDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.AbstractLetterDetailsGenerator;
-
 import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -26,7 +26,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDe
 public abstract class LetterHandlerTestBase {
 
     protected static final String AUTH_TOKEN = "AUTH_TOKEN";
-    protected static final String DOCUMENT_UUID = "dd153d4c-d2bd-11ec-9d64-0242ac120002";
     public static final String CASE_ID = "1234";
 
     private AbstractLetterDetailsGenerator letterDetailsGenerator;
@@ -74,8 +73,7 @@ public abstract class LetterHandlerTestBase {
             setUpCaseDocumentInteraction(noticeOfChangeLetterDetails,
                 nocDocumentService, "appDocFileName");
 
-        when(bulkPrintService.sendDocumentForPrint(caseDocumentApplicant, caseDetails, AUTH_TOKEN)).thenReturn(UUID.fromString(DOCUMENT_UUID));
-
+        Assert.assertNotNull(caseDocumentApplicant);
         getLetterHandler().handle(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
         assertThat(paperNotificationRecipientArgumentCaptor.getValue(), is(recipient));
@@ -86,7 +84,8 @@ public abstract class LetterHandlerTestBase {
         }
 
         verify(nocDocumentService).generateNoticeOfChangeLetter(AUTH_TOKEN, noticeOfChangeLetterDetails, CASE_ID);
-        verify(bulkPrintService).sendDocumentForPrint(caseDocumentApplicant, caseDetails, AUTH_TOKEN);
+        verify(bulkPrintService).sendDocumentForPrint(caseDocumentApplicant, caseDetails,
+            bulkPrintService.getRecipient(recipient.toString()), AUTH_TOKEN);
     }
 
 

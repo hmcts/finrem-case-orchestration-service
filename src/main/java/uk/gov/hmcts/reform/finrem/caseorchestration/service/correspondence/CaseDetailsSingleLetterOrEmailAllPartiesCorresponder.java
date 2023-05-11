@@ -9,6 +9,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
+
 @Component
 @Slf4j
 @RequiredArgsConstructor
@@ -31,7 +34,7 @@ public abstract class CaseDetailsSingleLetterOrEmailAllPartiesCorresponder exten
             bulkPrintService.sendDocumentForPrint(
                 getDocumentToPrint(caseDetails,
                     authorisationToken,
-                    DocumentHelper.PaperNotificationRecipient.APPLICANT), caseDetails, authorisationToken);
+                    DocumentHelper.PaperNotificationRecipient.APPLICANT), caseDetails, APPLICANT, authorisationToken);
         }
     }
 
@@ -45,7 +48,7 @@ public abstract class CaseDetailsSingleLetterOrEmailAllPartiesCorresponder exten
                 getDocumentToPrint(
                     caseDetails,
                     authorisationToken,
-                    DocumentHelper.PaperNotificationRecipient.RESPONDENT), caseDetails, authorisationToken);
+                    DocumentHelper.PaperNotificationRecipient.RESPONDENT), caseDetails, RESPONDENT, authorisationToken);
         }
     }
 

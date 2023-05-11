@@ -72,7 +72,7 @@ class ManualPaymentSubmittedHandlerTest {
         when(service.generateManualPaymentLetter(finremCallbackRequest.getCaseDetails(),
             AUTH_TOKEN, APPLICANT)).thenReturn(caseDocument());
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
-        verify(printService).sendDocumentForPrint(any(CaseDocument.class), any(FinremCaseDetails.class), anyString());
+        verify(printService).sendDocumentForPrint(any(CaseDocument.class), any(FinremCaseDetails.class), any(), anyString());
     }
 
     @Test
@@ -80,7 +80,7 @@ class ManualPaymentSubmittedHandlerTest {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         handler.handle(finremCallbackRequest, AUTH_TOKEN);
         verify(printService, never())
-            .sendDocumentForPrint(any(CaseDocument.class), any(FinremCaseDetails.class), anyString());
+            .sendDocumentForPrint(any(CaseDocument.class), any(FinremCaseDetails.class), any(), anyString());
     }
 
 

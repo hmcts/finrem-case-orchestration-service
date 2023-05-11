@@ -43,7 +43,8 @@ public class BarristerLetterService {
                                     String authToken) {
         log.info("About to start sending barrister access letter for case {}", caseDetails.getId());
         Optional<CaseDocument> barristerLetter = getBarristerLetter(caseDetails, barrister, barristerLetterTuple);
-        barristerLetter.ifPresent(letter -> bulkPrintService.sendDocumentForPrint(letter, caseDetails, authToken));
+        barristerLetter.ifPresent(letter -> bulkPrintService.sendDocumentForPrint(letter, caseDetails,
+            bulkPrintService.getRecipient(barristerLetterTuple.getRecipient().toString()), authToken));
     }
 
     private Optional<CaseDocument> getBarristerLetter(CaseDetails caseDetails,
@@ -94,4 +95,5 @@ public class BarristerLetterService {
         Map<String, Object> caseDetailsMap = Map.of(CASE_DATA, objectMapper.convertValue(letterDetails, Map.class));
         return Map.of(CASE_DETAILS, caseDetailsMap);
     }
+
 }

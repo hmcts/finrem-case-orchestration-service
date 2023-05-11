@@ -8,6 +8,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
+
 @Component
 @Slf4j
 @RequiredArgsConstructor
@@ -24,7 +26,7 @@ public abstract class FinremSingleLetterOrEmailApplicantCorresponder extends Sin
             this.emailApplicantSolicitor(caseDetails);
         } else {
             log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
-            bulkPrintService.sendDocumentForPrint(getDocumentToPrint(caseDetails, authToken), caseDetails, authToken);
+            bulkPrintService.sendDocumentForPrint(getDocumentToPrint(caseDetails, authToken), caseDetails, APPLICANT, authToken);
         }
     }
 

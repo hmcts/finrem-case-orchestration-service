@@ -1,5 +1,5 @@
 {
-  "event_id": "FR_issueApplication",
+  "event_id": "FR_addSchedulingListingInfo",
   "case_details": {
     "id": "123",
     "jurisdiction": "DIVORCE",
@@ -68,7 +68,7 @@
       "divorceCaseNumber": "DD12D12345",
       "issueDate": "2019-03-04",
       "hearingDate": "2019-03-24",
-      "fastTrackDecision": "no",
+      "fastTrackDecision": "No",
       "pensionCollection": [
         {
           "id": "ad403dd7-75da-4ca6-8cf6-24a5e42f5bf4",

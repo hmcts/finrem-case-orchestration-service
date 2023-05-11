@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -32,7 +33,7 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
                 getDocumentToPrint(
                     caseDetails,
                     authorisationToken,
-                    DocumentHelper.PaperNotificationRecipient.APPLICANT), caseDetails, authorisationToken);
+                    DocumentHelper.PaperNotificationRecipient.APPLICANT), caseDetails, CCDConfigConstant.APPLICANT, authorisationToken);
         }
     }
 
@@ -46,7 +47,7 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
                 getDocumentToPrint(
                     caseDetails,
                     authorisationToken,
-                    DocumentHelper.PaperNotificationRecipient.RESPONDENT), caseDetails, authorisationToken);
+                    DocumentHelper.PaperNotificationRecipient.RESPONDENT), caseDetails, CCDConfigConstant.RESPONDENT, authorisationToken);
         }
     }
 

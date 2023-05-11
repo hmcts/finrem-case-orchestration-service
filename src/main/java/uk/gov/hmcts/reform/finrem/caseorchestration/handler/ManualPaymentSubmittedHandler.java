@@ -6,6 +6,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
@@ -50,7 +51,7 @@ public class ManualPaymentSubmittedHandler extends FinremCallbackHandler {
             log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
             CaseDocument caseDocument =
                 service.generateManualPaymentLetter(caseDetails, userAuthorisation, APPLICANT);
-            printService.sendDocumentForPrint(caseDocument, caseDetails, userAuthorisation);
+            printService.sendDocumentForPrint(caseDocument, caseDetails, CCDConfigConstant.APPLICANT, userAuthorisation);
         }
 
         return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()

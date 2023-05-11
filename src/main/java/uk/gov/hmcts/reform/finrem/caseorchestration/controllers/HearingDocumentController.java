@@ -57,9 +57,6 @@ public class HearingDocumentController extends BaseController {
     private final ObjectMapper objectMapper;
     private final CheckRespondentSolicitorIsDigitalService checkRespondentSolicitorIsDigitalService;
 
-    private List<String> nonFastTrackWarningsList = new ArrayList<>();
-    private List<String> fastTrackWarningsList = new ArrayList<>();
-
     @PostMapping(path = "/documents/hearing", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @Operation(summary = "Handles Form C and G generation. Serves as a callback from CCD")
     @ApiResponses(value = {
@@ -100,23 +97,8 @@ public class HearingDocumentController extends BaseController {
             caseDetails.getData().putAll(hearingDocumentService.generateHearingDocuments(authorisationToken, caseDetails));
         }
 
-        List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails, fastTrackWarningsList, nonFastTrackWarningsList);
-        log.info("Hearing date warning {} Case ID: {}",warnings, caseId);
-        if ((warnings.isEmpty() || fastTrackWarningsList.size() > 1 || nonFastTrackWarningsList.size() > 1)
-            && caseDataService.isContestedApplication(caseDetails)) {
-            CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-            if (caseDetailsBefore != null && hearingDocumentService.alreadyHadFirstHearing(caseDetailsBefore)) {
-                log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseId);
-                additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, caseDetails);
-                log.info("Sent Additional Hearing Document to bulk print for Contested Case ID: {}", caseId);
-            } else {
-                log.info("Sending Forms A, C, G to bulk print for Contested Case ID: {}", caseId);
-                hearingDocumentService.sendInitialHearingCorrespondence(caseDetails, authorisationToken);
-                log.info("sent Forms A, C, G to bulk print for Contested Case ID: {}", caseId);
-            }
-            fastTrackWarningsList = new ArrayList<>();
-            nonFastTrackWarningsList = new ArrayList<>();
-        }
+        List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
+        log.info("Hearing date warning {} Case ID: {}", warnings, caseDetails.getId());
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).warnings(warnings).build());
     }
 

@@ -29,9 +29,7 @@ public class GenericDocumentService {
     public CaseDocument generateDocument(String authorisationToken, CaseDetails caseDetailsCopy,
                                          String template, String fileName) {
         Map<String, Object> caseData = caseDetailsCopy.getData();
-        if (caseData.get(DocumentHelper.CASE_NUMBER) == null) {
-            caseData.put(DocumentHelper.CASE_NUMBER, caseDetailsCopy.getId());
-        }
+        caseData.computeIfAbsent(DocumentHelper.CASE_NUMBER, k -> caseDetailsCopy.getId());
         Map<String, Object> caseDetailsMap = Collections.singletonMap(DOCUMENT_CASE_DETAILS_JSON_KEY, caseDetailsCopy);
         return generateDocumentFromPlaceholdersMap(authorisationToken, caseDetailsMap, template, fileName,
             caseDetailsCopy.getId().toString());
@@ -44,9 +42,9 @@ public class GenericDocumentService {
         return toCaseDocument(generatedPdf);
     }
 
-    public UUID bulkPrint(BulkPrintRequest bulkPrintRequest, String auth) {
+    public UUID bulkPrint(BulkPrintRequest bulkPrintRequest, String recipient, String auth) {
         final List<byte[]> documents = bulkPrintDocumentService.downloadDocuments(bulkPrintRequest, auth);
-        return bulkPrintDocumentGeneratorService.send(bulkPrintRequest, documents);
+        return bulkPrintDocumentGeneratorService.send(bulkPrintRequest, recipient, documents);
     }
 
     public void deleteDocument(String documentUrl, String authorisationToken) {

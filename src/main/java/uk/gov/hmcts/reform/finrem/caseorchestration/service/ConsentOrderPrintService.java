@@ -19,6 +19,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_RES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 
 @Slf4j
 @Service
@@ -85,9 +86,7 @@ public class ConsentOrderPrintService {
         return bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, applicantDocuments);
     }
 
-    private UUID sendConsentOrderForBulkPrintRespondent(CaseDocument coverSheet,
-                                                        CaseDetails caseDetails,
-                                                        String authorisationToken) {
+    private UUID sendConsentOrderForBulkPrintRespondent(CaseDocument coverSheet, CaseDetails caseDetails, String authorisationToken) {
         log.info("Sending order documents to recipient / solicitor for Bulk Print, case {}", caseDetails.getId());
 
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
@@ -117,6 +116,7 @@ public class ConsentOrderPrintService {
 
         return bulkPrintService.bulkPrintFinancialRemedyLetterPack(
             caseDetails.getId(),
+            RESPONDENT,
             bulkPrintDocuments,
             authorisationToken);
     }
