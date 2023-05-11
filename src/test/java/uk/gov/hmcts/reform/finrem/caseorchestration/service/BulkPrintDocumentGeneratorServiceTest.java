@@ -28,6 +28,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BulkPrintDocumentGeneratorServiceTest {
@@ -49,7 +50,7 @@ public class BulkPrintDocumentGeneratorServiceTest {
         when(sendLetterApi.sendLetter(anyString(), any(LetterWithPdfsRequest.class)))
             .thenReturn(new SendLetterResponse(randomId));
 
-        UUID letterId = service.send(getBulkPrintRequest(), singletonList("abc".getBytes()));
+        UUID letterId = service.send(getBulkPrintRequest(), APPLICANT, singletonList("abc".getBytes()));
         assertThat(letterId, is(equalTo(randomId)));
     }
 
@@ -59,7 +60,7 @@ public class BulkPrintDocumentGeneratorServiceTest {
     public void throwsException() {
         when(authTokenGenerator.generate()).thenThrow(new RuntimeException());
         thrown.expect(RuntimeException.class);
-        service.send(getBulkPrintRequest(), singletonList("abc".getBytes()));
+        service.send(getBulkPrintRequest(), APPLICANT, singletonList("abc".getBytes()));
         verifyNoInteractions(sendLetterApi);
     }
 
@@ -72,7 +73,7 @@ public class BulkPrintDocumentGeneratorServiceTest {
             .thenThrow(new RuntimeException());
 
         thrown.expect(RuntimeException.class);
-        service.send(getBulkPrintRequest(), singletonList("abc".getBytes()));
+        service.send(getBulkPrintRequest(), APPLICANT, singletonList("abc".getBytes()));
         verify(authTokenGenerator).generate();
     }
 

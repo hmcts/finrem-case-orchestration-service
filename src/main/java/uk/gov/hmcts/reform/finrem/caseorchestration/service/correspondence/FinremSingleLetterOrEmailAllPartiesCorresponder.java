@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -29,7 +30,9 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
         } else {
             log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
             bulkPrintService.sendDocumentForPrint(
-                getDocumentToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.APPLICANT), caseDetails);
+                getDocumentToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.APPLICANT),
+                caseDetails,
+                CCDConfigConstant.APPLICANT);
         }
     }
 
@@ -40,7 +43,9 @@ public abstract class FinremSingleLetterOrEmailAllPartiesCorresponder extends Em
         } else {
             log.info("Sending letter correspondence to respondent for case: {}", caseDetails.getId());
             bulkPrintService.sendDocumentForPrint(
-                getDocumentToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT), caseDetails);
+                getDocumentToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT),
+                caseDetails,
+                CCDConfigConstant.RESPONDENT);
         }
     }
 
