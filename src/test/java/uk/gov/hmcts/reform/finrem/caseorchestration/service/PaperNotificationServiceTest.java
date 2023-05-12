@@ -6,6 +6,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.generalapplication.service.RejectGeneralApplicationDocumentService;
 
@@ -44,7 +45,7 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
 
         verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(any(CaseDetails.class), eq(AUTH_TOKEN), eq(APPLICANT));
         verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(any(CaseDetails.class), eq(AUTH_TOKEN), eq(RESPONDENT));
-        verify(bulkPrintService, times(2)).sendDocumentForPrint(any(), any(CaseDetails.class));
+        verify(bulkPrintService, times(2)).sendDocumentForPrint(any(), any(CaseDetails.class), any());
     }
 
     @Test
@@ -92,7 +93,7 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
         when(rejectGeneralApplicationDocumentService.generateGeneralApplicationRejectionLetter(eq(caseDetails), any(), eq(APPLICANT)))
             .thenReturn(caseDocument);
         paperNotificationService.printApplicantRejectionGeneralApplication(caseDetails, AUTH_TOKEN);
-        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails);
+        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, CCDConfigConstant.APPLICANT);
     }
 
     @Test
@@ -106,6 +107,6 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
         when(rejectGeneralApplicationDocumentService.generateGeneralApplicationRejectionLetter(eq(caseDetails), any(), eq(RESPONDENT)))
             .thenReturn(caseDocument);
         paperNotificationService.printRespondentRejectionGeneralApplication(caseDetails, AUTH_TOKEN);
-        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails);
+        verify(bulkPrintService).sendDocumentForPrint(caseDocument, caseDetails, CCDConfigConstant.RESPONDENT);
     }
 }

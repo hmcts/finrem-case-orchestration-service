@@ -7,13 +7,18 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedHearingHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Barrister;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentedHearingDataWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -25,8 +30,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerOneWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.GeneralEmailWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.solicitors.CheckSolicitorIsDigitalService;
 
 import java.io.IOException;
@@ -39,6 +46,7 @@ import java.util.Optional;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -58,6 +66,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_NOC_CASEWORKER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENTED_NOTICE_OF_CHANGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_GENERAL_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_GENERAL_EMAIL_ATTACHMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_AVAILABLE_CTSC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONSENT_ORDER_MADE;
@@ -69,6 +78,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_APPLICATION_OUTCOME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_GENERAL_ORDER_CONSENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames.FR_CONTESTED_HWF_SUCCESSFUL;
@@ -142,7 +152,11 @@ public class NotificationServiceTest extends BaseServiceTest {
     @MockBean
     private NotificationRequestMapper notificationRequestMapper;
     @MockBean
+    private FinremNotificationRequestMapper finremNotificationRequestMapper;
+    @MockBean
     private CheckSolicitorIsDigitalService checkSolicitorIsDigitalService;
+    @MockBean
+    private EvidenceManagementDownloadService evidenceManagementDownloadService;
     @MockBean
     private CaseDataService caseDataService;
 
@@ -156,6 +170,10 @@ public class NotificationServiceTest extends BaseServiceTest {
         notificationRequest = new NotificationRequest();
         when(notificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(CaseDetails.class))).thenReturn(notificationRequest);
         when(notificationRequestMapper.getNotificationRequestForRespondentSolicitor(any(CaseDetails.class))).thenReturn(notificationRequest);
+        when(finremNotificationRequestMapper.getNotificationRequestForApplicantSolicitor(any(FinremCaseDetails.class)))
+            .thenReturn(notificationRequest);
+        when(evidenceManagementDownloadService.download(anyString()))
+            .thenReturn(ResponseEntity.status(HttpStatus.OK).body(new byte[2048]));
     }
 
     @Test
@@ -692,6 +710,26 @@ public class NotificationServiceTest extends BaseServiceTest {
             .id(123450L).build()));
     }
 
+    @Test
+    public void shouldSendGeneralEmailWithAttachmentConsented() {
+        FinremCaseDetails finremCaseDetails = getFinremCaseDetails(CaseType.CONSENTED);
+        notificationService.sendConsentGeneralEmail(finremCaseDetails);
+
+        verify(finremNotificationRequestMapper).getNotificationRequestForApplicantSolicitor(finremCaseDetails);
+        verify(evidenceManagementDownloadService).download(anyString());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENT_GENERAL_EMAIL_ATTACHMENT);
+    }
+
+    @Test
+    public void shouldSendGeneralEmailWithAttachmentContested() {
+        FinremCaseDetails finremCaseDetails = getFinremCaseDetails(CaseType.CONTESTED);
+        notificationService.sendContestedGeneralEmail(finremCaseDetails);
+
+        verify(finremNotificationRequestMapper).getNotificationRequestForApplicantSolicitor(finremCaseDetails);
+        verify(evidenceManagementDownloadService).download(anyString());
+        verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONTESTED_GENERAL_EMAIL_ATTACHMENT);
+    }
+
 
     @Test
     public void shouldEmailApplicantSolicitorWhenApplicantSolicitorIsDigitalAndEmailIsPopulated() {
@@ -1077,6 +1115,21 @@ public class NotificationServiceTest extends BaseServiceTest {
                 verify(emailService).sendConfirmationEmail(notificationRequest, FR_CONSENTED_LIST_FOR_HEARING);
             }
         });
+    }
+
+    private static FinremCaseDetails getFinremCaseDetails(CaseType caseType) {
+        return FinremCaseDetails.builder()
+            .data(FinremCaseData.builder()
+                .ccdCaseType(caseType)
+                .generalEmailWrapper(GeneralEmailWrapper.builder()
+                    .generalEmailRecipient(APPLICANT_EMAIL)
+                    .generalEmailUploadedDocument(CaseDocument.builder()
+                        .documentBinaryUrl("dummyUrl")
+                        .build())
+                    .build())
+                .build())
+            .caseType(caseType)
+            .build();
     }
 
 }

@@ -15,4 +15,6 @@ public class GeneralEmailData {
     private String generalEmailCreatedBy;
     @JsonProperty("generalEmailBody")
     private String generalEmailBody;
+    @JsonProperty("generalEmailUploadedDocument")
+    private CaseDocument generalEmailUploadedDocument;
 }

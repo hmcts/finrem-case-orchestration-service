@@ -39,8 +39,7 @@ public class ValidateHearingService {
             ? List.of(REQUIRED_FIELD_EMPTY_ERROR) : List.of();
     }
 
-    public List<String> validateHearingWarnings(CaseDetails caseDetails, List<String> fastTrackWarningsList,
-                                                List<String>  nonFastTrackWarningsList) {
+    public List<String> validateHearingWarnings(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
         String issueDate = Objects.toString(caseData.get(ISSUE_DATE), "");
         String hearingDate = Objects.toString(caseData.get(HEARING_DATE), "");
@@ -52,13 +51,11 @@ public class ValidateHearingService {
         if (fastTrackApplication) {
             if (!isDateInBetweenIncludingEndPoints(issueLocalDate.plusWeeks(6), issueLocalDate.plusWeeks(10),
                 hearingLocalDate)) {
-                fastTrackWarningsList.add(DATE_BETWEEN_6_AND_10_WEEKS);
-                return fastTrackWarningsList;
+                return List.of(DATE_BETWEEN_6_AND_10_WEEKS);
             }
         } else if (!isDateInBetweenIncludingEndPoints(issueLocalDate.plusWeeks(12), issueLocalDate.plusWeeks(16),
             hearingLocalDate)) {
-            nonFastTrackWarningsList.add(DATE_BETWEEN_12_AND_16_WEEKS);
-            return nonFastTrackWarningsList;
+            return List.of(DATE_BETWEEN_12_AND_16_WEEKS);
         }
         return List.of();
     }

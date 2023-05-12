@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.letters.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Assert;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -13,8 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.NoticeType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.NocDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.noc.documents.generators.AbstractLetterDetailsGenerator;
-
-import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -73,8 +72,7 @@ public abstract class LetterHandlerTestBase {
             setUpCaseDocumentInteraction(noticeOfChangeLetterDetails,
                 nocDocumentService, "appDocFileName");
 
-        when(bulkPrintService.sendDocumentForPrint(caseDocumentApplicant, caseDetails)).thenReturn(UUID.fromString(DOCUMENT_UUID));
-
+        Assert.assertNotNull(caseDocumentApplicant);
         getLetterHandler().handle(caseDetails, caseDetailsBefore, AUTH_TOKEN);
 
         assertThat(paperNotificationRecipientArgumentCaptor.getValue(), is(recipient));
@@ -85,7 +83,8 @@ public abstract class LetterHandlerTestBase {
         }
 
         verify(nocDocumentService).generateNoticeOfChangeLetter(AUTH_TOKEN, noticeOfChangeLetterDetails);
-        verify(bulkPrintService).sendDocumentForPrint(caseDocumentApplicant, caseDetails);
+        verify(bulkPrintService).sendDocumentForPrint(caseDocumentApplicant, caseDetails,
+            bulkPrintService.getRecipient(recipient.toString()));
     }
 
 
