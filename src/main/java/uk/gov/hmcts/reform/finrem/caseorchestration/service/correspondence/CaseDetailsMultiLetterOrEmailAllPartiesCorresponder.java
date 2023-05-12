@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
@@ -14,6 +16,7 @@ public abstract class CaseDetailsMultiLetterOrEmailAllPartiesCorresponder extend
 
     protected final BulkPrintService bulkPrintService;
     protected final NotificationService notificationService;
+    protected final NotificationRequestMapper notificationRequestMapper;
 
     protected void sendApplicantCorrespondence(String authorisationToken, CaseDetails caseDetails) {
         if (shouldSendApplicantSolicitorEmail(caseDetails)) {
@@ -35,6 +38,29 @@ public abstract class CaseDetailsMultiLetterOrEmailAllPartiesCorresponder extend
         }
     }
 
+    public void sendIntervenerCorrespondence(String authorisationToken, CaseDetails caseDetails) {
+        if (shouldSendIntervenerSolicitorEmail(caseDetails,"intervener1SolEmail")) {
+            log.info("Sending email correspondence to intervener 1 for case: {}", caseDetails.getId());
+            SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper = notificationRequestMapper.getCaseDataKeysForIntervenerOneSolicitor();
+            this.emailIntervenerSolicitor(caseDetails, solicitorCaseDataKeysWrapper);
+        }
+        if (shouldSendIntervenerSolicitorEmail(caseDetails,"intervener2SolEmail")) {
+            log.info("Sending email correspondence to intervener 2 for case: {}", caseDetails.getId());
+            final SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper = notificationRequestMapper.getCaseDataKeysForIntervenerTwoSolicitor();
+            this.emailIntervenerSolicitor(caseDetails, solicitorCaseDataKeysWrapper);
+        }
+        if (shouldSendIntervenerSolicitorEmail(caseDetails,"intervener3SolEmail")) {
+            log.info("Sending email correspondence to intervener 3 for case: {}", caseDetails.getId());
+            final SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper = notificationRequestMapper.getCaseDataKeysForIntervenerThreeSolicitor();
+            this.emailIntervenerSolicitor(caseDetails, solicitorCaseDataKeysWrapper);
+        }
+        if (shouldSendIntervenerSolicitorEmail(caseDetails,"intervener4SolEmail")) {
+            log.info("Sending email correspondence to intervener 4 for case: {}", caseDetails.getId());
+            final SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper = notificationRequestMapper.getCaseDataKeysForIntervenerFourSolicitor();
+            this.emailIntervenerSolicitor(caseDetails, solicitorCaseDataKeysWrapper);
+        }
+    }
+
     protected boolean shouldSendApplicantSolicitorEmail(CaseDetails caseDetails) {
         return notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails);
     }
@@ -43,5 +69,8 @@ public abstract class CaseDetailsMultiLetterOrEmailAllPartiesCorresponder extend
         return notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails);
     }
 
+    protected boolean shouldSendIntervenerSolicitorEmail(CaseDetails caseDetails, String intervenerField) {
+        return notificationService.isIntervenerSolicitorDigitalAndEmailPopulated(caseDetails, intervenerField);
+    }
 
 }

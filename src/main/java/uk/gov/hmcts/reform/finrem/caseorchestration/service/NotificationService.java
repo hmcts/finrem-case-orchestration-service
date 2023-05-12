@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerThreeWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.wrapper.IntervenerTwoWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.SolicitorCaseDataKeysWrapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.domain.EmailTemplateNames;
 import uk.gov.hmcts.reform.finrem.caseorchestration.notifications.service.EmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.evidencemanagement.EvidenceManagementDownloadService;
@@ -186,22 +187,22 @@ public class NotificationService {
 
     private boolean isIntervenerOneEmailPresent(IntervenerOneWrapper intervenerOneWrapper) {
         return intervenerOneWrapper != null
-            && intervenerOneWrapper.getIntervener1Email() != null;
+            && intervenerOneWrapper.getIntervener1SolEmail() != null;
     }
 
     private boolean isIntervenerTwoEmailPresent(IntervenerTwoWrapper intervenerTwoWrapper) {
         return intervenerTwoWrapper != null
-            && intervenerTwoWrapper.getIntervener2Email() != null;
+            && intervenerTwoWrapper.getIntervener2SolEmail() != null;
     }
 
     private boolean isIntervenerThreeEmailPresent(IntervenerThreeWrapper intervenerThreeWrapper) {
         return intervenerThreeWrapper != null
-            && intervenerThreeWrapper.getIntervener3Email() != null;
+            && intervenerThreeWrapper.getIntervener3SolEmail() != null;
     }
 
     private boolean isIntervenerFourEmailPresent(IntervenerFourWrapper intervenerFourWrapper) {
         return intervenerFourWrapper != null
-            && intervenerFourWrapper.getIntervener4Email() != null;
+            && intervenerFourWrapper.getIntervener4SolEmail() != null;
     }
 
     private NotificationRequest getIntervenerTwoNotification(FinremCaseDetails finremCaseDetails,
@@ -516,6 +517,15 @@ public class NotificationService {
 
     public void sendPrepareForHearingEmailRespondent(FinremCaseDetails caseDetails) {
         sendPrepareForHearingEmail(finremNotificationRequestMapper.getNotificationRequestForRespondentSolicitor(caseDetails));
+    }
+
+    @Deprecated
+    public void sendPrepareForHearingEmailIntervener(CaseDetails caseDetails, SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
+        sendPrepareForHearingEmail(notificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails, solicitorCaseDataKeysWrapper));
+    }
+
+    public void sendPrepareForHearingEmailIntervener(FinremCaseDetails caseDetails, SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper ) {
+        sendPrepareForHearingEmail(finremNotificationRequestMapper.getNotificationRequestForIntervenerSolicitor(caseDetails, solicitorCaseDataKeysWrapper));
     }
 
     private void sendPrepareForHearingEmail(NotificationRequest notificationRequest) {
@@ -1082,6 +1092,12 @@ public class NotificationService {
     public boolean isRespondentSolicitorDigitalAndEmailPopulated(CaseDetails caseDetails) {
         return caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseDetails.getData())
             && checkSolicitorIsDigitalService.isRespondentSolicitorDigital(caseDetails.getId().toString());
+    }
+
+    public boolean isIntervenerSolicitorDigitalAndEmailPopulated(CaseDetails caseDetails, String intervenerField) {
+        return caseDataService.isNotEmpty(intervenerField, caseDetails.getData())
+            && checkSolicitorIsDigitalService.isIntervenerSolicitorDigital(caseDetails.getId().toString(),
+            CaseRole.INTVR_SOLICITOR_1);
     }
 
     public boolean isRespondentSolicitorDigitalAndEmailPopulated(FinremCaseDetails caseDetails) {

@@ -24,7 +24,10 @@ public class AdditionalHearingCorresponderTest extends HearingCorrespondenceBase
 
     @Before
     public void setUpTest() {
-        applicantAndRespondentMultiLetterCorresponder = new AdditionalHearingCorresponder(bulkPrintService, notificationService, documentHelper);
+        applicantAndRespondentMultiLetterCorresponder = new AdditionalHearingCorresponder(bulkPrintService,
+            notificationService,
+            notificationRequestMapper,
+            documentHelper);
         caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
 
         when(documentHelper.convertToAdditionalHearingDocumentData(any())).thenReturn(getAdditionalHearingDocumentData());

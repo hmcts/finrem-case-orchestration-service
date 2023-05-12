@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
@@ -28,8 +29,9 @@ public class ApprovedOrderNoticeOfHearingCorresponder extends HearingCorresponde
     @Autowired
     public ApprovedOrderNoticeOfHearingCorresponder(BulkPrintService bulkPrintService,
                                                     NotificationService notificationService,
+                                                    NotificationRequestMapper notificationRequestMapper,
                                                     ObjectMapper objectMapper, DocumentHelper documentHelper) {
-        super(bulkPrintService, notificationService);
+        super(bulkPrintService, notificationService, notificationRequestMapper);
         this.objectMapper = objectMapper;
         this.documentHelper = documentHelper;
     }

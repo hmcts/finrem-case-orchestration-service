@@ -72,6 +72,11 @@ public class NotificationRequestMapper {
         return buildInterimHearingNotificationRequest(caseDetails, getCaseDataKeysForRespondentSolicitor());
     }
 
+    public NotificationRequest getNotificationRequestForIntervenerSolicitor(CaseDetails caseDetails,
+                                                                            SolicitorCaseDataKeysWrapper solicitorCaseDataKeysWrapper) {
+        return buildInterimHearingNotificationRequest(caseDetails, solicitorCaseDataKeysWrapper);
+    }
+
     @Deprecated
     public NotificationRequest getNotificationRequestForConsentApplicantSolicitor(CaseDetails caseDetails,
                                                                            Map<String, Object> hearingData) {
@@ -120,6 +125,38 @@ public class NotificationRequestMapper {
         return SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey(RESP_SOLICITOR_EMAIL)
             .solicitorNameKey(RESP_SOLICITOR_NAME)
+            .solicitorReferenceKey(RESP_SOLICITOR_REFERENCE)
+            .build();
+    }
+
+    public SolicitorCaseDataKeysWrapper getCaseDataKeysForIntervenerOneSolicitor() {
+        return SolicitorCaseDataKeysWrapper.builder()
+            .solicitorEmailKey("intervener1SolEmail")
+            .solicitorNameKey("intervener1SolName")
+            .solicitorReferenceKey(RESP_SOLICITOR_REFERENCE) // TODO: check sol reference for intervener
+            .build();
+    }
+
+    public SolicitorCaseDataKeysWrapper getCaseDataKeysForIntervenerTwoSolicitor() {
+        return SolicitorCaseDataKeysWrapper.builder()
+            .solicitorEmailKey("intervener2SolEmail")
+            .solicitorNameKey("intervener2SolName")
+            .solicitorReferenceKey(RESP_SOLICITOR_REFERENCE)
+            .build();
+    }
+
+    public SolicitorCaseDataKeysWrapper getCaseDataKeysForIntervenerThreeSolicitor() {
+        return SolicitorCaseDataKeysWrapper.builder()
+            .solicitorEmailKey("intervener3SolEmail")
+            .solicitorNameKey("intervener3SolName")
+            .solicitorReferenceKey(RESP_SOLICITOR_REFERENCE)
+            .build();
+    }
+
+    public SolicitorCaseDataKeysWrapper getCaseDataKeysForIntervenerFourSolicitor() {
+        return SolicitorCaseDataKeysWrapper.builder()
+            .solicitorEmailKey("intervener4SolEmail")
+            .solicitorNameKey("intervener4SolName")
             .solicitorReferenceKey(RESP_SOLICITOR_REFERENCE)
             .build();
     }

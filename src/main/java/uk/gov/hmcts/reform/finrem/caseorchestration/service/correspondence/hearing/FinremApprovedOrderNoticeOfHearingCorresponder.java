@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
@@ -25,8 +26,9 @@ public class FinremApprovedOrderNoticeOfHearingCorresponder extends FinremHearin
     @Autowired
     public FinremApprovedOrderNoticeOfHearingCorresponder(BulkPrintService bulkPrintService,
                                                           NotificationService notificationService,
+                                                          FinremNotificationRequestMapper notificationRequestMapper,
                                                           ObjectMapper objectMapper, DocumentHelper documentHelper) {
-        super(bulkPrintService, notificationService);
+        super(bulkPrintService, notificationService, notificationRequestMapper);
         this.objectMapper = objectMapper;
         this.documentHelper = documentHelper;
     }

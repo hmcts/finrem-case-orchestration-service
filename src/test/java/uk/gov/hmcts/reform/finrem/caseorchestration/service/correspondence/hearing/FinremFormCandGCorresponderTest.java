@@ -40,7 +40,7 @@ public class FinremFormCandGCorresponderTest extends FinremHearingCorrespondence
     public void setUp() throws Exception {
         caseDetails = caseDetails(NO_VALUE);
         applicantAndRespondentMultiLetterCorresponder =
-            new FinremFormCandGCorresponder(bulkPrintService, notificationService,
+            new FinremFormCandGCorresponder(bulkPrintService, notificationService, notificationRequestMapper,
                 new DocumentHelper(objectMapper, new CaseDataService(objectMapper), genericDocumentService, finremCaseDetailsMapper), objectMapper);
     }
 
