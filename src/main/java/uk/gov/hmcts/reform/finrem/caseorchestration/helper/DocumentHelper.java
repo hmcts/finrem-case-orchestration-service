@@ -13,6 +13,10 @@ import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerFourToIntervenerDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerOneToIntervenerDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerThreeToIntervenerDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerTwoToIntervenerDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
@@ -34,6 +38,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Region;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerAction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
@@ -120,6 +125,10 @@ public class DocumentHelper {
     private final CaseDataService caseDataService;
     private final GenericDocumentService service;
     private final FinremCaseDetailsMapper finremCaseDetailsMapper;
+    private final IntervenerOneToIntervenerDetailsMapper intervenerOneDetailsMapper;
+    private final IntervenerTwoToIntervenerDetailsMapper intervenerTwoDetailsMapper;
+    private final IntervenerThreeToIntervenerDetailsMapper intervenerThreeDetailsMapper;
+    private final IntervenerFourToIntervenerDetailsMapper intervenerFourDetailsMapper;
 
     public static CtscContactDetails buildCtscContactDetails() {
         return CtscContactDetails.builder()
@@ -453,24 +462,53 @@ public class DocumentHelper {
         String addresseeName;
         Address addressToSendTo;
 
-        if (recipient == INTERVENER_ONE && !caseData.isIntervenerOneRepresentedByASolicitor()) {
-            log.info("Intervener One is not represented by a solicitor");
-            addresseeName = caseData.getIntervenerOneWrapper().getIntervener1Name();
-            addressToSendTo = caseData.getIntervenerOneWrapper().getIntervener1Address();
-        } else if (recipient == INTERVENER_TWO && !caseData.isIntervenerTwoRepresentedByASolicitor()) {
-            log.info("Intervener Two is not represented by a solicitor");
-            addresseeName = caseData.getIntervenerTwoWrapper().getIntervener2Name();
-            addressToSendTo = caseData.getIntervenerTwoWrapper().getIntervener2Address();
-        } else if (recipient == INTERVENER_THREE && !caseData.isIntervenerThreeRepresentedByASolicitor()) {
-            log.info("Intervener Three is not represented by a solicitor");
-            addresseeName = caseData.getIntervenerThreeWrapper().getIntervener3Name();
-            addressToSendTo = caseData.getIntervenerThreeWrapper().getIntervener3Address();
-        } else if (recipient == INTERVENER_FOUR && !caseData.isIntervenerFourRepresentedByASolicitor()) {
-            log.info("Intervener Four is not represented by a solicitor");
-            addresseeName = caseData.getIntervenerFourWrapper().getIntervener4Name();
-            addressToSendTo = caseData.getIntervenerFourWrapper().getIntervener4Address();
+        if (recipient == INTERVENER_ONE) {
+            if (caseData.getCurrentIntervenerChangeDetails().getIntervenerAction().equals(IntervenerAction.REMOVED)) {
+                addresseeName = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerName();
+                addressToSendTo = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerAddress();
+                caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(intervenerOneDetailsMapper.mapToIntervenerDetails(
+                    caseDetails.getData().getIntervenerOneWrapper()));
+            }
+            else {
+                addresseeName = caseData.getIntervenerOneWrapper().getIntervener1Name();
+                addressToSendTo = caseData.getIntervenerOneWrapper().getIntervener1Address();
+            }
+
+        } else if (recipient == INTERVENER_TWO) {
+            if (caseData.getCurrentIntervenerChangeDetails().getIntervenerAction().equals(IntervenerAction.REMOVED)) {
+                addresseeName = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerName();
+                addressToSendTo = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerAddress();
+                caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(intervenerTwoDetailsMapper.mapToIntervenerDetails(
+                    caseDetails.getData().getIntervenerTwoWrapper()));
+            }
+            else {
+                addresseeName = caseData.getIntervenerTwoWrapper().getIntervener2Name();
+                addressToSendTo = caseData.getIntervenerTwoWrapper().getIntervener2Address();
+            }
+        } else if (recipient == INTERVENER_THREE) {
+            if (caseData.getCurrentIntervenerChangeDetails().getIntervenerAction().equals(IntervenerAction.REMOVED)) {
+                addresseeName = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerName();
+                addressToSendTo = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerAddress();
+                caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(intervenerThreeDetailsMapper.mapToIntervenerDetails(
+                    caseDetails.getData().getIntervenerThreeWrapper()));
+            }
+            else {
+                addresseeName = caseData.getIntervenerThreeWrapper().getIntervener3Name();
+                addressToSendTo = caseData.getIntervenerThreeWrapper().getIntervener3Address();
+            }
+        } else if (recipient == INTERVENER_FOUR) {
+            if (caseData.getCurrentIntervenerChangeDetails().getIntervenerAction().equals(IntervenerAction.REMOVED)) {
+                addresseeName = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerName();
+                addressToSendTo = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerAddress();
+                caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(intervenerFourDetailsMapper.mapToIntervenerDetails(
+                    caseDetails.getData().getIntervenerFourWrapper()));
+            }
+            else {
+                addresseeName = caseData.getIntervenerFourWrapper().getIntervener4Name();
+                addressToSendTo = caseData.getIntervenerFourWrapper().getIntervener4Address();
+            }
+
         } else {
-            log.info("{} is not represented by a solicitor", recipient);
             addresseeName = recipient == APPLICANT
                 ? caseDetails.getData().getFullApplicantName()
                 : caseDetails.getData().getRespondentFullName();

@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerAddedLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerAddedSolicitorLetterDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerRemovedLetterDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.intervener.IntervenerRemovedSolicitorLetterDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
@@ -38,104 +40,149 @@ public class IntervenerDocumentService {
                                                                   DocumentHelper.PaperNotificationRecipient recipient) {
 
         log.info("Generating Intervener Added Notification Letter {} from {} for bulk print for {}",
-            documentConfiguration.getIntervenerAddedTemplate(),
-            documentConfiguration.getIntervenerAddedFilename(),
-            recipient);
+            documentConfiguration.getIntervenerAddedTemplate(), documentConfiguration.getIntervenerAddedFilename(), recipient);
 
         CaseDetails caseDetailsForBulkPrint = documentHelper.prepareIntervenerLetterTemplateData(finremCaseDetails, recipient);
         finremCaseDetails.getData().setCurrentAddressee((Addressee) caseDetailsForBulkPrint.getData().get(ADDRESSEE));
         IntervenerAddedLetterDetails intervenerAddedLetterDetails = generateAddedLetterDetails(finremCaseDetails);
 
-        return getCaseDocument(authToken, intervenerAddedLetterDetails);
+        return getIntervenerAddedCaseDocument(authToken, intervenerAddedLetterDetails);
+    }
+
+    public CaseDocument generateIntervenerRemovedNotificationLetter(FinremCaseDetails finremCaseDetails, String authToken,
+                                                                    DocumentHelper.PaperNotificationRecipient recipient) {
+        log.info("Generating Intervener Removed Notification Letter {} from {} for bulk print for {}",
+            documentConfiguration.getIntervenerRemovedTemplate(), documentConfiguration.getIntervenerRemovedFilename(), recipient);
+
+        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareIntervenerLetterTemplateData(finremCaseDetails, recipient);
+        finremCaseDetails.getData().setCurrentAddressee((Addressee) caseDetailsForBulkPrint.getData().get(ADDRESSEE));
+        IntervenerRemovedLetterDetails intervenerRemovedLetterDetails = generateRemovedLetterDetails(finremCaseDetails);
+
+        return getIntervenerRemovedCaseDocument(authToken, intervenerRemovedLetterDetails);
     }
 
     public CaseDocument generateIntervenerSolicitorAddedLetter(FinremCaseDetails finremCaseDetails, String authToken,
                                                                DocumentHelper.PaperNotificationRecipient recipient) {
-
         log.info("Generating Intervener Added Solicitor Notification Letter {} from {} for bulk print for {}",
-            documentConfiguration.getIntervenerAddedSolicitorTemplate(),
-            documentConfiguration.getIntervenerAddedSolicitorFilename(),
-            recipient);
+            documentConfiguration.getIntervenerAddedSolicitorTemplate(), documentConfiguration.getIntervenerAddedSolicitorFilename(), recipient);
 
         CaseDetails caseDetailsForBulkPrint = documentHelper.prepareIntervenerLetterTemplateData(finremCaseDetails, recipient);
         finremCaseDetails.getData().setCurrentAddressee((Addressee) caseDetailsForBulkPrint.getData().get(ADDRESSEE));
         IntervenerAddedSolicitorLetterDetails intervenerAddedSolicitorLetterDetails = generateSolAddedLetterDetails(finremCaseDetails);
 
-        return getCaseDocument(authToken, intervenerAddedSolicitorLetterDetails);
+        return getIntervenerAddedCaseDocument(authToken, intervenerAddedSolicitorLetterDetails);
     }
 
-    private CaseDocument getCaseDocument(String authToken, IntervenerAddedLetterDetails intervenerAddedLetterDetails) {
+    public CaseDocument generateIntervenerSolicitorRemovedLetter(FinremCaseDetails finremCaseDetails, String authToken,
+                                                                 DocumentHelper.PaperNotificationRecipient recipient) {
+        log.info("Generating Intervener Removed Solicitor Notification Letter {} from {} for bulk print for {}",
+            documentConfiguration.getIntervenerRemovedSolicitorTemplate(), documentConfiguration.getIntervenerRemovedSolicitorFilename(), recipient);
 
-        CaseDocument generatedIntervenerAddedNotificationLetter = generateDocument(authToken,
-            intervenerAddedLetterDetails,
-            documentConfiguration.getIntervenerAddedTemplate(),
-            documentConfiguration.getIntervenerAddedFilename());
+        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareIntervenerLetterTemplateData(finremCaseDetails, recipient);
+        finremCaseDetails.getData().setCurrentAddressee((Addressee) caseDetailsForBulkPrint.getData().get(ADDRESSEE));
+        IntervenerRemovedSolicitorLetterDetails intervenerRemovedSolicitorLetterDetails = generateSolRemovedLetterDetails(finremCaseDetails);
 
+        return getIntervenerRemovedCaseDocument(authToken, intervenerRemovedSolicitorLetterDetails);
+    }
+
+    private CaseDocument getIntervenerAddedCaseDocument(String authToken, IntervenerAddedLetterDetails intervenerAddedLetterDetails) {
+        CaseDocument generatedIntervenerAddedNotificationLetter =
+            generateDocument(authToken, intervenerAddedLetterDetails, documentConfiguration.getIntervenerAddedTemplate(),
+                documentConfiguration.getIntervenerAddedFilename());
         log.info("Generated Intervener Added Notification Letter: {}", generatedIntervenerAddedNotificationLetter);
         return generatedIntervenerAddedNotificationLetter;
     }
 
-    private CaseDocument getCaseDocument(String authToken, IntervenerAddedSolicitorLetterDetails intervenerAddedSolicitorLetterDetails) {
-
-        CaseDocument generatedIntervenerAddedSolicitorNotificationLetter = generateDocument(authToken,
-            intervenerAddedSolicitorLetterDetails,
-            documentConfiguration.getIntervenerAddedSolicitorTemplate(),
-            documentConfiguration.getIntervenerAddedSolicitorFilename());
-
+    private CaseDocument getIntervenerAddedCaseDocument(String authToken,
+                                                        IntervenerAddedSolicitorLetterDetails intervenerAddedSolicitorLetterDetails) {
+        CaseDocument generatedIntervenerAddedSolicitorNotificationLetter =
+            generateDocument(authToken, intervenerAddedSolicitorLetterDetails, documentConfiguration.getIntervenerAddedSolicitorTemplate(),
+                documentConfiguration.getIntervenerAddedSolicitorFilename());
         log.info("Generated Intervener Added Solicitor Notification Letter: {}", generatedIntervenerAddedSolicitorNotificationLetter);
         return generatedIntervenerAddedSolicitorNotificationLetter;
     }
 
-    private CaseDocument generateDocument(String authToken,
-                                                    IntervenerAddedLetterDetails intervenerAddedLetterDetails,
-                                                    String template,
-                                                    String filename) {
-        return genericDocumentService.generateDocumentFromPlaceholdersMap(
-            authToken,
-            convertLetterDetailsToMap(intervenerAddedLetterDetails),
-            template,
-            filename);
+    private CaseDocument getIntervenerRemovedCaseDocument(String authToken, IntervenerRemovedLetterDetails intervenerRemovedLetterDetails) {
+        CaseDocument generatedIntervenerRemovedNotificationLetter =
+            generateDocument(authToken, intervenerRemovedLetterDetails, documentConfiguration.getIntervenerRemovedTemplate(),
+                documentConfiguration.getIntervenerRemovedFilename());
+        log.info("Generated Intervener Removed Notification Letter: {}", generatedIntervenerRemovedNotificationLetter);
+        return generatedIntervenerRemovedNotificationLetter;
     }
 
-    private CaseDocument generateDocument(String authToken,
-                                          IntervenerAddedSolicitorLetterDetails intervenerAddedSolicitorLetterDetails,
-                                          String template,
+    private CaseDocument getIntervenerRemovedCaseDocument(String authToken,
+                                                          IntervenerRemovedSolicitorLetterDetails intervenerRemovedSolicitorLetterDetails) {
+        CaseDocument generatedIntervenerRemovedSolicitorNotificationLetter =
+            generateDocument(authToken, intervenerRemovedSolicitorLetterDetails, documentConfiguration.getIntervenerRemovedSolicitorTemplate(),
+                documentConfiguration.getIntervenerRemovedSolicitorFilename());
+        log.info("Generated Intervener Removed Solicitor Notification Letter: {}", generatedIntervenerRemovedSolicitorNotificationLetter);
+        return generatedIntervenerRemovedSolicitorNotificationLetter;
+    }
+
+    private CaseDocument generateDocument(String authToken, IntervenerAddedLetterDetails intervenerAddedLetterDetails, String template,
                                           String filename) {
-        return genericDocumentService.generateDocumentFromPlaceholdersMap(
-            authToken,
-            convertLetterDetailsToMap(intervenerAddedSolicitorLetterDetails),
-            template,
-            filename);
+        return genericDocumentService.generateDocumentFromPlaceholdersMap(authToken, convertLetterDetailsToMap(intervenerAddedLetterDetails),
+            template, filename);
+    }
+
+    private CaseDocument generateDocument(String authToken, IntervenerRemovedLetterDetails intervenerRemovedLetterDetails, String template,
+                                          String filename) {
+        return genericDocumentService.generateDocumentFromPlaceholdersMap(authToken, convertLetterDetailsToMap(intervenerRemovedLetterDetails),
+            template, filename);
+    }
+
+    private CaseDocument generateDocument(String authToken, IntervenerAddedSolicitorLetterDetails intervenerAddedSolicitorLetterDetails,
+                                          String template, String filename) {
+        return genericDocumentService.generateDocumentFromPlaceholdersMap(authToken, convertLetterDetailsToMap(intervenerAddedSolicitorLetterDetails),
+            template, filename);
+    }
+
+    private CaseDocument generateDocument(String authToken, IntervenerRemovedSolicitorLetterDetails intervenerRemovedSolicitorLetterDetails,
+                                          String template, String filename) {
+        return genericDocumentService.generateDocumentFromPlaceholdersMap(authToken,
+            convertLetterDetailsToMap(intervenerRemovedSolicitorLetterDetails), template, filename);
     }
 
     private IntervenerAddedLetterDetails generateAddedLetterDetails(FinremCaseDetails caseDetails) {
 
-        return IntervenerAddedLetterDetails.builder()
-            .courtDetails(CaseHearingFunctions.buildFrcCourtDetails(caseDetails.getData()))
-            .addressee(caseDetails.getData().getCurrentAddressee())
-            .divorceCaseNumber(caseDetails.getData().getDivorceCaseNumber())
-            .applicantName(caseDetails.getData().getFullApplicantName())
-            .respondentName(caseDetails.getRespondentFullName())
-            .letterDate(DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()))
-            .caseNumber(caseDetails.getId().toString())
-            .intervenerFullName(caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerName())
-            .build();
+        return IntervenerAddedLetterDetails.builder().courtDetails(CaseHearingFunctions.buildFrcCourtDetails(caseDetails.getData()))
+            .addressee(caseDetails.getData().getCurrentAddressee()).divorceCaseNumber(caseDetails.getData().getDivorceCaseNumber())
+            .applicantName(caseDetails.getData().getFullApplicantName()).respondentName(caseDetails.getRespondentFullName())
+            .letterDate(DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now())).caseNumber(caseDetails.getId().toString())
+            .intervenerFullName(caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerName()).build();
+    }
+
+    private IntervenerRemovedLetterDetails generateRemovedLetterDetails(FinremCaseDetails caseDetails) {
+
+        return IntervenerRemovedLetterDetails.builder().courtDetails(CaseHearingFunctions.buildFrcCourtDetails(caseDetails.getData()))
+            .addressee(caseDetails.getData().getCurrentAddressee()).divorceCaseNumber(caseDetails.getData().getDivorceCaseNumber())
+            .applicantName(caseDetails.getData().getFullApplicantName()).respondentName(caseDetails.getRespondentFullName())
+            .letterDate(DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now())).caseNumber(caseDetails.getId().toString())
+            .intervenerFullName(caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerName()).build();
     }
 
     private IntervenerAddedSolicitorLetterDetails generateSolAddedLetterDetails(FinremCaseDetails caseDetails) {
 
-        return IntervenerAddedSolicitorLetterDetails.builder()
-            .courtDetails(CaseHearingFunctions.buildFrcCourtDetails(caseDetails.getData()))
-            .addressee(caseDetails.getData().getCurrentAddressee())
-            .divorceCaseNumber(caseDetails.getData().getDivorceCaseNumber())
-            .applicantName(caseDetails.getData().getFullApplicantName())
-            .respondentName(caseDetails.getRespondentFullName())
-            .letterDate(DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now()))
-            .caseNumber(caseDetails.getId().toString())
+        return IntervenerAddedSolicitorLetterDetails.builder().courtDetails(CaseHearingFunctions.buildFrcCourtDetails(caseDetails.getData()))
+            .addressee(caseDetails.getData().getCurrentAddressee()).divorceCaseNumber(caseDetails.getData().getDivorceCaseNumber())
+            .applicantName(caseDetails.getData().getFullApplicantName()).respondentName(caseDetails.getRespondentFullName())
+            .letterDate(DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now())).caseNumber(caseDetails.getId().toString())
             .intervenerFullName(caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerName())
-            .intervenerSolicitorFirm(caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerDetails()
-                .getIntervenerOrganisation().getOrganisation().getOrganisationName())
-            .build();
+            .intervenerSolicitorFirm(
+                caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerOrganisation().getOrganisation()
+                    .getOrganisationName()).build();
+    }
+
+    private IntervenerRemovedSolicitorLetterDetails generateSolRemovedLetterDetails(FinremCaseDetails caseDetails) {
+
+        return IntervenerRemovedSolicitorLetterDetails.builder().courtDetails(CaseHearingFunctions.buildFrcCourtDetails(caseDetails.getData()))
+            .addressee(caseDetails.getData().getCurrentAddressee()).divorceCaseNumber(caseDetails.getData().getDivorceCaseNumber())
+            .applicantName(caseDetails.getData().getFullApplicantName()).respondentName(caseDetails.getRespondentFullName())
+            .letterDate(DateTimeFormatter.ofPattern(LETTER_DATE_FORMAT).format(LocalDate.now())).caseNumber(caseDetails.getId().toString())
+            .intervenerFullName(caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerName())
+            .intervenerSolicitorFirm(
+                caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerOrganisation().getOrganisation()
+                    .getOrganisationName()).build();
     }
 
     private Map<String, Object> convertLetterDetailsToMap(IntervenerAddedLetterDetails letterDetails) {
@@ -143,7 +190,17 @@ public class IntervenerDocumentService {
         return Map.of(CASE_DETAILS, caseDetailsMap);
     }
 
+    private Map<String, Object> convertLetterDetailsToMap(IntervenerRemovedLetterDetails letterDetails) {
+        Map<String, Object> caseDetailsMap = Map.of(CASE_DATA, objectMapper.convertValue(letterDetails, Map.class));
+        return Map.of(CASE_DETAILS, caseDetailsMap);
+    }
+
     private Map<String, Object> convertLetterDetailsToMap(IntervenerAddedSolicitorLetterDetails letterDetails) {
+        Map<String, Object> caseDetailsMap = Map.of(CASE_DATA, objectMapper.convertValue(letterDetails, Map.class));
+        return Map.of(CASE_DETAILS, caseDetailsMap);
+    }
+
+    private Map<String, Object> convertLetterDetailsToMap(IntervenerRemovedSolicitorLetterDetails letterDetails) {
         Map<String, Object> caseDetailsMap = Map.of(CASE_DATA, objectMapper.convertValue(letterDetails, Map.class));
         return Map.of(CASE_DETAILS, caseDetailsMap);
     }

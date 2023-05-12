@@ -10,29 +10,31 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.Intervener
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerTwoToIntervenerDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.YesOrNo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.FinremSingleLetterOrEmailAllPartiesCorresponder;
 
 @Slf4j
 @Component
-public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPartiesCorresponder {
+public class IntervenerRemovedCorresponder extends FinremSingleLetterOrEmailAllPartiesCorresponder {
 
     private final IntervenerDocumentService intervenerDocumentService;
+    private final IntervenerService intervenerService;
     private final IntervenerOneToIntervenerDetailsMapper intervenerOneDetailsMapper;
     private final IntervenerTwoToIntervenerDetailsMapper intervenerTwoDetailsMapper;
     private final IntervenerThreeToIntervenerDetailsMapper intervenerThreeDetailsMapper;
     private final IntervenerFourToIntervenerDetailsMapper intervenerFourDetailsMapper;
 
-    public IntervenerAddedCorresponder(NotificationService notificationService, BulkPrintService bulkPrintService,
-                                       IntervenerDocumentService intervenerDocumentService,
-                                       IntervenerOneToIntervenerDetailsMapper intervenerOneDetailsMapper,
-                                       IntervenerTwoToIntervenerDetailsMapper intervenerTwoDetailsMapper,
-                                       IntervenerThreeToIntervenerDetailsMapper intervenerThreeDetailsMapper,
-                                       IntervenerFourToIntervenerDetailsMapper intervenerFourDetailsMapper) {
+    public IntervenerRemovedCorresponder(NotificationService notificationService, BulkPrintService bulkPrintService,
+                                         IntervenerDocumentService intervenerDocumentService, IntervenerService intervenerService,
+                                         IntervenerOneToIntervenerDetailsMapper intervenerOneDetailsMapper,
+                                         IntervenerTwoToIntervenerDetailsMapper intervenerTwoDetailsMapper,
+                                         IntervenerThreeToIntervenerDetailsMapper intervenerThreeDetailsMapper,
+                                         IntervenerFourToIntervenerDetailsMapper intervenerFourDetailsMapper) {
         super(notificationService, bulkPrintService);
         this.intervenerDocumentService = intervenerDocumentService;
+        this.intervenerService = intervenerService;
         this.intervenerOneDetailsMapper = intervenerOneDetailsMapper;
         this.intervenerTwoDetailsMapper = intervenerTwoDetailsMapper;
         this.intervenerThreeDetailsMapper = intervenerThreeDetailsMapper;
@@ -42,14 +44,14 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
     public void sendCorrespondence(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore, String authToken) {
         sendApplicantCorrespondence(caseDetails, caseDetailsBefore, authToken);
         sendRespondentCorrespondence(caseDetails, caseDetailsBefore, authToken);
-        if (hasIntervenerOneBeenAdded(caseDetails, caseDetailsBefore)) {
-            sendIntervenerOneCorrespondence(caseDetails, authToken);
-        } else if (hasIntervenerTwoBeenAdded(caseDetails, caseDetailsBefore)) {
-            sendIntervenerTwoCorrespondence(caseDetails, authToken);
-        } else if (hasIntervenerThreeBeenAdded(caseDetails, caseDetailsBefore)) {
-            sendIntervenerThreeCorrespondence(caseDetails, authToken);
-        } else if (hasIntervenerFourBeenAdded(caseDetails, caseDetailsBefore)) {
-            sendIntervenerFourCorrespondence(caseDetails, authToken);
+        if (hasIntervenerOneBeenRemoved(caseDetails, caseDetailsBefore)) {
+            sendIntervenerOneCorrespondence(caseDetails, caseDetailsBefore, authToken);
+        } else if (hasIntervenerTwoBeenRemoved(caseDetails, caseDetailsBefore)) {
+            sendIntervenerTwoCorrespondence(caseDetails, caseDetailsBefore, authToken);
+        } else if (hasIntervenerThreeBeenRemoved(caseDetails, caseDetailsBefore)) {
+            sendIntervenerThreeCorrespondence(caseDetails, caseDetailsBefore, authToken);
+        } else if (hasIntervenerFourBeenRemoved(caseDetails, caseDetailsBefore)) {
+            sendIntervenerFourCorrespondence(caseDetails, caseDetailsBefore, authToken);
         }
     }
 
@@ -59,14 +61,14 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
             this.emailApplicantSolicitor(caseDetails);
         }
         log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
-        if (hasAnyIntervenerSolicitorBeenAdded(caseDetails)) {
+        if (hasAnyIntervenerBeenRemoved(caseDetails, caseDetailsBefore)) {
             bulkPrintService.sendDocumentForPrint(
-                printIntervenerSolicitorAddedLetter(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.APPLICANT),
-                caseDetails);
+                printIntervenerRemovedLetter(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.APPLICANT), caseDetails);
         }
-        if (hasAnyIntervenerBeenAdded(caseDetails, caseDetailsBefore)) {
+        if (intervenerService.checkIfAnyIntervenerSolicitorRemoved(caseDetails.getData(), caseDetailsBefore.getData())) {
             bulkPrintService.sendDocumentForPrint(
-                printIntervenerAddedLetter(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.APPLICANT), caseDetails);
+                printIntervenerSolicitorRemovedLetter(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.APPLICANT),
+                caseDetails);
         }
     }
 
@@ -76,82 +78,79 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
             this.emailRespondentSolicitor(caseDetails);
         }
         log.info("Sending letter correspondence to respondent for case: {}", caseDetails.getId());
-        if (hasAnyIntervenerSolicitorBeenAdded(caseDetails)) {
+        if (hasAnyIntervenerBeenRemoved(caseDetails, caseDetailsBefore)) {
             bulkPrintService.sendDocumentForPrint(
-                printIntervenerSolicitorAddedLetter(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT),
-                caseDetails);
+                printIntervenerRemovedLetter(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT), caseDetails);
         }
-        if (hasAnyIntervenerBeenAdded(caseDetails, caseDetailsBefore)) {
+        if (intervenerService.checkIfAnyIntervenerSolicitorRemoved(caseDetails.getData(), caseDetailsBefore.getData())) {
             bulkPrintService.sendDocumentForPrint(
-                printIntervenerAddedLetter(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT), caseDetails);
+                printIntervenerSolicitorRemovedLetter(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT),
+                caseDetails);
         }
     }
 
-    protected void sendIntervenerOneCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
+    protected void sendIntervenerOneCorrespondence(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore, String authorisationToken) {
         if (shouldSendIntervenerOneSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to Intervener One for case: {}", caseDetails.getId());
             //send email
         }
         log.info("Sending letter correspondence to Intervener One for case: {}", caseDetails.getId());
         caseDetails.getData().getCurrentIntervenerChangeDetails()
-            .setIntervenerDetails(intervenerOneDetailsMapper.mapToIntervenerDetails(caseDetails.getData().getIntervenerOneWrapper()));
-
+            .setIntervenerDetails(intervenerOneDetailsMapper.mapToIntervenerDetails(caseDetailsBefore.getData().getIntervenerOneWrapper()));
         bulkPrintService.sendDocumentForPrint(
             getDocumentToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE), caseDetails);
     }
 
-    protected void sendIntervenerTwoCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
+    protected void sendIntervenerTwoCorrespondence(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore, String authorisationToken) {
         if (shouldSendIntervenerTwoSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to Intervener Two for case: {}", caseDetails.getId());
             //send email
         }
         log.info("Sending letter correspondence to Intervener Two for case: {}", caseDetails.getId());
         caseDetails.getData().getCurrentIntervenerChangeDetails()
-            .setIntervenerDetails(intervenerTwoDetailsMapper.mapToIntervenerDetails(caseDetails.getData().getIntervenerTwoWrapper()));
+            .setIntervenerDetails(intervenerTwoDetailsMapper.mapToIntervenerDetails(caseDetailsBefore.getData().getIntervenerTwoWrapper()));
         bulkPrintService.sendDocumentForPrint(
             getDocumentToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO), caseDetails);
     }
 
-    protected void sendIntervenerThreeCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
+    protected void sendIntervenerThreeCorrespondence(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore, String authorisationToken) {
         if (shouldSendIntervenerThreeSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to Intervener Three for case: {}", caseDetails.getId());
             //send email
         }
         log.info("Sending letter correspondence to Intervener Three for case: {}", caseDetails.getId());
         caseDetails.getData().getCurrentIntervenerChangeDetails()
-            .setIntervenerDetails(intervenerThreeDetailsMapper.mapToIntervenerDetails(caseDetails.getData().getIntervenerThreeWrapper()));
-
+            .setIntervenerDetails(intervenerThreeDetailsMapper.mapToIntervenerDetails(caseDetailsBefore.getData().getIntervenerThreeWrapper()));
         bulkPrintService.sendDocumentForPrint(
             getDocumentToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE), caseDetails);
     }
 
-    protected void sendIntervenerFourCorrespondence(FinremCaseDetails caseDetails, String authorisationToken) {
+    protected void sendIntervenerFourCorrespondence(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore, String authorisationToken) {
         if (shouldSendIntervenerFourSolicitorEmail(caseDetails)) {
             log.info("Sending email correspondence to Intervener Four for case: {}", caseDetails.getId());
             //send email
         }
         log.info("Sending letter correspondence to Intervener Four for case: {}", caseDetails.getId());
         caseDetails.getData().getCurrentIntervenerChangeDetails()
-            .setIntervenerDetails(intervenerFourDetailsMapper.mapToIntervenerDetails(caseDetails.getData().getIntervenerFourWrapper()));
-
+            .setIntervenerDetails(intervenerFourDetailsMapper.mapToIntervenerDetails(caseDetailsBefore.getData().getIntervenerFourWrapper()));
         bulkPrintService.sendDocumentForPrint(
             getDocumentToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR), caseDetails);
     }
 
-    public CaseDocument printIntervenerSolicitorAddedLetter(FinremCaseDetails caseDetails, String authorisationToken,
-                                                            DocumentHelper.PaperNotificationRecipient recipient) {
-        return intervenerDocumentService.generateIntervenerSolicitorAddedLetter(caseDetails, authorisationToken, recipient);
+    public CaseDocument printIntervenerSolicitorRemovedLetter(FinremCaseDetails caseDetails, String authorisationToken,
+                                                              DocumentHelper.PaperNotificationRecipient recipient) {
+        return intervenerDocumentService.generateIntervenerSolicitorRemovedLetter(caseDetails, authorisationToken, recipient);
     }
 
-    public CaseDocument printIntervenerAddedLetter(FinremCaseDetails caseDetails, String authorisationToken,
-                                                   DocumentHelper.PaperNotificationRecipient recipient) {
-        return intervenerDocumentService.generateIntervenerAddedNotificationLetter(caseDetails, authorisationToken, recipient);
+    public CaseDocument printIntervenerRemovedLetter(FinremCaseDetails caseDetails, String authorisationToken,
+                                                     DocumentHelper.PaperNotificationRecipient recipient) {
+        return intervenerDocumentService.generateIntervenerRemovedNotificationLetter(caseDetails, authorisationToken, recipient);
     }
 
     @Override
     public CaseDocument getDocumentToPrint(FinremCaseDetails caseDetails, String authorisationToken,
                                            DocumentHelper.PaperNotificationRecipient recipient) {
-        return intervenerDocumentService.generateIntervenerAddedNotificationLetter(caseDetails, authorisationToken, recipient);
+        return intervenerDocumentService.generateIntervenerRemovedNotificationLetter(caseDetails, authorisationToken, recipient);
     }
 
     protected boolean shouldSendIntervenerOneSolicitorEmail(FinremCaseDetails caseDetails) {
@@ -170,33 +169,29 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
         return notificationService.isIntervenerFourSolicitorDigitalAndEmailPopulated(caseDetails);
     }
 
-    private boolean hasAnyIntervenerSolicitorBeenAdded(FinremCaseDetails caseDetails) {
-        return caseDetails.getData().getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerRepresented() == YesOrNo.YES;
+    private boolean hasIntervenerOneBeenRemoved(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore) {
+        return !StringUtils.isNotEmpty(caseDetails.getData().getIntervenerOneWrapper().getIntervener1Name()) &&
+            StringUtils.isNotEmpty(caseDetailsBefore.getData().getIntervenerOneWrapper().getIntervener1Name());
     }
 
-    private boolean hasAnyIntervenerBeenAdded(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore) {
-        return hasIntervenerOneBeenAdded(caseDetails, caseDetailsBefore) || hasIntervenerTwoBeenAdded(caseDetails, caseDetailsBefore) ||
-            hasIntervenerThreeBeenAdded(caseDetails, caseDetailsBefore) || hasIntervenerFourBeenAdded(caseDetails, caseDetailsBefore);
+    private boolean hasIntervenerTwoBeenRemoved(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore) {
+        return !StringUtils.isNotEmpty(caseDetails.getData().getIntervenerTwoWrapper().getIntervener2Name()) &&
+            StringUtils.isNotEmpty(caseDetailsBefore.getData().getIntervenerTwoWrapper().getIntervener2Name());
     }
 
-    private boolean hasIntervenerOneBeenAdded(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore) {
-        return StringUtils.isNotEmpty(caseDetails.getData().getIntervenerOneWrapper().getIntervener1Name()) &&
-            !StringUtils.isNotEmpty(caseDetailsBefore.getData().getIntervenerOneWrapper().getIntervener1Name());
+    private boolean hasIntervenerThreeBeenRemoved(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore) {
+        return !StringUtils.isNotEmpty(caseDetails.getData().getIntervenerThreeWrapper().getIntervener3Name()) &&
+            StringUtils.isNotEmpty(caseDetailsBefore.getData().getIntervenerThreeWrapper().getIntervener3Name());
     }
 
-    private boolean hasIntervenerTwoBeenAdded(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore) {
-        return StringUtils.isNotEmpty(caseDetails.getData().getIntervenerTwoWrapper().getIntervener2Name()) &&
-            !StringUtils.isNotEmpty(caseDetailsBefore.getData().getIntervenerTwoWrapper().getIntervener2Name());
+    private boolean hasIntervenerFourBeenRemoved(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore) {
+        return !StringUtils.isNotEmpty(caseDetails.getData().getIntervenerFourWrapper().getIntervener4Name()) &&
+            StringUtils.isNotEmpty(caseDetailsBefore.getData().getIntervenerFourWrapper().getIntervener4Name());
     }
 
-    private boolean hasIntervenerThreeBeenAdded(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore) {
-        return StringUtils.isNotEmpty(caseDetails.getData().getIntervenerThreeWrapper().getIntervener3Name()) &&
-            !StringUtils.isNotEmpty(caseDetailsBefore.getData().getIntervenerThreeWrapper().getIntervener3Name());
-    }
-
-    private boolean hasIntervenerFourBeenAdded(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore) {
-        return StringUtils.isNotEmpty(caseDetails.getData().getIntervenerFourWrapper().getIntervener4Name()) &&
-            !StringUtils.isNotEmpty(caseDetailsBefore.getData().getIntervenerFourWrapper().getIntervener4Name());
+    private boolean hasAnyIntervenerBeenRemoved(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore) {
+        return hasIntervenerOneBeenRemoved(caseDetails, caseDetailsBefore) || hasIntervenerTwoBeenRemoved(caseDetails, caseDetailsBefore) ||
+            hasIntervenerThreeBeenRemoved(caseDetails, caseDetailsBefore) || hasIntervenerFourBeenRemoved(caseDetails, caseDetailsBefore);
     }
 
     @Override
