@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hear
 
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
@@ -19,9 +18,8 @@ public class FinremAdditionalHearingCorresponder extends FinremHearingCorrespond
     @Autowired
     public FinremAdditionalHearingCorresponder(BulkPrintService bulkPrintService,
                                                NotificationService notificationService,
-                                               FinremNotificationRequestMapper notificationRequestMapper,
                                                DocumentHelper documentHelper) {
-        super(bulkPrintService, notificationService, notificationRequestMapper);
+        super(bulkPrintService, notificationService);
         this.documentHelper = documentHelper;
     }
 

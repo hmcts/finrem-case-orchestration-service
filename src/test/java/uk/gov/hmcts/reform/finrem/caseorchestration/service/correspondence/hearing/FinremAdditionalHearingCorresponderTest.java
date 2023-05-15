@@ -24,7 +24,7 @@ public class FinremAdditionalHearingCorresponderTest extends FinremHearingCorres
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
         applicantAndRespondentMultiLetterCorresponder =
-            new FinremAdditionalHearingCorresponder(bulkPrintService, notificationService, notificationRequestMapper, documentHelper);
+            new FinremAdditionalHearingCorresponder(bulkPrintService, notificationService, documentHelper);
         caseDetails = TestSetUpUtils.finremCaseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
 
         when(documentHelper.getBulkPrintDocumentFromCaseDocument(any())).thenReturn(getBulkPrintDocument());

@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.hear
 import org.junit.Test;
 import org.mockito.Mock;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremNotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -23,9 +22,6 @@ public abstract class FinremHearingCorrespondenceBaseTest {
     NotificationService notificationService;
     @Mock
     BulkPrintService bulkPrintService;
-
-    @Mock
-    FinremNotificationRequestMapper notificationRequestMapper;
 
     @Mock
     DocumentHelper documentHelper;

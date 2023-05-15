@@ -29,7 +29,7 @@ public class FinremApprovedOrderNoticeOfHearingCorresponderTest extends FinremHe
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
         applicantAndRespondentMultiLetterCorresponder =
-            new FinremApprovedOrderNoticeOfHearingCorresponder(bulkPrintService, notificationService, notificationRequestMapper,
+            new FinremApprovedOrderNoticeOfHearingCorresponder(bulkPrintService, notificationService,
                 objectMapper, documentHelper);
         caseDetails = finremCaseDetailsFromResource("/fixtures/general-application-directions.json", objectMapper);
         caseDetails.getData().setHearingNoticeDocumentPack(buildHearingNoticePack());
