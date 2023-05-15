@@ -33,5 +33,7 @@ public class IntervenerThreeWrapper {
     private String intervener3SolName;
     private String intervener3SolEmail;
     private String intervener3SolPhone;
+    private String intervener3SolicitorFirm;
+    private String intervener3SolicitorReference;
     private OrganisationPolicy intervener3Organisation;
 }
