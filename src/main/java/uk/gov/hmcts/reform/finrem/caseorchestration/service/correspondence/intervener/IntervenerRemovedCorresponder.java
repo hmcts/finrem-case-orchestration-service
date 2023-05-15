@@ -14,6 +14,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.FinremSingleLetterOrEmailAllPartiesCorresponder;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_ONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_TWO;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_THREE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_FOUR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
 
 @Slf4j
 @Component
@@ -62,13 +68,14 @@ public class IntervenerRemovedCorresponder extends FinremSingleLetterOrEmailAllP
         }
         if (hasAnyIntervenerBeenRemoved(caseDetails, caseDetailsBefore)) {
             bulkPrintService.sendDocumentForPrint(
-                printIntervenerRemovedLetter(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.APPLICANT), caseDetails);
+                printIntervenerRemovedLetter(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.APPLICANT), caseDetails,
+                APPLICANT);
             log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
         }
         if (intervenerService.checkIfAnyIntervenerSolicitorRemoved(caseDetails.getData(), caseDetailsBefore.getData())) {
             bulkPrintService.sendDocumentForPrint(
                 printIntervenerSolicitorRemovedLetter(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.APPLICANT),
-                caseDetails);
+                caseDetails, APPLICANT);
             log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
         }
     }
@@ -80,13 +87,14 @@ public class IntervenerRemovedCorresponder extends FinremSingleLetterOrEmailAllP
         }
         if (hasAnyIntervenerBeenRemoved(caseDetails, caseDetailsBefore)) {
             bulkPrintService.sendDocumentForPrint(
-                printIntervenerRemovedLetter(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT), caseDetails);
+                printIntervenerRemovedLetter(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT), caseDetails,
+                RESPONDENT);
             log.info("Sending letter correspondence to respondent for case: {}", caseDetails.getId());
         }
         if (intervenerService.checkIfAnyIntervenerSolicitorRemoved(caseDetails.getData(), caseDetailsBefore.getData())) {
             bulkPrintService.sendDocumentForPrint(
                 printIntervenerSolicitorRemovedLetter(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT),
-                caseDetails);
+                caseDetails, RESPONDENT);
             log.info("Sending letter correspondence to respondent for case: {}", caseDetails.getId());
         }
     }
@@ -100,7 +108,8 @@ public class IntervenerRemovedCorresponder extends FinremSingleLetterOrEmailAllP
         caseDetails.getData().getCurrentIntervenerChangeDetails()
             .setIntervenerDetails(intervenerOneDetailsMapper.mapToIntervenerDetails(caseDetailsBefore.getData().getIntervenerOneWrapper()));
         bulkPrintService.sendDocumentForPrint(
-            getDocumentToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE), caseDetails);
+            getDocumentToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE), caseDetails,
+            INTERVENER_ONE);
     }
 
     protected void sendIntervenerTwoCorrespondence(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore, String authorisationToken) {
@@ -112,7 +121,8 @@ public class IntervenerRemovedCorresponder extends FinremSingleLetterOrEmailAllP
         caseDetails.getData().getCurrentIntervenerChangeDetails()
             .setIntervenerDetails(intervenerTwoDetailsMapper.mapToIntervenerDetails(caseDetailsBefore.getData().getIntervenerTwoWrapper()));
         bulkPrintService.sendDocumentForPrint(
-            getDocumentToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO), caseDetails);
+            getDocumentToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_TWO), caseDetails,
+            INTERVENER_TWO);
     }
 
     protected void sendIntervenerThreeCorrespondence(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore, String authorisationToken) {
@@ -124,7 +134,8 @@ public class IntervenerRemovedCorresponder extends FinremSingleLetterOrEmailAllP
         caseDetails.getData().getCurrentIntervenerChangeDetails()
             .setIntervenerDetails(intervenerThreeDetailsMapper.mapToIntervenerDetails(caseDetailsBefore.getData().getIntervenerThreeWrapper()));
         bulkPrintService.sendDocumentForPrint(
-            getDocumentToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE), caseDetails);
+            getDocumentToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE), caseDetails,
+            INTERVENER_THREE);
     }
 
     protected void sendIntervenerFourCorrespondence(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore, String authorisationToken) {
@@ -136,7 +147,8 @@ public class IntervenerRemovedCorresponder extends FinremSingleLetterOrEmailAllP
         caseDetails.getData().getCurrentIntervenerChangeDetails()
             .setIntervenerDetails(intervenerFourDetailsMapper.mapToIntervenerDetails(caseDetailsBefore.getData().getIntervenerFourWrapper()));
         bulkPrintService.sendDocumentForPrint(
-            getDocumentToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR), caseDetails);
+            getDocumentToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR), caseDetails,
+            INTERVENER_FOUR);
     }
 
     public CaseDocument printIntervenerSolicitorRemovedLetter(FinremCaseDetails caseDetails, String authorisationToken,
