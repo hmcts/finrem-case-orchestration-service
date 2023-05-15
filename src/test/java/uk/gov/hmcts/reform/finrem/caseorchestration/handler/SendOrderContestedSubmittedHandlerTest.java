@@ -5,7 +5,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
@@ -30,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static java.util.Collections.singletonList;
 import static java.util.List.of;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -38,6 +38,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @ExtendWith(MockitoExtension.class)
@@ -99,10 +100,7 @@ class SendOrderContestedSubmittedHandlerTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         setupData(caseDetails);
-
         caseDetails.getData().setSendOrderPostStateOption(SendOrderEventPostStateOption.PREPARE_FOR_HEARING);
-        when(documentHelper.getCaseDocumentAsBulkPrintDocument(any()))
-            .thenReturn(BulkPrintDocument.builder().binaryFileUrl("anyBinaryURL").build());
 
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -115,10 +113,7 @@ class SendOrderContestedSubmittedHandlerTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         setupData(caseDetails);
-
         caseDetails.getData().setSendOrderPostStateOption(SendOrderEventPostStateOption.CLOSE);
-        when(documentHelper.getCaseDocumentAsBulkPrintDocument(any()))
-            .thenReturn(BulkPrintDocument.builder().binaryFileUrl("anyBinaryURL").build());
 
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -131,10 +126,7 @@ class SendOrderContestedSubmittedHandlerTest {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         setupData(caseDetails);
-
         caseDetails.getData().setSendOrderPostStateOption(SendOrderEventPostStateOption.ORDER_SENT);
-        when(documentHelper.getCaseDocumentAsBulkPrintDocument(any()))
-            .thenReturn(BulkPrintDocument.builder().binaryFileUrl("anyBinaryURL").build());
 
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
@@ -154,67 +146,102 @@ class SendOrderContestedSubmittedHandlerTest {
     }
 
     @Test
-    void givenAgreedToReceiveEmails_WhenHandle_ThenSendContestOrderApprovedEmail() {
-        when(generalOrderService.getParties(any(FinremCaseDetails.class))).thenReturn(List.of(CaseRole.APP_SOLICITOR.getValue()));
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
-        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
-
-        FinremCallbackRequest callbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
-        data.setFinalOrderCollection(List.of(DirectionOrderCollection.builder()
-            .value(DirectionOrder.builder().uploadDraftDocument(new CaseDocument()).build()).build()));
-
-        sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
-
-        verify(notificationService).sendContestOrderApprovedEmailApplicant(any(FinremCaseDetails.class));
-        verify(notificationService, never()).sendContestOrderApprovedEmailRespondent(any(FinremCaseDetails.class));
-    }
-
-    @Test
-    void givenNotAgreedToReceiveEmails_WhenHandle_ThenDoNotSendContestOrderApprovedEmail() {
-        sendOrderContestedSubmittedHandler.handle(buildCallbackRequest(), AUTH_TOKEN);
-        verifyNoInteractions(notificationService);
-    }
-
-    @Test
-    void givenRespAgreedToReceiveEmails_WhenHandle_ThenSendContestOrderApprovedEmailToRespondent() {
-        when(generalOrderService.getParties(any(FinremCaseDetails.class))).thenReturn(List.of(CaseRole.RESP_SOLICITOR.getValue()));
-        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
-        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(true);
-
-        FinremCallbackRequest callbackRequest = buildCallbackRequest();
-        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
-        FinremCaseData data = caseDetails.getData();
-        data.setFinalOrderCollection(List.of(DirectionOrderCollection.builder()
-            .value(DirectionOrder.builder().uploadDraftDocument(new CaseDocument()).build()).build()));
-
-        sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
-
-        verify(notificationService).sendContestOrderApprovedEmailRespondent(any(CaseDetails.class));
-        verify(notificationService, never()).sendContestOrderApprovedEmailApplicant(any(CaseDetails.class));
-        verify(notificationService, never()).sendContestOrderApprovedEmailApplicant(any(CaseDetails.class));
-    }
-
-    @Test
-    void givenRespNotAgreedToReceiveEmails_WhenHandle_ThenDoNotSendContestOrderApprovedEmailToRespondent() {
-
+    void givenContestedCase_whenSolicitorsAreDigitalButOnlySelectedPartyIsApplicant_thenSendContestOrderApprovedEmail() {
         FinremCallbackRequest callbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
         setupData(caseDetails);
-
         FinremCaseData data = caseDetails.getData();
+        data.getGeneralOrderWrapper().setGeneralOrderLatestDocument(caseDocument());
         data.setFinalOrderCollection(List.of(DirectionOrderCollection.builder()
             .value(DirectionOrder.builder().uploadDraftDocument(new CaseDocument()).build()).build()));
+        data.setSendOrderPostStateOption(SendOrderEventPostStateOption.ORDER_SENT);
 
-        when(documentHelper.getCaseDocumentAsBulkPrintDocument(any()))
-            .thenReturn(BulkPrintDocument.builder().binaryFileUrl("anyBinaryURL").build());
+        when(generalOrderService.getParties(any(FinremCaseDetails.class)))
+            .thenReturn(List.of(CaseRole.APP_SOLICITOR.getValue(), CaseRole.RESP_SOLICITOR.getValue()));
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(true);
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(true);
+        when(documentHelper.getCaseDocumentAsBulkPrintDocument(caseDocument())).thenReturn(getBulkPrintDocument(caseDocument()));
 
-        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class))).thenReturn(false);
-        
         sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
 
-        verify(notificationService, never()).isRespondentSolicitorDigitalAndEmailPopulated(any(CaseDetails.class));
+        verify(bulkPrintService, never()).printApplicantDocuments(any(FinremCaseDetails.class), any(), any());
+        verify(bulkPrintService, never()).printRespondentDocuments(any(FinremCaseDetails.class), any(), any());
+        verify(notificationService).sendContestOrderApprovedEmailApplicant(any(FinremCaseDetails.class));
+        verify(notificationService).sendContestOrderApprovedEmailRespondent(any(FinremCaseDetails.class));
+        verifyNoInteractions(ccdService);
+    }
+
+    @Test
+    void givenContestedCase_whenNoOrderToSend_thenDoNotAnySortOfCorrespondence() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        setupData(caseDetails);
+        FinremCaseData data = caseDetails.getData();
+        data.setSendOrderPostStateOption(SendOrderEventPostStateOption.NONE);
+
+        sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        verifyNoInteractions(bulkPrintService);
+        verifyNoInteractions(notificationService);
+        verifyNoInteractions(ccdService);
+    }
+
+    @Test
+    void givenRespIsDigital_WhenPartSelectedToShareOrderIsRespondent_ThenSendContestOrderApprovedEmailToRespondent() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        setupData(caseDetails);
+        FinremCaseData data = caseDetails.getData();
+        data.getGeneralOrderWrapper().setGeneralOrderLatestDocument(caseDocument());
+        data.setFinalOrderCollection(List.of(DirectionOrderCollection.builder()
+            .value(DirectionOrder.builder().uploadDraftDocument(new CaseDocument()).build()).build()));
+        data.setSendOrderPostStateOption(SendOrderEventPostStateOption.ORDER_SENT);
+
+        when(generalOrderService.getParties(any(FinremCaseDetails.class)))
+            .thenReturn(singletonList(CaseRole.RESP_SOLICITOR.getValue()));
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(false);
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(true);
+        when(documentHelper.getCaseDocumentAsBulkPrintDocument(caseDocument())).thenReturn(getBulkPrintDocument(caseDocument()));
+
+
+        sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(notificationService).sendContestOrderApprovedEmailRespondent(any(FinremCaseDetails.class));
+        verify(notificationService, never()).sendContestOrderApprovedEmailApplicant(any(FinremCaseDetails.class));
+        verifyNoInteractions(bulkPrintService);
+        verifyNoInteractions(ccdService);
+    }
+
+    @Test
+    void givenAppSolIsDigital_WhenPartSelectedToShareOrderIsApplicabt_ThenSendContestOrderApprovedEmailToApplicant() {
+        FinremCallbackRequest callbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        setupData(caseDetails);
+        FinremCaseData data = caseDetails.getData();
+        data.getGeneralOrderWrapper().setGeneralOrderLatestDocument(caseDocument());
+        data.setFinalOrderCollection(singletonList(DirectionOrderCollection.builder()
+            .value(DirectionOrder.builder().uploadDraftDocument(new CaseDocument()).build()).build()));
+        data.setSendOrderPostStateOption(SendOrderEventPostStateOption.PREPARE_FOR_HEARING);
+
+        when(generalOrderService.getParties(any(FinremCaseDetails.class)))
+            .thenReturn(singletonList(CaseRole.APP_SOLICITOR.getValue()));
+        when(notificationService.isApplicantSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(true);
+        when(notificationService.isRespondentSolicitorDigitalAndEmailPopulated(any(FinremCaseDetails.class))).thenReturn(false);
+        when(documentHelper.getCaseDocumentAsBulkPrintDocument(caseDocument())).thenReturn(getBulkPrintDocument(caseDocument()));
+
+
+        sendOrderContestedSubmittedHandler.handle(callbackRequest, AUTH_TOKEN);
+
+        verify(notificationService, never()).sendContestOrderApprovedEmailRespondent(any(FinremCaseDetails.class));
+        verify(notificationService).sendContestOrderApprovedEmailApplicant(any(FinremCaseDetails.class));
+        verifyNoInteractions(bulkPrintService);
+        verify(ccdService).executeCcdEventOnCase(any(), any(), any(), any());
+    }
+
+    public BulkPrintDocument getBulkPrintDocument(CaseDocument caseDocument) {
+        return BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl())
+            .fileName(caseDocument.getDocumentFilename())
+            .build();
     }
 
     private DynamicMultiSelectList getParties() {

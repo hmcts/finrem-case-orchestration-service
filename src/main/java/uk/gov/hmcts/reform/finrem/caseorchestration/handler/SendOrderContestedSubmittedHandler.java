@@ -82,7 +82,9 @@ public class SendOrderContestedSubmittedHandler extends FinremCallbackHandler {
 
         log.info("Sending hearing order for case {}", caseDetails.getId());
         List<CaseDocument> hearingOrders = generalOrderService.hearingOrderToProcess(caseDetails, selectedDocs);
-        printAndMailHearingDocuments(caseDetails, hearingOrders, parties, userAuthorisation);
+        if (!hearingOrders.isEmpty()) {
+            printAndMailHearingDocuments(caseDetails, hearingOrders, parties, userAuthorisation);
+        }
 
         sendNotifications(callbackRequest, parties);
 
