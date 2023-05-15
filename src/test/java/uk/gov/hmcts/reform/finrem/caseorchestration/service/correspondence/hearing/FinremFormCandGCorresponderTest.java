@@ -8,6 +8,10 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerFourToIntervenerDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerOneToIntervenerDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerThreeToIntervenerDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerTwoToIntervenerDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocument;
@@ -30,7 +34,10 @@ public class FinremFormCandGCorresponderTest extends FinremHearingCorrespondence
 
     private ObjectMapper objectMapper = new ObjectMapper();
     private FinremCaseDetailsMapper finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
-
+    private IntervenerOneToIntervenerDetailsMapper intervenerOneDetailsMapper;
+    private IntervenerTwoToIntervenerDetailsMapper intervenerTwoDetailsMapper;
+    private IntervenerThreeToIntervenerDetailsMapper intervenerThreeDetailsMapper;
+    private IntervenerFourToIntervenerDetailsMapper intervenerFourDetailsMapper;
     @Mock
     private GenericDocumentService genericDocumentService;
 
@@ -39,9 +46,9 @@ public class FinremFormCandGCorresponderTest extends FinremHearingCorrespondence
     @Before
     public void setUp() throws Exception {
         caseDetails = caseDetails(NO_VALUE);
-        applicantAndRespondentMultiLetterCorresponder =
-            new FinremFormCandGCorresponder(bulkPrintService, notificationService,
-                new DocumentHelper(objectMapper, new CaseDataService(objectMapper), genericDocumentService, finremCaseDetailsMapper), objectMapper);
+        applicantAndRespondentMultiLetterCorresponder = new FinremFormCandGCorresponder(bulkPrintService, notificationService,
+            new DocumentHelper(objectMapper, new CaseDataService(objectMapper), genericDocumentService, finremCaseDetailsMapper,
+                intervenerOneDetailsMapper, intervenerTwoDetailsMapper, intervenerThreeDetailsMapper, intervenerFourDetailsMapper), objectMapper);
     }
 
     @Test
@@ -51,21 +58,12 @@ public class FinremFormCandGCorresponderTest extends FinremHearingCorrespondence
     }
 
     private FinremCaseDetails caseDetails(String isFastTrackDecision) {
-        FinremCaseData caseData = FinremCaseData.builder()
-            .hearingDate(LocalDate.parse(DATE_OF_HEARING))
-            .fastTrackDecision(YesOrNo.forValue(isFastTrackDecision))
-            .formC(caseDocument())
-            .formG(caseDocument())
-            .copyOfPaperFormA(List.of(
-                PaymentDocumentCollection.builder()
-                    .value(PaymentDocument.builder()
-                        .typeOfDocument(PaymentDocumentType.COPY_OF_PAPER_FORM_A)
-                        .uploadedDocument(caseDocument())
-                        .build())
-                    .build()))
-            .outOfFamilyCourtResolution(caseDocument())
-            .additionalListOfHearingDocuments(caseDocument())
-            .build();
+        FinremCaseData caseData =
+            FinremCaseData.builder().hearingDate(LocalDate.parse(DATE_OF_HEARING)).fastTrackDecision(YesOrNo.forValue(isFastTrackDecision))
+                .formC(caseDocument()).formG(caseDocument()).copyOfPaperFormA(List.of(PaymentDocumentCollection.builder()
+                    .value(PaymentDocument.builder().typeOfDocument(PaymentDocumentType.COPY_OF_PAPER_FORM_A)
+                    .uploadedDocument(caseDocument()).build())
+                    .build())).outOfFamilyCourtResolution(caseDocument()).additionalListOfHearingDocuments(caseDocument()).build();
         return FinremCaseDetails.builder().id(1234L).data(caseData).build();
     }
 }

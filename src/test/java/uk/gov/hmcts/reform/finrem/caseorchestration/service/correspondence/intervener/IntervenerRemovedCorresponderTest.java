@@ -54,6 +54,7 @@ public class IntervenerRemovedCorresponderTest {
     private static final String AUTHORISATION_TOKEN = "authToken";
     private FinremCaseDetails finremCaseDetails;
     private FinremCaseData finremCaseData;
+
     @Before
     public void setup() {
         intervenerRemovedCorresponder = new IntervenerRemovedCorresponder(notificationService, bulkPrintService,

@@ -125,13 +125,11 @@ public class IntervenerService {
             } else {
                 FinremCaseData beforeData = caseDetailsBefore.getData();
                 IntervenerFourWrapper beforeIntv = beforeData.getIntervenerFourWrapper();
-                if (ObjectUtils.isNotEmpty(beforeIntv)
-                    && beforeIntv.getIntervener4Represented() != null
+                if (ObjectUtils.isNotEmpty(beforeIntv) && beforeIntv.getIntervener4Represented() != null
                     && beforeIntv.getIntervener4Represented().equals(YesOrNo.YES)) {
                     log.info("Intervener4 now not represented for case {}", caseId);
                     remokeIntervenerRole(caseId, beforeIntv.getIntervener4SolEmail(),
-                        beforeIntv.getIntervener4Organisation().getOrganisation().getOrganisationID(),
-                        CaseRole.INTVR_SOLICITOR_4.getValue());
+                        beforeIntv.getIntervener4Organisation().getOrganisation().getOrganisationID(), CaseRole.INTVR_SOLICITOR_4.getValue());
                     intervenerFourWrapper.setIntervener4SolEmail(null);
                     intervenerFourWrapper.setIntervener4SolName(null);
                     intervenerFourWrapper.setIntervener4SolPhone(null);
@@ -141,8 +139,7 @@ public class IntervenerService {
 
             }
         }
-        intervenerFourChangeDetails.setIntervenerDetails(
-            intervenerFourDetailsMapper.mapToIntervenerDetails(intervenerFourWrapper));
+        intervenerFourChangeDetails.setIntervenerDetails(intervenerFourDetailsMapper.mapToIntervenerDetails(intervenerFourWrapper));
         return intervenerFourChangeDetails;
     }
 
@@ -173,14 +170,11 @@ public class IntervenerService {
             } else {
                 FinremCaseData beforeData = caseDetailsBefore.getData();
                 IntervenerThreeWrapper beforeIntv = beforeData.getIntervenerThreeWrapper();
-                if (ObjectUtils.isNotEmpty(beforeIntv)
-                    && beforeIntv.getIntervener3Represented() != null
+                if (ObjectUtils.isNotEmpty(beforeIntv) && beforeIntv.getIntervener3Represented() != null
                     && beforeIntv.getIntervener3Represented().equals(YesOrNo.YES)) {
-
                     log.info("Intervener3 now not represented for case {}", caseId);
                     remokeIntervenerRole(caseId, beforeIntv.getIntervener3SolEmail(),
-                        beforeIntv.getIntervener3Organisation().getOrganisation().getOrganisationID(),
-                        CaseRole.INTVR_SOLICITOR_3.getValue());
+                        beforeIntv.getIntervener3Organisation().getOrganisation().getOrganisationID(), CaseRole.INTVR_SOLICITOR_3.getValue());
                     intervenerThreeWrapper.setIntervener3SolEmail(null);
                     intervenerThreeWrapper.setIntervener3SolName(null);
                     intervenerThreeWrapper.setIntervener3SolPhone(null);
@@ -189,8 +183,7 @@ public class IntervenerService {
                 setDefaultOrgForintervenerThree(intervenerThreeWrapper);
             }
         }
-        intervenerThreeChangeDetails.setIntervenerDetails(
-            intervenerThreeDetailsMapper.mapToIntervenerDetails(intervenerThreeWrapper));
+        intervenerThreeChangeDetails.setIntervenerDetails(intervenerThreeDetailsMapper.mapToIntervenerDetails(intervenerThreeWrapper));
         return intervenerThreeChangeDetails;
     }
 
@@ -221,14 +214,11 @@ public class IntervenerService {
             } else {
                 FinremCaseData beforeData = caseDetailsBefore.getData();
                 IntervenerTwoWrapper beforeIntv = beforeData.getIntervenerTwoWrapper();
-                if (ObjectUtils.isNotEmpty(beforeIntv)
-                    && beforeIntv.getIntervener2Represented() != null
+                if (ObjectUtils.isNotEmpty(beforeIntv) && beforeIntv.getIntervener2Represented() != null
                     && beforeIntv.getIntervener2Represented().equals(YesOrNo.YES)) {
-
                     log.info("Intervener2 now not represented for case {}", caseId);
                     remokeIntervenerRole(caseId, beforeIntv.getIntervener2SolEmail(),
-                        beforeIntv.getIntervener2Organisation().getOrganisation().getOrganisationID(),
-                        CaseRole.INTVR_SOLICITOR_2.getValue());
+                        beforeIntv.getIntervener2Organisation().getOrganisation().getOrganisationID(), CaseRole.INTVR_SOLICITOR_2.getValue());
                     intervenerTwoWrapper.setIntervener2SolEmail(null);
                     intervenerTwoWrapper.setIntervener2SolName(null);
                     intervenerTwoWrapper.setIntervener2SolPhone(null);
@@ -238,8 +228,7 @@ public class IntervenerService {
 
             }
         }
-        intervenerTwoChangeDetails.setIntervenerDetails(
-            intervenerTwoDetailsMapper.mapToIntervenerDetails(intervenerTwoWrapper));
+        intervenerTwoChangeDetails.setIntervenerDetails(intervenerTwoDetailsMapper.mapToIntervenerDetails(intervenerTwoWrapper));
         return intervenerTwoChangeDetails;
     }
 
@@ -270,14 +259,11 @@ public class IntervenerService {
             } else {
                 FinremCaseData beforeData = caseDetailsBefore.getData();
                 IntervenerOneWrapper beforeIntv = beforeData.getIntervenerOneWrapper();
-                if (ObjectUtils.isNotEmpty(beforeIntv)
-                    && beforeIntv.getIntervener1Represented() != null
+                if (ObjectUtils.isNotEmpty(beforeIntv) && beforeIntv.getIntervener1Represented() != null
                     && beforeIntv.getIntervener1Represented().equals(YesOrNo.YES)) {
-
                     log.info("Intervener1 now not represented for case {}", caseId);
                     remokeIntervenerRole(caseId, beforeIntv.getIntervener1SolEmail(),
-                        beforeIntv.getIntervener1Organisation().getOrganisation().getOrganisationID(),
-                        CaseRole.INTVR_SOLICITOR_1.getValue());
+                        beforeIntv.getIntervener1Organisation().getOrganisation().getOrganisationID(), CaseRole.INTVR_SOLICITOR_1.getValue());
                     intervenerOneWrapper.setIntervener1SolEmail(null);
                     intervenerOneWrapper.setIntervener1SolName(null);
                     intervenerOneWrapper.setIntervener1SolPhone(null);
@@ -286,8 +272,7 @@ public class IntervenerService {
                 setDefaultOrgForintervenerOne(intervenerOneWrapper);
             }
         }
-        intervenerOneChangeDetails.setIntervenerDetails(
-            intervenerOneDetailsMapper.mapToIntervenerDetails(intervenerOneWrapper));
+        intervenerOneChangeDetails.setIntervenerDetails(intervenerOneDetailsMapper.mapToIntervenerDetails(intervenerOneWrapper));
         return intervenerOneChangeDetails;
     }
 
@@ -295,13 +280,11 @@ public class IntervenerService {
         FinremCaseData beforeData = caseDetailsBefore.getData();
         IntervenerFourWrapper beforeIntv = beforeData.getIntervenerFourWrapper();
 
-        if (ObjectUtils.isNotEmpty(beforeIntv)
-            && beforeIntv.getIntervener4Represented() != null
+        if (ObjectUtils.isNotEmpty(beforeIntv) && beforeIntv.getIntervener4Represented() != null
             && beforeIntv.getIntervener4Represented().equals(YesOrNo.YES)) {
             String beforeOrgId = beforeIntv.getIntervener4Organisation().getOrganisation().getOrganisationID();
             if (!beforeOrgId.equals(orgId) || !beforeIntv.getIntervener4SolEmail().equals(email)) {
-                remokeIntervenerRole(caseDetailsBefore.getId(), beforeIntv.getIntervener4SolEmail(),
-                    beforeOrgId,
+                remokeIntervenerRole(caseDetailsBefore.getId(), beforeIntv.getIntervener4SolEmail(), beforeOrgId,
                     CaseRole.INTVR_SOLICITOR_4.getValue());
             }
         }
@@ -311,13 +294,11 @@ public class IntervenerService {
         FinremCaseData beforeData = caseDetailsBefore.getData();
         IntervenerThreeWrapper beforeIntv = beforeData.getIntervenerThreeWrapper();
 
-        if (ObjectUtils.isNotEmpty(beforeIntv)
-            && beforeIntv.getIntervener3Represented() != null
+        if (ObjectUtils.isNotEmpty(beforeIntv) && beforeIntv.getIntervener3Represented() != null
             && beforeIntv.getIntervener3Represented().equals(YesOrNo.YES)) {
             String beforeOrgId = beforeIntv.getIntervener3Organisation().getOrganisation().getOrganisationID();
             if (!beforeOrgId.equals(orgId) || !beforeIntv.getIntervener3SolEmail().equals(email)) {
-                remokeIntervenerRole(caseDetailsBefore.getId(), beforeIntv.getIntervener3SolEmail(),
-                    beforeOrgId,
+                remokeIntervenerRole(caseDetailsBefore.getId(), beforeIntv.getIntervener3SolEmail(), beforeOrgId,
                     CaseRole.INTVR_SOLICITOR_3.getValue());
             }
         }
@@ -327,13 +308,11 @@ public class IntervenerService {
         FinremCaseData beforeData = caseDetailsBefore.getData();
         IntervenerTwoWrapper beforeIntv = beforeData.getIntervenerTwoWrapper();
 
-        if (ObjectUtils.isNotEmpty(beforeIntv)
-            && beforeIntv.getIntervener2Represented() != null
+        if (ObjectUtils.isNotEmpty(beforeIntv) && beforeIntv.getIntervener2Represented() != null
             && beforeIntv.getIntervener2Represented().equals(YesOrNo.YES)) {
             String beforeOrgId = beforeIntv.getIntervener2Organisation().getOrganisation().getOrganisationID();
             if (!beforeOrgId.equals(orgId) || !beforeIntv.getIntervener2SolEmail().equals(email)) {
-                remokeIntervenerRole(caseDetailsBefore.getId(), beforeIntv.getIntervener2SolEmail(),
-                    beforeOrgId,
+                remokeIntervenerRole(caseDetailsBefore.getId(), beforeIntv.getIntervener2SolEmail(), beforeOrgId,
                     CaseRole.INTVR_SOLICITOR_2.getValue());
             }
         }
@@ -343,40 +322,38 @@ public class IntervenerService {
         FinremCaseData beforeData = caseDetailsBefore.getData();
         IntervenerOneWrapper beforeIntv = beforeData.getIntervenerOneWrapper();
 
-        if (ObjectUtils.isNotEmpty(beforeIntv)
-            && beforeIntv.getIntervener1Represented() != null
+        if (ObjectUtils.isNotEmpty(beforeIntv) && beforeIntv.getIntervener1Represented() != null
             && beforeIntv.getIntervener1Represented().equals(YesOrNo.YES)) {
             String beforeOrgId = beforeIntv.getIntervener1Organisation().getOrganisation().getOrganisationID();
             if (!beforeOrgId.equals(orgId) || !beforeIntv.getIntervener1SolEmail().equals(email)) {
-                remokeIntervenerRole(caseDetailsBefore.getId(), beforeIntv.getIntervener1SolEmail(),
-                    beforeOrgId,
+                remokeIntervenerRole(caseDetailsBefore.getId(), beforeIntv.getIntervener1SolEmail(), beforeOrgId,
                     CaseRole.INTVR_SOLICITOR_1.getValue());
             }
         }
     }
 
     private boolean checkIfIntervenerOneSolicitorRemoved(FinremCaseData caseData, FinremCaseData caseDataBefore) {
-        return YesOrNo.YES.equals(caseDataBefore.getIntervenerOneWrapper().getIntervener1Represented()) &&
-            (YesOrNo.NO.equals(caseData.getIntervenerOneWrapper().getIntervener1Represented()) ||
-                caseData.getIntervenerOneWrapper().getIntervener1Represented() == null);
+        return YesOrNo.YES.equals(caseDataBefore.getIntervenerOneWrapper().getIntervener1Represented())
+            && (YesOrNo.NO.equals(caseData.getIntervenerOneWrapper().getIntervener1Represented())
+                || caseData.getIntervenerOneWrapper().getIntervener1Represented() == null);
     }
 
     private boolean checkIfIntervenerTwoSolicitorRemoved(FinremCaseData caseData, FinremCaseData caseDataBefore) {
-        return YesOrNo.YES.equals(caseDataBefore.getIntervenerTwoWrapper().getIntervener2Represented()) &&
-            (YesOrNo.NO.equals(caseData.getIntervenerTwoWrapper().getIntervener2Represented()) ||
-                caseData.getIntervenerTwoWrapper().getIntervener2Represented() == null);
+        return YesOrNo.YES.equals(caseDataBefore.getIntervenerTwoWrapper().getIntervener2Represented())
+            && (YesOrNo.NO.equals(caseData.getIntervenerTwoWrapper().getIntervener2Represented())
+                || caseData.getIntervenerTwoWrapper().getIntervener2Represented() == null);
     }
 
     private boolean checkIfIntervenerThreeSolicitorRemoved(FinremCaseData caseData, FinremCaseData caseDataBefore) {
-        return YesOrNo.YES.equals(caseDataBefore.getIntervenerThreeWrapper().getIntervener3Represented()) &&
-            (YesOrNo.NO.equals(caseData.getIntervenerThreeWrapper().getIntervener3Represented()) ||
-                caseData.getIntervenerThreeWrapper().getIntervener3Represented() == null);
+        return YesOrNo.YES.equals(caseDataBefore.getIntervenerThreeWrapper().getIntervener3Represented())
+            && (YesOrNo.NO.equals(caseData.getIntervenerThreeWrapper().getIntervener3Represented())
+                || caseData.getIntervenerThreeWrapper().getIntervener3Represented() == null);
     }
 
     private boolean checkIfIntervenerFourSolicitorRemoved(FinremCaseData caseData, FinremCaseData caseDataBefore) {
-        return YesOrNo.YES.equals(caseDataBefore.getIntervenerFourWrapper().getIntervener4Represented()) &&
-            (YesOrNo.NO.equals(caseData.getIntervenerFourWrapper().getIntervener4Represented()) ||
-                caseData.getIntervenerFourWrapper().getIntervener4Represented() == null);
+        return YesOrNo.YES.equals(caseDataBefore.getIntervenerFourWrapper().getIntervener4Represented())
+            && (YesOrNo.NO.equals(caseData.getIntervenerFourWrapper().getIntervener4Represented())
+                || caseData.getIntervenerFourWrapper().getIntervener4Represented() == null);
     }
 
     public boolean checkIfAnyIntervenerSolicitorRemoved(FinremCaseData caseData, FinremCaseData caseDataBefore) {
@@ -416,8 +393,7 @@ public class IntervenerService {
         IntervenerChangeDetails intervenerOneChangeDetails = new IntervenerChangeDetails();
         intervenerOneChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
         intervenerOneChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
-        intervenerOneChangeDetails.setIntervenerDetails(
-            intervenerOneDetailsMapper.mapToIntervenerDetails(caseData.getIntervenerOneWrapper()));
+        intervenerOneChangeDetails.setIntervenerDetails(intervenerOneDetailsMapper.mapToIntervenerDetails(caseData.getIntervenerOneWrapper()));
 
         return intervenerOneChangeDetails;
     }
@@ -426,8 +402,7 @@ public class IntervenerService {
         IntervenerChangeDetails intervenerTwoChangeDetails = new IntervenerChangeDetails();
         intervenerTwoChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
         intervenerTwoChangeDetails.setIntervenerType(IntervenerType.INTERVENER_TWO);
-        intervenerTwoChangeDetails.setIntervenerDetails(
-            intervenerTwoDetailsMapper.mapToIntervenerDetails(caseData.getIntervenerTwoWrapper()));
+        intervenerTwoChangeDetails.setIntervenerDetails(intervenerTwoDetailsMapper.mapToIntervenerDetails(caseData.getIntervenerTwoWrapper()));
 
         return intervenerTwoChangeDetails;
     }
@@ -436,8 +411,7 @@ public class IntervenerService {
         IntervenerChangeDetails intervenerThreeChangeDetails = new IntervenerChangeDetails();
         intervenerThreeChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
         intervenerThreeChangeDetails.setIntervenerType(IntervenerType.INTERVENER_THREE);
-        intervenerThreeChangeDetails.setIntervenerDetails(
-            intervenerThreeDetailsMapper.mapToIntervenerDetails(caseData.getIntervenerThreeWrapper()));
+        intervenerThreeChangeDetails.setIntervenerDetails(intervenerThreeDetailsMapper.mapToIntervenerDetails(caseData.getIntervenerThreeWrapper()));
 
         return intervenerThreeChangeDetails;
     }
@@ -446,8 +420,7 @@ public class IntervenerService {
         IntervenerChangeDetails intervenerFourChangeDetails = new IntervenerChangeDetails();
         intervenerFourChangeDetails.setIntervenerAction(IntervenerAction.ADDED);
         intervenerFourChangeDetails.setIntervenerType(IntervenerType.INTERVENER_FOUR);
-        intervenerFourChangeDetails.setIntervenerDetails(
-            intervenerFourDetailsMapper.mapToIntervenerDetails(caseData.getIntervenerFourWrapper()));
+        intervenerFourChangeDetails.setIntervenerDetails(intervenerFourDetailsMapper.mapToIntervenerDetails(caseData.getIntervenerFourWrapper()));
 
         return intervenerFourChangeDetails;
     }
@@ -456,8 +429,7 @@ public class IntervenerService {
         IntervenerChangeDetails intervenerOneChangeDetails = new IntervenerChangeDetails();
         intervenerOneChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
         intervenerOneChangeDetails.setIntervenerType(IntervenerType.INTERVENER_ONE);
-        intervenerOneChangeDetails.setIntervenerDetails(
-            intervenerOneDetailsMapper.mapToIntervenerDetails(caseData.getIntervenerOneWrapper()));
+        intervenerOneChangeDetails.setIntervenerDetails(intervenerOneDetailsMapper.mapToIntervenerDetails(caseData.getIntervenerOneWrapper()));
         return intervenerOneChangeDetails;
     }
 
@@ -465,8 +437,7 @@ public class IntervenerService {
         IntervenerChangeDetails intervenerTwoChangeDetails = new IntervenerChangeDetails();
         intervenerTwoChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
         intervenerTwoChangeDetails.setIntervenerType(IntervenerType.INTERVENER_TWO);
-        intervenerTwoChangeDetails.setIntervenerDetails(
-            intervenerTwoDetailsMapper.mapToIntervenerDetails(caseData.getIntervenerTwoWrapper()));
+        intervenerTwoChangeDetails.setIntervenerDetails(intervenerTwoDetailsMapper.mapToIntervenerDetails(caseData.getIntervenerTwoWrapper()));
         return intervenerTwoChangeDetails;
     }
 
@@ -474,8 +445,7 @@ public class IntervenerService {
         IntervenerChangeDetails intervenerThreeChangeDetails = new IntervenerChangeDetails();
         intervenerThreeChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
         intervenerThreeChangeDetails.setIntervenerType(IntervenerType.INTERVENER_THREE);
-        intervenerThreeChangeDetails.setIntervenerDetails(
-            intervenerThreeDetailsMapper.mapToIntervenerDetails(caseData.getIntervenerThreeWrapper()));
+        intervenerThreeChangeDetails.setIntervenerDetails(intervenerThreeDetailsMapper.mapToIntervenerDetails(caseData.getIntervenerThreeWrapper()));
         return intervenerThreeChangeDetails;
     }
 
@@ -483,25 +453,19 @@ public class IntervenerService {
         IntervenerChangeDetails intervenerFourChangeDetails = new IntervenerChangeDetails();
         intervenerFourChangeDetails.setIntervenerAction(IntervenerAction.REMOVED);
         intervenerFourChangeDetails.setIntervenerType(IntervenerType.INTERVENER_FOUR);
-        intervenerFourChangeDetails.setIntervenerDetails(
-            intervenerFourDetailsMapper.mapToIntervenerDetails(caseData.getIntervenerFourWrapper()));
+        intervenerFourChangeDetails.setIntervenerDetails(intervenerFourDetailsMapper.mapToIntervenerDetails(caseData.getIntervenerFourWrapper()));
         return intervenerFourChangeDetails;
     }
 
     private void addIntervenerRole(Long caseId, String email, String orgId, String caseRole) {
         organisationService.findUserByEmail(email, systemUserService.getSysUserToken())
-            .ifPresentOrElse(
-                userId -> assignCaseAccessService.grantCaseRoleToUser(caseId, userId, caseRole, orgId),
-                throwNoSuchUserException(email)
-            );
+            .ifPresentOrElse(userId -> assignCaseAccessService.grantCaseRoleToUser(caseId, userId, caseRole, orgId), throwNoSuchUserException(email));
     }
 
     private void remokeIntervenerRole(Long caseId, String email, String orgId, String caseRole) {
         organisationService.findUserByEmail(email, systemUserService.getSysUserToken())
-            .ifPresentOrElse(
-                userId -> assignCaseAccessService.removeCaseRoleToUser(caseId, userId, caseRole, orgId),
-                throwNoSuchUserException(email)
-            );
+            .ifPresentOrElse(userId -> assignCaseAccessService.removeCaseRoleToUser(caseId, userId, caseRole, orgId),
+                throwNoSuchUserException(email));
     }
 
     private Runnable throwNoSuchUserException(String email) {

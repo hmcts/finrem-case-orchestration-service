@@ -468,8 +468,7 @@ public class DocumentHelper {
                 addressToSendTo = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerAddress();
                 caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(intervenerOneDetailsMapper.mapToIntervenerDetails(
                     caseDetails.getData().getIntervenerOneWrapper()));
-            }
-            else {
+            } else {
                 addresseeName = caseData.getIntervenerOneWrapper().getIntervener1Name();
                 addressToSendTo = caseData.getIntervenerOneWrapper().getIntervener1Address();
             }
@@ -480,8 +479,7 @@ public class DocumentHelper {
                 addressToSendTo = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerAddress();
                 caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(intervenerTwoDetailsMapper.mapToIntervenerDetails(
                     caseDetails.getData().getIntervenerTwoWrapper()));
-            }
-            else {
+            } else {
                 addresseeName = caseData.getIntervenerTwoWrapper().getIntervener2Name();
                 addressToSendTo = caseData.getIntervenerTwoWrapper().getIntervener2Address();
             }
@@ -491,8 +489,7 @@ public class DocumentHelper {
                 addressToSendTo = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerAddress();
                 caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(intervenerThreeDetailsMapper.mapToIntervenerDetails(
                     caseDetails.getData().getIntervenerThreeWrapper()));
-            }
-            else {
+            } else {
                 addresseeName = caseData.getIntervenerThreeWrapper().getIntervener3Name();
                 addressToSendTo = caseData.getIntervenerThreeWrapper().getIntervener3Address();
             }
@@ -502,12 +499,10 @@ public class DocumentHelper {
                 addressToSendTo = caseData.getCurrentIntervenerChangeDetails().getIntervenerDetails().getIntervenerAddress();
                 caseDetails.getData().getCurrentIntervenerChangeDetails().setIntervenerDetails(intervenerFourDetailsMapper.mapToIntervenerDetails(
                     caseDetails.getData().getIntervenerFourWrapper()));
-            }
-            else {
+            } else {
                 addresseeName = caseData.getIntervenerFourWrapper().getIntervener4Name();
                 addressToSendTo = caseData.getIntervenerFourWrapper().getIntervener4Address();
             }
-
         } else {
             addresseeName = recipient == APPLICANT
                 ? caseDetails.getData().getFullApplicantName()

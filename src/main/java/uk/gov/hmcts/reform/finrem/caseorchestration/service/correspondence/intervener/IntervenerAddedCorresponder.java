@@ -15,11 +15,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.FinremSingleLetterOrEmailAllPartiesCorresponder;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_ONE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_TWO;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_THREE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_FOUR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_FOUR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_ONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_THREE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_TWO;
 
 @Slf4j
 @Component
@@ -186,28 +186,28 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
     }
 
     private boolean hasAnyIntervenerBeenAdded(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore) {
-        return hasIntervenerOneBeenAdded(caseDetails, caseDetailsBefore) || hasIntervenerTwoBeenAdded(caseDetails, caseDetailsBefore) ||
-            hasIntervenerThreeBeenAdded(caseDetails, caseDetailsBefore) || hasIntervenerFourBeenAdded(caseDetails, caseDetailsBefore);
+        return hasIntervenerOneBeenAdded(caseDetails, caseDetailsBefore) || hasIntervenerTwoBeenAdded(caseDetails, caseDetailsBefore)
+            || hasIntervenerThreeBeenAdded(caseDetails, caseDetailsBefore) || hasIntervenerFourBeenAdded(caseDetails, caseDetailsBefore);
     }
 
     private boolean hasIntervenerOneBeenAdded(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore) {
-        return StringUtils.isNotEmpty(caseDetails.getData().getIntervenerOneWrapper().getIntervener1Name()) &&
-            !StringUtils.isNotEmpty(caseDetailsBefore.getData().getIntervenerOneWrapper().getIntervener1Name());
+        return StringUtils.isNotEmpty(caseDetails.getData().getIntervenerOneWrapper().getIntervener1Name())
+            && !StringUtils.isNotEmpty(caseDetailsBefore.getData().getIntervenerOneWrapper().getIntervener1Name());
     }
 
     private boolean hasIntervenerTwoBeenAdded(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore) {
-        return StringUtils.isNotEmpty(caseDetails.getData().getIntervenerTwoWrapper().getIntervener2Name()) &&
-            !StringUtils.isNotEmpty(caseDetailsBefore.getData().getIntervenerTwoWrapper().getIntervener2Name());
+        return StringUtils.isNotEmpty(caseDetails.getData().getIntervenerTwoWrapper().getIntervener2Name())
+            && !StringUtils.isNotEmpty(caseDetailsBefore.getData().getIntervenerTwoWrapper().getIntervener2Name());
     }
 
     private boolean hasIntervenerThreeBeenAdded(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore) {
-        return StringUtils.isNotEmpty(caseDetails.getData().getIntervenerThreeWrapper().getIntervener3Name()) &&
-            !StringUtils.isNotEmpty(caseDetailsBefore.getData().getIntervenerThreeWrapper().getIntervener3Name());
+        return StringUtils.isNotEmpty(caseDetails.getData().getIntervenerThreeWrapper().getIntervener3Name())
+            && !StringUtils.isNotEmpty(caseDetailsBefore.getData().getIntervenerThreeWrapper().getIntervener3Name());
     }
 
     private boolean hasIntervenerFourBeenAdded(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore) {
-        return StringUtils.isNotEmpty(caseDetails.getData().getIntervenerFourWrapper().getIntervener4Name()) &&
-            !StringUtils.isNotEmpty(caseDetailsBefore.getData().getIntervenerFourWrapper().getIntervener4Name());
+        return StringUtils.isNotEmpty(caseDetails.getData().getIntervenerFourWrapper().getIntervener4Name())
+            && !StringUtils.isNotEmpty(caseDetailsBefore.getData().getIntervenerFourWrapper().getIntervener4Name());
     }
 
     @Override

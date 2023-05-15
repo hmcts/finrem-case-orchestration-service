@@ -15,11 +15,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.IntervenerService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.correspondence.FinremSingleLetterOrEmailAllPartiesCorresponder;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_ONE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_TWO;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_THREE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_FOUR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_FOUR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_ONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_THREE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerConstant.INTERVENER_TWO;
 
 @Slf4j
 @Component
@@ -184,28 +184,28 @@ public class IntervenerRemovedCorresponder extends FinremSingleLetterOrEmailAllP
     }
 
     private boolean hasIntervenerOneBeenRemoved(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore) {
-        return !StringUtils.isNotEmpty(caseDetails.getData().getIntervenerOneWrapper().getIntervener1Name()) &&
-            StringUtils.isNotEmpty(caseDetailsBefore.getData().getIntervenerOneWrapper().getIntervener1Name());
+        return !StringUtils.isNotEmpty(caseDetails.getData().getIntervenerOneWrapper().getIntervener1Name())
+            && StringUtils.isNotEmpty(caseDetailsBefore.getData().getIntervenerOneWrapper().getIntervener1Name());
     }
 
     private boolean hasIntervenerTwoBeenRemoved(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore) {
-        return !StringUtils.isNotEmpty(caseDetails.getData().getIntervenerTwoWrapper().getIntervener2Name()) &&
-            StringUtils.isNotEmpty(caseDetailsBefore.getData().getIntervenerTwoWrapper().getIntervener2Name());
+        return !StringUtils.isNotEmpty(caseDetails.getData().getIntervenerTwoWrapper().getIntervener2Name())
+            && StringUtils.isNotEmpty(caseDetailsBefore.getData().getIntervenerTwoWrapper().getIntervener2Name());
     }
 
     private boolean hasIntervenerThreeBeenRemoved(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore) {
-        return !StringUtils.isNotEmpty(caseDetails.getData().getIntervenerThreeWrapper().getIntervener3Name()) &&
-            StringUtils.isNotEmpty(caseDetailsBefore.getData().getIntervenerThreeWrapper().getIntervener3Name());
+        return !StringUtils.isNotEmpty(caseDetails.getData().getIntervenerThreeWrapper().getIntervener3Name())
+            && StringUtils.isNotEmpty(caseDetailsBefore.getData().getIntervenerThreeWrapper().getIntervener3Name());
     }
 
     private boolean hasIntervenerFourBeenRemoved(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore) {
-        return !StringUtils.isNotEmpty(caseDetails.getData().getIntervenerFourWrapper().getIntervener4Name()) &&
-            StringUtils.isNotEmpty(caseDetailsBefore.getData().getIntervenerFourWrapper().getIntervener4Name());
+        return !StringUtils.isNotEmpty(caseDetails.getData().getIntervenerFourWrapper().getIntervener4Name())
+            && StringUtils.isNotEmpty(caseDetailsBefore.getData().getIntervenerFourWrapper().getIntervener4Name());
     }
 
     private boolean hasAnyIntervenerBeenRemoved(FinremCaseDetails caseDetails, FinremCaseDetails caseDetailsBefore) {
-        return hasIntervenerOneBeenRemoved(caseDetails, caseDetailsBefore) || hasIntervenerTwoBeenRemoved(caseDetails, caseDetailsBefore) ||
-            hasIntervenerThreeBeenRemoved(caseDetails, caseDetailsBefore) || hasIntervenerFourBeenRemoved(caseDetails, caseDetailsBefore);
+        return hasIntervenerOneBeenRemoved(caseDetails, caseDetailsBefore) || hasIntervenerTwoBeenRemoved(caseDetails, caseDetailsBefore)
+            || hasIntervenerThreeBeenRemoved(caseDetails, caseDetailsBefore) || hasIntervenerFourBeenRemoved(caseDetails, caseDetailsBefore);
     }
 
     @Override

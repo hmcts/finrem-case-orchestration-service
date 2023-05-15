@@ -14,6 +14,10 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerFourToIntervenerDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerOneToIntervenerDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerThreeToIntervenerDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.intervener.IntervenerTwoToIntervenerDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollection;
@@ -90,6 +94,10 @@ public class DocumentHelperTest {
     @Mock
     private GenericDocumentService service;
     private FinremCaseDetailsMapper finremCaseDetailsMapper;
+    private IntervenerOneToIntervenerDetailsMapper intervenerOneDetailsMapper;
+    private IntervenerTwoToIntervenerDetailsMapper intervenerTwoDetailsMapper;
+    private IntervenerThreeToIntervenerDetailsMapper intervenerThreeDetailsMapper;
+    private IntervenerFourToIntervenerDetailsMapper intervenerFourDetailsMapper;
 
     @Before
     public void setup() {
@@ -97,23 +105,23 @@ public class DocumentHelperTest {
         objectMapper.registerModule(new JavaTimeModule());
         CaseDataService caseDataService = new CaseDataService(objectMapper);
         finremCaseDetailsMapper = new FinremCaseDetailsMapper(objectMapper);
-        documentHelper = new DocumentHelper(objectMapper, caseDataService, service, finremCaseDetailsMapper);
+        documentHelper = new DocumentHelper(objectMapper, caseDataService, service, finremCaseDetailsMapper, intervenerOneDetailsMapper,
+            intervenerTwoDetailsMapper, intervenerThreeDetailsMapper, intervenerFourDetailsMapper);
     }
 
     @Test
     public void shouldGetLatestAmendedConsentOrder() throws Exception {
         CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("amend-consent-order-by-caseworker.json");
-        CaseDocument latestAmendedConsentOrder = documentHelper.getLatestAmendedConsentOrder(
-            callbackRequest.getCaseDetails().getData());
+        CaseDocument latestAmendedConsentOrder = documentHelper.getLatestAmendedConsentOrder(callbackRequest.getCaseDetails().getData());
         assertThat(latestAmendedConsentOrder.getDocumentBinaryUrl(),
             is("http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary"));
     }
 
     @Test
     public void shouldGetLatestFinremAmendedConsentOrder() throws Exception {
-        FinremCallbackRequest callbackRequest = prepareFinremCallbackRequestForLatestConsentedConsentOrder("amend-consent-order-by-caseworker.json");
-        CaseDocument latestAmendedConsentOrder = documentHelper.getLatestAmendedConsentOrder(
-            callbackRequest.getCaseDetails().getData());
+        FinremCallbackRequest callbackRequest = prepareFinremCallbackRequestForLatestConsentedConsentOrder(
+            "amend-consent-order-by-caseworker.json");
+        CaseDocument latestAmendedConsentOrder = documentHelper.getLatestAmendedConsentOrder(callbackRequest.getCaseDetails().getData());
         assertThat(latestAmendedConsentOrder.getDocumentBinaryUrl(),
             is("http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary"));
     }
@@ -121,8 +129,7 @@ public class DocumentHelperTest {
     @Test
     public void shouldGetPensionDocuments() throws Exception {
         CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("validate-pension-collection.json");
-        List<CaseDocument> pensionDocuments = documentHelper.getPensionDocumentsData(
-            callbackRequest.getCaseDetails().getData());
+        List<CaseDocument> pensionDocuments = documentHelper.getPensionDocumentsData(callbackRequest.getCaseDetails().getData());
         assertThat(pensionDocuments.size(), is(2));
     }
 
@@ -130,33 +137,30 @@ public class DocumentHelperTest {
     @Test
     public void castToList() throws Exception {
         CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("validate-pension-collection.json");
-        List<String> natureList = documentHelper.convertToList(
-            callbackRequest.getCaseDetails().getData().get("natureOfApplication6"));
+        List<String> natureList = documentHelper.convertToList(callbackRequest.getCaseDetails().getData().get("natureOfApplication6"));
         assertThat(natureList.size(), is(2));
     }
 
     @Test
     public void shouldGetFormADocuments() throws Exception {
         CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("validate-form-a-collection.json");
-        List<CaseDocument> formADocuments = documentHelper.getFormADocumentsData(
-            callbackRequest.getCaseDetails().getData());
+        List<CaseDocument> formADocuments = documentHelper.getFormADocumentsData(callbackRequest.getCaseDetails().getData());
         assertThat(formADocuments.size(), is(2));
     }
 
 
     @Test
     public void shouldGetFormADocumentsFinrem() throws Exception {
-        FinremCallbackRequest callbackRequest = prepareFinremCallbackRequestForLatestConsentedConsentOrder("validate-form-a-collection.json");
-        List<CaseDocument> pensionDocuments = documentHelper.getFormADocumentsData(
-            callbackRequest.getCaseDetails().getData());
+        FinremCallbackRequest callbackRequest = prepareFinremCallbackRequestForLatestConsentedConsentOrder(
+            "validate-form-a-collection.json");
+        List<CaseDocument> pensionDocuments = documentHelper.getFormADocumentsData(callbackRequest.getCaseDetails().getData());
         assertThat(pensionDocuments.size(), is(2));
     }
 
     @Test
     public void shouldGetConsentedInContestedPensionDocuments() throws Exception {
         CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("consented-in-consented.json");
-        List<CaseDocument> pensionDocuments = documentHelper.getConsentedInContestedPensionDocumentsData(
-            callbackRequest.getCaseDetails().getData());
+        List<CaseDocument> pensionDocuments = documentHelper.getConsentedInContestedPensionDocumentsData(callbackRequest.getCaseDetails().getData());
         assertThat(pensionDocuments.size(), is(2));
     }
 
@@ -164,8 +168,8 @@ public class DocumentHelperTest {
     public void hasAnotherHearing_shouldReturnTrue() {
         Map<String, Object> caseData = new HashMap<>();
         DirectionDetailsCollection directionDetailsCollection = DirectionDetailsCollection.builder().isAnotherHearingYN(YES_VALUE).build();
-        DirectionDetailsCollectionData directionDetailsCollectionData
-            = DirectionDetailsCollectionData.builder().directionDetailsCollection(directionDetailsCollection).build();
+        DirectionDetailsCollectionData directionDetailsCollectionData =
+            DirectionDetailsCollectionData.builder().directionDetailsCollection(directionDetailsCollection).build();
         List<DirectionDetailsCollectionData> directionDetailsCollectionList = singletonList(directionDetailsCollectionData);
         caseData.put(DIRECTION_DETAILS_COLLECTION_CT, directionDetailsCollectionList);
 
@@ -191,8 +195,8 @@ public class DocumentHelperTest {
     public void hasAnotherHearing_noNextHearing() {
         Map<String, Object> caseData = new HashMap<>();
         DirectionDetailsCollection directionDetailsCollection = DirectionDetailsCollection.builder().isAnotherHearingYN(NO_VALUE).build();
-        DirectionDetailsCollectionData directionDetailsCollectionData
-            = DirectionDetailsCollectionData.builder().directionDetailsCollection(directionDetailsCollection).build();
+        DirectionDetailsCollectionData directionDetailsCollectionData =
+            DirectionDetailsCollectionData.builder().directionDetailsCollection(directionDetailsCollection).build();
         List<DirectionDetailsCollectionData> directionDetailsCollectionList = singletonList(directionDetailsCollectionData);
         caseData.put(DIRECTION_DETAILS_COLLECTION_CT, directionDetailsCollectionList);
 
@@ -202,10 +206,7 @@ public class DocumentHelperTest {
     @Test
     public void getHearingDocumentsAsBulkPrintDocuments() {
         Map<String, Object> caseData = new HashMap<>();
-        DocumentCollection dc = DocumentCollection
-            .builder()
-            .value(caseDocument(DOCUMENT_URL, FILE_NAME, BINARY_URL))
-            .build();
+        DocumentCollection dc = DocumentCollection.builder().value(caseDocument(DOCUMENT_URL, FILE_NAME, BINARY_URL)).build();
         List<DocumentCollection> documentCollections = new ArrayList<>();
         documentCollections.add(dc);
         caseData.put(HEARING_ORDER_OTHER_COLLECTION, documentCollections);
@@ -222,26 +223,28 @@ public class DocumentHelperTest {
     @Test
     public void shouldGetRespondToOrderDocuments() throws Exception {
         CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("respond-to-order-solicitor.json");
-        Optional<CaseDocument> latestRespondToOrderDocuments = documentHelper.getLatestRespondToOrderDocuments(
-            callbackRequest.getCaseDetails().getData());
+        Optional<CaseDocument> latestRespondToOrderDocuments =
+            documentHelper.getLatestRespondToOrderDocuments(callbackRequest.getCaseDetails().getData());
         assertThat(latestRespondToOrderDocuments.isPresent(), is(true));
         assertThat(latestRespondToOrderDocuments.get().getDocumentBinaryUrl(), is("http://doc2/binary"));
     }
 
     @Test
     public void shouldGetFinremRespondToOrderDocuments() throws Exception {
-        FinremCallbackRequest callbackRequest = prepareFinremCallbackRequestForLatestConsentedConsentOrder("respond-to-order-solicitor.json");
-        Optional<CaseDocument> latestRespondToOrderDocuments = documentHelper.getLatestRespondToOrderDocuments(
-            callbackRequest.getCaseDetails().getData());
+        FinremCallbackRequest callbackRequest = prepareFinremCallbackRequestForLatestConsentedConsentOrder(
+            "respond-to-order-solicitor.json");
+        Optional<CaseDocument> latestRespondToOrderDocuments =
+            documentHelper.getLatestRespondToOrderDocuments(callbackRequest.getCaseDetails().getData());
         assertThat(latestRespondToOrderDocuments.isPresent(), is(true));
         assertThat(latestRespondToOrderDocuments.get().getDocumentBinaryUrl(), is("http://doc2/binary"));
     }
 
     @Test
     public void shouldNotGetRespondToOrderDocuments() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("respond-to-order-without-consent-order.json");
-        Optional<CaseDocument> latestRespondToOrderDocuments = documentHelper.getLatestRespondToOrderDocuments(
-            callbackRequest.getCaseDetails().getData());
+        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder(
+            "respond-to-order-without-consent-order.json");
+        Optional<CaseDocument> latestRespondToOrderDocuments =
+            documentHelper.getLatestRespondToOrderDocuments(callbackRequest.getCaseDetails().getData());
         assertThat(latestRespondToOrderDocuments.isPresent(), is(false));
     }
 
@@ -249,8 +252,8 @@ public class DocumentHelperTest {
     public void shouldNotGetFinremRespondToOrderDocuments() throws Exception {
         FinremCallbackRequest callbackRequest =
             prepareFinremCallbackRequestForLatestConsentedConsentOrder("respond-to-order-without-consent-order.json");
-        Optional<CaseDocument> latestRespondToOrderDocuments = documentHelper.getLatestRespondToOrderDocuments(
-            callbackRequest.getCaseDetails().getData());
+        Optional<CaseDocument> latestRespondToOrderDocuments =
+            documentHelper.getLatestRespondToOrderDocuments(callbackRequest.getCaseDetails().getData());
         assertThat(latestRespondToOrderDocuments.isPresent(), is(false));
     }
 
@@ -291,12 +294,9 @@ public class DocumentHelperTest {
 
         String formattedAddress = documentHelper.formatAddressForLetterPrinting(testAddressMap);
 
-        String expectedAddress = "50 Applicant Street" + "\n"
-            + "Second Address Line" + "\n"
-            + "Third Address Line" + "\n"
-            + "Greater London" + "\n"
-            + "London" + "\n"
-            + "SW1";
+        String expectedAddress =
+            "50 Applicant Street" + "\n" + "Second Address Line" + "\n" + "Third Address Line" + "\n" + "Greater London" + "\n" + "London" + "\n"
+                + "SW1";
 
         assertThat(formattedAddress, is(expectedAddress));
     }
@@ -331,12 +331,9 @@ public class DocumentHelperTest {
         testAddressMap.put("PostCode", "SW1");
 
         String formattedAddress = documentHelper.formatAddressForLetterPrinting(testAddressMap);
-        String expectedAddress = "50 Applicant Street" + "\n"
-            + "Second Address Line" + "\n"
-            + "Third Address Line" + "\n"
-            + "Greater London" + "\n"
-            + "London" + "\n"
-            + "SW1";
+        String expectedAddress =
+            "50 Applicant Street" + "\n" + "Second Address Line" + "\n" + "Third Address Line" + "\n" + "Greater London" + "\n" + "London" + "\n"
+                + "SW1";
 
         assertThat(formattedAddress, is(expectedAddress));
     }
@@ -375,16 +372,9 @@ public class DocumentHelperTest {
     public void whenPreparingLetterToApplicantTemplateData_CtscDataIsPopulated() {
         CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(defaultConsentedCaseDetails(), APPLICANT);
 
-        CtscContactDetails ctscContactDetails = CtscContactDetails.builder()
-            .serviceCentre(CTSC_SERVICE_CENTRE)
-            .careOf(CTSC_CARE_OF)
-            .poBox(CTSC_PO_BOX)
-            .town(CTSC_TOWN)
-            .postcode(CTSC_POSTCODE)
-            .emailAddress(CTSC_EMAIL_ADDRESS)
-            .phoneNumber(CTSC_PHONE_NUMBER)
-            .openingHours(CTSC_OPENING_HOURS)
-            .build();
+        CtscContactDetails ctscContactDetails =
+            CtscContactDetails.builder().serviceCentre(CTSC_SERVICE_CENTRE).careOf(CTSC_CARE_OF).poBox(CTSC_PO_BOX).town(CTSC_TOWN)
+                .postcode(CTSC_POSTCODE).emailAddress(CTSC_EMAIL_ADDRESS).phoneNumber(CTSC_PHONE_NUMBER).openingHours(CTSC_OPENING_HOURS).build();
 
         assertEquals(ctscContactDetails, preparedCaseDetails.getData().get(CTSC_CONTACT_DETAILS));
     }
@@ -393,16 +383,9 @@ public class DocumentHelperTest {
     public void whenPreparingLetterToApplicantTemplateData_CtscDataIsPopulated_finrem() {
         CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(defaultConsentedFinremCaseDetails(), APPLICANT);
 
-        CtscContactDetails ctscContactDetails = CtscContactDetails.builder()
-            .serviceCentre(CTSC_SERVICE_CENTRE)
-            .careOf(CTSC_CARE_OF)
-            .poBox(CTSC_PO_BOX)
-            .town(CTSC_TOWN)
-            .postcode(CTSC_POSTCODE)
-            .emailAddress(CTSC_EMAIL_ADDRESS)
-            .phoneNumber(CTSC_PHONE_NUMBER)
-            .openingHours(CTSC_OPENING_HOURS)
-            .build();
+        CtscContactDetails ctscContactDetails =
+            CtscContactDetails.builder().serviceCentre(CTSC_SERVICE_CENTRE).careOf(CTSC_CARE_OF).poBox(CTSC_PO_BOX).town(CTSC_TOWN)
+                .postcode(CTSC_POSTCODE).emailAddress(CTSC_EMAIL_ADDRESS).phoneNumber(CTSC_PHONE_NUMBER).openingHours(CTSC_OPENING_HOURS).build();
 
         assertEquals(ctscContactDetails, preparedCaseDetails.getData().get(CTSC_CONTACT_DETAILS));
     }
@@ -411,16 +394,9 @@ public class DocumentHelperTest {
     public void whenPreparingLetterToRespondentTemplateData_CtscDataIsPopulated() {
         CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(defaultConsentedCaseDetails(), RESPONDENT);
 
-        CtscContactDetails ctscContactDetails = CtscContactDetails.builder()
-            .serviceCentre(CTSC_SERVICE_CENTRE)
-            .careOf(CTSC_CARE_OF)
-            .poBox(CTSC_PO_BOX)
-            .town(CTSC_TOWN)
-            .postcode(CTSC_POSTCODE)
-            .emailAddress(CTSC_EMAIL_ADDRESS)
-            .phoneNumber(CTSC_PHONE_NUMBER)
-            .openingHours(CTSC_OPENING_HOURS)
-            .build();
+        CtscContactDetails ctscContactDetails =
+            CtscContactDetails.builder().serviceCentre(CTSC_SERVICE_CENTRE).careOf(CTSC_CARE_OF).poBox(CTSC_PO_BOX).town(CTSC_TOWN)
+                .postcode(CTSC_POSTCODE).emailAddress(CTSC_EMAIL_ADDRESS).phoneNumber(CTSC_PHONE_NUMBER).openingHours(CTSC_OPENING_HOURS).build();
 
         assertEquals(ctscContactDetails, preparedCaseDetails.getData().get(CTSC_CONTACT_DETAILS));
     }
@@ -430,16 +406,9 @@ public class DocumentHelperTest {
     public void whenPreparingLetterToRespondentTemplateData_CtscDataIsPopulated_finrem() {
         CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(defaultConsentedFinremCaseDetails(), RESPONDENT);
 
-        CtscContactDetails ctscContactDetails = CtscContactDetails.builder()
-            .serviceCentre(CTSC_SERVICE_CENTRE)
-            .careOf(CTSC_CARE_OF)
-            .poBox(CTSC_PO_BOX)
-            .town(CTSC_TOWN)
-            .postcode(CTSC_POSTCODE)
-            .emailAddress(CTSC_EMAIL_ADDRESS)
-            .phoneNumber(CTSC_PHONE_NUMBER)
-            .openingHours(CTSC_OPENING_HOURS)
-            .build();
+        CtscContactDetails ctscContactDetails =
+            CtscContactDetails.builder().serviceCentre(CTSC_SERVICE_CENTRE).careOf(CTSC_CARE_OF).poBox(CTSC_PO_BOX).town(CTSC_TOWN)
+                .postcode(CTSC_POSTCODE).emailAddress(CTSC_EMAIL_ADDRESS).phoneNumber(CTSC_PHONE_NUMBER).openingHours(CTSC_OPENING_HOURS).build();
 
         assertEquals(ctscContactDetails, preparedCaseDetails.getData().get(CTSC_CONTACT_DETAILS));
     }
@@ -448,12 +417,9 @@ public class DocumentHelperTest {
     public void whenRecipientIsIntervenerOne_AndIntervenerNotRepresented_setAddressee() {
         FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
         Address address = Address.builder().addressLine1("addressLine1").postCode("SW1 1TE").build();
-        IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder()
-            .intervener1Name("Name")
-            .intervener1Address(address).build();
+        IntervenerOneWrapper intervenerOneWrapper = IntervenerOneWrapper.builder().intervener1Name("Name").intervener1Address(address).build();
         caseDetails.getData().setIntervenerOneWrapper(intervenerOneWrapper);
-        Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
-            + "\nSW1 1TE").build();
+        Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1" + "\nSW1 1TE").build();
 
         CaseDetails result = documentHelper.prepareIntervenerLetterTemplateData(caseDetails, INTERVENER_ONE);
 
@@ -464,12 +430,9 @@ public class DocumentHelperTest {
     public void whenRecipientIsIntervenerTwo_AndIntervenerNotRepresented_setAddressee() {
         FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
         Address address = Address.builder().addressLine1("addressLine1").postCode("SW1 1TE").build();
-        IntervenerTwoWrapper intervenerTwoWrapper = IntervenerTwoWrapper.builder()
-            .intervener2Name("Name")
-            .intervener2Address(address).build();
+        IntervenerTwoWrapper intervenerTwoWrapper = IntervenerTwoWrapper.builder().intervener2Name("Name").intervener2Address(address).build();
         caseDetails.getData().setIntervenerTwoWrapper(intervenerTwoWrapper);
-        Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
-            + "\nSW1 1TE").build();
+        Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1" + "\nSW1 1TE").build();
 
         CaseDetails result = documentHelper.prepareIntervenerLetterTemplateData(caseDetails, INTERVENER_TWO);
 
@@ -480,12 +443,9 @@ public class DocumentHelperTest {
     public void whenRecipientIsIntervenerThree_AndIntervenerNotRepresented_setAddressee() {
         FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
         Address address = Address.builder().addressLine1("addressLine1").postCode("SW1 1TE").build();
-        IntervenerThreeWrapper intervenerThreeWrapper = IntervenerThreeWrapper.builder()
-            .intervener3Name("Name")
-            .intervener3Address(address).build();
+        IntervenerThreeWrapper intervenerThreeWrapper = IntervenerThreeWrapper.builder().intervener3Name("Name").intervener3Address(address).build();
         caseDetails.getData().setIntervenerThreeWrapper(intervenerThreeWrapper);
-        Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
-            + "\nSW1 1TE").build();
+        Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1" + "\nSW1 1TE").build();
 
         CaseDetails result = documentHelper.prepareIntervenerLetterTemplateData(caseDetails, INTERVENER_THREE);
 
@@ -496,12 +456,9 @@ public class DocumentHelperTest {
     public void whenRecipientIsIntervenerFour_AndIntervenerNotRepresented_setAddressee() {
         FinremCaseDetails caseDetails = defaultContestedFinremCaseDetails();
         Address address = Address.builder().addressLine1("addressLine1").postCode("SW1 1TE").build();
-        IntervenerFourWrapper intervenerFourWrapper = IntervenerFourWrapper.builder()
-            .intervener4Name("Name")
-            .intervener4Address(address).build();
+        IntervenerFourWrapper intervenerFourWrapper = IntervenerFourWrapper.builder().intervener4Name("Name").intervener4Address(address).build();
         caseDetails.getData().setIntervenerFourWrapper(intervenerFourWrapper);
-        Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1"
-            + "\nSW1 1TE").build();
+        Addressee expected = Addressee.builder().name("Name").formattedAddress("addressLine1" + "\nSW1 1TE").build();
 
         CaseDetails result = documentHelper.prepareIntervenerLetterTemplateData(caseDetails, INTERVENER_FOUR);
 
@@ -567,9 +524,7 @@ public class DocumentHelperTest {
 
             CallbackRequest callbackRequest = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
             FinremCaseDetails finremCaseDetails = finremCaseDetailsMapper.mapToFinremCaseDetails(callbackRequest.getCaseDetails());
-            return FinremCallbackRequest.builder()
-                .caseDetails(finremCaseDetails)
-                .build();
+            return FinremCallbackRequest.builder().caseDetails(finremCaseDetails).build();
         }
     }
 }
