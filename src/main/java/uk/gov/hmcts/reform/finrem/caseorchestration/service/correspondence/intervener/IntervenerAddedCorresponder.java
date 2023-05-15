@@ -58,15 +58,16 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
             log.info("Sending email correspondence to applicant for case: {}", caseDetails.getId());
             this.emailApplicantSolicitor(caseDetails);
         }
-        log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
         if (hasAnyIntervenerSolicitorBeenAdded(caseDetails)) {
             bulkPrintService.sendDocumentForPrint(
                 printIntervenerSolicitorAddedLetter(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.APPLICANT),
                 caseDetails);
+            log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
         }
         if (hasAnyIntervenerBeenAdded(caseDetails, caseDetailsBefore)) {
             bulkPrintService.sendDocumentForPrint(
                 printIntervenerAddedLetter(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.APPLICANT), caseDetails);
+            log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
         }
     }
 
@@ -75,15 +76,16 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
             log.info("Sending email correspondence to respondent for case: {}", caseDetails.getId());
             this.emailRespondentSolicitor(caseDetails);
         }
-        log.info("Sending letter correspondence to respondent for case: {}", caseDetails.getId());
         if (hasAnyIntervenerSolicitorBeenAdded(caseDetails)) {
             bulkPrintService.sendDocumentForPrint(
                 printIntervenerSolicitorAddedLetter(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT),
                 caseDetails);
+            log.info("Sending letter correspondence to respondent for case: {}", caseDetails.getId());
         }
         if (hasAnyIntervenerBeenAdded(caseDetails, caseDetailsBefore)) {
             bulkPrintService.sendDocumentForPrint(
                 printIntervenerAddedLetter(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT), caseDetails);
+            log.info("Sending letter correspondence to respondent for case: {}", caseDetails.getId());
         }
     }
 
@@ -95,7 +97,6 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
         log.info("Sending letter correspondence to Intervener One for case: {}", caseDetails.getId());
         caseDetails.getData().getCurrentIntervenerChangeDetails()
             .setIntervenerDetails(intervenerOneDetailsMapper.mapToIntervenerDetails(caseDetails.getData().getIntervenerOneWrapper()));
-
         bulkPrintService.sendDocumentForPrint(
             getDocumentToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_ONE), caseDetails);
     }
@@ -120,7 +121,6 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
         log.info("Sending letter correspondence to Intervener Three for case: {}", caseDetails.getId());
         caseDetails.getData().getCurrentIntervenerChangeDetails()
             .setIntervenerDetails(intervenerThreeDetailsMapper.mapToIntervenerDetails(caseDetails.getData().getIntervenerThreeWrapper()));
-
         bulkPrintService.sendDocumentForPrint(
             getDocumentToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_THREE), caseDetails);
     }
@@ -133,7 +133,6 @@ public class IntervenerAddedCorresponder extends FinremSingleLetterOrEmailAllPar
         log.info("Sending letter correspondence to Intervener Four for case: {}", caseDetails.getId());
         caseDetails.getData().getCurrentIntervenerChangeDetails()
             .setIntervenerDetails(intervenerFourDetailsMapper.mapToIntervenerDetails(caseDetails.getData().getIntervenerFourWrapper()));
-
         bulkPrintService.sendDocumentForPrint(
             getDocumentToPrint(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.INTERVENER_FOUR), caseDetails);
     }

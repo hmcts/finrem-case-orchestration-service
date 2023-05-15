@@ -60,15 +60,16 @@ public class IntervenerRemovedCorresponder extends FinremSingleLetterOrEmailAllP
             log.info("Sending email correspondence to applicant for case: {}", caseDetails.getId());
             this.emailApplicantSolicitor(caseDetails);
         }
-        log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
         if (hasAnyIntervenerBeenRemoved(caseDetails, caseDetailsBefore)) {
             bulkPrintService.sendDocumentForPrint(
                 printIntervenerRemovedLetter(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.APPLICANT), caseDetails);
+            log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
         }
         if (intervenerService.checkIfAnyIntervenerSolicitorRemoved(caseDetails.getData(), caseDetailsBefore.getData())) {
             bulkPrintService.sendDocumentForPrint(
                 printIntervenerSolicitorRemovedLetter(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.APPLICANT),
                 caseDetails);
+            log.info("Sending letter correspondence to applicant for case: {}", caseDetails.getId());
         }
     }
 
@@ -77,15 +78,16 @@ public class IntervenerRemovedCorresponder extends FinremSingleLetterOrEmailAllP
             log.info("Sending email correspondence to respondent for case: {}", caseDetails.getId());
             this.emailRespondentSolicitor(caseDetails);
         }
-        log.info("Sending letter correspondence to respondent for case: {}", caseDetails.getId());
         if (hasAnyIntervenerBeenRemoved(caseDetails, caseDetailsBefore)) {
             bulkPrintService.sendDocumentForPrint(
                 printIntervenerRemovedLetter(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT), caseDetails);
+            log.info("Sending letter correspondence to respondent for case: {}", caseDetails.getId());
         }
         if (intervenerService.checkIfAnyIntervenerSolicitorRemoved(caseDetails.getData(), caseDetailsBefore.getData())) {
             bulkPrintService.sendDocumentForPrint(
                 printIntervenerSolicitorRemovedLetter(caseDetails, authorisationToken, DocumentHelper.PaperNotificationRecipient.RESPONDENT),
                 caseDetails);
+            log.info("Sending letter correspondence to respondent for case: {}", caseDetails.getId());
         }
     }
 
