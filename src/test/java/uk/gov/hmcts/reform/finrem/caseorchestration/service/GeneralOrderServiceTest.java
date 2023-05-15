@@ -54,7 +54,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_COLLECTION_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PARIY_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 public class GeneralOrderServiceTest extends BaseServiceTest {
@@ -282,7 +281,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void whenRequestedOrderList_and_shared_before_returnList() throws Exception {
+    public void whenRequestedOrderList_and_shared_before_returnList() {
         FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
         FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
         FinremCaseData data = caseDetails.getData();
@@ -294,6 +293,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
                 .build());
 
         data.setUploadHearingOrder(hearingOrderDocuments);
+        data.getGeneralOrderWrapper().setGeneralOrderLatestDocument(caseDocument("hmctsurl", "hmcts.pdf", "hmctsbinaryurl"));
 
         List<DynamicMultiSelectListElement> dynamicElementList = List.of(getDynamicElementList(
             caseDocument("url", "moj.pdf", "binaryurl")));
@@ -307,15 +307,15 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
 
         generalOrderService.setOrderList(caseDetails);
 
-        assertEquals("One document available to share with other parties", 1, data.getOrdersToShare().getListItems().size());
+        assertEquals("One document available to share with other parties", 2, data.getOrdersToShare().getListItems().size());
         assertEquals("One document selected", 1, data.getOrdersToShare().getValue().size());
     }
 
     @Test
     public void givenContestedCase_whenRequestedParies_thenReturnParties() {
-        CallbackRequest callbackRequest = callbackRequest();
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> data = caseDetails.getData();
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseDetails caseDetails = finremCallbackRequest.getCaseDetails();
+        FinremCaseData data = caseDetails.getData();
 
         List<DynamicMultiSelectListElement> dynamicElementList = List.of(getDynamicElementList(CaseRole.APP_SOLICITOR.getValue()),
             getDynamicElementList(CaseRole.RESP_SOLICITOR.getValue()),
@@ -329,9 +329,9 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
             .listItems(dynamicElementList)
             .build();
 
-        data.put(PARIY_LIST, parties);
+        data.setPartiesOnCase(parties);
 
-        List<String> partyList = generalOrderService.getPartyList(caseDetails);
+        List<String> partyList = generalOrderService.getParties(caseDetails);
         assertEquals("6 parties availablle ", 6, partyList.size());
     }
 

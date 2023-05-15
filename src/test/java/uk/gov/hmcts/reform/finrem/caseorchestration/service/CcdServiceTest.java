@@ -9,7 +9,10 @@ import uk.gov.hmcts.reform.ccd.client.CaseEventsApi;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.handler.FinremCallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.wrapper.IdamToken;
 
 import java.util.HashMap;
@@ -19,6 +22,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CcdServiceTest {
@@ -39,8 +43,9 @@ public class CcdServiceTest {
         when(coreCaseDataApi.startEventForCaseWorker(any(), any(), any(), any(), any(), any(), any()))
             .thenReturn(StartEventResponse.builder().caseDetails(buildCaseDetails()).build());
         when(systemUserService.getIdamToken(AUTH_TOKEN)).thenReturn(IdamToken.builder().build());
-
-        ccdService.executeCcdEventOnCase(AUTH_TOKEN, buildCaseDetails(), EventType.CLOSE.getCcdType());
+        FinremCaseDetails caseDetails = buildCallbackRequest().getCaseDetails();
+        ccdService.executeCcdEventOnCase(AUTH_TOKEN, caseDetails.getId().toString(),
+            caseDetails.getCaseType().getCcdType(), EventType.CLOSE.getCcdType());
 
         verify(coreCaseDataApi).startEventForCaseWorker(any(), any(), any(), any(), any(), any(), any());
         verify(coreCaseDataApi).submitEventForCaseWorker(any(), any(), any(), any(), any(), any(), anyBoolean(), any());
@@ -62,4 +67,14 @@ public class CcdServiceTest {
         return CaseDetails.builder().id(123L).data(caseData).build();
     }
 
+    private FinremCallbackRequest buildCallbackRequest() {
+        return FinremCallbackRequest
+            .builder()
+            .eventType(EventType.SEND_ORDER)
+            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+                .data(new FinremCaseData()).build())
+            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED)
+                .data(new FinremCaseData()).build())
+            .build();
+    }
 }

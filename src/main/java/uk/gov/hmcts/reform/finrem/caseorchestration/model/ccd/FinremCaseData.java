@@ -285,7 +285,7 @@ public class FinremCaseData {
     private List<HearingUploadBundleCollection> hearingUploadBundle;
     private SendOrderEventPostStateOption sendOrderPostStateOption;
     private DynamicMultiSelectList ordersToShare;
-    private DynamicMultiSelectList partiesInCase;
+    private DynamicMultiSelectList partiesOnCase;
     private List<UploadConfidentialDocumentCollection> confidentialDocumentsUploaded;
     private ChangeOrganisationRequest changeOrganisationRequestField;
     @JsonProperty("ApplicantOrganisationPolicy")

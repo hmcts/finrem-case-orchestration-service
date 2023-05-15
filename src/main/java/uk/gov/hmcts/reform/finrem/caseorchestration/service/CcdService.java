@@ -24,11 +24,8 @@ public class CcdService {
     private final CoreCaseDataApi coreCaseDataApi;
     private final SystemUserService systemUserService;
 
-    public void executeCcdEventOnCase(String authorisation, CaseDetails caseDetails,
+    public void executeCcdEventOnCase(String authorisation, String caseId, String caseTypeId,
                                       String eventType) {
-
-        Long caseId = caseDetails.getId();
-        String caseTypeId = caseDetails.getCaseTypeId();
 
         log.info("Executing eventType {} on caseId {}", eventType, caseId);
 
@@ -40,7 +37,7 @@ public class CcdService {
                 idamToken.getUserId(),
                 JURISDICTION,
                 caseTypeId,
-                caseId.toString(),
+                caseId,
                 eventType);
 
         coreCaseDataApi.submitEventForCaseWorker(
@@ -49,7 +46,7 @@ public class CcdService {
             idamToken.getUserId(),
             JURISDICTION,
             caseTypeId,
-            caseId.toString(),
+            caseId,
             true,
             getCaseDataContent(startEventResponse.getCaseDetails().getData(), startEventResponse));
     }

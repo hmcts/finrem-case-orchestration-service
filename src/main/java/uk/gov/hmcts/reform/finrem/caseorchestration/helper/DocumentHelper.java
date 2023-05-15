@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -14,19 +13,20 @@ import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.letterdetails.AddresseeGeneratorHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.IntervenerOrderCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PaymentDocumentCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionType;
@@ -42,7 +42,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.StampType;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -85,7 +84,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_NOTICES_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_OTHER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
@@ -197,6 +195,16 @@ public class DocumentHelper {
             .map(PensionType::getPensionDocument)
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
+    }
+
+
+    public boolean hasAnotherHearing(FinremCaseData caseData) {
+
+        List<DirectionDetailCollection> directionDetailsCollection = caseData.getDirectionDetailsCollection();
+
+        // use a utility to handle directionDetailsCollectionList being null as well as empty
+        return !directionDetailsCollection.isEmpty() && YES_VALUE.equalsIgnoreCase(
+            nullToEmpty(directionDetailsCollection.get(0).getValue().getIsAnotherHearingYN()));
     }
 
     public boolean hasAnotherHearing(Map<String, Object> caseData) {
@@ -315,6 +323,20 @@ public class DocumentHelper {
         if (additionalHearingDocumentData.isPresent()) {
             return additionalHearingDocumentData
                 .map(additionalHearingDocumentDataCopy -> additionalHearingDocumentData.get().getAdditionalHearingDocument().getDocument());
+        }
+        return Optional.empty();
+    }
+
+    public Optional<CaseDocument> getLatestAdditionalHearingDocument(FinremCaseData caseData) {
+        List<AdditionalHearingDocumentCollection> additionalHearingDocuments  =  caseData.getAdditionalHearingDocuments();
+        Optional<AdditionalHearingDocumentCollection> documentCollection
+            = ofNullable(additionalHearingDocuments)
+            .orElse(emptyList())
+            .stream()
+            .reduce((first, second) -> second);
+        if (documentCollection.isPresent()) {
+            return documentCollection
+                .map(documentCollectionCopy -> documentCollectionCopy.getValue().getDocument());
         }
         return Optional.empty();
     }
@@ -498,32 +520,23 @@ public class DocumentHelper {
             : Optional.empty();
     }
 
-    public List<BulkPrintDocument> getHearingDocumentsAsBulkPrintDocuments(Map<String, Object> data, String authorisationToken) {
+    public List<BulkPrintDocument> getHearingDocumentsAsBulkPrintDocuments(FinremCaseData data, String authorisationToken) {
 
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         List<DocumentCollection> pdfDocuments = new ArrayList<>();
-        List<DocumentCollection> documentCollections = covertDocumentCollections(data.get(HEARING_ORDER_OTHER_COLLECTION));
-        documentCollections.forEach(doc -> {
-            CaseDocument caseDocument = doc.getValue();
-            CaseDocument pdfDocument = service.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken);
-            pdfDocuments.add(DocumentCollection
-                .builder()
-                .value(pdfDocument)
-                .build());
-            bulkPrintDocuments.add(getCaseDocumentAsBulkPrintDocument(pdfDocument));
-        });
-
-        data.put(HEARING_ORDER_OTHER_COLLECTION, pdfDocuments);
+        List<DocumentCollection> documentCollections = data.getHearingOrderOtherDocuments();
+        if (!documentCollections.isEmpty()) {
+            documentCollections.forEach(doc -> {
+                CaseDocument caseDocument = doc.getValue();
+                CaseDocument pdfDocument = service.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken);
+                pdfDocuments.add(DocumentCollection.builder().value(pdfDocument).build());
+                bulkPrintDocuments.add(getCaseDocumentAsBulkPrintDocument(pdfDocument));
+            });
+            data.setHearingOrderOtherDocuments(pdfDocuments);
+        }
         return bulkPrintDocuments;
     }
 
-    private List<DocumentCollection> covertDocumentCollections(Object object) {
-        if (object == null) {
-            return Collections.emptyList();
-        }
-        return objectMapper.registerModule(new JavaTimeModule()).convertValue(object, new TypeReference<>() {
-        });
-    }
 
     public List<CaseDocument> getDocumentLinksFromCustomCollectionAsCaseDocuments(Map<String, Object> data, String collectionName,
                                                                                   String documentName) {
@@ -585,12 +598,6 @@ public class DocumentHelper {
         return objectMapper.convertValue(caseData.get(FINAL_ORDER_COLLECTION), new TypeReference<>() {
         });
     }
-
-    public List<IntervenerOrderCollection> getIntervenerFinalOrderDocuments(Map<String, Object> caseData, String intervener) {
-        return objectMapper.convertValue(caseData.get(intervener), new TypeReference<>() {
-        });
-    }
-
 
     public List<HearingOrderCollectionData> getHearingOrderDocuments(Map<String, Object> caseData) {
         return objectMapper.convertValue(caseData.get(HEARING_ORDER_COLLECTION),

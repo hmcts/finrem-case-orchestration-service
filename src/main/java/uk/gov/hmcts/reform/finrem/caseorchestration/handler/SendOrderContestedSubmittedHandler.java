@@ -1,36 +1,61 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.handler;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.callback.CallbackType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.GenericAboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.FinremCaseDetailsMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.EventType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.PostStateOption;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseRole;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicMultiSelectListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinremCaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.SendOrderEventPostStateOption;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralOrderService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.PostStateOption.getSendOrderPostStateOption;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SEND_ORDER_POST_STATE_OPTION_FIELD;
+import static java.util.Collections.singletonList;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
-public class SendOrderContestedSubmittedHandler
-    implements CallbackHandler<Map<String, Object>> {
+public class SendOrderContestedSubmittedHandler extends FinremCallbackHandler {
     private final NotificationService notificationService;
     private final GeneralOrderService generalOrderService;
     private final CcdService ccdService;
+    private final BulkPrintService bulkPrintService;
+    private final DocumentHelper documentHelper;
+    private final GenericDocumentService genericDocumentService;
+
+    public SendOrderContestedSubmittedHandler(FinremCaseDetailsMapper finremCaseDetailsMapper,
+                                              NotificationService notificationService,
+                                              GeneralOrderService generalOrderService,
+                                              CcdService ccdService,
+                                              BulkPrintService bulkPrintService,
+                                              DocumentHelper documentHelper,
+                                              GenericDocumentService genericDocumentService) {
+        super(finremCaseDetailsMapper);
+        this.notificationService = notificationService;
+        this.generalOrderService = generalOrderService;
+        this.ccdService = ccdService;
+        this.bulkPrintService = bulkPrintService;
+        this.documentHelper = documentHelper;
+        this.genericDocumentService = genericDocumentService;
+    }
+
 
     @Override
     public boolean canHandle(CallbackType callbackType, CaseType caseType, EventType eventType) {
@@ -40,58 +65,165 @@ public class SendOrderContestedSubmittedHandler
     }
 
     @Override
-    public GenericAboutToStartOrSubmitCallbackResponse<Map<String, Object>> handle(
-        CallbackRequest callbackRequest,
-        String userAuthorisation) {
+    public GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> handle(FinremCallbackRequest callbackRequest,
+                                                                              String userAuthorisation) {
 
-        sendNotifications(callbackRequest);
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        log.info("Invoking contested {} submitted callback for case id: {}", callbackRequest.getEventType(), caseDetails.getId());
 
-        updateCaseWithPostStateOption(callbackRequest, userAuthorisation);
+        List<String> parties = generalOrderService.getParties(caseDetails);
+        log.info("Selected parties {} on case {}", parties, caseDetails.getId());
 
-        return GenericAboutToStartOrSubmitCallbackResponse
-            .<Map<String, Object>>builder()
-            .data(callbackRequest.getCaseDetails().getData())
-            .build();
+        DynamicMultiSelectList selectedDocs = caseDetails.getData().getOrdersToShare();
+        log.info("Selected orders {} on case {}", selectedDocs, caseDetails.getId());
+
+        log.info("Sending general order for case {}", caseDetails.getId());
+        printAndMailGeneralOrderToParties(caseDetails, parties, selectedDocs, userAuthorisation);
+
+        log.info("Sending hearing order for case {}", caseDetails.getId());
+        List<CaseDocument> hearingOrders = generalOrderService.hearingOrderToProcess(caseDetails, selectedDocs);
+        printAndMailHearingDocuments(caseDetails, hearingOrders, parties, userAuthorisation);
+
+        sendNotifications(callbackRequest, parties);
+
+        updateCaseWithPostStateOption(caseDetails, userAuthorisation);
+
+        return GenericAboutToStartOrSubmitCallbackResponse.<FinremCaseData>builder()
+            .data(caseDetails.getData()).build();
     }
 
-    private void updateCaseWithPostStateOption(CallbackRequest callbackRequest,
-                                               String userAuthorisation) {
+    private void printAndMailHearingDocuments(FinremCaseDetails caseDetails,
+                                              List<CaseDocument> hearingOrders,
+                                              List<String> partyList,
+                                              String authorisationToken) {
 
-        PostStateOption postStateOption =
-            getSendOrderPostStateOption(
-                (String) callbackRequest.getCaseDetails().getData().get(SEND_ORDER_POST_STATE_OPTION_FIELD));
+        List<BulkPrintDocument> hearingDocumentPack = createHearingDocumentPack(caseDetails, hearingOrders, authorisationToken);
 
-        if (isOptionThatRequireUpdate(postStateOption)) {
-            callbackRequest.getCaseDetails().getData().put(SEND_ORDER_POST_STATE_OPTION_FIELD, null);
-            ccdService.executeCcdEventOnCase(
-                userAuthorisation,
-                callbackRequest.getCaseDetails(),
-                postStateOption.getEventToTrigger().getCcdType());
+        if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)
+            && partyList.contains(CaseRole.APP_SOLICITOR.getValue())) {
+            log.info("Received request to send hearing pack for applicant for case {}:", caseDetails.getId());
+            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, hearingDocumentPack);
+        }
+
+        if (!notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)
+            && partyList.contains(CaseRole.RESP_SOLICITOR.getValue())) {
+            log.info("Received request to send hearing pack for respondent for case {}:", caseDetails.getId());
+            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, hearingDocumentPack);
+        }
+
+    }
+
+    private List<BulkPrintDocument> createHearingDocumentPack(FinremCaseDetails caseDetails,
+                                                              List<CaseDocument> hearingOrders, String authorisationToken) {
+
+        Long id = caseDetails.getId();
+        FinremCaseData caseData = caseDetails.getData();
+        List<BulkPrintDocument> hearingDocumentPack = new ArrayList<>();
+
+        hearingDocumentPack.add(documentHelper.getCaseDocumentAsBulkPrintDocument(caseData.getOrderApprovedCoverLetter()));
+        hearingOrders.forEach(order -> hearingDocumentPack.add(documentHelper.getCaseDocumentAsBulkPrintDocument(order)));
+
+        CaseDocument document = caseData.getAdditionalDocument();
+        if (document != null) {
+            CaseDocument caseDocument = genericDocumentService.convertDocumentIfNotPdfAlready(document, authorisationToken);
+            log.info("additional uploaded document with send order {} for caseId {}", caseDocument, id);
+            hearingDocumentPack.add(documentHelper.getCaseDocumentAsBulkPrintDocument(caseDocument));
+            caseData.setAdditionalDocument(caseDocument);
+        }
+
+        if (documentHelper.hasAnotherHearing(caseData)) {
+            Optional<CaseDocument> latestAdditionalHearingDocument = documentHelper.getLatestAdditionalHearingDocument(caseData);
+            latestAdditionalHearingDocument.ifPresent(
+                caseDocument -> hearingDocumentPack.add(documentHelper.getCaseDocumentAsBulkPrintDocument(caseDocument)));
+        }
+
+        List<BulkPrintDocument> otherHearingDocuments = documentHelper.getHearingDocumentsAsBulkPrintDocuments(
+            caseData, authorisationToken);
+
+        if (!otherHearingDocuments.isEmpty()) {
+            hearingDocumentPack.addAll(otherHearingDocuments);
+        }
+        return hearingDocumentPack;
+    }
+
+
+
+    private void printAndMailGeneralOrderToParties(FinremCaseDetails caseDetails,
+                                                   List<String> partyList,
+                                                   DynamicMultiSelectList selectedDocs,
+                                                   String authorisationToken) {
+
+        log.info("Print selected 'GeneralOrder' to selected parties for caseId {}", caseDetails.getId());
+        FinremCaseData caseData = caseDetails.getData();
+        CaseDocument generalOrder = caseData.getGeneralOrderWrapper().getGeneralOrderLatestDocument();
+
+        if (generalOrder != null) {
+            BulkPrintDocument generalOrderPrint = documentHelper.getCaseDocumentAsBulkPrintDocument(generalOrder);
+            if (!notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)
+                && partyList.contains(CaseRole.APP_SOLICITOR.getValue())
+                && isSelectedOrderMatches(selectedDocs, generalOrder.getDocumentFilename())) {
+                log.info("Sending selected general order {} to applicant via bulk print for caseId {}",
+                    generalOrder.getDocumentFilename(), caseDetails.getId());
+                bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, singletonList(generalOrderPrint));
+            }
+
+            if (!notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)
+                && partyList.contains(CaseRole.RESP_SOLICITOR.getValue())
+                && isSelectedOrderMatches(selectedDocs, generalOrder.getDocumentFilename())) {
+
+                log.info("Sending selected general order {} to respondent via bulk print for caseId {}",
+                    generalOrder.getDocumentFilename(), caseDetails.getId());
+                bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, singletonList(generalOrderPrint));
+            }
         }
     }
 
-    private boolean isOptionThatRequireUpdate(PostStateOption postStateOption) {
-        return PostStateOption.PREPARE_FOR_HEARING.equals(postStateOption)
-            || PostStateOption.CLOSE.equals(postStateOption);
+    private boolean isSelectedOrderMatches(DynamicMultiSelectList selectedDocs, String documentName) {
+        Optional<DynamicMultiSelectListElement> selectedOrder = isLatestGeneralOrderSelectedToShare(selectedDocs);
+        return selectedOrder.map(dynamicMultiSelectListElement -> dynamicMultiSelectListElement.getCode()
+            .equals(documentName)).orElse(false);
     }
 
-    private void sendNotifications(CallbackRequest callbackRequest) {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
+    private Optional<DynamicMultiSelectListElement> isLatestGeneralOrderSelectedToShare(DynamicMultiSelectList selectedDocs) {
+        List<DynamicMultiSelectListElement> selectedOrder = selectedDocs.getValue();
+        return selectedOrder.stream()
+            .filter(doc -> doc.getCode().equals(GENERAL_ORDER_LATEST_DOCUMENT)).findAny();
+    }
 
-        List<String> partyList = generalOrderService.getPartyList(caseDetails);
+    private void updateCaseWithPostStateOption(FinremCaseDetails caseDetails, String userAuthorisation) {
 
-        if (Objects.nonNull(caseData.get(FINAL_ORDER_COLLECTION))) {
-            log.info("Received request to send email for 'Contest Order Approved' for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        SendOrderEventPostStateOption sendOrderPostStateOption = caseDetails.getData().getSendOrderPostStateOption();
+        if (isOptionThatRequireUpdate(sendOrderPostStateOption)) {
+            caseDetails.getData().setSendOrderPostStateOption(null);
+            ccdService.executeCcdEventOnCase(
+                userAuthorisation,
+                String.valueOf(caseDetails.getId()),
+                caseDetails.getCaseType().getCcdType(),
+                sendOrderPostStateOption.getEventToTrigger().getCcdType());
+        }
+    }
+
+    private boolean isOptionThatRequireUpdate(SendOrderEventPostStateOption postStateOption) {
+        return postStateOption.getEventToTrigger().equals(EventType.PREPARE_FOR_HEARING)
+            || postStateOption.getEventToTrigger().equals(EventType.CLOSE);
+    }
+
+    private void sendNotifications(FinremCallbackRequest callbackRequest, List<String> parties) {
+        FinremCaseDetails caseDetails = callbackRequest.getCaseDetails();
+        FinremCaseData caseData = caseDetails.getData();
+        String caseId = String.valueOf(caseDetails.getId());
+
+        if (Objects.nonNull(caseData.getFinalOrderCollection())) {
+            log.info("Received request to send email for 'Contest Order Approved' for Case ID: {}", caseId);
             if (notificationService.isApplicantSolicitorDigitalAndEmailPopulated(caseDetails)
-                && partyList.contains(CaseRole.APP_SOLICITOR.getValue())) {
-                log.info("Sending 'Contest Order Approved' email notification to Applicant Solicitor");
+                && parties.contains(CaseRole.APP_SOLICITOR.getValue())) {
+                log.info("Sending 'Contested Order Approved' email notification to Applicant Solicitor for Case ID: {}", caseId);
                 notificationService.sendContestOrderApprovedEmailApplicant(caseDetails);
             }
 
             if (notificationService.isRespondentSolicitorDigitalAndEmailPopulated(caseDetails)
-                && partyList.contains(CaseRole.RESP_SOLICITOR.getValue())) {
-                log.info("Sending 'Contest Order Approved' email notification to Respondent Solicitor");
+                && parties.contains(CaseRole.RESP_SOLICITOR.getValue())) {
+                log.info("Sending 'Contested Order Approved' email notification to Respondent Solicitor for Case ID: {}", caseId);
                 notificationService.sendContestOrderApprovedEmailRespondent(caseDetails);
             }
         }

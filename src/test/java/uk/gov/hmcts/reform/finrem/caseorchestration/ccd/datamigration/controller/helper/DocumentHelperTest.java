@@ -64,9 +64,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_OTHER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HIGHCOURT_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseType.CONTESTED;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DocumentHelperTest {
@@ -191,19 +191,20 @@ public class DocumentHelperTest {
 
     @Test
     public void getHearingDocumentsAsBulkPrintDocuments() {
-        Map<String, Object> caseData = new HashMap<>();
+        FinremCallbackRequest finremCallbackRequest = buildCallbackRequest();
+        FinremCaseData caseData = finremCallbackRequest.getCaseDetails().getData();
         DocumentCollection dc = DocumentCollection
             .builder()
             .value(caseDocument(DOCUMENT_URL, FILE_NAME, BINARY_URL))
             .build();
         List<DocumentCollection> documentCollections = new ArrayList<>();
         documentCollections.add(dc);
-        caseData.put(HEARING_ORDER_OTHER_COLLECTION, documentCollections);
+        caseData.setHearingOrderOtherDocuments(documentCollections);
 
         when(service.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument());
         List<BulkPrintDocument> hearingDocuments = documentHelper.getHearingDocumentsAsBulkPrintDocuments(caseData, AUTHORIZATION_HEADER);
-        assertEquals(hearingDocuments.get(0).getFileName(), "app_docs.pdf");
-        assertEquals(hearingDocuments.get(0).getBinaryFileUrl(), BINARY_URL);
+        assertEquals("app_docs.pdf", hearingDocuments.get(0).getFileName());
+        assertEquals(BINARY_URL, hearingDocuments.get(0).getBinaryFileUrl());
 
         verify(service).convertDocumentIfNotPdfAlready(any(), any());
     }
@@ -530,5 +531,12 @@ public class DocumentHelperTest {
         assertThat(caseDocument.getDocumentBinaryUrl(), is("http://file1.binary"));
         assertThat(caseDocument.getDocumentUrl(), is("http://file1"));
         assertThat(caseDocument.getDocumentFilename(), is("file1"));
+    }
+
+    private FinremCallbackRequest buildCallbackRequest() {
+        return FinremCallbackRequest.builder()
+            .caseDetailsBefore(FinremCaseDetails.builder().id(123L).caseType(CONTESTED).data(new FinremCaseData()).build())
+            .caseDetails(FinremCaseDetails.builder().id(123L).caseType(CONTESTED).data(new FinremCaseData()).build())
+            .build();
     }
 }

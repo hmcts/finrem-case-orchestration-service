@@ -71,8 +71,8 @@ class SendOrderContestedAboutToStartHandlerTest {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> resp = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        DynamicMultiSelectList partiesInCase = resp.getData().getPartiesInCase();
-        assertEquals(6, partiesInCase.getListItems().size(), "available parties");
+        DynamicMultiSelectList partiesOnCase = resp.getData().getPartiesOnCase();
+        assertEquals(6, partiesOnCase.getListItems().size(), "available parties");
         verify(generalOrderService).setOrderList(caseDetails);
     }
 
@@ -108,13 +108,13 @@ class SendOrderContestedAboutToStartHandlerTest {
             .listItems(dynamicElementList)
             .build();
 
-        data.setPartiesInCase(parties);
+        data.setPartiesOnCase(parties);
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> resp = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        DynamicMultiSelectList partiesInCase = resp.getData().getPartiesInCase();
-        assertEquals(6, partiesInCase.getListItems().size(), "available parties");
-        assertEquals(6, partiesInCase.getValue().size(), "selected parties");
+        DynamicMultiSelectList partiesOnCase = resp.getData().getPartiesOnCase();
+        assertEquals(6, partiesOnCase.getListItems().size(), "available parties");
+        assertEquals(6, partiesOnCase.getValue().size(), "selected parties");
         verify(generalOrderService).setOrderList(caseDetails);
     }
 
@@ -152,8 +152,8 @@ class SendOrderContestedAboutToStartHandlerTest {
 
         GenericAboutToStartOrSubmitCallbackResponse<FinremCaseData> resp = handler.handle(finremCallbackRequest, AUTH_TOKEN);
 
-        DynamicMultiSelectList partiesInCase = resp.getData().getPartiesInCase();
-        assertEquals(6, partiesInCase.getListItems().size(), "available parties");
+        DynamicMultiSelectList partiesOnCase = resp.getData().getPartiesOnCase();
+        assertEquals(6, partiesOnCase.getListItems().size(), "available parties");
         verify(generalOrderService).setOrderList(caseDetails);
     }
 
